@@ -36,9 +36,9 @@
   --scrollbar-thumb-color: var(--color-gray-10);
   --scrollbar_hover-thumb-color: var(--color-gray-30);
   /* navbar */
-  --navbar-background: var(--color-jet-80);
-  --navbar-font-color: var(--color-white);
-  --navbar_hover-background: var(--color-black);
+  --navbar-background: var(--color-white);
+  --navbar-font-color: var(--body-font-color);
+  --navbar_hover-background: var(--color-white);
   --navbar-button-background: var(--color-white);
   --navbar-button-border-color: var(--panel-border-color);
   --navbar-button-font-color: var(--body-font-color);
@@ -46,8 +46,9 @@
   --navbar-menu-background: var(--color-white);
   --navbar-menu-font-color: var(--body-font-color);
   --navbar-menu_hover-background: var(--color-smoke-50);
+  --navbar-boxshadow: #0000000d 2px 2px 10px;
   /* nav */
-  --nav-background: var(--panel-background);
+  --nav-background: var(--color-white);
   --nav-border-color: var(--color-gray-10);
   --nav-line-height: 1.35;
   --nav-heading-font-color: var(--color-jet-30);
@@ -55,7 +56,7 @@
   --nav-panel-divider-color: var(--color-smoke-90);
   --nav-secondary-background: var(--color-smoke-70);
   /* toolbar */
-  --toolbar-background: var(--panel-background);
+  --toolbar-background: var(--color-white);
   --toolbar-border-color: var(--panel-border-color);
   --toolbar-font-color: var(--color-gray-70);
   --toolbar-muted-color: var(--color-gray-40);

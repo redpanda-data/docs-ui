@@ -15,6 +15,7 @@ body {
   top: 0;
   width: 100%;
   z-index: var(--z-index-navbar);
+  box-shadow: var(--navbar-boxshadow);
 }
 
 .navbar a {
