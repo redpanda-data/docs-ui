@@ -12,8 +12,6 @@
   .doc {
     flex: auto;
     font-size: var(--doc-font-size--desktop);
-    margin: var(--doc-margin--desktop);
-    max-width: var(--doc-max-width--desktop);
     min-width: 0;
   }
 }
@@ -32,8 +30,9 @@
 }
 
 .doc > h1.page:first-child {
-  font-size: calc(36 / var(--rem-base) * 1rem);
+  font-size: calc(48 / var(--rem-base) * 1rem);
   margin: 1.5rem 0;
+  margin-bottom: 0;
 }
 
 @media screen and (min-width: 769px) {
@@ -63,7 +62,6 @@
 }
 
 .doc h2:not(.discrete) {
-  border-bottom: 1px solid var(--section-divider-color);
   margin-left: -1rem;
   margin-right: -1rem;
   padding: 0.4rem 1rem 0.1rem;

@@ -21,6 +21,7 @@ a + .breadcrumbs {
   margin: 0;
   padding: 0;
   list-style: none;
+  font-size: small;
 }
 
 .breadcrumbs li {
@@ -29,10 +30,22 @@ a + .breadcrumbs {
 }
 
 .breadcrumbs li::after {
-  content: "/";
+  content: ">";
   padding: 0 0.5rem;
 }
 
 .breadcrumbs li:last-of-type::after {
   content: none;
+}
+
+.breadcrumbs li a {
+  padding: 7px;
+}
+
+.breadcrumbs li:hover a,
+.breadcrumbs li:last-child a {
+  background-color: var(--link-highlight-background-color);
+  color: var(--link-font-color);
+  border-radius: 1.5rem;
+  text-decoration: none;
 }

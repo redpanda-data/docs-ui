@@ -1,6 +1,36 @@
 <script id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
 <script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>
-{{#if env.SITE_SEARCH_PROVIDER}}
-{{> search-scripts}}
-{{/if}}
 <script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
+{{#if env.ALGOLIA_API_KEY}}
+<script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3"></script>
+<script>
+docsearch({
+  container: '#search-field',
+  appId: '{{{env.ALGOLIA_APP_ID}}}',
+  indexName: '{{{env.ALGOLIA_INDEX_NAME}}}',
+  apiKey: '{{{env.ALGOLIA_API_KEY}}}',
+  getMissingResultsUrl({ query }) {
+    return `https://github.com/JakeSCahill/redpanda-docs-antora/issues/new?title=${query}`;
+  },
+  resultsFooterComponent({ state }) {
+    return {
+      // The HTML `tag`
+      type: 'a',
+      ref: undefined,
+      constructor: undefined,
+      key: state.query,
+      // Its props
+      props: {
+        href: `/search.html?q=${state.query}`,
+        /*onClick: (event) => {
+          console.log(JSON.stringify(state,null,2));
+        },*/
+        // Raw text rendered in the HTML element
+        children: `See all ${state.context.nbHits} results`,
+      },
+      __v: null,
+    };
+  },
+});
+</script>
+{{/if}}

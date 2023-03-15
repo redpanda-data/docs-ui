@@ -1,24 +1,30 @@
 <div class="nav-panel-explore{{#unless page.navigation}} is-active{{/unless}}" data-panel="explore">
   {{#if page.component}}
   <div class="context">
+    <div class="container has-dropdown">
     <span class="title">{{page.component.title}}</span>
-    <span class="version">{{page.componentVersion.displayVersion}}</span>
+      <div class="components">
+          {{#each site.components}}
+          {{#if (and (ne this.name 'home') (ne this.name 'ROOT'))}}
+          <span class="component
+            {{~#if (eq this.title @root.page.component.title)}} is-current{{/if}}">
+            <a href="{{{relativize ./url}}}">{{{./title}}}</a>
+          </span>
+          {{/if}}
+          {{/each}}
+        </div>
+    </div>
+    <div class="container has-dropdown">
+      <span class="current-version">{{page.componentVersion.displayVersion}}</span>
+      <div class="versions">
+        {{#each page.component.versions}}
+        <span class="version
+          {{~#if (eq this.version @root.page.component.latest.version)}} is-latest{{/if}}">
+          <a href="{{{relativize ./url}}}">{{./displayVersion}}</a>
+        </span>
+        {{/each}}
+      </div>
+    </div>
   </div>
   {{/if}}
-  <ul class="components">
-    {{#each site.components}}
-    <li class="component{{#if (eq this @root.page.component)}} is-current{{/if}}">
-      <a class="title" href="{{{relativize ./url}}}">{{{./title}}}</a>
-      <ul class="versions">
-        {{#each ./versions}}
-        <li class="version
-          {{~#if (and (eq .. @root.page.component) (eq this @root.page.componentVersion))}} is-current{{/if~}}
-          {{~#if (eq this ../latest)}} is-latest{{/if}}">
-          <a href="{{{relativize ./url}}}">{{./displayVersion}}</a>
-        </li>
-        {{/each}}
-      </ul>
-    </li>
-    {{/each}}
-  </ul>
 </div>

@@ -5,6 +5,9 @@
 
   var navContainer = document.querySelector('.nav-container')
   var navToggle = document.querySelector('.nav-toggle')
+
+  if (!navContainer) return
+
   var nav = navContainer.querySelector('.nav')
 
   navToggle.addEventListener('click', showNav)
@@ -12,6 +15,7 @@
 
   var menuPanel = navContainer.querySelector('[data-panel=menu]')
   if (!menuPanel) return
+
   var explorePanel = navContainer.querySelector('[data-panel=explore]')
 
   var currentPageItem = menuPanel.querySelector('.is-current-page')
@@ -38,6 +42,26 @@
       // NOTE logic assumes there are only two panels
       find(nav, '[data-panel]').forEach(function (panel) {
         panel.classList.toggle('is-active')
+      })
+    })
+    // Get all the containers with the "has-dropdown" class
+    const dropdownContainers = explorePanel.querySelectorAll('.context .container.has-dropdown')
+
+    dropdownContainers.forEach((container) => {
+      container.addEventListener('click', (event) => {
+        event.preventDefault()
+        // Toggle the "active" class on the container
+        container.classList.toggle('is-active')
+      })
+
+      container.addEventListener('mouseover', () => {
+        container.classList.add('is-active')
+      })
+    })
+
+    explorePanel.addEventListener('mouseleave', () => {
+      dropdownContainers.forEach((container) => {
+        container.classList.remove('is-active')
       })
     })
   }
