@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Search the Documentation'}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7.4.5/themes/satellite-min.css">
+  </head>
+  <body>
+{{> header}}
+<article class="search">
+{{#with page.title}}
+<h1 class="page">{{{this}}}</h1>
+{{/with}}
+<div class="ais-InstantSearch">
+  <div class="right-panel">
+    <div class="container">
+      <div class="searchbox" id="searchbox"></div>
+      <div class="search-panel__filters">
+        Versions
+        <div class="versions" id="version"></div>
+      </div>
+    </div>
+    <div id="hits"></div>
+    <div id="pagination"></div>
+  </div>
+</div>
+</article>
+{{> footer}}
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.14.2/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.49.1/dist/instantsearch.production.min.js"></script>
+<script>
+if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
+  const { algoliasearch, instantsearch } = window;
+
+  const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
+  const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
+
+  const search = instantsearch({
+      searchClient,
+      indexName,
+      routing: {
+          stateMapping: {
+              stateToRoute(uiState) {
+                  const indexUiState = uiState[indexName];
+                  return {
+                      q: indexUiState.query,
+                  }
+              },
+              routeToState({q}) {
+                  return {
+                      [indexName]: {
+                          query: q,
+                      },
+                  };
+              },
+          },
+      }
+  });
+
+  search.addWidgets([
+      instantsearch.widgets.searchBox({
+          container: '#searchbox',
+      }),
+      instantsearch.widgets.hits({
+          container: '#hits',
+          templates: {
+              item(hit, { html, components, sendEvent }) {
+                  return html`
+          <div>
+              <p class="ais-Heading"><a href="${hit.url}">${hit.hierarchy.lvl2 ? hit.hierarchy.lvl2 : hit.hierarchy.lvl1}</a></p>
+              <p>${components.Highlight({ hit, attribute: 'content' })}</p>
+              <p class="ais-Breadcrumbs">${hit.hierarchy.lvl0} > ${hit.hierarchy.lvl1} ${hit.hierarchy.lvl2 ? "> " + hit.hierarchy.lvl2 : ""}</p>
+          </div>
+          `;
+              },
+          },
+      }),
+      instantsearch.widgets.refinementList({
+        container: '#version', // the CSS Selector of the DOM element inside which the widget is inserted.
+        attribute: 'version',  // the name of the attribute in the records.
+        /*templates: {
+          item(item, { html }) {
+            const { url, label, count, isRefined } = item;
+
+            return html`
+              <a href="${url}" style="${isRefined ? 'font-weight: bold' : ''}">
+                <span>${label} (${count})</span>
+              </a>
+            `;
+          },
+        },*/
+      }),
+      instantsearch.widgets.configure({
+          hitsPerPage: 20,
+          //facetFilters: [`lang:${currentLang}`],
+          //queryLanguages: [currentLang]
+      }),
+      instantsearch.widgets.pagination({
+          container: '#pagination',
+      }),
+  ]);
+
+  search.start();
+}
+</script>
+  </body>
+</html>
