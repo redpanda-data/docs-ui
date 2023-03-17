@@ -7,6 +7,7 @@ footer.footer {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   gap: 10%;
 }
 
@@ -24,4 +25,11 @@ footer.footer {
 
 .footer a {
   color: var(--footer-link-font-color);
+}
+
+@media screen and (min-width: 1024px) {
+  footer.footer {
+    align-items: flex-start;
+    flex-direction: row;
+  }
 }

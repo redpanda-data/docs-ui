@@ -2,10 +2,17 @@
   color: var(--toc-font-color);
 }
 
-.toc.sidebar .toc-menu {
-  margin-right: 0.75rem;
+.toc.sidebar {
   position: sticky;
-  top: var(--toc-top);
+  height: fit-content;
+  top: 100px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
+}
+
+.toc.sidebar .thumbs {
+  margin-top: 70px;
+  align-items: flex-start;
+  padding: 0.25rem 0 1rem 1rem;
 }
 
 .toc .toc-menu h3 {
@@ -25,7 +32,6 @@
 }
 
 .toc .toc-menu ul {
-  font-size: calc(15 / var(--rem-base) * 1rem);
   line-height: var(--toc-line-height);
   list-style: none;
   margin: 0;

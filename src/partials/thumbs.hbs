@@ -1,4 +1,4 @@
-<form class="hide_dYu6" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field">
+<form class="hidden" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field">
   <div>
     <div class="modalContent_fq6z">
       <div>
@@ -47,3 +47,29 @@
     </div>
   </div>
 </form>
+<div class="thumbs" {{#if id}}id="{{id}}"{{/if}}>
+  <div>Was this helpful?</div>
+  <div>
+    <button class="thumb">
+      <span class="material-icons MuiIcon-root" aria-hidden="true">thumb_up</span>
+    </button>
+    <button class="thumb">
+      <span class="material-icons MuiIcon-root" aria-hidden="true">thumb_down</span>
+    </button>
+  </div>
+</div>
+<script>
+document.addEventListener('scroll', function(e){
+  let documentHeight = document.body.scrollHeight;
+  let currentScroll = window.scrollY + window.innerHeight;
+  // Wait until the user is [modifier]px from the bottom.
+  let modifier = 200; 
+  const feedback = document.getElementById('thumbs-toc');
+  if (!feedback) return
+  if(currentScroll + modifier > documentHeight) {
+      feedback.style.display = 'none';
+  } else {
+    feedback.style.display = 'block';
+  }
+})
+</script>
