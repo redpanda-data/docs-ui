@@ -1,13 +1,25 @@
 footer.footer {
-  background-color: var(--footer-background);
+  box-shadow: 1px 3px 5px #666;
   color: var(--footer-font-color);
   font-size: calc(15 / var(--rem-base) * 1rem);
   line-height: var(--footer-line-height);
   padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10%;
+}
+
+.footer .social-links {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 15%;
 }
 
 .footer p {
   margin: 0.5rem 0;
+  color: #808080;
 }
 
 .footer a {
