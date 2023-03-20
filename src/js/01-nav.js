@@ -48,12 +48,6 @@
     const dropdownContainers = explorePanel.querySelectorAll('.context .container.has-dropdown')
 
     dropdownContainers.forEach((container) => {
-      container.addEventListener('click', (event) => {
-        event.preventDefault()
-        // Toggle the "active" class on the container
-        container.classList.toggle('is-active')
-      })
-
       container.addEventListener('mouseover', () => {
         container.classList.add('is-active')
       })
