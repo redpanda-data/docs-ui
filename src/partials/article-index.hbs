@@ -4,7 +4,7 @@
 {{/with}}
 {{> page-versions}}
 
-<ul>
+<ul class="index">
 {{#each page.breadcrumbs}}
   {{#if (and (eq this.url @root.page.url) (ne this.items.length 0))}}
     {{#each this.items}}

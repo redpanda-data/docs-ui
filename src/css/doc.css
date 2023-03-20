@@ -8,6 +8,10 @@
   padding: 0 1rem 4rem;
 }
 
+.doc ul.index {
+  padding-inline-start: 1rem;
+}
+
 .doc li.index,
 .doc p.index {
   margin-top: 1rem;
