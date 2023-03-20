@@ -16,6 +16,12 @@
     min-width: 0; /* min-width: 0 required for flexbox to constrain overflowing elements */
   }
 
+  main.index {
+    flex: 1;
+    max-width: unset;
+    margin: unset;
+  }
+
   main > .content {
     display: flex;
   }
