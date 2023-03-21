@@ -15,6 +15,7 @@
           {{/each}}
         </div>
     </div>
+    {{#if (ne page.componentVersion.displayVersion 'default')}}
     <div class="container has-dropdown">
       <span class="current-version">{{page.componentVersion.displayVersion}}</span>
       <div class="versions">
@@ -26,6 +27,7 @@
         {{/each}}
       </div>
     </div>
+    {{/if}}
   </div>
   {{/if}}
 </div>
