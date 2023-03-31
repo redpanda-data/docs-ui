@@ -112,13 +112,15 @@ const handleSubmit = function (e) {
   const beta = {{ is-beta page }}
   const version = {{ page.attributes.version }}
 
-  var formData = {}
+  const form = event.target;
+  var formData = new FormData(form);
+
   formData.version = version
   formData.url = currentUrl
   formData.beta = beta
 
-  const form = e.target.closest('form')
-  const feedback = form.querySelector('input[name="feedback"]:checked').value
+  const formFields = e.target.closest('form')
+  const feedback = formFields.querySelector('input[name="feedback"]:checked').value
 
   formData.positiveFeedback = feedback
   formData.otherText = form.querySelector('textarea[name="otherText"]').value
@@ -134,12 +136,11 @@ const handleSubmit = function (e) {
     language: window.navigator.language
   })
 
-  fetch('/', {
-    method: 'POST',
+  fetch("/", {
+    method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: encode(formData)
-  })
-    .then(() => {
+    body: new URLSearchParams(formData).toString(),
+  }).then(() => {
       console.log('Form submission success')
     })
     .catch(error => {
