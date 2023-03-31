@@ -40,7 +40,7 @@
           <textarea id="otherText" name="otherText" rows="4" cols="50" placeholder="Please share details or suggestions for this topic."></textarea>
         </div>
       </div>
-      <div class="form-field submit">
+      <div class="form-field wrapper">
         <button type="submit" class="button">Submit</button>
       </div>
     </div>
@@ -90,7 +90,7 @@
           <textarea id="otherText" name="otherText" rows="4" cols="50" placeholder="Please share details or suggestions for this topic."></textarea>
         </div>
       </div>
-      <div class="form-field submit">
+      <div class="form-field wrapper">
         <button type="submit" class="button">Submit</button>
       </div>
     </div>
@@ -98,53 +98,3 @@
   <div class="modal-overlay" id="modal-overlay">
   </div>
 </form>
-<script>
-function encode(data) {
-  return Object.keys(data)
-    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-    .join("&");
-}
-
-const handleSubmit = function (e) {
-  e.preventDefault();
-  console.log(e)
-  const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
-  const beta = {{ is-beta page }}
-  const version = {{ page.attributes.version }}
-
-  const form = event.target;
-  var formData = new FormData(form);
-
-  formData.version = version
-  formData.url = currentUrl
-  formData.beta = beta
-
-  const formFields = e.target.closest('form')
-  const feedback = formFields.querySelector('input[name="feedback"]:checked').value
-
-  formData.positiveFeedback = feedback
-  formData.otherText = form.querySelector('textarea[name="otherText"]').value
-
-  formData.email = form.querySelector('input[name="email"]').value
-
-  formData.date = new Date().toISOString()
-  formData.navigator = JSON.stringify({
-    appName: window.navigator.appName,
-    appVersion: window.navigator.appVersion,
-    platform: window.navigator.platform,
-    userAgent: window.navigator.userAgent,
-    language: window.navigator.language
-  })
-
-  fetch("/", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(formData).toString(),
-  }).then(() => {
-      console.log('Form submission success')
-    })
-    .catch(error => {
-      console.error('Form submission error:', error)
-    })
-}
-</script>
