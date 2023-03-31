@@ -1,0 +1,149 @@
+<form id="positive" class="hidden" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmit(event)">
+  <div class="feedback-modal">
+    <div class="feedback-modal-body">
+      <h4>What do you like about this doc?</h4>
+      <div>
+        <div class="radio-buttons form-field">
+          <input type="hidden" name="form-name" value="feedbackForm">
+          <p class="hidden">
+            <label class="hidden">Beep-Boop. Bot-field <input name="bot-field"></label>
+          </p>
+          <input class="hidden" name="version">
+          <input class="hidden" name="url">
+          <input class="hidden" name="positiveFeedback">
+          <input class="hidden" name="beta">
+          <input class="hidden" name="date">
+          <input class="hidden" name="navigator">
+          <label>
+            <input type="radio" name="feedback" id="solvedProblem" value="Solved my problem" checked="">
+            <span class="label">Solved my problem</span>
+          </label>
+          <br>
+          <label>
+            <input type="radio" name="feedback" id="easyToUnderstand" value="Easy to understand">
+            <span class="label">Easy to understand</span>
+          </label>
+          <br>
+          <label>
+            <input type="radio" name="feedback" id="other" value="other">
+            <span class="label">Other</span>
+          </label>
+        </div>
+        <div class="form-field">
+          <h4>Optional: Share your email address</h4>
+          Let us know if we can contact you about your feedback.
+          </br>
+          <input type="text" name="email" id="email" placeholder="email@example.com">
+        </div>
+        <div class="form-field">
+          <h4>Let us know what we do well:</h4>
+          <textarea id="otherText" name="otherText" rows="4" cols="50" placeholder="Please share details or suggestions for this topic."></textarea>
+        </div>
+      </div>
+      <div class="form-field submit">
+        <button type="submit" class="button">Submit</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="modal-overlay">
+  </div>
+</form>
+<form id="negative" class="hidden" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmit(event)">
+  <div class="feedback-modal">
+    <div class="feedback-modal-body">
+      <h4>What did you not like about this doc?</h4>
+      <div>
+        <div class="radio-buttons form-field">
+          <input type="hidden" name="form-name" value="feedbackForm">
+          <p class="hidden">
+            <label class="hidden">Beep-Boop. Bot-field <input name="bot-field"></label>
+          </p>
+          <input class="hidden" name="version">
+          <input class="hidden" name="url">
+          <input class="hidden" name="positiveFeedback">
+          <input class="hidden" name="beta">
+          <input class="hidden" name="date">
+          <input class="hidden" name="navigator">
+          <label>
+            <input type="radio" name="feedback" id="solvedProblem" value="Solved my problem" checked="">
+            <span class="label">Did not solve my problem</span>
+          </label>
+          <br>
+          <label>
+            <input type="radio" name="feedback" id="easyToUnderstand" value="Easy to understand">
+            <span class="label">Hard to understand</span>
+          </label>
+          <br>
+          <label>
+            <input type="radio" name="feedback" id="other" value="other">
+            <span class="label">Other</span>
+          </label>
+        </div>
+        <div class="form-field">
+          <h4>Optional: Share your email address</h4>
+          Let us know if we can contact you about your feedback.
+          </br>
+          <input type="text" name="email" id="email" placeholder="email@example.com">
+        </div>
+        <div class="form-field">
+          <h4>Let us know what we can improve:</h4>
+          <textarea id="otherText" name="otherText" rows="4" cols="50" placeholder="Please share details or suggestions for this topic."></textarea>
+        </div>
+      </div>
+      <div class="form-field submit">
+        <button type="submit" class="button">Submit</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="modal-overlay">
+  </div>
+</form>
+<script>
+function encode(data) {
+  return Object.keys(data)
+    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+    .join("&");
+}
+
+const handleSubmit = function (e) {
+  e.preventDefault();
+  console.log(e)
+  const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
+  const beta = {{ is-beta page }}
+  const version = {{ page.attributes.version }}
+
+  var formData = {}
+  formData.version = version
+  formData.url = currentUrl
+  formData.beta = beta
+
+  const form = e.target.closest('form')
+  const feedback = form.querySelector('input[name="feedback"]:checked').value
+
+  formData.positiveFeedback = feedback
+  formData.otherText = form.querySelector('textarea[name="otherText"]').value
+
+  formData.email = form.querySelector('input[name="email"]').value
+
+  formData.date = new Date().toISOString()
+  formData.navigator = JSON.stringify({
+    appName: window.navigator.appName,
+    appVersion: window.navigator.appVersion,
+    platform: window.navigator.platform,
+    userAgent: window.navigator.userAgent,
+    language: window.navigator.language
+  })
+
+  fetch('/', {
+    method: 'POST',
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: encode(formData)
+  })
+    .then(() => {
+      console.log('Form submission success')
+    })
+    .catch(error => {
+      console.error('Form submission error:', error)
+    })
+}
+</script>

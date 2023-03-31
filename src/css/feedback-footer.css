@@ -18,25 +18,6 @@
   text-decoration: none;
 }
 
-.thumbs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: inherit;
-  color: var(--link-font-color);
-  margin-top: 20px;
-}
-
-.thumb {
-  color: var(--link-font-color);
-  background: none;
-  border: none;
-}
-
-.thumb:hover {
-  color: var(--link_hover-font-color);
-}
-
 .feedback-section .col {
   display: flex;
   align-items: center;

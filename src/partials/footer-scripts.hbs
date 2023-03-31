@@ -34,3 +34,18 @@ docsearch({
 });
 </script>
 {{/if}}
+<script>
+const thumbs = document.querySelectorAll('.thumb');
+const positiveModal = document.getElementById('positive');
+const negativeModal = document.getElementById('negative');
+
+thumbs.forEach(function(thumb) {
+  thumb.addEventListener('click', function() {
+    if (thumb.id.indexOf('up') !== -1) {
+      positiveModal.classList.toggle("hidden");
+    } else if (thumb.id.indexOf('down') !== -1) {
+      negativeModal.classList.toggle("hidden");
+    }
+  });
+});
+</script>
