@@ -1,1 +1,4 @@
-    {{!-- Add additional meta tags here --}}
+{{!-- Prevent old versions from being indexed by search engines --}}
+{{#if (ne page.version page.component.latest.version)}}
+<meta name="robots" content="noindex">
+{{/if}}
