@@ -32,7 +32,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         echo "tag=${{ github.event.ref#refs/tags/}}" >> $GITHUB_ENV
-        gh release create "$tag" ./build/ui-bundle.zip \
+        gh release create "${{ env.tag }}" ./build/ui-bundle.zip \
             --repo="$GITHUB_REPOSITORY" \
-            --title="$tag" \
+            --title="${{ env.tag }}" \
             --generate-notes
