@@ -25,12 +25,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        github-script: |
+        script: |
           const { execSync } = require('child_process');
           const releaseNotes = execSync('npx auto-changelog --stdout --commit-limit false').toString();
           console.log(releaseNotes);
-        output: |
-          ${{ steps.gen_changelog.outputs.stdout }}
 
     - name: Create Release
       id: create_release
