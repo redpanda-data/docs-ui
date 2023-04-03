@@ -34,5 +34,5 @@ jobs:
       run: |
         gh release create "${ref}" ./build/ui-bundle.zip \
             --repo="$GITHUB_REPOSITORY" \
-            --title="${GITHUB_REPOSITORY#*/} ${ref}" \
+            --title="${ref}" \
             --generate-notes
