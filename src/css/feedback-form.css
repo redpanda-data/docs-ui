@@ -44,6 +44,10 @@
   text-align: center;
 }
 
+.radio-label {
+  line-height: 40px;
+}
+
 button[type=submit],
 button.close {
   background-color: var(--link-font-color);
