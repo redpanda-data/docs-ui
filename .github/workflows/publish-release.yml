@@ -32,9 +32,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.event.push.ref }}
       run: |
-        tag=${ref##*/}
-
-        gh release create "$tag" ./build/ui-bundle.zip \
+        gh release create "${ref}" ./build/ui-bundle.zip \
             --repo="$GITHUB_REPOSITORY" \
-            --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+            --title="${GITHUB_REPOSITORY#*/} ${ref}" \
             --generate-notes
