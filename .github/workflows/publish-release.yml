@@ -31,7 +31,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create ${{ github.event.push.ref }} ./build/ui-bundle.zip \
+        gh release create "${{ github.event.push.ref }}" ./build/ui-bundle.zip \
             --repo="$GITHUB_REPOSITORY" \
             --title="${{ github.event.push.ref }}" \
             --generate-notes
