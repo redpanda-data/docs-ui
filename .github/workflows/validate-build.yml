@@ -1,6 +1,6 @@
 # This workflow makes sure that the UI builds without errors
 
-name: Validate the build process
+name: Validate the build
 
 on:
   pull_request:
