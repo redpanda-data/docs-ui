@@ -71,8 +71,13 @@
   --note-on-color: var(--color-white);
   --tip-color: #41af46;
   --tip-on-color: var(--color-white);
-  --warning-color: #e18114;
+  --warning-color: #e6a700;
+  --warning-background: #fff8e6;
   --warning-on-color: var(--color-white);
+  --admonition-border-left-width: 5px;
+  --admonition-border-radius: 1px;
+  --admonition-box-shadow: 0 1px 2px 0 #0000001a;
+  --admonition-padding: 1rem;
   /* doc */
   --doc-font-color: var(--color-jet-50);
   --doc-font-size: inherit;

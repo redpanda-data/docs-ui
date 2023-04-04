@@ -1,0 +1,15 @@
+.banner-container {
+  background-color: var(--warning-background);
+  border: 0 solid var(--warning-color);
+  border-left-width: var(--admonition-border-left-width);
+  border-radius: var(--admonition-border-radius);
+  box-shadow: var(--admonition-border-box-shadow);
+  padding: var(--admonition-padding);
+  margin-left: 1rem;
+}
+
+@media screen and (min-width: 1024px) {
+  .banner-container {
+    width: 80%;
+  }
+}

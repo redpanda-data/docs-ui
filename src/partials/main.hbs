@@ -1,11 +1,14 @@
 <main class="article">
 {{> toolbar}}
-  <div class="content">
-{{#if (eq page.layout '404')}}
-{{> article-404}}
-{{else}}
-{{> toc}}
-{{> article}}
+{{#if (ne page.version page.component.latest.version)}}
+  {{> latest-banner}}
 {{/if}}
+  <div class="content">
+    {{#if (eq page.layout '404')}}
+    {{> article-404}}
+    {{else}}
+    {{> toc}}
+    {{> article}}
+    {{/if}}
   </div>
 </main>

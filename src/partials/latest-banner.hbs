@@ -1,0 +1,8 @@
+<div class="doc banner-container" id="latest-banner">
+  <div>
+    This is documentation for {{page.component.title}} <b>{{page.version}}</b>.
+  </div>
+  <div>
+    For up-to-date documentation, see the {{#with (latest-page-url)}}<a href="{{relativize this}}">latest version</a>{{/with}} ({{page.component.latest.version}}).
+  </div>
+</div>
