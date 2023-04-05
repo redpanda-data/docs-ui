@@ -3,7 +3,7 @@ module.exports = (currentPage) => {
   for (let i = 0; i < currentPage.component.versions.length; i++) {
     const version = currentPage.component.versions[i].version
     if (currentVersion === version) {
-      if (version.prerelease === 'true') {
+      if (currentPage.component.versions[i].prerelease === true) {
         return true
       } else {
         return false
