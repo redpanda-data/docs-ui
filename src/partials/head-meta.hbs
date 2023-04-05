@@ -1,4 +1,4 @@
 {{!-- Prevent old versions from being indexed by search engines --}}
-{{#if (ne page.version page.component.latest.version)}}
+{{#if (is-beta page)}}
 <meta name="robots" content="noindex">
 {{/if}}
