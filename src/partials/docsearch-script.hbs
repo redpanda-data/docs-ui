@@ -1,0 +1,31 @@
+<script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3"></script>
+<script>
+docsearch({
+  container: '#search-field',
+  appId: '{{{env.ALGOLIA_APP_ID}}}',
+  indexName: '{{{env.ALGOLIA_INDEX_NAME}}}',
+  apiKey: '{{{env.ALGOLIA_API_KEY}}}',
+  getMissingResultsUrl({ query }) {
+    return `https://github.com/JakeSCahill/redpanda-docs-antora/issues/new?title=${query}`;
+  },
+  resultsFooterComponent({ state }) {
+    return {
+      // The HTML `tag`
+      type: 'a',
+      ref: undefined,
+      constructor: undefined,
+      key: state.query,
+      // Its props
+      props: {
+        href: `/search.html?q=${state.query}`,
+        /*onClick: (event) => {
+          console.log(JSON.stringify(state,null,2));
+        },*/
+        // Raw text rendered in the HTML element
+        children: `See all ${state.context.nbHits} results`,
+      },
+      __v: null,
+    };
+  },
+});
+</script>

@@ -1,0 +1,72 @@
+<script>
+const thumbs = document.querySelectorAll('.thumb');
+const positiveModal = document.getElementById('positive');
+const negativeModal = document.getElementById('negative');
+var currentForm;
+
+thumbs.forEach(function(thumb) {
+  thumb.addEventListener('click', function() {
+    if (thumb.id.indexOf('up') !== -1) {
+      positiveModal.classList.toggle("hidden");
+      currentForm = positiveModal
+    } else if (thumb.id.indexOf('down') !== -1) {
+      negativeModal.classList.toggle("hidden");
+      currentForm = negativeModal
+    }
+  });
+});
+
+const handleSubmit = function (e) {
+  e.preventDefault();
+  const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
+  const beta = {{ is-beta page }}
+  const version = {{ page.attributes.version }}
+
+  const form = event.target;
+  var formData = new FormData(form);
+
+  formData.set('version', version)
+  formData.set('url', currentUrl)
+  formData.set('beta', beta)
+
+  const formFields = e.target.closest('form')
+  const feedback = formFields.querySelector('input[name="feedback"]:checked').value
+
+  formData.set('positiveFeedback', feedback)
+  formData.set('otherText', (form.querySelector('textarea[name="otherText"]').value))
+
+  formData.set('email', (form.querySelector('input[name="email"]').value))
+
+  formData.set('date', new Date().toISOString())
+  formData.set('navigator', JSON.stringify({
+    appName: window.navigator.appName,
+    appVersion: window.navigator.appVersion,
+    platform: window.navigator.platform,
+    userAgent: window.navigator.userAgent,
+    language: window.navigator.language
+  }))
+
+  fetch("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData).toString(),
+  }).then(() => {
+      console.log('Form submission success')
+      clearFeedbackModal()
+    })
+    .catch(error => {
+      console.error('Form submission error:', error)
+    })
+}
+function clearFeedbackModal() {
+  var modalBody = currentForm.querySelector('.feedback-modal-body');
+  modalBody.innerHTML = `
+  {{> feedback-success-modal}}
+  `;
+}
+
+function closeForm(e) {
+  e.preventDefault()
+  currentForm.classList.toggle("hidden");
+}
+</script>

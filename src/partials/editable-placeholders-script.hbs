@@ -1,0 +1,82 @@
+<script>
+function createEditablePlaceholders () {
+  const codeElements = document.querySelectorAll("pre > code");
+
+  for (let i = 0; i < codeElements.length; i++) {
+    const codeElement = codeElements[i];
+    searchForPlaceholders(codeElement);
+  }
+}
+
+function searchForPlaceholders(element) {
+  if (element.textContent.match(/<[^>A-Z]*>/)){
+    addEditableSpan(element)
+  }
+}
+
+function addEditableSpan(element) {
+  if (!element || !element.textContent) {
+    return;
+  }
+  const html = element.innerHTML;
+  const regex = /&lt;(?:<[^>]+>)?([a-z-]+)(?:<[^>]+>)?&gt;/g;
+  const newHtml = html.replace(regex, '<span contenteditable="true" data-type="$1" onclick="removeCursor(event)">&lt;$1&gt;</span><span class="cursor"></span>');
+  element.innerHTML = newHtml;
+}
+
+function removeCursor (element) {
+  if (element.target) {
+    element = element.target
+  }
+  if (element.contentEditable == 'true') {
+    element.nextElementSibling.classList.remove('cursor');
+  } else {
+    element.parentElement.nextElementSibling.classList.remove('cursor');
+  }
+}
+
+function addClasses () {
+  const editablePlaceholders = document.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
+
+  editablePlaceholders.forEach((placeholder) => {
+    placeholder.classList.add('editable');
+    placeholder.addEventListener('input', function(event) {
+      console.log(event.target.textContent)
+      const dataType = event.target.dataset.type;
+      const newText = event.target.textContent;
+
+      document.querySelectorAll(`[data-type="${dataType}"][contenteditable="true"]`).forEach(span => {
+        if (span !== event.target) {
+          span.textContent = newText;
+        }
+      });
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    createEditablePlaceholders();
+    addClasses()
+  } catch (error) {
+    console.error('An error occurred while making placeholders editable:', error);
+  }
+});
+window.onload = function() {
+  const editablePlaceholders = document.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
+
+  editablePlaceholders.forEach((placeholder) => {
+    placeholder.addEventListener('input', function(event) {
+      const dataType = event.target.dataset.type;
+      const newText = event.target.textContent;
+
+      document.querySelectorAll(`[data-type="${dataType}"][contenteditable="true"]`).forEach(span => {
+        if (span !== event.target) {
+          span.textContent = newText;
+          removeCursor(span)
+        }
+      });
+    });
+  });
+};
+</script>
