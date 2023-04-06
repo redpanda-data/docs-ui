@@ -22,7 +22,7 @@ const handleSubmit = function (e) {
   const beta = {{ is-beta page }}
   var version = '';
   {{#if page.attributes.version }}
-  version = page.attributes.version
+  version = {{{ page.attributes.version }}}
   {{/if}}
 
   const form = event.target;
