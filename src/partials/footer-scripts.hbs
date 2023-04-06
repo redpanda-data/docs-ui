@@ -4,7 +4,7 @@
 {{#if env.ALGOLIA_API_KEY}}
 {{> docsearch-script}}
 {{/if}}
-{{#if page.version }}
+{{#if (ne page.layout '404') }}
 {{> feedback-form-script}}
 {{> editable-placeholders-script}}
 {{/if}}

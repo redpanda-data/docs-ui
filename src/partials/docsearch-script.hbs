@@ -17,7 +17,7 @@ docsearch({
       key: state.query,
       // Its props
       props: {
-        href: `/search.html?q=${state.query}`,
+        href: `{{{relativize '/search' }}}?q=${state.query}`,
         /*onClick: (event) => {
           console.log(JSON.stringify(state,null,2));
         },*/

@@ -18,4 +18,26 @@
   </li>
   {{/each}}
 </ul>
+{{else if (or (eq page.layout 'home') (eq page.layout '404'))}}
+<ul class="nav-list">
+  {{#with site.components.redpanda}}
+    {{#each ./latest.navigation}}
+      <li class="nav-item" data-depth="{{or ../level 0}}">
+        {{#if ./content}}
+        {{#if ./items.length}}
+        <button class="nav-item-toggle"></button>
+        {{/if}}
+        {{#if ./url}}
+        <a class="nav-link" href="
+          {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
+          {{~else}}{{{./url}}}{{~/if}}">{{{./content}}}</a>
+        {{else}}
+        <span class="nav-text">{{{./content}}}</span>
+        {{/if}}
+        {{/if}}
+    {{> nav-tree navigation=./items level=(increment ../level)}}
+      </li>
+    {{/each}}
+  {{/with}}
+</ul>
 {{/if}}

@@ -20,7 +20,10 @@ const handleSubmit = function (e) {
   e.preventDefault();
   const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
   const beta = {{ is-beta page }}
-  const version = {{ page.attributes.version }}
+  var version = '';
+  {{#if page.attributes.version }}
+  version = page.attributes.version
+  {{/if}}
 
   const form = event.target;
   var formData = new FormData(form);

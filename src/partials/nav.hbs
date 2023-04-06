@@ -1,4 +1,4 @@
-{{#if page.version }}
+{{#if (ne page.layout '404') }}
 {{> feedback-forms}}
 {{/if}}
 <div class="nav-container"{{#if page.component}} data-component="{{page.component.name}}" data-version="{{page.version}}"{{/if}}>
