@@ -9,8 +9,8 @@
   {{#if (and (eq this.url @root.page.url) (ne this.items.length 0))}}
     {{#each this.items}}
       {{#with (get-page-info this.url)}}
-        <li class="index"><a href="{{this.url}}">{{this.title}}</a>
-        <p class="index">{{this.description}}</p>
+        <li class="index"><a href="{{this.url}}">{{{this.title}}}</a>
+        <p class="index">{{{this.description}}}</p>
         </li>
       {{/with}}
     {{/each}}
