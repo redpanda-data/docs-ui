@@ -1,11 +1,16 @@
 {{#if navigation.length}}
 <ul class="nav-list">
+  {{#with site.components.home}}
+    <li class="nav-item">
+      <div class="item">
+        <a href="{{{relativize ./url}}}">Docs Home</a>
+      </div>
+    </li>
+  {{/with}}
   {{#each navigation}}
   <li class="nav-item{{#if (eq ./url @root.page.url)}} is-current-page{{/if}}" data-depth="{{or ../level 0}}">
     {{#if ./content}}
-    {{#if ./items.length}}
-    <button class="nav-item-toggle"></button>
-    {{/if}}
+    <div class="item">
     {{#if ./url}}
     <a class="nav-link" href="
       {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
@@ -13,6 +18,10 @@
     {{else}}
     <span class="nav-text">{{{./content}}}</span>
     {{/if}}
+    {{#if ./items.length}}
+    <button class="nav-item-toggle"></button>
+    {{/if}}
+    </div>
     {{/if}}
 {{> nav-tree navigation=./items level=(increment ../level)}}
   </li>
@@ -20,13 +29,18 @@
 </ul>
 {{else if (or (eq page.layout 'home') (eq page.layout '404'))}}
 <ul class="nav-list">
+  {{#with site.components.home}}
+    <li class="nav-item">
+      <div class="item">
+        <a href="{{{relativize ./url}}}">Docs Home</a>
+      </div>
+    </li>
+  {{/with}}
   {{#with site.components.redpanda}}
     {{#each ./latest.navigation}}
       <li class="nav-item" data-depth="{{or ../level 0}}">
         {{#if ./content}}
-        {{#if ./items.length}}
-        <button class="nav-item-toggle"></button>
-        {{/if}}
+        <div class="item">
         {{#if ./url}}
         <a class="nav-link" href="
           {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
@@ -34,6 +48,10 @@
         {{else}}
         <span class="nav-text">{{{./content}}}</span>
         {{/if}}
+        {{#if ./items.length}}
+        <button class="nav-item-toggle"></button>
+        {{/if}}
+        </div>
         {{/if}}
     {{> nav-tree navigation=./items level=(increment ../level)}}
       </li>
