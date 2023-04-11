@@ -28,8 +28,9 @@
   }
 
   find(menuPanel, '.nav-item-toggle').forEach(function (btn) {
-    var li = btn.parentElement
-    btn.addEventListener('click', toggleActive.bind(li))
+    var li = btn.closest('.nav-item')
+    var div = btn.closest('.item')
+    div.addEventListener('click', toggleActive.bind(li))
     var navItemSpan = findNextElement(btn, '.nav-text')
     if (navItemSpan) {
       navItemSpan.style.cursor = 'pointer'
@@ -120,7 +121,8 @@
     navItem.classList.add('is-active')
   }
 
-  function toggleActive () {
+  function toggleActive (event) {
+    event.stopPropagation()
     if (this.classList.toggle('is-active')) {
       var padding = parseFloat(window.getComputedStyle(this).marginTop)
       var rect = this.getBoundingClientRect()

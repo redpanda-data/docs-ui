@@ -1,8 +1,5 @@
 <main class="article">
 {{> toolbar}}
-{{#if (ne page.version page.component.latest.version)}}
-  {{> latest-banner}}
-{{/if}}
   <div class="content">
     {{#if (eq page.layout '404')}}
     {{> article-404}}

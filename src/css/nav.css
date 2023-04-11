@@ -40,6 +40,8 @@
 .nav {
   background: var(--nav-background);
   position: relative;
+  overflow-y: scroll;
+  overscroll-behavior: none;
   top: var(--toolbar-height);
   height: var(--nav-height);
   border-right: 1px solid var(--nav-border-color);
@@ -100,8 +102,6 @@ html.is-clipped--nav {
 }
 
 .nav-panel-menu {
-  overflow-y: scroll;
-  overscroll-behavior: none;
   height: var(--nav-panel-menu-height);
 }
 
@@ -122,7 +122,7 @@ html.is-clipped--nav {
 
 .nav-list {
   list-style: none;
-  margin: 0 0 0 0.75rem;
+  margin: 0 0 0 0.5rem;
   padding: 0;
 }
 
@@ -131,18 +131,50 @@ html.is-clipped--nav {
 }
 
 .nav-item {
-  margin-top: 0.5em;
+  margin-top: 0.3em;
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+  cursor: pointer;
 }
 
-/* adds some breathing room below a nested list */
-.nav-item-toggle ~ .nav-list {
-  padding-bottom: 0.125rem;
+.nav .item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  border-radius: 3px;
 }
 
-/* matches list without a title */
+li[data-depth="1"] > .item {
+  height: 30px;
+}
+
+ul.nav-list > li:first-child[data-depth="2"],
+ul.nav-list > li:first-child[data-depth="3"],
+ul.nav-list > li:first-child[data-depth="4"],
+ul.nav-list > li:first-child[data-depth="5"],
+ul.nav-list > li:first-child[data-depth="6"] {
+  padding-top: 0.5em;
+}
+
+.nav-list > li > .item:hover {
+  background-color: #0000000d;
+  color: var(--link-font-color);
+}
+
+.nav-list a {
+  text-decoration: none !important;
+}
+
 .nav-item[data-depth="0"] > .nav-list:first-child {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex: 1;
   margin: 0;
+  flex-direction: column;
 }
 
 .nav-item:not(.is-active) > .nav-list {
@@ -150,20 +182,18 @@ html.is-clipped--nav {
 }
 
 .nav-item-toggle {
-  background: transparent url(../img/caret.svg) no-repeat center / 50%;
+  background: transparent url(../img/caret.svg) no-repeat center / 100%;
   border: none;
+  transform: rotate(90deg);
   outline: none;
   line-height: inherit;
   padding: 0;
-  position: absolute;
-  height: calc(var(--nav-line-height) * 1em);
-  width: calc(var(--nav-line-height) * 1em);
-  margin-top: -0.05em;
-  margin-left: calc(var(--nav-line-height) * -1em);
+  height: calc(var(--nav-line-height) * 1.5em);
+  width: calc(var(--nav-line-height) * 1.5em);
 }
 
-.nav-item.is-active > .nav-item-toggle {
-  transform: rotate(90deg);
+.nav-item.is-active > .item > .nav-item-toggle {
+  transform: rotate(180deg);
 }
 
 .is-current-page > .nav-link,
