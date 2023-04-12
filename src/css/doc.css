@@ -92,12 +92,9 @@
 .doc h6 .anchor {
   position: absolute;
   text-decoration: none;
-  width: 1.75ex;
-  margin-left: -1.5ex;
   visibility: hidden;
-  font-size: 0.8em;
   font-weight: normal;
-  padding-top: 0.05em;
+  margin-left: 0.3rem;
 }
 
 .doc h1 .anchor::before,
@@ -106,7 +103,7 @@
 .doc h4 .anchor::before,
 .doc h5 .anchor::before,
 .doc h6 .anchor::before {
-  content: "\00a7";
+  content: "#";
 }
 
 .doc h1:hover .anchor,
