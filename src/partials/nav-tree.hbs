@@ -2,7 +2,7 @@
 <ul class="nav-list">
   {{#with site.components.home}}
     <li class="nav-item">
-      <div class="item">
+      <div class="item" onclick="window.location.href = '{{{relativize ./url}}}'">
         <a href="{{{relativize ./url}}}">Docs Home</a>
       </div>
     </li>
@@ -31,7 +31,7 @@
 <ul class="nav-list">
   {{#with site.components.home}}
     <li class="nav-item">
-      <div class="item">
+      <div class="item" onclick="window.location.href = '{{{relativize ./url}}}'">
         <a href="{{{relativize ./url}}}">Docs Home</a>
       </div>
     </li>

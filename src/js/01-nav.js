@@ -130,7 +130,8 @@
       var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
       if (overflowY > 0) menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
       const a = this.querySelector('a')
-      a && window.open(a.href)
+      if (!a) return
+      window.location.href = a.href
     }
   }
 
