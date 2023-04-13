@@ -2,7 +2,7 @@
   <div class='container'>
     <div class="grid boxes">
       {{#each page.attributes.feature-list}}
-      <a href={{{ relativize url}}} class="feature-link">
+      <a href="{{{relativize (resolvePageURL url)}}}" class="feature-link">
         <div class="feature-box">
           <div class="feature-image">
             <img src='./_images/{{image}}' alt={{{title}}} />
@@ -32,7 +32,7 @@
         <ul class="menu-list">
           {{#each items}}
             <li class="menu-list-item">
-              <a href={{{ relativize this.url}}} class="menu-list-item-link">
+              <a href="{{{relativize (resolvePageURL this.url)}}}"  class="menu-list-item-link">
                 {{{this.text}}}
               </a>
             </li>
