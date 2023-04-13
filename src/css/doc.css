@@ -125,12 +125,18 @@
   margin: 0;
 }
 
-.doc a {
+.doc a,
+.doc .glossary-term {
   color: var(--link-font-color);
 }
 
-.doc a:hover {
+.doc a:hover,
+.doc .glossary-term:hover {
   color: var(--link_hover-font-color);
+}
+
+.doc .glossary-term {
+  cursor: pointer;
 }
 
 .doc a.bare {
