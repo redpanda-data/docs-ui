@@ -7,66 +7,11 @@
 {{/with}}
 {{> page-versions}}
 {{#if (eq page.layout 'home')}}
-  <section class="features">
-    <div class='container'>
-      <div class="grid boxes">
-        {{#each page.attributes.feature-list}}
-        <a href={{{ relativize url}}} class="feature-link">
-          <div class="feature-box">
-            <div class="feature-image">
-              <img src='./_images/{{image}}' alt={{{title}}} />
-            </div>
-            <div class="feature-text">
-              <h2 class="feature-title">{{{title}}}</h2>
-              {{#if description}}
-                <p class="feature-description">{{{description}}}</p>
-              {{/if}}
-              {{#if learn-text}}
-                <p class="feature-learn-text">Learn more &rarr;</p>
-              {{/if}}
-            </div>
-          </div>
-        </a>
-        {{/each}}
-      </div>
-    </div>
-    <div class='container'>
-      <div class="grid highlights">
-        {{#each page.attributes.footer-menu-list}}
-        <div class="menu-container">
-          <div class="footer-menu-header">
-              <img src='./_images/{{icon.url}}' alt={{{title}}} class="{{icon.size}}"/>
-              <h3>{{{title}}}</h3>
-          </div>
-          <ul class="menu-list">
-            {{#each items}}
-              <li class="menu-list-item">
-                <a href={{{ relativize this.url}}} class="menu-list-item-link">
-                  {{{this.text}}}
-                </a>
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/each}}
-      </div>
-    </div>
-  </section>
+  {{> home}}
 {{else if (eq page.layout 'index')}}
-  <ul class="index">
-  {{#each page.breadcrumbs}}
-    {{#if (and (eq this.url @root.page.url) (ne this.items.length 0))}}
-      {{#each this.items}}
-        {{#with (get-page-info this.url)}}
-          <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
-          <p class="index">{{{this.description}}}</p>
-          </li>
-        {{/with}}
-      {{/each}}
-    {{/if}}
-  {{/each}}
-  </ul>
+  {{> index}}
 {{else}}
+  {{> context-switcher}}
   {{{page.contents}}}
 {{/if}}
 {{> feedback-footer}}

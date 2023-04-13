@@ -1,0 +1,14 @@
+{{#if page.attributes.context-links}}
+<div class="context-switcher">
+  {{#each (obj page.attributes.context-links)}}
+    <a
+      id="{{{this.name}}}"
+      href="{{{relativize (resolvePageURL this.to)}}}"
+      onclick="setActive(event)"
+      class="context-link {{#if (eq @root.page.url (resolvePageURL this.to))}}active{{/if}}"
+    >
+      <button type="button">{{{this.name}}}</button>
+    </a>
+    {{/each}}
+</div>
+{{/if}}
