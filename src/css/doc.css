@@ -163,6 +163,12 @@
   hyphens: none;
 }
 
+/* Override Prism.js styles */
+.doc code .token.operator,
+.doc code .token.url {
+  background-color: inherit;
+}
+
 .doc pre {
   font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.5;
