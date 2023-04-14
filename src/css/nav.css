@@ -41,10 +41,17 @@
   visibility: visible;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
 .nav {
   background: var(--nav-background);
   position: relative;
   overflow-y: scroll;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
   overscroll-behavior: none;
   top: var(--toolbar-height);
   height: var(--nav-height);
@@ -195,6 +202,10 @@ ul.nav-list > li:first-child[data-depth="6"] {
   padding: 0;
   height: calc(var(--nav-line-height) * 1.5em);
   width: calc(var(--nav-line-height) * 1.5em);
+}
+
+.nav-item-toggle:hover {
+  background-color: #0000000d;
 }
 
 .nav-item.is-active > .item > .nav-item-toggle {
