@@ -236,6 +236,35 @@
   margin: 1rem 0 0;
 }
 
+.doc .tab {
+  border: 0;
+}
+
+.tabs:not(.is-loading) .tablist li:not(.is-selected) {
+  background-color: unset !important;
+}
+
+.tabs:not(.is-loading) .tablist li:not(.is-selected):hover {
+  background-color: #0000000d !important;
+}
+
+.tablist > ul {
+  margin-bottom: 15px !important;
+}
+
+.doc .tab.is-selected {
+  border-bottom: 5px solid #f15d61;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  color: #f15d61;
+}
+
+.doc .tabpanel {
+  padding: unset;
+  padding-right: 1.25em;
+  border: none;
+}
+
 .doc table.tableblock {
   font-size: calc(15 / var(--rem-base) * 1rem);
 }
