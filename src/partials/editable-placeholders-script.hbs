@@ -4,25 +4,43 @@ function createEditablePlaceholders () {
 
   for (let i = 0; i < codeElements.length; i++) {
     const codeElement = codeElements[i];
-    searchForPlaceholders(codeElement);
+    addEditableSpan(/&lt;.[^&A-Z]*&gt;/g, codeElement);
   }
 }
 
-function searchForPlaceholders(element) {
-  if (element.textContent.match(/<[^>A-Z]*>/)){
-    addEditableSpan(element)
-  }
+if (!RegExp.escape) {
+  RegExp.escape = function(s) {
+    return s.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+  };
 }
 
-function addEditableSpan(element) {
+function addEditableSpan(regex, element) {
   if (!element || !element.textContent) {
     return;
   }
-  const html = element.innerHTML;
-  const regex = /&lt;(?:<[^>]+>)?([a-z-]+)(?:<[^>]+>)?&gt;/g;
-  const newHtml = html.replace(regex, '<span contenteditable="true" data-type="$1" onclick="removeCursor(event)">&lt;$1&gt;</span><span class="cursor"></span>');
-  element.innerHTML = newHtml;
+  var html = element.innerHTML;
+  var placeholders = html.match(regex) || []
+  var processed = {}
+  for (const placeholder of placeholders) {
+    const placeholdersNoSpan = placeholder.replace(/<[^>]*>/g, '');
+    const cleanedPlaceholder = placeholdersNoSpan.replace(/&lt;|&gt;/g, '');
+    if (processed[cleanedPlaceholder]) {
+      const regexString = '(?<!onclick="removeCursor\\(event\\)">)(' + RegExp.escape(placeholder) + ')';
+      const regex = new RegExp(regexString, 'g');
+      html = element.innerHTML;
+      if (html.match(regex)) {
+        html = html.replace(regex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" onclick="removeCursor(event)">&lt;${cleanedPlaceholder}&gt;</span><span class="cursor"></span>`);
+        element.innerHTML = html
+        continue;
+      }
+    }
+    processed[cleanedPlaceholder] = cleanedPlaceholder
+    html = html.replace(placeholder, `<span contenteditable="true" data-type="${cleanedPlaceholder}" onclick="removeCursor(event)">&lt;${cleanedPlaceholder}&gt;</span><span class="cursor"></span>`);
+    element.innerHTML = html
+  }
 }
+
+
 
 function removeCursor (element) {
   if (element.target) {
@@ -41,7 +59,6 @@ function addClasses () {
   editablePlaceholders.forEach((placeholder) => {
     placeholder.classList.add('editable');
     placeholder.addEventListener('input', function(event) {
-      console.log(event.target.textContent)
       const dataType = event.target.dataset.type;
       const newText = event.target.textContent;
 
@@ -54,15 +71,7 @@ function addClasses () {
   });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  try {
-    createEditablePlaceholders();
-    addClasses()
-  } catch (error) {
-    console.error('An error occurred while making placeholders editable:', error);
-  }
-});
-window.onload = function() {
+function addEvents() {
   const editablePlaceholders = document.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
 
   editablePlaceholders.forEach((placeholder) => {
@@ -78,5 +87,15 @@ window.onload = function() {
       });
     });
   });
+}
+
+window.onload = function() {
+  try {
+    createEditablePlaceholders();
+    addClasses()
+    addEvents()
+  } catch (error) {
+    console.error('An error occurred while making placeholders editable:', error);
+  }
 };
 </script>

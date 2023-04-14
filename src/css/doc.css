@@ -158,6 +158,7 @@
   color: var(--code-font-color);
   background: var(--code-background);
   border-radius: 0.25em;
+  box-shadow: 0 1px 2px 0 #0000001a;
   font-size: 0.95em;
   padding: 0.125em 0.25em;
 }
@@ -642,7 +643,12 @@
   font-weight: var(--caption-font-weight);
   hyphens: none;
   letter-spacing: 0.01em;
-  padding-bottom: 0.075rem;
+  border-bottom: 1px solid #dadde1;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  margin-bottom: -0.75rem;
+  padding: 1rem;
+  background-color: #f6f8fa;
 }
 
 .doc .tableblock caption {
@@ -767,7 +773,12 @@
   box-shadow: inset 0 0 1.75px var(--pre-border-color);
   display: block;
   overflow-x: auto;
-  padding: 0.875em;
+  font-weight: 300;
+}
+
+code[class*=language-],
+pre[class*=language-] {
+  font-family: inherit !important;
 }
 
 .doc .listingblock > .content {
