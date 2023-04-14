@@ -13,6 +13,10 @@
   font-size: 13px;
   font-weight: 200;
   margin: 0;
+  position: sticky;
+  z-index: 999;
+  top: 0;
+  background-color: inherit;
   padding: 10px;
   width: 100%;
 }
@@ -124,6 +128,7 @@ html.is-clipped--nav {
   list-style: none;
   margin: 0 0 0 0.5rem;
   padding: 0;
+  width: 100%;
 }
 
 .nav-menu > .nav-list + .nav-list {
