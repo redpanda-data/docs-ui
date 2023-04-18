@@ -18,28 +18,22 @@ function addEditableSpan(regex, element) {
   if (!element || !element.textContent) {
     return;
   }
-  var html = element.innerHTML;
-  var placeholders = html.match(regex) || []
-  var processed = {}
+  const text = element.innerHTML;
+  const placeholders = text.match(regex) || [];
+  const processed = new Set();
+  let newHTML = text;
   for (const placeholder of placeholders) {
-    const placeholdersNoSpan = placeholder.replace(/<[^>]*>/g, '');
-    const cleanedPlaceholder = placeholdersNoSpan.replace(/&lt;|&gt;/g, '');
-    if (processed[cleanedPlaceholder]) {
-      const regexString = '(?<!onclick="removeCursor\\(event\\)">)(' + RegExp.escape(placeholder) + ')';
-      const regex = new RegExp(regexString, 'g');
-      html = element.innerHTML;
-      if (html.match(regex)) {
-        html = html.replace(regex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" onclick="removeCursor(event)">&lt;${cleanedPlaceholder}&gt;</span><span class="cursor"></span>`);
-        element.innerHTML = html
-        continue;
-      }
+    const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
+    if (processed.has(placeholder)) {
+      continue;
     }
-    processed[cleanedPlaceholder] = cleanedPlaceholder
-    html = html.replace(placeholder, `<span contenteditable="true" data-type="${cleanedPlaceholder}" onclick="removeCursor(event)">&lt;${cleanedPlaceholder}&gt;</span><span class="cursor"></span>`);
-    element.innerHTML = html
+    const regexString = RegExp.escape(placeholder);
+    const globalRegex = new RegExp(regexString, 'g');
+    newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" onclick="removeCursor(event)">&lt;${cleanedPlaceholder}&gt;</span><span class="cursor"></span>`);
+    processed.add(placeholder);
   }
+  element.innerHTML = newHTML;
 }
-
 
 
 function removeCursor (element) {
