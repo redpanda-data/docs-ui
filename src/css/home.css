@@ -40,7 +40,7 @@
   text-decoration: underline;
 }
 
-.home a.feature-link:hover .feature-box {
+html:not([data-theme=dark]) .home a.feature-link:hover .feature-box {
   border-color: var(--color-jet-50);
 }
 
@@ -86,7 +86,11 @@
 
 .home div.menu-container {
   padding: 2rem;
-  background: #f9fafb;
+  background: var(--code-background);
+}
+
+.home div.menu-container a:hover {
+  text-decoration: none;
 }
 
 .home ul.menu-list {

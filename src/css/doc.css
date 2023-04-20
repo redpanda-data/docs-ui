@@ -930,10 +930,10 @@ html[data-theme=dark] code[class*=language-] .token.function {
   display: inline-flex;
   justify-content: center;
   margin-top: 1em;
-  background-color: var(--doc-font-color);
+  background-color: var(--body-font-color);
   border-radius: 0.25em;
   padding: 0.5em;
-  color: var(--color-white);
+  color: var(--body-background);
   cursor: auto;
   opacity: 0;
   transition: opacity 0.5s ease 0.5s;
@@ -946,7 +946,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
   width: 1em;
   height: 1em;
   border: 0.55em solid transparent;
-  border-left-color: var(--doc-font-color);
+  border-left-color: var(--body-font-color);
   transform: rotate(-90deg) translateX(50%) translateY(50%);
   transform-origin: left;
 }
