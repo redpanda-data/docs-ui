@@ -13,12 +13,12 @@ nav.pagination span {
 }
 
 nav.pagination .prev {
-  padding-right: 0.5rem;
+  padding-left: 0.5rem;
 }
 
 nav.pagination .next {
   margin-left: auto;
-  padding-left: 0.5rem;
+  padding-right: 0.5rem;
   text-align: right;
 }
 

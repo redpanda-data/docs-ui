@@ -12,7 +12,7 @@ article.search .ais-InstantSearch .container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 50px;
+  gap: 5px;
   margin-bottom: 20px;
 }
 
@@ -23,6 +23,10 @@ article.search .searchbox {
 article.search .ais-SearchBox-form::before {
   height: 0.95rem !important;
   width: 0.95rem !important;
+}
+
+article.search .ais-Hits-item {
+  background: unset;
 }
 
 article.search .search-panel__filters {
@@ -83,7 +87,6 @@ article.search .ais-Heading > a:hover {
 
 article.search .ais-Breadcrumbs {
   font-size: 0.8rem;
-  color: #525860;
 }
 
 article.search .ais-Pagination-list {

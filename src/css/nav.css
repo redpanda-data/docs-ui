@@ -86,7 +86,7 @@
   margin-top: 2px;
   gap: 10px;
   z-index: 1;
-  background-color: #fff;
+  background-color: var(--page-version-menu-background);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 10px;
 }
@@ -196,6 +196,7 @@ ul.nav-list > li:first-child[data-depth="6"] {
 .nav-item-toggle {
   background: transparent url(../img/caret.svg) no-repeat center / 100%;
   border: none;
+  filter: var(--nav-toggle-filter);
   transform: rotate(90deg);
   outline: none;
   line-height: inherit;
@@ -254,7 +255,9 @@ ul.nav-list > li:first-child[data-depth="6"] {
 .nav-panel-explore .context .version.is-latest,
 .nav-panel-explore .context .version:hover,
 .nav-panel-explore .context .component.is-current,
-.nav-panel-explore .context .component:hover {
+.nav-panel-explore .context .component:hover,
+.nav-panel-explore .context .version a:hover,
+.nav-panel-explore .context .component a:hover {
   background-color: var(--link-highlight-background-color);
   color: var(--link-font-color);
   border-radius: 3px;
@@ -262,9 +265,12 @@ ul.nav-list > li:first-child[data-depth="6"] {
 
 .nav-panel-explore .context .version a,
 .nav-panel-explore .context .component a {
+  color: var(--page-version-font-color);
   text-decoration: none;
   line-height: 25px;
   padding-left: 5px;
+  display: block;
+  width: 100%;
 }
 
 .nav-panel-explore .context .version,
