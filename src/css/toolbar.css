@@ -2,7 +2,6 @@
   color: var(--toolbar-font-color);
   align-items: center;
   background-color: var(--toolbar-background);
-  box-shadow: 0 1px 0 var(--toolbar-border-color);
   display: flex;
   font-size: calc(15 / var(--rem-base) * 1rem);
   height: var(--toolbar-height);
@@ -10,6 +9,10 @@
   position: sticky;
   top: var(--navbar-height);
   z-index: var(--z-index-toolbar);
+}
+
+html:not([data-theme=dark]) .toolbar {
+  box-shadow: 0 1px 0 var(--toolbar-border-color);
 }
 
 .toolbar a {
@@ -26,6 +29,10 @@
   height: var(--toolbar-height);
   width: var(--toolbar-height);
   margin-right: -0.25rem;
+}
+
+html[data-theme=dark] .nav-toggle {
+  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(248deg) brightness(105%) contrast(101%);
 }
 
 @media screen and (min-width: 1024px) {
@@ -45,6 +52,10 @@
   height: calc(var(--toolbar-height) / 2);
   width: calc(var(--toolbar-height) / 2);
   margin: calc(var(--toolbar-height) / 4);
+}
+
+html[data-theme=dark] .home-link {
+  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(248deg) brightness(105%) contrast(101%);
 }
 
 .edit-this-page {

@@ -1,3 +1,23 @@
+<script>
+!function (theme) {
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    window.addEventListener('load', function () {
+      switchButton = document.getElementById('switch-theme')
+      if (!switchButton) return
+      const img = document.querySelector('#switch-theme > img:first-child')
+      if (img) {
+        const newSrc = img.src.replace('view-sun', 'view-moon')
+        img.src = newSrc
+        // turn it white
+        img.classList.add('moon')
+      }
+    })
+  } else {
+    document.documentElement.removeAttribute('data-theme')
+  }
+}(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')) && localStorage.setItem('theme', 'dark'))
+</script>
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/tabs.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"

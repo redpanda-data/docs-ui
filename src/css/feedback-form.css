@@ -1,6 +1,6 @@
 .feedback-modal {
   position: fixed;
-  top: 50%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1010;
@@ -8,16 +8,18 @@
   max-width: 100%;
   height: 400px;
   max-height: 100%;
+  border-radius: 8px;
 }
 
-.feedback-modal-body {
-  background-color: #fefefe;
+.feedback-modal .feedback-modal-body {
+  background-color: var(--feedback-modal-background);
   border: 1px solid #888;
   flex-direction: column;
   display: flex;
   padding: 20px;
   gap: 10px;
   overflow: auto;
+  border-radius: 8px;
 }
 
 .modal-overlay {
@@ -30,21 +32,21 @@
   background-color: rgba(0, 0, 0, 0.4);
 }
 
-.feedback-modal h4 {
+.feedback-modal .feedback-modal h4 {
   margin-top: 5px;
   margin-bottom: 5px;
 }
 
-.form-field {
+.feedback-modal .form-field {
   margin-bottom: 20px;
 }
 
-.form-field.wrapper {
+.feedback-modal .form-field.wrapper {
   margin: 0 auto;
   text-align: center;
 }
 
-.radio-label {
+.feedback-modal .radio-label {
   line-height: 40px;
 }
 
@@ -58,12 +60,12 @@ button.close {
   color: var(--color-white);
 }
 
-input[type=radio]:checked {
+.feedback-modal input[type=radio]:checked {
   border: 2px solid var(--link-font-color);
   background-color: var(--link-font-color);
 }
 
-input[type=radio] {
+.feedback-modal input[type=radio] {
   -webkit-appearance: none;
   appearance: none;
   background-clip: content-box;
@@ -75,4 +77,13 @@ input[type=radio] {
   padding: 2px;
   transform: scale(1.5);
   width: 15px;
+}
+
+.feedback-modal input[type=text],
+.feedback-modal textarea {
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 80%;
+  padding: 7px;
 }

@@ -1,6 +1,7 @@
 @import "typeface-roboto.css";
 @import "typeface-roboto-mono.css";
 @import "vars.css";
+@import "dark-mode.css";
 @import "base.css";
 @import "body.css";
 @import "home.css";
@@ -25,3 +26,4 @@
 @import "expandable-images.css";
 @import "context-switcher.css";
 @import "swagger.css";
+@import "switch-theme.css";
