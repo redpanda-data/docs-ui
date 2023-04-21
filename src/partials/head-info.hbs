@@ -9,8 +9,12 @@
     <link rel="next" href="{{{relativize ./url}}}">
     {{/with}}
     {{/unless}}
+    {{#with page.title}}
+    <meta property="og:title" content="{{{this}}}">
+    {{/with}}
     {{#with page.description}}
     <meta name="description" content="{{{detag this}}}">
+    <meta property="og:description" content="{{{detag this}}}">
     {{/with}}
     {{#with page.keywords}}
     <meta name="keywords" content="{{{this}}}">
