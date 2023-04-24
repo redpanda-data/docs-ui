@@ -1,36 +1,25 @@
-<form
-  data-netlify="true"
-  id="notfound"
-  name="notfoundForm"
-  method="POST"
-  netlify-honeypot="bot-field"
->
-  <input
-    class="hidden"
-    type="hide"
-    name="form-name"
-    value="notfoundForm"
+<form data-netlify="true" id="notfound" name="notfoundForm" method="POST" netlify-honeypot="bot-field" onsubmit="handleSubmit(event)">
+  <input class="hidden" type="hide" name="form-name" value="notfoundForm"
   />
   <p class="hidden">
     <label>
       Beep-Boop. Bot-field <input name="bot-field" />
     </label>
   </p>
-  <input class="hidden" name="url" />
-  <input class="hidden" name="date" />
-  <input class="hidden" type="submit" />
+  <input id="url" class="hidden" name="url" />
+  <input id="date" class="hidden" name="date" />
   <button type="submit" id="submit-button" class="hidden"></button>
 </form>
 
 <script>
 const form = document.getElementById('notfound');
-form.addEventListener("submit", function (event) {
-  event.preventDefault();
-  var formData = new FormData(event.target)
-
-  formData.set('date', new Date())
-  formData.set('url', window.location.href)
-  formData.set('form-name', 'notfoundForm');
+var url = document.getElementById('url');
+var date = document.getElementById('date');
+url.value = window.location.href;
+date.value = new Date();
+const handleSubmit = function (e) {
+  e.preventDefault();
+  const formData = new FormData(e.target)
 
   fetch("/", {
     method: "POST",
@@ -38,10 +27,11 @@ form.addEventListener("submit", function (event) {
     body: new URLSearchParams(formData).toString(),
   }).then(() => {
       console.log('Form submission success')
-  })
+      clearFeedbackModal()
+    })
     .catch(error => {
       console.error('Form submission error:', error)
-  })
-});
+    })
+}
 document.getElementById('submit-button').click();
 </script>
