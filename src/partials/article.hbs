@@ -1,7 +1,5 @@
 <article class="doc">
-{{#if (ne page.version page.component.latest.version)}}
-  {{> latest-banner}}
-{{/if}}
+{{> latest-banner}}
 {{#with page.title}}
 <h1 class="page">{{{this}}}</h1>
 {{/with}}
