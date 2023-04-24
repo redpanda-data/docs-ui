@@ -1,0 +1,44 @@
+<form
+  data-netlify="true"
+  name="notfoundForm"
+  method="POST"
+  onSubmit="handleSubmit(event)"
+  netlify-honeypot="bot-field"
+>
+  <input
+    class="hidden"
+    type="hide"
+    name="form-name"
+    value="notfoundForm"
+  />
+  <p class="hidden">
+    <label>
+      Beep-Boop. Bot-field <input name="bot-field" />
+    </label>
+  </p>
+  <input class="hidden" name="url" />
+  <input class="hidden" name="date" />
+  <input class="hidden" type="submit" />
+</form>
+
+<script>
+const handleSubmit = function (e) {
+  e.preventDefault()
+  const form = event.target
+  var formData = new FormData(form)
+
+  formData.set('date', new Date())
+  formData.set('url', window.location.href)
+
+  fetch("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData).toString(),
+  }).then(() => {
+      console.log('Form submission success')
+    })
+    .catch(error => {
+      console.error('Form submission error:', error)
+    })
+}
+</script>
