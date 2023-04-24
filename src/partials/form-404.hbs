@@ -23,8 +23,9 @@
 </form>
 
 <script>
-const handleSubmit = function () {
-  const form = document.getElementById('notfound')
+const handleSubmit = function (event) {
+  event.preventDefault();
+  const form = event.target
   var formData = new FormData(form)
 
   formData.set('date', new Date())
@@ -41,5 +42,14 @@ const handleSubmit = function () {
       console.error('Form submission error:', error)
   })
 }
-handleSubmit()
+
+const form = document.getElementById('notfound')
+// Create a new submit event
+const submitEvent = new Event('submit', {
+  bubbles: true,
+  cancelable: true
+});
+
+// Dispatch the submit event on the form element
+form.dispatchEvent(submitEvent);
 </script>
