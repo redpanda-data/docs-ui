@@ -112,17 +112,21 @@ html:not([data-theme=dark]) {
   /* feedback */
   --feedback-modal-background: #fefefe;
   /* admonitions */
-  --caution-color: #a0439c;
-  --caution-on-color: var(--color-white);
-  --important-color: #d32f2f;
-  --important-on-color: var(--color-white);
-  --note-color: #217ee7;
-  --note-on-color: var(--color-white);
-  --tip-color: #41af46;
-  --tip-on-color: var(--color-white);
-  --warning-color: #e6a700;
-  --warning-background: #fff8e6;
-  --warning-on-color: var(--color-white);
+  --warning-color: #a0439c;
+  --warning-background: #d1c2e9;
+  --warning-on-color: #a0439c;
+  --important-color: #e13238;
+  --important-background: #ffebec;
+  --important-on-color: #4b1113;
+  --note-color: #4cb3d4;
+  --note-background: #eef9fd;
+  --note-on-color: #193c47;
+  --tip-color: #009400;
+  --tip-background: #e6f6e6;
+  --tip-on-color: #003100;
+  --caution-color: #e6a700;
+  --caution-background: #fff8e6;
+  --caution-on-color: #4d3800;
   /* doc */
   --doc-font-color: var(--color-jet-50);
   --heading-font-color: var(--color-jet-80);
