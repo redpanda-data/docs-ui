@@ -171,7 +171,9 @@ ul.nav-list > li:first-child[data-depth="6"] {
   padding-top: 0.5em;
 }
 
-.nav-list > li > .item:hover {
+.nav-list > li > .item:hover,
+.nav-list .is-current-path > div.item:first-child,
+.nav-list > li > .is-current-page {
   background-color: #0000000d;
   color: var(--link-font-color);
 }
