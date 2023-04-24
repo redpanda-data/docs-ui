@@ -19,13 +19,14 @@
   <input class="hidden" name="url" />
   <input class="hidden" name="date" />
   <input class="hidden" type="submit" />
+  <button type="submit" id="submit-button" class="hidden"></button>
 </form>
 
 <script>
 const form = document.getElementById('notfound');
 form.addEventListener("submit", function (event) {
   event.preventDefault();
-  var formData = new FormData(form)
+  var formData = new FormData(event.target)
 
   formData.set('date', new Date())
   formData.set('url', window.location.href)
@@ -42,5 +43,5 @@ form.addEventListener("submit", function (event) {
       console.error('Form submission error:', error)
   })
 });
-form.submit()
+document.getElementById('submit-button').click();
 </script>
