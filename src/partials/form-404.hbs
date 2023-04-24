@@ -24,7 +24,9 @@
 
 <script>
 const handleSubmit = function (event) {
-  event.preventDefault();
+  if (typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  }
   const form = event.target
   var formData = new FormData(form)
 
@@ -43,13 +45,13 @@ const handleSubmit = function (event) {
   })
 }
 
-const form = document.getElementById('notfound')
-// Create a new submit event
-const submitEvent = new Event('submit', {
-  bubbles: true,
-  cancelable: true
+// Call handleSubmit on page load with a simulated event
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('notfound');
+  const submitEvent = new Event('submit', {
+    bubbles: true,
+    cancelable: true
+  });
+  handleSubmit({ target: form, ...submitEvent });
 });
-
-// Dispatch the submit event on the form element
-form.dispatchEvent(submitEvent);
 </script>
