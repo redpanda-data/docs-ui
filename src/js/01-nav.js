@@ -32,9 +32,7 @@
   }
 
   find(menuPanel, '.nav-item').forEach(function (element) {
-    console.log(element)
     var div = findClosestChild(element, '.item')
-    console.log(div)
     div.addEventListener('click', toggleActive.bind(element))
     var navItemSpan = findNextElement(element, '.nav-text')
     if (navItemSpan) {
@@ -127,7 +125,6 @@
   }
 
   function toggleActive (event) {
-    console.log(event)
     var padding = parseFloat(window.getComputedStyle(this).marginTop)
     var rect = this.getBoundingClientRect()
     var menuPanelRect = menuPanel.getBoundingClientRect()
