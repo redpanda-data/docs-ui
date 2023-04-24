@@ -27,14 +27,19 @@
     menuPanel.scrollTop = 0
   }
 
-  find(menuPanel, '.nav-item-toggle').forEach(function (btn) {
-    var li = btn.closest('.nav-item')
-    var div = btn.closest('.item')
-    div.addEventListener('click', toggleActive.bind(li))
-    var navItemSpan = findNextElement(btn, '.nav-text')
+  function findClosestChild (parent, selector) {
+    return parent.querySelector(selector)
+  }
+
+  find(menuPanel, '.nav-item').forEach(function (element) {
+    console.log(element)
+    var div = findClosestChild(element, '.item')
+    console.log(div)
+    div.addEventListener('click', toggleActive.bind(element))
+    var navItemSpan = findNextElement(element, '.nav-text')
     if (navItemSpan) {
       navItemSpan.style.cursor = 'pointer'
-      navItemSpan.addEventListener('click', toggleActive.bind(li))
+      navItemSpan.addEventListener('click', toggleActive.bind(element))
     }
   })
 
@@ -122,16 +127,17 @@
   }
 
   function toggleActive (event) {
-    event.stopPropagation()
+    console.log(event)
     var padding = parseFloat(window.getComputedStyle(this).marginTop)
     var rect = this.getBoundingClientRect()
     var menuPanelRect = menuPanel.getBoundingClientRect()
     var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
-    if (event.target === 'button.nav-item-toggle') {
+    if (event.target.className === 'nav-item-toggle') {
       this.classList.toggle('is-active')
       if (overflowY > 0) {
         menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
       }
+      event.stopPropagation()
     } else {
       if (this.classList.toggle('is-active')) {
         if (overflowY > 0) {
