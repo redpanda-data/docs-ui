@@ -3,8 +3,6 @@
   id="notfound"
   name="notfoundForm"
   method="POST"
-  action="{{page.url}}"
-  onSubmit="handleSubmit()"
   netlify-honeypot="bot-field"
 >
   <input
@@ -24,11 +22,9 @@
 </form>
 
 <script>
-const handleSubmit = function (event) {
-  if (typeof event.preventDefault === 'function') {
-    event.preventDefault();
-  }
-  const form = event.target
+const form = document.getElementById('notfound');
+form.addEventListener("submit", function (event) {
+  event.preventDefault();
   var formData = new FormData(form)
 
   formData.set('date', new Date())
@@ -45,11 +41,6 @@ const handleSubmit = function (event) {
     .catch(error => {
       console.error('Form submission error:', error)
   })
-}
-
-// Call handleSubmit on page load with a simulated event
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('notfound');
-  form.submit()
 });
+form.submit()
 </script>
