@@ -38,17 +38,21 @@ html[data-theme=dark] {
   /* feedback */
   --feedback-modal-background: var(--body-background);
   /* admonitions */
-  --caution-color: #a0439c;
-  --caution-on-color: var(--color-white);
-  --important-color: #d32f2f;
-  --important-on-color: var(--color-white);
-  --note-color: #217ee7;
-  --note-on-color: var(--color-white);
-  --tip-color: #41af46;
-  --tip-on-color: var(--color-white);
-  --warning-color: #e6a700;
-  --warning-background: #4d3800;
-  --warning-on-color: var(--color-white);
+  --warning-color: #a0439c;
+  --warning-background: #6a2673;
+  --warning-on-color: var(--body-font-color);
+  --important-color: #e13238;
+  --important-background: #4b1113;
+  --important-on-color: var(--body-font-color);
+  --note-color: #4cb3d4;
+  --note-background: #193c47;
+  --note-on-color: var(--body-font-color);
+  --tip-color: #009400;
+  --tip-background: #003132;
+  --tip-on-color: var(--body-font-color);
+  --caution-color: #e6a700;
+  --caution-background: #4d3800;
+  --caution-on-color: var(--body-font-color);
   /* doc */
   --doc-font-color: var(--body-font-color);
   --heading-font-color: var(--body-font-color);

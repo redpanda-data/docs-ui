@@ -391,6 +391,43 @@
 
 .doc .admonitionblock {
   margin: 1.4rem 0 0;
+  box-shadow: var(--admonition-border-box-shadow);
+  padding: var(--admonition-padding);
+}
+
+.doc .admonitionblock.note {
+  background-color: var(--note-background);
+  border: 0 solid var(--note-color);
+  border-left-width: var(--admonition-border-left-width);
+  border-radius: var(--admonition-border-radius);
+}
+
+.doc .admonitionblock.warning {
+  background-color: var(--warning-background);
+  border: 0 solid var(--warning-color);
+  border-left-width: var(--admonition-border-left-width);
+  border-radius: var(--admonition-border-radius);
+}
+
+.doc .admonitionblock.tip {
+  background-color: var(--tip-background);
+  border: 0 solid var(--tip-color);
+  border-left-width: var(--admonition-border-left-width);
+  border-radius: var(--admonition-border-radius);
+}
+
+.doc .admonitionblock.caution {
+  background-color: var(--caution-background);
+  border: 0 solid var(--caution-color);
+  border-left-width: var(--admonition-border-left-width);
+  border-radius: var(--admonition-border-radius);
+}
+
+.doc .admonitionblock.important {
+  background-color: var(--important-background);
+  border: 0 solid var(--important-color);
+  border-left-width: var(--admonition-border-left-width);
+  border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock p,
@@ -415,7 +452,6 @@
 
 .doc .admonitionblock td.content {
   padding: 1rem 1rem 0.75rem;
-  background: var(--admonition-background);
   width: 100%;
   word-wrap: anywhere;
 }
@@ -435,27 +471,22 @@
 }
 
 .doc .admonitionblock.caution .icon {
-  background-color: var(--caution-color);
   color: var(--caution-on-color);
 }
 
 .doc .admonitionblock.important .icon {
-  background-color: var(--important-color);
   color: var(--important-on-color);
 }
 
 .doc .admonitionblock.note .icon {
-  background-color: var(--note-color);
   color: var(--note-on-color);
 }
 
 .doc .admonitionblock.tip .icon {
-  background-color: var(--tip-color);
   color: var(--tip-on-color);
 }
 
 .doc .admonitionblock.warning .icon {
-  background-color: var(--warning-color);
   color: var(--warning-on-color);
 }
 
