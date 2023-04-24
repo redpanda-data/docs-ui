@@ -1,4 +1,4 @@
-<form data-netlify="true" id="notfound" name="notfoundForm" method="POST" netlify-honeypot="bot-field" onsubmit="handleSubmit(event)">
+<form data-netlify="true" id="notfound" name="notfoundForm" method="POST" netlify-honeypot="bot-field">
   <input class="hidden" type="hide" name="form-name" value="notfoundForm"
   />
   <p class="hidden">
@@ -17,7 +17,7 @@ var url = document.getElementById('url');
 var date = document.getElementById('date');
 url.value = window.location.href;
 date.value = new Date();
-const handleSubmit = function (e) {
+form.submit(function (e) {
   e.preventDefault();
   const formData = new FormData(e.target)
 
@@ -27,11 +27,9 @@ const handleSubmit = function (e) {
     body: new URLSearchParams(formData).toString(),
   }).then(() => {
       console.log('Form submission success')
-      clearFeedbackModal()
     })
     .catch(error => {
       console.error('Form submission error:', error)
     })
-}
-document.getElementById('submit-button').click();
+})
 </script>
