@@ -36,9 +36,9 @@ const handleSubmit = function (e) {
     body: new URLSearchParams(formData).toString(),
   }).then(() => {
       console.log('Form submission success')
-    })
+  })
     .catch(error => {
       console.error('Form submission error:', error)
-    })
+  })
 }
 </script>
