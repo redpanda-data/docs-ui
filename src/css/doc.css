@@ -848,7 +848,7 @@
 }
 
 .doc .literalblock pre {
-  padding-left: 10px;
+  padding-left: 1em;
 }
 
 code[class*=language-],

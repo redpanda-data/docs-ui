@@ -45,14 +45,6 @@ Eu mea inani iriure.footnote:[Quisque porta facilisis tortor, vitae bibendum vel
 }
 ----
 
-.Example paragraph syntax
-[,asciidoc]
-----
-.Optional title
-[example]
-This is an example paragraph.
-----
-
 .Optional title
 [example]
 This is an example paragraph.

@@ -17,9 +17,12 @@
   flex-direction: column;
   display: flex;
   padding: 20px;
-  gap: 10px;
   overflow: auto;
   border-radius: 8px;
+}
+
+.feedback-modal textarea {
+  font-family: inherit;
 }
 
 .modal-overlay {
@@ -35,6 +38,11 @@
 .feedback-modal .feedback-modal h4 {
   margin-top: 5px;
   margin-bottom: 5px;
+}
+
+.feedback-modal .radio-buttons.form-field {
+  display: flex;
+  flex-direction: column;
 }
 
 .feedback-modal .form-field {
