@@ -17,19 +17,21 @@ var url = document.getElementById('url');
 var date = document.getElementById('date');
 url.value = window.location.href;
 date.value = new Date();
-form.submit(function (e) {
-  e.preventDefault();
-  const formData = new FormData(e.target)
+const handleSubmit = (e) => {
+e.preventDefault();
+const formData = new FormData(e.target)
 
-  fetch("/", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(formData).toString(),
-  }).then(() => {
-      console.log('Form submission success')
-    })
-    .catch(error => {
-      console.error('Form submission error:', error)
-    })
-})
+fetch("/", {
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams(formData).toString(),
+}).then(() => {
+    console.log('Form submission success')
+  })
+  .catch(error => {
+    console.error('Form submission error:', error)
+  })
+}
+form.addEventListener('submit', handleSubmit)
+document.getElementById('submit-button').click();
 </script>
