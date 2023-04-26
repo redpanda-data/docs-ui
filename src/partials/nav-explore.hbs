@@ -2,7 +2,9 @@
   <div class="context">
     <div class="container has-dropdown">
     {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
-    <span class="title">Explore Docs</span>
+    {{#with site.components.redpanda}}
+    <span class="title">{{./latest.title}}</span>
+    {{/with}}
     {{else}}
     <span class="title">{{page.component.title}}</span>
     {{/if}}
@@ -17,18 +19,30 @@
           {{/each}}
         </div>
     </div>
-    {{#if (ne page.componentVersion.displayVersion 'default')}}
     <div class="container has-dropdown">
+      {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
+      {{#with site.components.redpanda}}
+      <span class="current-version">{{./latest.displayVersion}}</span>
+      {{/with}}
+      {{else if (ne page.componentVersion.displayVersion 'default')}}
       <span class="current-version">{{page.componentVersion.displayVersion}}</span>
+      {{/if}}
       <div class="versions">
-        {{#each page.component.versions}}
-        <span class="version
-          {{~#if (eq this.version @root.page.component.latest.version)}} is-latest{{/if}}">
-          <a href="{{{relativize ./url}}}">{{./displayVersion}}</a>
-        </span>
-        {{/each}}
+        {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
+          {{#each site.components.redpanda.versions}}
+          <span class="version">
+            <a href="{{{relativize this.url}}}">{{this.displayVersion}}</a>
+          </span>
+          {{/each}}
+        {{else if (ne page.componentVersion.displayVersion 'default')}}
+          {{#each page.component.versions}}
+          <span class="version
+            {{~#if (eq this.version @root.page.component.latest.version)}} is-latest{{/if}}">
+            <a href="{{{relativize ./url}}}">{{./displayVersion}}</a>
+          </span>
+          {{/each}}
+        {{/if}}
       </div>
     </div>
-    {{/if}}
   </div>
 </div>
