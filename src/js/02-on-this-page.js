@@ -48,8 +48,27 @@
   if (startOfContent) {
     var embeddedToc = document.createElement('aside')
     embeddedToc.className = 'toc embedded'
-    embeddedToc.appendChild(menu.cloneNode(true))
-    startOfContent.parentNode.insertBefore(embeddedToc, startOfContent)
+    var tocMenuDropdown = document.createElement('div')
+    tocMenuDropdown.className = 'toc-menu-dropdown'
+    var clonedMenu = menu.cloneNode(true)
+    var dropdownTitle = clonedMenu.querySelector('h3')
+    dropdownTitle.textContent = 'On this page'
+    clonedMenu.removeChild(dropdownTitle)
+    tocMenuDropdown.insertBefore(dropdownTitle, tocMenuDropdown.firstChild)
+    tocMenuDropdown.appendChild(clonedMenu)
+    embeddedToc.appendChild(tocMenuDropdown)
+    var pageVersions = document.querySelector('.page-versions')
+    if (pageVersions) {
+      pageVersions.parentNode.insertBefore(embeddedToc, pageVersions.nextSibling)
+    } else {
+      startOfContent.parentNode.insertBefore(embeddedToc, startOfContent)
+    }
+    tocMenuDropdown.querySelector('.toc-menu').classList.add('hidden')
+
+    tocMenuDropdown.addEventListener('click', function (e) {
+      const tocMenu = tocMenuDropdown.querySelector('.toc-menu')
+      tocMenu.classList.toggle('hidden')
+    })
   }
 
   window.addEventListener('load', function () {

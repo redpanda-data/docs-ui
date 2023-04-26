@@ -143,7 +143,7 @@ html:not([data-theme=dark]) {
   --caption-font-color: var(--color-gray-70);
   --caption-background-color: #f6f8fa;
   --caption-font-style: italic;
-  --tabs-hover-background: #0000000d;
+  --tabs_hover-background: #0000000d;
   --caption-font-weight: var(--body-font-weight-bold);
   --code-background: var(--panel-background);
   --code-font-color: var(--body-font-color);
