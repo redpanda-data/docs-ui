@@ -1,12 +1,14 @@
-{{#if (and (ne page.component.name 'home') (ne page.component.name 'ROOT'))}}
 <div class="nav-panel-explore{{#unless page.navigation}} is-active{{/unless}}" data-panel="explore">
-  {{#if page.component}}
   <div class="context">
     <div class="container has-dropdown">
+    {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
+    <span class="title">Explore Docs</span>
+    {{else}}
     <span class="title">{{page.component.title}}</span>
+    {{/if}}
       <div class="components">
           {{#each site.components}}
-          {{#if (and (ne this.name 'home') (ne this.name 'ROOT'))}}
+          {{#if (ne this.asciidoc.attributes.page-exclude-from-dropdown-selector true)}}
           <span class="component
             {{~#if (eq this.title @root.page.component.title)}} is-current{{/if}}">
             <a href="{{{relativize ./url}}}">{{{./title}}}</a>
@@ -29,6 +31,4 @@
     </div>
     {{/if}}
   </div>
-  {{/if}}
 </div>
-{{/if}}

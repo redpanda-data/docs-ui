@@ -12,11 +12,6 @@
 </form>
 
 <script>
-const form = document.getElementById('notfound');
-var url = document.getElementById('url');
-var date = document.getElementById('date');
-url.value = window.location.href;
-date.value = new Date();
 const handleSubmit = (e) => {
 e.preventDefault();
 const formData = new FormData(e.target)
@@ -33,5 +28,12 @@ fetch("/", {
   })
 }
 form.addEventListener('submit', handleSubmit)
-document.getElementById('submit-button').click();
+window.addEventListener("DOMContentLoaded", (event) => {
+  const form = document.getElementById('notfound');
+  var url = document.getElementById('url');
+  var date = document.getElementById('date');
+  url.value = window.location.href;
+  date.value = new Date();
+  document.getElementById('submit-button').click();
+  });
 </script>

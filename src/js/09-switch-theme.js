@@ -7,7 +7,6 @@
   let theme = window.localStorage.getItem('theme')
 
   function setTheme (switchButton) {
-    console.log(theme)
     const img = switchButton.querySelector('img:first-child')
     if (theme === 'dark') {
       const newSrc = img.src.replace('view-sun', 'view-moon')
@@ -24,7 +23,6 @@
   }
 
   switchButton.addEventListener('click', function () {
-    console.log(theme)
     theme = theme === 'light' ? 'dark' : 'light'
     window.localStorage.setItem('theme', theme)
     setTheme(this)
