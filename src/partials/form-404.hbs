@@ -27,9 +27,9 @@ fetch("/", {
     console.error('Form submission error:', error)
   })
 }
-form.addEventListener('submit', handleSubmit)
 window.addEventListener("DOMContentLoaded", (event) => {
   const form = document.getElementById('notfound');
+  form.addEventListener('submit', handleSubmit)
   var url = document.getElementById('url');
   var date = document.getElementById('date');
   url.value = window.location.href;
