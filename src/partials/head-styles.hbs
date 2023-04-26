@@ -16,7 +16,7 @@
   } else {
     document.documentElement.removeAttribute('data-theme')
   }
-}(localStorage && localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)')) && 'dark')
+}(localStorage && localStorage.getItem('theme') || matchMedia('(prefers-color-scheme: dark)').matches && 'dark')
 </script>
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/tabs.css">
