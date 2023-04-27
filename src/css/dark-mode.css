@@ -60,6 +60,7 @@ html[data-theme=dark] {
   --link-font-color: #f15d61;
   --link-highlight-background-color: #0000000d;
   --link_hover-font-color: #d85556;
+  --external-link-filter: invert(100%) sepia(5%) saturate(1016%) hue-rotate(181deg) brightness(100%) contrast(106%);
   --link_unresolved-font-color: var(--important-color);
   --abstract-background: var(--color-smoke-70);
   --abstract-font-color: var(--color-jet-20);
