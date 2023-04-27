@@ -142,15 +142,9 @@
   color: var(--link_unresolved-font-color);
 }
 
-.doc a[href*="//"]:not([href*="docs.redpanda.com"])::after {
-  content: url('/_/img/external-link.svg');
-  position: relative;
-  margin-left: 2px;
-  filter: var(--external-link-filter);
-}
-
+.doc a[href*="//"]:not([href*="docs.redpanda.com"])::after,
 .doc a[href*="//"]:not([href*="netlify.app"])::after {
-  content: url('/docs/_/img/external-link.svg');
+  content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;
   filter: var(--external-link-filter);
