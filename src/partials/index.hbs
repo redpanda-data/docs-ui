@@ -2,11 +2,24 @@
   {{#each page.breadcrumbs}}
     {{#if (and (eq this.url @root.page.url) (ne this.items.length 0))}}
       {{#each this.items}}
-        {{#with (get-page-info this.url)}}
-          <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
-          <p class="index">{{{this.description}}}</p>
-          </li>
-        {{/with}}
+        {{#if this.url}}
+          {{#with (get-page-info this.url)}}
+            <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
+            <p class="index">{{{this.description}}}</p>
+            </li>
+          {{/with}}
+        {{else}}
+          <li class="index">{{{this.content}}}</li>
+          <ul>
+            {{#each this.items}}
+              {{#with (get-page-info this.url)}}
+                <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
+                <p class="index">{{{this.description}}}</p>
+                </li>
+              {{/with}}
+            {{/each}}
+          </ul>
+        {{/if}}
       {{/each}}
     {{/if}}
   {{/each}}

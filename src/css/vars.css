@@ -29,6 +29,7 @@ html[data-theme=dark] {
   --body-font-weight-bold: 500;
   --monospace-font-family: inter, "Courier Prime", courier, monospace;
   --monospace-font-weight-bold: 500;
+  --alt-heading-font-weight: 600;
   /* nav */
   --nav-line-height: 1.35;
   /* admonitions */

@@ -121,12 +121,14 @@
 }
 
 .doc a,
-.doc .glossary-term {
+.doc .glossary-term,
+.doc p a > code {
   color: var(--link-font-color);
 }
 
 .doc a:hover,
-.doc .glossary-term:hover {
+.doc .glossary-term:hover,
+.doc p a > code:hover {
   color: var(--link_hover-font-color);
 }
 
@@ -142,15 +144,9 @@
   color: var(--link_unresolved-font-color);
 }
 
-.doc a[href*="//"]:not([href*="docs.redpanda.com"])::after {
-  content: url('/_/img/external-link.svg');
-  position: relative;
-  margin-left: 2px;
-  filter: var(--external-link-filter);
-}
-
+.doc a[href*="//"]:not([href*="docs.redpanda.com"])::after,
 .doc a[href*="//"]:not([href*="netlify.app"])::after {
-  content: url('/docs/_/img/external-link.svg');
+  content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;
   filter: var(--external-link-filter);
@@ -191,7 +187,7 @@
 }
 
 .doc pre > code {
-  padding-bottom: 10px;
+  padding-bottom: 1rem;
 }
 
 .doc blockquote {
@@ -869,6 +865,10 @@ code[class*=language-],
 pre[class*=language-] {
   font-family: inherit !important;
   color: var(--code-font-color) !important;
+}
+
+pre {
+  padding-bottom: 0 !important;
 }
 
 html[data-theme=dark] code[class*=language-],
