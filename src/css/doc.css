@@ -121,12 +121,14 @@
 }
 
 .doc a,
-.doc .glossary-term {
+.doc .glossary-term,
+.doc p a > code {
   color: var(--link-font-color);
 }
 
 .doc a:hover,
-.doc .glossary-term:hover {
+.doc .glossary-term:hover,
+.doc p a > code:hover {
   color: var(--link_hover-font-color);
 }
 
@@ -185,7 +187,7 @@
 }
 
 .doc pre > code {
-  padding-bottom: 10px;
+  padding-bottom: 1rem;
 }
 
 .doc blockquote {
@@ -863,6 +865,10 @@ code[class*=language-],
 pre[class*=language-] {
   font-family: inherit !important;
   color: var(--code-font-color) !important;
+}
+
+pre {
+  padding-bottom: 0 !important;
 }
 
 html[data-theme=dark] code[class*=language-],
