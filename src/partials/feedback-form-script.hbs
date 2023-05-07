@@ -49,7 +49,7 @@ const handleSubmit = function (e) {
     language: window.navigator.language
   }))
 
-  fetch("/", {
+  fetch("{{page.url}}", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(formData).toString(),
