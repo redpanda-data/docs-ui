@@ -48,7 +48,7 @@
 
 .nav {
   background: var(--nav-background);
-  font-size: calc(15/var(--rem-base)*1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   position: relative;
   overflow-y: scroll;
   -ms-overflow-style: none;  /* IE and Edge */
