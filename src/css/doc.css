@@ -184,6 +184,7 @@
   font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.5;
   margin: 0;
+  padding: 1em;
 }
 
 .doc pre > code {
@@ -867,7 +868,7 @@ pre[class*=language-] {
   color: var(--code-font-color) !important;
 }
 
-pre {
+pre.code-first-child {
   padding-bottom: 0 !important;
 }
 

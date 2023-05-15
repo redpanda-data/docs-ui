@@ -10,6 +10,12 @@
   var svgAs = config.svgAs
   var supportsCopy = window.navigator.clipboard
 
+  document.querySelectorAll('pre').forEach(function (pre) {
+    if (pre.firstElementChild && pre.firstElementChild.tagName.toLowerCase() === 'code') {
+      pre.classList.add('code-first-child')
+    }
+  })
+
   ;[].slice.call(document.querySelectorAll('.doc pre.highlight, .doc .literalblock pre')).forEach(function (pre) {
     var code, language, lang, copy, toast, toolbox
     if (pre.classList.contains('highlight')) {
