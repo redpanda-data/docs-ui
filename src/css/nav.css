@@ -157,13 +157,13 @@ html.is-clipped--nav {
   border-radius: 3px;
 }
 
-/*ul.nav-list > li:first-child[data-depth="2"],
+/* ul.nav-list > li:first-child[data-depth="2"],
 ul.nav-list > li:first-child[data-depth="3"],
 ul.nav-list > li:first-child[data-depth="4"],
 ul.nav-list > li:first-child[data-depth="5"],
 ul.nav-list > li:first-child[data-depth="6"] {
   margin-top: 0.5em;
-}*/
+} */
 
 .nav-list > li > .item:hover,
 .nav-list .is-current-path > div.item:first-child,
