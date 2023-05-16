@@ -38,7 +38,7 @@
     }
     ;(toolbox = document.createElement('div')).className = 'source-toolbox'
     if (lang) toolbox.appendChild(lang)
-    if (supportsCopy) {
+    if (supportsCopy && !pre.parentNode.parentNode.classList.contains('no-copy')) {
       ;(copy = document.createElement('button')).className = 'copy-button'
       copy.setAttribute('title', 'Copy to clipboard')
       if (svgAs === 'svg') {
