@@ -156,12 +156,9 @@ html.is-clipped--nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px;
+  padding: 2px;
+  padding-left: 5px;
   border-radius: 3px;
-}
-
-li[data-depth="1"] > .item {
-  height: 30px;
 }
 
 ul.nav-list > li:first-child[data-depth="2"],
