@@ -118,6 +118,7 @@
 .doc p,
 .doc dl {
   margin: 0;
+  hyphens: none;
 }
 
 .doc a,
