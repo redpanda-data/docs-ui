@@ -6,7 +6,7 @@ docsearch({
   indexName: '{{{env.ALGOLIA_INDEX_NAME}}}',
   apiKey: '{{{env.ALGOLIA_API_KEY}}}',
   getMissingResultsUrl({ query }) {
-    return `https://github.com/JakeSCahill/redpanda-docs-antora/issues/new?title=${query}`;
+    return `https://github.com/redpanda-data/documentation/issues/new?title=${query}`;
   },
   resultsFooterComponent({ state }) {
     return {
