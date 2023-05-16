@@ -3,12 +3,15 @@
   <head>
     {{> head defaultPageTitle='API Reference'}}
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
-    <redoc spec-url='{{site.url}}{{get-path page.url}}/_attachments/{{page.attributes.api-spec-url}}'></redoc>
-    <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"> </script>
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
   </head>
   <body class="swagger">
     {{> header}}
-    {{{page.contents}}}
+    <div id="redoc-container"></div>
+    <script>
+    Redoc.init('{{site.url}}{{get-path page.url}}/_attachments/{{page.attributes.api-spec-url}}', {
+    }, document.getElementById('redoc-container'))
+    </script>
     {{> footer}}
   </body>
 </html>

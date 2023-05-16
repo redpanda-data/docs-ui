@@ -101,3 +101,8 @@ html[data-theme=dark] {
   --footer-font-color: var(--color-gray-70);
   --footer-link-font-color: var(--color-jet-80);
 }
+
+html[data-theme=dark] body.swagger {
+  /* base */
+  --body-background: var(--color-white);
+}
