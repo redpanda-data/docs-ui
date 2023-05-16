@@ -1,11 +1,14 @@
 <ul class="index">
+  {{{page.contents}}}
   {{#each page.breadcrumbs}}
     {{#if (and (eq this.url @root.page.url) (ne this.items.length 0))}}
       {{#each this.items}}
         {{#if this.url}}
           {{#with (get-page-info this.url)}}
             <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
+            {{#if (ne this.title this.description)}}
             <p class="index">{{{this.description}}}</p>
+            {{/if}}
             </li>
           {{/with}}
         {{else}}
@@ -14,7 +17,9 @@
             {{#each this.items}}
               {{#with (get-page-info this.url)}}
                 <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
+                {{#if (ne this.title this.description)}}
                 <p class="index">{{{this.description}}}</p>
+                {{/if}}
                 </li>
               {{/with}}
             {{/each}}
