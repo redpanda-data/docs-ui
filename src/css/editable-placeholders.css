@@ -1,6 +1,6 @@
 span.editable,
 span.editable > span {
-  font-weight: bold;
+  font-weight: 550;
   color: var(--editable-code-font-color);
 }
 

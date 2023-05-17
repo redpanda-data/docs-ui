@@ -149,21 +149,20 @@ html.is-clipped--nav {
 .nav .item {
   width: 100%;
   display: flex;
-  min-height: 35px;
+  min-height: 30px;
   justify-content: space-between;
   align-items: center;
-  padding: 5px;
   margin-top: 5px;
   border-radius: 3px;
 }
 
-/* ul.nav-list > li:first-child[data-depth="2"],
+ul.nav-list > li:first-child[data-depth="2"],
 ul.nav-list > li:first-child[data-depth="3"],
 ul.nav-list > li:first-child[data-depth="4"],
 ul.nav-list > li:first-child[data-depth="5"],
 ul.nav-list > li:first-child[data-depth="6"] {
   margin-top: 0.5em;
-} */
+}
 
 .nav-list > li > .item:hover,
 .nav-list .is-current-path > div.item:first-child,
@@ -174,6 +173,12 @@ ul.nav-list > li:first-child[data-depth="6"] {
 
 .nav-list a {
   text-decoration: none !important;
+}
+
+.nav-list .nav-link,
+.nav-list .nav-text {
+  padding: 5px;
+  font-weight: 300;
 }
 
 .nav-item[data-depth="0"] > .nav-list:first-child {

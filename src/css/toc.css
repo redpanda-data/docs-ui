@@ -53,6 +53,7 @@
   height: fit-content;
   top: 100px;
   font-size: calc(16 / var(--rem-base) * 1rem);
+  font-weight: 300;
 }
 
 .toc.sidebar .thumbs {

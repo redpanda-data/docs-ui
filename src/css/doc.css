@@ -3,7 +3,6 @@
   font-size: var(--doc-font-size);
   hyphens: auto;
   line-height: var(--doc-line-height);
-  margin: var(--doc-margin);
   max-width: var(--doc-max-width);
   padding: 0 1rem 4rem;
 }
@@ -74,13 +73,19 @@
 }
 
 .doc h2:not(.discrete) {
+  font-size: calc(32 / var(--rem-base) * 1rem);
   margin-left: -1rem;
   margin-right: -1rem;
   padding: 0.4rem 1rem 0.1rem;
 }
 
-.doc h3:not(.discrete),
+.doc h3:not(.discrete) {
+  font-size: calc(24 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
 .doc h4:not(.discrete) {
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
@@ -494,6 +499,31 @@
   color: var(--note-on-color);
 }
 
+.icon-note::before {
+  content: "✏️";
+  margin-right: 5px;
+}
+
+.icon-tip::before {
+  content: "💡";
+  margin-right: 5px;
+}
+
+.icon-warning::before {
+  content: "🚨";
+  margin-right: 5px;
+}
+
+.icon-caution::before {
+  content: "⚠️";
+  margin-right: 5px;
+}
+
+.icon-important::before {
+  content: "❗";
+  margin-right: 5px;
+}
+
 .doc .admonitionblock.tip .icon {
   color: var(--tip-on-color);
 }
@@ -732,6 +762,11 @@
   margin-bottom: -0.75rem;
   padding: 1rem;
   background-color: var(--caption-background-color);
+}
+
+/* immediate sibling of an element with the class title, where this title class element is a direct child of a td element with the class content */
+.doc .admonitionblock td.content > .title + * {
+  margin-top: 20px;
 }
 
 .doc .tableblock caption {
