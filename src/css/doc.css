@@ -502,26 +502,31 @@
 .icon-note::before {
   content: "✏️";
   margin-right: 5px;
+  margin-left: -5px;
 }
 
 .icon-tip::before {
   content: "💡";
   margin-right: 5px;
+  margin-left: -5px;
 }
 
 .icon-warning::before {
   content: "🚨";
   margin-right: 5px;
+  margin-left: -5px;
 }
 
 .icon-caution::before {
   content: "⚠️";
   margin-right: 5px;
+  margin-left: -5px;
 }
 
 .icon-important::before {
   content: "❗";
   margin-right: 5px;
+  margin-left: -5px;
 }
 
 .doc .admonitionblock.tip .icon {

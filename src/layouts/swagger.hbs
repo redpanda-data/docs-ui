@@ -9,7 +9,7 @@
     {{> header}}
     <div id="redoc-container"></div>
     <script>
-    Redoc.init('{{site.url}}{{get-path page.url}}/_attachments/{{page.attributes.api-spec-url}}', {
+    Redoc.init('{{resolve-resource page.attributes.api-spec-url}}', {
     }, document.getElementById('redoc-container'))
     </script>
     {{> footer}}
