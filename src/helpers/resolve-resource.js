@@ -8,6 +8,5 @@ module.exports = (spec, { data, hash: context }) => {
   }
   const file = contentCatalog.resolveResource(spec, context)
   if (!file) return
-  console.log(file.pub.url)
   return file.pub.url
 }
