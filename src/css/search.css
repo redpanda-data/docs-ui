@@ -89,6 +89,11 @@ article.search .ais-Breadcrumbs {
   font-size: 0.8rem;
 }
 
+.ais-Breadcrumbs > *:not(:last-child)::after {
+  content: " > ";
+  margin-left: 5px;
+}
+
 article.search .ais-Pagination-list {
   justify-content: space-evenly;
 }
@@ -111,4 +116,8 @@ article.search .ais-Pagination-list {
 
 .DocSearch-Hit[aria-selected=true] a {
   background-color: var(--link-font-color) !important;
+}
+
+.aa-DetachedCancelButton {
+  width: 80px;
 }

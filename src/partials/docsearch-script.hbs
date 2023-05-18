@@ -1,4 +1,4 @@
-<script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3"></script>
 <script>
 docsearch({
   container: '#search-field',
@@ -26,6 +26,108 @@ docsearch({
       },
       __v: null,
     };
+  },
+});
+</script>-->
+<script>
+const searchClient = algoliasearch(
+  '{{{env.ALGOLIA_APP_ID}}}',
+  '{{{env.ALGOLIA_API_KEY}}}'
+);
+
+const recentSearchesPlugin = createLocalStorageRecentSearchesPlugin({
+  key: 'RECENT_SEARCH',
+  limit: 5,
+});
+
+autocomplete({
+  container: '#autocomplete',
+  placeholder: 'Search for docs',
+  detachedMediaQuery: '',
+  plugins: [recentSearchesPlugin],
+  insights: true,
+  getSources({ query }) {
+    return [
+      {
+        sourceId: 'docs',
+        getItems() {
+          return getAlgoliaResults({
+            searchClient,
+            queries: [
+              {
+                indexName: 'test',
+                query,
+                params: {
+                  hitsPerPage: 10,
+                  attributesToSnippet: ['title:10', 'preamble:35'],
+                  snippetEllipsisText: '…',
+                  facetFilters: ['version: {{#if (eq page.component.title 'home')}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}','product: {{#if (eq page.component.title 'home')}}Redpanda{{else}}{{{page.component.title}}}{{/if}}']
+                },
+              },
+            ],
+          });
+        },
+        templates: {
+          noResults({state, html}) {
+            return html`Believe this query should return results? <a href="https://github.com/redpanda-data/documentation/issues/new?title=${state.query}">Let us know</a>.`;
+          },
+          footer({ state, html }) {
+            return html`<div class="aa-Footer">
+                    <a href="{{{relativize '/search' }}}?q=${state.query}">View all results</a>
+                    </div>`;
+          },
+          item({ item, components, html }) {
+            return html`<a class="aa-ItemLink" href="${item.objectID}">
+              <div class="aa-ItemContent">
+                <div class="aa-ItemIcon aa-ItemIcon--alignTop">
+                  <img
+                    src="${item.image}"
+                    alt="${item.name}"
+                    width="40"
+                    height="40"
+                  />
+                </div>
+                <div class="aa-ItemContentBody">
+                  <div class="aa-ItemContentTitle">
+                    ${components.Highlight({
+                      hit: item,
+                      attribute: 'title',
+                    })}
+                  </div>
+                  <div class="aa-ItemContentDescription">
+                    ${components.Snippet({
+                      hit: item,
+                      attribute: 'preamble',
+                    })}
+                  </div>
+                </div>
+                <div class="aa-ItemActions">
+                  <button
+                    class="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
+                    type="button"
+                    title="Open page"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </a>`;
+          },
+        },
+        getItemUrl({ item }) {
+          return item.objectID;
+        },
+      },
+    ];
   },
 });
 </script>
