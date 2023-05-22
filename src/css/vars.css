@@ -70,6 +70,10 @@ html[data-theme=dark] {
   --z-index-toolbar: 2;
   --z-index-page-version-menu: 3;
   --z-index-navbar: 4;
+  /* Algolia */
+  --aa-detached-modal-max-width: 900px;
+  --aa-spacing-factor: 1.3;
+  --aa-primary-color-rgb: 241, 93, 97;
 }
 
 html:not([data-theme=dark]) {

@@ -14,11 +14,13 @@
       // turn it white
       img.classList.add('moon')
       document.documentElement.setAttribute('data-theme', 'dark')
+      document.body.setAttribute('data-theme', 'dark')
     } else {
       const newSrc = img.src.replace('view-moon', 'view-sun')
       img.src = newSrc
       img.classList.remove('moon')
       document.documentElement.removeAttribute('data-theme')
+      document.body.removeAttribute('data-theme')
     }
   }
 

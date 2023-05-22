@@ -28,6 +28,7 @@
 <script>
 if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
   const { algoliasearch, instantsearch } = window;
+  const { searchBox } = instantsearch.widgets;
 
   const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
   const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
@@ -95,6 +96,9 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
       }),
       instantsearch.widgets.pagination({
           container: '#pagination',
+      }),
+      searchBox({
+        container: '#searchbox',
       }),
   ]);
 
