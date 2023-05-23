@@ -4,43 +4,25 @@ window.addEventListener('DOMContentLoaded', function() {
   const { createLocalStorageRecentSearchesPlugin } = window[
     '@algolia/autocomplete-plugin-recent-searches'
   ];
+  const { createQuerySuggestionsPlugin } = window[
+    '@algolia/autocomplete-plugin-query-suggestions'
+  ];
 
   const searchClient = algoliasearch(
     '{{{env.ALGOLIA_APP_ID}}}',
     '{{{env.ALGOLIA_API_KEY}}}'
   );
 
-  const recentSearchesPlugin = createLocalStorageRecentSearchesPlugin({
-    key: 'recent-searches',
-    limit: 3,
-    transformSource({ source, html }) {
-      console.log(...source)
-      return {
-        ...source,
-        templates: {
-          ...source.templates,
-          header({ state }) {
-            if (state.query) {
-              return null;
-            }
-            return html`
-                <span class="aa-SourceHeaderTitle">Your searches</span>
-                <div class="aa-SourceHeaderLine" />
-              `
-          },
-        },
-      };
-    },
-  });
-
   autocomplete({
     container: '#autocomplete',
     placeholder: 'Search for docs',
     detachedMediaQuery: '',
-    plugins: [recentSearchesPlugin],
-    openOnFocus: true,
+    plugins: [],
     insights: true,
     defaultActiveItemId: 0,
+    onStateChange({ state }) {
+      state.preview = null
+    },
     render({ children, state, render, html, components, createElement }, root) {
       const { preview } = state.context;
       render(
@@ -105,6 +87,7 @@ window.addEventListener('DOMContentLoaded', function() {
       );
     },
     getSources({ query }) {
+      if (!query) return [];
       return [
         {
           sourceId: 'docs',
@@ -117,7 +100,7 @@ window.addEventListener('DOMContentLoaded', function() {
                   query,
                   params: {
                     hitsPerPage: 10,
-                    attributesToSnippet: ['title:10', 'preamble:35'],
+                    attributesToSnippet: ['title:7'],
                     snippetEllipsisText: '…',
                     facetFilters: ['version: {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}','product: {{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}}']
                   },
@@ -127,12 +110,21 @@ window.addEventListener('DOMContentLoaded', function() {
           },
           templates: {
             noResults({state, html}) {
-              return html`<p>Believe this query should return results?<a class="aa-ItemLink" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a></p>`;
+              state.context.preview = null
+              if (!state.query) return
+              return html`<div>No results for ${state.query}</div><p>Believe this query should return results?<a href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
+            },
+            header({html}) {
+              return html`<span class="aa-SourceHeaderTitle">{{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}} {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}</span>
+              <div class="aa-SourceHeaderLine"></div>
+              `;
             },
             footer({state, html}) {
-              return html`<div class="aa-Footer">
-              <a class="aa-ItemLink" href="{{{relativize '/search' }}}?q=${state.query}">View all results</a>
-              </div>`
+              if (state.context.preview) {
+                return html`<div class="aa-Footer">
+                <a class="aa-ItemLink" href="{{{relativize '/search' }}}?q=${state.query}">View all results</a>
+                </div>`
+              }
             },
             item({ item, components, html }) {
               return html`<a class="aa-ItemLink" href="${item.objectID}">
@@ -192,6 +184,48 @@ window.addEventListener('DOMContentLoaded', function() {
             }
           },
         },
+        {
+          sourceId: 'suggestions',
+          getItems({ query }) {
+            return getAlgoliaResults({
+              searchClient,
+              queries: [
+                {
+                  indexName: 'test_query_suggestions',
+                  query,
+                  params: {
+                    hitsPerPage: 5,
+                  },
+                },
+              ],
+            });
+          },
+          onSelect({ item, setQuery, setIsOpen, refresh }) {
+            setQuery(`${item.query} `);
+            setIsOpen(true);
+            refresh();
+          },
+          templates: {
+            header({ items, html }) {
+              if (items.length === 0) {
+                return null;
+              }
+
+              return html`
+                  <span class="aa-SourceHeaderTitle">
+                    Can't find what you're looking for?
+                  </span>
+                  <div class="aa-SourceHeaderLine" />
+                `
+            },
+            item({ item, components, html }) {
+              console.log(item)
+              return html`<div class="aa-QuerySuggestion">
+                ${item.query}
+                </div>`
+            },
+          },
+        }
       ];
     },
   });
