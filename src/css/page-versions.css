@@ -1,6 +1,6 @@
 .page-versions {
   position: relative;
-  font-size: small;
+  font-size: 1rem;
   line-height: 0.5;
   background-color: var(--page-version-menu-background);
   width: fit-content;
@@ -30,7 +30,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 5px;
+  gap: 7px;
   background: linear-gradient(to bottom, var(--page-version-menu-background) 0%, var(--page-version-menu-background) 100%) no-repeat;
   padding: 1.375rem 1.5rem 0.5rem 0.5rem;
   position: absolute;

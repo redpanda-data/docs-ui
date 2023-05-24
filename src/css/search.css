@@ -113,7 +113,7 @@ article.search .ais-Breadcrumbs {
   gap: 5px;
   padding: 0;
   list-style: none;
-  font-size: 0.6rem;
+  font-size: 0.8rem;
 }
 
 .ais-Breadcrumbs > *:not(:last-child)::after,
@@ -210,13 +210,13 @@ kbd.algolia-command {
   bottom: -10px;
   background: var(--body-background);
   padding: 10px;
+  font-size: 1rem;
 }
 
 .search-commands {
   display: flex;
   gap: 20px;
   list-style: none;
-  font-size: small;
   padding-left: 0;
 }
 
@@ -229,16 +229,16 @@ kbd.algolia-command {
   gap: 10px;
 }
 
-.aa-Results.aa-Column {
-  font-size: 15px;
-}
-
 .aa-ItemLink:hover {
   text-decoration: none;
 }
 
 .aa-ItemIcon {
   margin: 10px auto;
+}
+
+.aa-Results.aa-Column {
+  font-size: 1rem !important;
 }
 
 .aa-Preview.aa-Column .breadcrumbs {
@@ -265,7 +265,11 @@ kbd.algolia-command {
 }
 
 .aa-ItemContentTitle {
-  font-size: 0.84rem;
+  font-size: 1rem;
+}
+
+.aa-SourceHeaderTitle {
+  font-size: 1rem !important;
 }
 
 @media screen and (min-width: 900px) {

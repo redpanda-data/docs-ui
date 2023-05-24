@@ -80,7 +80,7 @@ html:not([data-theme=dark]) .home a.feature-link:hover .feature-box {
 }
 
 .home .feature-text p {
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 400;
   color: var(--body-font-color);
 }

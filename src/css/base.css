@@ -79,7 +79,7 @@ strong strong { /* stylelint-disable-line */
 button {
   cursor: pointer;
   font-family: inherit;
-  font-size: 1em;
+  font-size: 1rem;
   line-height: var(--body-line-height);
   margin: 0;
 }

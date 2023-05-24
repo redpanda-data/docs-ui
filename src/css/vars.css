@@ -1,31 +1,108 @@
 html:not([data-theme=dark]),
 html[data-theme=dark] {
+  --ash-900: #212121;
+  --ash-800: #252525;
+  --ash-700: #292929;
+  --ash-600: #3e3e3e;
+  --ash-500: #545454;
+  --ash-400: #696969;
+  --ash-300: #bfbfbf;
+  --ash-200: #d4d4d4;
+  --ash-100: #eaeaea;
+  --ash-50: #f4f4f4;
+  --ash-25: #f9f9f9;
+  --slate-900: #101828;
+  --slate-800: #1d2939;
+  --slate-700: #344054;
+  --slate-600: #475467;
+  --slate-500: #667085;
+  --slate-400: #98a2b3;
+  --slate-300: #d0d5dd;
+  --slate-200: #eaecf0;
+  --slate-100: #f2f4f7;
+  --slate-50: #f9fafb;
+  --slate-25: #fcfcfd;
+  --saphire-900: #111322;
+  --saphire-800: #30374f;
+  --saphire-700: #404968;
+  --saphire-600: #4a5578;
+  --saphire-500: #5d6b98;
+  --saphire-400: #7d89b0;
+  --saphire-300: #b9c0d4;
+  --saphire-200: #dcdfea;
+  --saphire-100: #eff1f5;
+  --saphire-50: #f9f9fb;
+  --saphire-25: #fcfcfd;
+  --sepia-900: #1d1711;
+  --sepia-800: #392e21;
+  --sepia-700: #564632;
+  --sepia-600: #725d42;
+  --sepia-500: #8e7453;
+  --sepia-400: #a78b67;
+  --sepia-300: #b7a184;
+  --sepia-200: #c8b6a0;
+  --sepia-100: #d8ccbd;
+  --sepia-50: #e9e2d9;
+  --sepia-25: #f4f1ec;
+  --amber-900: #713b12;
+  --amber-800: #854a0e;
+  --amber-700: #a15c07;
+  --amber-600: #ca8504;
+  --amber-500: #eaaa08;
+  --amber-400: #fac515;
+  --amber-300: #fde272;
+  --amber-200: #feee95;
+  --amber-100: #fef7c3;
+  --amber-50: #fefbe8;
+  --amber-25: #fefdf0;
+  --saffron-900: #be5107;
+  --saffron-800: #da5d08;
+  --saffron-700: #f77923;
+  --saffron-600: #f88639;
+  --saffron-500: #f9944f;
+  --saffron-400: #faa165;
+  --saffron-300: #fbb77b;
+  --saffron-200: #fbbc91;
+  --saffron-100: #fdd7bd;
+  --saffron-50: #feefe4;
+  --saffron-25: #fef2e9;
+  --redpanda-900: #c83918;
+  --redpanda-800: #e2401b;
+  --redpanda-700: #e65433;
+  --redpanda-600: #ed7f66;
+  --redpanda-500: #f0947f;
+  --redpanda-400: #f3aa99;
+  --redpanda-300: #f6bfb2;
+  --redpanda-200: #f9cbc1;
+  --redpanda-100: #f9d4cc;
+  --redpanda-50: #fceae5;
+  --redpanda-25: #fff5f5;
   /* colors */
-  --color-white: #fff;
-  --color-smoke-10: #fefefe;
-  --color-smoke-30: #f3f3f3;
-  --color-smoke-50: #f5f5f5;
-  --color-smoke-70: #f0f0f0;
-  --color-smoke-90: #e1e1e1;
-  --color-gray-10: #dad8d8;
-  --color-gray-30: #9c9c9c;
-  --color-gray-40: #8e8e8e;
-  --color-gray-50: #808080;
-  --color-gray-70: #525860;
-  --color-jet-20: #4a4a4a;
-  --color-jet-30: #424242;
-  --color-jet-50: #333;
-  --color-jet-60: #262626;
-  --color-jet-70: #222;
-  --color-jet-80: #191919;
-  --color-black: #000;
+  --color-white: var(--ash-25);
+  --color-smoke-10: var(--ash-25);
+  --color-smoke-30: var(--ash-50);
+  --color-smoke-50: var(--ash-50);
+  --color-smoke-70: var(--ash-100);
+  --color-smoke-90: var(--ash-200);
+  --color-gray-10: var(--ash-300);
+  --color-gray-30: var(--ash-400);
+  --color-gray-40: var(--ash-400);
+  --color-gray-50: var(--ash-500);
+  --color-gray-70: var(--slate-500);
+  --color-jet-20: var(--ash-600);
+  --color-jet-30: var(--ash-700);
+  --color-jet-50: var(--ash-900);
+  --color-jet-60: var(--ash-900);
+  --color-jet-70: var(--slate-900);
+  --color-jet-80: var(--slate-900);
+  --color-black: var(--slate-900);
   /* fonts */
-  --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
-  --body-font-size: 1.0625em; /* 17px */
-  --body-font-size--desktop: 1.125em; /* 18px */
-  --body-font-size--print: 0.9375em; /* 15px */
+  --rem-base: 15; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) */
+  --body-font-size: 1.0625em;
+  --body-font-size--desktop: 1.125em;
+  --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
-  --body-font-family: inter, sans-serif;
+  --body-font-family: "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
   --body-font-weight-bold: 500;
   --monospace-font-family: inter, "Courier Prime", courier, monospace;
   --monospace-font-weight-bold: 500;
@@ -42,6 +119,7 @@ html[data-theme=dark] {
   --doc-font-size--desktop: calc(16 / var(--rem-base) * 1rem);
   --doc-line-height: 1.65;
   --heading-font-weight: 700;
+  --heading-font-family: "Patron Medium", georgia, "Times New Roman", "Palatino Linotype", "Book Antiqua", garamond, "Roboto Slab", serif;
   --admonition-label-font-weight: var(--body-font-weight-bold);
   --caption-font-style: italic;
   --caption-font-weight: var(--body-font-weight-bold);
@@ -77,7 +155,7 @@ html[data-theme=dark] {
 }
 
 html:not([data-theme=dark]) {
-  --body-font-color: var(--color-jet-70);
+  --body-font-color: rgb(102, 112, 133);
   /* base */
   --body-background: var(--color-white);
   --panel-background: var(--color-smoke-30);
@@ -135,9 +213,9 @@ html:not([data-theme=dark]) {
   --doc-font-color: var(--color-jet-50);
   --heading-font-color: var(--color-jet-80);
   --section-divider-color: var(--panel-border-color);
-  --link-font-color: #f15d61;
+  --link-font-color: var(--redpanda-800);
   --link-highlight-background-color: #0000000d;
-  --link_hover-font-color: #d85556;
+  --link_hover-font-color: var(--redpanda-900);
   --link_unresolved-font-color: var(--important-color);
   --abstract-background: var(--color-smoke-70);
   --abstract-font-color: var(--color-jet-20);

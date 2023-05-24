@@ -21,7 +21,7 @@ a + .breadcrumbs {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: small;
+  font-size: 0.9rem;
 }
 
 .breadcrumbs li {
