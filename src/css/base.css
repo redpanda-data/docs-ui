@@ -42,14 +42,14 @@ a:active {
 code,
 kbd,
 pre {
-  font-family: var(--monospace-font-family);
+  font-family: var(--monospace-font-family) !important;
 }
 
 b,
 dt,
 strong,
 th {
-  font-weight: var(--body-font-weight-bold);
+  font-family: var(--body-font-family-bold);
 }
 
 sub,

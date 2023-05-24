@@ -104,7 +104,8 @@ html[data-theme=dark] {
   --body-line-height: 1.15;
   --body-font-family: "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
   --body-font-weight-bold: 500;
-  --monospace-font-family: inter, "Courier Prime", courier, monospace;
+  --body-font-family-bold: "Calibre Medium", "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
+  --monospace-font-family: "IBM Plex Mono", inter, "Courier Prime", courier, monospace;
   --monospace-font-weight-bold: 500;
   --alt-heading-font-weight: 600;
   /* nav */
@@ -117,7 +118,7 @@ html[data-theme=dark] {
   /* doc */
   --doc-font-size: inherit;
   --doc-font-size--desktop: calc(16 / var(--rem-base) * 1rem);
-  --doc-line-height: 1.65;
+  --doc-line-height: 1.75;
   --heading-font-weight: 700;
   --heading-font-family: "Patron Medium", georgia, "Times New Roman", "Palatino Linotype", "Book Antiqua", garamond, "Roboto Slab", serif;
   --admonition-label-font-weight: var(--body-font-weight-bold);
@@ -228,7 +229,7 @@ html:not([data-theme=dark]) {
   --tabs_hover-background: #0000000d;
   --caption-font-weight: var(--body-font-weight-bold);
   --code-background: var(--panel-background);
-  --code-font-color: var(--body-font-color);
+  --code-font-color: rgb(0 0 0/1);
   --editable-code-font-color: var(--link-font-color);
   --example-background: var(--color-white);
   --example-border-color: var(--color-gray-70);

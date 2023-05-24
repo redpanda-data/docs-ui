@@ -906,8 +906,8 @@
 
 code[class*=language-],
 pre[class*=language-] {
-  font-family: inherit !important;
   color: var(--code-font-color) !important;
+  font-size: 0.95rem !important;
 }
 
 pre.code-first-child {
@@ -1072,7 +1072,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc td.hdlist1 {
-  font-weight: var(--body-font-weight-bold);
+  font-family: var(--body-font-family-bold);
   padding-right: 0.25rem;
 }
 
@@ -1180,7 +1180,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 .doc .menuseq i.caret::before {
   content: "\203a";
   font-size: 1.1em;
-  font-weight: var(--body-font-weight-bold);
+  font-family: var(--body-font-family-bold);
   line-height: calc(1 / 1.1);
 }
 

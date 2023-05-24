@@ -1,0 +1,26 @@
+@font-face {
+  font-family: "Calibre Medium";
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local("Calibre Medium"),
+    url(../font/calibre-medium.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Calibre Semibold";
+  font-style: bold;
+  font-weight: 500;
+  src:
+    local("Calibre Medium"),
+    url(../font/calibre-semibold.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Calibre Medium";
+  font-style: italic;
+  font-weight: 500;
+  src:
+    local("Calibre Medium"),
+    url(../font/calibre-medium-italic.woff2) format("woff2");
+}

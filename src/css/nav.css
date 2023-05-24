@@ -127,7 +127,7 @@ html.is-clipped--nav {
 .nav-menu h3.title {
   color: var(--nav-heading-font-color);
   font-size: inherit;
-  font-weight: var(--body-font-weight-bold);
+  font-family: var(--body-font-family-bold);
   margin: 0;
   padding: 0.25em 0 0.125em;
 }
@@ -289,5 +289,5 @@ ul.nav-list > li:first-child[data-depth="6"] {
 }
 
 .nav-panel-explore .component .title {
-  font-weight: var(--body-font-weight-bold);
+  font-family: var(--body-font-family-bold);
 }
