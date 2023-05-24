@@ -32,7 +32,6 @@
 .home h2.feature-title {
   padding-top: 0 !important;
   margin-top: 0;
-  font-size: calc(24 / var(--rem-base) * 1rem) !important;
 }
 
 .home a.feature-link {

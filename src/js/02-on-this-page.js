@@ -52,6 +52,7 @@
     tocMenuDropdown.className = 'toc-menu-dropdown'
     var clonedMenu = menu.cloneNode(true)
     var dropdownTitle = clonedMenu.querySelector('h3')
+    dropdownTitle.classList.add('discrete')
     dropdownTitle.textContent = 'On this page'
     clonedMenu.removeChild(dropdownTitle)
     tocMenuDropdown.insertBefore(dropdownTitle, tocMenuDropdown.firstChild)
