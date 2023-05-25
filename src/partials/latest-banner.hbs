@@ -1,22 +1,26 @@
 {{#unless (or (ne page.attributes.hide-view-latest undefined) (eq page.componentVersion page.component.latest))}}
 {{#with page.latest}}
 {{#if ./missing}}
-{{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
-<div class="doc banner-container" id="latest-banner">
-  <div>You are viewing the documentation for a prerelease version.
+  {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
+  <div class="doc banner-container" id="latest-banner">
+    <div>You are viewing the documentation for a prerelease version.
+    </div>
   </div>
-</div>
-{{/if}}
+  {{/if}}
 {{else}}
 <div class="doc banner-container" id="latest-banner">
-{{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
-  <div>You are viewing the documentation for a prerelease version.
-  </div>
-{{else}}
-  <div>
-    This is documentation for {{@root.page.component.title}} <b>{{@root.page.version}}</b>.
-  </div>
-{{/if}}
+  {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
+    <div>You are viewing the documentation for a prerelease version.
+    </div>
+  {{else if (eq @root.page.attributes.eol true)}}
+    <div>
+      This is documentation for {{@root.page.component.title}} <b>{{@root.page.version}}</b>, which is no longer supported.
+    </div>
+  {{else}}
+    <div>
+      This is documentation for {{@root.page.component.title}} <b>{{@root.page.version}}</b>.
+    </div>
+  {{/if}}
   <div>
     For up-to-date documentation, see the <a href="{{relativize ./url}}">latest version</a> ({{@root.page.component.latest.version}}).
   </div>
