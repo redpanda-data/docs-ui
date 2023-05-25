@@ -98,7 +98,7 @@ article.search .ais-Heading > a:hover,
 }
 
 article.search .ais-Breadcrumbs {
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .aa-Breadcrumbs {
@@ -137,6 +137,10 @@ article.search .ais-Pagination-list {
 
 .aa-Form {
   border-radius: 40px !important;
+}
+
+.aa-Input {
+  font-size: 1.3rem !important;
 }
 
 .aa-Item[aria-selected=true] .aa-ItemContent mark {
@@ -184,7 +188,8 @@ kbd.algolia-command {
 }
 
 .aa-DetachedCancelButton {
-  width: 80px;
+  font-size: 1.2rem !important;
+  width: 100px;
 }
 
 .aa-Preview.aa-Column {
@@ -296,4 +301,8 @@ kbd.algolia-command {
     column-gap: calc(var(--aa-spacing-half) / 2);
     grid-template-columns: 50% 1fr;
   }
+}
+
+html[data-theme=dark] .aa-ItemIcon img {
+  background: #fff;
 }

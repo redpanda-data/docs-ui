@@ -78,7 +78,7 @@ html[data-theme=dark] {
   --redpanda-50: #fceae5;
   --redpanda-25: #fff5f5;
   /* colors */
-  --color-white: var(--ash-25);
+  --color-white: #fff;
   --color-smoke-10: var(--ash-25);
   --color-smoke-30: var(--ash-50);
   --color-smoke-50: var(--ash-50);
@@ -175,9 +175,9 @@ html:not([data-theme=dark]) {
   --navbar-menu-background: var(--color-white);
   --navbar-menu-font-color: var(--body-font-color);
   --navbar-menu_hover-background: var(--color-smoke-50);
-  --navbar-boxshadow: #0000000d 2px 2px 10px;
+  --navbar-boxshadow: 1px 3px 5px var(--ash-50);
   /* nav */
-  --nav-background: #f9fafb;
+  --nav-background: var(--saphire-25);
   --nav-border-color: var(--color-gray-10);
   --nav-heading-font-color: var(--color-jet-30);
   --nav-muted-color: var(--color-gray-70);
@@ -185,7 +185,7 @@ html:not([data-theme=dark]) {
   --nav-secondary-background: var(--color-smoke-70);
   --nav-toggle-filter: '';
   /* toolbar */
-  --toolbar-background: var(--color-white);
+  --toolbar-background: var(--body-background);
   --toolbar-border-color: var(--panel-border-color);
   --toolbar-font-color: var(--color-gray-70);
   --toolbar-muted-color: var(--color-gray-40);
