@@ -27,6 +27,7 @@ article.search .ais-SearchBox-form::before {
 
 article.search .ais-Hits-item {
   background: unset;
+  box-shadow: var(--search-hits-boxshadow) !important;
 }
 
 article.search .search-panel__filters {
@@ -44,14 +45,7 @@ article.search .search-panel__filters {
   height: 2.5rem;
   max-width: 100%;
   line-height: 2.4rem;
-  padding-left: 20px;
-}
-
-article.search .search-panel__filters::after {
-  content: "▼";
-  font-size: small;
-  float: right;
-  margin-right: 10px;
+  padding-left: 5px;
 }
 
 article.search .versions {
@@ -60,9 +54,9 @@ article.search .versions {
   background-color: #f9f9f9;
   min-width: 160px;
   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-  padding: 12px 16px;
+  padding: 12px 12px;
   z-index: 1;
-  margin-left: -20px;
+  margin-left: -5px;
   width: 100%;
   font-size: 0.875rem;
 }
@@ -175,7 +169,7 @@ kbd.algolia-command {
 
 .aa-DetachedContainer.aa-DetachedContainer--modal {
   padding: 20px;
-  background: #f5f6f7;
+  background: var(--search-detached-mode-background);
 }
 
 .aa-DetachedFormContainer {
@@ -300,6 +294,15 @@ kbd.algolia-command {
     padding: 0 calc(var(--aa-spacing-half) / 2);
     column-gap: calc(var(--aa-spacing-half) / 2);
     grid-template-columns: 50% 1fr;
+  }
+}
+
+@media screen and (min-width: 330px) {
+  article.search .search-panel__filters::after {
+    content: "▼";
+    font-size: small;
+    float: right;
+    margin-right: 10px;
   }
 }
 

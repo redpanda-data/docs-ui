@@ -172,7 +172,7 @@
   background: var(--code-background);
   border-radius: 0.25em;
   box-shadow: 0 1px 2px 0 #0000001a;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   padding: 0.125em 0.25em;
 }
 
@@ -296,7 +296,7 @@
 }
 
 .doc table.tableblock {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(15.5 / var(--rem-base) * 1rem);
 }
 
 .doc .tablecontainer,
@@ -908,7 +908,7 @@
 code[class*=language-],
 pre[class*=language-] {
   color: var(--code-font-color) !important;
-  font-size: 0.95rem !important;
+  font-size: 0.9rem !important;
 }
 
 pre.code-first-child {

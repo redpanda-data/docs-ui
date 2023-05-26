@@ -97,9 +97,9 @@ html[data-theme=dark] {
   --color-jet-80: var(--slate-900);
   --color-black: var(--slate-900);
   /* fonts */
-  --rem-base: 15; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) */
-  --body-font-size: 1.0625em;
-  --body-font-size--desktop: 1.125em;
+  --rem-base: 15;
+  --body-font-size: calc(18.75 / var(--rem-base) * 1rem);
+  --body-font-size--desktop: calc(17.579 / var(--rem-base) * 1rem);
   --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
   --body-font-family: "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
@@ -164,6 +164,9 @@ html:not([data-theme=dark]) {
   --scrollbar-track-color: var(--color-smoke-30);
   --scrollbar-thumb-color: var(--color-gray-10);
   --scrollbar_hover-thumb-color: var(--color-gray-30);
+  /* search */
+  --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
+  --search-detached-mode-background: #f5f6f7;
   /* navbar */
   --navbar-background: var(--color-white);
   --navbar-font-color: var(--body-font-color);

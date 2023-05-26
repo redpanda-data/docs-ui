@@ -8,6 +8,9 @@ html[data-theme=dark] {
   --scrollbar_hover-thumb-color: var(--color-gray-30);
   --body-font-color: var(--color-white);
   --alt-heading-font-weight: 600;
+  /* search */
+  --search-hits-boxshadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 3px 0 rgba(255, 255, 255, 0.15);
+  --search-detached-mode-background: #0a0908;
   /* navbar */
   --navbar-background: var(--body-background);
   --navbar-font-color: var(--body-font-color);
