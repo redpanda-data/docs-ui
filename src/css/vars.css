@@ -150,7 +150,7 @@ html[data-theme=dark] {
   --z-index-page-version-menu: 3;
   --z-index-navbar: 4;
   /* Algolia */
-  --aa-detached-modal-max-width: 900px;
+  --aa-detached-modal-max-width: 1000px;
   --aa-spacing-factor: 1.3;
   --aa-primary-color-rgb: 241, 93, 97;
 }
