@@ -4,10 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
     tab.addEventListener('click', function (event) {
       const currentTab = event.target.parentElement
       const id = currentTab.id
-      console.log(id)
       if (!id) return
-      const url = window.location.href.replace(window.location.hash, '') + '#' + encodeURIComponent(id)
-      window.history.pushState(null, null, url)
+      window.location.hash = '#' + encodeURIComponent(id)
       const panel = document.querySelector(`div#${id}--panel`)
       if (panel) {
         const hiddenElement = panel.querySelector('.is-hidden[hidden]')
