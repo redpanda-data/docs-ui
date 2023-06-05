@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const tabs = document.querySelectorAll('li.tab')
+  const tabs = document.querySelectorAll('li.tab > p')
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function (event) {
-      const currentTab = event.target
+      const currentTab = event.target.parentElement
       const id = currentTab.id
       console.log(id)
       if (!id) return
