@@ -100,6 +100,12 @@ article.search .ais-Breadcrumbs {
   display: flex;
 }
 
+@media screen and (min-width: 1024px) {
+  .breadcrumbs {
+    display: none;
+  }
+}
+
 .aa-Breadcrumbs ul {
   display: flex;
   flex-wrap: wrap;
@@ -107,7 +113,7 @@ article.search .ais-Breadcrumbs {
   gap: 5px;
   padding: 0;
   list-style: none;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
 }
 
 .ais-Breadcrumbs > *:not(:last-child)::after,

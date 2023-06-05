@@ -97,9 +97,9 @@ html[data-theme=dark] {
   --color-jet-80: var(--slate-900);
   --color-black: var(--slate-900);
   /* fonts */
-  --rem-base: 15;
-  --body-font-size: calc(18.75 / var(--rem-base) * 1rem);
-  --body-font-size--desktop: calc(17.579 / var(--rem-base) * 1rem);
+  --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
+  --body-font-size: calc(20 / var(--rem-base) * 1rem);
+  --body-font-size--desktop: calc(20 / var(--rem-base) * 1rem);
   --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
   --body-font-family: "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
@@ -117,7 +117,7 @@ html[data-theme=dark] {
   --admonition-padding: 1rem;
   /* doc */
   --doc-font-size: inherit;
-  --doc-font-size--desktop: calc(16 / var(--rem-base) * 1rem);
+  --doc-font-size--desktop: calc(20 / var(--rem-base) * 1rem);
   --doc-line-height: 1.75;
   --heading-font-weight: 700;
   --heading-font-family: "Patron Medium", georgia, "Times New Roman", "Palatino Linotype", "Book Antiqua", garamond, "Roboto Slab", serif;
@@ -198,12 +198,12 @@ html:not([data-theme=dark]) {
   /* feedback */
   --feedback-modal-background: #fefefe;
   /* admonitions */
-  --warning-color: #a0439c;
-  --warning-background: #d1c2e9;
-  --warning-on-color: #a0439c;
-  --important-color: #e13238;
-  --important-background: #ffebec;
-  --important-on-color: #4b1113;
+  --important-color: #a0439c;
+  --important-background: #e5dcf5;
+  --important-on-color: #a0439c;
+  --warning-color: #e13238;
+  --warning-background: #ffebec;
+  --warning-on-color: #4b1113;
   --note-color: #4cb3d4;
   --note-background: #eef9fd;
   --note-on-color: #193c47;

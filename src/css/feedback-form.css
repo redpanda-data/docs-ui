@@ -1,11 +1,11 @@
 .feedback-modal {
   position: fixed;
-  top: 40%;
+  top: 33%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1010;
   width: 600px;
-  max-width: 100%;
+  max-width: 80vw;
   height: 400px;
   max-height: 100%;
   border-radius: 8px;
@@ -19,10 +19,12 @@
   padding: 20px;
   overflow: auto;
   border-radius: 8px;
+  max-height: 80vh;
 }
 
 .feedback-modal textarea {
   font-family: inherit;
+  font-size: 0.9rem;
 }
 
 .modal-overlay {

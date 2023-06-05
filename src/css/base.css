@@ -43,6 +43,7 @@ code,
 kbd,
 pre {
   font-family: var(--monospace-font-family) !important;
+  font-size: 0.9rem;
 }
 
 b,

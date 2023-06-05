@@ -3,7 +3,7 @@
   top: var(--navbar-height);
   left: 0;
   width: 100%;
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   z-index: var(--z-index-nav);
   visibility: hidden;
 }
@@ -29,7 +29,7 @@
 
 @media screen and (min-width: 1024px) {
   .nav-container {
-    font-size: calc(14.5 / var(--rem-base) * 1rem);
+    font-size: calc(18 / var(--rem-base) * 1rem);
     flex: none;
     position: static;
     top: 0;
@@ -48,7 +48,7 @@
 
 .nav {
   background: var(--nav-background);
-  font-size: calc(14.5 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   position: relative;
   overflow-y: scroll;
   -ms-overflow-style: none;  /* IE and Edge */
@@ -194,6 +194,11 @@ ul.nav-list > li:first-child[data-depth="6"] {
   display: none;
 }
 
+.dropdown a.nav-link,
+.dropdown a.nav-text {
+  max-width: 80%;
+}
+
 .nav-item-toggle {
   background: transparent url(../img/caret.svg) no-repeat center / 100%;
   border: none;
@@ -226,7 +231,7 @@ ul.nav-list > li:first-child[data-depth="6"] {
 }
 
 .nav-panel-explore .context {
-  font-size: calc(14.5 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   flex-shrink: 0;
   color: var(--nav-muted-color);
   padding: 0 0.5rem;

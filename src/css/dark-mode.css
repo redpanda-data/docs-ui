@@ -42,12 +42,12 @@ html[data-theme=dark] {
   /* feedback */
   --feedback-modal-background: var(--body-background);
   /* admonitions */
-  --warning-color: #a0439c;
-  --warning-background: #6a2673;
-  --warning-on-color: var(--body-font-color);
-  --important-color: #e13238;
-  --important-background: #4b1113;
+  --important-color: #a0439c;
+  --important-background: #6a2673;
   --important-on-color: var(--body-font-color);
+  --warning-color: #e13238;
+  --warning-background: #4b1113;
+  --warning-on-color: var(--body-font-color);
   --note-color: #4cb3d4;
   --note-background: #193c47;
   --note-on-color: var(--body-font-color);
