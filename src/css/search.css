@@ -101,7 +101,7 @@ article.search .ais-Breadcrumbs {
 }
 
 @media screen and (min-width: 1024px) {
-  .breadcrumbs {
+  .aa-Breadcrumbs {
     display: none;
   }
 }
