@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
   const tabs = document.querySelectorAll('li.tab')
-  if (!tabs) return
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
       if (tab.classList.contains('is-selected')) {
         const id = tab.id
+        console.log(id)
         if (!id) return
         const url = window.location.href.replace(window.location.hash, '') + '#' + encodeURIComponent(id)
         window.history.pushState(null, null, url)
