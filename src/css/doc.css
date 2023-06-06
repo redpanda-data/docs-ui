@@ -250,7 +250,6 @@
 .doc .imageblock,
 .doc .listingblock,
 .doc .literalblock,
-.doc .tabs,
 .doc .sidebarblock,
 .doc .verseblock,
 .doc .videoblock,
@@ -259,40 +258,6 @@
 .doc details,
 .doc hr {
   margin: 1rem 0 0;
-}
-
-.doc .tab {
-  border: 0;
-}
-
-.tabs:not(.is-loading) .tablist li:not(.is-selected) {
-  background-color: unset;
-}
-
-.tabs:not(.is-loading) .tablist li:not(.is-selected):hover {
-  background-color: var(--tabs_hover-background) !important;
-}
-
-.tablist > ul {
-  margin-bottom: 15px !important;
-}
-
-.tablist > ul li {
-  background-color: unset !important;
-}
-
-.doc .tab.is-selected {
-  border-bottom: 5px solid var(--link-font-color);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  color: var(--link-font-color);
-}
-
-.doc .tabpanel {
-  padding: unset;
-  padding-right: 1.25em;
-  border: none;
-  background-color: unset;
 }
 
 .doc table.tableblock {

@@ -27,7 +27,6 @@
   const tabs = document.querySelectorAll('li.tab > p')
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function (event) {
-      event.preventDefault()
       const currentTab = event.target.parentElement
       const id = currentTab.id
       if (!id) return
