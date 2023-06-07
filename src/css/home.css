@@ -89,7 +89,7 @@ html:not([data-theme=dark]) .home a.feature-link:hover .feature-box {
 
 .home div.menu-container {
   padding: 2rem;
-  background: var(--code-background);
+  background: var(--nav-background);
 }
 
 .home div.menu-container a:hover {

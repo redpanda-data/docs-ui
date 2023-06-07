@@ -180,7 +180,7 @@ html:not([data-theme=dark]) {
   --navbar-menu_hover-background: var(--color-smoke-50);
   --navbar-boxshadow: 1px 3px 5px var(--ash-50);
   /* nav */
-  --nav-background: var(--saphire-25);
+  --nav-background: var(--slate-50);
   --nav-border-color: var(--color-gray-10);
   --nav-heading-font-color: var(--color-jet-30);
   --nav-muted-color: var(--color-gray-70);
