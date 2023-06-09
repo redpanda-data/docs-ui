@@ -95,6 +95,14 @@ footer .footer-links {
   padding-bottom: 2rem;
 }
 
+.footer .footer-copyright {
+  order: 2;
+}
+
+.footer .footer-cookie {
+  order: 3;
+}
+
 .footer .footer-social-links {
   display: flex;
   width: 11rem;
@@ -102,6 +110,8 @@ footer .footer-links {
   justify-content: space-between;
   list-style: none;
   gap: 7px;
+  padding-left: 0;
+  order: 1;
 }
 
 @media (min-width: 768px) {
@@ -116,5 +126,11 @@ footer .footer-links {
 
   .footer .footer-social {
     flex-direction: row;
+  }
+
+  .footer .footer-social-links,
+  .footer .footer-cookie,
+  .footer .footer-copyright {
+    order: 0;
   }
 }
