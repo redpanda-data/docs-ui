@@ -96,7 +96,7 @@ window.addEventListener('DOMContentLoaded', function() {
               searchClient,
               queries: [
                 {
-                  indexName: 'test',
+                  indexName: '{{{env.ALGOLIA_INDEX_NAME}}}',
                   query,
                   params: {
                     hitsPerPage: 10,
@@ -191,7 +191,7 @@ window.addEventListener('DOMContentLoaded', function() {
               searchClient,
               queries: [
                 {
-                  indexName: 'test_query_suggestions',
+                  indexName: '{{{env.ALGOLIA_INDEX_NAME}}}_query_suggestions',
                   query,
                   params: {
                     hitsPerPage: 5,
