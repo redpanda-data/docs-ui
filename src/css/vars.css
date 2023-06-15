@@ -122,7 +122,7 @@ html[data-theme=dark] {
   --heading-font-weight: 700;
   --heading-font-family: "Patron Medium", georgia, "Times New Roman", "Palatino Linotype", "Book Antiqua", garamond, "Roboto Slab", serif;
   --admonition-label-font-weight: var(--body-font-weight-bold);
-  --caption-font-style: italic;
+  --caption-font-style: normal;
   --caption-font-weight: var(--body-font-weight-bold);
   /* toc */
   --toc-line-height: 1.2;
