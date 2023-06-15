@@ -62,7 +62,7 @@ git --version
 
 If not, {url-git}[download and install] the git package for your system.
 
-==== Node 10
+==== Node.js
 
 you must have {url-nodejs}[Node.js] 16 or higher installed on your machine.
 
