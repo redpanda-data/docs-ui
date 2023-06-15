@@ -2,7 +2,7 @@
   <div class="context">
     <div class="container has-dropdown">
     {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
-    {{#with site.components.redpanda}}
+    {{#with site.components.ROOT}}
     <span class="title">{{./latest.title}}</span>
     {{/with}}
     {{else}}
@@ -21,7 +21,7 @@
     </div>
     <div class="container has-dropdown">
       {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
-      {{#with site.components.redpanda}}
+      {{#with site.components.ROOT}}
       <span class="current-version">{{./latest.displayVersion}}</span>
       {{/with}}
       {{else if (ne page.componentVersion.displayVersion 'default')}}
@@ -29,7 +29,7 @@
       {{/if}}
       <div class="versions">
         {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
-          {{#each site.components.redpanda.versions}}
+          {{#each site.components.ROOT.versions}}
           <span class="version">
             <a href="{{{relativize this.url}}}">{{this.displayVersion}}</a>
           </span>

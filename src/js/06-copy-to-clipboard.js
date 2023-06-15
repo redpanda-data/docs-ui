@@ -10,6 +10,12 @@
   var svgAs = config.svgAs
   var supportsCopy = window.navigator.clipboard
 
+  document.querySelectorAll('pre').forEach(function (pre) {
+    if (pre.firstElementChild && pre.firstElementChild.tagName.toLowerCase() === 'code') {
+      pre.classList.add('code-first-child')
+    }
+  })
+
   ;[].slice.call(document.querySelectorAll('.doc pre.highlight, .doc .literalblock pre')).forEach(function (pre) {
     var code, language, lang, copy, toast, toolbox
     if (pre.classList.contains('highlight')) {
@@ -32,7 +38,7 @@
     }
     ;(toolbox = document.createElement('div')).className = 'source-toolbox'
     if (lang) toolbox.appendChild(lang)
-    if (supportsCopy) {
+    if (supportsCopy && !pre.parentNode.parentNode.classList.contains('no-copy')) {
       ;(copy = document.createElement('button')).className = 'copy-button'
       copy.setAttribute('title', 'Copy to clipboard')
       if (svgAs === 'svg') {

@@ -24,6 +24,7 @@
 
   main > .content {
     display: flex;
+    justify-content: center;
   }
 
   aside.toc.embedded {

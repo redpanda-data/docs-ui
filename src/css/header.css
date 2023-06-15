@@ -22,6 +22,14 @@ body {
   text-decoration: none;
 }
 
+.navbar-menu {
+  color: rgb(102 112 133/1);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.2em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
 .navbar-brand {
   display: flex;
   flex: auto;

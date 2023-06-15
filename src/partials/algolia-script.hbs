@@ -1,0 +1,233 @@
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
+  const { createLocalStorageRecentSearchesPlugin } = window[
+    '@algolia/autocomplete-plugin-recent-searches'
+  ];
+  const { createQuerySuggestionsPlugin } = window[
+    '@algolia/autocomplete-plugin-query-suggestions'
+  ];
+
+  const searchClient = algoliasearch(
+    '{{{env.ALGOLIA_APP_ID}}}',
+    '{{{env.ALGOLIA_API_KEY}}}'
+  );
+
+  autocomplete({
+    container: '#autocomplete',
+    placeholder: 'Search for docs',
+    detachedMediaQuery: '',
+    plugins: [],
+    insights: true,
+    defaultActiveItemId: 0,
+    onStateChange({ state }) {
+      state.preview = null
+    },
+    render({ children, state, render, html, components, createElement }, root) {
+      const { preview } = state.context;
+      render(
+        html`<div class="aa-Grid">
+        <div class="aa-Results aa-Column">${children}</div>
+        ${preview
+          ? html`<div class="aa-Preview aa-Column doc">
+            <div class="aa-PanelLayout aa-Panel--scrollable">
+              ${
+                preview.image.src
+                ? html`<div class="aa-ItemIcon">
+                        <img
+                          src="${preview.image.src}"
+                          alt="${preview.image.alt}"
+                          width="40"
+                          height="40"
+                        />
+                      </div>`
+                : ''
+              }
+              <div class="breadcrumbs">
+                <ul>
+                ${preview.breadcrumbs.map(breadcrumb =>
+                  html`<li><a href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
+                )}
+                </ul>
+              </div>
+              <h3>
+                ${components.Highlight({
+                  hit: preview,
+                  attribute: 'title',
+                })}
+              </h3>
+              <p>
+                ${components.Highlight({
+                  hit: preview,
+                  attribute: 'intro',
+                })}
+              </p>
+              <div class="toc sidebar">
+                <div class="toc-menu">
+                  ${preview.titles.length > 0 ?
+                  html`<h4>On this page</h4>`
+                  : ''}
+                  <ul>
+                  ${preview.titles.map(title =>
+                    html`<li><a href="${preview.objectID}#${title.h}">${components.Highlight({
+                        hit: title,
+                        attribute: 't',
+                    })}</a></li>`
+                  )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <footer class="search-footer"><ul class="search-commands"><li><kbd class="algolia-command"><svg width="15" height="15" aria-label="Enter key" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M12 3.53088v3c0 1-1 2-2 2H4M7 11.53088l-3-3 3-3"></path></g></svg></kbd><span class="algolia-label">to select</span></li><li><kbd class="algolia-command"><svg width="15" height="15" aria-label="Arrow down" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M7.5 3.5v8M10.5 8.5l-3 3-3-3"></path></g></svg></kbd><kbd class="algolia-command"><svg width="15" height="15" aria-label="Arrow up" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M7.5 11.5v-8M10.5 6.5l-3-3-3 3"></path></g></svg></kbd><span class="algolia-label">to navigate</span></li><li><kbd class="algolia-command"><svg width="15" height="15" aria-label="Escape key" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M13.6167 8.936c-.1065.3583-.6883.962-1.4875.962-.7993 0-1.653-.9165-1.653-2.1258v-.5678c0-1.2548.7896-2.1016 1.653-2.1016.8634 0 1.3601.4778 1.4875 1.0724M9 6c-.1352-.4735-.7506-.9219-1.46-.8972-.7092.0246-1.344.57-1.344 1.2166s.4198.8812 1.3445.9805C8.465 7.3992 8.968 7.9337 9 8.5c.032.5663-.454 1.398-1.4595 1.398C6.6593 9.898 6 9 5.963 8.4851m-1.4748.5368c-.2635.5941-.8099.876-1.5443.876s-1.7073-.6248-1.7073-2.204v-.4603c0-1.0416.721-2.131 1.7073-2.131.9864 0 1.6425 1.031 1.5443 2.2492h-2.956"></path></g></svg></kbd><span class="algolia-label">to close</span></li></ul></footer>`
+          : ''
+          }
+        </div>`,
+        root
+      );
+    },
+    getSources({ query }) {
+      if (!query) return [];
+      return [
+        {
+          sourceId: 'docs',
+          getItems() {
+            return getAlgoliaResults({
+              searchClient,
+              queries: [
+                {
+                  indexName: '{{{env.ALGOLIA_INDEX_NAME}}}',
+                  query,
+                  params: {
+                    hitsPerPage: 10,
+                    attributesToSnippet: ['title:7'],
+                    snippetEllipsisText: '…',
+                    facetFilters: ['version: {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}','product: {{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}}']
+                  },
+                },
+              ],
+            })
+          },
+          templates: {
+            noResults({state, html}) {
+              state.context.preview = null
+              if (!state.query) return
+              return html`<div>No results for ${state.query}</div><p>Believe this query should return results?<a href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
+            },
+            header({html}) {
+              return html`<span class="aa-SourceHeaderTitle">{{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}} {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}</span>
+              <div class="aa-SourceHeaderLine"></div>
+              `;
+            },
+            footer({state, html}) {
+              if (state.context.preview) {
+                return html`<div class="aa-Footer">
+                <a class="aa-ItemLink" href="{{{relativize '/search' }}}?q=${state.query}">View all results</a>
+                </div>`
+              }
+            },
+            item({ item, components, html }) {
+              return html`<a class="aa-ItemLink" href="${item.objectID}">
+                <div class="aa-ItemContent">
+                  <div class="aa-ItemContentBody">
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle">
+                        ${components.Highlight({
+                          hit: item,
+                          attribute: 'title',
+                        })}
+                      </div>
+                    </div>
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-Breadcrumbs">
+                        <ul>
+                        ${item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
+                        html`<li>${breadcrumb.t}</li>`
+                        )}
+                        ${item.breadcrumbs.length === 2 && item.breadcrumbs.slice(1).map(breadcrumb =>
+                        html`<li>${breadcrumb.t}</li>`
+                        )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="aa-ItemActions">
+                    <button
+                      class="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
+                      type="button"
+                      title="Open page"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </a>`;
+            },
+          },
+          getItemUrl({ item }) {
+            return item.objectID;
+          },
+          onActive({ item, setContext }) {
+            if (item) {
+              setContext({ preview: item });
+            } else {
+              setContext( { preview: null } );
+            }
+          },
+        },
+        {
+          sourceId: 'suggestions',
+          getItems({ query }) {
+            return getAlgoliaResults({
+              searchClient,
+              queries: [
+                {
+                  indexName: '{{{env.ALGOLIA_INDEX_NAME}}}_query_suggestions',
+                  query,
+                  params: {
+                    hitsPerPage: 5,
+                  },
+                },
+              ],
+            });
+          },
+          onSelect({ item, setQuery, setIsOpen, refresh }) {
+            setQuery(`${item.query} `);
+            setIsOpen(true);
+            refresh();
+          },
+          templates: {
+            header({ items, html }) {
+              if (items.length === 0) {
+                return null;
+              }
+
+              return html`
+                  <span class="aa-SourceHeaderTitle">
+                    Can't find what you're looking for?
+                  </span>
+                  <div class="aa-SourceHeaderLine" />
+                `
+            },
+            item({ item, components, html }) {
+              console.log(item)
+              return html`<div class="aa-QuerySuggestion">
+                ${item.query}
+                </div>`
+            },
+          },
+        }
+      ];
+    },
+  });
+})
+</script>

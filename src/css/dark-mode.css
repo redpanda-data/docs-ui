@@ -8,6 +8,9 @@ html[data-theme=dark] {
   --scrollbar_hover-thumb-color: var(--color-gray-30);
   --body-font-color: var(--color-white);
   --alt-heading-font-weight: 600;
+  /* search */
+  --search-hits-boxshadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 3px 0 rgba(255, 255, 255, 0.15);
+  --search-detached-mode-background: #0a0908;
   /* navbar */
   --navbar-background: var(--body-background);
   --navbar-font-color: var(--body-font-color);
@@ -39,12 +42,12 @@ html[data-theme=dark] {
   /* feedback */
   --feedback-modal-background: var(--body-background);
   /* admonitions */
-  --warning-color: #a0439c;
-  --warning-background: #6a2673;
-  --warning-on-color: var(--body-font-color);
-  --important-color: #e13238;
-  --important-background: #4b1113;
+  --important-color: #a0439c;
+  --important-background: #6a2673;
   --important-on-color: var(--body-font-color);
+  --warning-color: #e13238;
+  --warning-background: #4b1113;
+  --warning-on-color: var(--body-font-color);
   --note-color: #4cb3d4;
   --note-background: #193c47;
   --note-on-color: var(--body-font-color);
@@ -67,11 +70,11 @@ html[data-theme=dark] {
   --abstract-font-color: var(--color-jet-20);
   --abstract-border-color: var(--panel-border-color);
   --admonition-background: var(--panel-background);
-  --admonition-label-font-weight: var(--body-font-weight-bold);
+  --admonition-label-font-family: var(--body-font-family-bold);
   --caption-font-color: var(--body-font-color);
   --caption-background-color: #ffffff0d;
   --caption-font-style: italic;
-  --caption-font-weight: var(--body-font-weight-bold);
+  --caption-font-family: var(--body-font-family-bold);
   --code-background: rgba(177, 209, 241, 0.15);
   --code-font-color: #eceff1;
   --tabs_hover-background: var(--caption-background-color);
@@ -100,4 +103,9 @@ html[data-theme=dark] {
   --footer-background: var(--color-smoke-90);
   --footer-font-color: var(--color-gray-70);
   --footer-link-font-color: var(--color-jet-80);
+}
+
+html[data-theme=dark] body.swagger {
+  /* base */
+  --body-background: var(--color-white);
 }

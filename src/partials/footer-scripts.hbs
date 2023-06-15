@@ -1,8 +1,9 @@
 <script id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
-<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>
+<!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
 <script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
-{{#if env.ALGOLIA_API_KEY}}
-{{> docsearch-script}}
+<script src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
+{{#if (and env.ALGOLIA_API_KEY (ne page.layout 'search'))}}
+{{> algolia-script}}
 {{/if}}
 {{#if (ne page.layout '404') }}
 {{> feedback-form-script}}

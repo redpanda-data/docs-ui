@@ -35,7 +35,7 @@ const handleSubmit = function (e) {
   const formFields = e.target.closest('form')
   const feedback = formFields.querySelector('input[name="feedback"]:checked').value
 
-  formData.set('positiveFeedback', feedback)
+  formData.set('feedback', feedback)
   formData.set('otherText', (form.querySelector('textarea[name="otherText"]').value))
 
   formData.set('email', (form.querySelector('input[name="email"]').value))
@@ -49,7 +49,7 @@ const handleSubmit = function (e) {
     language: window.navigator.language
   }))
 
-  fetch("/", {
+  fetch("{{page.url}}", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(formData).toString(),

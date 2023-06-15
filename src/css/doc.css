@@ -1,9 +1,8 @@
 .doc {
-  color: var(--doc-font-color);
+  color: var(--body-font-color);
   font-size: var(--doc-font-size);
   hyphens: auto;
   line-height: var(--doc-line-height);
-  margin: var(--doc-margin);
   max-width: var(--doc-max-width);
   padding: 0 1rem 4rem;
 }
@@ -32,7 +31,7 @@
 .doc h5,
 .doc h6 {
   color: var(--heading-font-color);
-  font-weight: var(--heading-font-weight);
+  font-family: var(--heading-font-family);
   hyphens: none;
   line-height: 1.3;
   margin: 1rem 0 0;
@@ -40,7 +39,7 @@
 
 .doc > h1.page:first-child,
 .doc > h1.page:nth-child(2) {
-  font-size: calc(48 / var(--rem-base) * 1rem);
+  font-size: calc(36 / var(--rem-base) * 1rem);
   margin: 1.5rem 0;
   margin-bottom: 0;
 }
@@ -49,6 +48,7 @@
   .doc > h1.page:first-child,
   .doc > h1.page:nth-child(2) {
     margin-top: 2.5rem;
+    font-size: calc(48 / var(--rem-base) * 1rem);
   }
 }
 
@@ -74,13 +74,20 @@
 }
 
 .doc h2:not(.discrete) {
+  font-size: calc(32 / var(--rem-base) * 1rem);
   margin-left: -1rem;
   margin-right: -1rem;
   padding: 0.4rem 1rem 0.1rem;
 }
 
 .doc h3:not(.discrete),
+.aa-PreviewTitle {
+  font-size: calc(24 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
 .doc h4:not(.discrete) {
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
@@ -118,6 +125,7 @@
 .doc p,
 .doc dl {
   margin: 0;
+  hyphens: none;
 }
 
 .doc a,
@@ -164,7 +172,7 @@
   background: var(--code-background);
   border-radius: 0.25em;
   box-shadow: 0 1px 2px 0 #0000001a;
-  font-size: 0.95em;
+  font-size: 0.88rem;
   padding: 0.125em 0.25em;
 }
 
@@ -184,6 +192,7 @@
   font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.5;
   margin: 0;
+  padding: 1em;
 }
 
 .doc pre > code {
@@ -241,7 +250,6 @@
 .doc .imageblock,
 .doc .listingblock,
 .doc .literalblock,
-.doc .tabs,
 .doc .sidebarblock,
 .doc .verseblock,
 .doc .videoblock,
@@ -252,42 +260,8 @@
   margin: 1rem 0 0;
 }
 
-.doc .tab {
-  border: 0;
-}
-
-.tabs:not(.is-loading) .tablist li:not(.is-selected) {
-  background-color: unset;
-}
-
-.tabs:not(.is-loading) .tablist li:not(.is-selected):hover {
-  background-color: var(--tabs_hover-background) !important;
-}
-
-.tablist > ul {
-  margin-bottom: 15px !important;
-}
-
-.tablist > ul li {
-  background-color: unset !important;
-}
-
-.doc .tab.is-selected {
-  border-bottom: 5px solid #f15d61;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  color: #f15d61;
-}
-
-.doc .tabpanel {
-  padding: unset;
-  padding-right: 1.25em;
-  border: none;
-  background-color: unset;
-}
-
 .doc table.tableblock {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .tablecontainer,
@@ -440,18 +414,13 @@
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock p,
-.doc .admonitionblock td.content {
-  font-size: calc(16 / var(--rem-base) * 1rem);
-}
-
 .doc .admonitionblock td.content > :not(.title):first-child,
 .doc .admonitionblock td.content > .title + * {
   margin-top: 0;
 }
 
 .doc .admonitionblock pre {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .admonitionblock > table {
@@ -470,7 +439,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   padding: 0 0.5rem;
   height: 1.25rem;
   line-height: 1;
@@ -492,6 +461,36 @@
   color: var(--note-on-color);
 }
 
+.icon-note::before {
+  content: "✏️";
+  margin-right: 5px;
+  margin-left: -5px;
+}
+
+.icon-tip::before {
+  content: "💡";
+  margin-right: 5px;
+  margin-left: -5px;
+}
+
+.icon-warning::before {
+  content: "🚨";
+  margin-right: 5px;
+  margin-left: -5px;
+}
+
+.icon-caution::before {
+  content: "⚠️";
+  margin-right: 5px;
+  margin-left: -5px;
+}
+
+.icon-important::before {
+  content: "❗";
+  margin-right: 5px;
+  margin-left: -5px;
+}
+
 .doc .admonitionblock.tip .icon {
   color: var(--tip-on-color);
 }
@@ -508,6 +507,16 @@
 
 .doc .admonitionblock .icon i::after {
   content: attr(title);
+}
+
+.listingblock .title > * {
+  color: var(--body-font-color);
+  font-style: initial;
+  font-weight: initial;
+}
+
+.listingblock .title {
+  margin-top: 0.5rem;
 }
 
 .doc .imageblock,
@@ -552,7 +561,7 @@
   background: var(--abstract-background);
   border-left: 5px solid var(--abstract-border-color);
   color: var(--abstract-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   padding: 0.75em 1em;
 }
 
@@ -569,7 +578,7 @@
 
 .doc .quoteblock .attribution {
   color: var(--quote-attribution-font-color);
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   margin-top: 0.75rem;
 }
 
@@ -710,7 +719,19 @@
   padding: 0;
 }
 
-.doc .admonitionblock .title,
+.doc .admonitionblock .title {
+  font-weight: bold;
+}
+
+.doc summary .title {
+  border-bottom: 0;
+  background-color: none;
+}
+
+.doc .listingblock .title {
+  margin-bottom: -0.5rem;
+}
+
 .doc .exampleblock .title,
 .doc .imageblock .title,
 .doc .literalblock .title,
@@ -719,7 +740,7 @@
 .doc .videoblock .title,
 .doc .tableblock caption {
   color: var(--caption-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-style: var(--caption-font-style);
   font-weight: var(--caption-font-weight);
   hyphens: none;
@@ -732,16 +753,14 @@
   background-color: var(--caption-background-color);
 }
 
+/* immediate sibling of an element with the class title, where this title class element is a direct child of a td element with the class content */
+.doc .admonitionblock td.content > .title + * {
+  margin-top: 20px;
+}
+
 .doc .tableblock caption {
   text-align: left;
   margin-bottom: 0;
-}
-
-.doc .ulist .title,
-.doc .olist .title {
-  font-style: var(--caption-font-style);
-  font-weight: var(--caption-font-weight);
-  margin-bottom: 0.25rem;
 }
 
 .doc .imageblock .title {
@@ -749,15 +768,16 @@
   padding-bottom: 0;
 }
 
-.doc details {
-  margin-left: 1rem;
-}
-
-.doc details > summary {
+.doc .openblock details > summary.title {
   display: block;
   position: relative;
   line-height: var(--doc-line-height);
-  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: unset;
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .doc details > summary::-webkit-details-marker {
@@ -771,7 +791,7 @@
   border-width: 0.3em 0 0.3em 0.5em;
   position: absolute;
   top: calc((var(--doc-line-height) * 0.5 - 0.3) * 1em);
-  left: -1rem;
+  left: 0;
   transform: translateX(15%);
 }
 
@@ -781,13 +801,13 @@
   transform: translateY(15%);
 }
 
-.doc details > summary::after {
-  content: "";
-  width: 1rem;
-  height: 1em;
-  position: absolute;
-  top: calc((var(--doc-line-height) * 0.5 - 0.5) * 1em);
-  left: -1rem;
+.doc details {
+  border: 1px solid var(--note-color);
+  margin: 1rem 0;
+  background-color: var(--note-background);
+  box-shadow: 0 1px 2px 0 #0000001a;
+  padding: 1rem 1rem;
+  border-radius: 1px;
 }
 
 .doc details.result {
@@ -863,11 +883,11 @@
 
 code[class*=language-],
 pre[class*=language-] {
-  font-family: inherit !important;
   color: var(--code-font-color) !important;
+  font-size: 0.88rem !important;
 }
 
-pre {
+pre.code-first-child {
   padding-bottom: 0 !important;
 }
 
@@ -919,8 +939,8 @@ html[data-theme=dark] code[class*=language-] .token.function {
   right: 0.5rem;
   color: var(--pre-annotation-font-color);
   font-family: var(--body-font-family);
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  line-height: 1;
+  font-size: calc(15 / var(--rem-base) * 1rem);
+  line-height: 1.5;
   white-space: nowrap;
   z-index: 1;
 }
@@ -957,8 +977,8 @@ html[data-theme=dark] code[class*=language-] .token.function {
 
 .doc .source-toolbox .copy-icon {
   flex: none;
-  width: inherit;
-  height: inherit;
+  width: 20px;
+  height: 20px;
 }
 
 .doc .source-toolbox img.copy-icon {
@@ -1029,7 +1049,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc td.hdlist1 {
-  font-weight: var(--body-font-weight-bold);
+  font-family: var(--body-font-family-bold);
   padding-right: 0.25rem;
 }
 
@@ -1038,7 +1058,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .colist {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   margin: 0.25rem 0 -0.25rem;
 }
 
@@ -1098,7 +1118,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 
 .doc kbd {
   display: inline-block;
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   background: var(--kbd-background);
   border: 1px solid var(--kbd-border-color);
   border-radius: 0.25em;
@@ -1137,7 +1157,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 .doc .menuseq i.caret::before {
   content: "\203a";
   font-size: 1.1em;
-  font-weight: var(--body-font-weight-bold);
+  font-family: var(--body-font-family-bold);
   line-height: calc(1 / 1.1);
 }
 

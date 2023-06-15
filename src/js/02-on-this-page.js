@@ -21,7 +21,7 @@
     headingsSelector.push(headingSelector.join('>'))
   }
   var headings = find(headingsSelector.join(','), article.parentNode)
-  if (!headings.length) return sidebar.parentNode.removeChild(sidebar)
+  if (!headings.length) return sidebar.querySelector('#thumbs-toc').remove()
 
   var lastActiveFragment
   var links = {}
@@ -52,6 +52,7 @@
     tocMenuDropdown.className = 'toc-menu-dropdown'
     var clonedMenu = menu.cloneNode(true)
     var dropdownTitle = clonedMenu.querySelector('h3')
+    dropdownTitle.classList.add('discrete')
     dropdownTitle.textContent = 'On this page'
     clonedMenu.removeChild(dropdownTitle)
     tocMenuDropdown.insertBefore(dropdownTitle, tocMenuDropdown.firstChild)

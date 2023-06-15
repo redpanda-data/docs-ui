@@ -2,7 +2,8 @@
 !function (theme) {
   if (theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark')
-    window.addEventListener('load', function () {
+    window.addEventListener('DOMContentLoaded', function () {
+      document.body.setAttribute('data-theme', 'dark');
       switchButton = document.getElementById('switch-theme')
       if (!switchButton) return
       const img = document.querySelector('#switch-theme > img:first-child')

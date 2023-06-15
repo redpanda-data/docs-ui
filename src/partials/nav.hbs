@@ -6,9 +6,7 @@
     <div class="top-panel">
     {{#if (ne page.layout 'search')}}
       <div class="search hide-for-print">
-        <div id="search-field" class="field">
-          <input id="search-input" type="text" placeholder="Search the docs"{{#if page.home}} autofocus{{/if}}>
-        </div>
+          <div id="autocomplete"></div>
       </div>
     {{/if}}
     {{> nav-explore}}

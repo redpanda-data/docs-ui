@@ -25,11 +25,10 @@
 </div>
 </article>
 {{> footer}}
-<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.14.2/dist/algoliasearch-lite.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.49.1/dist/instantsearch.production.min.js"></script>
 <script>
 if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
   const { algoliasearch, instantsearch } = window;
+  const { searchBox } = instantsearch.widgets;
 
   const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
   const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
@@ -57,23 +56,24 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
   });
 
   search.addWidgets([
-      instantsearch.widgets.searchBox({
-          container: '#searchbox',
-      }),
-      instantsearch.widgets.hits({
-          container: '#hits',
-          templates: {
-              item(hit, { html, components, sendEvent }) {
-                  return html`
-          <div>
-              <p class="ais-Heading"><a href="${hit.url}">${hit.hierarchy.lvl2 ? hit.hierarchy.lvl2 : hit.hierarchy.lvl1}</a></p>
-              <p>${components.Highlight({ hit, attribute: 'content' })}</p>
-              <p class="ais-Breadcrumbs">${hit.hierarchy.lvl0} > ${hit.hierarchy.lvl1} ${hit.hierarchy.lvl2 ? "> " + hit.hierarchy.lvl2 : ""}</p>
-          </div>
-          `;
-              },
-          },
-      }),
+    instantsearch.widgets.hits({
+      container: '#hits',
+      templates: {
+        item(hit, { html, components, sendEvent }) {
+          // Helper function to convert an array of objects to HTML links
+          function arrayToHtmlLinks(array) {
+            return array.map(item => `<a href="${item.u}">${item.t}</a>`).join(' ');
+          }
+
+          return `
+            <div>
+                <p class="ais-Heading"><a href="${hit.objectID}">${hit.title}</a></p>
+                <p class="ais-Breadcrumbs">${arrayToHtmlLinks(hit.breadcrumbs)}</p>
+            </div>`;
+        },
+      },
+    }),
+
       instantsearch.widgets.refinementList({
         container: '#version', // the CSS Selector of the DOM element inside which the widget is inserted.
         attribute: 'version',  // the name of the attribute in the records.
@@ -96,6 +96,9 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
       }),
       instantsearch.widgets.pagination({
           container: '#pagination',
+      }),
+      searchBox({
+        container: '#searchbox',
       }),
   ]);
 

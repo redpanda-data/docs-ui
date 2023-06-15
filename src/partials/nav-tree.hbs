@@ -3,14 +3,14 @@
   {{#with site.components.home}}
     <li class="nav-item">
       <div class="item" onclick="window.location.href = '{{{relativize ./url}}}'">
-        <a href="{{{relativize ./url}}}">Docs Home</a>
+        <a class="nav-link" href="{{{relativize ./url}}}">Docs Home</a>
       </div>
     </li>
   {{/with}}
   {{#each navigation}}
   <li class="nav-item" data-depth="{{or ../level 0}}">
     {{#if ./content}}
-    <div class="item {{#if (eq ./url @root.page.url)}} is-current-page{{/if}}">
+    <div class="item {{#if (eq ./url @root.page.url)}} is-current-page{{/if}} {{#if ./items.length}} dropdown {{/if}}">
     {{#if ./url}}
     <a class="nav-link" href="
       {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
@@ -32,11 +32,11 @@
   {{#with site.components.home}}
     <li class="nav-item">
       <div class="item" onclick="window.location.href = '{{{relativize ./url}}}'">
-        <a href="{{{relativize ./url}}}">Docs Home</a>
+        <a class="nav-link" href="{{{relativize ./url}}}">Docs Home</a>
       </div>
     </li>
   {{/with}}
-  {{#with site.components.redpanda}}
+  {{#with site.components.ROOT}}
     {{#each ./latest.navigation}}
       <li class="nav-item" data-depth="{{or ../level 0}}">
         {{#if ./content}}
