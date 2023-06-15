@@ -1,219 +1,283 @@
-= Antora Default UI
-// Settings:
-:experimental:
+= Redpanda Documentation UI
+:url-docs: https://docs.redpanda.com
+:url-org: https://github.com/redpanda-data
+:ui-project: redpanda-docs-ui
+:url-ui: https://github.com/JakeSCahill/{ui-project}
+:url-extensions: https://github.com/JakeSCahill/antora-extensions-and-macros
+:url-site: https://github.com/JakeSCahill/docs-site
 :hide-uri-scheme:
-// Project URLs:
-:url-project: https://gitlab.com/antora/antora-ui-default
-:url-preview: https://antora.gitlab.io/antora-ui-default
-:url-ci-pipelines: {url-project}/pipelines
-:img-ci-status: {url-project}/badges/master/pipeline.svg
-// External URLs:
-:url-antora: https://antora.org
+:url-contributing: {url-site}/blob/main/meta-docs/CONTRIBUTING.adoc
+:url-netlify: https://netlify.com
+:url-netlify-docs: https://docs.netlify.com
 :url-antora-docs: https://docs.antora.org
-:url-git: https://git-scm.com
-:url-git-dl: {url-git}/downloads
-:url-gulp: http://gulpjs.com
-:url-opendevise: https://opendevise.com
-:url-nodejs: https://nodejs.org
-:url-nvm: https://github.com/creationix/nvm
-:url-nvm-install: {url-nvm}#installation
-:url-source-maps: https://developer.mozilla.org/en-US/docs/Tools/Debugger/How_to/Use_a_source_map
+:url-redoc: https://github.com/Redocly/redoc
+:url-nodejs: https://nodejs.org/en/download
+:url-git: https://git-scm.com/downloads
+:idprefix:
+:idseparator: -
+:experimental:
+ifdef::env-github[]
+:important-caption: :exclamation:
+:note-caption: :paperclip:
+endif::[]
+:toc:
+:toc-title: Contents
 
-image:{img-ci-status}[CI Status (GitLab CI), link={url-ci-pipelines}]
+toc::[]
 
-This project is an archetype that demonstrates how to produce a UI bundle that can be used by {url-antora}[Antora] to generated a documentation site.
-You can see a preview of the default UI at {url-preview}.
 
-While the default UI is ready to be used with Antora, the intent is that you'll fork it and customize it for your own needs.
-It's intentionally minimalistic so as to give you a good starting point without requiring too much effort to customize.
+This project is used to develop and distribute the UI for the {url-site}[Redpanda documentation site].
+The UI bundle this project produces is intended to be used with {url-antora}[Antora].
+The UI bundle contains the HTML templates, CSS, JavaScript, fonts, and site-wide images.
+The rest of the material for the documentation site comes from the {url-site}[playbook repository] and content repositories.
 
-== Code of Conduct
+== Usage
 
-The Antora project and its project spaces are governed by our https://gitlab.com/antora/antora/-/blob/HEAD/CODE-OF-CONDUCT.adoc[Code of Conduct].
-By participating, you're agreeing to honor this code.
-Let's work together to make this a welcoming, professional, inclusive, and safe environment for everyone.
-
-== Use the Default UI
-
-If you want to simply use the default UI for your Antora-generated site, add the following UI configuration to your playbook:
+To use this UI with Antora, add the following configuration to your playbook file:
 
 [source,yaml]
 ----
 ui:
   bundle:
-    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
-    snapshot: true
+    url: {url-ui}/releases/latest/download/ui-bundle.zip
 ----
-
-NOTE: The `snapshot` flag tells Antora to fetch the UI when the `--fetch` command-line flag is present.
-This setting is required because updates to the UI bundle are pushed to the same URL.
-If the URL were to be unique, this setting would not be required.
-
-Read on to learn how to customize the default UI for your own documentation.
 
 == Development Quickstart
 
-This section offers a basic tutorial to teach you how to set up the default UI project, preview it locally, and bundle it for use with Antora.
-A more comprehensive tutorial can be found in the documentation at {url-antora-docs}.
+In this section, you learn how to set up the UI project, preview it locally, and bundle it for use with Antora.
 
 === Prerequisites
 
-To preview and bundle the default UI, you need the following software on your computer:
-
-* {url-git}[git] (command: `git`)
-* {url-nodejs}[Node.js] (commands: `node` and `npm`)
-* {url-gulp}[Gulp CLI] (command: `gulp`)
+To preview and bundle the UI, you need the following software on your computer:
 
 ==== git
 
-First, make sure you have git installed.
+Make sure you have git installed.
 
- $ git --version
+[,bash]
+----
+git --version
+----
 
-If not, {url-git-dl}[download and install] the git package for your system.
+If not, {url-git}[download and install] the git package for your system.
 
-==== Node.js
+==== Node 10
 
-Next, make sure that you have Node.js installed (which also provides npm).
+you must have {url-nodejs}[Node.js] 16 or higher installed on your machine.
 
- $ node --version
+[,bash]
+----
+node --version
+----
 
-If this command fails with an error, you don't have Node.js installed.
-If the command doesn't report an LTS version of Node.js (e.g., v10.15.3), it means you don't have a suitable version of Node.js installed.
-In this guide, we'll be installing Node.js 10.
-
-While you can install Node.js from the official packages, we strongly recommend that you use {url-nvm}[nvm] (Node Version Manager) to manage your Node.js installation(s).
-Follow the {url-nvm-install}[nvm installation instructions] to set up nvm on your machine.
-
-Once you've installed nvm, open a new terminal and install Node.js 10 using the following command:
-
- $ nvm install 10
-
-You can switch to this version of Node.js at any time using the following command:
-
- $ nvm use 10
-
-To make Node.js 10 the default in new terminals, type:
-
- $ nvm alias default 10
-
-Now that you have Node.js installed, you can proceed with installing the Gulp CLI.
+If this command fails, you don't have Node.js installed.
 
 ==== Gulp CLI
 
 You'll need the Gulp command-line interface (CLI) to run the build.
-The Gulp CLI package provides the `gulp` command which, in turn, executes the version of Gulp declared by the project.
+This package provides the `gulp` command which, in turn, executes the version of Gulp declared by the project.
 
-You can install the Gulp CLI globally (which resolves to a location in your user directory if you're using nvm) using the following command:
+You should install the Gulp CLI globally (which resolves to a location in your user directory if you're using nvm) using the following command:
 
- $ npm install -g gulp-cli
+[,bash]
+----
+npm install -g gulp-cli
+----
 
 Verify the Gulp CLI is installed and on your PATH by running:
 
- $ gulp --version
-
-If you prefer to install global packages using Yarn, run this command instead:
-
- $ yarn global add gulp-cli
-
-Alternately, you can use the `gulp` command that is installed by the project's dependencies.
-
- $ $(npm bin)/gulp --version
+[,bash]
+----
+gulp -v
+----
 
 Now that you have the prerequisites installed, you can fetch and build the UI project.
 
 === Clone and Initialize the UI Project
 
-Clone the default UI project using git:
+Clone the UI project using git:
 
-[subs=attributes+]
- $ git clone {url-project} &&
-   cd "`basename $_`"
+[,bash,subs=attributes+]
+----
+git clone {url-ui}
+cd {ui-project}
+----
 
-The example above clones Antora's default UI project and then switches to the project folder on your filesystem.
-Stay in this project folder when executing all subsequent commands.
+The example above clones the Redpanda docs UI project and then switches to the project directory on your filesystem.
+Stay in this project directory when executing all subsequent commands.
 
 Use npm to install the project's dependencies inside the project.
 In your terminal, execute the following command:
 
- $ npm install
+[,bash]
+----
+npm install
+----
 
-This command installs the dependencies listed in [.path]_package.json_ into the [.path]_node_modules/_ folder inside the project.
-This folder does not get included in the UI bundle and should _not_ be committed to the source control repository.
-
-[TIP]
-====
-If you prefer to install packages using Yarn, run this command instead:
-
- $ yarn
-====
+This command installs the dependencies listed in `package.json` into the `node_modules/` directory inside the project.
+This directory does not get included in the UI bundle and should _not_ be committed to the source control repository.
 
 === Preview the UI
 
-The default UI project is configured to preview offline.
-The files in the [.path]_preview-src/_ folder provide the sample content that allow you to see the UI in action.
-In this folder, you'll primarily find pages written in AsciiDoc.
+The UI project is configured to preview offline.
+The files in the `preview-src/` directory provide the sample content that allow you to see the UI in action.
+In this directory, you'll primarily find pages written in AsciiDoc.
 These pages provide a representative sample and kitchen sink of content from the real site.
 
 To build the UI and preview it in a local web server, run the `preview` command:
 
- $ gulp preview
+[,bash]
+----
+gulp preview
+----
 
 You'll see a URL listed in the output of this command:
 
 ....
-[12:00:00] Starting server...
-[12:00:00] Server started http://localhost:5252
-[12:00:00] Running server
+[17:32:55] Starting 'preview:serve'...
+[17:32:55] Starting server...
+[17:32:55] Server started http://localhost:5252 and http://192.168.1.3:5252
+[17:32:55] Running server
 ....
 
 Navigate to this URL to preview the site locally.
 
 While this command is running, any changes you make to the source files will be instantly reflected in the browser.
-This works by monitoring the project for changes, running the `preview:build` task if a change is detected, and sending the updates to the browser.
+This works by monitoring the project for changes, running the `build` task if a change is detected, and sending the updates to the browser.
 
 Press kbd:[Ctrl+C] to stop the preview server and end the continuous build.
+
+==== Preview Online
+
+You can share a preview of the UI online by submitting a pull request to GitHub.
+The repository is configured to create a deploy preview on Netlify for every pull request.
 
 === Package for Use with Antora
 
 If you need to package the UI so you can use it to generate the documentation site locally, run the following command:
 
- $ gulp bundle
+[,bash]
+----
+gulp bundle
+----
 
 If any errors are reported by lint, you'll need to fix them.
 
-When the command completes successfully, the UI bundle will be available at [.path]_build/ui-bundle.zip_.
-You can point Antora at this bundle using the `--ui-bundle-url` command-line option.
+When the command completes successfully, the UI bundle will be available at `build/ui-bundle.zip`.
+You can point Antora at this bundle using the `--ui-bundle-url` command-line option or in the `ui.bundle.url` property of the playbook file.
 
-If you have the preview running, and you want to bundle without causing the preview to be clobbered, use:
+== Control the Visual Appearance of Pages
 
- $ gulp bundle:pack
+To control the visual appearance of pages, the UI bundle provides a CSS stylesheet (for changing the CSS style rules) and any number of layouts in the form of Handlebars templates (for changing the HTML).
+Although most styles are used on all pages, it's possible to configure styles to target certain pages based on the layout.
+This section will introduce these various options and explain how they work.
 
-The UI bundle will again be available at [.path]_build/ui-bundle.zip_.
+=== UI Layouts
 
-==== Source Maps
+The most drastic way to change the appearance of the page is to change the HTML.
+The HTML is controlled by layouts, which are Handlebars templates located in [.path]_src/layouts_.
+A layout typically includes partials, located in [.path]_src/partials_, which are reusable template fragments.
+Partials may, in turn, include other partials.
 
-The build consolidates all the CSS and client-side JavaScript into combined files, [.path]_site.css_ and [.path]_site.js_, respectively, in order to reduce the size of the bundle.
-{url-source-maps}[Source maps] correlate these combined files with their original sources.
+This project currently has six layouts:
 
-This "`source mapping`" is accomplished by generating additional map files that make this association.
-These map files sit adjacent to the combined files in the build folder.
-The mapping they provide allows the debugger to present the original source rather than the obfuscated file, an essential tool for debugging.
+* default.hbs
+* 404.hbs
+* home.hbs
+* index.hbs
+* search.hbs
+* swagger.hbs
 
-In preview mode, source maps are enabled automatically, so there's nothing you have to do to make use of them.
-If you need to include source maps in the bundle, you can do so by setting the `SOURCEMAPS` environment variable to `true` when you run the bundle command:
+If a page doesn't specify a layout, the `default.hbs` layout is used.
 
- $ SOURCEMAPS=true gulp bundle
+To specify a layout, the page file must declare the `page-layout` document attribute in the AsciiDoc header.
+The value of that attribute should match the stem of the layout file (the filename minus the file extension, such as `home`).
 
-In this case, the bundle will include the source maps, which can be used for debugging your production site.
+For example, the home page declares the following document attribute in the AsciiDoc header:
+
+[source,asciidoc]
+----
+= Redpanda Documentation
+:page-layout: home
+----
+
+In this case, Antora will select the `home.hbs` layout for this page instead of `default.hbs`.
+Using a dedicated layout affords a lot of control over what gets displayed on this page.
+Every layout has access to the same UI model.
+
+The home page likely requires additional styles that are only relevant for that page.
+You can organize these styles inside a namespace by adding a dedicated class to the `<body>` tag.
+In fact, that's what the `home.hbs` layout currently does.
+
+[source,html]
+----
+<body class="home">
+  ...
+</body>
+----
+
+You can now define styles that are scoped to that page as follows:
+
+[source,css]
+----
+.home h1,
+.home h2,
+.home h3 {
+  line-height: 1.2;
+  margin: 0;
+}
+----
+
+To make these styles easier to find and manage, they should be organized in a dedicated file `src/css/home.css` and included into the master `src/css/site.css` file, which is how this project is currently configured.
+
+When you run the preview, you can see the home page by visiting the URL \http://localhost:5002/home.html.
+
+=== Content Preview
+
+You can create an arbitrary number of pages for the preview site.
+To make a page, create a new AsciiDoc file inside the `preview-src` directory.
+You can then access the page in the preview site using the URL pattern \http://localhost:5252/<stem>.html, where `<stem>` is the stem of the source file (the filename minus the file extension).
+
+These preview pages serve the purpose of testing the page layout and content styling.
+Each page may declare a layout, role, or both.
+
+The only caveat is that, at the moment, every page provides the same UI model (with a few exceptions).
+The model is defined in `preview-src/ui-model.yml` file.
+The exceptions include the layout, role, title, contents, and, in the case of home.adoc, the component, which get updated dynamically by the build.
+
+For information about what goes in the UI model, refer the https://docs.antora.org/antora-ui-default/templates/[Handlebars templates page] in the Antora documentation.
+
+== Integrations
+
+=== Algolia Search
+
+This UI provides integration with Algolia search.
+The Algolia client is configured in the files `src/partials/algolia-script.hbs` and `src/layouts/search.hbs`.
+You can test the search directly from the preview site by setting the following environment variables in your shell:
+
+* `ALGOLIA_APP_ID` - the application ID that hosts the search index
+* `ALGOLIA_API_KEY` - your API key for Algolia
+* `ALGOLIA_INDEX_NAME` - the name of the index
+
+You can point to any index that is publicly accessible.
+
+== Release the UI Bundle
+
+Once you're satisfied with the changes you've made to the UI and would like to make those changes available to Antora, you'll need to publish the UI as a bundle by making a release.
+This project provides a GitHub Action that fully automates the release.
+
+Whenever you push a new tag to this repository, the GitHub Action will generate a new release and bundle the UI before publishing the bundle to the releases section of the repository on GitHub.
+The bundle can then be downloaded using a unique URL, accessible from the release page.
+You can see a list of all past releases on the {url-ui}/releases[releases page].
 
 == Copyright and License
 
-Copyright (C) 2017-present OpenDevise Inc. and the Antora Project.
+=== Software
 
-Use of this software is granted under the terms of the https://www.mozilla.org/en-US/MPL/2.0/[Mozilla Public License Version 2.0] (MPL-2.0).
-See link:LICENSE[] to find the full license text.
+The software in this repository (build scripts, JavaScript files, Handlebars templates, foundation CSS, utility icons, etc) is part of the {url-antora}[Antora project].
+As such, use of the software is granted under the terms of the https://www.mozilla.org/en-US/MPL/2.0/[Mozilla Public License Version 2.0] (MPL-2.0).
 
-== Authors
+=== Branding and Design
 
-Development of Antora is led and sponsored by {url-opendevise}[OpenDevise Inc].
+Copyright (C) {url-redpanda}[Redpanda] 2023.
+All rights reserved.

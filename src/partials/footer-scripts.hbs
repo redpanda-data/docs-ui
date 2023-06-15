@@ -3,7 +3,7 @@
 <script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
 <script src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
 {{#if (and env.ALGOLIA_API_KEY (ne page.layout 'search'))}}
-{{> docsearch-script}}
+{{> algolia-script}}
 {{/if}}
 {{#if (ne page.layout '404') }}
 {{> feedback-form-script}}
