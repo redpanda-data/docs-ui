@@ -5,6 +5,7 @@
 :url-ui: https://github.com/JakeSCahill/{ui-project}
 :url-extensions: https://github.com/JakeSCahill/antora-extensions-and-macros
 :url-site: https://github.com/JakeSCahill/docs-site
+:url-redpanda: https://redpanda.com
 :hide-uri-scheme:
 :url-contributing: {url-site}/blob/main/meta-docs/CONTRIBUTING.adoc
 :url-netlify: https://netlify.com
