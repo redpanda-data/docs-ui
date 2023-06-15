@@ -14,7 +14,7 @@ document.addEventListener('scroll', function(e){
   let documentHeight = document.body.scrollHeight;
   let currentScroll = window.scrollY + window.innerHeight;
   // Wait until the user is [modifier]px from the bottom.
-  let modifier = 200;
+  let modifier = 700;
   const feedback = document.getElementById('thumbs-toc');
   if (!feedback) return
   if(currentScroll + modifier > documentHeight) {
