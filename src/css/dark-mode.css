@@ -73,7 +73,7 @@ html[data-theme=dark] {
   --admonition-label-font-family: var(--body-font-family-bold);
   --caption-font-color: var(--body-font-color);
   --caption-background-color: #ffffff0d;
-  --caption-font-style: italic;
+  --caption-font-style: normal;
   --caption-font-family: var(--body-font-family-bold);
   --code-background: rgba(177, 209, 241, 0.15);
   --code-font-color: #eceff1;

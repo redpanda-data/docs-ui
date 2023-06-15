@@ -8,6 +8,10 @@
   border: 0;
 }
 
+.tablist > ul li {
+  background-color: var(--body-background-color);
+}
+
 .doc .tabs.is-loading .tablist > ul li:not(:first-child),
 .doc .tabs:not(.is-loading) .tablist > ul li:not(.is-selected) {
   background-color: unset;
@@ -23,6 +27,11 @@
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   color: var(--link-font-color);
+}
+
+.tabs.is-loading .tablist li:first-child::after,
+.tabs:not(.is-loading) .tablist li.is-selected::after {
+  background-color: unset;
 }
 
 .doc .tabpanel {
