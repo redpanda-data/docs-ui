@@ -29,7 +29,8 @@
   color: var(--link-font-color);
 }
 
-.tabs.is-loading .tablist li:first-child::after, .tabs:not(.is-loading) .tablist li.is-selected::after {
+.tabs.is-loading .tablist li:first-child::after,
+.tabs:not(.is-loading) .tablist li.is-selected::after {
   background-color: unset;
 }
 
