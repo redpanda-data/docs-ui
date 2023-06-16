@@ -122,7 +122,7 @@ This directory does not get included in the UI bundle and should _not_ be commit
 === Preview the UI
 
 The UI project is configured to preview offline.
-The files in the `preview-src/` directory provide the sample content that allow you to see the UI in action.
+The files in the `preview-src/` directory provide the sample content that allows you to see the UI in action.
 In this directory, you'll primarily find pages written in AsciiDoc.
 These pages provide a representative sample and kitchen sink of content from the real site.
 
@@ -207,7 +207,7 @@ In this case, Antora will select the `home.hbs` layout for this page instead of 
 Using a dedicated layout affords a lot of control over what gets displayed on this page.
 Every layout has access to the same UI model.
 
-The home page likely requires additional styles that are only relevant for that page.
+The home page likely requires additional styles that are only relevant to that page.
 You can organize these styles inside a namespace by adding a dedicated class to the `<body>` tag.
 In fact, that's what the `home.hbs` layout currently does.
 
@@ -230,7 +230,7 @@ You can now define styles that are scoped to that page as follows:
 }
 ----
 
-To make these styles easier to find and manage, they should be organized in a dedicated file `src/css/home.css` and included into the master `src/css/site.css` file, which is how this project is currently configured.
+To make these styles easier to find and manage, they should be organized in a dedicated file `src/css/home.css` and included in the master `src/css/site.css` file, which is how this project is currently configured.
 
 When you run the preview, you can see the home page by visiting the URL \http://localhost:5002/home.html.
 
@@ -277,7 +277,7 @@ You can see a list of all past releases on the {url-ui}/releases[releases page].
 === Software
 
 The software in this repository (build scripts, JavaScript files, Handlebars templates, foundation CSS, utility icons, etc) is part of the {url-antora}[Antora project].
-As such, use of the software is granted under the terms of the https://www.mozilla.org/en-US/MPL/2.0/[Mozilla Public License Version 2.0] (MPL-2.0).
+As such, the use of the software is granted under the terms of the https://www.mozilla.org/en-US/MPL/2.0/[Mozilla Public License Version 2.0] (MPL-2.0).
 
 === Branding and Design
 
