@@ -37,7 +37,7 @@ The rest of the material for the documentation site comes from the {url-site}[pl
 
 To use this UI with Antora, add the following configuration to your playbook file:
 
-[source,yaml]
+[source,yaml,subs=attributes+]
 ----
 ui:
   bundle:
