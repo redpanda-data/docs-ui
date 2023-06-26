@@ -18,6 +18,10 @@
   text-decoration: none;
 }
 
+.feedback-section a:hover {
+  cursor: pointer;
+}
+
 .feedback-section .col {
   display: flex;
   align-items: center;
