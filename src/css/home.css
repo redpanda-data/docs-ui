@@ -120,17 +120,14 @@ html:not([data-theme=dark]) .home a.feature-link:hover .feature-box {
 }
 
 .home .footer-menu-header img.default {
-  width: 1.3rem;
   height: 1.3rem;
 }
 
 .home .footer-menu-header img.wider {
-  width: 1.6rem;
   height: 1rem;
 }
 
 .home .footer-menu-header img.higher {
-  width: 1rem;
   height: 1.3rem;
 }
 

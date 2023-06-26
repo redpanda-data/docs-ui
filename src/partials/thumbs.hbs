@@ -1,10 +1,10 @@
 <div class="thumbs" {{#if id}}id="{{id}}"{{/if}}>
   <div>Was this helpful?</div>
   <div>
-    <button class="thumb" id="up{{#if id}}-{{id}}{{/if}}">
+    <button aria-label="Give positive feedback" class="thumb" id="up{{#if id}}-{{id}}{{/if}}">
       <span class="material-icons MuiIcon-root" aria-hidden="true">thumb_up</span>
     </button>
-    <button class="thumb" id="down{{#if id}}-{{id}}{{/if}}">
+    <button aria-label="Give negative feedback" class="thumb" id="down{{#if id}}-{{id}}{{/if}}">
       <span class="material-icons MuiIcon-root" aria-hidden="true">thumb_down</span>
     </button>
   </div>
