@@ -272,6 +272,10 @@ Whenever you push a new tag to this repository, the GitHub Action will generate 
 The bundle can then be downloaded using a unique URL, accessible from the release page.
 You can see a list of all past releases on the {url-ui}/releases[releases page].
 
+== Troubleshooting
+
+If you’re trying to bundle the UI on Windows, Visual Studio Code can output this error message: `Cannot be loaded because running scripts is disabled on this system`. To fix this problem, follow the steps in https://stackoverflow.com/a/67420296[this post].
+
 == Copyright and License
 
 === Software
