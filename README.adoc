@@ -1,10 +1,10 @@
 = Redpanda Documentation UI
 :url-docs: https://docs.redpanda.com
 :url-org: https://github.com/redpanda-data
-:ui-project: redpanda-docs-ui
-:url-ui: https://github.com/JakeSCahill/{ui-project}
-:url-extensions: https://github.com/JakeSCahill/antora-extensions-and-macros
-:url-site: https://github.com/JakeSCahill/docs-site
+:ui-project: docs-ui
+:url-ui: {url-org}/{ui-project}
+:url-extensions: {url-org}/docs-extensions-and-macros
+:url-site: {url-org}/docs-site
 :url-redpanda: https://redpanda.com
 :url-antora: https://antora.org/
 :hide-uri-scheme:
