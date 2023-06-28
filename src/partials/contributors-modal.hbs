@@ -21,8 +21,12 @@
       </div>
       <div class="modal-column">
         <h3>Contributing guide</h3>
-        <p>Review the contributing guide for more extensive content additions and updates, or if you prefer to work locally.</p>
-        <a href="https://example.com/contributing" target="_blank" rel="noopener noreferrer"><span>See the contributing guide</span></a>
+        <p>For extensive content updates, or if you prefer to work locally:</p>
+        <a href="https://github.com/redpanda-data/docs-site/blob/main/meta-docs/CONTRIBUTING.adoc" target="_blank" rel="noopener noreferrer"><span>See the contributing guide</span></a>
+        <p>Or, to let us know about something that you want us to change:</p>
+        {{#with (get-page-info page.url)}}
+        <a href="{{this.webUrl}}/issues/new?title=Docs: Feedback for {{{this.title}}}&body=Hi, I have some feedback about [this page]({{{this.editUrl}}})%0D%0A" target="_blank" rel="noopener noreferrer"><span>Open an issue</span></a>
+        {{/with}}
       </div>
     </div>
   </div>
