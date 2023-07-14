@@ -24,7 +24,7 @@ body {
 
 .navbar-menu {
   color: rgb(102 112 133/1);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Simplon Mono', monospace;
   letter-spacing: 0.2em;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -263,7 +263,10 @@ body {
   }
 
   .navbar-item.is-hoverable:hover .navbar-dropdown {
-    display: block;
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(-1px);
+    visibility: visible;
   }
 
   .navbar-link::after {
@@ -299,14 +302,33 @@ body {
 
   .navbar-dropdown {
     background: var(--navbar-menu-background);
-    border: 1px solid var(--navbar-menu-border-color);
     border-top: none;
-    border-radius: 0 0 0.25rem 0.25rem;
-    display: none;
-    top: 100%;
-    left: 0;
+    border-radius: 0.25rem;
+    top: calc(100% - (0.25rem + 0.3rem));
+    left: -80px;
+    right: 0;
     min-width: 100%;
     position: absolute;
+    box-shadow: var(--navbar-dropdown-boxshadow);
+
+    opacity: 0;
+    visibility: hidden;
+
+    max-height: 80vh;
+    min-width: 5rem;
+    padding: 0.5rem;
+
+    transition-duration: var(--transition-fast);
+    transition-property: opacity, transform, visibility;
+    transition-timing-function: var(--transition-timing-default);
+    transform: translateY(-2.625rem);
+  }
+
+  .navbar-dropdown:hover {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(-1px);
+    visibility: visible;
   }
 
   .navbar-dropdown .navbar-item {
@@ -331,4 +353,31 @@ body {
   .navbar-dropdown a.navbar-item:hover {
     background: var(--navbar-menu_hover-background);
   }
+}
+
+.navbar-dropdown-content {
+  font-family: 'Calibre Medium', monospace;
+  font-size: 16px;
+  text-transform: none;
+  letter-spacing: normal;
+  list-style: none;
+  padding-inline-start: 0;
+  line-height: 30px;
+  margin: 0;
+  word-wrap: break-word;
+  border-radius: 0.25rem;
+}
+
+.navbar-dropdown-content a {
+  text-decoration: none;
+  color: var(--navbar-font-color);
+  display: block;
+}
+
+.navbar-dropdown-content a:hover {
+  color: var(--link_hover-font-color);
+}
+
+.navbar-dropdown-content li:hover {
+  background-color: var(--navbar-dropdown-background-hover-color);
 }
