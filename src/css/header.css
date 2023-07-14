@@ -307,17 +307,13 @@ body {
     top: calc(100% - (0.25rem + 0.3rem));
     left: -80px;
     right: 0;
-    min-width: 100%;
     position: absolute;
     box-shadow: var(--navbar-dropdown-boxshadow);
-
     opacity: 0;
     visibility: hidden;
-
     max-height: 80vh;
     min-width: 5rem;
     padding: 0.5rem;
-
     transition-duration: var(--transition-fast);
     transition-property: opacity, transform, visibility;
     transition-timing-function: var(--transition-timing-default);
