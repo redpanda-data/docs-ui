@@ -732,10 +732,8 @@
   margin-bottom: -0.5rem;
 }
 
-.doc .exampleblock .title,
 .doc .imageblock .title,
 .doc .literalblock .title,
-.doc .listingblock .title,
 .doc .openblock .title,
 .doc .videoblock .title,
 .doc .tableblock caption {
