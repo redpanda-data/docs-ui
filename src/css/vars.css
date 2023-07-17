@@ -179,7 +179,7 @@ html:not([data-theme=dark]) {
   --navbar-menu-font-color: var(--body-font-color);
   --navbar-menu_hover-background: var(--color-smoke-50);
   --navbar-boxshadow: 1px 3px 5px var(--ash-50);
-  --navbar-dropdown-boxshadow: 0 5px 40px #0003;
+  --navbar-dropdown-boxshadow: 0 4px 10px #0003;
   --navbar-dropdown-background-hover-color: #0000000d;
 
   /* navbar animations */

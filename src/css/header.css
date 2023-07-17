@@ -351,7 +351,7 @@ body {
   }
 }
 
-.navbar-dropdown-content {
+.navbar-dropdown > ul {
   font-family: 'Calibre Medium', monospace;
   font-size: 16px;
   text-transform: none;
@@ -364,16 +364,17 @@ body {
   border-radius: 0.25rem;
 }
 
-.navbar-dropdown-content a {
+.navbar-dropdown a {
   text-decoration: none;
   color: var(--navbar-font-color);
   display: block;
+  padding: 0.5rem 1rem;
 }
 
-.navbar-dropdown-content a:hover {
+.navbar-dropdown a:hover {
   color: var(--link_hover-font-color);
 }
 
-.navbar-dropdown-content li:hover {
+.navbar-dropdown > ul > li:hover {
   background-color: var(--navbar-dropdown-background-hover-color);
 }
