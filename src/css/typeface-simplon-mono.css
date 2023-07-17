@@ -1,0 +1,8 @@
+@font-face {
+  font-family: "Simplon Mono";
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local("Simplon Mono"),
+    url(../font/SimplonMono.ttf) format("truetype");
+}

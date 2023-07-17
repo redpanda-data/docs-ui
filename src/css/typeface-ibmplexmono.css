@@ -4,7 +4,7 @@
   font-weight: 400;
   src:
     local("IBM Plex Mono"),
-    url(../font/IBMPlexMono-Regular.ttf) format("woff2");
+    url(../font/IBMPlexMono-Regular.ttf) format("truetype");
 }
 
 @font-face {
@@ -13,5 +13,5 @@
   font-weight: 500;
   src:
     local("IBM Plex Mono"),
-    url(../font/IBMPlexMono-Bold.ttf) format("woff2");
+    url(../font/IBMPlexMono-Bold.ttf) format("truetype");
 }

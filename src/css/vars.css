@@ -179,6 +179,13 @@ html:not([data-theme=dark]) {
   --navbar-menu-font-color: var(--body-font-color);
   --navbar-menu_hover-background: var(--color-smoke-50);
   --navbar-boxshadow: 1px 3px 5px var(--ash-50);
+  --navbar-dropdown-boxshadow: 0 4px 10px #0003;
+  --navbar-dropdown-background-hover-color: #0000000d;
+
+  /* navbar animations */
+  --transition-timing-default: cubic-bezier(0.08, 0.52, 0.52, 1);
+  --transition-fast: 200ms;
+
   /* nav */
   --nav-background: var(--slate-50);
   --nav-border-color: var(--color-gray-10);
