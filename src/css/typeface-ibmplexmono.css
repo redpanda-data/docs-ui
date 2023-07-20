@@ -5,6 +5,7 @@
   src:
     local("IBM Plex Mono"),
     url(../font/IBMPlexMono-Regular.ttf) format("truetype");
+  font-display: swap;
 }
 
 @font-face {
@@ -14,4 +15,5 @@
   src:
     local("IBM Plex Mono"),
     url(../font/IBMPlexMono-Bold.ttf) format("truetype");
+  font-display: swap;
 }
