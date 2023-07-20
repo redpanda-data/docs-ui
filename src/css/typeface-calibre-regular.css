@@ -5,4 +5,5 @@
   src:
     local("Calibre Regular"),
     url(../font/calibre-Regular.woff2) format("woff2");
+  font-display: swap;
 }

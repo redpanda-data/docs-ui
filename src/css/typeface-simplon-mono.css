@@ -5,4 +5,5 @@
   src:
     local("Simplon Mono"),
     url(../font/SimplonMono.ttf) format("truetype");
+  font-display: swap;
 }
