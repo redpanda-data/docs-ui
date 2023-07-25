@@ -99,6 +99,7 @@ window.addEventListener('DOMContentLoaded', function() {
                   indexName: '{{{env.ALGOLIA_INDEX_NAME}}}',
                   query,
                   params: {
+                    clickAnalytics: true,
                     hitsPerPage: 10,
                     attributesToSnippet: ['title:7'],
                     snippetEllipsisText: '…',
