@@ -45,7 +45,7 @@ html[data-theme=dark] {
   --feedback-modal-background: var(--body-background);
   /* admonitions */
   --important-color: #a0439c;
-  --important-background: #6a2673;
+  --important-background: #6a26734d;
   --important-on-color: var(--body-font-color);
   --warning-color: #e13238;
   --warning-background: #4b1113;

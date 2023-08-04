@@ -32,13 +32,17 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 7px;
+  gap: 10px;
   background: linear-gradient(to bottom, var(--page-version-menu-background) 0%, var(--page-version-menu-background) 100%) no-repeat;
   padding: 1.375rem 1.5rem 0.5rem 0.5rem;
   position: absolute;
   top: 0;
   right: 0;
   white-space: nowrap;
+}
+
+.page-versions .version-menu:first-child {
+  padding-top: 0.75rem;
 }
 
 .page-versions:not(.is-active) .version-menu {
@@ -57,5 +61,5 @@
 .page-versions .version.is-missing {
   color: var(--page-version-missing-font-color);
   font-style: italic;
-  text-decoration: none;
+  text-decoration: line-through;
 }
