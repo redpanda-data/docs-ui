@@ -206,7 +206,7 @@ html:not([data-theme=dark]) {
   --feedback-modal-background: #fefefe;
   /* admonitions */
   --important-color: #a0439c;
-  --important-background: #e5dcf5;
+  --important-background: #e5dcf56b;
   --important-on-color: #a0439c;
   --warning-color: #e13238;
   --warning-background: #ffebec;
