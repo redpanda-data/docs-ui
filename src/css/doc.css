@@ -377,6 +377,8 @@
   margin: 1.4rem 0 0;
   box-shadow: var(--admonition-border-box-shadow);
   padding: var(--admonition-padding);
+  position: relative;
+  z-index: -1;
 }
 
 .doc .admonitionblock.note {
@@ -420,7 +422,7 @@
 }
 
 .doc .admonitionblock pre {
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
 }
 
 .doc .admonitionblock > table {
