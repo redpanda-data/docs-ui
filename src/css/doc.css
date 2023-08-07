@@ -165,7 +165,14 @@
   font-style: normal;
 }
 
+.doc code,
+.doc pre {
+  hyphens: none;
+  color: var(--code-font-color);
+}
+
 .doc p code,
+.doc code,
 .doc thead code,
 .doc .colist > table code {
   color: var(--code-font-color);
@@ -174,12 +181,6 @@
   box-shadow: 0 1px 2px 0 #0000001a;
   font-size: 0.88rem;
   padding: 0.125em 0.25em;
-}
-
-.doc code,
-.doc pre {
-  hyphens: none;
-  color: var(--code-font-color);
 }
 
 /* Override Prism.js styles */
