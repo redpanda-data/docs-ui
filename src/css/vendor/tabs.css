@@ -34,6 +34,10 @@
   background-color: unset;
 }
 
+.doc .tabpanel>:first-child {
+  margin-top: 15px;
+}
+
 .doc .tabpanel {
   padding: unset;
   padding-right: 1.25em;
