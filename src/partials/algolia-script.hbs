@@ -13,26 +13,25 @@ window.addEventListener('DOMContentLoaded', function() {
     '{{{env.ALGOLIA_API_KEY}}}'
   );
 
-  async function sendClickedEvent(position, preview, insights) {
-    const userToken = await aa('getUserToken', {}, (err, userToken) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        return userToken;
-    });
-    return function(event, userToken) {
-        const clickedElement = event.target;
+  function sendClickedEvent(position, preview, insights) {
+    aa('getUserToken', {}, (err, userToken) => {
+      if (err) {
+        console.error(err);
+        return true;
+      } else {
         insights.clickedObjectIDsAfterSearch({
-            userToken: userToken,
-            eventName: 'Item Selected',
-            index: preview.__autocomplete_indexName,
-            queryID: preview.__autocomplete_queryID,
-            objectIDs: [preview.objectID],
-            positions: [position],
+          userToken: userToken,
+          eventName: 'Item Selected',
+          index: preview.__autocomplete_indexName,
+          queryID: preview.__autocomplete_queryID,
+          objectIDs: [preview.objectID],
+          positions: [position]
         });
-    };
+      }
+    });
+    return true
   }
+
 
   autocomplete({
     container: '#autocomplete',
@@ -45,6 +44,7 @@ window.addEventListener('DOMContentLoaded', function() {
       state.preview = null
     },
     render({ children, state, render, html, components, createElement }, root) {
+      console.log(state)
       const { preview } = state.context;
       render(
         html`<div class="aa-Grid">
@@ -67,7 +67,7 @@ window.addEventListener('DOMContentLoaded', function() {
               <div class="breadcrumbs">
                 <ul>
                 ${preview.breadcrumbs.map(breadcrumb =>
-                  html`<li><a onclick="${event => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)(event)}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
+                  html`<li><a onclick="${() => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
                 )}
                 </ul>
               </div>
@@ -90,7 +90,7 @@ window.addEventListener('DOMContentLoaded', function() {
                   : ''}
                   <ul>
                   ${preview.titles.map(title =>
-                    html`<li><a onclick="${event => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)(event)}" href="${preview.objectID}#${title.h}">${components.Highlight({
+                    html`<li><a onclick="${() => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)}" href="${preview.objectID}#${title.h}">${components.Highlight({
                         hit: title,
                         attribute: 't',
                     })}</a></li>`
