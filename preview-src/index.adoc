@@ -68,10 +68,6 @@ Voila!
 Voila!
 ====
 
-=== Some Terms
-
-glossterm:test term[]
-
 === Some Code
 
 How about some code?
