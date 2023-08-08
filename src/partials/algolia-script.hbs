@@ -24,7 +24,7 @@ window.addEventListener('DOMContentLoaded', function() {
       state.preview = null
     },
     render({ children, state, render, html, components, createElement }, root) {
-      console.log(JSON.stringify(state))
+      console.log(state.context.algoliaInsightsPlugin.insights)
       const { preview } = state.context;
       render(
         html`<div class="aa-Grid">
