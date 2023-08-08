@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded', function() {
         console.log(event)
         console.log(userToken)
         insights.clickedObjectIDsAfterSearch({
-            userToken: userToken
+            userToken: userToken,
             eventName: 'Clicked',
             index: '{{{env.ALGOLIA_INDEX_NAME}}}',
             queryID: 'queryID',
