@@ -13,6 +13,15 @@ window.addEventListener('DOMContentLoaded', function() {
     '{{{env.ALGOLIA_API_KEY}}}'
   );
 
+  const userToken = aa && aa('getUserToken', {}, (err, userToken) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    return userToken;
+  });
+
+
   autocomplete({
     container: '#autocomplete',
     placeholder: 'Search for docs',
@@ -24,7 +33,8 @@ window.addEventListener('DOMContentLoaded', function() {
       state.preview = null
     },
     render({ children, state, render, html, components, createElement }, root) {
-      console.log(state.context.algoliaInsightsPlugin.insights)
+      //console.log(state.context.algoliaInsightsPlugin.insights)
+      console.log(userToken)
       const { preview } = state.context;
       render(
         html`<div class="aa-Grid">
