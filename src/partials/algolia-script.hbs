@@ -13,6 +13,29 @@ window.addEventListener('DOMContentLoaded', function() {
     '{{{env.ALGOLIA_API_KEY}}}'
   );
 
+  async function sendClickedEvent(insights, breadcrumb) {
+    const userToken = await aa('getUserToken', {}, (err, userToken) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        return userToken;
+    });
+    return function(event, userToken) {
+        const clickedElement = event.target;
+        console.log(event)
+        console.log(userToken)
+        insights.clickedObjectIDsAfterSearch({
+            userToken: userToken
+            eventName: 'Clicked',
+            index: '{{{env.ALGOLIA_INDEX_NAME}}}',
+            queryID: 'queryID',
+            objectIDs: ['objectID-1'],
+            positions: [2],
+        });
+    };
+  }
+
   autocomplete({
     container: '#autocomplete',
     placeholder: 'Search for docs',
@@ -23,17 +46,9 @@ window.addEventListener('DOMContentLoaded', function() {
     onStateChange({ state }) {
       state.preview = null
     },
-    render({ children, state, render, html, components, createElement }, root) {
-      const userToken = aa('getUserToken', {}, (err, userToken) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        return userToken;
-      });
-      //console.log(state.context.algoliaInsightsPlugin.insights)
-      console.log(userToken)
+    render({ item, children, state, render, html, components, createElement }, root) {
       const { preview } = state.context;
+      console.log(item)
       render(
         html`<div class="aa-Grid">
         <div class="aa-Results aa-Column">${children}</div>
@@ -55,7 +70,7 @@ window.addEventListener('DOMContentLoaded', function() {
               <div class="breadcrumbs">
                 <ul>
                 ${preview.breadcrumbs.map(breadcrumb =>
-                  html`<li><a href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
+                  html`<li><a onclick="${event => sendClickedEvent(state.context.algoliaInsightsPlugin.insights)(event)}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
                 )}
                 </ul>
               </div>
