@@ -24,6 +24,7 @@ window.addEventListener('DOMContentLoaded', function() {
       state.preview = null
     },
     render({ children, state, render, html, components, createElement }, root) {
+      console.log(JSON.stringify(state))
       const { preview } = state.context;
       render(
         html`<div class="aa-Grid">
@@ -113,7 +114,7 @@ window.addEventListener('DOMContentLoaded', function() {
             noResults({state, html}) {
               state.context.preview = null
               if (!state.query) return
-              return html`<div>No results for ${state.query}</div><p>Believe this query should return results?<a href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
+              return html`<div>No results for ${state.query}</div><p>Believe this query should return results?<a target="_blank" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
             },
             header({html}) {
               return html`<span class="aa-SourceHeaderTitle">{{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}} {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}</span>
