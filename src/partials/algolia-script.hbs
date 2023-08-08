@@ -23,8 +23,6 @@ window.addEventListener('DOMContentLoaded', function() {
     });
     return function(event, userToken) {
         const clickedElement = event.target;
-        console.log(event)
-        console.log(userToken)
         insights.clickedObjectIDsAfterSearch({
             userToken: userToken,
             eventName: 'Item Selected',
@@ -48,7 +46,6 @@ window.addEventListener('DOMContentLoaded', function() {
     },
     render({ children, state, render, html, components, createElement }, root) {
       const { preview } = state.context;
-      console.log(state)
       render(
         html`<div class="aa-Grid">
         <div class="aa-Results aa-Column">${children}</div>
@@ -244,7 +241,6 @@ window.addEventListener('DOMContentLoaded', function() {
                 `
             },
             item({ item, components, html }) {
-              console.log(item)
               return html`<div class="aa-QuerySuggestion">
                 ${item.query}
                 </div>`
