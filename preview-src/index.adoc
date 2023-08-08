@@ -22,6 +22,24 @@ Quisque pharetra tristique arcu fringilla dapibus.
 https://example.org[Curabitur,role=unresolved] ut massa aliquam, cursus enim et, accumsan lectus.
 Mauris eget leo nunc, nec tempus mi? Curabitur id nisl mi, ut vulputate urna.
 
+== Tables
+
+|===
+| Name | Age | Occupation
+
+| John | 28 | Engineer
+| Emily | 34 | Artist
+| David | 22 | Student
+| Lisa | 42 | Doctor
+| Sarah | 30 | Writer
+| Michael | 55 | Chef
+| Amy | 29 | Scientist
+| Mark | 38 | Lawyer
+| Laura | 26 | Designer
+| Chris | 33 | Photographer
+|===
+
+
 == Cu solet
 
 Nominavi luptatum eos, an vim hinc philosophia intellegebat.
