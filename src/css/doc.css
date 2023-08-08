@@ -290,6 +290,10 @@
   border: 0 solid var(--table-border-color);
 }
 
+.doc table.tableblock th {
+  text-align: center;
+}
+
 .doc table.grid-all > * > tr > * {
   border-width: 1px;
 }
