@@ -19,12 +19,12 @@ site:
   - &component
     name: ROOT
     title: &component_title Redpanda
-    url: /xyz/6.0/index.html
+    url: /xyz/23.2/index.html
     versions:
     - &latest_version_xyz
-      url: /xyz/6.0/index.html
-      version: '6.0'
-      displayVersion: '6.0'
+      url: /xyz/23.2/index.html
+      version: '23.2'
+      displayVersion: '23.2'
     - &component_version
       title: *component_title
       url: '#'

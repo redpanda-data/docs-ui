@@ -46,9 +46,11 @@ window.addEventListener('DOMContentLoaded', function() {
     onStateChange({ state }) {
       state.preview = null
     },
-    render({ item, children, state, render, html, components, createElement }, root) {
+    render({ item, items, children, state, render, html, components, createElement }, root) {
       const { preview } = state.context;
       console.log(item)
+      console.log(items)
+      console.log(state)
       render(
         html`<div class="aa-Grid">
         <div class="aa-Results aa-Column">${children}</div>
