@@ -17,8 +17,8 @@ site:
       displayVersion: '1.0'
     latestVersion: *latest_version_abc
   - &component
-    name: xyz
-    title: &component_title Project XYZ
+    name: ROOT
+    title: &component_title Redpanda
     url: /xyz/6.0/index.html
     versions:
     - &latest_version_xyz
