@@ -156,7 +156,7 @@ html[data-theme=dark] {
 }
 
 html:not([data-theme=dark]) {
-  --body-font-color: rgb(102, 112, 133);
+  --body-font-color: black;
   /* base */
   --body-background: var(--color-white);
   --panel-background: #f9fafb;
