@@ -1,6 +1,6 @@
 <script>
 window.addEventListener('DOMContentLoaded', function() {
-    const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
+  const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
   const { createLocalStorageRecentSearchesPlugin } = window[
     '@algolia/autocomplete-plugin-recent-searches'
   ];
@@ -12,27 +12,6 @@ window.addEventListener('DOMContentLoaded', function() {
     '{{{env.ALGOLIA_APP_ID}}}',
     '{{{env.ALGOLIA_API_KEY}}}'
   );
-
-  function sendClickedEvent(position, preview, insights) {
-    aa('getUserToken', {}, (err, userToken) => {
-      if (err) {
-        console.error(err);
-        return true;
-      } else {
-        insights.clickedObjectIDsAfterSearch({
-          userToken: userToken,
-          eventName: 'Item Selected',
-          index: preview.__autocomplete_indexName,
-          queryID: preview.__autocomplete_queryID,
-          objectIDs: [preview.objectID],
-          positions: [position]
-        });
-      }
-    });
-    return true
-  }
-
-
   autocomplete({
     container: '#autocomplete',
     placeholder: 'Search for docs',
@@ -44,8 +23,14 @@ window.addEventListener('DOMContentLoaded', function() {
       state.preview = null
     },
     render({ children, state, render, html, components, createElement }, root) {
-      console.log(state)
       const { preview } = state.context;
+      if (!state.context.preview.insightsInitialized) {
+        aa('init',{
+          appId: '{{{env.ALGOLIA_APP_ID}}}',
+          apiKey: '{{{env.ALGOLIA_API_KEY}}}',
+        });
+      }
+      state.context.preview.insightsInitialized = true
       render(
         html`<div class="aa-Grid">
         <div class="aa-Results aa-Column">${children}</div>
@@ -67,7 +52,16 @@ window.addEventListener('DOMContentLoaded', function() {
               <div class="breadcrumbs">
                 <ul>
                 ${preview.breadcrumbs.map(breadcrumb =>
-                  html`<li><a onclick="${() => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
+                  html`<li><a onclick="${(event) => {
+                    event.stopPropagation();
+                    aa('clickedObjectIDsAfterSearch',{
+                      eventName: 'Preview Selected',
+                      index: state.context.preview.__autocomplete_indexName,
+                      queryID: state.context.preview.__autocomplete_queryID,
+                      objectIDs: [state.context.preview.objectID],
+                      positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                    })
+                  }}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
                 )}
                 </ul>
               </div>
@@ -90,7 +84,16 @@ window.addEventListener('DOMContentLoaded', function() {
                   : ''}
                   <ul>
                   ${preview.titles.map(title =>
-                    html`<li><a onclick="${() => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)}" href="${preview.objectID}#${title.h}">${components.Highlight({
+                    html`<li><a onclick="${(event) => {
+                    event.stopPropagation();
+                    aa('clickedObjectIDsAfterSearch',{
+                      eventName: 'Preview Selected',
+                      index: state.context.preview.__autocomplete_indexName,
+                      queryID: state.context.preview.__autocomplete_queryID,
+                      objectIDs: [state.context.preview.objectID],
+                      positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                    })
+                  }}" href="${preview.objectID}#${title.h}">${components.Highlight({
                         hit: title,
                         attribute: 't',
                     })}</a></li>`
@@ -241,7 +244,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 `
             },
             item({ item, components, html }) {
-              return html`<div class="aa-QuerySuggestion">
+             return html`<div class="aa-QuerySuggestion">
                 ${item.query}
                 </div>`
             },
