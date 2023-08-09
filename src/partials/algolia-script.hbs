@@ -7,47 +7,19 @@ window.addEventListener('DOMContentLoaded', function() {
   const { createQuerySuggestionsPlugin } = window[
     '@algolia/autocomplete-plugin-query-suggestions'
   ];
+  const { createAlgoliaInsightsPlugin } = window[
+    '@algolia/autocomplete-plugin-algolia-insights'
+  ];
+
+  const algoliaInsightsPlugin = createAlgoliaInsightsPlugin()
 
   const searchClient = algoliasearch(
     '{{{env.ALGOLIA_APP_ID}}}',
     '{{{env.ALGOLIA_API_KEY}}}'
   );
 
-  function sendClickedEvent(position, preview, insights) {
-    aa('getUserToken', {}, (err, userToken) => {
-      if (err) {
-        console.error(err);
-        return true;
-      } else {
-        insights.clickedObjectIDsAfterSearch({
-          userToken: userToken,
-          eventName: 'Item Selected',
-          index: preview.__autocomplete_indexName,
-          queryID: preview.__autocomplete_queryID,
-          objectIDs: [preview.objectID],
-          positions: [position]
-        });
-      }
-    });
-    return true
-  }
-
-
-  autocomplete({
-    container: '#autocomplete',
-    placeholder: 'Search for docs',
-    detachedMediaQuery: '',
-    plugins: [],
-    insights: true,
-    defaultActiveItemId: 0,
-    onStateChange({ state }) {
-      state.preview = null
-    },
-    render({ children, state, render, html, components, createElement }, root) {
-      console.log(state)
-      const { preview } = state.context;
-      render(
-        html`<div class="aa-Grid">
+  function createPreviewTemplate({children, state, html, components, preview, insights}) {
+    return html`<div class="aa-Grid">
         <div class="aa-Results aa-Column">${children}</div>
         ${preview
           ? html`<div class="aa-Preview aa-Column doc">
@@ -67,7 +39,19 @@ window.addEventListener('DOMContentLoaded', function() {
               <div class="breadcrumbs">
                 <ul>
                 ${preview.breadcrumbs.map(breadcrumb =>
-                  html`<li><a onclick="${() => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
+                  html`<li><a onclick="${(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log(event)
+                    console.log(state)
+                    state.context.algoliaInsightsPlugin.insights.clickedObjectIDsAfterSearch({
+                      eventName: 'Item Selected',
+                      index: state.context.preview.__autocomplete_indexName,
+                      queryID: state.context.preview.__autocomplete_queryID,
+                      objectIDs: [state.context.preview.objectID],
+                      positions: [state.activeItemId]
+                    })
+                  }}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
                 )}
                 </ul>
               </div>
@@ -90,7 +74,19 @@ window.addEventListener('DOMContentLoaded', function() {
                   : ''}
                   <ul>
                   ${preview.titles.map(title =>
-                    html`<li><a onclick="${() => sendClickedEvent(state.activeItemId, state.context.preview, state.context.algoliaInsightsPlugin.insights)}" href="${preview.objectID}#${title.h}">${components.Highlight({
+                    html`<li><a onclick="${(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log(event)
+                    console.log(state)
+                    state.context.algoliaInsightsPlugin.insights.clickedObjectIDsAfterSearch({
+                      eventName: 'Item Selected',
+                      index: state.context.preview.__autocomplete_indexName,
+                      queryID: state.context.preview.__autocomplete_queryID,
+                      objectIDs: [state.context.preview.objectID],
+                      positions: [state.activeItemId]
+                    })
+                  }}" href="${preview.objectID}#${title.h}">${components.Highlight({
                         hit: title,
                         attribute: 't',
                     })}</a></li>`
@@ -103,7 +99,34 @@ window.addEventListener('DOMContentLoaded', function() {
           <footer class="search-footer"><ul class="search-commands"><li><kbd class="algolia-command"><svg width="15" height="15" aria-label="Enter key" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M12 3.53088v3c0 1-1 2-2 2H4M7 11.53088l-3-3 3-3"></path></g></svg></kbd><span class="algolia-label">to select</span></li><li><kbd class="algolia-command"><svg width="15" height="15" aria-label="Arrow down" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M7.5 3.5v8M10.5 8.5l-3 3-3-3"></path></g></svg></kbd><kbd class="algolia-command"><svg width="15" height="15" aria-label="Arrow up" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M7.5 11.5v-8M10.5 6.5l-3-3-3 3"></path></g></svg></kbd><span class="algolia-label">to navigate</span></li><li><kbd class="algolia-command"><svg width="15" height="15" aria-label="Escape key" role="img"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"><path d="M13.6167 8.936c-.1065.3583-.6883.962-1.4875.962-.7993 0-1.653-.9165-1.653-2.1258v-.5678c0-1.2548.7896-2.1016 1.653-2.1016.8634 0 1.3601.4778 1.4875 1.0724M9 6c-.1352-.4735-.7506-.9219-1.46-.8972-.7092.0246-1.344.57-1.344 1.2166s.4198.8812 1.3445.9805C8.465 7.3992 8.968 7.9337 9 8.5c.032.5663-.454 1.398-1.4595 1.398C6.6593 9.898 6 9 5.963 8.4851m-1.4748.5368c-.2635.5941-.8099.876-1.5443.876s-1.7073-.6248-1.7073-2.204v-.4603c0-1.0416.721-2.131 1.7073-2.131.9864 0 1.6425 1.031 1.5443 2.2492h-2.956"></path></g></svg></kbd><span class="algolia-label">to close</span></li></ul></footer>`
           : ''
           }
-        </div>`,
+        </div>`
+  }
+
+
+  autocomplete({
+    container: '#autocomplete',
+    placeholder: 'Search for docs',
+    detachedMediaQuery: '',
+    plugins: [algoliaInsightsPlugin],
+    insights: true,
+    defaultActiveItemId: 0,
+    onStateChange({ state }) {
+      state.preview = null
+    },
+    render({ children, state, render, html, components, createElement }, root) {
+      console.log(state)
+      const { preview } = state.context;
+      const insights = state.context.algoliaInsightsPlugin.insights;
+
+      // Ensure you initialize insights only once
+      if (!insights._hasBeenInitialized) {
+        insights.init({
+          apiKey: state.context.preview.__autocomplete_algoliaCredentials.apiKey,
+          appId: state.context.preview.__autocomplete_algoliaCredentials.appId
+        });
+        insights._hasBeenInitialized = true;  // Mark it as initialized
+      }
+      render(createPreviewTemplate({children, state, html, components, preview, insights}),
         root
       );
     },
