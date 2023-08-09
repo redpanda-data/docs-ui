@@ -7,11 +7,6 @@ window.addEventListener('DOMContentLoaded', function() {
   const { createQuerySuggestionsPlugin } = window[
     '@algolia/autocomplete-plugin-query-suggestions'
   ];
-  const { createAlgoliaInsightsPlugin } = window[
-    '@algolia/autocomplete-plugin-algolia-insights'
-  ];
-
-  const algoliaInsightsPlugin = createAlgoliaInsightsPlugin()
 
   const searchClient = algoliasearch(
     '{{{env.ALGOLIA_APP_ID}}}',
@@ -107,7 +102,7 @@ window.addEventListener('DOMContentLoaded', function() {
     container: '#autocomplete',
     placeholder: 'Search for docs',
     detachedMediaQuery: '',
-    plugins: [algoliaInsightsPlugin],
+    plugins: [],
     insights: true,
     defaultActiveItemId: 0,
     onStateChange({ state }) {
@@ -117,15 +112,7 @@ window.addEventListener('DOMContentLoaded', function() {
       console.log(state)
       const { preview } = state.context;
       const insights = state.context.algoliaInsightsPlugin.insights;
-
-      // Ensure you initialize insights only once
-      if (!insights._hasBeenInitialized) {
-        insights.init({
-          apiKey: state.context.preview.__autocomplete_algoliaCredentials.apiKey,
-          appId: state.context.preview.__autocomplete_algoliaCredentials.appId
-        });
-        insights._hasBeenInitialized = true;  // Mark it as initialized
-      }
+      console.log(insights)
       render(createPreviewTemplate({children, state, html, components, preview, insights}),
         root
       );
