@@ -103,7 +103,7 @@ html[data-theme=dark] {
   --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
   --body-font-family: "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
-  --body-font-weight-bold: 500;
+  --body-font-weight-bold: bold;
   --body-font-family-bold: "Calibre Medium", "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
   --monospace-font-family: "IBM Plex Mono", inter, "Courier Prime", courier, monospace;
   --monospace-font-weight-bold: 500;
