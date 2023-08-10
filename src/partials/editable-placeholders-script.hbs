@@ -4,7 +4,6 @@ function createEditablePlaceholders () {
 
   for (let i = 0; i < codeElements.length; i++) {
     const codeElement = codeElements[i];
-    addConumSpans(codeElement);
     if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html') {
       addEditableSpan(/&lt;.[^&A-Z]*&gt;/g, codeElement);
     }
@@ -16,16 +15,6 @@ if (!RegExp.escape) {
     return s.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
   };
 }
-
-function addConumSpans(element) {
-    if (!element || !element.textContent) {
-        return;
-    }
-    const regex = /<span class="token punctuation">\((<\/span><span class="token number">)(\d+)(<\/span><span class="token punctuation">)\)<\/span>/g;
-    let newHTML = element.innerHTML.replace(regex, '<span class="conum" data-value="$2"></span>');
-    element.innerHTML = newHTML;
-}
-
 
 function addEditableSpan(regex, element) {
   if (!element || !element.textContent) {
