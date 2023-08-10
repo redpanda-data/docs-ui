@@ -1,9 +1,7 @@
 <script>
 window.addEventListener('DOMContentLoaded', function() {
   const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
-  const { createLocalStorageRecentSearchesPlugin } = window[
-    '@algolia/autocomplete-plugin-recent-searches'
-  ];
+
   const { createQuerySuggestionsPlugin } = window[
     '@algolia/autocomplete-plugin-query-suggestions'
   ];
@@ -12,25 +10,34 @@ window.addEventListener('DOMContentLoaded', function() {
     '{{{env.ALGOLIA_APP_ID}}}',
     '{{{env.ALGOLIA_API_KEY}}}'
   );
+
+  const { createLocalStorageRecentSearchesPlugin } = window[
+    '@algolia/autocomplete-plugin-recent-searches'
+  ];
+
+  const recentSearchesPlugin = createLocalStorageRecentSearchesPlugin({
+    key: 'RECENT_SEARCH',
+    limit: 5,
+  });
+
   autocomplete({
     container: '#autocomplete',
     placeholder: 'Search for docs',
     detachedMediaQuery: '',
-    plugins: [],
+    plugins: [recentSearchesPlugin],
     insights: true,
     defaultActiveItemId: 0,
     onStateChange({ state }) {
-      state.preview = null
     },
     render({ children, state, render, html, components, createElement }, root) {
       const { preview } = state.context;
-      if (!state.context.preview.insightsInitialized) {
+      if (state.context.preview && !state.context.preview.insightsInitialized) {
         aa('init',{
           appId: '{{{env.ALGOLIA_APP_ID}}}',
           apiKey: '{{{env.ALGOLIA_API_KEY}}}',
         });
+        state.context.preview.insightsInitialized = true
       }
-      state.context.preview.insightsInitialized = true
       render(
         html`<div class="aa-Grid">
         <div class="aa-Results aa-Column">${children}</div>
@@ -111,7 +118,6 @@ window.addEventListener('DOMContentLoaded', function() {
       );
     },
     getSources({ query }) {
-      if (!query) return [];
       return [
         {
           sourceId: 'docs',
@@ -202,11 +208,7 @@ window.addEventListener('DOMContentLoaded', function() {
             return item.objectID;
           },
           onActive({ item, setContext }) {
-            if (item) {
-              setContext({ preview: item });
-            } else {
-              setContext( { preview: null } );
-            }
+            setContext({ preview: item });
           },
         },
         {

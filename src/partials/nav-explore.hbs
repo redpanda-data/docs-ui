@@ -37,12 +37,14 @@
           </span>
           {{/each}}
         {{else if (ne page.componentVersion.displayVersion 'default')}}
-          {{#each page.component.versions}}
-          <span class="version
-            {{~#if (eq this.version @root.page.component.latest.version)}} is-latest{{/if}}">
-            <a href="{{{relativize ./url}}}">{{./displayVersion}}</a>
-          </span>
-          {{/each}}
+          {{#with page.versions}}
+            {{#each this}}
+              {{#if (ne ./version @root.page.version)}}
+                <a class="version
+                {{~#if ./missing}} is-missing{{/if}}" href="{{{relativize ./url}}}">{{./displayVersion}}</a>
+              {{/if}}
+            {{/each}}
+          {{/with}}
         {{/if}}
       </div>
     </div>

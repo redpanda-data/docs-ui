@@ -1,12 +1,5 @@
 {{#if navigation.length}}
 <ul class="nav-list">
-  {{#with site.components.home}}
-    <li class="nav-item">
-      <div class="item" onclick="window.location.href = '{{{relativize ./url}}}'">
-        <a class="nav-link" href="{{{relativize ./url}}}">Docs Home</a>
-      </div>
-    </li>
-  {{/with}}
   {{#each navigation}}
   <li class="nav-item" data-depth="{{or ../level 0}}">
     {{#if ./content}}
@@ -27,15 +20,8 @@
   </li>
   {{/each}}
 </ul>
-{{else if (or (eq page.layout 'home') (eq page.layout '404'))}}
+{{else if (eq page.layout '404')}}
 <ul class="nav-list">
-  {{#with site.components.home}}
-    <li class="nav-item">
-      <div class="item" onclick="window.location.href = '{{{relativize ./url}}}'">
-        <a class="nav-link" href="{{{relativize ./url}}}">Docs Home</a>
-      </div>
-    </li>
-  {{/with}}
   {{#with site.components.ROOT}}
     {{#each ./latest.navigation}}
       <li class="nav-item" data-depth="{{or ../level 0}}">
