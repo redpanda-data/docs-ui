@@ -8,15 +8,15 @@
     </div>
   {{else if (eq @root.page.attributes.eol true)}}
     <div>
-      This is documentation for {{@root.page.component.title}} <b>{{@root.page.version}}</b>, which is no longer supported.
+      This is documentation for {{@root.page.component.title}} <b>v{{@root.page.version}}</b>, which is no longer supported.
     </div>
   {{else}}
     <div>
-      This is documentation for {{@root.page.component.title}} <b>{{@root.page.version}}</b>.
+      This is documentation for {{@root.page.component.title}} <b>v{{@root.page.version}}</b>.
     </div>
   {{/if}}
   <div>
-    For the latest version of the documentation, see <a href="{{relativize ./url}}">v</a> ({{@root.page.component.latest.version}}).
+    For the latest version of the documentation, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
   </div>
 </div>
 {{/with}}

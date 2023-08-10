@@ -37,24 +37,16 @@
   margin: 1rem 0 0;
 }
 
-.doc > h1.page:first-child,
-.doc > h1.page:nth-child(2) {
+.doc h1 {
   font-size: calc(36 / var(--rem-base) * 1rem);
-  margin: 1.5rem 0;
   margin-bottom: 0;
+  margin-top: 0;
 }
 
 @media screen and (min-width: 769px) {
-  .doc > h1.page:first-child,
-  .doc > h1.page:nth-child(2) {
-    margin-top: 2.5rem;
+  .doc h1 {
     font-size: calc(48 / var(--rem-base) * 1rem);
   }
-}
-
-.doc > h1.page:first-child + aside.toc.embedded,
-.doc > h1.page:nth-child(2) + aside.toc.embedded {
-  margin-top: -0.5rem;
 }
 
 .doc > h2#name + .sectionbody {

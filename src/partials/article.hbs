@@ -1,9 +1,9 @@
 <article class="doc">
 {{> latest-banner}}
+{{> page-versions}}
 {{#with page.title}}
 <h1 class="page">{{{this}}}</h1>
 {{/with}}
-{{> page-versions}}
 {{#if (eq page.layout 'home')}}
   {{> home}}
 {{else if (eq page.layout 'index')}}

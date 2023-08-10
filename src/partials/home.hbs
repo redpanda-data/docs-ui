@@ -5,7 +5,7 @@
       <a href="{{{relativize (resolvePageURL url)}}}" class="feature-link">
         <div class="feature-box">
           <div class="feature-image">
-            <img src='./_images/{{image}}' alt={{{title}}} />
+            <img src='{{image}}' alt={{{title}}} loading="lazy"/>
           </div>
           <div class="feature-text">
             <h2 class="discrete feature-title">{{{title}}}</h2>
@@ -26,7 +26,7 @@
       {{#each page.attributes.footer-menu-list}}
       <div class="menu-container">
         <div class="footer-menu-header">
-            <img src='./_images/{{icon.url}}' alt={{{title}}} class="{{icon.size}}"/>
+            <img src='{{icon.url}}' alt={{{title}}} class="{{icon.size}}" loading="lazy"/>
             <h3 class="discrete">{{{title}}}</h3>
         </div>
         <ul class="menu-list">
