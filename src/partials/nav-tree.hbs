@@ -26,7 +26,7 @@
     {{#each ./latest.navigation}}
       <li class="nav-item" data-depth="{{or ../level 0}}">
         {{#if ./content}}
-        <div class="item">
+        <div class="item is-current-page {{#if ./items.length}} dropdown {{/if}}">
         {{#if ./url}}
         <a class="nav-link" href="
           {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
