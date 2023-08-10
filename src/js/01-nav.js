@@ -97,6 +97,8 @@
     } else {
       return
     }
+    var is404 = !!document.getElementById('page-404');
+    if (is404) return
     if (navItem === currentPageItem) return
     find(menuPanel, '.nav-item.is-active').forEach(function (el) {
       el.classList.remove('is-active', 'is-current-path', 'is-current-page')
