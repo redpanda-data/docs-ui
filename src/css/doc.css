@@ -169,6 +169,7 @@
 .doc .colist > table code {
   color: var(--code-font-color);
   background: var(--code-background);
+  border: 0.1rem solid #0000001a;
   border-radius: 0.25em;
   font-size: 0.88rem;
   padding: 0.125em 0.25em;
@@ -189,6 +190,7 @@
 
 .doc pre > code {
   padding-bottom: 1rem;
+  border: none;
 }
 
 .doc blockquote {
@@ -880,6 +882,7 @@ code[class*=language-],
 pre[class*=language-] {
   color: var(--code-font-color) !important;
   font-size: 0.88rem !important;
+  background: var(--pre-background) !important;
 }
 
 pre.code-first-child {
