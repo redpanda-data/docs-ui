@@ -4,6 +4,7 @@ function createEditablePlaceholders () {
 
   for (let i = 0; i < codeElements.length; i++) {
     const codeElement = codeElements[i];
+    addConumSpans(codeElement);
     if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html') {
       addEditableSpan(/&lt;.[^&A-Z]*&gt;/g, codeElement);
     }
@@ -35,6 +36,19 @@ function addEditableSpan(regex, element) {
     processed.add(placeholder);
   }
   element.innerHTML = newHTML;
+}
+
+function addConumSpans(element) {
+  if (!element || !element.textContent) {
+      return;
+  }
+  let codeContent = element.innerHTML;
+
+  // Find numbers inside brackets at the end of lines
+  let pattern = /<span class="token punctuation">\(<\/span><span class="token number">(\d+)<\/span><span class="token punctuation">\)<\/span>\s*$/gm;
+  let replaced = codeContent.replace(pattern, '<i class="conum" data-value="$1"></i>');
+  console.log(replaced)
+  element.innerHTML = replaced;
 }
 
 
