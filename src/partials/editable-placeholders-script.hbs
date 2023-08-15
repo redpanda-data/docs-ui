@@ -42,11 +42,12 @@ function addConumSpans(element) {
   if (!element || !element.textContent) {
       return;
   }
-  let codeContent = element.innerText;
+  let codeContent = element.innerHTML;
 
   // Find numbers inside brackets at the end of lines
-  let pattern = /\((\d+)\)\s*$/gm;
+  let pattern = /<span class="token punctuation">\(<\/span><span class="token number">(\d+)<\/span><span class="token punctuation">\)<\/span>\s*$/gm;
   let replaced = codeContent.replace(pattern, '<i class="conum" data-value="$1"></i>');
+  console.log(replaced)
   element.innerHTML = replaced;
 }
 
