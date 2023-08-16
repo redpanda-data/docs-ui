@@ -733,6 +733,7 @@
 
 .doc .imageblock .title,
 .doc .literalblock .title,
+.doc .listingblock .title,
 .doc .openblock .title,
 .doc .videoblock .title,
 .doc .tableblock caption {
@@ -742,7 +743,7 @@
   font-weight: var(--caption-font-weight);
   hyphens: none;
   letter-spacing: 0.01em;
-  border-bottom: 1px solid #dadde1;
+  border-bottom: 7px solid #dadde1;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
   margin-bottom: -0.75rem;
