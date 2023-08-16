@@ -159,7 +159,7 @@ html:not([data-theme=dark]) {
   --body-font-color: rgb(102, 112, 133);
   /* base */
   --body-background: var(--color-white);
-  --panel-background: var(--color-smoke-30);
+  --panel-background: #f9fafb;
   --panel-border-color: var(--color-smoke-90);
   --scrollbar-track-color: var(--color-smoke-30);
   --scrollbar-thumb-color: var(--color-gray-10);
@@ -254,7 +254,7 @@ html:not([data-theme=dark]) {
   --quote-attribution-font-color: var(--color-gray-40);
   --sidebar-background: var(--color-smoke-90);
   --table-border-color: var(--panel-border-color);
-  --table-stripe-background: var(--panel-background);
+  --table-stripe-background: #00000008;
   --table-footer-background: linear-gradient(to bottom, var(--color-smoke-70) 0%, var(--color-white) 100%);
   /* toc */
   --toc-font-color: var(--nav-muted-color);
