@@ -229,7 +229,7 @@ html:not([data-theme=dark]) {
   --link-font-color: var(--redpanda-800);
   --link-highlight-background-color: #0000000d;
   --link_hover-font-color: var(--redpanda-900);
-  --link_unresolved-font-color: var(--important-color);
+  --link_unresolved-font-color: var(--redpanda-800);
   --abstract-background: var(--color-smoke-70);
   --abstract-font-color: var(--color-jet-20);
   --abstract-border-color: var(--panel-border-color);
