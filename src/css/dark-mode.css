@@ -1,7 +1,7 @@
 html[data-theme=dark] {
   /* base */
   --body-background: var(--color-jet-60);
-  --panel-background: var(--body-background);
+  --panel-background: #ffffff12;
   --panel-border-color: var(--color-white);
   --scrollbar-track-color: var(--color-white);
   --scrollbar-thumb-color: var(--color-gray-10);
@@ -38,8 +38,8 @@ html[data-theme=dark] {
   --toolbar-border-color: var(--panel-border-color);
   --toolbar-font-color: var(--body-font-color);
   --toolbar-muted-color: var(--color-gray-40);
-  --page-version-menu-background: #ebedf0;
-  --page-version-font-color: var(--body-background);
+  --page-version-menu-background: #545454;
+  --page-version-font-color: var(--body-font-color);
   --page-version-missing-font-color: var(--color-gray-40);
   /* feedback */
   --feedback-modal-background: var(--body-background);
