@@ -240,7 +240,7 @@ ul.nav-list > li:first-child[data-depth="6"] {
   justify-content: space-between;
   line-height: 1;
   height: var(--drawer-height);
-  border-bottom: 1px solid var(--nav-border-color);
+  border-bottom: 1px solid var(--toolbar-border-color);
 }
 
 .nav-panel-explore:not(:first-child) .context .container.has-dropdown:has(.components,.versions) {

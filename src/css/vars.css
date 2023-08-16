@@ -157,6 +157,8 @@ html[data-theme=dark] {
 
 html:not([data-theme=dark]) {
   --body-font-color: black;
+  --body-faint-font-color: #667085;
+  --body-footer-font-color: #98a2b3;
   /* base */
   --body-background: var(--color-white);
   --panel-background: #f9fafb;
@@ -187,8 +189,8 @@ html:not([data-theme=dark]) {
   --transition-fast: 200ms;
 
   /* nav */
-  --nav-background: var(--slate-50);
-  --nav-border-color: var(--color-gray-10);
+  --nav-background: white;
+  --nav-border-color: var(--slate-100);
   --nav-heading-font-color: var(--color-jet-30);
   --nav-muted-color: var(--color-gray-70);
   --nav-panel-divider-color: var(--color-smoke-90);
