@@ -6,7 +6,7 @@ function createEditablePlaceholders () {
     const codeElement = codeElements[i];
     addConumSpans(codeElement);
     if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html') {
-      addEditableSpan(/&lt;.[^&A-Z]*&gt;/g, codeElement);
+      addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
     }
   }
 }
