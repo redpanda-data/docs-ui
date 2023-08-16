@@ -751,10 +751,6 @@
   background-color: var(--caption-background-color);
 }
 
-.doc .tableblock caption {
-  border-bottom: 1px solid #dadde1;
-}
-
 /* immediate sibling of an element with the class title, where this title class element is a direct child of a td element with the class content */
 .doc .admonitionblock td.content > .title + * {
   margin-top: 20px;
@@ -763,6 +759,7 @@
 .doc .tableblock caption {
   text-align: left;
   margin-bottom: 0;
+  border-bottom: 1px solid #dadde1;
 }
 
 .doc .imageblock .title {
