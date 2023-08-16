@@ -102,7 +102,7 @@ html[data-theme=dark] {
   --toc-border-color: var(--panel-border-color);
   /* footer */
   --footer-line-height: var(--doc-line-height);
-  --footer-background: var(--color-smoke-90);
+  --footer-background: var(--light-dark);
   --footer-font-color: var(--color-gray-70);
   --footer-link-font-color: var(--color-jet-80);
 }
