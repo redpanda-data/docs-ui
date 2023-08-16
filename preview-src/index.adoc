@@ -49,6 +49,7 @@ E = mc^2^.
 Eum an doctus <<liber-recusabo,maiestatis efficiantur>>.
 Eu mea inani iriure.footnote:[Quisque porta facilisis tortor, vitae bibendum velit fringilla vitae! Lorem ipsum dolor sit amet, consectetur adipiscing elit.]
 
+.`package.json`
 [,json]
 ----
 {
