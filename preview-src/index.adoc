@@ -58,7 +58,7 @@ Eu mea inani iriure.footnote:[Quisque porta facilisis tortor, vitae bibendum vel
   "author": "Author Name <author@example.com>",
   "scripts": {
     "test": "mocha",
-    "lint": "eslint"
+    "lint": "eslint"<>
   }
 }
 ----
