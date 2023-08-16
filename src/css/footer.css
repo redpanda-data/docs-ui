@@ -57,7 +57,7 @@ footer .footer-links {
 
 .footer-links-heading {
   display: inline;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1rem;
   letter-spacing: 0.2em;
   font-family: "IBM Plex Mono", sans-serif;
