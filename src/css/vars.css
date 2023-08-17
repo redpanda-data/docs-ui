@@ -77,6 +77,7 @@ html[data-theme=dark] {
   --redpanda-100: #f9d4cc;
   --redpanda-50: #fceae5;
   --redpanda-25: #fff5f5;
+  --light-dark: #262626;
   /* colors */
   --color-white: #fff;
   --color-smoke-10: var(--ash-25);
@@ -129,7 +130,7 @@ html[data-theme=dark] {
   /* footer */
   --footer-line-height: var(--doc-line-height);
   /* dimensions and positioning */
-  --navbar-height: calc(63 / var(--rem-base) * 1rem);
+  --navbar-height: calc(90 / var(--rem-base) * 1rem);
   --toolbar-height: calc(45 / var(--rem-base) * 1rem);
   --drawer-height: var(--toolbar-height);
   --body-top: var(--navbar-height);
@@ -156,7 +157,9 @@ html[data-theme=dark] {
 }
 
 html:not([data-theme=dark]) {
-  --body-font-color: rgb(102, 112, 133);
+  --body-font-color: black;
+  --body-faint-font-color: #667085;
+  --body-footer-font-color: #98a2b3;
   /* base */
   --body-background: var(--color-white);
   --panel-background: #f9fafb;
@@ -187,8 +190,8 @@ html:not([data-theme=dark]) {
   --transition-fast: 200ms;
 
   /* nav */
-  --nav-background: var(--slate-50);
-  --nav-border-color: var(--color-gray-10);
+  --nav-background: white;
+  --nav-border-color: var(--slate-100);
   --nav-heading-font-color: var(--color-jet-30);
   --nav-muted-color: var(--color-gray-70);
   --nav-panel-divider-color: var(--color-smoke-90);
@@ -227,7 +230,7 @@ html:not([data-theme=dark]) {
   --link-font-color: var(--redpanda-800);
   --link-highlight-background-color: #0000000d;
   --link_hover-font-color: var(--redpanda-900);
-  --link_unresolved-font-color: var(--important-color);
+  --link_unresolved-font-color: var(--redpanda-800);
   --abstract-background: var(--color-smoke-70);
   --abstract-font-color: var(--color-jet-20);
   --abstract-border-color: var(--panel-border-color);
@@ -262,7 +265,7 @@ html:not([data-theme=dark]) {
   --toc-border-color: var(--panel-border-color);
   /* footer */
   --footer-line-height: var(--doc-line-height);
-  --footer-background: var(--color-smoke-90);
+  --footer-background: var(--slate-50);
   --footer-font-color: var(--color-gray-70);
   --footer-link-font-color: var(--color-jet-80);
 }

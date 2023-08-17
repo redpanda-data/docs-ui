@@ -3,8 +3,8 @@ footer.footer {
   width: 100%;
   flex-direction: column;
   align-items: center;
-  background-color: var(--nav-background);
-  color: var(--body-font-color);
+  background-color: var(--footer-background);
+  color: var(--body-faint-font-color);
 }
 
 footer .footer-container {
@@ -28,6 +28,8 @@ footer nav.footer-nav {
   flex: 1 1 0%;
   flex-direction: column;
   padding-bottom: 2rem;
+  font-family: "Calibre Regular", sans-serif;
+  font-size: 16px;
 }
 
 footer .footer-details {
@@ -43,14 +45,14 @@ footer .footer-address {
   padding-top: 0.5rem;
   padding-bottom: 2rem;
   font-style: normal;
+  color: var(--body-faint-font-color);
 }
 
 footer .footer-links {
   display: flex;
   flex-direction: column;
-  padding-top: 1rem;
-  font-size: 1rem;
   line-height: 1.5rem;
+  margin: 0;
 }
 
 .footer-links-heading {
@@ -61,29 +63,35 @@ footer .footer-links {
   font-family: "IBM Plex Mono", sans-serif;
   margin-bottom: 0;
   font-weight: 300;
+  color: var(--body-font-color);
 }
 
 .footer-links-list {
-  margin-top: calc(1rem * calc(1 - 0));
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   line-height: 1.5rem;
-  color: rgb(102 112 133/1);
+  color: var(--body-faint-font-color);
   display: flex;
   flex-direction: column;
   padding-left: 0;
   gap: 5px;
+  margin: 0;
+}
+
+.footer-links-list-item-detail {
+  max-height: 19px;
+  color: var(--body-faint-font-color) !important;
+  text-decoration: none;
 }
 
 .footer-links-list-item {
   display: flex;
   flex-direction: row;
-  font-size: 1rem;
   line-height: 1.5rem;
-  color: var(--body-font-color);
+  padding-top: 1rem;
 }
 
 .footer-links-list-item a {
-  color: var(--body-font-color);
+  color: var(--body-faint-font-color);
 }
 
 .footer .footer-social {
@@ -93,6 +101,7 @@ footer .footer-links {
   justify-content: space-between;
   gap: 1rem;
   padding-bottom: 2rem;
+  color: var(--body-footer-font-color);
 }
 
 .footer .footer-copyright {
@@ -133,4 +142,11 @@ footer .footer-links {
   .footer .footer-copyright {
     order: 0;
   }
+}
+
+.footer-separator {
+  border-top: 1px solid;
+  margin-top: 30px;
+  padding-top: 10px;
+  border-color: #d0d7de;
 }

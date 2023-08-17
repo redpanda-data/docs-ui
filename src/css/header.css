@@ -23,17 +23,17 @@ body {
 }
 
 .navbar-menu {
-  color: rgb(102 112 133/1);
-  font-family: 'Simplon Mono', monospace;
+  color: #667085;
+  font-family: "Simplon Mono", monospace;
   letter-spacing: 0.2em;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 
 .navbar-brand {
   display: flex;
   flex: auto;
-  padding-left: 1rem;
+  padding-left: 1.5rem;
 }
 
 .navbar-brand .navbar-item {
