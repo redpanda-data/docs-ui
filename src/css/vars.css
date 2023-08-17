@@ -238,7 +238,7 @@ html:not([data-theme=dark]) {
   --admonition-label-font-weight: var(--body-font-weight-bold);
   --caption-font-color: var(--color-gray-70);
   --caption-background-color: #f6f8fa;
-  --caption-font-style: italic;
+  --caption-font-style: normal;
   --tabs_hover-background: #0000000d;
   --caption-font-weight: var(--body-font-weight-bold);
   --code-background: var(--panel-background);
@@ -268,4 +268,6 @@ html:not([data-theme=dark]) {
   --footer-background: var(--slate-50);
   --footer-font-color: var(--color-gray-70);
   --footer-link-font-color: var(--color-jet-80);
+  /* home */
+  --highlight-container-background: #f9fafb;
 }

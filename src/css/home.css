@@ -89,7 +89,7 @@ html:not([data-theme=dark]) .home a.feature-link:hover .feature-box {
 
 .home div.menu-container {
   padding: 2rem;
-  background: var(--nav-background);
+  background: var(--highlight-container-background);
 }
 
 .home div.menu-container a:hover {
@@ -117,6 +117,7 @@ html:not([data-theme=dark]) .home a.feature-link:hover .feature-box {
 
 .home .footer-menu-header img {
   margin-right: 1rem;
+  filter: var(--svg-dark-mode-filter);
 }
 
 .home .footer-menu-header img.default {
