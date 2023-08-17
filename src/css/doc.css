@@ -161,6 +161,7 @@
 .doc pre {
   hyphens: none;
   color: var(--code-font-color);
+  background: var(--pre-background);
 }
 
 .doc p code,
