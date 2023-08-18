@@ -1,11 +1,17 @@
 span.editable,
 span.editable > span {
-  font-weight: 550;
+  font-weight: 450;
   color: var(--editable-code-font-color);
+  padding: 3px;
+  border: 0.1rem solid rgba(0, 0, 0, 0.10196078431372549);
+  border-radius: 0.25rem;
+  margin-left: 1px;
+  margin-right: 1px;
+  background: var(--editable-background);
 }
 
 span.cursor {
-  left: -3px;
+  left: -9px;
   position: relative;
   display: inline-block;
   width: 4px;
