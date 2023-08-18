@@ -157,7 +157,7 @@ html[data-theme=dark] {
 }
 
 html:not([data-theme=dark]) {
-  --body-font-color: black;
+  --body-font-color: #333;
   --body-faint-font-color: #667085;
   --body-footer-font-color: #98a2b3;
   /* base */
