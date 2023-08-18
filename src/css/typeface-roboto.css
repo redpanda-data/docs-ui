@@ -33,7 +33,7 @@
 
 @font-face {
   font-family: "Roboto";
-  font-style: italic;
+  font-style: normal;
   font-weight: 500;
   src:
     url(~@fontsource/roboto/files/roboto-latin-500-italic.woff2) format("woff2"),

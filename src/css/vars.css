@@ -157,7 +157,7 @@ html[data-theme=dark] {
 }
 
 html:not([data-theme=dark]) {
-  --body-font-color: black;
+  --body-font-color: #333;
   --body-faint-font-color: #667085;
   --body-footer-font-color: #98a2b3;
   /* base */
@@ -240,10 +240,11 @@ html:not([data-theme=dark]) {
   --caption-background-color: #f6f8fa;
   --caption-font-style: normal;
   --tabs_hover-background: #0000000d;
-  --caption-font-weight: var(--body-font-weight-bold);
+  --caption-font-weight: normal;
   --code-background: var(--panel-background);
   --code-font-color: rgb(0 0 0/1);
   --editable-code-font-color: var(--link-font-color);
+  --editable-background: #eff0f1;
   --example-background: var(--color-white);
   --example-border-color: var(--color-gray-70);
   --kbd-background: var(--panel-background);

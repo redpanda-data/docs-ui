@@ -81,6 +81,7 @@ html[data-theme=dark] {
   --code-font-color: #eceff1;
   --tabs_hover-background: var(--caption-background-color);
   --editable-code-font-color: var(--link-font-color);
+  --editable-background: #323440;
   --example-background: var(--body-background);
   --example-border-color: var(--color-gray-70);
   --kbd-background: var(--panel-background);
