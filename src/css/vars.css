@@ -108,7 +108,7 @@ html[data-theme=dark] {
   --body-font-family-bold: "Calibre Medium", "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
   --monospace-font-family: "IBM Plex Mono", inter, "Courier Prime", courier, monospace;
   --monospace-font-weight-bold: 500;
-  --alt-heading-font-weight: 600;
+  --alt-heading-font-weight: 800;
   /* nav */
   --nav-line-height: 1.35;
   /* admonitions */
