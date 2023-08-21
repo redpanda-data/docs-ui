@@ -16,6 +16,7 @@ body {
   width: 100%;
   z-index: var(--z-index-navbar);
   box-shadow: var(--navbar-boxshadow);
+  flex-wrap: wrap;
 }
 
 .navbar a {
