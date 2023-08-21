@@ -533,6 +533,10 @@
   align-items: center;
 }
 
+.doc .videoblock {
+  align-items: flex-start;
+}
+
 .doc .imageblock.text-left,
 .doc .videoblock.text-left {
   align-items: flex-start;
