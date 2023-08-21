@@ -1,7 +1,8 @@
 <header class="header">
   <nav class="navbar">
-    <div class="navbar-brand">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "auto" alt="Redpanda logo"/></a>
+    {{> announcement-bar}}
+    <div class="navbar-brand" id="brand">
+      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
       <button class="navbar-burger" data-target="topbar-nav" aria-label="Header navigation menu">
         <span></span>
         <span></span>
