@@ -37,4 +37,4 @@ jobs:
             --generate-notes
 
     - name: Trigger Netlify Build Hook
-      run: curl -X POST -d {} https://api.netlify.com/build_hooks/64b123d4be2b350088a6eaef
+      run: curl -X POST -d {} https://api.netlify.com/build_hooks/64e4682992f9ec30865c7c0b
