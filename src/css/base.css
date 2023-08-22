@@ -98,7 +98,7 @@ summary {
 
 table {
   border-collapse: collapse;
-  word-wrap: normal; /* table widths aren't computed as expected when word-wrap is enabled */
+  word-wrap: inherit; /* table widths aren't computed as expected when word-wrap is enabled */
 }
 
 object[type="image/svg+xml"]:not([width]) {
