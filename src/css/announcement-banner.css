@@ -33,7 +33,7 @@
 }
 
 @media screen and (max-width: 1023px) {
-  button.close {
+  .announcement-bar button.close {
     margin-top: 1.2rem;
   }
 }
