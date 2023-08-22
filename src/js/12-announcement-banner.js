@@ -4,7 +4,7 @@
     var announcementBar = document.querySelector('.announcement-bar')
     if (!announcementBar) return
     var navbarBrand = document.getElementById('brand')
-    var closeButton = document.getElementById('close')
+    var closeButton = document.getElementById('close-announcement')
     // Hide the announcement bar if the session cookie is set
     if (window.sessionStorage.getItem('announcementClosed')) {
       announcementBar.style.display = 'none'
