@@ -170,6 +170,7 @@ html:not([data-theme=dark]) {
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;
+  --search-icon-color: rgba(var(--aa-muted-color-rgb), var(--aa-muted-color-alpha));
   /* navbar */
   --navbar-background: var(--color-white);
   --navbar-font-color: var(--body-font-color);
