@@ -1,6 +1,5 @@
 .announcement-bar {
   flex-basis: 100%;
-  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9,6 +8,12 @@
   font-size: 1rem;
   position: relative;
   text-align: center;
+}
+
+@media screen and (min-width: 1024px) {
+  .announcement-bar {
+    height: 30px;
+  }
 }
 
 .announcement-bar .announcement-content a {
@@ -25,4 +30,10 @@
   padding: 0;
   position: absolute;
   right: 10px;
+}
+
+@media screen and (min-width: 1024px) {
+  button.close {
+    margin-top: 1.2rem;
+  }
 }
