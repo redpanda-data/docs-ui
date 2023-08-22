@@ -1,4 +1,4 @@
 {{!-- Prevent old versions from being indexed by search engines --}}
-{{#if (is-beta page)}}
+{{#if (or (is-beta page) site.keys.preview)}}
 <meta name="robots" content="noindex">
 {{/if}}
