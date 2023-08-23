@@ -21,6 +21,7 @@
       </div>
       {{/if}}
     </div>
+    {{#unless page.attributes.cloud}}
     <div class="container has-dropdown">
       {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
       {{#with site.components.ROOT}}
@@ -48,5 +49,6 @@
         {{/if}}
       </div>
     </div>
+    {{/unless}}
   </div>
 </div>
