@@ -1,6 +1,8 @@
 <article class="doc">
 {{> latest-banner}}
-{{> page-versions}}
+{{#unless page.attributes.cloud}}
+  {{> page-versions}}
+{{/unless}}
 {{#with page.title}}
 <h1 class="page">{{{this}}}</h1>
 {{/with}}
