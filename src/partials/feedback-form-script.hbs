@@ -47,11 +47,7 @@ const handleSubmit = function (event) {
   formData.set('date', new Date())
   const nav = window.navigator
   const navigatorString =
-      'appName: ' + nav.appName + ', ' +
-      'appVersion: ' + nav.appVersion + ', ' +
-      'platform: ' + nav.platform + ', ' +
-      'userAgent: ' + nav.userAgent + ', ' +
-      'language: ' + nav.language
+      nav.userAgent + ', ' + nav.language
 
   formData.set('navigator', navigatorString)
 
