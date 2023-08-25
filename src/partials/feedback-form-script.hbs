@@ -3,15 +3,18 @@ const thumbs = document.querySelectorAll('.thumb');
 const positiveModal = document.getElementById('positive');
 const negativeModal = document.getElementById('negative');
 var currentForm;
+var positive;
 
 thumbs.forEach(function(thumb) {
   thumb.addEventListener('click', function() {
     if (thumb.id.indexOf('up') !== -1) {
       positiveModal.classList.toggle("hidden");
       currentForm = positiveModal
+      positive = true;
     } else if (thumb.id.indexOf('down') !== -1) {
       negativeModal.classList.toggle("hidden");
       currentForm = negativeModal
+      positive = false;
     }
   });
 });
@@ -30,6 +33,7 @@ const handleSubmit = function (e) {
 
   formData.set('version', version)
   formData.set('url', currentUrl)
+  formData.set('positiveFeedback', positive);
   formData.set('beta', beta)
 
   const formFields = e.target.closest('form')
