@@ -19,8 +19,8 @@ thumbs.forEach(function(thumb) {
   });
 });
 
-const handleSubmit = function (e) {
-  e.preventDefault();
+const handleSubmit = function (event) {
+  event.preventDefault();
   const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
   const beta = {{ is-beta page }}
   var version = '';
@@ -36,7 +36,7 @@ const handleSubmit = function (e) {
   formData.set('positiveFeedback', positive);
   formData.set('beta', beta)
 
-  const formFields = e.target.closest('form')
+  const formFields = event.target.closest('form')
   const feedback = formFields.querySelector('input[name="feedback"]:checked').value
 
   formData.set('feedback', feedback)
@@ -72,8 +72,8 @@ function clearFeedbackModal() {
   `;
 }
 
-function closeForm(e) {
-  e.preventDefault()
+function closeForm(event) {
+  event.preventDefault()
   currentForm.classList.toggle("hidden");
 }
 </script>
