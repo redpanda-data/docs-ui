@@ -45,13 +45,15 @@ const handleSubmit = function (event) {
   formData.set('email', (form.querySelector('input[name="email"]').value))
 
   formData.set('date', new Date())
-  formData.set('navigator', JSON.stringify({
-    appName: window.navigator.appName,
-    appVersion: window.navigator.appVersion,
-    platform: window.navigator.platform,
-    userAgent: window.navigator.userAgent,
-    language: window.navigator.language
-  }))
+  const nav = window.navigator
+  const navigatorString =
+      'appName: ' + nav.appName + ', ' +
+      'appVersion: ' + nav.appVersion + ', ' +
+      'platform: ' + nav.platform + ', ' +
+      'userAgent: ' + nav.userAgent + ', ' +
+      'language: ' + nav.language
+
+  formData.set('navigator', navigatorString)
 
   fetch("{{page.url}}", {
     method: "POST",
