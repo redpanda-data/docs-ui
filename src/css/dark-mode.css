@@ -116,3 +116,9 @@ html[data-theme=dark] body.swagger {
   /* base */
   --body-background: var(--color-white);
 }
+
+body.dark,
+body[data-theme=dark] {
+  --aa-muted-color-rgb: 0 !important;
+  --aa-primary-color-rgb: 0 !important;
+}
