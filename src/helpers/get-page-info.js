@@ -10,8 +10,8 @@ module.exports = (url, { data: { root } }) => {
         title: pages[i].asciidoc.doctitle,
         description: pages[i].asciidoc.attributes.description,
         url: pages[i].pub.url,
-        webUrl: pages[i].src.origin.webUrl,
-        editUrl: pages[i].src.editUrl,
+        webUrl: pages[i].src.origin.webUrl.replace("-private",""),
+        editUrl: pages[i].src.editUrl.replace("-private",""),
       }
     }
   }
