@@ -11,6 +11,7 @@ html[data-theme=dark] {
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 3px 0 rgba(255, 255, 255, 0.15);
   --search-detached-mode-background: #0a0908;
+  --search-icon-color: var(--link-font-color);
   /* navbar */
   --navbar-background: var(--body-background);
   --navbar-font-color: var(--body-font-color);
@@ -114,4 +115,10 @@ html[data-theme=dark] {
 html[data-theme=dark] body.swagger {
   /* base */
   --body-background: var(--color-white);
+}
+
+body.dark,
+body[data-theme=dark] {
+  --aa-muted-color-rgb: 0 !important;
+  --aa-primary-color-rgb: 0 !important;
 }
