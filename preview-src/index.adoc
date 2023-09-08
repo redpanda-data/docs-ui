@@ -106,16 +106,6 @@ vfs
 <.> Wrap each streaming file in a buffer so the files can be processed by uglify.
 Uglify can only work with buffers, not streams.
 
-[source,js,lines=1-3+5+6]
-----
-function helloWorld() {
-    console.log("Hello, World!") <sample>;
-    console.log("This is a sample.");
-    console.log("With multiple lines.");
-    console.log("Highlighted using Prism.");
-}
-----
-
 Execute these commands to validate and build your site:
 
  $ podman run -v $PWD:/antora:Z --rm -t antora/antora \
