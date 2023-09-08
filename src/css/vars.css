@@ -154,6 +154,8 @@ html[data-theme=dark] {
   --aa-detached-modal-max-width: 1000px;
   --aa-spacing-factor: 1.3;
   --aa-primary-color-rgb: 241, 93, 97;
+  /* Prism */
+  --highlight-background: rgba(255, 255, 0, 0.23);
 }
 
 html:not([data-theme=dark]) {

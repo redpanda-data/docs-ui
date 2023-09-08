@@ -16,10 +16,6 @@ pre.line-numbers .line-numbers-rows {
   width: 3em; /* works for line-numbers below 1000 lines */
   letter-spacing: -1px;
   border-right: 1px solid #999;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
 
 .line-numbers-rows > span {
@@ -33,4 +29,22 @@ pre.line-numbers .line-numbers-rows {
   display: block;
   padding-right: 0.8em;
   text-align: right;
+}
+
+.line-numbers span.line-numbers-rows > span {
+  position: relative;
+  /* For future use (linkable line numbers)
+  cursor: pointer;
+  */
+}
+
+/* For future use (linkable line numbers)
+.line-numbers-rows > span:hover {
+  background-color: rgba(255, 255, 0, 0.23);
+}
+*/
+
+pre .line-highlight {
+  position: absolute;
+  background-color: var(--highlight-background);
 }

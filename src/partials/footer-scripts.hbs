@@ -1,7 +1,10 @@
-<script id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script defer id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
 <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
 <script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
-<script src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-highlight-plugin.js"></script>
 {{#if (and env.ALGOLIA_API_KEY (ne page.layout 'search'))}}
 {{> algolia-script}}
 {{/if}}
