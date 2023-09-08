@@ -197,6 +197,11 @@
   font-weight: lighter;
 }
 
+.doc pre > code span {
+  position: relative;
+  z-index: 1;
+}
+
 .doc blockquote {
   margin: 0;
 }
