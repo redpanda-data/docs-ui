@@ -46,6 +46,10 @@ pre {
   font-size: 0.9rem;
 }
 
+code {
+  word-wrap: break-word;
+}
+
 b,
 dt,
 strong,
