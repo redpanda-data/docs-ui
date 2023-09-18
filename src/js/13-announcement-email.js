@@ -4,6 +4,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     const footer = document.querySelector('.announcement-email')
     const closeButton = document.querySelector('.close-footer')
+    const submitButton = document.querySelector('.submitButtonEmail')
     let footerDisplayed = false
     let footerIsStatic = false
     let lastScrollTop = 0
@@ -34,7 +35,7 @@
       lastScrollTop = scrollTop
     })
 
-    if (closeButton) {
+    if (closeButton || submitButton) {
       closeButton.addEventListener('click', function () {
         footer.classList.remove('show-footer')
         footer.classList.add('hidden-footer')
