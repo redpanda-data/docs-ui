@@ -35,8 +35,20 @@
       lastScrollTop = scrollTop
     })
 
-    if (closeButton || submitButton) {
+    if (closeButton) {
       closeButton.addEventListener('click', function () {
+        footer.classList.remove('show-footer')
+        footer.classList.add('hidden-footer')
+        footerDisplayed = false
+        footer.style.position = 'fixed'
+        footerIsStatic = false
+
+        window.localStorage.setItem('footerClosed', 'true')
+      })
+    }
+
+    if (submitButton) {
+      submitButton.addEventListener('click', function () {
         footer.classList.remove('show-footer')
         footer.classList.add('hidden-footer')
         footerDisplayed = false
