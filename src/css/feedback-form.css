@@ -60,14 +60,13 @@
   line-height: 40px;
 }
 
-button[type=submit]:not(.aa-SubmitButton),
-button.close {
+.submitButton {
   background-color: var(--link-font-color);
   border: 1px solid #dadce0;
-  border-radius: 8px;
   margin-top: 10px;
   padding: 5px 20px;
   color: var(--color-white);
+  border-radius: 8px;
 }
 
 .feedback-modal input[type=radio]:checked {

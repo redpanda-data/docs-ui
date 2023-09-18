@@ -4,7 +4,8 @@
   const switchButton = document.getElementById('switch-theme')
   if (!switchButton) return
 
-  let theme = window.localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  let theme = window.localStorage.getItem('theme') ||
+  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
 
   function setTheme (switchButton) {
     const img = switchButton.querySelector('img:first-child')
