@@ -13,7 +13,6 @@ const handleSubmitEmail = function (event) {
     body: new URLSearchParams(formData).toString(),
   }).then(() => {
       console.log('Form submission success')
-      clearFeedbackModal()
     })
     .catch(error => {
       console.error('Form submission error:', error)
