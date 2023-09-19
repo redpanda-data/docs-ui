@@ -4,8 +4,10 @@ const handleSubmitEmail = function (event) {
   event.preventDefault();
   const form = event.target;
   var formData = new FormData(form);
-  formData.set('email', email)
+  const formFields = event.target.closest('form')
+  const email = formFields.querySelector('input[name="email"]').value
 
+  formData.set('email', email)
 
   fetch("{{page.url}}", {
     method: "POST",
