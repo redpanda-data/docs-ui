@@ -26,7 +26,12 @@
   border-right: 1px solid #ccc;
   border-bottom-left-radius: 20px !important;
   border-top-left-radius: 20px !important;
-  margin-top: 1rem;
+}
+
+@media screen and (max-width: 1023px) {
+  .emailInput {
+    margin-top: 1rem;
+  }
 }
 
 .submitButtonEmail {
