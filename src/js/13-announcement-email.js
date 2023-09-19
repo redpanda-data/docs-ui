@@ -5,6 +5,8 @@
     const footer = document.querySelector('.announcement-email')
     const closeButton = document.querySelector('.close-footer')
     const submitButton = document.querySelector('.submitButtonEmail')
+    const inputContainer =document.querySelector('.inputContainer');
+    const successfulSentEmail =document.querySelector('.successfulSentEmail');
     let footerDisplayed = false
     let footerIsStatic = false
     let lastScrollTop = 0
@@ -49,12 +51,16 @@
 
     if (submitButton) {
       submitButton.addEventListener('click', function () {
-        footer.classList.remove('show-footer')
-        footer.classList.add('hidden-footer')
-        footerDisplayed = false
-        footer.style.position = 'fixed'
-        footerIsStatic = false
+        inputContainer.style.display = 'none'
+        successfulSentEmail.style.display='block'
 
+        setTimeout(function() {
+          footer.classList.remove('show-footer')
+          footer.classList.add('hidden-footer')
+          footerDisplayed = false
+          footer.style.position = 'fixed'
+          footerIsStatic = false
+      }, 3000);
         window.localStorage.setItem('footerClosed', 'true')
       })
     }

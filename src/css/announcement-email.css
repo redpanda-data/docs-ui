@@ -100,3 +100,8 @@
   opacity: 0;
   pointer-events: none; /* This ensures the user can't interact with the faded-out footer */
 }
+
+.successfulSentEmail {
+  display: none;
+  padding: 10px;
+}
