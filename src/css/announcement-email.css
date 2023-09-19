@@ -14,6 +14,7 @@
   right: 0;
   z-index: 999;
   opacity: 0;
+  max-height: 8rem;
 }
 
 .emailInput {
@@ -22,9 +23,10 @@
   border: none;
   outline: none;
   flex: 1;
-  border-right: 1px solid #ccc;  /* A subtle separator */
+  border-right: 1px solid #ccc;
   border-bottom-left-radius: 20px !important;
   border-top-left-radius: 20px !important;
+  margin-top: 1rem;
 }
 
 .submitButtonEmail {
@@ -53,8 +55,14 @@
   padding-left: 20px;
 }
 
+@media screen and (min-width: 1024px) {
+  .inputContainer {
+    display: flex;
+    align-items: center;
+  }
+}
+
 .inputContainer {
-  display: flex;
   align-items: center;
 }
 
