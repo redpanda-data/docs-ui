@@ -10,6 +10,11 @@
 
 .tablist > ul li {
   background-color: var(--body-background-color);
+  padding: 0;
+}
+
+.tablist > ul li > p {
+  padding: 0.25em 1em;
 }
 
 .doc .tabs.is-loading .tablist > ul li:not(:first-child),
