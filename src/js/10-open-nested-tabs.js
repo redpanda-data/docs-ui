@@ -16,7 +16,6 @@
       const currentTab = event.target.parentElement
       const id = currentTab.id
       if (!id) return
-      const tabContent = document.getElementById(id + '--panel')
       const url = new URL(window.location.href)
       url.searchParams.set('tab', encodeURIComponent(id))
       window.history.pushState(null, null, url)
