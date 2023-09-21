@@ -1,11 +1,13 @@
 <script>
-function makePlaceholdersEditable () {
-  createEditablePlaceholders();
-  addClasses()
-  addEvents()
+function makePlaceholdersEditable(element) {
+  createEditablePlaceholders(element);
+  addClasses(element)
+  addEvents(element)
 }
-function createEditablePlaceholders () {
-  const codeElements = document.querySelectorAll("pre > code");
+
+function createEditablePlaceholders(parentElement) {
+  const baseElement = parentElement || document;
+  const codeElements = baseElement.querySelectorAll("pre > code");
 
   for (let i = 0; i < codeElements.length; i++) {
     const codeElement = codeElements[i];
@@ -67,16 +69,18 @@ function removeCursor (element) {
   }
 }
 
-function addClasses () {
-  const editablePlaceholders = document.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
+function addClasses(parentElement) {
+  const baseElement = parentElement || document;
+  const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
 
   editablePlaceholders.forEach((placeholder) => {
     placeholder.classList.add('editable');
   });
 }
 
-function addEvents() {
-  const editablePlaceholders = document.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
+function addEvents(parentElement) {
+  const baseElement = parentElement || document;
+  const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
   editablePlaceholders.forEach((placeholder) => {
     placeholder.addEventListener('input', function(event) {
       const dataType = event.target.dataset.type;
