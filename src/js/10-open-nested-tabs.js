@@ -40,8 +40,8 @@
               makePlaceholdersEditable(tabContent)
             }
           })
-        })
-      }, 0)
+        }, 0)
+      }, true)
     })
   })
   function waitForVisibility (element, callback) {
