@@ -2,10 +2,6 @@
 window.addEventListener('DOMContentLoaded', function() {
   const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
 
-  const { createQuerySuggestionsPlugin } = window[
-    '@algolia/autocomplete-plugin-query-suggestions'
-  ];
-
   const searchClient = algoliasearch(
     '{{{env.ALGOLIA_APP_ID}}}',
     '{{{env.ALGOLIA_API_KEY}}}'
@@ -211,6 +207,7 @@ window.addEventListener('DOMContentLoaded', function() {
             setContext({ preview: item });
           },
         },
+        /*
         {
           sourceId: 'suggestions',
           getItems({ query }) {
@@ -251,7 +248,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 </div>`
             },
           },
-        }
+        }*/
       ];
     },
   });
