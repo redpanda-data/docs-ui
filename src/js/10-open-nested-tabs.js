@@ -10,6 +10,26 @@
       this.location.hash = `#${tabId}`
     }
   })
+  function waitForVisibility (element, callback) {
+    if (window.getComputedStyle(element, null).display !== 'none') {
+      callback()
+      return
+    }
+
+    const observer = new window.MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.target === element && window.getComputedStyle(element, null).display !== 'none') {
+          observer.disconnect()
+          callback()
+        }
+      })
+    })
+
+    observer.observe(element, {
+      attributes: true,
+      attributeFilter: ['style'],
+    })
+  }
   const tabs = document.querySelectorAll('li.tab')
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function (event) {
@@ -22,7 +42,7 @@
       const url = new URL(window.location.href)
       url.searchParams.set('tab', encodeURIComponent(id))
       window.history.pushState(null, null, url)
-      // Prism requires content to to visible
+      // Prism requires content to be visible
       // so that it can calculate dimensions for the lines.
       // Since tab content is hidden until clicked
       // we need to rerun Prism when the tab is clicked
@@ -34,9 +54,9 @@
       // the content no longer matches the regex in editable placeholders
       //so it is no longer editable
       const preElementWithDataLine = tabContent.querySelector('.content pre[data-line]')
-      Promise.resolve().then(() => {
-        if (preElementWithDataLine) {
-          Prism && Prism.highlightAllUnder(tabContent)
+      preElementWithDataLine && waitForVisibility(preElementWithDataLine, () => {
+        if (Prism) {
+          Prism.highlightAllUnder(tabContent)
           makePlaceholdersEditable(tabContent)
         }
       })
