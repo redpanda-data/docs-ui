@@ -3,16 +3,16 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     const footer = document.querySelector('.announcement-email')
-    const closeButton = document.querySelector('.close-footer')
-    const submitButton = document.querySelector('.submitButtonEmail')
-    const inputContainer = document.querySelector('.inputContainer')
-    const successfulSentEmail = document.querySelector('.successfulSentEmail')
+    const closeButton = document.querySelector('.close-announcement-email-footer')
+    const submitButton = document.querySelector('.submit-announcement-button-email')
+    const inputContainer = document.querySelector('.input-container')
+    const successfulSentEmail = document.querySelector('.successful-sent-email')
     let footerDisplayed = false
     let footerIsStatic = false
     let lastScrollTop = 0
     if (typeof window !== 'undefined') {
-      if (window.localStorage.getItem('footerClosed') === 'true') {
-        footer.classList.add('hidden-footer')
+      if (window.localStorage.getItem('announcement-email-footer-closed') === 'true') {
+        footer.classList.add('hidden-announcement-email-footer')
         return
       }
     }
@@ -20,7 +20,7 @@
       const scrollTop = window.scrollY
 
       if (scrollTop > 50 && !footerDisplayed) {
-        footer.classList.add('show-footer')
+        footer.classList.add('show-announcement-email-footer')
         footerDisplayed = true
       }
 
@@ -39,13 +39,13 @@
 
     if (closeButton) {
       closeButton.addEventListener('click', function () {
-        footer.classList.remove('show-footer')
-        footer.classList.add('hidden-footer')
+        footer.classList.remove('show-announcement-email-footer')
+        footer.classList.add('hidden-announcement-email-footer')
         footerDisplayed = false
         footer.style.position = 'fixed'
         footerIsStatic = false
 
-        window.localStorage.setItem('footerClosed', 'true')
+        window.localStorage.setItem('announcement-email-footer-closed', 'true')
       })
     }
 
@@ -53,11 +53,11 @@
       submitButton.addEventListener('click', function () {
         inputContainer.style.display = 'none'
         successfulSentEmail.style.display = 'block'
-        window.localStorage.setItem('footerClosed', 'true')
+        window.localStorage.setItem('announcement-email-footer-closed', 'true')
 
         setTimeout(function () {
-          footer.classList.remove('show-footer')
-          footer.classList.add('hidden-footer')
+          footer.classList.remove('show-announcement-email-footer')
+          footer.classList.add('hidden-announcement-email-footer')
           footerDisplayed = false
           footer.style.position = 'fixed'
           footerIsStatic = false

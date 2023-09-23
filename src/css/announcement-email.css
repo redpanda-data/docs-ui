@@ -35,7 +35,7 @@
   }
 }
 
-.submitButtonEmail {
+.submit-announcement-button-email {
   border: none;
   background-color: black;
   color: #fff;
@@ -49,7 +49,7 @@
   box-sizing: border-box;
 }
 
-.submitButtonEmail:hover {
+.submit-announcement-button-email:hover {
   background-color: var(--redpanda-1000);
 }
 
@@ -58,20 +58,20 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .inputContainer {
+  .input-container {
     display: flex;
   }
 }
 
-.inputContainer {
+.input-container {
   align-items: center;
 }
 
-.show-footer {
+.show-announcement-email-footer {
   opacity: 1;
 }
 
-.close-footer {
+.close-announcement-email-footer {
   border: 0;
   background: transparent;
   position: absolute;
@@ -86,16 +86,16 @@
   text-align: center;
 }
 
-.close-footer:focus {
+.close-announcement-email-footer:focus {
   outline: none;
 }
 
-.hidden-footer {
+.hidden-announcement-email-footer {
   opacity: 0;
   pointer-events: none; /* This ensures the user can't interact with the faded-out footer */
 }
 
-.successfulSentEmail {
+.successful-sent-email {
   display: none;
   padding: 10px;
 }
