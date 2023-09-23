@@ -28,13 +28,6 @@
   border-top-left-radius: 20px !important;
 }
 
-@media screen and (max-width: 1023px) {
-  .emailInput {
-    margin-top: 1rem;
-    max-width: 45vw;
-  }
-}
-
 .submit-announcement-button-email {
   border: none;
   background-color: black;
@@ -53,14 +46,12 @@
   background-color: var(--redpanda-1000);
 }
 
-::-webkit-input-placeholder :-moz-placeholder {
+::-webkit-input-placeholder {
   padding-left: 20px;
 }
 
-@media screen and (min-width: 1024px) {
-  .input-container {
-    display: flex;
-  }
+:-moz-placeholder {
+  padding-left: 20px;
 }
 
 .input-container {
@@ -98,4 +89,17 @@
 .successful-sent-email {
   display: none;
   padding: 10px;
+}
+
+@media screen and (max-width: 1023px) {
+  .emailInput {
+    margin-top: 1rem;
+    max-width: 45vw;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .input-container {
+    display: flex;
+  }
 }
