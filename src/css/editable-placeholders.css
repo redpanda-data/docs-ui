@@ -1,5 +1,4 @@
-span.editable,
-span.editable > span {
+span.editable {
   font-weight: 450;
   color: var(--editable-code-font-color);
   padding: 0 3px;
@@ -11,10 +10,12 @@ span.editable > span {
 }
 
 span.cursor {
+  font-weight: 450;
+  color: var(--editable-code-font-color);
   left: -9px;
   position: relative;
   display: inline-block;
-  width: 4px;
+  width: 0;
 }
 
 span.cursor::after,

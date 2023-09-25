@@ -1,6 +1,7 @@
 <script>
 function makePlaceholdersEditable(element) {
   createEditablePlaceholders(element);
+  unnestPlaceholders()
   addClasses(element)
   addEvents(element)
 }
@@ -24,6 +25,16 @@ if (!RegExp.escape) {
   };
 }
 
+function unnestPlaceholders() {
+  const editables = document.querySelectorAll('[contenteditable="true"]');
+
+  editables.forEach(editable => {
+    if (editable.parentElement && editable.parentElement.getAttribute('contenteditable') === 'true') {
+      editable.parentElement.replaceWith(editable);
+    }
+  });
+}
+
 function addEditableSpan(regex, element) {
   if (!element || !element.textContent) {
     return;
@@ -32,7 +43,8 @@ function addEditableSpan(regex, element) {
   const placeholders = text.match(regex) || [];
   const processed = new Set();
   let newHTML = text;
-  for (const placeholder of placeholders) {
+  const sortedPlaceholders = placeholders.sort((a, b) => b.length - a.length);
+  for (const placeholder of sortedPlaceholders) {
     const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
     if (processed.has(placeholder) || cleanedPlaceholder === 'none') {
       continue;
@@ -58,20 +70,21 @@ function addConumSpans(element) {
 }
 
 
-function removeCursor (element) {
+function removeCursor(element) {
   if (element.target) {
-    element = element.target
+    element = element.target;
   }
-  if (element.contentEditable == 'true') {
+
+  if (element.contentEditable === 'true' && element.nextElementSibling) {
     element.nextElementSibling.classList.remove('cursor');
-  } else {
+  } else if (element.parentElement && element.parentElement.nextElementSibling) {
     element.parentElement.nextElementSibling.classList.remove('cursor');
   }
 }
 
 function addClasses(parentElement) {
   const baseElement = parentElement || document;
-  const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
+  const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"]');
 
   editablePlaceholders.forEach((placeholder) => {
     placeholder.classList.add('editable');
@@ -80,7 +93,7 @@ function addClasses(parentElement) {
 
 function addEvents(parentElement) {
   const baseElement = parentElement || document;
-  const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"], [contenteditable="true"] span');
+  const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"]');
   editablePlaceholders.forEach((placeholder) => {
     placeholder.addEventListener('input', function(event) {
       const dataType = event.target.dataset.type;
