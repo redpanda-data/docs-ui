@@ -28,7 +28,7 @@
   border-top-left-radius: 20px !important;
 }
 
-.submit-announcement-button-email {
+.announcement-email .submit-announcement-button-email {
   border: none;
   background-color: black;
   color: #fff;
@@ -42,19 +42,19 @@
   box-sizing: border-box;
 }
 
-.submit-announcement-button-email:hover {
+.announcement-email .submit-announcement-button-email:hover {
   background-color: var(--redpanda-1000);
 }
 
-::-webkit-input-placeholder {
+.announcement-email ::-webkit-input-placeholder {
   padding-left: 20px;
 }
 
-:-moz-placeholder {
+.announcement-email :-moz-placeholder {
   padding-left: 20px;
 }
 
-.input-container {
+.announcement-email .input-container {
   align-items: center;
 }
 
@@ -62,7 +62,7 @@
   opacity: 1;
 }
 
-.close-announcement-email-footer {
+.announcement-email .close-announcement-email-footer {
   border: 0;
   background: transparent;
   position: absolute;
@@ -77,29 +77,29 @@
   text-align: center;
 }
 
-.close-announcement-email-footer:focus {
+.announcement-email .close-announcement-email-footer:focus {
   outline: none;
 }
 
-.hidden-announcement-email-footer {
+.announcement-email .hidden-announcement-email-footer {
   opacity: 0;
   pointer-events: none; /* This ensures the user can't interact with the faded-out footer */
 }
 
-.successful-sent-email {
+.announcement-email .successful-sent-email {
   display: none;
   padding: 10px;
 }
 
 @media screen and (max-width: 1023px) {
-  .emailInput {
+  .announcement-email .emailInput {
     margin-top: 1rem;
     max-width: 45vw;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .input-container {
+  .announcement-email .input-container {
     display: flex;
   }
 }
