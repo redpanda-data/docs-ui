@@ -20,8 +20,10 @@
       const scrollTop = window.scrollY
 
       if (scrollTop > 50 && !footerDisplayed) {
-        footer.classList.add('show-announcement-email-footer')
-        footerDisplayed = true
+        if(successfulSentEmail.style.display != 'block'){
+          footer.classList.add('show-announcement-email-footer')
+          footerDisplayed = true
+        }
       }
 
       const scrolledToBottom = (window.innerHeight + scrollTop) >= (document.body.offsetHeight)
