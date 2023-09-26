@@ -17,7 +17,7 @@
   max-height: 8rem;
 }
 
-.emailInput {
+.announcement-email .emailInput {
   margin-left: 10vw;
   padding: 10px;
   border: none;
