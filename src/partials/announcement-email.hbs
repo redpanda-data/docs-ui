@@ -1,0 +1,26 @@
+<div class="announcement-email" role="banner" id="announcement-email">
+  <div class="row">
+    <form data-netlify="true" name="announcementEmail" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmitEmail(event)">
+      <input type="hidden" name="form-name" value="announcementEmail">
+      <p class="hidden">
+        <label class="hidden">Beep-Boop. Bot-field <input name="bot-field"></label>
+      </p>
+      <div class="input-container">
+        <div>Keep up-to-date with Redpanda software</div>
+        <div>
+          <input type="email" name="email" id="email" placeholder="Email" class="email-input" required><input type="submit" class="submit-announcement-button-email"></input>
+        </div>
+        <button id="close-announcement-email-footer" type="button" aria-label="close" class="close-announcement-email-footer">
+          <svg viewBox="0 0 15 15" width="14" height="14">
+            <g stroke="currentColor" stroke-width="2.4">
+              <path d="M.75.75l13.5 13.5M14.25.75L.75 14.25"></path>
+            </g>
+          </svg>
+        </button>
+      </div>
+      <div id="successful-sent-email" name="successful-sent-email" class="successful-sent-email">
+        <span>Subscribed!</span>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+<script>
+
+const handleSubmitEmail = function (event) {
+  event.preventDefault();
+  const form = event.target;
+  var formData = new FormData(form);
+  const formFields = event.target.closest('form')
+  const email = formFields.querySelector('input[name="email"]').value
+
+  formData.set('email', email)
+
+  fetch("{{page.url}}", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData).toString(),
+  }).then(() => {
+      console.log('Form submission success')
+    })
+    .catch(error => {
+      console.error('Form submission error:', error)
+    })
+}
+</script>

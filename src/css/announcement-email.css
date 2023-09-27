@@ -1,0 +1,105 @@
+.announcement-email {
+  background-color: var(--redpanda-900);
+  color: white;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  padding: 15px;
+  transition: opacity 0.4s ease-in-out;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  opacity: 0;
+  max-height: 8rem;
+}
+
+.announcement-email .input-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 2vh;
+  font-size: 1.1rem;
+}
+
+.announcement-email .email-input {
+  padding: 10px;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  height: 35px;
+  border-right: 1px solid #ccc;
+  border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
+}
+
+.announcement-email .submit-announcement-button-email {
+  border: none;
+  background-color: black;
+  color: #fff;
+  cursor: pointer;
+  height: 35px;
+  transition: background-color 0.3s ease;
+  border-bottom-right-radius: 20px;
+  border-top-right-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 8px 20px 9px 10px;
+  box-sizing: border-box;
+}
+
+.announcement-email .submit-announcement-button-email:hover {
+  background-color: var(--redpanda-1000);
+}
+
+.announcement-email ::-webkit-input-placeholder {
+  padding-left: 20px;
+}
+
+.announcement-email :-moz-placeholder {
+  padding-left: 20px;
+}
+
+.show-announcement-email-footer {
+  opacity: 1;
+}
+
+.announcement-email .close-announcement-email-footer {
+  border: 0;
+  background: transparent;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  line-height: 24px;
+  text-align: center;
+}
+
+.announcement-email .close-announcement-email-footer:focus {
+  outline: none;
+}
+
+.announcement-email .hidden-announcement-email-footer {
+  opacity: 0;
+  pointer-events: none; /* This ensures the user can't interact with the faded-out footer */
+}
+
+.announcement-email .successful-sent-email {
+  display: none;
+  padding: 10px;
+  color: white;
+  font-size: 1.1rem;
+}
+
+@media screen and (min-width: 1023px) {
+  .announcement-email .input-container {
+    flex-direction: row;
+    gap: 70px;
+  }
+}
