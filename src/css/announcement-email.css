@@ -4,7 +4,6 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  font-size: 1.1em;
   overflow: hidden;
   padding: 15px;
   transition: opacity 0.4s ease-in-out;
@@ -17,15 +16,23 @@
   max-height: 8rem;
 }
 
-.announcement-email .emailInput {
-  margin-left: 10vw;
+.announcement-email .input-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 1.1rem;
+}
+
+.announcement-email .email-input {
   padding: 10px;
   border: none;
   outline: none;
-  flex: 1;
+  font-size: 0.9rem;
+  height: 35px;
   border-right: 1px solid #ccc;
-  border-bottom-left-radius: 20px !important;
-  border-top-left-radius: 20px !important;
+  border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
 }
 
 .announcement-email .submit-announcement-button-email {
@@ -33,11 +40,12 @@
   background-color: black;
   color: #fff;
   cursor: pointer;
+  height: 35px;
   transition: background-color 0.3s ease;
   border-bottom-right-radius: 20px;
   border-top-right-radius: 20px;
   font-weight: bold;
-  font-size: 0.9em;
+  font-size: 0.9rem;
   padding: 8px 20px 9px 10px;
   box-sizing: border-box;
 }
@@ -52,10 +60,6 @@
 
 .announcement-email :-moz-placeholder {
   padding-left: 20px;
-}
-
-.announcement-email .input-container {
-  align-items: center;
 }
 
 .show-announcement-email-footer {
@@ -89,17 +93,13 @@
 .announcement-email .successful-sent-email {
   display: none;
   padding: 10px;
+  color: white;
+  font-size: 0.9rem;
 }
 
-@media screen and (max-width: 1023px) {
-  .announcement-email .emailInput {
-    margin-top: 1rem;
-    max-width: 45vw;
-  }
-}
-
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1023px) {
   .announcement-email .input-container {
-    display: flex;
+    flex-direction: row;
+    gap: 70px;
   }
 }
