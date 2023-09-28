@@ -16,6 +16,14 @@ const handleSubmit = (e) => {
 e.preventDefault();
 const formData = new FormData(e.target)
 
+const date = new Date();
+let possibleBot = false;
+if(date.value.toString().includes("GMT+0000")){
+  possibleBot = true;
+}
+
+formData.set('possibleBot', possibleBot)
+
 fetch("{{page.url}}", {
   method: "POST",
   headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -34,12 +42,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
   var date = document.getElementById('date');
   url.value = window.location.href;
   date.value = new Date();
-  let possibleBot = false;
-  if(date.value.toString().includes("GMT+0000")){
-    possibleBot = true;
-  }
-
-  console.log(possibleBot);
   document.getElementById('submit-button').click();
   });
 </script>
