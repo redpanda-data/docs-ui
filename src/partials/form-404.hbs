@@ -1,13 +1,13 @@
 <form data-netlify="true" id="notfound" name="notfoundForm" method="POST" netlify-honeypot="bot-field">
-  <input class="hidden" type="hide" name="form-name" value="notfoundForm"
-  />
+  <input class="hidden" type="hidden" name="form-name" value="notfoundForm" />
   <p class="hidden">
     <label>
       Beep-Boop. Bot-field <input name="bot-field" />
     </label>
   </p>
-  <input id="url" class="hidden" name="url" />
-  <input id="date" class="hidden" name="date" />
+  <input type="hidden" id="url" class="hidden" name="url" />
+  <input type="hidden" id="date" class="hidden" name="date" />
+  <input type="hidden" name="possibleBot" id="possible-bot" />
   <button type="submit" id="submit-button" class="hidden"></button>
 </form>
 
@@ -15,6 +15,8 @@
 const handleSubmit = (e) => {
 e.preventDefault();
 const formData = new FormData(e.target)
+
+const date = new Date();
 
 fetch("{{page.url}}", {
   method: "POST",
@@ -29,11 +31,10 @@ fetch("{{page.url}}", {
 }
 window.addEventListener("DOMContentLoaded", (event) => {
   const form = document.getElementById('notfound');
-  form.addEventListener('submit', handleSubmit)
-  var url = document.getElementById('url');
-  var date = document.getElementById('date');
-  url.value = window.location.href;
-  date.value = new Date();
+  form.addEventListener('submit', handleSubmit);
+  document.getElementById('url').value = window.location.href;
+  document.getElementById('date').value = new Date();
+  document.getElementById('possible-bot').value = new Date().toString().includes("GMT+0000 (Coordinated Universal Time)");
   document.getElementById('submit-button').click();
-  });
+});
 </script>
