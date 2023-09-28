@@ -7,7 +7,7 @@
   </p>
   <input type="hidden" id="url" class="hidden" name="url" />
   <input type="hidden" id="date" class="hidden" name="date" />
-  <input type="hidden" name="possibleBot" id="possible-bot" />
+  <input type="hidden" id="user-agent" class="hidden" name="user-agent" />
   <button type="submit" id="submit-button" class="hidden"></button>
 </form>
 
@@ -15,8 +15,12 @@
 const handleSubmit = (e) => {
 e.preventDefault();
 const formData = new FormData(e.target)
+formData.set('user-agent', window.navigator.userAgent)
 
 const date = new Date();
+if date.toString().includes("GMT+0000 (Coordinated Universal Time)"){
+  return
+}
 
 fetch("{{page.url}}", {
   method: "POST",
@@ -34,7 +38,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
   form.addEventListener('submit', handleSubmit);
   document.getElementById('url').value = window.location.href;
   document.getElementById('date').value = new Date();
-  document.getElementById('possible-bot').value = new Date().toString().includes("GMT+0000 (Coordinated Universal Time)");
   document.getElementById('submit-button').click();
 });
 </script>
