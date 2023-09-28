@@ -18,7 +18,7 @@ const formData = new FormData(e.target)
 
 const date = new Date();
 let possibleBot = false;
-if(date.value.toString().includes("GMT+0000")){
+if(date.value.toString().includes("GMT+0000 (Coordinated Universal Time)")){
   possibleBot = true;
 }
 
