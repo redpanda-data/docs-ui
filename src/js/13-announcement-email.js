@@ -20,7 +20,8 @@
       const scrollTop = window.scrollY
 
       if (scrollTop > 50 && !footerDisplayed) {
-        if (successfulSentEmail.style.display !== 'block' && window.localStorage.getItem('announcement-email-footer-closed') !== 'true') {
+        if (successfulSentEmail.style.display !== 'block' &&
+         window.localStorage.getItem('announcement-email-footer-closed') !== 'true') {
           footer.classList.add('show-announcement-email-footer')
           footerDisplayed = true
         }
