@@ -17,8 +17,7 @@ e.preventDefault();
 const formData = new FormData(e.target)
 formData.set('user-agent', window.navigator.userAgent)
 
-const date = new Date();
-if date.toString().includes("GMT+0000 (Coordinated Universal Time)"){
+if (new Date().toString().includes("GMT+0000 (Coordinated Universal Time)"){
   return
 }
 
