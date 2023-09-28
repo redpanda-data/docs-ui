@@ -34,6 +34,12 @@ window.addEventListener("DOMContentLoaded", (event) => {
   var date = document.getElementById('date');
   url.value = window.location.href;
   date.value = new Date();
+  let possibleBot = false;
+  if(date.value.toString().includes("GMT+0000")){
+    possibleBot = true;
+  }
+
+  console.log(possibleBot);
   document.getElementById('submit-button').click();
   });
 </script>
