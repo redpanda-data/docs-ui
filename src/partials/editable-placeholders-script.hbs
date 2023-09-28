@@ -59,14 +59,23 @@ function addEditableSpan(regex, element) {
 
 function addConumSpans(element) {
   if (!element || !element.textContent) {
-      return;
+    return;
   }
   let codeContent = element.innerHTML;
 
-  // Find numbers inside brackets at the end of lines
-  let pattern = /<span class="token punctuation">\(<\/span><span class="token number">(\d+)<\/span><span class="token punctuation">\)<\/span>\s*$/gm;
-  let replaced = codeContent.replace(pattern, '<i class="conum" data-value="$1"></i>');
-  element.innerHTML = replaced;
+  // Patterns:
+  // 1. For numbers inside brackets wrapped within spans.
+  // 2. For direct numbers inside brackets.
+  let patterns = [
+    /<span class="token punctuation">\(<\/span><span class="token number">(\d+)<\/span><span class="token punctuation">\)<\/span>\s*(?:\n)?$/gm,
+    /\((\d+)\)\s*(?:\n)?$/gm
+  ];
+
+  patterns.forEach(pattern => {
+    codeContent = codeContent.replace(pattern, '<i class="conum" data-value="$1"></i>');
+  });
+
+  element.innerHTML = codeContent;
 }
 
 
