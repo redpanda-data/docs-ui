@@ -23,7 +23,7 @@
   var is404 = !!document.getElementById('page-404')
   if (currentPageItem && !is404) {
     activateCurrentPath(currentPageItem)
-    scrollItemToMidpoint(menuPanel, currentPageItem.querySelector('.nav-link'))
+    scrollItemToMidpoint(currentPageItem.querySelector('.nav-link'))
   } else {
     menuPanel.scrollTop = 0
   }
@@ -107,7 +107,7 @@
     navItem.classList.add('is-current-page')
     currentPageItem = navItem
     activateCurrentPath(navItem)
-    scrollItemToMidpoint(menuPanel, navLink)
+    scrollItemToMidpoint(navLink)
   }
 
   if (menuPanel.querySelector('.nav-link[href^="#"]')) {
@@ -177,12 +177,8 @@
     e.stopPropagation()
   }
 
-  function scrollItemToMidpoint (panel, el) {
-    var rect = panel.getBoundingClientRect()
-    var effectiveHeight = rect.height
-    var navStyle = window.getComputedStyle(nav)
-    if (navStyle.position === 'sticky') effectiveHeight -= rect.top - parseFloat(navStyle.top)
-    panel.scrollTop = Math.max(0, (el.getBoundingClientRect().height - effectiveHeight) * 0.5 + el.offsetTop)
+  function scrollItemToMidpoint (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   function find (from, selector) {

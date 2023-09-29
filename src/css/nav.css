@@ -165,9 +165,12 @@ ul.nav-list > li:first-child[data-depth="6"] {
 }
 
 .nav-list > li > .item:hover,
-.nav-list .is-current-path > div.item:first-child,
 .nav-list > li > .is-current-page {
   background-color: #0000000d;
+  color: var(--link-font-color);
+}
+
+.nav-list .is-current-path > div.item:first-child {
   color: var(--link-font-color);
 }
 
