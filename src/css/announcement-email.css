@@ -85,7 +85,7 @@
   outline: none;
 }
 
-.announcement-email .hidden-announcement-email-footer {
+.announcement-email.hidden-announcement-email-footer {
   opacity: 0;
   pointer-events: none; /* This ensures the user can't interact with the faded-out footer */
 }
