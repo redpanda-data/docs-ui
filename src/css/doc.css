@@ -267,6 +267,10 @@
   margin: 1rem 0 0;
 }
 
+.doc .ulist.two-column {
+  column-count: 2;
+}
+
 .doc table.tableblock {
   font-size: calc(18 / var(--rem-base) * 1rem);
 }
