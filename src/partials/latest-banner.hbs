@@ -4,7 +4,7 @@
 {{/with}}
 <div class="doc banner-container" id="latest-banner">
   {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
-    <div>You are viewing the documentation for a beta version.
+    <div>You are viewing a Beta preview version of the Redpanda documentation.
     </div>
   {{else if (eq @root.page.attributes.eol true)}}
     <div>
@@ -16,7 +16,7 @@
     </div>
   {{/if}}
   <div>
-    For the latest version of the documentation, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
+    To view the latest available version of the Redpanda documentation, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
   </div>
 </div>
 {{/with}}
