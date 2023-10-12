@@ -11,6 +11,10 @@ html {
   scroll-behavior: smooth;
 }
 
+html.no-smooth-scroll {
+  scroll-behavior: unset;
+}
+
 @media screen and (min-width: 1024px) {
   html {
     font-size: var(--body-font-size--desktop);

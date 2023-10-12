@@ -1,15 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="no-smooth-scroll" lang="en">
   <head>
     {{> head defaultPageTitle='API Reference'}}
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
-    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
   </head>
   <body class="swagger">
     {{> header}}
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
     <div id="redoc-container"></div>
     <script>
+    // Calculate offset for scroll.
+    // See https://redocly.com/docs/redoc/config/#scrollyoffset
+    function getNavbarHeight() {
+      const navbar = document.querySelector('nav.navbar');
+      if (!navbar) {
+          console.error('Navbar not found.');
+          return null;
+      }
+      const style = window.getComputedStyle(navbar);
+      const height = parseFloat(style.height);
+      return height;
+    }
     Redoc.init('{{resolve-resource page.attributes.api-spec-url}}', {
+      scrollYOffset: getNavbarHeight
     }, document.getElementById('redoc-container'))
     </script>
     {{> footer}}

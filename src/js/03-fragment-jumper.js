@@ -4,6 +4,8 @@
   var article = document.querySelector('article.doc')
   var toolbar = document.querySelector('.toolbar')
 
+  if (!article || !toolbar) return
+
   function decodeFragment (hash) {
     return hash && (~hash.indexOf('%') ? decodeURIComponent(hash) : hash).slice(1)
   }
