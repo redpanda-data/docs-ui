@@ -4,7 +4,7 @@
 {{/with}}
 <div class="doc banner-container" id="latest-banner">
   {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
-    <div>You are viewing the documentation for a prerelease version.
+    <div>You are viewing the documentation for a beta version.
     </div>
   {{else if (eq @root.page.attributes.eol true)}}
     <div>
