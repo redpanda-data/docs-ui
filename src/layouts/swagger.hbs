@@ -1,30 +1,60 @@
 <!DOCTYPE html>
-<html class="no-smooth-scroll" lang="en">
+<html lang="en">
   <head>
     {{> head defaultPageTitle='API Reference'}}
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
   </head>
   <body class="swagger">
     {{> header}}
-    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
-    <div id="redoc-container"></div>
-    <script>
-    // Calculate offset for scroll.
-    // See https://redocly.com/docs/redoc/config/#scrollyoffset
-    function getNavbarHeight() {
-      const navbar = document.querySelector('nav.navbar');
-      if (!navbar) {
-          console.error('Navbar not found.');
-          return null;
-      }
-      const style = window.getComputedStyle(navbar);
-      const height = parseFloat(style.height);
-      return height;
-    }
-    Redoc.init('{{resolve-resource page.attributes.api-spec-url}}', {
-      scrollYOffset: getNavbarHeight
-    }, document.getElementById('redoc-container'))
-    </script>
+    <rapi-doc id="api" spec-url="{{resolve-resource page.attributes.api-spec-url}}" primary-color="#e2401b"
+        show-header="false" show-curl-before-try=true>
+    </rapi-doc>
     {{> footer}}
+    <script defer>
+      function getNavbarHeight() {
+          const navbar = document.querySelector('nav.navbar');
+          if (!navbar) {
+            console.error('Navbar not found.');
+            return null;
+          }
+          const style = window.getComputedStyle(navbar);
+          const height = parseFloat(style.height);
+          return height;
+      }
+      function adjustScrollForNavbar() {
+          const height = getNavbarHeight();
+          console.log(height);
+          if (height && window.location.hash) {
+            window.scrollTo(window.scrollX, window.scrollY - height);
+          }
+      }
+      let lastHash = window.location.hash;
+      setInterval(function() {
+        if (window.location.hash !== lastHash) {
+          lastHash = window.location.hash;
+          adjustScrollForNavbar();
+        }
+      }, 100);
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(adjustScrollForNavbar, 100)
+      });
+      let resizeTimeout;
+      function debouncedApplyMobileLogic() {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(applyMobileLogic, 250);
+      }
+
+      function applyMobileLogic() {
+          const rapidocEl = document.getElementById('api');
+          if (window.innerWidth <= 768) {
+            rapidocEl.setAttribute('render-style', 'view');
+          } else {
+            rapidocEl.setAttribute('render-style', 'focused');
+          }
+      }
+
+      window.addEventListener('DOMContentLoaded', applyMobileLogic);
+      window.addEventListener('resize', debouncedApplyMobileLogic);
+    </script>
   </body>
 </html>
