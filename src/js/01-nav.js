@@ -145,7 +145,11 @@
         }
         const a = this.querySelector('a')
         if (a && a.href !== window.location.href) {
-          window.location.href = a.href
+          if (a.href.includes(window.location.hostname)) {
+            window.location.href = a.href
+          } else {
+            window.open(a.href, '_blank')
+          }
         }
       }
     }
