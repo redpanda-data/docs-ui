@@ -1,6 +1,6 @@
 .banner-container {
-  background-color: var(--caution-background);
-  border: 0 solid var(--caution-color);
+  background-color: var(--important-background);
+  border: 0 solid var(--important-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
   box-shadow: var(--admonition-border-box-shadow);
