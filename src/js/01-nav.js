@@ -34,11 +34,28 @@
 
   find(menuPanel, '.nav-item').forEach(function (element) {
     var div = findClosestChild(element, '.item')
-    div.addEventListener('click', toggleActive.bind(element))
+    // Check if the nav item contains an external link
+    var externalLink = div.querySelector('a[href^="https://"]')
+    if (!externalLink) {
+      // Only attach the toggleActive listener if it's not an external link
+      div.addEventListener('click', toggleActive.bind(element))
+    } else {
+      div.addEventListener('click', function (event) {
+        window.open(externalLink.href, '_blank')
+        event.preventDefault()
+      })
+    }
     var navItemSpan = findNextElement(element, '.nav-text')
     if (navItemSpan) {
       navItemSpan.style.cursor = 'pointer'
-      navItemSpan.addEventListener('click', toggleActive.bind(element))
+      if (!externalLink) {
+        navItemSpan.addEventListener('click', toggleActive.bind(element))
+      } else {
+        navItemSpan.addEventListener('click', function (event) {
+          window.open(externalLink.href, '_blank')
+          event.preventDefault()
+        })
+      }
     }
   })
 
@@ -145,11 +162,7 @@
         }
         const a = this.querySelector('a')
         if (a && a.href !== window.location.href) {
-          if (a.href.includes(window.location.hostname)) {
-            window.location.href = a.href
-          } else {
-            window.open(a.href, '_blank')
-          }
+          window.location.href = a.href
         }
       }
     }
