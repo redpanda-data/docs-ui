@@ -52,22 +52,26 @@ window.addEventListener('DOMContentLoaded', function() {
                       </div>`
                 : ''
               }
-              <div class="breadcrumbs">
-                <ul>
-                ${preview.breadcrumbs.map(breadcrumb =>
-                  html`<li><a onclick="${(event) => {
-                    event.stopPropagation();
-                    aa('clickedObjectIDsAfterSearch',{
-                      eventName: 'Preview Selected',
-                      index: state.context.preview.__autocomplete_indexName,
-                      queryID: state.context.preview.__autocomplete_queryID,
-                      objectIDs: [state.context.preview.objectID],
-                      positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
-                    })
-                  }}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
-                )}
-                </ul>
-              </div>
+              ${
+                preview.breadcrumbs && preview.breadcrumbs.length > 0
+                ? html`<div class="breadcrumbs">
+                    <ul>
+                      ${preview.breadcrumbs.map(breadcrumb =>
+                        html`<li><a onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: preview.__autocomplete_indexName,
+                            queryID: preview.__autocomplete_queryID,
+                            objectIDs: [preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" href="${breadcrumb.url}">${breadcrumb.label}</a></li>`
+                      )}
+                    </ul>
+                  </div>`
+                : ''
+              }
               <h3>
                 ${components.Highlight({
                   hit: preview,
@@ -168,7 +172,7 @@ window.addEventListener('DOMContentLoaded', function() {
                     <div class="aa-ItemContentRow">
                       <div class="aa-Breadcrumbs">
                         <ul>
-                        ${item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
+                        ${item.breadcrumbs && item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
                         html`<li>${breadcrumb.t}</li>`
                         )}
                         ${item.breadcrumbs.length === 2 && item.breadcrumbs.slice(1).map(breadcrumb =>
