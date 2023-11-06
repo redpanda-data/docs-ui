@@ -67,10 +67,12 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
             return array.map(item => `<a href="${item.u}">${item.t}</a>`).join(' ');
           }
 
+          const breadcrumbsHtml = hit.breadcrumbs ? arrayToHtmlLinks(hit.breadcrumbs) : '';
+
           return `
             <div>
                 <p class="ais-Heading"><a href="${hit.objectID}">${hit.title}</a></p>
-                <p class="ais-Breadcrumbs">${arrayToHtmlLinks(hit.breadcrumbs)}</p>
+                <p class="ais-Breadcrumbs">${breadcrumbsHtml}</p>
             </div>`;
         },
       },

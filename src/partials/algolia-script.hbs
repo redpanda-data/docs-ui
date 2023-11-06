@@ -52,7 +52,9 @@ window.addEventListener('DOMContentLoaded', function() {
                       </div>`
                 : ''
               }
-              <div class="breadcrumbs">
+              ${
+                preview.breadcrumbs
+                ? html`<div class="breadcrumbs">
                 <ul>
                 ${preview.breadcrumbs.map(breadcrumb =>
                   html`<li><a onclick="${(event) => {
@@ -67,7 +69,9 @@ window.addEventListener('DOMContentLoaded', function() {
                   }}" href="${breadcrumb.u}">${breadcrumb.t}</a></li>`
                 )}
                 </ul>
-              </div>
+              </div>`
+              : ''
+              }
               <h3>
                 ${components.Highlight({
                   hit: preview,
@@ -165,7 +169,8 @@ window.addEventListener('DOMContentLoaded', function() {
                         })}
                       </div>
                     </div>
-                    <div class="aa-ItemContentRow">
+                    ${ item.breadcrumbs
+                      ? html`<div class="aa-ItemContentRow">
                       <div class="aa-Breadcrumbs">
                         <ul>
                         ${item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
@@ -176,7 +181,9 @@ window.addEventListener('DOMContentLoaded', function() {
                         )}
                         </ul>
                       </div>
-                    </div>
+                    </div>`
+                    : ''
+                  }
                   </div>
                   <div class="aa-ItemActions">
                     <button
