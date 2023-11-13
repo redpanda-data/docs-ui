@@ -5,13 +5,12 @@
     {{#if ./content}}
     <div class="item {{#if (eq ./url @root.page.url)}}is-current-page{{/if}} {{#if ./items.length}}dropdown{{/if}}">
     {{#if ./url}}
-    <a class="nav-link" href="
+    <a class="nav-link {{~#if (is-beta ./url)}} beta{{~/if}}" href="
       {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
-      {{~else}}{{{./url}}}{{~/if}}">{{{./content}}}</a>
+      {{~else}}{{{./url}}}{{~/if}}">{{{./url}}}</a>
     {{else}}
     <span class="nav-text">{{{./content}}} </span>
     {{/if}}
-    {{#if (is-beta ./url)}} beta{{/if}} {{~#if (is-beta ./url)}} CCCC{{/if}}
     {{#if ./items.length}}
     <button aria-label="Expand navigation" class="nav-item-toggle"></button>
     {{/if}}
