@@ -1,17 +1,18 @@
-module.exports = (currentPage) => {
-  if (!currentPage.attributes) return
-  const currentVersion = currentPage.attributes.version
-  if (!currentVersion) return false
-  for (let i = 0; i < currentPage.component.versions.length; i++) {
-    const version = currentPage.component.versions[i].version
-    if (currentVersion === version) {
-      if (currentPage.component.versions[i].prerelease === true) {
-        return true
-      } else {
-        return false
-      }
-    } else {
-      return false
+'use strict'
+
+module.exports = (navUrl, { data: { root } }) => {
+  const { contentCatalog, page } = root
+  var pages = contentCatalog.navGroup
+  var cp = contentCatalog.cp
+  if (!pages || cp !== page.component.name) {
+    pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
+    contentCatalog.navGroup = pages
+    contentCatalog.cp = page.component.name
+  }
+  for (let i = 0; i < pages.length; i++) {
+    if (pages[i].pub.url === navUrl &&
+      pages[i].asciidoc.attributes['page-beta'] === 'true') {
+      return true
     }
   }
 }
