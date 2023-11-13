@@ -22,7 +22,7 @@ thumbs.forEach(function(thumb) {
 const handleSubmit = function (event) {
   event.preventDefault();
   const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
-  const beta = {{ is-beta page }}
+  const beta = {{ is-prerelease page }}
   var version = '';
   {{#if page.attributes.version }}
   version = {{{ page.attributes.version }}}
