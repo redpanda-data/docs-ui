@@ -3,6 +3,7 @@
 module.exports = (navUrl, { data: { root } }) => {
   const { contentCatalog, page } = root
   if (page.layout === '404') return
+  if (contentCatalog === undefined) return
   var pages = contentCatalog.navGroup
   var cp = contentCatalog.cp
   if (!pages || cp !== page.component.name) {
