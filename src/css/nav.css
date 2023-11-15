@@ -299,3 +299,12 @@ ul.nav-list > li:first-child[data-depth="6"] {
 .nav-panel-explore .component .title {
   font-family: var(--body-font-family-bold);
 }
+
+.nav-link.beta::after {
+  background-image: url(../img/beta.svg);
+  height: 24px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: '';
+}

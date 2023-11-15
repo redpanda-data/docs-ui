@@ -1227,3 +1227,12 @@ html[data-theme=dark] code[class*=language-] .token.function {
   text-align: right;
   width: 1.5em;
 }
+
+.cloud-beta {
+  background-image: url(../img/cloud-beta.svg);
+  height: 24px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: '';
+}

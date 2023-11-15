@@ -5,6 +5,7 @@
 {{/unless}}
 {{#with page.title}}
 <h1 class="page">{{{this}}}</h1>
+{{~#if (is-beta ./url)}} <span class="cloud-beta"></span>{{~/if}}
 {{/with}}
 {{#if (eq page.layout 'home')}}
   {{> home}}
