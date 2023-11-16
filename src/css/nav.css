@@ -299,3 +299,12 @@ ul.nav-list > li:first-child[data-depth="6"] {
 .nav-panel-explore .component .title {
   font-family: var(--body-font-family-bold);
 }
+
+.nav-link.cloud-beta::after {
+  background-image: url(../img/cloud-beta.svg);
+  height: 20px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: '';
+}
