@@ -4,7 +4,8 @@
 {{/with}}
 <div class="doc banner-container" id="latest-banner">
   {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
-    <div>You are viewing a Beta preview version of the Redpanda documentation.
+    <div>You are viewing the documentation for Redpanda Beta version <b>v{{@root.page.version}}</b>.
+    <br>We welcome your feedback at the <a href="https://redpandacommunity.slack.com/archives/C04N3C10VUL">Redpanda Community Slack #beta-feedback channel</a>.
     </div>
   {{else if (eq @root.page.attributes.eol true)}}
     <div>
