@@ -285,6 +285,7 @@
 .doc .tablecontainer {
   max-height: 350px;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .doc .tablecontainer::-webkit-scrollbar {
@@ -303,7 +304,7 @@
 }
 
 .doc .tablecontainer table.tableblock thead {
-  background: #f6f6f6;
+  background: var(--sticky-table-header-background);
   position: sticky;
   top: -1px;
   z-index: var(--z-index-nav);

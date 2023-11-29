@@ -170,6 +170,7 @@ html:not([data-theme=dark]) {
   --scrollbar-track-color: var(--color-smoke-30);
   --scrollbar-thumb-color: var(--color-gray-10);
   --scrollbar_hover-thumb-color: var(--color-gray-30);
+  --sticky-table-header-background: #f6f6f6;
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;
