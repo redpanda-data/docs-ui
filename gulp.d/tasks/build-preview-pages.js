@@ -18,7 +18,7 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
   Promise.all([
     loadSampleUiModel(previewSrc),
     toPromise(
-      merge(compileLayouts(src), registerResources(src), copyImages(previewSrc, previewDest))
+      merge(compileLayouts(src), registerPartials(src), registerHelpers(src), registerVendorsCss(src), registerVendorsJs(src), copyImages(previewSrc, previewDest))
     ),
   ])
     .then(([baseUiModel, { layouts }]) => {
@@ -76,13 +76,6 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
 
 function loadSampleUiModel (src) {
   return fs.readFile(ospath.join(src, 'ui-model.yml'), 'utf8').then((contents) => yaml.safeLoad(contents))
-}
-
-function registerResources (src) {
-  registerPartials(src)
-  registerHelpers(src)
-  registerVendorsCss(src)
-  registerVendorsJs(src)
 }
 
 function registerPartials (src) {
