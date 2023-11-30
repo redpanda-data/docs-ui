@@ -96,6 +96,8 @@ module.exports = (src, dest, preview) => () => {
           ].reduce((accum, it) => (it ? accum.concat(it) : accum), [])
         )
     ),
+    vfs.src('css/vendor/**/*.css', opts),
+    vfs.src('js/vendor/**/*.js', opts),
     vfs.src('helpers/*.js', opts),
     vfs.src('layouts/*.hbs', opts),
     vfs.src('partials/*.hbs', opts),
