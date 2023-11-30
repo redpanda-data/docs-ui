@@ -252,8 +252,20 @@ kbd.algolia-command {
   text-decoration: none;
 }
 
+.aa-Preview.aa-Column.doc {
+  margin-top: 0;
+}
+
 .aa-ItemIcon {
   margin: 10px auto;
+  height: unset !important;
+  width: unset !important;
+}
+
+.aa-ItemIcon img {
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: unset !important;
 }
 
 .aa-Results.aa-Column {
