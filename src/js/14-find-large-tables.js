@@ -3,7 +3,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     const tables = document.querySelectorAll('table.tableblock')
     tables && tables.forEach((table) => {
-      if (table.offsetHeight > 350) {
+      if (table.offsetHeight > 700) {
         const wrapper = document.createElement('div')
         wrapper.className = 'tablecontainer'
         table.parentNode.insertBefore(wrapper, table)
