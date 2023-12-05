@@ -7,15 +7,18 @@
     {{#if (ne page.layout 'search')}}
       <div class="search hide-for-print">
         <div id="autocomplete"></div>
-        <div class="filter-options">
-          <label>
-            <input type="checkbox" class="filter-checkbox" data-filter-name="blogs">
-            Include blog posts
-          </label>
-          <label>
-            <input type="checkbox" class="filter-checkbox" data-filter-name="videos">
-            Include YouTube videos
-          </label>
+        <div class="dropdown">
+        <div class="search-filters" id="filters-dropdown" aria-haspopup="true" aria-expanded="false" onclick="toggleDropdown()"><div class="filter-toggle">Search filters</div><div class="selected-items" id="selectedItems"></div></div>
+          <div id="search-filters" class="dropdown-content">
+            <label>
+              <input type="checkbox" class="filter-checkbox" data-filter-name="blogs" onchange="updateSelection(this)">
+              Include blog posts
+            </label>
+            <label>
+              <input type="checkbox" class="filter-checkbox" data-filter-name="videos" onchange="updateSelection(this)">
+              Include YouTube videos
+            </label>
+          </div>
         </div>
       </div>
     {{/if}}

@@ -1,6 +1,6 @@
 <script>
 
-let filters = [['{{#if (or (eq page.component.title home)(eq page.component.layout 404))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}']];
+let filters = [['{{#if (or (eq page.component.title home)(eq page.component.layout 404))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}', 'apis']];
 
 function getCheckboxFilters(filters) {
   const checkboxes = document.querySelectorAll('.filter-checkbox');
@@ -17,11 +17,51 @@ function getCheckboxFilters(filters) {
       }
     }
   });
+  window.localStorage.setItem('appliedSearchFilters', JSON.stringify(filters[0]));
   return filters;
 }
 
+function loadFilters() {
+  const savedFilters = JSON.parse(localStorage.getItem('appliedSearchFilters'));
+  if (savedFilters && savedFilters.length > 0) {
+    const checkboxes = document.querySelectorAll('.filter-checkbox');
+    checkboxes.forEach(checkbox => {
+      const filterName = checkbox.getAttribute('data-filter-name');
+      checkbox.checked = savedFilters.includes(filterName);
+      updateSelection(checkbox);
+    });
+  }
+}
+
+function toggleDropdown() {
+  var isOpen = document.getElementById("search-filters").classList.toggle("is-active");
+  var dropdown = document.getElementById("filters-dropdown");
+  dropdown.setAttribute("aria-expanded", isOpen);
+}
+
+window.onclick = function(event) {
+  if (!event.target.matches('.dropdown button')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    for (var i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('is-active')) {
+        openDropdown.classList.remove('is-active');
+      }
+    }
+  }
+}
+
+function updateSelection(checkbox) {
+  var selectedItemsDiv = document.getElementById("selectedItems");
+  if (checkbox.checked) {
+    selectedItemsDiv.innerHTML += "<span>" + checkbox.getAttribute('data-filter-name') + " </span>";
+  } else {
+    selectedItemsDiv.innerHTML = selectedItemsDiv.innerHTML.replace("<span>" + checkbox.getAttribute('data-filter-name') + " </span>", "");
+  }
+}
 
 window.addEventListener('DOMContentLoaded', function() {
+  loadFilters();
   const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
 
   const searchClient = algoliasearch(
@@ -97,9 +137,19 @@ window.addEventListener('DOMContentLoaded', function() {
               ${
                 preview.image
                 ? html`<div class="aa-ItemIcon">
-                        <img
+                        <a
+                        onclick="${(event) => {
+                        event.stopPropagation();
+                        aa('clickedObjectIDsAfterSearch',{
+                          eventName: 'Preview Selected',
+                          index: state.context.preview.__autocomplete_indexName,
+                          queryID: state.context.preview.__autocomplete_queryID,
+                          objectIDs: [state.context.preview.objectID],
+                          positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                        })
+                      }}" href="${preview.objectID}"><img
                           src="${preview.image}"
-                        />
+                        /></a>
                       </div>`
                 : ''
               }
@@ -163,12 +213,19 @@ window.addEventListener('DOMContentLoaded', function() {
             noResults({state, html}) {
               state.context.preview = null
               if (!state.query) return
-              return html`<div>No results for ${state.query}</div><p>Believe this query should return results?<a target="_blank" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
+              return html`
+              <div>No results for ${state.query}</div><p>Believe this query should return results?<a target="_blank" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
             },
-            header({html}) {
-              return html`<span class="aa-SourceHeaderTitle">{{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}} {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}} Docs</span>
-              <div class="aa-SourceHeaderLine"></div>
-              `;
+            header({items, html}) {
+              if (!items.length) {
+                return;
+              }
+              let headerTitle = "{{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}} {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}";
+
+
+              return html`
+              <span class="aa-SourceHeaderTitle">${headerTitle}</span>
+              <div class="aa-SourceHeaderLine"></div>`;
             },
             footer({state, html}) {
               if (state.context.preview) {
@@ -181,6 +238,11 @@ window.addEventListener('DOMContentLoaded', function() {
               return html`<a class="aa-ItemLink" href="${item.objectID}">
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.type}
+                      </div>
+                    </div>
                     <div class="aa-ItemContentRow">
                       <div class="aa-ItemContentTitle">
                         ${components.Highlight({

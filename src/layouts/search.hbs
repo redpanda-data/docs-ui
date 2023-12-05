@@ -71,6 +71,7 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
 
           return `
             <div>
+                <p class="ais-Breadcrumbs">${hit.type}</p>
                 <p class="ais-Heading"><a href="${hit.objectID}">${hit.title}</a></p>
                 <p class="ais-Breadcrumbs">${breadcrumbsHtml}</p>
             </div>`;

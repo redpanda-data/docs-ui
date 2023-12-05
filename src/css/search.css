@@ -256,6 +256,10 @@ kbd.algolia-command {
   margin-top: 0;
 }
 
+.aa-ItemContentTitle.result-type {
+  font-size: smaller;
+}
+
 .aa-ItemIcon {
   margin: 10px auto;
   height: unset !important;
