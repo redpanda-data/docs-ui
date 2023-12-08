@@ -14,17 +14,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <script defer src="https://plausible.io/js/plausible.js" data-domain="redpanda.com"></script>
 
-<script> var uiRootPath="{{{uiRootPath}}}"</script>
 
 {{#if env.ALGOLIA_API_KEY}}
-<script defer src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/algoliasearch@4.19.0/dist/algoliasearch-lite.umd.js" integrity="sha256-Tu/bkomwucYThFtrH8PgFj6WbPQQVC4IEOlGI2r2xuk=" crossorigin="anonymous"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-js.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
 <link
   rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic"
+  href="{{{uiRootPath}}}/css/vendor/algolia/autocomplete-theme-classic.css"
 />
-<script defer src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-plugin-recent-searches"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-plugin-query-suggestions"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-plugin-algolia-insights"></script>
 {{/if}}
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-recent-searches.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-query-suggestions.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-algolia-insights.js"></script>
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
+<script> var uiRootPath="{{{uiRootPath}}}"</script>

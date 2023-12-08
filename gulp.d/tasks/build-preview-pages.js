@@ -18,7 +18,7 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
   Promise.all([
     loadSampleUiModel(previewSrc),
     toPromise(
-      merge(compileLayouts(src), registerPartials(src), registerHelpers(src), copyImages(previewSrc, previewDest))
+      merge(compileLayouts(src), registerPartials(src), registerHelpers(src), registerVendorsCss(src), registerVendorsJs(src), copyImages(previewSrc, previewDest))
     ),
   ])
     .then(([baseUiModel, { layouts }]) => {
@@ -93,6 +93,24 @@ function registerHelpers (src) {
   return vfs.src('helpers/*.js', { base: src, cwd: src }).pipe(
     map((file, enc, next) => {
       handlebars.registerHelper(file.stem, requireFromString(file.contents.toString()))
+      next()
+    })
+  )
+}
+
+function registerVendorsJs (src) {
+  return vfs.src('js/vendor/**/*.js', { base: src, cwd: src }).pipe(
+    map((file, enc, next) => {
+      handlebars.registerPartial(file.stem, file.contents.toString())
+      next()
+    })
+  )
+}
+
+function registerVendorsCss (src) {
+  return vfs.src('css/vendor/**/*.js', { base: src, cwd: src }).pipe(
+    map((file, enc, next) => {
+      handlebars.registerPartial(file.stem, file.contents.toString())
       next()
     })
   )
