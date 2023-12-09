@@ -23,7 +23,6 @@
 
 .top-panel .search {
   padding: 5px;
-  border-bottom: 1px solid var(--toolbar-border-color);
 }
 
 .top-panel .dropdown .dropdown-content {

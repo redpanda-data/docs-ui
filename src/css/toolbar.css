@@ -11,6 +11,10 @@
   z-index: var(--z-index-toolbar);
 }
 
+html:not([data-theme=dark]) .toolbar {
+  box-shadow: 0 1px 0 var(--toolbar-border-color);
+}
+
 .toolbar a {
   color: inherit;
 }

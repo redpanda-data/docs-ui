@@ -266,6 +266,20 @@ kbd.algolia-command {
   width: unset !important;
 }
 
+.aa-ItemActionButton svg {
+  color: white !important;
+}
+
+.aa-Source[data-autocomplete-source-id="filters"] .aa-List {
+  display: flex;
+}
+
+.aa-Source[data-autocomplete-source-id="filters"] .aa-List .aa-Item {
+  min-height: unset;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .aa-ItemIcon img {
   max-width: 100% !important;
   height: auto !important;
