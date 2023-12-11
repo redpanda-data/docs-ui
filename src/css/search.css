@@ -280,6 +280,16 @@ kbd.algolia-command {
   padding-bottom: 0;
 }
 
+.aa-Grid .toc.sidebar {
+  position: unset;
+  height: unset;
+}
+
+.aa-Grid .toc.sidebar .toc-menu ul {
+  max-height: unset;
+  overflow-y: unset;
+}
+
 .aa-ItemIcon img {
   max-width: 100% !important;
   height: auto !important;
