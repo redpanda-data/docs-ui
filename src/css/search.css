@@ -280,6 +280,11 @@ kbd.algolia-command {
   padding-bottom: 0;
 }
 
+.aa-Source[data-autocomplete-source-id=tagsPlugin] .aa-Item {
+  min-height: unset;
+  padding: 0;
+}
+
 .aa-Grid .toc.sidebar {
   position: unset;
   height: unset;
