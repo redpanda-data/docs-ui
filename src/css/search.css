@@ -268,6 +268,9 @@ kbd.algolia-command {
 
 .aa-ItemActionButton svg {
   color: white !important;
+  height: 15px;
+  width: unset;
+  margin: 5px;
 }
 
 .aa-Source[data-autocomplete-source-id="filters"] .aa-List {
@@ -330,6 +333,7 @@ kbd.algolia-command {
 
 .aa-ItemContentTitle {
   font-size: 1rem;
+  margin: 0 0.1em 0 0 !important;
 }
 
 .aa-SourceHeaderTitle {
