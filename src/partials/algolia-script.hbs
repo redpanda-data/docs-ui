@@ -1,9 +1,13 @@
 <script>
 
 function mapToAlgoliaFilters(tagsByFacet) {
-  let filters = [['{{#if (or (eq page.component.title home)(eq page.component.layout 404))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}', 'apis']];
-  Object.keys(tagsByFacet)
-    .forEach(facet => {
+  const hasDocsTag = Object.values(tagsByFacet).flat().some(tag => tag.label === 'docs');
+
+  let filters = hasDocsTag
+    ? [['{{#if (or (eq page.component.title home)(eq page.component.layout 404))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}', 'apis']]
+    : [[]];
+
+  Object.keys(tagsByFacet).forEach(facet => {
     tagsByFacet[facet].forEach(tag => {
       const filterString = tag.label;
       const isFilterInArray = filters[0].includes(filterString);
@@ -12,8 +16,9 @@ function mapToAlgoliaFilters(tagsByFacet) {
       } else {
         filters[0] = filters[0].filter(item => item !== filterString);
       }
-    })
-    })
+    });
+  });
+
   return filters;
 }
 
@@ -61,6 +66,7 @@ window.addEventListener('DOMContentLoaded', function() {
         },
       ];
     },
+    initialTags: [{ label: 'docs', facet: '_tags' }],
   });
 
   autocomplete({
@@ -196,7 +202,6 @@ window.addEventListener('DOMContentLoaded', function() {
 
               return facetHits[0]
                 .filter(hit =>
-                  hit.label !== 'docs' &&
                   hit.label !== 'apis' &&
                   !hit.label.startsWith('Redpanda-') &&
                   !existingTags.includes(hit.label)
