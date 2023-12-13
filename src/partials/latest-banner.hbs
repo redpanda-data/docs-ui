@@ -1,7 +1,9 @@
 {{#unless (or (ne page.attributes.hide-view-latest undefined) (eq page.componentVersion page.component.latest))}}
 {{#with page.latest}}
+{{#if (ne @root.page.componentVersion.prerelease true)}}
 {{#with (log-missing this ./missing @root.page.url)}}
 {{/with}}
+{{/if}}
 <div class="doc banner-container" id="latest-banner">
   {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
     <div>You are viewing the documentation for Redpanda Beta version <b>v{{@root.page.version}}</b>.
