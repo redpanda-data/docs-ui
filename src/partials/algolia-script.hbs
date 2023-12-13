@@ -242,7 +242,7 @@ window.addEventListener('DOMContentLoaded', function() {
               if (!items.length) {
                 return;
               }
-              let headerTitle = "Add filters";
+              let headerTitle = "Search in";
               return html`
               <span class="aa-SourceHeaderTitle">${headerTitle}</span>
               <div class="aa-SourceHeaderLine"></div>`;
@@ -280,11 +280,9 @@ window.addEventListener('DOMContentLoaded', function() {
               if (!items.length) {
                 return;
               }
-              let headerTitle = "{{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}} {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}";
-
 
               return html`
-              <span class="aa-SourceHeaderTitle">Results for ${headerTitle}</span>
+              <span class="aa-SourceHeaderTitle">Results</span>
               <div class="aa-SourceHeaderLine"></div>`;
             },
             footer({state, html}) {
@@ -331,6 +329,11 @@ window.addEventListener('DOMContentLoaded', function() {
                       <div class="aa-ItemContentTitle result-type">
                         ${item.type}
                       </div>
+                      ${item.version ? html`
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.version}
+                      </div>` : ''
+                      }
                     </div>
                   </div>
                   <div class="aa-ItemActions">
