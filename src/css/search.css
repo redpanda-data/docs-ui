@@ -257,7 +257,14 @@ kbd.algolia-command {
 }
 
 .aa-ItemContentTitle.result-type {
-  font-size: smaller;
+  font-size: small;
+  padding: 0 2px;
+  border-radius: 5px;
+  border: 1px solid #dadde1;
+}
+
+li.aa-Item:not([id*="filters"]) {
+  border-bottom: 1px solid #dadde1;
 }
 
 .aa-ItemIcon {
@@ -338,6 +345,10 @@ kbd.algolia-command {
 
 .aa-SourceHeaderTitle {
   font-size: 1rem !important;
+}
+
+.aa-ItemContentSnippet {
+  font-size: smaller;
 }
 
 @media screen and (min-width: 900px) {

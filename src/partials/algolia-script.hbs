@@ -261,7 +261,7 @@ window.addEventListener('DOMContentLoaded', function() {
                   params: {
                     clickAnalytics: true,
                     hitsPerPage: 10,
-                    attributesToSnippet: ['title:7'],
+                    attributesToSnippet: ['*:10'],
                     snippetEllipsisText: '…',
                     tagFilters: mapToAlgoliaFilters(tagsByFacet),
                   },
@@ -299,11 +299,6 @@ window.addEventListener('DOMContentLoaded', function() {
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
                     <div class="aa-ItemContentRow">
-                      <div class="aa-ItemContentTitle result-type">
-                        ${item.type}
-                      </div>
-                    </div>
-                    <div class="aa-ItemContentRow">
                       <div class="aa-ItemContentTitle">
                         ${components.Highlight({
                           hit: item,
@@ -326,6 +321,17 @@ window.addEventListener('DOMContentLoaded', function() {
                     </div>`
                     : ''
                   }
+                    <div class="aa-ItemContentSnippet">
+                      ${components.Snippet({
+                        hit: item,
+                        attribute: 'text',
+                      })}
+                    </div>
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.type}
+                      </div>
+                    </div>
                   </div>
                   <div class="aa-ItemActions">
                     <button
