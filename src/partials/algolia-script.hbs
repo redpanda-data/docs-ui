@@ -10,11 +10,14 @@ function mapToAlgoliaFilters(tagsByFacet) {
   Object.keys(tagsByFacet).forEach(facet => {
     tagsByFacet[facet].forEach(tag => {
       const filterString = tag.label;
-      const isFilterInArray = filters[0].includes(filterString);
-      if (!isFilterInArray) {
-        filters[0].push(filterString);
-      } else {
-        filters[0] = filters[0].filter(item => item !== filterString);
+      // Don't add the docs filter as it allows all versions to be displayed in results.
+      if (tag.label !== 'docs') {
+        const isFilterInArray = filters[0].includes(filterString);
+        if (!isFilterInArray) {
+          filters[0].push(filterString);
+        } else {
+          filters[0] = filters[0].filter(item => item !== filterString);
+        }
       }
     });
   });
