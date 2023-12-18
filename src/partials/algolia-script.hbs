@@ -1,6 +1,45 @@
 <script>
+
+function mapToAlgoliaFilters(tagsByFacet) {
+  const hasDocsTag = Object.values(tagsByFacet).flat().some(tag => tag.label === 'docs');
+
+  let filters = hasDocsTag
+    ? [['{{#if (or (eq page.component.title home)(eq page.component.layout 404))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}', 'apis']]
+    : [[]];
+
+  Object.keys(tagsByFacet).forEach(facet => {
+    tagsByFacet[facet].forEach(tag => {
+      const filterString = tag.label;
+      const isFilterInArray = filters[0].includes(filterString);
+      if (!isFilterInArray) {
+        filters[0].push(filterString);
+      } else {
+        filters[0] = filters[0].filter(item => item !== filterString);
+      }
+    });
+  });
+
+  return filters;
+}
+
+function groupBy(items, predicate) {
+  return items.reduce((acc, item) => {
+    const key = predicate(item);
+
+    if (!acc.hasOwnProperty(key)) {
+      acc[key] = [];
+    }
+
+    acc[key].push(item);
+
+    return acc;
+  }, {});
+}
+
 window.addEventListener('DOMContentLoaded', function() {
-  const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
+  const { createTagsPlugin } = window['@algolia/autocomplete-plugin-tags'];
+
+  const { autocomplete, getAlgoliaResults, getAlgoliaFacets } = window['@algolia/autocomplete-js'];
 
   const searchClient = algoliasearch(
     '{{{env.ALGOLIA_APP_ID}}}',
@@ -16,11 +55,25 @@ window.addEventListener('DOMContentLoaded', function() {
     limit: 5,
   });
 
+  const tagsPlugin = createTagsPlugin({
+    getTagsSubscribers() {
+      return [
+        {
+          sourceId: 'filters',
+          getTag({ item }) {
+            return item;
+          },
+        },
+      ];
+    },
+    initialTags: [{ label: 'docs', facet: '_tags' }],
+  });
+
   autocomplete({
     container: '#autocomplete',
     placeholder: 'Search for docs',
     detachedMediaQuery: '',
-    plugins: [recentSearchesPlugin],
+    plugins: [recentSearchesPlugin, tagsPlugin],
     insights: true,
     defaultActiveItemId: 0,
     onStateChange({ state }) {
@@ -40,18 +93,6 @@ window.addEventListener('DOMContentLoaded', function() {
         ${preview
           ? html`<div class="aa-Preview aa-Column doc">
             <div class="aa-PanelLayout aa-Panel--scrollable">
-              ${
-                preview.image
-                ? html`<div class="aa-ItemIcon">
-                        <img
-                          src="${preview.image.src}"
-                          alt="${preview.image.alt}"
-                          width="40"
-                          height="40"
-                        />
-                      </div>`
-                : ''
-              }
               ${
                 preview.breadcrumbs
                 ? html`<div class="breadcrumbs">
@@ -84,26 +125,77 @@ window.addEventListener('DOMContentLoaded', function() {
                   attribute: 'intro',
                 })}
               </p>
+              ${
+                preview.image
+                ? html`<div class="aa-ItemIcon">
+                      ${preview.type == 'Doc' ?
+                        html`<a
+                          onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" href="${preview.objectID}"><img
+                            src="${preview.image}"
+                          /></a>` :
+                        html`<a
+                          onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" target="_blank" href="${preview.objectID}"><img
+                            src="${preview.image}"/>
+                        </a>`
+                      }
+                      </div>`
+                : ''
+              }
               <div class="toc sidebar">
                 <div class="toc-menu">
-                  ${preview.titles.length > 0 ?
+                  ${preview.titles && preview.titles.length > 0 ?
                   html`<h4>On this page</h4>`
                   : ''}
                   <ul>
-                  ${preview.titles.map(title =>
-                    html`<li><a onclick="${(event) => {
-                    event.stopPropagation();
-                    aa('clickedObjectIDsAfterSearch',{
-                      eventName: 'Preview Selected',
-                      index: state.context.preview.__autocomplete_indexName,
-                      queryID: state.context.preview.__autocomplete_queryID,
-                      objectIDs: [state.context.preview.objectID],
-                      positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
-                    })
-                  }}" href="${preview.objectID}#${title.h}">${components.Highlight({
-                        hit: title,
-                        attribute: 't',
-                    })}</a></li>`
+                  ${preview.titles && preview.titles.length > 0 && preview.titles.map(title =>
+                    html`<li>
+                      ${state.context.preview.type == 'Doc' ?
+                        html`<a onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" href="${preview.objectID}#${title.h}">${components.Highlight({
+                              hit: title,
+                              attribute: 't',
+                          })}</a>` :
+                        html`<a onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" target="_blank" href="${preview.objectID}#${title.h}">${components.Highlight({
+                              hit: title,
+                              attribute: 't',
+                          })}</a>`
+                        }
+                    </li>`
                   )}
                   </ul>
                 </div>
@@ -117,8 +209,78 @@ window.addEventListener('DOMContentLoaded', function() {
         root
       );
     },
-    getSources({ query }) {
+    getSources({ query, state }) {
+      const tagsByFacet = groupBy(
+        state.context.tagsPlugin.tags,
+        (tag) => tag.facet
+      );
       return [
+        {
+          sourceId: 'filters',
+          getItems({ query }) {
+            return getAlgoliaFacets({
+              searchClient,
+              queries: [
+              {
+                indexName: '{{{env.ALGOLIA_INDEX_NAME}}}',
+                facet: '_tags',
+                params: {
+                  facetQuery: '',
+                },
+              },
+            ],
+            transformResponse({ facetHits }) {
+              const existingTags = (tagsByFacet["_tags"] || []).map(tag => tag.label);
+
+              return facetHits[0]
+                .filter(hit =>
+                  hit.label !== 'apis' &&
+                  !hit.label.startsWith('Redpanda-') &&
+                  !existingTags.includes(hit.label)
+                )
+                .map(hit => ({ ...hit, facet: '_tags' }));
+            },
+          });
+          },
+          templates: {
+            item({ item, components, html }) {
+              return html`<div class="aa-ItemWrapper">
+                <div class="aa-ItemContent">
+                  <div class="aa-ItemContentBody">
+                    <div class="aa-ItemContentTitle">
+                      ${components.Highlight({ hit: item, attribute: 'label' })}
+                    </div>
+                  </div>
+                </div>
+                <div class="aa-ItemActions">
+                  <button
+                    class="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
+                    type="button"
+                    title="Add filter"
+                  >
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>`;
+            },
+            header({items, html}) {
+              if (!items.length) {
+                return;
+              }
+              let headerTitle = "Search In";
+              return html`
+              <span class="aa-SourceHeaderTitle">${headerTitle}</span>
+              <div class="aa-SourceHeaderLine"></div>`;
+            },
+          },
+        },
         {
           sourceId: 'docs',
           getItems() {
@@ -131,9 +293,9 @@ window.addEventListener('DOMContentLoaded', function() {
                   params: {
                     clickAnalytics: true,
                     hitsPerPage: 10,
-                    attributesToSnippet: ['title:7'],
+                    attributesToSnippet: ['*:10'],
                     snippetEllipsisText: '…',
-                    facetFilters: ['version: {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}','product: {{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}}']
+                    tagFilters: mapToAlgoliaFilters(tagsByFacet),
                   },
                 },
               ],
@@ -143,12 +305,17 @@ window.addEventListener('DOMContentLoaded', function() {
             noResults({state, html}) {
               state.context.preview = null
               if (!state.query) return
-              return html`<div>No results for ${state.query}</div><p>Believe this query should return results?<a target="_blank" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
+              return html`
+              <div>No results for ${state.query}</div><p>Believe this query should return results?<a target="_blank" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}"> Let us know</a>.</p>`;
             },
-            header({html}) {
-              return html`<span class="aa-SourceHeaderTitle">{{#if (or (eq page.component.title 'home') (eq page.component.layout '404'))}}Redpanda{{else}}{{{page.component.title}}}{{/if}} {{#if (or (eq page.component.title 'home')(eq page.component.layout '404'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.version}}}{{/if}}</span>
-              <div class="aa-SourceHeaderLine"></div>
-              `;
+            header({items, html}) {
+              if (!items.length) {
+                return;
+              }
+
+              return html`
+              <span class="aa-SourceHeaderTitle">Results</span>
+              <div class="aa-SourceHeaderLine"></div>`;
             },
             footer({state, html}) {
               if (state.context.preview) {
@@ -158,7 +325,7 @@ window.addEventListener('DOMContentLoaded', function() {
               }
             },
             item({ item, components, html }) {
-              return html`<a class="aa-ItemLink" href="${item.objectID}">
+              const aTag = item.type == 'Doc' ? html`<a class="aa-ItemLink" href="${item.objectID}">
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
                     <div class="aa-ItemContentRow">
@@ -184,6 +351,22 @@ window.addEventListener('DOMContentLoaded', function() {
                     </div>`
                     : ''
                   }
+                    <div class="aa-ItemContentSnippet">
+                      ${components.Snippet({
+                        hit: item,
+                        attribute: 'text',
+                      })}
+                    </div>
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.type}
+                      </div>
+                      ${item.version ? html`
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.version}
+                      </div>` : ''
+                      }
+                    </div>
                   </div>
                   <div class="aa-ItemActions">
                     <button
@@ -204,7 +387,70 @@ window.addEventListener('DOMContentLoaded', function() {
                     </button>
                   </div>
                 </div>
-              </a>`;
+              </a>` : html`<a target="_blank" class="aa-ItemLink" href="${item.objectID}">
+                <div class="aa-ItemContent">
+                  <div class="aa-ItemContentBody">
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle">
+                        ${components.Highlight({
+                          hit: item,
+                          attribute: 'title',
+                        })}
+                      </div>
+                    </div>
+                    ${ item.breadcrumbs
+                      ? html`<div class="aa-ItemContentRow">
+                      <div class="aa-Breadcrumbs">
+                        <ul>
+                        ${item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
+                        html`<li>${breadcrumb.t}</li>`
+                        )}
+                        ${item.breadcrumbs.length === 2 && item.breadcrumbs.slice(1).map(breadcrumb =>
+                        html`<li>${breadcrumb.t}</li>`
+                        )}
+                        </ul>
+                      </div>
+                    </div>`
+                    : ''
+                  }
+                    <div class="aa-ItemContentSnippet">
+                      ${components.Snippet({
+                        hit: item,
+                        attribute: 'text',
+                      })}
+                    </div>
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.type}
+                      </div>
+                      ${item.version ? html`
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.version}
+                      </div>` : ''
+                      }
+                    </div>
+                  </div>
+                  <div class="aa-ItemActions">
+                    <button
+                      class="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
+                      type="button"
+                      title="Open page"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </a>`
+              return html`${aTag}`;
             },
           },
           getItemUrl({ item }) {
@@ -213,49 +459,7 @@ window.addEventListener('DOMContentLoaded', function() {
           onActive({ item, setContext }) {
             setContext({ preview: item });
           },
-        },
-        /*
-        {
-          sourceId: 'suggestions',
-          getItems({ query }) {
-            return getAlgoliaResults({
-              searchClient,
-              queries: [
-                {
-                  indexName: '{{{env.ALGOLIA_INDEX_NAME}}}_query_suggestions',
-                  query,
-                  params: {
-                    hitsPerPage: 5,
-                  },
-                },
-              ],
-            });
-          },
-          onSelect({ item, setQuery, setIsOpen, refresh }) {
-            setQuery(`${item.query} `);
-            setIsOpen(true);
-            refresh();
-          },
-          templates: {
-            header({ items, html }) {
-              if (items.length === 0) {
-                return null;
-              }
-
-              return html`
-                  <span class="aa-SourceHeaderTitle">
-                    Can't find what you're looking for?
-                  </span>
-                  <div class="aa-SourceHeaderLine" />
-                `
-            },
-            item({ item, components, html }) {
-             return html`<div class="aa-QuerySuggestion">
-                ${item.query}
-                </div>`
-            },
-          },
-        }*/
+        }
       ];
     },
   });

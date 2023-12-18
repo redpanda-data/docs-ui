@@ -252,8 +252,63 @@ kbd.algolia-command {
   text-decoration: none;
 }
 
+.aa-Preview.aa-Column.doc {
+  margin-top: 0;
+}
+
+.aa-ItemContentTitle.result-type {
+  font-size: small;
+  padding: 0 2px;
+  border-radius: 5px;
+  border: 1px solid #dadde1;
+}
+
+li.aa-Item:not([id*="filters"]) {
+  border-bottom: 1px solid #dadde1;
+}
+
 .aa-ItemIcon {
   margin: 10px auto;
+  height: unset !important;
+  width: unset !important;
+}
+
+.aa-ItemActionButton svg {
+  color: white !important;
+  height: 15px;
+  width: unset;
+  margin: 5px;
+}
+
+.aa-Source[data-autocomplete-source-id="filters"] .aa-List {
+  display: flex;
+}
+
+.aa-Source[data-autocomplete-source-id="filters"] .aa-List .aa-Item {
+  min-height: unset;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.aa-Source[data-autocomplete-source-id=tagsPlugin] .aa-Item {
+  min-height: unset;
+  padding: 0;
+}
+
+.aa-Grid .toc.sidebar {
+  position: unset;
+  height: unset;
+}
+
+.aa-Grid .toc.sidebar .toc-menu ul {
+  max-height: unset;
+  overflow-y: unset;
+}
+
+.aa-ItemIcon img {
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: unset !important;
 }
 
 .aa-Results.aa-Column {
@@ -285,10 +340,15 @@ kbd.algolia-command {
 
 .aa-ItemContentTitle {
   font-size: 1rem;
+  margin: 0 0.1em 0 0 !important;
 }
 
 .aa-SourceHeaderTitle {
   font-size: 1rem !important;
+}
+
+.aa-ItemContentSnippet {
+  font-size: smaller;
 }
 
 @media screen and (min-width: 900px) {

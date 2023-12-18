@@ -17,7 +17,7 @@
     <div class="container">
       <div class="searchbox" id="searchbox"></div>
       <div class="search-panel__filters">
-        Versions
+        Doc versions
         <div class="versions" id="version"></div>
       </div>
     </div>
@@ -71,6 +71,7 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
 
           return `
             <div>
+                <p class="ais-Breadcrumbs">${hit.type}</p>
                 <p class="ais-Heading"><a href="${hit.objectID}">${hit.title}</a></p>
                 <p class="ais-Breadcrumbs">${breadcrumbsHtml}</p>
             </div>`;
