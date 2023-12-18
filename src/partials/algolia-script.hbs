@@ -128,19 +128,34 @@ window.addEventListener('DOMContentLoaded', function() {
               ${
                 preview.image
                 ? html`<div class="aa-ItemIcon">
-                        <a
-                        onclick="${(event) => {
-                        event.stopPropagation();
-                        aa('clickedObjectIDsAfterSearch',{
-                          eventName: 'Preview Selected',
-                          index: state.context.preview.__autocomplete_indexName,
-                          queryID: state.context.preview.__autocomplete_queryID,
-                          objectIDs: [state.context.preview.objectID],
-                          positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
-                        })
-                      }}" href="${preview.objectID}"><img
-                          src="${preview.image}"
-                        /></a>
+                      ${preview.type == 'Doc' ?
+                        html`<a
+                          onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" href="${preview.objectID}"><img
+                            src="${preview.image}"
+                          /></a>` :
+                        html`<a
+                          onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" target="_blank" href="${preview.objectID}"><img
+                            src="${preview.image}"/>
+                        </a>`
+                      }
                       </div>`
                 : ''
               }
@@ -151,19 +166,36 @@ window.addEventListener('DOMContentLoaded', function() {
                   : ''}
                   <ul>
                   ${preview.titles && preview.titles.length > 0 && preview.titles.map(title =>
-                    html`<li><a onclick="${(event) => {
-                    event.stopPropagation();
-                    aa('clickedObjectIDsAfterSearch',{
-                      eventName: 'Preview Selected',
-                      index: state.context.preview.__autocomplete_indexName,
-                      queryID: state.context.preview.__autocomplete_queryID,
-                      objectIDs: [state.context.preview.objectID],
-                      positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
-                    })
-                  }}" href="${preview.objectID}#${title.h}">${components.Highlight({
-                        hit: title,
-                        attribute: 't',
-                    })}</a></li>`
+                    html`<li>
+                      ${state.context.preview.type == 'Doc' ?
+                        html`<a onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" href="${preview.objectID}#${title.h}">${components.Highlight({
+                              hit: title,
+                              attribute: 't',
+                          })}</a>` :
+                        html`<a onclick="${(event) => {
+                          event.stopPropagation();
+                          aa('clickedObjectIDsAfterSearch',{
+                            eventName: 'Preview Selected',
+                            index: state.context.preview.__autocomplete_indexName,
+                            queryID: state.context.preview.__autocomplete_queryID,
+                            objectIDs: [state.context.preview.objectID],
+                            positions: [state.activeItemId + 1] // positions start from 1 but itemIds start from 0
+                          })
+                        }}" target="_blank" href="${preview.objectID}#${title.h}">${components.Highlight({
+                              hit: title,
+                              attribute: 't',
+                          })}</a>`
+                        }
+                    </li>`
                   )}
                   </ul>
                 </div>
@@ -242,7 +274,7 @@ window.addEventListener('DOMContentLoaded', function() {
               if (!items.length) {
                 return;
               }
-              let headerTitle = "Search in";
+              let headerTitle = "Search In";
               return html`
               <span class="aa-SourceHeaderTitle">${headerTitle}</span>
               <div class="aa-SourceHeaderLine"></div>`;
@@ -293,7 +325,7 @@ window.addEventListener('DOMContentLoaded', function() {
               }
             },
             item({ item, components, html }) {
-              return html`<a class="aa-ItemLink" href="${item.objectID}">
+              const aTag = item.type == 'Doc' ? html`<a class="aa-ItemLink" href="${item.objectID}">
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
                     <div class="aa-ItemContentRow">
@@ -355,7 +387,70 @@ window.addEventListener('DOMContentLoaded', function() {
                     </button>
                   </div>
                 </div>
-              </a>`;
+              </a>` : html`<a target="_blank" class="aa-ItemLink" href="${item.objectID}">
+                <div class="aa-ItemContent">
+                  <div class="aa-ItemContentBody">
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle">
+                        ${components.Highlight({
+                          hit: item,
+                          attribute: 'title',
+                        })}
+                      </div>
+                    </div>
+                    ${ item.breadcrumbs
+                      ? html`<div class="aa-ItemContentRow">
+                      <div class="aa-Breadcrumbs">
+                        <ul>
+                        ${item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
+                        html`<li>${breadcrumb.t}</li>`
+                        )}
+                        ${item.breadcrumbs.length === 2 && item.breadcrumbs.slice(1).map(breadcrumb =>
+                        html`<li>${breadcrumb.t}</li>`
+                        )}
+                        </ul>
+                      </div>
+                    </div>`
+                    : ''
+                  }
+                    <div class="aa-ItemContentSnippet">
+                      ${components.Snippet({
+                        hit: item,
+                        attribute: 'text',
+                      })}
+                    </div>
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.type}
+                      </div>
+                      ${item.version ? html`
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.version}
+                      </div>` : ''
+                      }
+                    </div>
+                  </div>
+                  <div class="aa-ItemActions">
+                    <button
+                      class="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
+                      type="button"
+                      title="Open page"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </a>`
+              return html`${aTag}`;
             },
           },
           getItemUrl({ item }) {
