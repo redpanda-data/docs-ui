@@ -563,6 +563,10 @@
   border: none;
 }
 
+table code {
+  word-wrap: unset;
+}
+
 .listingblock .title {
   margin-top: 0.5rem;
 }
