@@ -302,6 +302,26 @@ window.addEventListener('DOMContentLoaded', function() {
                   },
                 },
               ],
+              transformResponse({ hits }) {
+                return hits.map(nestedHits => {
+                  const docIndices = new Map();
+                  nestedHits.forEach((item, index) => {
+                    if (item.type === 'Doc') {
+                      docIndices.set(index, item);
+                    }
+                  });
+                  const nonDocItems = nestedHits.filter(item => item.type !== 'Doc' && typeof item.unixTimestamp === 'number')
+                  .sort((a, b) => b.unixTimestamp - a.unixTimestamp);
+                  let nonDocIndex = 0;
+                  return nestedHits.map((item, index) => {
+                    if (docIndices.has(index)) {
+                      return docIndices.get(index);
+                    } else {
+                      return nonDocItems[nonDocIndex++];
+                    }
+                  });
+                });
+              },
             })
           },
           templates: {
