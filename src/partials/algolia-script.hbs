@@ -310,7 +310,7 @@ window.addEventListener('DOMContentLoaded', function() {
                       docIndices.set(index, item);
                     }
                   });
-                  const nonDocItems = nestedHits.filter(item => item.type !== 'Doc')
+                  const nonDocItems = nestedHits.filter(item => item.type !== 'Doc' && typeof item.unixTimestamp === 'number')
                   .sort((a, b) => b.unixTimestamp - a.unixTimestamp);
                   let nonDocIndex = 0;
                   return nestedHits.map((item, index) => {
