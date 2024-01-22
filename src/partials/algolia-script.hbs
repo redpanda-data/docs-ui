@@ -311,14 +311,24 @@ window.addEventListener('DOMContentLoaded', function() {
                     }
                   });
                   const nonDocItems = nestedHits.filter(item => item.type !== 'Doc' && typeof item.unixTimestamp === 'number')
-                  .sort((a, b) => b.unixTimestamp - a.unixTimestamp);
+                    .sort((a, b) => b.unixTimestamp - a.unixTimestamp);
                   let nonDocIndex = 0;
-                  return nestedHits.map((item, index) => {
-                    if (docIndices.has(index)) {
-                      return docIndices.get(index);
-                    } else {
-                      return nonDocItems[nonDocIndex++];
+
+                  docIndices.forEach((item, index) => {
+                    if (item._highlightResult && item._highlightResult.titles) {
+                      const matchedIndex = item._highlightResult.titles.findIndex(title => title.t.matchLevel === "full");
+                      if (matchedIndex !== -1) {
+                        const matchedTopLevelTitle = item.titles[matchedIndex];
+                        if (matchedTopLevelTitle) {
+                          item.matchingHeading = `#${matchedTopLevelTitle.h}`;
+                        }
+                      }
                     }
+                    nestedHits[index] = item;
+                  });
+
+                  return nestedHits.map((item, index) => {
+                    return docIndices.has(index) ? docIndices.get(index) : nonDocItems[nonDocIndex++];
                   });
                 });
               },
@@ -348,7 +358,8 @@ window.addEventListener('DOMContentLoaded', function() {
               }
             },
             item({ item, components, html }) {
-              const aTag = item.type == 'Doc' ? html`<a class="aa-ItemLink" href="${item.objectID}">
+              const matchingHeading = item.matchingHeading || ''
+              const aTag = item.type == 'Doc' ? html`<a class="aa-ItemLink" href="${item.objectID}${matchingHeading}">
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
                     <div class="aa-ItemContentRow">
