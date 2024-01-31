@@ -13,7 +13,7 @@ function createEditablePlaceholders(parentElement) {
   for (let i = 0; i < codeElements.length; i++) {
     const codeElement = codeElements[i];
     addConumSpans(codeElement);
-    if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html') {
+    if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html' && codeElement.dataset.lang !== 'rust') {
       addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
     }
   }
