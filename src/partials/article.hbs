@@ -17,7 +17,9 @@
   {{> index}}
 {{else}}
   {{> context-switcher}}
-  {{{page.contents}}}
+  {{#with (add-suggested-labs page.attributes page.contents)  as |suggestedLabs|}}
+    {{{suggestedLabs}}}
+  {{/with}}
 {{/if}}
 {{> feedback-footer}}
 {{> pagination}}

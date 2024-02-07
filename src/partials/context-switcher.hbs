@@ -4,7 +4,6 @@
     <a
       id="{{{this.name}}}"
       href="{{{relativize (resolvePageURL this.to)}}}"
-      onclick="setActive(event)"
       class="context-link {{#if (eq @root.page.url (resolvePageURL this.to))}}active{{/if}}"
     >
       <button type="button">{{{this.name}}}</button>

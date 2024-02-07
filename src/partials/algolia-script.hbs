@@ -1,10 +1,12 @@
 <script>
 
+const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else}}{{/if}}"
+
 function mapToAlgoliaFilters(tagsByFacet) {
   const hasDocsTag = Object.values(tagsByFacet).flat().some(tag => tag.label === 'docs');
 
   let filters = hasDocsTag
-    ? [['{{#if (or (eq page.component.title home)(eq page.component.layout 404))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}', 'apis']]
+    ? [["{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}", 'apis']]
     : [[]];
 
   Object.keys(tagsByFacet).forEach(facet => {
@@ -69,7 +71,7 @@ window.addEventListener('DOMContentLoaded', function() {
         },
       ];
     },
-    initialTags: [{ label: 'docs', facet: '_tags' }],
+    initialTags: [{ label: INITIAL_TAG, facet: '_tags' }],
   });
 
   autocomplete({
