@@ -10,10 +10,10 @@
  */
 module.exports = (latest, missing, previousVersion, { data: { root } }) => {
   const { contentCatalog } = root
-  if (!contentCatalog || !missing || !latest || typeof latest.version === 'undefined') return
+  if (!contentCatalog || !missing || !latest || typeof latest.version === 'undefined' || !latest.asciidoc) return
   const previousVersionWithoutPrefix = previousVersion.replace(/^\/\d+\.\d+\//, '')
-  const intentionalRemovals = latest.asciidoc?.attributes['removals-without-aliases']
-  const isIntentionallyRemoved = intentionalRemovals?.some((removal) => {
+  const intentionalRemovals = latest.asciidoc.attributes['removals-without-aliases']
+  const isIntentionallyRemoved = intentionalRemovals && intentionalRemovals.some((removal) => {
     return previousVersionWithoutPrefix.includes(removal.page)
   })
   if (!isIntentionallyRemoved) console.warn(`${previousVersion} does not exist in ${latest.version}`)
