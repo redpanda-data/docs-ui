@@ -12,18 +12,26 @@
 {{#with page.title}}
 <h1 class="page">{{{this}}}</h1>
 {{/with}}
-<div class="ais-InstantSearch">
-  <div class="right-panel">
-    <div class="container">
-      <div class="searchbox" id="searchbox"></div>
-      <div class="search-panel__filters">
-        Doc versions
-        <div class="versions" id="version"></div>
+<div class="container">
+  <div class="searchbox" id="searchbox"></div>
+    <div class="search-content">
+      <div class="badge-button" id="display-filters">Filters </div>
+      <div class="filters" id="filters">
+      <!-- Filters will be dynamically inserted here -->
+        <div>
+          <div class="type">
+          </div>
+        </div>
+        <div>
+          <div class="version">
+          </div>
+        </div>
       </div>
-    </div>
-    <div id="hits"></div>
-    <div id="pagination"></div>
+      <div class="results">
+        <!-- Search results will be displayed here -->
+      </div>
   </div>
+  <div id="pagination"></div>
 </div>
 </article>
 {{> footer}}
@@ -36,79 +44,160 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
   const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
 
   const search = instantsearch({
-      searchClient,
-      indexName,
-      routing: {
-          stateMapping: {
-              stateToRoute(uiState) {
-                  const indexUiState = uiState[indexName];
-                  return {
-                      q: indexUiState.query,
-                  }
-              },
-              routeToState({q}) {
-                  return {
-                      [indexName]: {
-                          query: q,
-                      },
-                  };
-              },
-          },
+    searchClient,
+    indexName,
+    routing: {
+      stateMapping: {
+        // Convert UI state to URL parameters
+        stateToRoute(uiState) {
+          const indexUiState = uiState[indexName] || {};
+          return {
+            q: indexUiState.query, // Use 'q' for the query parameter in the URL
+            type: indexUiState.refinementList && indexUiState.refinementList.type,
+            version: indexUiState.refinementList && indexUiState.refinementList.version
+          };
+        },
+        // Convert URL parameters back to UI state
+        routeToState(routeState) {
+          return {
+            [indexName]: {
+              query: routeState.q,
+              refinementList: {
+                type: routeState.type ? // Corrected from 'type' to 'types' to match URL parameters
+                  (Array.isArray(routeState.type) ? routeState.type : [routeState.type]) : [],
+                version: routeState.version ? // Corrected from 'version' to 'versions' to match URL parameters
+                  (Array.isArray(routeState.version) ? routeState.version : [routeState.version]) : []
+              }
+            }
+          };
+        }
       }
+    }
   });
+
+    const typePanel = instantsearch.widgets.panel({
+    templates: {
+      header: 'Content Type',
+    },
+    hidden(options) {
+    return options.results.nbHits === 0;
+    },
+  })(instantsearch.widgets.refinementList);
+
+  const versionPanel = instantsearch.widgets.panel({
+    templates: {
+      header: 'Version',
+    },
+    hidden(options) {
+    return options.results.nbHits === 0;
+    },
+  })(instantsearch.widgets.refinementList);
 
   search.addWidgets([
     instantsearch.widgets.hits({
-      container: '#hits',
+      container: '.results',
       templates: {
-        item(hit, { html, components, sendEvent }) {
-          // Helper function to convert an array of objects to HTML links
-          function arrayToHtmlLinks(array) {
-            return array.map(item => `<a href="${item.u}">${item.t}</a>`).join(' ');
-          }
-
-          const breadcrumbsHtml = hit.breadcrumbs ? arrayToHtmlLinks(hit.breadcrumbs) : '';
-
-          return `
-            <div>
-                <p class="ais-Breadcrumbs">${hit.type}</p>
-                <p class="ais-Heading"><a href="${hit.objectID}">${hit.title}</a></p>
-                <p class="ais-Breadcrumbs">${breadcrumbsHtml}</p>
-            </div>`;
+        item: (hit, {html, components}) => {
+          const isExternal = hit.objectID.startsWith('https') ? true : false
+          if (isExternal) return html`
+            <div class="card">
+              <h2 class="ais-Heading"><a href="${hit.objectID}" target="_blank">${components.Highlight({ attribute: 'title', hit })}</a></h2>
+              <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
+              <div class="aa-ItemContentRow">
+                ${hit.interactive ? html`
+                <div class="aa-ItemContentTitle result-type">
+                  Interactive
+                </div>` : ''
+                }
+                <div class="aa-ItemContentTitle result-type">
+                  ${hit.type}
+                </div>
+              </div>
+            </div>
+          `
+          if (!isExternal) return html`
+            <div class="card">
+              <h2 class="ais-Heading"><a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a></h2>
+              <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
+              <div class="aa-ItemContentRow">
+                <div class="aa-ItemContentTitle result-type">
+                  ${hit.type}
+                </div>
+                ${hit.version ? html`
+                <div class="aa-ItemContentTitle result-type">
+                  ${hit.version}
+                </div>` : ''
+                }
+              </div>
+            </div>
+          `
         },
       },
     }),
-
-      instantsearch.widgets.refinementList({
-        container: '#version', // the CSS Selector of the DOM element inside which the widget is inserted.
-        attribute: 'version',  // the name of the attribute in the records.
-        /*templates: {
-          item(item, { html }) {
-            const { url, label, count, isRefined } = item;
-
-            return html`
-              <a href="${url}" style="${isRefined ? 'font-weight: bold' : ''}">
-                <span>${label} (${count})</span>
-              </a>
-            `;
-          },
-        },*/
-      }),
-      instantsearch.widgets.configure({
-          hitsPerPage: 20,
-          //facetFilters: [`lang:${currentLang}`],
-          //queryLanguages: [currentLang]
-      }),
-      instantsearch.widgets.pagination({
-          container: '#pagination',
-      }),
-      searchBox({
-        container: '#searchbox',
-      }),
+    typePanel({
+      container: '.type',
+      attribute: 'type',
+      operator: 'and',
+    }),
+    versionPanel({
+      container: '.version',
+      attribute: 'version',
+      operator: 'and',
+    }),
+    instantsearch.widgets.configure({
+        hitsPerPage: 20,
+    }),
+    instantsearch.widgets.pagination({
+        container: '#pagination',
+    }),
+    searchBox({
+      container: '#searchbox',
+    }),
   ]);
 
   search.start();
 }
+
+document.addEventListener('DOMContentLoaded', function(event) {
+  const button = document.getElementById('display-filters')
+  const filters = document.getElementById('filters')
+
+  function checkWindowSize() {
+    if (window.innerWidth <= 1024) {
+      filters.classList.add('hidden')
+    } else {
+      filters.classList.remove('hidden')
+    }
+  }
+
+  // Debounce function to limit the rate of function execution
+  function debounce(func, wait, immediate) {
+    let timeout
+    return function() {
+      const context = this, args = arguments
+      const later = function() {
+        timeout = null
+        if (!immediate) func.apply(context, args)
+      }
+      const callNow = immediate && !timeout
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
+      if (callNow) func.apply(context, args)
+    }
+  }
+
+  const debouncedCheckWindowSize = debounce(checkWindowSize, 250)
+
+  // Initial check
+  checkWindowSize()
+
+  // Event listener for window resize
+  window.addEventListener('resize', debouncedCheckWindowSize)
+
+  button.addEventListener('click', function (event) {
+    filters.classList.toggle('hidden')
+  })
+})
 </script>
   </body>
 </html>

@@ -1,7 +1,6 @@
 article.search {
   margin: 0 auto;
   max-width: 1140px;
-  padding-left: 20px;
 }
 
 article.search .badge-button#display-filters {
@@ -33,6 +32,15 @@ article.search .ais-InstantSearch .container {
   margin-bottom: 20px;
 }
 
+article.search .filters .interactive {
+  margin-bottom: 1em;
+}
+
+article.search .filters {
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
 article.search .searchbox {
   flex: 0.75;
 }
@@ -42,12 +50,12 @@ article.search .ais-SearchBox-form::before {
   width: 0.95rem !important;
 }
 
-article.search.labs .search-content {
+article.search .search-content {
   display: flex;
   gap: 10px;
 }
 
-article.search.labs .ais-Hits-list {
+article.search .ais-Hits-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 20px;
@@ -55,36 +63,42 @@ article.search.labs .ais-Hits-list {
   padding: 20px;
 }
 
-article.search.labs .header {
+article.search .header {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 10%;
 }
 
-article.search.labs .header img {
+article.search .header img {
   max-width: 200px;
 }
 
-article.search.labs .header h1 {
+article.search .header h1 {
   font-size: 2.5em;
   margin-bottom: 0;
 }
 
-article.search.labs .header p {
+article.search .header p {
   max-width: 600px;
 }
 
-article.search.labs .ais-Hits-list .card {
+article.search .ais-Hits-list .card {
   min-height: 300px;
+  max-width: 250px;
 }
 
-article.search.labs .ais-Hits-list .card a:hover,
-article.search.labs .ais-Hits-list .card a:hover * {
+article.search .ais-Panel-header {
+  font-size: 1em;
+  color: var(--body-font-color);
+}
+
+article.search .ais-Hits-list .card a:hover,
+article.search .ais-Hits-list .card a:hover * {
   text-decoration: none;
 }
 
-article.search.labs span.ais-Snippet-nonHighlighted {
+article.search span.ais-Snippet-nonHighlighted {
   color: var(--body-font-color);
   font-size: large;
 }
@@ -420,29 +434,30 @@ li.aa-Item:not([id*="filters"]) {
     display: block;
   }
 
-  article.search.labs .ais-Hits-list {
+  article.search .ais-Hits-list {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  article.search.labs .search-content {
+  article.search .search-content {
     flex-direction: column;
   }
 
-  article.search.labs .filters {
+  article.search .filters {
     display: flex;
     justify-content: flex-start;
     gap: 20px;
     flex-wrap: wrap;
   }
 
-  article.search.labs .filters .interactive {
+  article.search .filters .interactive {
     flex-basis: 100%;
     display: flex;
+    margin-bottom: 0;
   }
 }
 
 @media screen and (max-width: 900px) {
-  article.search.labs .ais-Hits-list {
+  article.search .ais-Hits-list {
     grid-template-columns: repeat(1, 1fr);
   }
 }

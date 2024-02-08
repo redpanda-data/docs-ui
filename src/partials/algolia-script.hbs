@@ -1,6 +1,8 @@
 <script>
 
-const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else}}{{/if}}"
+const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else}}docs{{/if}}"
+
+const VERSION = "{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.componentVersion.version}}}{{/if}}"
 
 function mapToAlgoliaFilters(tagsByFacet) {
   const hasDocsTag = Object.values(tagsByFacet).flat().some(tag => tag.label === 'docs');
@@ -354,9 +356,22 @@ window.addEventListener('DOMContentLoaded', function() {
             },
             footer({state, html}) {
               if (state.context.preview) {
+                // Extract tags and format them for URL encoding as array parameters
+                const tag = state.context.tagsPlugin.tags[0]
+                // Convert to init caps and singular
+                const label = tag.label.charAt(0).toUpperCase() + tag.label.slice(1);
+                const formattedLabel = label.endsWith('s') ? label.slice(0, -1) : label;
+                // Encode as array parameter
+                const type = `type[0]=${encodeURIComponent(formattedLabel)}`;
+                const queryParam = state.query ? `&q=${encodeURIComponent(state.query)}` : '';
+                var queryParams = `${type}${queryParam}`;
+                console.log(label)
+                if (formattedLabel === 'Doc' && VERSION) {
+                   queryParams += `&version=${VERSION}`
+                }
                 return html`<div class="aa-Footer">
-                <a class="aa-ItemLink" href="{{{relativize '/search' }}}?q=${state.query}">View all results</a>
-                </div>`
+                <a class="aa-ItemLink" href="{{{relativize '/search' }}}?${queryParams}">View all results</a>
+                </div>`;
               }
             },
             item({ item, components, html }) {

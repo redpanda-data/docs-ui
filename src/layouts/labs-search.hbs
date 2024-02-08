@@ -27,12 +27,10 @@
         <div class="interactive">
         </div>
         <div>
-          <h3>Categories</h3>
           <div class="categories">
           </div>
         </div>
         <div>
-          <h3>Deployment Types</h3>
           <div class="deployment">
           </div>
         </div>
@@ -130,8 +128,20 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
     })
   )
 
-  search.addWidget(
-    instantsearch.widgets.refinementList({
+  const categoriesPanel = instantsearch.widgets.panel({
+    templates: {
+      header: 'Category',
+    },
+  })(instantsearch.widgets.refinementList);
+
+  const deploymentPanel = instantsearch.widgets.panel({
+    templates: {
+      header: 'Deployment',
+    },
+  })(instantsearch.widgets.refinementList);
+
+  search.addWidgets([
+    categoriesPanel({
       container: '.categories',
       attribute: 'categories',
       operator: 'and',
@@ -140,8 +150,13 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
       searchable: true,
       searchablePlaceholder: 'Search all categories',
       searchableIsAlwaysActive: false,
+    }),
+    deploymentPanel({
+      container: '.deployment',
+      attribute: 'deployment',
+      operator: 'and',
     })
-  )
+  ]);
 
   search.addWidget(
     instantsearch.widgets.toggleRefinement({
@@ -154,14 +169,6 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
           return html`Only interactive labs`
         },
       }
-    })
-  )
-
-    search.addWidget(
-    instantsearch.widgets.refinementList({
-      container: '.deployment',
-      attribute: 'deployment',
-      operator: 'and',
     })
   )
 
