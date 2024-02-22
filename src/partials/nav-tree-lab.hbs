@@ -1,0 +1,53 @@
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+    <ul class="nav-list">
+      {{#with (parse-json page.attributes.related-docs) as |relatedDocs| }}
+      {{#if relatedDocs.length}}
+      <li class="nav-item" data-depth="1">
+        <div class="item dropdown">
+          <span class="nav-text">Related Docs</span>
+          <button aria-label="Expand navigation" class="nav-item-toggle"></button>
+        </div>
+        <ul class="nav-list">
+        {{#each relatedDocs}}
+          <li class="nav-item" data-depth="2">
+            <div class="item">
+              <a class="nav-link" href="{{this.url}}">{{this.title}}</a>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </li>
+      {{/if}}
+      {{/with}}
+      {{#with (parse-json page.attributes.related-labs) as |relatedLabs| }}
+      {{#if (gt relatedLabs.length 1)}}
+      <li class="nav-item" data-depth="1">
+        <div class="item dropdown">
+          <span class="nav-text">Related Labs</span>
+          <button aria-label="Expand navigation" class="nav-item-toggle"></button>
+        </div>
+        <ul class="nav-list">
+        {{#each relatedLabs}}
+          {{#if (ne this.url @root.page.url)}}
+          <li class="nav-item" data-depth="2">
+            <div class="item">
+              <a class="nav-link" href="{{this.url}}">{{this.title}}</a>
+            </div>
+          </li>
+          {{/if}}
+          {{/each}}
+        </ul>
+      </li>
+      {{/if}}
+      {{/with}}
+      <li class="nav-item" data-depth="1">
+        <div class="item">
+          {{#with (get-page-info page.url)}}
+          <a class="nav-link" href="{{this.webUrl}}/tree/{{this.branch}}/{{this.path}}">Source Code<img class="dark-mode-filter" src="{{{@root.uiRootPath}}}/img/github.svg" width="30px" height= "20px" alt="GitHub logo" style="margin-bottom:-3px;"/></a>
+          {{/with}}
+        </div>
+      </li>
+    </ul>
+  </li>
+</ul>

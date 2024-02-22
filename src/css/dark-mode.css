@@ -109,7 +109,7 @@ html[data-theme=dark] {
   --footer-font-color: var(--color-gray-70);
   --footer-link-font-color: var(--color-jet-80);
   /* home */
-  --svg-dark-mode-filter: invert(100%) sepia(5%) saturate(1016%) hue-rotate(181deg) brightness(100%) contrast(106%);
+  --svg-dark-mode-filter: invert(100%) sepia(5%) saturate(100%) hue-rotate(181deg) brightness(100%) contrast(106%);
   --highlight-container-background: #262626;
 }
 

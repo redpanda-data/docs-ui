@@ -1,61 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-{{> head defaultPageTitle='Search the Documentation'}}
+{{> head defaultPageTitle='Search Redpanda Labs'}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/satellite-min.css">
 <script src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
 <script src="{{{uiRootPath}}}/js/vendor/algolia/instantsearch.production.min.js"></script>
   </head>
   <body>
 {{> header}}
-<article class="search">
-{{#with page.title}}
-<h1 class="page">{{{this}}}</h1>
-{{/with}}
-<div class="container">
-  <div class="searchbox" id="searchbox"></div>
+<article class="search labs">
+  <div class="header">
+    <img src="{{{uiRootPath}}}/img/redpanda-lab-standing.png">
+    <div>
+      {{#with page.title}}
+      <h1 class="page">{{{this}}}</h1>
+      {{/with}}
+      <p>Labs projects showcase what is possible to achieve with Redpanda as the centerpiece of your streaming data architecture. Some of these projects provide examples, guidance, best practices, and most importantly ideas for how you can use Redpanda in your own projects.</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="searchbox" id="searchbox"></div>
     <div class="search-content">
       <div class="badge-button" id="display-filters">Filters </div>
       <div class="filters" id="filters">
       <!-- Filters will be dynamically inserted here -->
+        <div class="interactive">
+        </div>
         <div>
-          <div class="type">
+          <div class="categories">
           </div>
         </div>
         <div>
-          <div class="version">
+          <div class="deployment">
           </div>
         </div>
       </div>
       <div class="results">
         <!-- Search results will be displayed here -->
       </div>
+    </div>
   </div>
-  <div id="pagination"></div>
-</div>
 </article>
 {{> footer}}
 <script>
 if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
-  const { algoliasearch, instantsearch } = window;
-  const { searchBox } = instantsearch.widgets;
+  const { algoliasearch, instantsearch } = window
 
-  const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
-  const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
+  const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}')
+  const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}'
 
   const search = instantsearch({
-    searchClient,
     indexName,
+    searchClient,
+    insights: true,
     routing: {
       stateMapping: {
         // Convert UI state to URL parameters
         stateToRoute(uiState) {
-          const indexUiState = uiState[indexName] || {};
+          const indexUiState = uiState[indexName] || {}
           return {
-            q: indexUiState.query, // Use 'q' for the query parameter in the URL
-            type: indexUiState.refinementList && indexUiState.refinementList.type,
-            version: indexUiState.refinementList && indexUiState.refinementList.version
-          };
+            q: indexUiState.query, // query parameter
+            category: indexUiState.refinementList && indexUiState.refinementList.categories,
+            deployment: indexUiState.refinementList && indexUiState.refinementList.deployment
+          }
         },
         // Convert URL parameters back to UI state
         routeToState(routeState) {
@@ -63,37 +70,35 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
             [indexName]: {
               query: routeState.q,
               refinementList: {
-                type: routeState.type ? // Corrected from 'type' to 'types' to match URL parameters
-                  (Array.isArray(routeState.type) ? routeState.type : [routeState.type]) : [],
-                version: routeState.version ? // Corrected from 'version' to 'versions' to match URL parameters
-                  (Array.isArray(routeState.version) ? routeState.version : [routeState.version]) : []
+                categories: routeState.category ?
+                  (Array.isArray(routeState.category) ? routeState.category : [routeState.category]) : [],
+                deployment: routeState.deployment ?
+                  (Array.isArray(routeState.deployment) ? routeState.deployment : [routeState.deployment]) : []
               }
             }
-          };
+          }
         }
       }
     }
-  });
+  })
 
-    const typePanel = instantsearch.widgets.panel({
-    templates: {
-      header: 'Content Type',
-    },
-    hidden(options) {
-    return options.results.nbHits === 0;
-    },
-  })(instantsearch.widgets.refinementList);
+  // Add search bar widget
+  search.addWidget(
+    instantsearch.widgets.searchBox({
+      container: '#searchbox',
+      placeholder: 'Search for labs',
+    })
+  )
 
-  const versionPanel = instantsearch.widgets.panel({
-    templates: {
-      header: 'Version',
-    },
-    hidden(options) {
-    return options.results.nbHits === 0;
-    },
-  })(instantsearch.widgets.refinementList);
+  search.addWidget(
+    instantsearch.widgets.configure({
+      // Filters to only include records where type is "Code Example"
+      filters: 'type:"Lab"'
+    })
+  )
 
-  search.addWidgets([
+  // Add results widget
+  search.addWidget(
     instantsearch.widgets.hits({
       container: '.results',
       templates: {
@@ -109,9 +114,6 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
                   Interactive
                 </div>` : ''
                 }
-                <div class="aa-ItemContentTitle result-type">
-                  ${hit.type}
-                </div>
               </div>
             </div>
           `
@@ -119,43 +121,59 @@ if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") 
             <div class="card">
               <h2 class="ais-Heading"><a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a></h2>
               <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
-              <div class="aa-ItemContentRow">
-                <div class="aa-ItemContentTitle result-type">
-                  ${hit.type}
-                </div>
-                ${hit.version ? html`
-                <div class="aa-ItemContentTitle result-type">
-                  ${hit.version}
-                </div>` : ''
-                }
-              </div>
             </div>
           `
         },
       },
-    }),
-    typePanel({
-      container: '.type',
-      attribute: 'type',
+    })
+  )
+
+  const categoriesPanel = instantsearch.widgets.panel({
+    templates: {
+      header: 'Category',
+    },
+  })(instantsearch.widgets.refinementList);
+
+  const deploymentPanel = instantsearch.widgets.panel({
+    templates: {
+      header: 'Deployment',
+    },
+  })(instantsearch.widgets.refinementList);
+
+  search.addWidgets([
+    categoriesPanel({
+      container: '.categories',
+      attribute: 'categories',
       operator: 'and',
+      limit: 5,
+      showMore: true,
+      searchable: true,
+      searchablePlaceholder: 'Search all categories',
+      searchableIsAlwaysActive: false,
     }),
-    versionPanel({
-      container: '.version',
-      attribute: 'version',
+    deploymentPanel({
+      container: '.deployment',
+      attribute: 'deployment',
       operator: 'and',
-    }),
-    instantsearch.widgets.configure({
-        hitsPerPage: 20,
-    }),
-    instantsearch.widgets.pagination({
-        container: '#pagination',
-    }),
-    searchBox({
-      container: '#searchbox',
-    }),
+    })
   ]);
 
-  search.start();
+  search.addWidget(
+    instantsearch.widgets.toggleRefinement({
+      container: '.interactive',
+      attribute: 'interactive',
+      on: true,
+      off: false,
+      templates: {
+        labelText({ count }, { html }) {
+          return html`Only interactive labs`
+        },
+      }
+    })
+  )
+
+  // Start the search
+  search.start()
 }
 
 document.addEventListener('DOMContentLoaded', function(event) {

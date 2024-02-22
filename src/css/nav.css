@@ -159,6 +159,10 @@
   height: inherit;
 }
 
+.article.lab .nav .panels {
+  padding-left: 0.5em;
+}
+
 html.is-clipped--nav {
   overflow-y: hidden;
 }

@@ -5,7 +5,26 @@
 <script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
 <script defer id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
 <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
-{{#if (and env.ALGOLIA_API_KEY (ne page.layout 'search'))}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const seeMoreBtn = document.getElementById('see-more-btn');
+  if (seeMoreBtn) {
+    seeMoreBtn.addEventListener('click', function() {
+      const hiddenItems = document.querySelectorAll('.ulist li.to-hide');
+      let anyItemWasHidden = false;
+      hiddenItems.forEach(function(item) {
+        if (item.classList.contains('hidden')) {
+          anyItemWasHidden = true;
+        }
+        item.classList.toggle('hidden');
+      });
+      hiddenItemsVisible = anyItemWasHidden;
+      seeMoreBtn.textContent = hiddenItemsVisible ? "See Less" : "See More";
+    });
+  }
+});
+</script>
+{{#if (and env.ALGOLIA_API_KEY (and (ne page.layout 'search') (ne page.layout 'labs-search')))}}
 {{> algolia-script}}
 {{/if}}
 {{#if (ne page.layout '404') }}

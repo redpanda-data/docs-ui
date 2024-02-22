@@ -546,6 +546,7 @@
   display: inline-flex;
   align-items: center;
   height: 100%;
+  font: unset;
 }
 
 .doc .admonitionblock .icon i::after {
@@ -934,6 +935,149 @@ table code {
 
 .doc .literalblock pre {
   padding-left: 1em;
+}
+
+.badge-button {
+  padding: 3px;
+  border: 1px solid var(--toolbar-border-color);
+  width: fit-content;
+  border-radius: 5px;
+  font-size: medium;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.badge-button img {
+  margin-left: 5px;
+  margin-bottom: -2px;
+  filter: var(--svg-dark-mode-filter);
+}
+
+.doc .nav-image img.dark-mode-filter,
+.nav .nav-image img.dark-mode-filter {
+  filter: var(--svg-dark-mode-filter);
+}
+
+.doc .nav-image,
+.nav .nav-image {
+  color: inherit;
+  padding-left: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.doc .nav-image::after,
+.nav .nav-image::after {
+  content: none !important;
+}
+
+.badge-button a:hover {
+  text-decoration: none;
+}
+
+.badge-button:hover {
+  cursor: pointer;
+}
+
+.badge-button a {
+  color: inherit;
+}
+
+.badge-container {
+  display: flex;
+  gap: 10px;
+}
+
+.doc .dropdown {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  font-size: medium;
+}
+
+.doc .terminal-icon {
+  width: 20px;
+  height: 18px;
+  border: 1px solid black;
+  position: relative;
+  border-radius: 3px;
+  background-color: #333;
+}
+
+.doc .terminal-icon::after {
+  content: '>_';
+  color: white;
+  font-size: 10px;
+  position: absolute;
+  left: 3px;
+  bottom: 2px;
+}
+
+.doc .dropdown ul {
+  display: none;
+  position: absolute;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #f9f9f9;
+  width: max-content;
+  max-height: 200px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  z-index: var(--z-index-page-version-menu);
+  overflow-y: auto;
+  animation: slideDown 0.3s ease-out;
+}
+
+.doc .dropdown ul::-webkit-scrollbar {
+  width: 5px;
+}
+
+.doc .dropdown ul::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.doc .dropdown ul::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+.doc .dropdown ul::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.doc .dropdown ul li a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.doc .dropdown ul li a:hover {
+  background-color: #f1f1f1;
+}
+
+.doc .dropdown:hover ul {
+  display: block;
+}
+
+.doc .dropdown ul li {
+  border-bottom: 1px solid #f1f1f1;
+  cursor: pointer;
 }
 
 code[class*=language-],

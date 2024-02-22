@@ -11,9 +11,8 @@
       {{#if (ne (length site.components) 1)}}
       <div class="components">
         {{#each site.components}}
-        {{#if (ne this.asciidoc.attributes.page-exclude-from-dropdown-selector true)}}
-        <span class="component
-          {{~#if (eq this.title @root.page.component.title)}} is-current{{/if}}">
+        {{#if (and (ne this.asciidoc.attributes.page-exclude-from-dropdown-selector true) (ne this.title @root.page.component.title))}}
+        <span class="component">
           <a href="{{{relativize ./url}}}">{{{./title}}}</a>
         </span>
         {{/if}}

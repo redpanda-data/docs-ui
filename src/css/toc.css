@@ -51,15 +51,15 @@
 .toc.sidebar {
   position: sticky;
   height: fit-content;
-  top: 100px;
+  top: 120px;
   font-size: calc(18 / var(--rem-base) * 1rem);
   font-weight: 300;
 }
 
 .toc.sidebar .thumbs {
-  margin-top: 70px;
   align-items: flex-start;
   padding: 0.25rem 0 1rem 1rem;
+  margin-top: 70px;
 }
 
 .toc .toc-menu h3 {
