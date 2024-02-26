@@ -137,9 +137,10 @@
   margin-top: 2px;
   gap: 10px;
   z-index: 2;
-  background-color: var(--page-version-menu-background);
+  background-color: var(--body-background);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 10px;
+  padding-left: 0;
 }
 
 .context .container.has-dropdown .components a,
@@ -321,7 +322,7 @@ ul.nav-list > li:first-child[data-depth="6"] {
   border-radius: 3px;
 }
 
-.nav-panel-explore .context .version a,
+.nav-panel-explore .context .versions a,
 .nav-panel-explore .context .component a {
   color: var(--page-version-font-color);
   text-decoration: none;
