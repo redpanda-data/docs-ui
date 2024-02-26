@@ -1,6 +1,7 @@
 article.search {
   margin: 0 auto;
   max-width: 1140px;
+  padding: 15px;
 }
 
 article.search .badge-button#display-filters {
@@ -432,6 +433,10 @@ li.aa-Item:not([id*="filters"]) {
 @media screen and (max-width: 1024px) {
   article.search .badge-button#display-filters {
     display: block;
+  }
+
+  article.search .header img {
+    display: none;
   }
 
   article.search .ais-Hits-list {
