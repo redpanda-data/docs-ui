@@ -218,6 +218,11 @@ At ornatus splendide sed, phaedrum omittantur usu an, vix an noster voluptatibus
 
 ---
 
+.Ordered list
+. [[step-one]]potenti donec cubilia tincidunt
+. etiam pulvinar inceptos velit quisque aptent himenaeos
+. lacus volutpat semper porttitor aliquet ornare primis nulla enim
+
 .Ordered list with customized numeration
 [upperalpha]
 . potenti donec cubilia tincidunt

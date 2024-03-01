@@ -32,10 +32,20 @@
     window.removeEventListener('load', jumpOnLoad)
   })
 
-  Array.prototype.slice.call(document.querySelectorAll('a[href^="#"]')).forEach(function (el) {
-    var fragment, target
-    if ((fragment = decodeFragment(el.hash)) && (target = document.getElementById(fragment))) {
-      el.addEventListener('click', jumpToAnchor.bind(target))
-    }
+  document.addEventListener('DOMContentLoaded', () => {
+    const childElementsWithId = article.querySelectorAll('*:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)[id]')
+    childElementsWithId.forEach((element) => {
+      const anchor = document.createElement('a')
+      anchor.className = 'anchor'
+      anchor.href = `#${element.id}`
+      anchor.setAttribute('aria-label', 'Link to this section')
+      element.parentNode.append(anchor)
+    })
+    Array.prototype.slice.call(document.querySelectorAll('a[href^="#"]')).forEach(function (el) {
+      var fragment, target
+      if ((fragment = decodeFragment(el.hash)) && (target = document.getElementById(fragment))) {
+        el.addEventListener('click', jumpToAnchor.bind(target))
+      }
+    })
   })
 })()

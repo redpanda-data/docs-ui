@@ -92,7 +92,8 @@
 .doc h3 .anchor,
 .doc h4 .anchor,
 .doc h5 .anchor,
-.doc h6 .anchor {
+.doc h6 .anchor,
+.doc li .anchor {
   position: absolute;
   text-decoration: none;
   visibility: hidden;
@@ -105,7 +106,8 @@
 .doc h3 .anchor::before,
 .doc h4 .anchor::before,
 .doc h5 .anchor::before,
-.doc h6 .anchor::before {
+.doc h6 .anchor::before,
+.doc li .anchor::before {
   content: "#";
 }
 
@@ -114,7 +116,7 @@
 .doc h3:hover .anchor,
 .doc h4:hover .anchor,
 .doc h5:hover .anchor,
-.doc h6:hover .anchor {
+.doc li:hover .anchor {
   visibility: visible;
 }
 
