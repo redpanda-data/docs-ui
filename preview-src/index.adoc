@@ -39,6 +39,47 @@ Mauris eget leo nunc, nec tempus mi? Curabitur id nisl mi, ut vulputate urna.
 | Chris | 33 | Photographer
 |===
 
+This table is larger than 1000px, so we clip it to 500px and allow the user to expand it.
+
+|===
+| Name | Age | Occupation
+
+| John | 28 | Engineer
+| Emily | 34 | Artist
+| David | 22 | Student
+| Lisa | 42 | Doctor
+| Sarah | 30 | Writer
+| Michael | 55 | Chef
+| Amy | 29 | Scientist
+| Mark | 38 | Lawyer
+| Laura | 26 | Designer
+| Chris | 33 | Photographer
+| Alex | 27 | Nurse
+| Jenna | 40 | Teacher
+| Brian | 31 | Architect
+| Olivia | 25 | Accountant
+| Ethan | 48 | Mechanic
+| Sophia | 37 | Pharmacist
+| Mason | 29 | Engineer
+| Ava | 45 | Editor
+| Logan | 32 | Graphic Designer
+| Mia | 23 | Research Assistant
+| Jacob | 36 | Consultant
+| Zoe | 39 | HR Manager
+| Lucas | 41 | Sales Manager
+| Lily | 34 | Event Planner
+| Aiden | 50 | Police Officer
+| Ella | 28 | Social Worker
+| James | 47 | Pilot
+| Chloe | 44 | Nutritionist
+| Benjamin | 52 | Judge
+| Isabella | 29 | Interior Designer
+| Noah | 33 | Software Developer
+| Madison | 26 | Marketing Specialist
+| Jack | 37 | Film Director
+| Harper | 31 | Fashion Designer
+|===
+
 
 == Cu solet
 
