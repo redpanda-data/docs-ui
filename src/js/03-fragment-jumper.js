@@ -40,7 +40,7 @@
       anchor.href = `#${element.id}`
       anchor.setAttribute('aria-label', 'Link to this section')
       if (!anchor.closest('ul[role="tablist"]')) {
-        anchor.classList.add('visible-anchor');
+        anchor.classList.add('visible-anchor')
       }
       element.parentNode.append(anchor)
     })
