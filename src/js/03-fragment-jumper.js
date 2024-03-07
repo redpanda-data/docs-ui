@@ -33,16 +33,17 @@
   })
 
   document.addEventListener('DOMContentLoaded', () => {
-    const childElementsWithId = article.querySelectorAll('*:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)[id]')
-    childElementsWithId.forEach((element) => {
-      const anchor = document.createElement('a')
-      anchor.className = 'anchor'
-      anchor.href = `#${element.id}`
-      anchor.setAttribute('aria-label', 'Link to this section')
-      if (!element.closest('ul[role="tablist"]')) {
-        anchor.classList.add('visible-anchor')
+    const article = document.querySelector('.doc')
+    const eligibleElements = article.querySelectorAll('li:not(.tablist li)')
+
+    eligibleElements.forEach((element) => {
+      if (element.id) {
+        const anchor = document.createElement('a')
+        anchor.href = `#${element.id}`
+        anchor.className = 'anchor visible-anchor'
+        anchor.setAttribute('aria-label', 'Link to this section')
+        element.appendChild(anchor)
       }
-      element.parentNode.append(anchor)
     })
     Array.prototype.slice.call(document.querySelectorAll('a[href^="#"]')).forEach(function (el) {
       var fragment, target
