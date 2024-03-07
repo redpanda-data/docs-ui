@@ -11,7 +11,7 @@
         wrapper.className = 'clippedcontainer'
         element.parentNode.insertBefore(wrapper, element)
         wrapper.appendChild(element)
-        wrapper.style.overflow = 'hidden'
+        wrapper.style.overflow = 'scroll'
         wrapper.style.maxHeight = '500px'
         wrapper.style.transition = 'max-height 0.5s ease'
 
@@ -28,14 +28,14 @@
         const storedState = window.localStorage.getItem(key)
         if (storedState === 'true') {
           wrapper.style.maxHeight = `${element.scrollHeight}px`
-          readMoreBtn.innerText = contentType === 'table' ? 'Hide Full Table' : 'View Less Code'
+          readMoreBtn.innerText = contentType === 'table' ? 'Hide full table' : 'View less code'
           readMoreBtn.setAttribute('aria-expanded', 'true')
         }
 
         readMoreBtn.addEventListener('click', function () {
           const isExpanded = readMoreBtn.getAttribute('aria-expanded') === 'true'
           wrapper.style.maxHeight = isExpanded ? '500px' : 'none'
-          wrapper.style.overflow = isExpanded ? 'hidden' : 'unset'
+          wrapper.style.overflow = isExpanded ? 'scroll' : 'unset'
           readMoreBtn.innerText = isExpanded
             ? (contentType === 'table'
               ? 'Show full table' : 'View more code') : (contentType === 'table'
