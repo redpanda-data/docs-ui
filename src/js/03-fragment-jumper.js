@@ -39,6 +39,9 @@
       anchor.className = 'anchor'
       anchor.href = `#${element.id}`
       anchor.setAttribute('aria-label', 'Link to this section')
+      if (!anchor.closest('ul[role="tablist"]')) {
+        anchor.classList.add('visible-anchor');
+      }
       element.parentNode.append(anchor)
     })
     Array.prototype.slice.call(document.querySelectorAll('a[href^="#"]')).forEach(function (el) {
