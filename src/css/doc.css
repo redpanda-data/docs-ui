@@ -93,7 +93,7 @@
 .doc h4 .anchor,
 .doc h5 .anchor,
 .doc h6 .anchor,
-.doc li .anchor {
+.doc li .visible-anchor {
   position: absolute;
   text-decoration: none;
   visibility: hidden;
@@ -107,7 +107,7 @@
 .doc h4 .anchor::before,
 .doc h5 .anchor::before,
 .doc h6 .anchor::before,
-.doc li .anchor::before {
+.doc li .visible-anchor::before {
   content: "#";
 }
 
@@ -116,8 +116,9 @@
 .doc h3:hover .anchor,
 .doc h4:hover .anchor,
 .doc h5:hover .anchor,
-.doc li:hover .anchor {
+.doc li:hover .visible-anchor {
   visibility: visible;
+  cursor: pointer;
 }
 
 .doc p,
@@ -789,6 +790,25 @@ table code {
   text-align: left;
   margin-bottom: 0;
   border-bottom: 1px solid #dadde1;
+}
+
+.tablecontainer {
+  overflow-x: auto;
+}
+
+.doc .clippedcontainer table.tableblock thead {
+  background: var(--sticky-table-header-background);
+  position: sticky;
+  top: -1px;
+  z-index: var(--z-index-nav);
+}
+
+.content .tablecontainer {
+  margin-bottom: 1.25em;
+}
+
+.content .tablecontainer > table.tableblock {
+  margin-bottom: 0;
 }
 
 .doc .imageblock .title {
