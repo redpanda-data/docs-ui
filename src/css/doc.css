@@ -811,25 +811,6 @@ table code {
   border-bottom: 1px solid #dadde1;
 }
 
-.tablecontainer {
-  overflow-x: auto;
-}
-
-.doc .clippedcontainer table.tableblock thead {
-  background: var(--sticky-table-header-background);
-  position: sticky;
-  top: -1px;
-  z-index: var(--z-index-nav);
-}
-
-.content .tablecontainer {
-  margin-bottom: 1.25em;
-}
-
-.content .tablecontainer > table.tableblock {
-  margin-bottom: 0;
-}
-
 .doc .imageblock .title {
   margin-top: 0.5rem;
   padding-bottom: 0;
