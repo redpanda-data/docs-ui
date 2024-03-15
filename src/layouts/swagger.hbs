@@ -48,7 +48,6 @@
         if (rapidoc) {
           rapidoc.style.marginTop = height + 'px'; // Adjusts the top margin based on the navbar's height
           rapidoc.addEventListener('before-try', (e) => {
-            console.log(e.detail.request.headers.get())
             const message = "Warning: API calls are executed against a real environment, not a sandbox.\nAre you sure you want to send this Delete request?"
           if (e.detail.request.method === 'DELETE') {
             if (!confirm(message)) {
