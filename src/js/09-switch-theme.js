@@ -20,6 +20,7 @@
       if (rapidocEl) {
         rapidocEl.setAttribute('theme', 'dark')
         rapidocEl.setAttribute('nav-bg-color', '#212121')
+        rapidocEl.setAttribute('bg-color', '#212121')
       }
     } else {
       const newSrc = img.src.replace('view-moon', 'view-sun')
@@ -30,6 +31,7 @@
       if (rapidocEl) {
         rapidocEl.setAttribute('theme', 'light')
         rapidocEl.setAttribute('nav-bg-color', '#fff')
+        rapidocEl.setAttribute('bg-color', '#fff')
       }
     }
   }

@@ -9,7 +9,7 @@
   </head>
   <body class="body swagger" style="padding-top:0; height:100vh;">
     <rapi-doc id="api" spec-url="{{resolve-resource page.attributes.api-spec-url}}" primary-color="#e2401b"
-        show-header=false {{#if page.attributes.try-it}}show-curl-before-try=true{{else}} allow-try=false {{/if}} show-method-in-nav-bar="as-colored-block" show-info="true" render-style="read" regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" fill-request-fields-with-example="false" nav-bg-color="#fff" nav-item-spacing="relaxed" font-size="largest" fetch-credentials="include">
+        show-header=false {{#if (ne page.attributes.try-it true)}}allow-try=false {{/if}} show-curl-before-try=true show-method-in-nav-bar="as-colored-block" show-info="true" render-style="read" regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" fill-request-fields-with-example="false" nav-bg-color="#fff"  bg-color="#fff" nav-item-spacing="relaxed" font-size="largest" fetch-credentials="include">
     <div class="toolbar" role="navigation" style="top:0;">
       {{#with site.homeUrl}}
       {{#if (ne @root.page.component.name 'redpanda-labs')}}
@@ -45,16 +45,31 @@
       window.addEventListener('DOMContentLoaded', function() {
         const height = getNavbarHeight();
         const rapidoc = document.querySelector('rapi-doc#api');
-        if (rapidoc) {
+        if (rapidoc && rapidoc.shadowRoot) {
+          // Hide the client ID
+          const observer = new MutationObserver(function(mutationsList, observer) {
+            mutationsList.forEach(mutation => {
+              mutation.addedNodes.forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                  const targetElement = node.querySelector('.oauth2.implicit.oauth.oauth-client-id');
+                  if (targetElement) {
+                    targetElement.style.display = 'none';
+                    observer.disconnect();
+                  }
+                }
+              });
+            });
+          });
+          observer.observe(rapidoc.shadowRoot, { childList: true, subtree: true });
           rapidoc.style.marginTop = height + 'px'; // Adjusts the top margin based on the navbar's height
           rapidoc.addEventListener('before-try', (e) => {
             const message = "Warning: API calls are executed against a real environment, not a sandbox.\nAre you sure you want to send this Delete request?"
-          if (e.detail.request.method === 'DELETE') {
-            if (!confirm(message)) {
-              e.detail.controller.abort();
+            if (e.detail.request.method === 'DELETE') {
+              if (!confirm(message)) {
+                e.detail.controller.abort();
+              }
             }
-          }
-        });
+          });
         }
       });
 
