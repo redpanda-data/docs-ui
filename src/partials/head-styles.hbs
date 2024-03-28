@@ -1,23 +1,38 @@
 <script>
-!function (theme) {
-  if (theme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark')
-    window.addEventListener('DOMContentLoaded', function () {
+!function(theme) {
+  window.addEventListener('DOMContentLoaded', function() {
+    const rapidocEl = document.getElementById('api');
+    const switchButton = document.getElementById('switch-theme');
+
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
       document.body.setAttribute('data-theme', 'dark');
-      switchButton = document.getElementById('switch-theme')
-      if (!switchButton) return
-      const img = document.querySelector('#switch-theme > img:first-child')
-      if (img) {
-        const newSrc = img.src.replace('view-sun', 'view-moon')
-        img.src = newSrc
-        // turn it white
-        img.classList.add('moon')
+      if (rapidocEl) {
+        rapidocEl.setAttribute('theme', 'dark');
+        rapidocEl.setAttribute('nav-bg-color', '#212121');
+        rapidocEl.setAttribute('bg-color', '#212121');
       }
-    })
-  } else {
-    document.documentElement.removeAttribute('data-theme')
-  }
-}(localStorage && localStorage.getItem('theme') || matchMedia('(prefers-color-scheme: dark)').matches && 'dark')
+      if (switchButton) {
+        const img = switchButton.querySelector('img:first-child');
+        if (img) {
+          img.src = img.src.replace('view-sun', 'view-moon');
+          img.classList.add('moon'); // Optionally adjust the image's appearance
+        }
+      }
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      document.body.removeAttribute('data-theme');
+      if (rapidocEl) {
+        rapidocEl.setAttribute('theme', 'light');
+        rapidocEl.setAttribute('nav-bg-color', '#fff');
+        rapidocEl.setAttribute('bg-color', '#fff');
+      }
+    }
+  });
+}(
+  localStorage.getItem('theme') ||
+  (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+);
 </script>
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/tabs.css">

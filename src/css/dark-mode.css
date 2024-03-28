@@ -113,11 +113,6 @@ html[data-theme=dark] {
   --highlight-container-background: #262626;
 }
 
-html[data-theme=dark] body.swagger {
-  /* base */
-  --body-background: var(--color-white);
-}
-
 body.dark,
 body[data-theme=dark] {
   --aa-muted-color-rgb: 0 !important;
