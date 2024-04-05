@@ -240,7 +240,7 @@ body {
   }
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1040px) {
   .navbar-burger {
     display: none;
   }
