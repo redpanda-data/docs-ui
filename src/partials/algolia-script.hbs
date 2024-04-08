@@ -355,7 +355,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 let label = 'docs'; // Default to 'docs'
 
                 // Check if a tag is selected and its first character is not uppercase
-                if (tag && !tag.label.charAt(0) !== tag.label.charAt(0).toUpperCase()) {
+                if (tag && tag.label.charAt(0) !== tag.label.charAt(0).toUpperCase()) {
                   label = tag.label; // Use the tag label if it doesn't start with an uppercase character
                 }
 
