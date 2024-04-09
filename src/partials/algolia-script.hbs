@@ -1,6 +1,6 @@
 <script>
 
-const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else if (eq page.component.name 'api')}}{{{site.components.ROOT.title}}} v{{{site.components.ROOT.latest.version}}}{{else if page.componentVersion.version}}{{{page.component.title}}} v{{{page.componentVersion.version}}}{{else}}{{{page.component.title}}}{{/if}}"
+const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else if (eq page.component.name 'api')}}{{{site.components.ROOT.title}}} v{{{site.components.ROOT.latest.version}}}{{else if (and (is-prerelease page) page.displayVersion)}}{{{page.component.title}}} v{{{page.displayVersion}}}{{else if page.componentVersion.version}}{{{page.component.title}}} v{{{page.componentVersion.version}}}{{else}}{{{page.component.title}}}{{/if}}"
 
 const VERSION = "{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.componentVersion.version}}}{{/if}}"
 
