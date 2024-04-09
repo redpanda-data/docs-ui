@@ -347,7 +347,6 @@ li.aa-Item:not([id*="filters"]) {
 }
 
 .aa-ItemActionButton svg {
-  color: white !important;
   height: 15px;
   width: unset;
   margin: 5px;
@@ -355,12 +354,19 @@ li.aa-Item:not([id*="filters"]) {
 
 .aa-Source[data-autocomplete-source-id="filters"] .aa-List {
   display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.aa-Source[data-autocomplete-source-id="filters"] .aa-ItemContentTitle {
+  font-size: 0.85em;
 }
 
 .aa-Source[data-autocomplete-source-id="filters"] .aa-List .aa-Item {
   min-height: unset;
   padding-top: 0;
   padding-bottom: 0;
+  border: 1px solid #dadde1;
 }
 
 .aa-Source[data-autocomplete-source-id=tagsPlugin] .aa-Item {
@@ -409,6 +415,10 @@ li.aa-Item:not([id*="filters"]) {
 .aa-Item[aria-selected=true] {
   background-color: var(--link-font-color) !important;
   color: white !important;
+}
+
+.aa-ActiveOnly {
+  visibility: visible !important;
 }
 
 .aa-ItemContentTitle {

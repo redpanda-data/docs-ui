@@ -1,27 +1,21 @@
 <script>
 
-const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else}}docs{{/if}}"
+const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else if (eq page.component.name 'api')}}{{{site.components.ROOT.title}}} v{{{site.components.ROOT.latest.version}}}{{else if page.componentVersion.version}}{{{page.component.title}}} v{{{page.componentVersion.version}}}{{else}}{{{page.component.title}}}{{/if}}"
 
 const VERSION = "{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.componentVersion.version}}}{{/if}}"
 
 function mapToAlgoliaFilters(tagsByFacet) {
-  const hasDocsTag = Object.values(tagsByFacet).flat().some(tag => tag.label === 'docs');
 
-  let filters = hasDocsTag
-    ? [["{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}{{{site.components.ROOT.latest.title}}}-{{{site.components.ROOT.latest.version}}}{{else}}{{{page.component.title}}}-{{{page.componentVersion.version}}}{{/if}}", 'apis']]
-    : [[]];
+  let filters = [[]];
 
   Object.keys(tagsByFacet).forEach(facet => {
     tagsByFacet[facet].forEach(tag => {
       const filterString = tag.label;
-      // Don't add the docs filter as it allows all versions to be displayed in results.
-      if (tag.label !== 'docs') {
-        const isFilterInArray = filters[0].includes(filterString);
-        if (!isFilterInArray) {
-          filters[0].push(filterString);
-        } else {
-          filters[0] = filters[0].filter(item => item !== filterString);
-        }
+      const isFilterInArray = filters[0].includes(filterString);
+      if (!isFilterInArray) {
+        filters[0].push(filterString);
+      } else {
+        filters[0] = filters[0].filter(item => item !== filterString);
       }
     });
   });
@@ -281,7 +275,7 @@ window.addEventListener('DOMContentLoaded', function() {
               if (!items.length) {
                 return;
               }
-              let headerTitle = "Search In";
+              let headerTitle = "Narrow your search";
               return html`
               <span class="aa-SourceHeaderTitle">${headerTitle}</span>
               <div class="aa-SourceHeaderLine"></div>`;
@@ -357,15 +351,24 @@ window.addEventListener('DOMContentLoaded', function() {
             footer({state, html}) {
               if (state.context.preview) {
                 // Extract tags and format them for URL encoding as array parameters
-                const tag = state.context.tagsPlugin.tags[0]
-                // Convert to init caps and singular
-                const label = tag.label.charAt(0).toUpperCase() + tag.label.slice(1);
+                const tag = state.context.tagsPlugin.tags[0];
+                let label = 'docs'; // Default to 'docs'
+
+                // Check if a tag is selected and its first character is not uppercase
+                if (tag && tag.label.charAt(0) !== tag.label.charAt(0).toUpperCase()) {
+                  label = tag.label; // Use the tag label if it doesn't start with an uppercase character
+                }
+
+                // Capitalize the first character of the label
+                label = label.charAt(0).toUpperCase() + label.slice(1);
+
+                // Convert label to singular if it ends with 's'
                 const formattedLabel = label.endsWith('s') ? label.slice(0, -1) : label;
+
                 // Encode as array parameter
                 const type = `type[0]=${encodeURIComponent(formattedLabel)}`;
                 const queryParam = state.query ? `&q=${encodeURIComponent(state.query)}` : '';
                 var queryParams = `${type}${queryParam}`;
-                console.log(label)
                 if (formattedLabel === 'Doc' && VERSION) {
                    queryParams += `&version=${VERSION}`
                 }
@@ -401,13 +404,21 @@ window.addEventListener('DOMContentLoaded', function() {
                       </div>
                     </div>`
                     : ''
-                  }
-                    <div class="aa-ItemContentSnippet">
+                    }
+                    ${ item.text
+                    ? html`<div class="aa-ItemContentSnippet">
                       ${components.Snippet({
                         hit: item,
                         attribute: 'text',
                       })}
-                    </div>
+                    </div>`
+                    : html`<div class="aa-ItemContentSnippet">
+                      ${components.Snippet({
+                        hit: item,
+                        attribute: 'intro',
+                      })}
+                    </div>`
+                    }
                     <div class="aa-ItemContentRow">
                       <div class="aa-ItemContentTitle result-type">
                         ${item.type}

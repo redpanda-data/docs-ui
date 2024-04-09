@@ -2,3 +2,6 @@
 {{#if (or (is-prerelease page) site.keys.preview)}}
 <meta name="robots" content="noindex">
 {{/if}}
+{{#with site.components.ROOT}}
+<meta name="latest-redpanda-version" content="{{this.latest.version}}">
+{{/with}}
