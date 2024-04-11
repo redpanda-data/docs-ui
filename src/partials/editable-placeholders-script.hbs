@@ -58,16 +58,19 @@ function addEditableSpan(regex, element) {
 }
 
 function addConumSpans(element) {
-  if (!element || !element.textContent) {
-      return;
-  }
-  let codeContent = element.innerHTML;
-
-  // Find numbers inside brackets at the end of lines
-  let pattern = /<span class="token punctuation">\(<\/span><span class="token number">(\d+)<\/span><span class="token punctuation">\)<\/span>\s*$/gm;
-  let replaced = codeContent.replace(pattern, '<i class="conum" data-value="$1"></i>');
-  element.innerHTML = replaced;
+    if (!element || !element.textContent) {
+        return;
+    }
+    let codeContent = element.innerHTML;
+    let pattern = /(\(<span class="token number">(\d+)<\/span>\)|\((\d+)\))\s*$/gm;
+    let replaced = codeContent.replace(pattern, function(match, p1, p2, p3) {
+        // Determine which group captured the digit, and use it for the data-value.
+        let digit = p2 || p3;
+        return `<i class="conum" data-value="${digit}"></i>`;
+    });
+    element.innerHTML = replaced;
 }
+
 
 
 function removeCursor(element) {
