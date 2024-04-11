@@ -800,6 +800,15 @@ table code {
   background-color: var(--caption-background-color);
 }
 
+.doc .openblock.side-by-side > .content {
+  display: flex;
+}
+
+.doc .openblock.side-by-side > .content > * {
+  flex: 1;
+  padding: 10px;
+}
+
 /* immediate sibling of an element with the class title, where this title class element is a direct child of a td element with the class content */
 .doc .admonitionblock td.content > .title + * {
   margin-top: 20px;
