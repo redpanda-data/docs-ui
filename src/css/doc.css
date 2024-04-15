@@ -47,6 +47,19 @@
   margin-top: 0;
 }
 
+@media screen and (min-width: 600px) {
+  .doc .openblock.side-by-side > .content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .doc .openblock.side-by-side > .content > * {
+    flex: 1;
+    padding: 10px;
+    width: 0;
+  }
+}
+
 @media screen and (min-width: 769px) {
   .doc h1 {
     font-size: calc(48 / var(--rem-base) * 1rem);

@@ -237,6 +237,46 @@ Here we just have some plain text.
 plain text
 ----
 
+==== Side-by-side code
+
+[.side-by-side]
+--
+.Strimzi
+[source,yaml]
+----
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: my-topic <1>
+  labels:
+    strimzi.io/cluster: my-kafka-cluster <2>
+spec:
+  partitions: 3 <3>
+  replicas: 3 <4>
+----
+
+.Redpanda
+[source,yaml]
+----
+apiVersion: cluster.redpanda.com/v1alpha1
+kind: Topic
+metadata:
+  name: my-topic <1>
+spec:
+  kafkaApiSpec: <2>
+    brokers:
+      - "redpanda-0.redpanda.<namespace>.svc.cluster.local:9093"
+      - "redpanda-1.redpanda.<namespace>.svc.cluster.local:9093"
+      - "redpanda-2.redpanda.<namespace>.svc.cluster.local:9093"
+    tls:
+      caCertSecretRef:
+        name: "redpanda-default-cert"
+        key: "ca.crt"
+  partitions: 3 <3>
+  replicationFactor: 3 <4>
+----
+--
+
 [.rolename]
 === Liber recusabo
 

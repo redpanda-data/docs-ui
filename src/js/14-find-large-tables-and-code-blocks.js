@@ -17,7 +17,6 @@
         element.parentNode.insertBefore(wrapper, element)
         wrapper.appendChild(element)
         wrapper.style.overflow = 'scroll'
-        wrapper.style.maxHeight = '400px'
         wrapper.style.transition = 'max-height 0.5s ease'
 
         // Create a new container for the button with flex styling
@@ -27,9 +26,9 @@
         buttonContainer.style.marginTop = '-10px'
 
         const readMoreBtn = document.createElement('button')
-        readMoreBtn.innerText = contentType === 'table' ? 'Show full table' : 'View more code'
+        readMoreBtn.innerText = contentType === 'table' ? 'Reduce table height' : 'Reduce code height'
         readMoreBtn.className = 'badge-button'
-        readMoreBtn.setAttribute('aria-expanded', 'false')
+        readMoreBtn.setAttribute('aria-expanded', 'true')
         readMoreBtn.setAttribute('role', 'button')
         readMoreBtn.setAttribute('tabindex', '0')
 
@@ -43,8 +42,8 @@
         const storedState = window.localStorage.getItem(key)
         if (storedState === 'true') {
           wrapper.style.maxHeight = `${element.scrollHeight}px`
-          readMoreBtn.innerText = contentType === 'table' ? 'Hide full table' : 'View less code'
-          readMoreBtn.setAttribute('aria-expanded', 'true')
+          readMoreBtn.innerText = contentType === 'table' ? 'Expand table' : 'Expand code block'
+          readMoreBtn.setAttribute('aria-expanded', 'false')
         }
 
         readMoreBtn.addEventListener('click', function () {
@@ -53,8 +52,8 @@
           wrapper.style.overflow = isExpanded ? 'scroll' : 'unset'
           readMoreBtn.innerText = isExpanded
             ? (contentType === 'table'
-              ? 'Show full table' : 'View more code') : (contentType === 'table'
-              ? 'Hide full table' : 'View less code')
+              ? 'Expand table' : 'Expand code block') : (contentType === 'table'
+              ? 'Reduce table height' : 'Reduce code height')
           readMoreBtn.setAttribute('aria-expanded', !isExpanded)
 
           window.localStorage.setItem(key, !isExpanded)
