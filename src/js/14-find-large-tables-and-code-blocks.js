@@ -15,6 +15,8 @@
         wrapper.style.overflow = 'scroll'
         wrapper.style.transition = 'max-height 0.5s ease'
         wrapper.style.maxHeight = '400px'
+        wrapper.style.marginTop = '1.5em'
+        element.style.marginTop = 'unset'
 
         const buttonContainer = document.createElement('div')
         buttonContainer.style.display = 'flex'
