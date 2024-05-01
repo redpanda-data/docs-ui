@@ -5,9 +5,9 @@
 
 .swagger {
   color: var(--body-font-color);
-  font-size: var(--swagger-font-size);
+  font-size: var(--body-font-size);
   hyphens: auto;
-  line-height: var(--swagger-line-height);
+  line-height: var(--doc-line-height);
   padding: 0 1rem;
   margin-top: 2.5rem;
 }
