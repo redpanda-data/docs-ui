@@ -15,11 +15,18 @@ module.exports = (url, slot, { data: { root } }) => {
   })
 
   if (!filteredPage) return null
+  console.log(JSON.stringify(filteredPage))
 
+  function removeRelativeLinkTags (htmlContent) {
+    const regex = /<a\s+(?:[^>]*?\s+)?href="(?!(http:\/\/|https:\/\/))([^"]*)"(?:[^>]*)>(.*?)<\/a>/gis
+    // Replace the matched <a> tags with just their text content
+    return htmlContent.replace(regex, '$3')
+  }
   // Decode the Buffer to string for the HTML content
   const contentBuffer = Buffer.from(filteredPage._contents)
   const decodedContent = contentBuffer.toString('utf8')
+  const cleanedContent = removeRelativeLinkTags(decodedContent)
 
   // Return the HTML content.
-  return decodedContent
+  return cleanedContent
 }
