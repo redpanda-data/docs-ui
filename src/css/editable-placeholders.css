@@ -7,6 +7,13 @@ span.editable {
   margin-left: 1px;
   margin-right: 1px;
   background: var(--editable-background);
+  border-bottom: 2px dashed;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+span.editable:hover {
+  cursor: pointer;
 }
 
 span.cursor {
@@ -15,6 +22,7 @@ span.cursor {
   left: -9px;
   position: relative;
   display: inline-block;
+  font-size: 1.1em;
   width: 0;
 }
 
@@ -22,7 +30,7 @@ span.cursor::after,
 span.cursor > span::after {
   content: "|";
   display: inline-block;
-  animation: cursor-blink 1.2s infinite;
+  animation: cursor-blink 1.1s infinite;
   font-weight: 100;
   color: var(--editable-code-font-color);
 }

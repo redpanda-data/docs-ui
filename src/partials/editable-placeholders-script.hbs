@@ -129,6 +129,23 @@ function addEvents(parentElement) {
         event.target.blur()
       }
     });
+    placeholder.addEventListener('blur', function() {
+      const currentText = this.textContent.trim();
+      const dataType = this.getAttribute('data-type');
+      if (currentText) {
+        sessionStorage.setItem(dataType, currentText);
+      } else {
+        // Reset to default
+        this.textContent = `<${dataType}>`;
+      }
+    });
+    const dataType = placeholder.getAttribute('data-type')
+    if (!dataType) {
+      console.error('Data type attribute is missing on the placeholder.')
+      return
+    }
+    const savedText = sessionStorage.getItem(dataType);
+    placeholder.textContent = savedText ? savedText : `<${dataType}>`;
   })
 }
 
