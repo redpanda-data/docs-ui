@@ -8,7 +8,7 @@
   </head>
   <body class="body swagger" style="padding-top:0; height:100vh;">
     <rapi-doc id="api" spec-url="{{resolve-resource page.attributes.api-spec-url}}" primary-color="#e2401b"
-        show-header=false {{#if page.attributes.try-it}}allow-try=true {{else}} allow-try=false {{/if}} show-curl-before-try=true show-method-in-nav-bar="as-colored-block" show-info="true" render-style="read" regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" fill-request-fields-with-example="false" nav-bg-color="#fff"  bg-color="#fff" nav-item-spacing="relaxed" font-size="largest" fetch-credentials="include">
+        show-header=false {{#if page.attributes.try-it}}allow-try=true {{else}} allow-try=false {{/if}} show-curl-before-try=true show-method-in-nav-bar="as-colored-block" show-info="true" render-style="read" regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" fill-request-fields-with-example="true" nav-bg-color="#fff"  bg-color="#fff" nav-item-spacing="relaxed" font-size="largest" fetch-credentials="include" css-file="{{{uiRootPath}}}/css/site.css"  css-classes="swagger">
     <div class="toolbar" role="navigation" style="top:0;">
       {{#with site.homeUrl}}
       {{#if (ne @root.page.component.name 'redpanda-labs')}}
@@ -24,6 +24,16 @@
     </div>
     <div slot="nav-logo" style="display: flex; align-items: center; justify-content: center;">
       <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
+    </div>
+    <div slot="overview">
+      {{#with (get-api-slots page.url 'overview')}}
+          {{{this}}}
+      {{/with}}
+    </div>
+    <div slot="auth">
+      {{#with (get-api-slots page.url 'auth')}}
+          {{{this}}}
+      {{/with}}
     </div>
     <div slot="footer">
       {{> footer}}
@@ -55,6 +65,29 @@
                     targetElement.style.display = 'none';
                     observer.disconnect();
                   }
+                  const subTitleDivs = node.querySelectorAll('.sub-title');
+                  subTitleDivs.forEach(div => {
+                    const h2 = document.createElement('h2');
+                    h2.innerHTML = div.innerHTML;
+                    const partAttribute = div.getAttribute('part');
+                    if (partAttribute) {
+                      h2.setAttribute('part', partAttribute);
+                    }
+                    div.parentNode.replaceChild(h2, div);
+                  });
+                  const headingElements = Array.from(node.querySelectorAll('h2:not(div.sect > h2), h3:not(div.sect > h3), h4:not(div.sect > h4)'));
+                  headingElements.forEach(heading => {
+                    if (!heading.closest('.sect')) {
+                      heading.style.fontSize = 'revert';
+                      heading.style.paddingTop = 'revert';
+                      heading.style.marginBlockEnd = 'revert';
+                    }
+                  });
+                  const tables = node.querySelectorAll('table');
+                  tables.forEach(table => {
+                    table.classList.add('tableblock', 'stripes-odd');
+                    table.style.width = '100%';
+                  });
                 }
               });
             });

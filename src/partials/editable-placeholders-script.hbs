@@ -120,6 +120,32 @@ function addEvents(parentElement) {
         }
       });
     });
+    // Handle the Enter key
+    placeholder.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        // Prevent the default Enter key behavior (newline)
+        event.preventDefault()
+        // Exit the editable mode and move the focus out
+        event.target.blur()
+      }
+    });
+    placeholder.addEventListener('blur', function() {
+      const currentText = this.textContent.trim();
+      const dataType = this.getAttribute('data-type');
+      if (currentText) {
+        sessionStorage.setItem(dataType, currentText);
+      } else {
+        // Reset to default
+        this.textContent = `<${dataType}>`;
+      }
+    });
+    const dataType = placeholder.getAttribute('data-type')
+    if (!dataType) {
+      console.error('Data type attribute is missing on the placeholder.')
+      return
+    }
+    const savedText = sessionStorage.getItem(dataType);
+    placeholder.textContent = savedText ? savedText : `<${dataType}>`;
   })
 }
 
