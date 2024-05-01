@@ -18,7 +18,7 @@ module.exports = (url, slot, { data: { root } }) => {
 
   // Decode the Buffer to string for the HTML content
   const contentBuffer = Buffer.from(filteredPage._contents)
-  let decodedContent = contentBuffer.toString('utf8')
+  const decodedContent = contentBuffer.toString('utf8')
 
   // Return the HTML content.
   return decodedContent
