@@ -10,6 +10,9 @@
   var svgAs = config.svgAs
   var supportsCopy = window.navigator.clipboard
 
+  // We use Rapidoc for the API docs, which comes with a copy button already.
+  if (document.querySelectorAll('.body.swagger').length > 0) return
+
   document.querySelectorAll('pre').forEach(function (pre) {
     if (pre.firstElementChild && pre.firstElementChild.tagName.toLowerCase() === 'code') {
       pre.classList.add('code-first-child')
