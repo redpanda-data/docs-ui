@@ -15,17 +15,36 @@ module.exports = (url, slot, { data: { root } }) => {
   })
 
   if (!filteredPage) return null
-  console.log(JSON.stringify(filteredPage))
 
   function removeRelativeLinkTags (htmlContent) {
     const regex = /<a\s+(?:[^>]*?\s+)?href="(?!(http:\/\/|https:\/\/))([^"]*)"(?:[^>]*)>(.*?)<\/a>/gis
     // Replace the matched <a> tags with just their text content
     return htmlContent.replace(regex, '$3')
   }
+  function extractDocContent (htmlContent) {
+    // Regular expression to find the <article class="doc">...</article> block
+    const articleRegex = /<article\s+class="doc"[^>]*>([\s\S]*?)<\/article>/
+    const match = htmlContent.match(articleRegex)
+
+    if (!match) return ''
+
+    // Extract content inside the article
+    let articleContent = match[1]
+    // Remove unnecessary elements
+    articleContent = articleContent.replace(/<nav[^>]*>[\s\S]*?<\/nav>/g, '')
+    articleContent = articleContent.replace(/<[^>]+class="[^"]*feedback-section[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/g, '')
+    articleContent = articleContent.replace(/<div[^>]*class="[^"]*col[^"]*"[^>]*>[\s\S]*?<\/div>/g, '')
+    articleContent = articleContent.replace(/<h1[^>]*>[\s\S]*?<\/h1>/g, '')
+    articleContent = articleContent.replace(/<button[^>]*class="[^"]*thumb[^"]*"[^>]*>[\s\S]*?<\/button>/g, '')
+
+    const cleanedContent = removeRelativeLinkTags(articleContent)
+
+    return cleanedContent
+  }
   // Decode the Buffer to string for the HTML content
   const contentBuffer = Buffer.from(filteredPage._contents)
   const decodedContent = contentBuffer.toString('utf8')
-  const cleanedContent = removeRelativeLinkTags(decodedContent)
+  const cleanedContent = extractDocContent(decodedContent)
 
   // Return the HTML content.
   return cleanedContent
