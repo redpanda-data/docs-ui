@@ -51,7 +51,7 @@ function addEditableSpan(regex, element) {
     }
     const regexString = RegExp.escape(placeholder);
     const globalRegex = new RegExp(regexString, 'g');
-    newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" onclick="removeCursor(event)">&lt;${cleanedPlaceholder}&gt;</span><span class="cursor"></span>`);
+    newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}">&lt;${cleanedPlaceholder}&gt;</span><span class="fa fa-pencil cursor"></span>`);
     processed.add(placeholder);
   }
   element.innerHTML = newHTML;
@@ -71,19 +71,6 @@ function addConumSpans(element) {
     element.innerHTML = replaced;
 }
 
-
-
-function removeCursor(element) {
-  if (element.target) {
-    element = element.target;
-  }
-
-  if (element.contentEditable === 'true' && element.nextElementSibling) {
-    element.nextElementSibling.classList.remove('cursor');
-  } else if (element.parentElement && element.parentElement.nextElementSibling) {
-    element.parentElement.nextElementSibling.classList.remove('cursor');
-  }
-}
 
 function addClasses(parentElement) {
   const baseElement = parentElement || document;
@@ -116,7 +103,6 @@ function addEvents(parentElement) {
         // Update the text if the span isn't within a hidden tab
         if (!hasHiddenAncestor && span !== event.target) {
             span.textContent = newText
-            removeCursor(span)
         }
       });
     });
@@ -130,6 +116,10 @@ function addEvents(parentElement) {
       }
     });
     placeholder.addEventListener('blur', function() {
+      const cursor = this.nextElementSibling;
+      if (cursor && cursor.classList.contains('cursor')) {
+        cursor.style.display = 'inline';
+      }
       const currentText = this.textContent.trim();
       const dataType = this.getAttribute('data-type');
       if (currentText) {
@@ -137,6 +127,12 @@ function addEvents(parentElement) {
       } else {
         // Reset to default
         this.textContent = `<${dataType}>`;
+      }
+    });
+    placeholder.addEventListener('focus', function() {
+    const cursor = this.nextElementSibling;
+      if (cursor && cursor.classList.contains('cursor')) {
+        cursor.style.display = 'none';
       }
     });
     const dataType = placeholder.getAttribute('data-type')

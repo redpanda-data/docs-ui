@@ -19,28 +19,5 @@ span.editable:hover {
 span.cursor {
   font-weight: 450;
   color: var(--editable-code-font-color);
-  left: -9px;
-  position: relative;
-  display: inline-block;
   font-size: 1.1em;
-  width: 0;
-}
-
-span.cursor::after,
-span.cursor > span::after {
-  content: "|";
-  display: inline-block;
-  animation: cursor-blink 1.1s infinite;
-  font-weight: 100;
-  color: var(--editable-code-font-color);
-}
-
-@keyframes cursor-blink {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
 }
