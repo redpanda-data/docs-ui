@@ -25,16 +25,9 @@
     <div slot="nav-logo" style="display: flex; align-items: center; justify-content: center;">
       <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
     </div>
-    <div slot="overview">
-      {{#with (get-api-slots page.url 'overview')}}
-          {{{this}}}
-      {{/with}}
-    </div>
-    <div slot="auth">
-      {{#with (get-api-slots page.url 'auth')}}
-          {{{this}}}
-      {{/with}}
-    </div>
+    {{#each (get-api-slots page.url)}}
+        {{{this}}}
+    {{/each}}
     <div slot="footer">
       {{> footer}}
     </div>
