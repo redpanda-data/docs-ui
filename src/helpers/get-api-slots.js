@@ -19,7 +19,7 @@ module.exports = (url, { data }) => {
     const pathParts = page.src.relative.split('/')
     if (pathParts.length !== 3) return false
 
-     // Use the first directory as the API name
+    // Use the first directory as the API name
     const api = pathParts[0]
 
     if (url.includes(api)) {
