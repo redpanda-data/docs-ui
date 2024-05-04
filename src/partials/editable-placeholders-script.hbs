@@ -12,6 +12,7 @@ function createEditablePlaceholders(parentElement) {
 
   for (let i = 0; i < codeElements.length; i++) {
     const codeElement = codeElements[i];
+    preprocessParentheses(codeElement)
     addConumSpans(codeElement);
     if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html' && codeElement.dataset.lang !== 'rust') {
       addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
@@ -56,6 +57,30 @@ function addEditableSpan(regex, element) {
   }
   element.innerHTML = newHTML;
 }
+
+function preprocessParentheses(element) {
+  if (!element || !element.textContent) {
+      return;
+  }
+
+  // This pattern matches parentheses that are wrapped in `span` tags.
+  let pattern = /<span class="token punctuation">(\()<\/span>|<span class="token punctuation">(\))<\/span>/g;
+
+  let codeContent = element.innerHTML;
+  // Replace the matched patterns by removing the span tags and leaving the parentheses.
+  let processedContent = codeContent.replace(pattern, function(match, openParen, closeParen) {
+    if (openParen) {
+      return openParen;
+    }
+    if (closeParen) {
+      return closeParen;
+    }
+    return match;
+  });
+
+  element.innerHTML = processedContent;
+}
+
 
 function addConumSpans(element) {
     if (!element || !element.textContent) {
