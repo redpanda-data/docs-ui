@@ -51,7 +51,7 @@ function addEditableSpan(regex, element) {
     }
     const regexString = RegExp.escape(placeholder);
     const globalRegex = new RegExp(regexString, 'g');
-    newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}">&lt;${cleanedPlaceholder}&gt;</span><span class="fa fa-pencil cursor"></span>`);
+    newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" aria-label="Edit ${cleanedPlaceholder}" title="Edit ${cleanedPlaceholder}" role="textbox" aria-multiline="false">&lt;${cleanedPlaceholder}&gt;</span><span class="fa fa-pencil cursor" aria-hidden="true"></span>`);
     processed.add(placeholder);
   }
   element.innerHTML = newHTML;
@@ -116,24 +116,36 @@ function addEvents(parentElement) {
       }
     });
     placeholder.addEventListener('blur', function() {
-      const cursor = this.nextElementSibling;
+      const cursor = this.nextElementSibling
       if (cursor && cursor.classList.contains('cursor')) {
-        cursor.style.display = 'inline';
+        cursor.style.display = 'inline'
       }
-      const currentText = this.textContent.trim();
-      const dataType = this.getAttribute('data-type');
-      if (currentText) {
-        sessionStorage.setItem(dataType, currentText);
+      const currentText = this.textContent.trim()
+      const dataType = this.getAttribute('data-type')
+
+      // Reset to default if empty and propagate the reset
+      if (!currentText) {
+        const defaultText = `<${dataType}>`
+        this.textContent = defaultText
+        // Update all placeholders of the same data-type with the default text
+        document.querySelectorAll(`[data-type="${dataType}"][contenteditable="true"]`).forEach(span => {
+          span.textContent = defaultText
+        })
       } else {
-        // Reset to default
-        this.textContent = `<${dataType}>`;
+        sessionStorage.setItem(dataType, currentText)
       }
-    });
+    })
     placeholder.addEventListener('focus', function() {
     const cursor = this.nextElementSibling;
       if (cursor && cursor.classList.contains('cursor')) {
         cursor.style.display = 'none';
       }
+      // Select all text inside the placeholder when it receives focus
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(this);
+      selection.removeAllRanges();
+      selection.addRange(range);
     });
     const dataType = placeholder.getAttribute('data-type')
     if (!dataType) {
