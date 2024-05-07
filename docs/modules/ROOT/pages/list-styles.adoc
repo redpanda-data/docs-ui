@@ -57,6 +57,15 @@ Here's an AsciiDoc source example that produces a checklist:
 * [x] done!
 ----
 
+If you want to make the checklist clickable, add a directive `[%interactive]` before the checklist.
+Example:
+
+[source,asciidoc]
+----
+[%interactive]
+* [ ] click on the box!
+----
+
 If font-based icons are enabled (`icons=font`), the checkbox gets inserted as the first element of the paragraph element that contains the list item text.
 
 [source,html]
