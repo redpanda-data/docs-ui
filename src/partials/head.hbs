@@ -1,3 +1,77 @@
+<script defer>
+document.documentElement.setAttribute('data-theme',
+  localStorage.getItem('theme') ||
+  (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+);
+(function() {
+  'use strict';
+
+  // Initialize theme based on local storage or system preference
+  const initialTheme = localStorage.getItem('theme') ||
+    (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  window.addEventListener('DOMContentLoaded', function() {
+    const switchButton = document.getElementById('switch-theme');
+    if (switchButton) {
+      setTheme(initialTheme);  // Apply initial theme on load
+      switchButton.addEventListener('click', function() {
+        // Toggle theme on button click
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        setTheme(newTheme);
+      });
+    }
+  });
+  function setTheme(theme) {
+    const rapidocEl = document.getElementById('api');
+    const switchButton = document.getElementById('switch-theme');
+    const img = switchButton.querySelector('img:first-child');
+
+    if (theme === 'dark') {
+      img.src = img.src.replace('view-sun', 'view-moon');
+      img.classList.add('moon');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.setAttribute('data-theme', 'dark');
+      if (rapidocEl) {
+        rapidocEl.setAttribute('theme', 'dark');
+        rapidocEl.setAttribute('nav-bg-color', '#212121');
+        rapidocEl.setAttribute('bg-color', '#212121');
+      }
+    } else {
+      img.src = img.src.replace('view-moon', 'view-sun');
+      img.classList.remove('moon');
+      document.documentElement.removeAttribute('data-theme');
+      document.body.removeAttribute('data-theme');
+      if (rapidocEl) {
+        rapidocEl.setAttribute('theme', 'light');
+        rapidocEl.setAttribute('nav-bg-color', '#fff');
+        rapidocEl.setAttribute('bg-color', '#fff');
+      }
+    }
+  }
+})();
+</script>
+<style>
+  :root {
+    --background-color: #212121; /* Default to dark background color */
+    --text-color: #ffffff; /* Default to light text color */
+  }
+
+  html[data-theme="dark"] {
+    --background-color: #212121;
+    --text-color: #ffffff;
+  }
+
+  html[data-theme="light"] {
+    --background-color: #ffffff;
+    --text-color: #333;
+  }
+
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+</style>
 {{> head-prelude}}
 {{> head-title}}
 {{> head-info}}
