@@ -12,7 +12,7 @@ module.exports = (url, { data: { root } }) => {
         url: pages[i].pub.url,
         webUrl: pages[i].src.origin.webUrl,
         editUrl: pages[i].src.editUrl,
-        path: pages[i].src.origin.startPath,
+        path: pages[i].src.origin.startPath.substring(0, pages[i].src.origin.startPath.lastIndexOf('/')) || '/',
         branch: pages[i].src.origin.branch,
       }
     }

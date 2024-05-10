@@ -956,7 +956,7 @@ table code {
   filter: var(--svg-dark-mode-filter);
 }
 
-.doc .nav-image img.dark-mode-filter,
+img.dark-mode-filter,
 .nav .nav-image img.dark-mode-filter {
   filter: var(--svg-dark-mode-filter);
 }
