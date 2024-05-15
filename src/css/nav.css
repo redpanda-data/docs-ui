@@ -25,6 +25,7 @@
   padding: 5px;
   justify-content: space-between;
   display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 

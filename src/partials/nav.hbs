@@ -6,10 +6,10 @@
     <div class="top-panel">
     {{#if (and (ne page.layout 'search') (ne page.layout 'labs-search'))}}
       <div class="search hide-for-print">
-        <div class="autocomplete" id="autocomplete"></div>
         <div id="custom-kapa-widget-container" style="display:flex;align-items:center;">
-          <button class="custom-class-kapa" type="button" data-button="true" style="padding: 2px 4px;background-color: rgb(225, 66, 37);box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;border-radius: 5px;border: none;color:white;"><div><span><div style="display:flex;flex-direction:row;"><div style="width: 1.6rem;"><figure style="margin:0;height:1.5rem;width:1.5rem;"><div><img src="https://avatars.githubusercontent.com/u/49406389?s=200&amp;v=4" alt="Project Logo" style="object-fit: cover; width: 1.5rem; height: 1.5rem; border-radius:5px;"></div></figure></div><div style="text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 2px;line-height:1.5rem;">Ask AI</div></div></span></div></button>
+          <button class="custom-class-kapa" type="button" data-button="true" style="background-color: rgb(225, 66, 37);box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;border-radius: 40px;border: none;color:white;height:44px;width:100%"><div style="margin-left:7px;"><span><div style="display:flex;flex-direction:row;"><div style="width: 2rem;"><figure style="margin:0;height:1.5rem;width:1.5rem;"><div><img src="https://avatars.githubusercontent.com/u/49406389?s=200&amp;v=4" alt="Project Logo" style="object-fit: cover; width: 1.5rem; height: 1.5rem; border-radius:5px;"></div></figure></div><div style="text-shadow: rgba(0, 0, 0, 0.2) 1px 1px 2px;line-height:1.5rem;">Ask AI</div></div></span></div></button>
         </div>
+        <div class="autocomplete" id="autocomplete"></div>
       </div>
     {{/if}}
     {{> nav-explore}}
