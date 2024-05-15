@@ -23,6 +23,10 @@
 
 .top-panel .search {
   padding: 5px;
+  justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .top-panel .dropdown .dropdown-content {
@@ -69,6 +73,10 @@
   border-radius: 5px;
   color: var(--page-version-font-color);
   padding: 2px 3px;
+}
+
+.top-panel .autocomplete {
+  flex: 1;
 }
 
 @media screen and (min-width: 769px) {
