@@ -16,8 +16,9 @@
       {{/if}}
       {{/with}}
     {{> breadcrumbs}}
-    {{> api-feedback}}
-
+    {{#if is-cloud-url}}
+      {{> api-feedback}}
+    {{/if}}
     </div>
     <div slot="nav-logo" style="display: flex; align-items: center; justify-content: center;">
       <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
