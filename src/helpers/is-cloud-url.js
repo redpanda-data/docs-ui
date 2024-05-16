@@ -12,7 +12,7 @@ module.exports = (navUrl, { data: { root } }) => {
   }
   for (let i = 0; i < pages.length; i++) {
     if (pages[i].pub.url === navUrl &&
-      pages[i].asciidoc.attributes['page-cloudapi']) {
+      pages[i].asciidoc.attributes['page-cloud-api']) {
       return true
     }
   }
