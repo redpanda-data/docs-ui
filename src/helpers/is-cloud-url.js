@@ -1,5 +1,5 @@
 'use strict'
-module.exports = function (context) {
+module.exports = (navUrl, { data: { root } }) => {
   const { contentCatalog, page } = root
   if (page.layout === '404') return
   if (contentCatalog === undefined) return
