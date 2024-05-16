@@ -1,8 +1,7 @@
-;(function () {
-  'use strict'
-
-  const currentUrl = window.location.href
+'use strict'
+module.exports = function (context) {
+  const pageUrl = context.getFile().getPath()
   const searchString = 'cloud'
 
-  return currentUrl.includes(searchString)
-})()
+  return pageUrl.includes(searchString)
+}
