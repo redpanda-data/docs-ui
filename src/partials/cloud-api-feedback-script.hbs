@@ -1,0 +1,38 @@
+<script>
+var currentForm;
+const successfulSentFeedbackEmail = document.getElementById('successful-sent-email-api-feedback')
+const cloudApiFeedbackModalContent = document.getElementById('cloud-api-feedback-modal-content')
+
+
+const handleSubmit = function (event) {
+  event.preventDefault();
+  const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
+  const form = event.target;
+  var formData = new FormData(form);
+
+  formData.set('url', currentUrl)
+  formData.set('email', (form.querySelector('input[name="email"]').value))
+  formData.set('date', new Date())
+
+  fetch("{{page.url}}", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData).toString(),
+  }).then(() => {
+      console.log('Form submission success')
+      clearFeedbackModal()
+    })
+    .catch(error => {
+      console.error('Form submission error:', error)
+    })
+}
+function clearFeedbackModal() {
+  cloudApiFeedbackModalContent.style.display='none' //hide content
+  successfulSentEmail.classList.toggle("hidden"); //display thank you note
+}
+
+function closeForm(event) {
+  event.preventDefault()
+  currentForm.classList.toggle("hidden");
+}
+</script>
