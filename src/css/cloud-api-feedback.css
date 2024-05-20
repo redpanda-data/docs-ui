@@ -1,0 +1,87 @@
+.cloud-api-feedback-section {
+  padding: 0 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+  color: var(--link-font-color);
+  gap: 10px;
+}
+
+.cloud-api-feedback-section .material-icons {
+  vertical-align: middle;
+}
+
+.cloud-api-feedback-section a {
+  text-decoration: none;
+}
+
+.cloud-api-feedback-section a:hover {
+  cursor: pointer;
+}
+
+.cloud-api-feedback-section .col {
+  gap: 8px;
+  margin-top: 20px;
+}
+
+@media screen and (min-width: 1024px) {
+  .cloud-api-feedback-section {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+}
+
+.cloud-api-feedback-modal {
+  display: block;
+  position: fixed;
+  z-index: 9;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.cloud-api-feedback-modal-content {
+  display: flex;
+  font-weight: bold;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+.cloud-api-feedback-modal-body {
+  background-color: var(--feedback-modal-background);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 350px;
+  position: relative;
+}
+
+.cloud-api-feedback-modal-close {
+  position: absolute;
+  top: -5px;
+  right: 0;
+}
+
+.cloud-api-feedback-modal-close button {
+  background-color: var(--body-background) !important;
+  border: 0 !important;
+  color: var(--link-font-color) !important;
+}
+
+.cloud-api-feedback-modal-input {
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 80%;
+  padding: 7px;
+}
+
+.cloud-api-feedback-modal .successful-sent-email-api-feedback {
+  display: hidden;
+}

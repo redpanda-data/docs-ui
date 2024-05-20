@@ -21,11 +21,16 @@
       {{/if}}
       {{/with}}
     {{> breadcrumbs}}
-      <div class="theme-switcher">
-        <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite">
-          <img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
-        </button>
-      </div>
+    {{#if (is-cloud-url page.url)}}
+      {{> cloud-api-feedback}}
+    {{/if}}
+    <div class="col">
+    <div class="theme-switcher">
+      <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite">
+        <img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
+      </button>
+    </div>
+  </div>
     </div>
     <div slot="nav-logo" style="display: flex; align-items: center; justify-content: center;">
       <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
@@ -176,5 +181,6 @@
         });
       }
     </script>
+    {{> cloud-api-feedback-modal}}
   </body>
 </html>
