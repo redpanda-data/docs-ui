@@ -364,7 +364,7 @@ ul.nav-list > li:first-child[data-depth="6"] {
 }
 
 .nav-link.cloud-beta::after {
-  background-image: url(../img/cloud-beta.svg);
+  background-image: url(../img/beta.svg);
   height: 20px;
   display: block;
   background-repeat: no-repeat;
