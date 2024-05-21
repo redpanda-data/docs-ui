@@ -13,7 +13,7 @@
   </head>
   <body class="body swagger" style="padding-top:0; height:100vh;">
     <rapi-doc id="api" spec-url="{{resolve-resource page.attributes.api-spec-url}}" primary-color="#e2401b"
-        show-header=false {{#if page.attributes.try-it}}allow-try=true {{else}} allow-try=false {{/if}} show-curl-before-try=true show-method-in-nav-bar="as-colored-text" show-info="true" render-style="read" regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" fill-request-fields-with-example="true" nav-bg-color="#fff"  bg-color="#fff" nav-item-spacing="relaxed" font-size="largest" fetch-credentials="include" css-file="{{{uiRootPath}}}/css/site.css"  css-classes="swagger">
+        show-header=false {{#if page.attributes.try-it}}allow-try=true {{else}} allow-try=false {{/if}} show-curl-before-try=true show-method-in-nav-bar="as-colored-text" show-info="true" render-style="read" regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" fill-request-fields-with-example="true" nav-bg-color="#fff"  bg-color="#fff" nav-item-spacing="relaxed" font-size="largest" css-file="{{{uiRootPath}}}/css/site.css"  css-classes="swagger">
     <div class="toolbar" role="navigation" style="top:-5px;">
       {{#with site.homeUrl}}
       {{#if (ne @root.page.component.name 'redpanda-labs')}}
