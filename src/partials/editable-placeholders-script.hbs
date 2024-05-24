@@ -95,7 +95,7 @@ function addConumSpans(element) {
         return;
     }
     let codeContent = element.innerHTML;
-    let pattern = /\s(\(<span class="token number">(\d+)<\/span>\)|\((\d+)\))\s*$/gm;
+    let pattern = /(\s\(<span class="token number">(\d+)<\/span>\)|\((\d+)\))\s*$/gm;
     let replaced = codeContent.replace(pattern, function(match, p1, p2, p3) {
         // Determine which group captured the digit, and use it for the data-value.
         let digit = p2 || p3;
