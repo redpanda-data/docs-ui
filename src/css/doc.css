@@ -957,6 +957,118 @@ table code {
   filter: var(--svg-dark-mode-filter);
 }
 
+.doc .two-column-grid {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr;
+}
+
+.doc .component-card {
+  background-color: var(--panel-background);
+  border: 1px solid var(--page-version-menu-background);
+  border-radius: 0.4rem;
+  display: inline-block;
+  margin: 3px;
+  padding: 0.3em 0.3em;
+  color: var(--body-font-color);
+}
+
+.doc .component-card:hover {
+  color: var(--link-font-color);
+  text-decoration: none;
+}
+
+.doc .choices {
+  overflow: visible;
+  border-radius: 10px;
+  margin-bottom: 0;
+  flex: 0.5;
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .choices__inner {
+  background-color: var(--body-background);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .choices__list--dropdown .choices__item,
+.doc .choices__list[aria-expanded] .choices__item {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .tableblock .choices__list--dropdown,
+.doc .tableblock .choices__list[aria-expanded],
+.doc .choices__list--dropdown,
+.doc .choices__list[aria-expanded],
+.doc .table-filters .choices__list--dropdown,
+.doc .table-filters .choices__list[aria-expanded] {
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .page-type-dropdown .choices[data-type*=select-one] .choices__inner {
+  padding: 0;
+}
+
+.doc .page-type-dropdown {
+  display: flex;
+  margin-top: 10px;
+  gap: 5px;
+  align-items: center;
+}
+
+.doc .page-type-dropdown .choices {
+  flex: 0.3;
+}
+
+.doc .choices__list--dropdown .choices__item--selectable.is-highlighted,
+.doc .choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+  background-color: var(--panel-background);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .choices__placeholder {
+  opacity: 9;
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .type-dropdown {
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.doc .table-filters {
+  display: flex;
+  margin-top: 1rem;
+  gap: 10px;
+}
+
+.doc .table-filters .table-search {
+  flex: 0.75;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.doc .table-filters .table-search::placeholder,
+.doc .table-filters .table-search::-moz-placeholder,
+.doc .table-filters .table-search::-webkit-input-placeholder {
+  opacity: 0.9;
+  color: var(--body-font-color);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .tableblock.component-table {
+  margin-top: 1rem;
+}
+
 img.dark-mode-filter,
 .nav .nav-image img.dark-mode-filter {
   filter: var(--svg-dark-mode-filter);
