@@ -12,9 +12,17 @@ function createEditablePlaceholders(parentElement) {
 
   for (let i = 0; i < codeElements.length; i++) {
     const codeElement = codeElements[i];
+    const preElement = codeElement.parentElement;
+    const contentDivElement = preElement.parentElement;
+    const listingBlockElement = contentDivElement.parentElement;
+
+    // Check if the grandparent has the class 'no-placeholders'
+    if (listingBlockElement.classList.contains('no-placeholders')) {
+      continue;
+    }
     preprocessParentheses(codeElement)
     addConumSpans(codeElement);
-    if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html' && codeElement.dataset.lang !== 'rust') {
+    if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html' && codeElement.dataset.lang !== 'rust' && codeElement.dataset.lang !== 'coffeescript') {
       addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
     }
   }
@@ -87,7 +95,7 @@ function addConumSpans(element) {
         return;
     }
     let codeContent = element.innerHTML;
-    let pattern = /(\(<span class="token number">(\d+)<\/span>\)|\((\d+)\))\s*$/gm;
+    let pattern = /\s(\(<span class="token number">(\d+)<\/span>\)|\((\d+)\))\s*$/gm;
     let replaced = codeContent.replace(pattern, function(match, p1, p2, p3) {
         // Determine which group captured the digit, and use it for the data-value.
         let digit = p2 || p3;

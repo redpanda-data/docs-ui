@@ -237,6 +237,14 @@ Here we just have some plain text.
 plain text
 ----
 
+
+==== Ignored placeholders
+
+[source,bash,role="no-placeholders"]
+----
+<this-placeholder-will-be-unchanged>
+----
+
 ==== Side-by-side code
 
 [.side-by-side]
