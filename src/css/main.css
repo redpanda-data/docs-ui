@@ -12,7 +12,7 @@
   main {
     margin: 0 auto;
     width: calc(100% - var(--nav-width));
-    padding-top: 20px;
+    padding-top: 0;
     min-width: 0; /* min-width: 0 required for flexbox to constrain overflowing elements */
   }
 

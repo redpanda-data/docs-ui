@@ -30,7 +30,7 @@ a + .breadcrumbs {
 }
 
 .breadcrumbs li::after {
-  content: ">";
+  content: "\203A";
   padding: 0 0.5rem;
 }
 
@@ -44,8 +44,8 @@ a + .breadcrumbs {
 
 .breadcrumbs li:hover a,
 .breadcrumbs li:last-child a {
-  background-color: var(--link-highlight-background-color);
   color: var(--link-font-color);
   border-radius: 1.5rem;
+  padding: 0;
   text-decoration: none;
 }

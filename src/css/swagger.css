@@ -7,8 +7,11 @@
   color: var(--body-font-color);
   hyphens: auto;
   line-height: var(--doc-line-height);
-  padding: 0 1rem;
-  margin-top: 2.5rem;
+}
+
+.swagger .main-content-inner--read-mode {
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 .swagger a,
@@ -225,3 +228,185 @@
 .swagger .valign-middle {
   vertical-align: middle;
 }
+
+/* Dan's edits */
+.rapidoc-container {
+  height: 100%;
+  width: 100%;
+  display: block;
+  padding-top: 0.5rem;
+  padding-top: var(--navbar-height);
+}
+
+.swagger .nav-bar {
+  border-right: 1px solid var(--nav-border-color);
+  width: var(--nav-width);
+  padding-top: 0.5rem;
+}
+
+.swagger .title,
+.swagger #api-title,
+.swagger h1,
+.swagger h2,
+.swagger h3,
+.swagger h4 {
+  font-weight: bold !important;
+  font-family: var(--heading-font-family);
+  text-transform: capitalize !important;
+}
+
+.req-res-title::first-line {
+  font-weight: bold !important;
+  font-family: var(--heading-font-family);
+  text-transform: capitalize !important;
+  color: red;
+}
+
+.swagger .nav-scroll {
+  padding-left: 1rem;
+  padding-right: 0.5rem;
+  padding-bottom: 2rem;
+}
+
+::part(section-overview-title) {
+  padding-top: 3rem;
+}
+
+::part(section-servers) > h2,
+::part(section-auth) > h2 {
+  padding-top: 5rem !important;
+}
+
+::part(section-tag) {
+  border-color: var(--nav-border-color);
+  padding-top: 4rem;
+}
+
+::part(section-operation) {
+  margin-top: 3rem;
+}
+
+::part(section-operation-summary) {
+  padding-top: 2rem;
+  margin-bottom: 0;
+  scroll-margin-top: 4rem !important;
+  scroll-padding-top: 4rem !important;
+}
+
+::part(operation-divider) {
+  display: none;
+}
+
+::part(section-operations-in-tag) {
+  padding-top: 1rem;
+}
+
+::part(section-operation-webhook-method) {
+  background: var(--pre-background);
+  padding: 0.5rem 1rem;
+  width: fit-content;
+  border-radius: 5px;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.expanded-req-resp-container .response-panel {
+  border: 0 !important;
+}
+
+.swagger .left-bar.active {
+  border-color: transparent !important;
+  background: var(--nav-hover-bg-color) !important;
+}
+
+.swagger .nav-bar-section {
+  text-align: left !important;
+  background: transparent !important;
+  cursor: default;
+  margin-top: 1.5rem;
+  padding-left: 1rem;
+  padding-bottom: 0;
+  font-size: 0.7rem;
+}
+
+.swagger .nav-bar-section:hover {
+  cursor: default;
+  background-color: transparent;
+  color: default !important;
+}
+
+.swagger .nav-bar-section-title {
+  padding-left: 0.25rem;
+}
+
+.swagger .nav-bar-section > div:first-child {
+  display: none !important;
+}
+
+.swagger .nav-bar-paths-under-tag {
+  padding-left: 0.75rem;
+}
+
+.swagger .nav-bar-info,
+::part(section-navbar-item) {
+  padding: 0.5rem;
+}
+
+.m-table .param-name {
+  text-align: left;
+}
+
+.m-table .param-type {
+  text-align: left;
+}
+
+/*
+Shadow Root CSS
+- this works by using the tags exposed in exportparts under the custom HTML elements in the DOM.
+- more info on how to use here:
+-- https: //developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/exportparts
+--https: //jordanbrennan.hashnode.dev/8-ways-to-style-the-shadow-dom
+- the format exposed is "internal:external" where you can use "external" to target in this CSS sheet
+- unfortunately not everything is exposed, so you cannot target general classes
+
+// API Request parts = <api-request>
+wrap-request-btn:wrap-request-btn,
+btn:btn,
+btn-fill:btn-fill,
+btn-outline:btn-outline,
+btn-try:btn-try,
+btn-clear:btn-clear,
+btn-clear-resp:btn-clear-resp,
+file-input:file-input,
+textbox:textbox,
+textbox-param:textbox-param,
+textarea:textarea,
+textarea-param:textarea-param,
+anchor:anchor,
+anchor-param-example:anchor-param-example,
+schema-description:schema-description,
+schema-multiline-toggle:schema-multiline-toggle
+
+// API Response parts = <api-response>
+btn:btn,
+btn-response-status:btn-response-status,
+btn-selected-response-status:btn-selected-response-status,
+btn-fill:btn-fill,
+btn-copy:btn-copy,
+schema-description:schema-description,
+schema-multiline-toggle:schema-multiline-toggle
+
+// JSON tree parts = <json-tree>
+btn:btn,
+btn-fill:btn-fill,
+btn-copy:btn-copy
+*/
+
+/* Outer container for API elements */
+.expanded-req-resp-container {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: 1fr; /* change this to 1fr 1fr for 2 columns */
+  gap: 1rem;
+}
+
+/* End Dan's edits */
