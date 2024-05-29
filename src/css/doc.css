@@ -985,9 +985,39 @@ table code {
   font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
+.doc .tableblock td .enterprise-label-container {
+  display: flex;
+}
+
+.doc .tableblock td .enterprise-label {
+  background-color: var(--redpanda-1000);
+  color: #fff;
+  padding: 0.2em 0.2em;
+  line-height: normal;
+  border-radius: 3px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
+}
+
+.doc .inline-enterprise-label {
+  background-color: var(--redpanda-1000);
+  color: #fff;
+  padding: 0.2em 0.2em;
+  border-radius: 3px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
+}
+
+.doc .tableblock td .enterprise-label-container:hover,
+.doc .tableblock td .enterprise-label {
+  cursor: pointer;
+}
+
 .doc .choices__inner {
   background-color: var(--body-background);
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
+}
+
+.doc .tableblock .choices__list--single {
+  padding: 0;
 }
 
 .doc .choices__list--dropdown .choices__item,
@@ -1047,9 +1077,16 @@ table code {
   gap: 10px;
 }
 
+@media (max-width: 480px) {
+  .doc .table-filters {
+    flex-direction: column;
+  }
+}
+
 .doc .table-filters .table-search {
   flex: 0.75;
   padding: 10px;
+  font-size: 1rem;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;

@@ -22,7 +22,7 @@ function createEditablePlaceholders(parentElement) {
     }
     preprocessParentheses(codeElement)
     addConumSpans(codeElement);
-    if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html' && codeElement.dataset.lang !== 'rust' && codeElement.dataset.lang !== 'coffeescript') {
+    if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html' && codeElement.dataset.lang !== 'rust' && codeElement.dataset.lang !== 'coffeescript' && codeElement.dataset.lang !== 'text') {
       addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
     }
   }
