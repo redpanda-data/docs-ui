@@ -9,6 +9,7 @@
   position: sticky;
   top: var(--navbar-height);
   z-index: var(--z-index-toolbar);
+  border-bottom: 1px solid var(--nav-border-color);
 }
 
 .toolbar a {

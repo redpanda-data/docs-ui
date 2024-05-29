@@ -24,12 +24,12 @@ html[data-theme=dark] {
   --navbar-menu-background: var(--body-background);
   --navbar-menu-font-color: var(--body-font-color);
   --navbar-menu_hover-background: none;
-  --navbar-boxshadow: 1px 3px 5px #f2f2f2;
+  --navbar-boxshadow: 1px 3px 5px rgba(16, 16, 16, 0.5);
   --navbar-dropdown-boxshadow: 0 4px 10px #f2f2f2;
   --navbar-dropdown-background-hover-color: #ffffff0d;
   /* nav */
   --nav-background: var(--body-background);
-  --nav-border-color: var(--color-gray-10);
+  --nav-border-color: rgba(0, 0, 0, 0.2);
   --nav-heading-font-color: var(--color-jet-30);
   --nav-muted-color: var(--body-font-color);
   --nav-panel-divider-color: var(--color-smoke-90);
