@@ -1,13 +1,11 @@
 <!-- Load core Prism scripts first -->
-<script async src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-
-<!-- Load UI-specific scripts -->
+<script async src="{{{uiRootPath}}}/js/vendor/prism-core.js"></script>
+<script async src="{{{uiRootPath}}}/js/vendor/prism-autoloader.js"></script>
 <script async src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
 <script async src="{{{uiRootPath}}}/js/vendor/prism-line-highlight-plugin.js"></script>
-<script async src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-<script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
 
 <!-- Load site-specific scripts last -->
+<script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
 <script defer id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
 <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
 <script>

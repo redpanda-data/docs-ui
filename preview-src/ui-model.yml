@@ -76,7 +76,7 @@ page:
   breadcrumbs:
   - content: Quickstart
     url: '#'
-    urlType: fragment
+    urlType: internal
   - content: Brand&#8217;s Hardware &amp; Software Requirements
     url: /xyz/23.2/index.html
     urlType: internal
@@ -99,7 +99,7 @@ page:
     items:
     - content: Quickstart
       url: '#'
-      urlType: fragment
+      urlType: internal
       items:
       - content: Brand&#8217;s Hardware &amp; Software Requirements
         url: /xyz/23.2/index.html
