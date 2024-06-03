@@ -10,11 +10,23 @@
  */
 module.exports = (latest, missing, previousVersion, { data: { root } }) => {
   const { contentCatalog } = root
+
+  // Exit early if essential parameters are missing or invalid
   if (!contentCatalog || !missing || !latest || typeof latest.version === 'undefined' || !latest.asciidoc) return
+
+  // Remove the version prefix from the previous version string
   const previousVersionWithoutPrefix = previousVersion.replace(/^\/\d+\.\d+\//, '')
+
+  // Retrieve the list of intentionally removed content pages
   const intentionalRemovals = latest.asciidoc.attributes['removals-without-aliases']
+
+  // Check if the content was intentionally removed
   const isIntentionallyRemoved = intentionalRemovals && intentionalRemovals.some((removal) => {
     return previousVersionWithoutPrefix.includes(removal.page)
   })
-  if (!isIntentionallyRemoved) console.warn(`${previousVersion} does not exist in ${latest.version}`)
+
+  // Log a warning if the content was not intentionally removed
+  if (!isIntentionallyRemoved) {
+    console.warn(`${previousVersion} does not exist in ${latest.version}`)
+  }
 }
