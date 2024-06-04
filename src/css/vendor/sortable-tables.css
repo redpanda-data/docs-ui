@@ -2,6 +2,6 @@ table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sor
   content: " \25B4";
 }
 
-table.sortable:hover {
+table.sortable th:hover {
   cursor: pointer;
 }
