@@ -122,6 +122,21 @@ This large table won't be clipped because it has the `no-clip` class.
 | Harper | 31 | Fashion Designer
 |===
 
+You can add `sortable` class to create a sortable table. This will make all headers clickable, and sortable upon click.
+
+[.sortable]
+|===
+| Name | Age | Occupation
+
+| John | 28 | Engineer
+| Emily | 34 | Artist
+| David | 22 | Student
+| Lisa | 42 | Doctor
+| Sarah | 30 | Writer
+| Michael | 55 | Chef
+| Amy | 29 | Scientist
+|===
+
 
 == Cu solet
 
