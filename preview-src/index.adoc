@@ -23,7 +23,7 @@ https://example.org[Curabitur,role=unresolved] ut massa aliquam, cursus enim et,
 Mauris eget leo nunc, nec tempus mi? Curabitur id nisl mi, ut vulputate urna.
 
 == Tables
-[.sortable]
+
 |===
 | Name | Age | Occupation
 
