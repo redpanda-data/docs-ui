@@ -462,6 +462,11 @@ window.addEventListener('DOMContentLoaded', function() {
                       <div class="aa-ItemContentTitle result-type">
                         ${item.type}
                       </div>
+                      ${item.product ? html`
+                      <div class="aa-ItemContentTitle result-type">
+                        ${item.product}
+                      </div>` : ''
+                      }
                       ${item.version ? html`
                       <div class="aa-ItemContentTitle result-type">
                         ${item.version}
