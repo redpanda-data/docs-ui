@@ -1,13 +1,71 @@
 <script>
 
-const INITIAL_TAG = "{{#if (eq page.component.name 'redpanda-labs')}}labs{{else if (eq page.component.name 'api')}}{{{site.components.ROOT.title}}} v{{{site.components.ROOT.latest.version}}}{{else if (and (is-prerelease page) page.displayVersion)}}{{{page.component.title}}} v{{{page.displayVersion}}}{{else if page.componentVersion.version}}{{{page.component.title}}} v{{{page.componentVersion.version}}}{{else}}{{{page.component.title}}}{{/if}}"
+const INITIAL_TAG = `
+{{#if (eq page.component.name 'api')}}
+{{{site.components.ROOT.title}}} v{{{site.components.ROOT.latest.version}}}
+{{else if (and (is-prerelease page) page.displayVersion)}}
+{{{page.component.title}}} v{{{page.displayVersion}}}
+{{else if page.componentVersion.version}}
+{{{page.component.title}}} v{{{page.componentVersion.version}}}
+{{else}}
+{{{page.component.title}}}
+{{/if}}`.trim()
 
-const VERSION = "{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}{{{site.components.ROOT.latest.version}}}{{else}}{{{page.componentVersion.version}}}{{/if}}"
+const PRERELEASE = `
+{{#if (and (is-prerelease page) page.displayVersion)}}
+true
+{{else}}
+false
+{{/if}}`.trim()
 
+const INITIAL_TAGS=['labs','Redpanda Connect', 'Redpanda v{{{site.components.ROOT.latest.version}}}']
+
+const VERSION = `
+{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}
+{{{site.components.ROOT.latest.version}}}
+{{else}}
+{{{page.componentVersion.version}}}
+{{/if}}`.trim()
+
+const getVersionDigit = (tag) => {
+    const versionRegex = /v(\d+)/;
+    const match = tag.match(versionRegex);
+    return match ? match[1] : null;
+};
+
+// Function to get the product name in versioned tags
+// For example Redpanda v24.2
+const getProductName = (tag) => {
+    const wordBeforeVRegex = /(\S+) v/;
+    const match = tag.match(wordBeforeVRegex);
+    return match ? match[1] : null;
+};
+
+// Function to apply all filter tags except when there's a matching initial tag with a different v digit
+const applyFilterTags = (initialTags, initialTag) => {
+    const initialVersionDigit = getVersionDigit(initialTag);
+    const initialWordBeforeV = getProductName(initialTag);
+    const filteredTags = initialTags.map(tag => {
+        const tagVersionDigit = getVersionDigit(tag);
+        const tagWordBeforeV = getProductName(tag);
+        if (
+            initialVersionDigit &&
+            tagVersionDigit &&
+            initialVersionDigit !== tagVersionDigit &&
+            initialWordBeforeV === tagWordBeforeV
+        ) {
+            return initialTag;
+        }
+        return tag;
+    });
+    return filteredTags.map(tag => ({ label: tag, facet: '_tags' }));
+};
+
+
+// Applies filters to search results
+// https://www.algolia.com/doc-beta/ui-libraries/autocomplete/guides/filtering-results#applying-filters-from-tags
 function mapToAlgoliaFilters(tagsByFacet) {
-
   let filters = [[]];
-
   Object.keys(tagsByFacet).forEach(facet => {
     tagsByFacet[facet].forEach(tag => {
       const filterString = tag.label;
@@ -19,20 +77,15 @@ function mapToAlgoliaFilters(tagsByFacet) {
       }
     });
   });
-
   return filters;
 }
-
 function groupBy(items, predicate) {
   return items.reduce((acc, item) => {
     const key = predicate(item);
-
     if (!acc.hasOwnProperty(key)) {
       acc[key] = [];
     }
-
     acc[key].push(item);
-
     return acc;
   }, {});
 }
@@ -57,6 +110,8 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 
   const tagsPlugin = createTagsPlugin({
+    // Adds tags on click
+    // See https://www.algolia.com/doc-beta/ui-libraries/autocomplete/guides/filtering-results#adding-tags
     getTagsSubscribers() {
       return [
         {
@@ -67,7 +122,7 @@ window.addEventListener('DOMContentLoaded', function() {
         },
       ];
     },
-    initialTags: [{ label: INITIAL_TAG, facet: '_tags' }],
+    initialTags: applyFilterTags(INITIAL_TAGS, INITIAL_TAG), // Pass your filter tags here
   });
 
   autocomplete({
@@ -230,13 +285,13 @@ window.addEventListener('DOMContentLoaded', function() {
                 },
               },
             ],
+            // Removes filters from the list after they've been applied
+            // to prevent confusion where a filter is applied but can still be clicked
             transformResponse({ facetHits }) {
               const existingTags = (tagsByFacet["_tags"] || []).map(tag => tag.label);
 
               return facetHits[0]
                 .filter(hit =>
-                  hit.label !== 'apis' &&
-                  !hit.label.startsWith('Redpanda-') &&
                   !existingTags.includes(hit.label)
                 )
                 .map(hit => ({ ...hit, facet: '_tags' }));
@@ -248,26 +303,10 @@ window.addEventListener('DOMContentLoaded', function() {
               return html`<div class="aa-ItemWrapper">
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
-                    <div class="aa-ItemContentTitle">
+                    <div class="aa-ItemContentTitle" title="Add filter">
                       ${components.Highlight({ hit: item, attribute: 'label' })}
                     </div>
                   </div>
-                </div>
-                <div class="aa-ItemActions">
-                  <button
-                    class="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
-                    type="button"
-                    title="Add filter"
-                  >
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                      />
-                    </svg>
-                  </button>
                 </div>
               </div>`;
             },
