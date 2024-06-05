@@ -33,7 +33,7 @@ const getVersionDigit = (tag) => {
     return match ? match[1] : null;
 };
 
-// Function to get the product name in versioned tags
+// Get the product name in versioned tags
 // For example Redpanda v24.2
 const getProductName = (tag) => {
     const wordBeforeVRegex = /(\S+) v/;
@@ -41,7 +41,7 @@ const getProductName = (tag) => {
     return match ? match[1] : null;
 };
 
-// Function to apply all filter tags except when there's a matching initial tag with a different v digit
+// Apply all filter tags except when there's a matching initial tag with a different version
 const applyFilterTags = (initialTags, initialTag) => {
     const initialVersionDigit = getVersionDigit(initialTag);
     const initialWordBeforeV = getProductName(initialTag);
@@ -122,7 +122,7 @@ window.addEventListener('DOMContentLoaded', function() {
         },
       ];
     },
-    initialTags: applyFilterTags(INITIAL_TAGS, INITIAL_TAG), // Pass your filter tags here
+    initialTags: applyFilterTags(INITIAL_TAGS, INITIAL_TAG),
   });
 
   autocomplete({
