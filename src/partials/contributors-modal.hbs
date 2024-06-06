@@ -19,7 +19,7 @@
           </a>
         {{/if}}
         <p>Or, let us know about something that you want us to change:</p>
-        {{#with (get-page-info page.url)}}
+        {{#with (get-page-info page.url page.component.name)}}
         <a href="{{this.webUrl}}/issues/new?title=Docs: Feedback for {{{this.title}}}&template=01_doc_request.yml&link=[{{this.title}}]({{@root.site.url}}{{this.url}}) [Page source]({{this.editUrl}})" target="_blank" rel="noopener noreferrer"><span>Open an issue</span></a>
         {{/with}}
       </div>
