@@ -4,7 +4,7 @@
     {{#if (and (eq this.url @root.page.url) (ne this.items.length 0))}}
       {{#each this.items}}
         {{#if this.url}}
-          {{#with (get-page-info this.url)}}
+          {{#with (get-page-info this.url null)}}
             <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
             {{#if (ne this.title this.description)}}
             <p class="index">{{{this.description}}}</p>
@@ -15,7 +15,7 @@
           <li class="index">{{{this.content}}}</li>
           <ul>
             {{#each this.items}}
-              {{#with (get-page-info this.url)}}
+              {{#with (get-page-info this.url null)}}
                 <li class="index"><a href="{{{relativize this.url}}}">{{{this.title}}}</a>
                 {{#if (ne this.title this.description)}}
                 <p class="index">{{{this.description}}}</p>
