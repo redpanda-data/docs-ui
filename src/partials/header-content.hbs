@@ -15,7 +15,11 @@
         <a target="_blank" class="navbar-item" href="https://redpanda.com/resources/">Resources</a>
         <a target="_blank" class="navbar-item" href="https://university.redpanda.com/">Training</a>
         <a target="_blank" class="navbar-item" href="https://redpanda.com/blog/">Blog</a>
+        {{#if (eq page.component.title 'Redpanda Connect')}}
+        <a target="_blank" class="navbar-item" href="https://github.com/redpanda-data/connect/">GitHub</a>
+        {{else}}
         <a target="_blank" class="navbar-item" href="https://github.com/redpanda-data/redpanda/">GitHub</a>
+        {{/if}}
         <div class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link" href="#">Contact</a>
           <div class="navbar-dropdown">
