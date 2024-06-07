@@ -293,10 +293,6 @@
   padding-top: 4rem;
 }
 
-::part(section-operation) {
-  margin-top: 3rem;
-}
-
 ::part(section-operation-summary) {
   padding-top: 2rem;
   margin-bottom: 0;
