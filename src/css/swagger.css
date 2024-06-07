@@ -14,8 +14,9 @@
   margin: 0 auto;
 }
 
-.swagger a,
 .swagger .glossary-term,
+.swagger p a,
+.swagger table a,
 .swagger p a > code {
   color: var(--link-font-color);
 }
@@ -27,10 +28,17 @@
 }
 
 .swagger code,
-.swagger pre {
+.swagger pre,
+.m-markdown-small pre,
+.m-markdown pre {
   hyphens: none;
   color: var(--code-font-color);
   background: var(--pre-background);
+  white-space: pre-wrap !important;
+}
+
+.m-markdown code {
+  color: var(--body-font-color);
 }
 
 .swagger p code,
@@ -62,7 +70,6 @@
 .swagger pre > code {
   padding-bottom: 1rem;
   border: none;
-  white-space: pre-wrap;
   font-weight: lighter;
 }
 
@@ -262,7 +269,7 @@
   color: red;
 }
 
-.swagger .nav-scroll {
+::part(section-navbar-scroll) {
   padding-left: 1rem;
   padding-right: 0.5rem;
   padding-bottom: 2rem;
@@ -295,6 +302,19 @@
 
 ::part(operation-divider) {
   display: none;
+}
+
+::part(section-navbar-item section-navbar-path) {
+  padding-left: 1.5rem;
+}
+
+::part(section-navbar-tag) {
+  padding-left: 1.25rem;
+}
+
+::part(section-navbar-operations-top) {
+  justify-content: flex-start;
+  margin-left: -6px;
 }
 
 ::part(section-operations-in-tag) {
@@ -342,15 +362,6 @@
   display: none !important;
 }
 
-.swagger .nav-bar-paths-under-tag {
-  padding-left: 0.75rem;
-}
-
-.swagger .nav-bar-info,
-::part(section-navbar-item) {
-  padding: 0.5rem;
-}
-
 .m-table .param-name {
   text-align: left;
 }
@@ -359,12 +370,64 @@
   text-align: left;
 }
 
+.swagger .breadcrumbs {
+  display: none;
+  flex: 1 1;
+  padding: 0 0.5rem 0 0.75rem;
+  line-height: var(--nav-line-height);
+}
+
+@media screen and (min-width: 1024px) {
+  .swagger .breadcrumbs {
+    display: block;
+  }
+}
+
+.swagger a + .breadcrumbs {
+  padding-left: 0.05rem;
+}
+
+.swagger .breadcrumbs ul {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.swagger .breadcrumbs li {
+  display: inline;
+  margin: 0;
+}
+
+.swagger .breadcrumbs li::after {
+  content: "\203A";
+  padding: 0 0.5rem;
+}
+
+.swagger .breadcrumbs li:last-of-type::after {
+  content: none;
+}
+
+.swagger .breadcrumbs li a {
+  padding: 7px;
+}
+
+.swagger .breadcrumbs li:hover a,
+.swagger .breadcrumbs li:last-child a {
+  color: var(--link-font-color);
+  border-radius: 1.5rem;
+  background-color: var(--link-highlight-background-color);
+  text-decoration: none;
+}
+
 /*
 Shadow Root CSS
 - this works by using the tags exposed in exportparts under the custom HTML elements in the DOM.
 - more info on how to use here:
--- https: //developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/exportparts
---https: //jordanbrennan.hashnode.dev/8-ways-to-style-the-shadow-dom
+-- https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/exportparts
+--https://jordanbrennan.hashnode.dev/8-ways-to-style-the-shadow-dom
 - the format exposed is "internal:external" where you can use "external" to target in this CSS sheet
 - unfortunately not everything is exposed, so you cannot target general classes
 

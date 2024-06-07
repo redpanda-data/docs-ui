@@ -14,7 +14,7 @@
   <body style="padding-top:0; height:100vh;">
 {{> header}}
 
-    <div class="rapidoc-container">
+    <div class="rapidoc-container swagger">
       <rapi-doc 
         id="api" 
         spec-url="{{resolve-resource page.attributes.api-spec-url}}" 
@@ -31,9 +31,12 @@
         nav-bg-color="#fff"  
         bg-color="#fff" 
         nav-item-spacing="relaxed" 
-        font-size="largest" 
+        font-size="largest"
+        response-area-height="300px"
         css-file="{{{uiRootPath}}}/css/site.css"  
-        css-classes="swagger">
+        css-classes="swagger, .swagger a,
+.swagger .glossary-term,
+.swagger p a > code">
 
         <div class="toolbar" role="navigation" style="top: 0;">
           {{#with site.homeUrl}}
@@ -93,8 +96,26 @@
                 const filteredTables = Array.from(tables).filter(table => table.innerHTML.includes('Region'));
                 if (filteredTables.length > 0) {
                   processTables(filteredTables);
-                  observer1.disconnect()
                 }
+                const anchors = node.querySelectorAll('p a');
+                anchors.forEach(anchor => {
+                  anchor.style.color = 'var(--link-font-color)';
+                });
+                /* Stops the 'Try it' button from getting pushed off the page when the auth token is injected into code snippets. */
+                // Traverse into nested shadow roots to change white-space property for pre elements
+                const nestedShadowRoots = rapidoc.shadowRoot.querySelectorAll('*');
+                nestedShadowRoots.forEach(element => {
+                  if (element.shadowRoot) {
+                    const preElements = element.shadowRoot.querySelectorAll('pre');
+                    preElements.forEach(pre => {
+                      pre.style.whiteSpace = 'pre-wrap';
+                    });
+                    const anchors = element.shadowRoot.querySelectorAll('p a');
+                    anchors.forEach(anchor => {
+                      anchor.style.color = 'var(--link-font-color)';
+                    });
+                  }
+                })
               }
             });
           });
@@ -129,58 +150,72 @@
     window.addEventListener('DOMContentLoaded', applyMobileLogic);
     window.addEventListener('resize', debouncedApplyMobileLogic);
 
-    function createTable(data, originalTable) {
-      // Create a new table element
-      const newTable = document.createElement('table');
-      newTable.style.width = '100%';
-      newTable.className = 'tableblock stripes-even';
-      newTable.innerHTML = '<thead><tr><th>Region</th><th>Zones</th><th>Throughput Tiers</th></tr></thead>';
+      function createTable(data, originalTable) {
+        // Create a new table element
+        const newTable = document.createElement('table');
+        newTable.style.width = '100%';
+        newTable.className = 'tableblock stripes-even';
+        newTable.innerHTML = '<thead><tr><th>Region</th><th>Zones</th><th>Throughput Tiers</th></thead>';
 
-      const tbody = document.createElement('tbody');
+        const tbody = document.createElement('tbody');
 
-      // Loop through each region to create rows
-      data.regions.forEach(region => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td class="tableblock halign-left valign-top"><div class="content">${region.region}</div></td>
-                            <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist" style="margin-top:0;"><ul style="margin-top:0;">${region.zones.map(zone => `<li>${zone}</li>`).join('')}</ul></div></div></td>
-                            <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist" style="margin-top:0;"><ul style="margin-top:0;">${region.tiers.map(tier => `<li>${tier}</li>`).join('')}</ul></div></div></td>`;
-        tbody.appendChild(row);
-      });
-
-      newTable.appendChild(tbody);
-      // Replace the original table with the new table
-      originalTable.parentNode.replaceChild(newTable, originalTable);
-    }
-
-    function processTables(tables) {
-      tables.forEach((table, index) => {
-        if (table.classList.contains('tableblock')) return
-        if (!table.innerHTML.includes('Region')) return
-        const platform = index === 0 ? 'Google Cloud Platform (GCP)' : 'Amazon Web Services (AWS)';
-        const rows = table.querySelectorAll('tr');
-        let regions = [];
-
-        rows.forEach((row, rowIndex) => {
-          if (rowIndex > 0) { // Skip header row
-            const cells = row.querySelectorAll('td');
-            const region = cells[0].textContent.trim();
-            const zones = cells[1].textContent.split(',').map(zone => zone.trim());
-            const tiers = cells[2].innerHTML.split('<br>').filter(tier => tier.trim() !== '');
-
-            regions.push({
-              region,
-              zones,
-              tiers
-            });
-          }
+        // Loop through each region to create rows
+        data.regions.forEach(region => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td class="tableblock halign-left valign-top"><div class="content">${region.region}</div></td>
+                              <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist" style="margin-top:0;"><ul style="margin-top:0;">${region.zones.map(zone => `<li>${zone}</li>`).join('')}</ul></div></div></td>
+                              <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist" style="margin-top:0;"><ul style="margin-top:0;">${region.tiers.map(tier => `<li>${tier}</li>`).join('')}</ul></div></div></td>`;
+          tbody.appendChild(row);
         });
 
-        const regionsData = {
-          platform,
-          regions
-        };
-        createTable(regionsData, table);
-      });
-    }
+        newTable.appendChild(tbody);
+
+        // Create collapsible container
+        const details = document.createElement('details');
+
+        const summary = document.createElement('summary');
+        summary.innerText = `Reveal regions for ${data.platform}`;
+
+        const content = document.createElement('div');
+        content.className = 'content';
+        content.appendChild(newTable);
+
+        details.appendChild(summary);
+        details.appendChild(content);
+
+        // Replace the original table with the collapsible container
+        originalTable.parentNode.replaceChild(details, originalTable);
+      }
+
+      function processTables(tables) {
+        tables.forEach((table, index) => {
+          if (table.classList.contains('tableblock')) return;
+          if (!table.innerHTML.includes('Region')) return;
+          const platform = index === 0 ? 'Google Cloud Platform (GCP)' : index === 1 ? 'Amazon Web Services (AWS)' : 'Microsoft Azure';
+          const rows = table.querySelectorAll('tr');
+          let regions = [];
+
+          rows.forEach((row, rowIndex) => {
+            if (rowIndex > 0) { // Skip header row
+              const cells = row.querySelectorAll('td');
+              const region = cells[0].textContent.trim();
+              const zones = cells[1].textContent.split(',').map(zone => zone.trim());
+              const tiers = cells[2].innerHTML.split('<br>').filter(tier => tier.trim() !== '');
+
+              regions.push({
+                region,
+                zones,
+                tiers
+              });
+            }
+          });
+
+          const regionsData = {
+            platform,
+            regions
+          };
+          createTable(regionsData, table);
+        });
+      }
   </script>
 </html>
