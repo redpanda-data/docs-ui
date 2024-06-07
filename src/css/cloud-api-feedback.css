@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-direction: column;
+  flex-direction: row;
   color: var(--link-font-color);
   gap: 10px;
   margin-top: -1rem;
