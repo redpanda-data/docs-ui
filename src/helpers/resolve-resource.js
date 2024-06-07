@@ -3,7 +3,7 @@
 module.exports = (spec, { data, hash: context }) => {
   if (!spec) return
   if (spec.startsWith('http')) {
-    return spec;
+    return spec
   }
   const { contentCatalog, page } = data.root
   if (page.component) {
