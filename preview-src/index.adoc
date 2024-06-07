@@ -6,7 +6,7 @@ Author Name
 :!table-caption:
 :page-pagination:
 
-link:./api.html[API preview]
+link:./cloud-api.html[API preview]
 
 [.float-group]
 --
