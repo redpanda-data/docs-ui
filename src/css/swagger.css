@@ -10,7 +10,7 @@
 }
 
 .swagger .main-content-inner--read-mode {
-  max-width: 1800px;
+  max-width: 1300px;
   margin: 0 auto;
 }
 
@@ -249,6 +249,10 @@
   border-right: 1px solid var(--nav-border-color);
   width: var(--nav-width);
   padding-top: 0.5rem;
+}
+
+.swagger .nav-bar-paths-under-tag {
+  max-height: none !important;
 }
 
 .swagger .title,
