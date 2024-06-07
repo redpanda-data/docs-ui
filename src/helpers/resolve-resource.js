@@ -2,6 +2,9 @@
 
 module.exports = (spec, { data, hash: context }) => {
   if (!spec) return
+  if (spec.startsWith('http')) {
+    return spec;
+  }
   const { contentCatalog, page } = data.root
   if (page.component) {
     context = Object.assign({ component: page.component.name, version: page.version, module: page.module }, context)

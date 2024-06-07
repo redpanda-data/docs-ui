@@ -6,6 +6,8 @@ Author Name
 :!table-caption:
 :page-pagination:
 
+link:./api.html[API preview]
+
 [.float-group]
 --
 image:multirepo-ssg.svg[Multirepo SSG,180,135,float=right,role=float-gap]
