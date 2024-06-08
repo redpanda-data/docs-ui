@@ -98,7 +98,6 @@
                 anchors.forEach(anchor => {
                   anchor.style.color = 'var(--link-font-color)';
                 });
-                /* Stops the 'Try it' button from getting pushed off the page when the auth token is injected into code snippets. */
                 // Traverse into nested shadow roots to change white-space property for pre elements
                 const nestedShadowRoots = rapidoc.shadowRoot.querySelectorAll('*');
                 nestedShadowRoots.forEach(element => {
