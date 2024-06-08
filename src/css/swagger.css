@@ -465,11 +465,14 @@ btn-copy:btn-copy
 */
 
 /* Outer container for API elements */
+/* Caused the 'Try it' button from getting pushed off the page when the auth token is injected into code snippets. */
+/*
 .expanded-req-resp-container {
   margin-top: 2rem;
   display: grid;
-  grid-template-columns: 1fr; /* change this to 1fr 1fr for 2 columns */
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
+*/
 
 /* End Dan's edits */
