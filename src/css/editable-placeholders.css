@@ -1,4 +1,5 @@
-span.editable {
+span.editable,
+span.editable > * {
   font-weight: 450;
   color: var(--editable-code-font-color);
   padding: 0 3px;
@@ -10,9 +11,22 @@ span.editable {
   border-bottom: 2px dashed;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  position: relative;
+  z-index: 1;
 }
 
-span.editable:hover {
+span.editable > * {
+  position: relative;
+  z-index: 1;
+  color: var(--editable-code-font-color) !important;
+  font-weight: 450;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+span.editable:hover,
+span.editable > *:hover {
   cursor: pointer;
 }
 
@@ -20,4 +34,6 @@ span.cursor {
   font-weight: 450;
   color: var(--editable-code-font-color);
   font-size: 1.1em;
+  position: relative;
+  z-index: 1;
 }

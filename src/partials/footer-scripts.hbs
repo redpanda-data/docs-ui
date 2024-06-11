@@ -1,46 +1,18 @@
-<!-- Load core Prism scripts first -->
-<script src="{{{uiRootPath}}}/js/vendor/prism-core.js"></script>
-<script src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
-<script src="{{{uiRootPath}}}/js/vendor/prism-line-highlight-plugin.js"></script>
 
-<!-- Load site-specific scripts last -->
+<!-- Prism scripts for code blocks -->
+<script defer src="{{{uiRootPath}}}/js/vendor/prism-core.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-highlight-plugin.js"></script>
+
+<!-- Site-specific scripts -->
 <script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
 <script defer id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/sorttable.js"></script>
 <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const seeMoreBtn = document.getElementById('see-more-btn');
-  if (seeMoreBtn) {
-    seeMoreBtn.addEventListener('click', function() {
-      const hiddenItems = document.querySelectorAll('.ulist li.to-hide');
-      let anyItemWasHidden = false;
-      hiddenItems.forEach(function(item) {
-        if (item.classList.contains('hidden')) {
-          anyItemWasHidden = true;
-        }
-        item.classList.toggle('hidden');
-      });
-      hiddenItemsVisible = anyItemWasHidden;
-      seeMoreBtn.textContent = hiddenItemsVisible ? "See Less" : "See More";
-    });
-  }
-});
-</script>
 {{#if (and env.ALGOLIA_API_KEY (and (ne page.layout 'search') (ne page.layout 'labs-search')))}}
 {{> algolia-script}}
 {{/if}}
 {{#if (ne page.layout '404') }}
 {{> feedback-form-script}}
 {{> announcement-email-script}}
-{{> editable-placeholders-script}}
 {{/if}}
-<script>
-tippy('[data-tippy-content]', {
-  animation: 'scale',
-  theme: 'redpanda-term',
-  touch: 'hold',
-  interactive: true,
-  allowHTML: true
-});
-</script>
