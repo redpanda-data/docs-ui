@@ -26,7 +26,29 @@ module.exports = (attributes, content, { data: { root } }) => {
     contentString += '<div class="badge-button" id="see-more-btn">See more</div>'
   }
   contentString += '<div class="badge-button"><a href="/redpanda-labs" class="search-all-labs-btn">Search all labs</a></div>'
-  contentString += '</div></div></div>'
+  contentString += `
+      </div>
+    </div>
+  </div>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const seeMoreBtn = document.getElementById('see-more-btn');
+    if (seeMoreBtn) {
+      seeMoreBtn.addEventListener('click', function() {
+        const hiddenItems = document.querySelectorAll('.ulist li.to-hide');
+        let anyItemWasHidden = false;
+        hiddenItems.forEach(function(item) {
+          if (item.classList.contains('hidden')) {
+            anyItemWasHidden = true;
+          }
+          item.classList.toggle('hidden');
+        });
+        hiddenItemsVisible = anyItemWasHidden;
+        seeMoreBtn.textContent = hiddenItemsVisible ? "See Less" : "See More";
+      });
+    }
+  });
+  </script>`.trim()
 
   const modifiedContent = Buffer.from(contentString, 'utf8')
   return modifiedContent

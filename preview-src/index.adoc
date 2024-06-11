@@ -150,7 +150,7 @@ Eum an doctus <<liber-recusabo,maiestatis efficiantur>>.
 Eu mea inani iriure.footnote:[Quisque porta facilisis tortor, vitae bibendum velit fringilla vitae! Lorem ipsum dolor sit amet, consectetur adipiscing elit.]
 
 .`package.json`
-[,json]
+[,json,lines=5]
 ----
 {
   "name": "module-name",
@@ -163,6 +163,28 @@ Eu mea inani iriure.footnote:[Quisque porta facilisis tortor, vitae bibendum vel
   }
 }
 ----
+
+++++
+<pre class="highlightjs highlight code-first-child line-numbers linkable-line-numbers language-yaml" tabindex="0" id="code-0yga220" data-line="4,6,7,8"><code class="hljs language-yaml" data-lang="yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> cluster.redpanda.com/v1alpha1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Redpanda
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+<span contenteditable="true" data-type="namespace" aria-label="Edit namespace" title="Edit namespace" role="textbox" aria-multiline="false" class="editable">&lt;namespace&gt;</span>
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+<span class="token key atrule">chartRef</span><span class="token punctuation">:</span>
+  <span class="token key atrule">chartVersion</span><span class="token punctuation">:</span> 5.8.8
+<span class="token key atrule">clusterSpec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">statefulset</span><span class="token punctuation">:</span>
+    <span class="token key atrule">extraVolumes</span><span class="token punctuation">:</span> <span class="token punctuation">|</span><span class="token punctuation">-</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+        <span class="token key atrule">configMap</span><span class="token punctuation">:</span>
+          <span class="token key atrule">name</span><span class="token punctuation">:</span> redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+    <span class="token key atrule">extraVolumeMounts</span><span class="token punctuation">:</span> <span class="token punctuation">|</span><span class="token punctuation">-</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+        <span class="token key atrule">mountPath</span><span class="token punctuation">:</span> /etc/redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+    <span class="token key atrule">additionalRedpandaCmdFlags</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"--io-properties-file=/etc/redpanda-io-config/io-config.yaml"</span>
+      </code></pre>
+++++
 
 .Optional title
 [example]
