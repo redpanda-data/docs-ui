@@ -1,5 +1,4 @@
-span.editable,
-span.editable > * {
+span.editable {
   font-weight: 450;
   color: var(--editable-code-font-color);
   padding: 0 3px;
