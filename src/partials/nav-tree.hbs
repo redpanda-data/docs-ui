@@ -20,28 +20,4 @@
   </li>
   {{/each}}
 </ul>
-{{else if (eq page.layout '404')}}
-<ul class="nav-list">
-  {{#with site.components.ROOT}}
-    {{#each ./latest.navigation}}
-      <li class="nav-item" data-depth="{{or ../level 0}}">
-        {{#if ./content}}
-        <div class="item is-current-page {{#if ./items.length}} dropdown {{/if}}">
-        {{#if ./url}}
-        <a class="nav-link" href="
-          {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
-          {{~else}}{{{./url}}}{{~/if}}">{{{./content}}}</a>
-        {{else}}
-        <span class="nav-text">{{{./content}}}</span>
-        {{/if}}
-        {{#if ./items.length}}
-        <button aria-label="Expand navigation" class="nav-item-toggle"></button>
-        {{/if}}
-        </div>
-        {{/if}}
-    {{> nav-tree navigation=./items level=(increment ../level)}}
-      </li>
-    {{/each}}
-  {{/with}}
-</ul>
 {{/if}}
