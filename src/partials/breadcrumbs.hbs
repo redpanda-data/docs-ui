@@ -1,7 +1,16 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
-  {{#if page.breadcrumbs}}
   <ul>
+    {{#if (ne page.component.title 'api')}}
+    {{#with page.componentVersion}}
+    {{#if (and ./title (ne ./title @root.page.breadcrumbs.0.content))}}
+    <li><a href="{{{relativize ./url}}}">{{{./title}}}</a></li>
+    {{/if}}
+    {{/with}}
+    {{/if}}
+    {{#if page.breadcrumbs}}
     {{#each page.breadcrumbs}}
+    <!-- Avoids displaying two breadcrumbs with the same URL -->
+    {{#if (ne @root.page.componentVersion.url ./url)}}
     <li>
     {{~#if (and ./url (eq ./urlType 'internal'))~}}
     <a href="{{{relativize ./url}}}">{{{./content}}}</a>
@@ -9,7 +18,9 @@
     {{{./content}}}
     {{~/if~}}
     </li>
+    {{/if}}
     {{/each}}
+    {{/if}}
   </ul>
-  {{/if}}
 </nav>
+
