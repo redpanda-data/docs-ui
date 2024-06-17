@@ -440,7 +440,7 @@ li.aa-Item:not([id*="filters"]) {
   }
 }
 
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 1224px) {
   article.search .badge-button#display-filters {
     display: block;
   }
