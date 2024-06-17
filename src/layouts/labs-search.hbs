@@ -10,41 +10,45 @@
     {{> header}}
     <div class="body">
       {{> nav}}
-      {{> toolbar}}
-      <article class="search labs">
-        <div class="header">
-          <img src="{{{uiRootPath}}}/img/redpanda-lab-standing.png">
-          <div>
-            {{#with page.title}}
-            <h1 class="page">{{{this}}}</h1>
-            {{/with}}
-            <p>Labs projects showcase what is possible to achieve with Redpanda as the centerpiece of your streaming data architecture. Some of these projects provide examples, guidance, best practices, and most importantly ideas for how you can use Redpanda in your own projects.</p>
-          </div>
-        </div>
-        <div class="container">
-          <div class="searchbox" id="searchbox"></div>
-          <div class="search-content">
-            <div class="badge-button" id="display-filters">Filters </div>
-            <div class="filters" id="filters">
-            <!-- Filters will be dynamically inserted here -->
-              <div class="interactive">
-              </div>
-              <div>
-                <div class="categories">
+      <main class="article">
+          {{> toolbar}}
+          <div class="content">
+            <article class="search labs">
+              <div class="header">
+                <img src="{{{uiRootPath}}}/img/redpanda-lab-standing.png">
+                <div>
+                  {{#with page.title}}
+                  <h1 class="page">{{{this}}}</h1>
+                  {{/with}}
+                  <p>Labs projects showcase what is possible to achieve with Redpanda as the centerpiece of your streaming data architecture. Some of these projects provide examples, guidance, best practices, and most importantly ideas for how you can use Redpanda in your own projects.</p>
                 </div>
               </div>
-              <div>
-                <div class="deployment">
+              <div class="container">
+                <div class="searchbox" id="searchbox"></div>
+                <div class="search-content">
+                  <div class="badge-button" id="display-filters">Filters </div>
+                  <div class="filters" id="filters">
+                  <!-- Filters will be dynamically inserted here -->
+                    <div class="interactive">
+                    </div>
+                    <div>
+                      <div class="categories">
+                      </div>
+                    </div>
+                    <div>
+                      <div class="deployment">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="results">
+                    <!-- Search results will be displayed here -->
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="results">
-              <!-- Search results will be displayed here -->
-            </div>
+              {{> tracking-pixel}}
+            </article>
           </div>
-        </div>
-      {{> tracking-pixel}}
-      </article>
+      </main>
     </div>
     {{> footer}}
     <script>
