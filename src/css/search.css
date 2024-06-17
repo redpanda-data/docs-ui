@@ -441,16 +441,18 @@ li.aa-Item:not([id*="filters"]) {
 }
 
 @media screen and (max-width: 1224px) {
+  article.search .ais-Hits-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 1024px) {
   article.search .badge-button#display-filters {
     display: block;
   }
 
   article.search .header img {
     display: none;
-  }
-
-  article.search .ais-Hits-list {
-    grid-template-columns: repeat(2, 1fr);
   }
 
   article.search .search-content {
