@@ -15,6 +15,10 @@
   {{> home}}
 {{else if (eq page.layout 'index')}}
   {{> index}}
+{{else if (eq page.attributes.role 'related-labs')}}
+  {{#with (list-related-labs page.title page.attributes page.contents)  as |listLabs|}}
+    {{{listLabs}}}
+  {{/with}}
 {{else}}
   {{> context-switcher}}
   {{#with (add-suggested-labs page.attributes page.contents)  as |suggestedLabs|}}
