@@ -1052,6 +1052,53 @@ table code {
   flex: 0.3;
 }
 
+.doc .back-to-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 150px;
+}
+
+.doc .button-arrow-up:hover::after {
+  background-image: url(../img/arrow-cta-hover.svg);
+  top: -6px;
+}
+
+.doc .button-arrow-up::after,
+.button-arrow-up:hover::after {
+  height: 15px;
+  margin-left: 4px;
+  -webkit-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+  width: 18px;
+}
+
+.doc .button-arrow-up::after {
+  background-image: url(../img/arrow-cta.svg);
+  background-position: -1px 0;
+  background-repeat: no-repeat;
+  content: "";
+  display: inline-block;
+  position: relative;
+  top: 0;
+  -webkit-transition: top 0.5s ease-in-out;
+  transition: top 0.5s ease-in-out;
+}
+
+.doc .button-arrow:active,
+.doc .button-arrow:focus,
+.doc .button-arrow:hover {
+  color: var(--link_hover-font-color);
+  text-decoration: none;
+}
+
+.doc .button-arrow {
+  color: var(--link-font-color);
+  font-size: 0.9em;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .doc .choices__list--dropdown .choices__item--selectable.is-highlighted,
 .doc .choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
   background-color: var(--panel-background);
