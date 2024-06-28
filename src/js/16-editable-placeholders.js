@@ -69,7 +69,8 @@
     const sortedPlaceholders = placeholders.sort((a, b) => b.length - a.length);
     for (const placeholder of sortedPlaceholders) {
       const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
-      if (processed.has(placeholder) || cleanedPlaceholder === 'none') {
+      // Ensure the cleanedPlaceholder includes only lowercase letters and dashes
+      if (!/^[a-z-]+$/.test(cleanedPlaceholder) || processed.has(placeholder) || cleanedPlaceholder === 'none') {
         continue;
       }
       const regexString = RegExp.escape(placeholder);
