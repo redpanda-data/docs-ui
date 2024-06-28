@@ -70,7 +70,7 @@
     for (const placeholder of sortedPlaceholders) {
       const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
       // Ensure the cleanedPlaceholder includes only lowercase letters and dashes
-      if (!/^[a-z-]+$/.test(cleanedPlaceholder) || processed.has(placeholder) || cleanedPlaceholder === 'none') {
+      if (!/^[a-z-_]+$/.test(cleanedPlaceholder) || processed.has(placeholder) || cleanedPlaceholder === 'none') {
         continue;
       }
       const regexString = RegExp.escape(placeholder);
