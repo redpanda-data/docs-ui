@@ -6,11 +6,15 @@
   window.addEventListener('load', function () {
     try {
       makePlaceholdersEditable()
-      // Rehighlight code blocklines.
-      Prism && Prism.highlightAll()
+      // Rehighlight code block lines.
+      if (Prism) {
+        Prism.highlightAll();
+      }
       // Remove any Prism markup injected inside editable spans.
       const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
       editableSpans.forEach(span => removeNestedSpans(span));
+      // Add pencil icons next to editable placeholders
+      addPencilSpans();
     } catch (error) {
       console.error('An error occurred while making placeholders editable:', error)
     }
@@ -21,6 +25,16 @@
     unnestPlaceholders()
     addClasses(element)
     addEvents(element)
+  }
+
+  function addPencilSpans() {
+    const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
+    editableSpans.forEach(span => {
+      const pencilSpan = document.createElement('span');
+      pencilSpan.className = 'fa fa-pencil cursor';
+      pencilSpan.setAttribute('aria-hidden', 'true');
+      span.insertAdjacentElement('afterend', pencilSpan);
+    });
   }
 
   function createEditablePlaceholders(parentElement) {
@@ -69,13 +83,12 @@
     const sortedPlaceholders = placeholders.sort((a, b) => b.length - a.length);
     for (const placeholder of sortedPlaceholders) {
       const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
-      // Ensure the cleanedPlaceholder includes only lowercase letters and dashes
-      if (!/^[a-z-_]+$/.test(cleanedPlaceholder) || processed.has(placeholder) || cleanedPlaceholder === 'none') {
+      if (processed.has(placeholder) || cleanedPlaceholder === 'none') {
         continue;
       }
       const regexString = RegExp.escape(placeholder);
       const globalRegex = new RegExp(regexString, 'g');
-      newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" aria-label="Edit ${cleanedPlaceholder}" title="Edit ${cleanedPlaceholder}" role="textbox" aria-multiline="false">&lt;${cleanedPlaceholder}&gt;</span><span class="fa fa-pencil cursor" aria-hidden="true"></span>`);
+      newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" aria-label="Edit ${cleanedPlaceholder}" title="Edit ${cleanedPlaceholder}" role="textbox" aria-multiline="false">&lt;${cleanedPlaceholder}&gt;</span>`);
       processed.add(placeholder);
     }
     element.innerHTML = newHTML;
