@@ -30,10 +30,9 @@
       const scrolledToBottom = (window.innerHeight + scrollTop) >= (document.body.offsetHeight)
 
       if (scrolledToBottom && !footerIsStatic) {
-        footer.style.position = 'static'
         footerIsStatic = true
+        window.scrollTo(0, document.body.scrollHeight + '100px')
       } else if (scrollTop < lastScrollTop && footerIsStatic) {
-        footer.style.position = 'fixed'
         footerIsStatic = false
       }
 
