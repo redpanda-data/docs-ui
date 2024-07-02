@@ -81,6 +81,7 @@
     tocMenuDropdown.querySelectorAll('.toc-menu a').forEach(function (link) {
       link.addEventListener('click', function (e) {
         e.preventDefault()
+        e.stopPropagation()
         var targetId = this.getAttribute('href').substring(1)
         var targetElement = document.getElementById(targetId)
         if (targetElement) {
@@ -91,7 +92,7 @@
           })
         }
         // Hide the dropdown menu after click
-        tocMenu.classList.add('hidden')
+        tocMenu.classList.toggle('hidden')
       })
     })
   }
