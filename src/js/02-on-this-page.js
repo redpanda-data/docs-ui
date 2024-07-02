@@ -1,6 +1,14 @@
 ;(function () {
   'use strict'
 
+  document.addEventListener('DOMContentLoaded', function () {
+    const backToTopButton = document.querySelector('#back-to-top')
+    backToTopButton.addEventListener('click', function (event) {
+      event.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  })
+
   var sidebar = document.querySelector('aside.toc.sidebar')
   if (!sidebar) return
   if (document.querySelector('body.-toc')) return sidebar.parentNode.removeChild(sidebar)
@@ -76,7 +84,7 @@
         var targetId = this.getAttribute('href').substring(1)
         var targetElement = document.getElementById(targetId)
         if (targetElement) {
-          var targetPosition = targetElement.getBoundingClientRect().top + window.scrollY
+          var targetPosition = targetElement.getBoundingClientRect().top
           window.scrollTo({
             top: targetPosition,
             behavior: 'smooth',
