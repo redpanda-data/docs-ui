@@ -6,6 +6,10 @@ body {
   padding-top: var(--navbar-height);
 }
 
+.header {
+  max-width: 100%;
+}
+
 .navbar {
   background: var(--navbar-background);
   color: var(--navbar-font-color);
