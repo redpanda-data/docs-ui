@@ -7,7 +7,6 @@
     const submitButton = document.querySelector('.submit-announcement-button-email')
     const inputContainer = document.querySelector('.input-container')
     const successfulSentEmail = document.querySelector('.successful-sent-email')
-    const backToTopButton = document.querySelector('#back-to-top-button')
     let footerDisplayed = false
     let lastScrollTop = 0
 
@@ -59,11 +58,6 @@
           footer.classList.add('hidden-announcement-email-footer')
           footerDisplayed = false
         }, 3000)
-      })
-    }
-    if (backToTopButton) {
-      backToTopButton.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
       })
     }
   })
