@@ -110,17 +110,6 @@ page:
       - content: English + 中文
         url: '/xyz/23.2/index.html#english+中文'
         urlType: internal
-    - content: Liber Recusabo
-      url: '#liber-recusabo'
-      urlType: fragment
-    - content: Reference
-      items:
-      - content: Keyboard Shortcuts
-        url: '#'
-        urlType: fragment
-      - content: Importing and Exporting
-        url: '#'
-        urlType: fragment
       - content: Some Code
         url: '/xyz/23.2/index.html#some-code'
         urlType: internal
