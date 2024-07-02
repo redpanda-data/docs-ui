@@ -65,10 +65,26 @@
       startOfContent.parentNode.insertBefore(embeddedToc, startOfContent)
     }
     tocMenuDropdown.querySelector('.toc-menu').classList.add('hidden')
-
+    const tocMenu = tocMenuDropdown.querySelector('.toc-menu')
     tocMenuDropdown.addEventListener('click', function (e) {
-      const tocMenu = tocMenuDropdown.querySelector('.toc-menu')
       tocMenu.classList.toggle('hidden')
+    })
+    // Handle ToC link clicks within the dropdown
+    tocMenuDropdown.querySelectorAll('.toc-menu a').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault()
+        var targetId = this.getAttribute('href').substring(1)
+        var targetElement = document.getElementById(targetId)
+        if (targetElement) {
+          var targetPosition = targetElement.getBoundingClientRect().top + window.scrollY
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth',
+          })
+        }
+        // Hide the dropdown menu after click
+        tocMenu.classList.add('hidden')
+      })
     })
   }
 
@@ -78,7 +94,7 @@
   })
 
   function onScroll () {
-    var scrolledBy = window.pageYOffset
+    var scrolledBy = window.scrollY
     var buffer = getNumericStyleVal(document.documentElement, 'fontSize') * 1.15
     var ceil = article.offsetTop
     if (scrolledBy && window.innerHeight + scrolledBy + 2 >= document.documentElement.scrollHeight) {
