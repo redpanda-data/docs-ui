@@ -1,0 +1,2 @@
+= Redpanda Connect
+:page-layout: redpanda-connect-home
