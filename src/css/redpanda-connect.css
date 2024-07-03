@@ -18,7 +18,7 @@
 }
 
 .redpanda-connect-cta-button {
-  background-color: #007bff;
+  background-color: var(--link-font-color);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -33,29 +33,6 @@
   max-width: 600px;
 }
 
-.redpanda-connect-easy-to-use {
-  margin-bottom: 40px;
-}
-
-.redpanda-connect-tabs {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-.redpanda-connect-tab-button {
-  background-color: #f0f0f0;
-  border: none;
-  padding: 10px 20px;
-  cursor: pointer;
-  border-radius: 5px 5px 0 0;
-}
-
-.redpanda-connect-tab-button.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.redpanda-connect-code-snippet,
 .redpanda-connect-config-example {
   background-color: #f8f8f8;
   padding: 20px;
@@ -63,16 +40,8 @@
   overflow-x: auto;
 }
 
-.redpanda-connect-pre {
-  margin: 0;
-}
-
-.redpanda-connect-code {
-  font-family: 'Courier New', Courier, monospace;
-}
-
 .redpanda-connect-read-more {
-  background-color: #007bff;
+  background-color: var(--link-font-color);
   color: white;
   border: none;
   padding: 5px 10px;
@@ -82,35 +51,9 @@
   margin-top: 10px;
 }
 
-.redpanda-connect-features {
-  display: flex;
-  justify-content: space-between;
-}
-
-.redpanda-connect-feature img {
-  max-width: 100%;
-  height: auto;
-}
-
-.redpanda-connect-benthos-studio {
-  display: flex;
-  margin-bottom: 40px;
-  align-items: flex-start;
-}
-
 .redpanda-connect-video-container iframe {
   width: 100%;
   aspect-ratio: 16 / 9;
-}
-
-.redpanda-connect-studio-description {
-  flex: 1;
-}
-
-.redpanda-connect-benthos-character {
-  max-width: 100px;
-  float: right;
-  margin-left: 20px;
 }
 
 .redpanda-connect-features-grid {
@@ -119,7 +62,6 @@
   gap: 40px;
   align-items: start;
 }
-
 
 .redpanda-connect-feature {
   background-color: #f8f8f8;
@@ -134,7 +76,7 @@
 }
 
 .redpanda-connect-a {
-  color: #007bff;
+  color: var(--link-font-color);
   text-decoration: none;
 }
 
