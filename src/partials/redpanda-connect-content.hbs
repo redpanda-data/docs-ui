@@ -5,8 +5,8 @@
             <div class="row top-header">
               <div class="col col--5 col--offset-1 redpanda-connect-header-content">
                 <h1 class="redpanda-connect-h1">Redpanda Connect</h1>
-                <p class="redpanda-connect-tagline">Fancy stream processing made operationally mundane</p>
-                <button class="redpanda-connect-cta-button" href="https://docs.redpanda.com/redpanda-connect/about/">Get Started</button>
+                <p class="redpanda-connect-tagline">Powerful stream processing made operationally mundane</p>
+                <button class="redpanda-connect-cta-button" href="https://docs.redpanda.com/redpanda-connect/about/">Get started</button>
               </div>
               <div class="col col--5">
                 <img src="{{{uiRootPath}}}/img/redpanda-connect-blog.png" alt="Redpanda Connect" class="redpanda-connect-header-image">
@@ -17,30 +17,53 @@
     </header>
     <div class="redpanda-connect-main">
         <section class="redpanda-connect-features-grid">
-          <div class="redpanda-connect-feature redpanda-connect-main-features">
-            <h2 class="redpanda-connect-feature-title">Easy to use</h2>
-            <p class="redpanda-connect-feature-description">Written in Go and deployed as a static binary, Redpanda Connect features declarative configuration. It is fully open source and cloud-native.</p>
+          <div class="redpanda-connect-feature">
+            <h3 class="redpanda-connect-feature-title">What is Redpanda Connect?</h3>
+            <p class="redpanda-connect-feature-description">A high-performance and resilient stream processor, Redpanda Connect offers seamless integration with a wide range of popular data sources and sinks, along with simple installation, configuration, and deployment.</p>
+            <div class="redpanda-connect-video-container">
+            <iframe src="https://www.youtube.com/embed/DYEphcjofgE" frameborder="0" allowfullscreen></iframe>
+          </div>
+          </div>
+
+        <div class="redpanda-connect-feature">
+         <h3 class="redpanda-connect-feature-title">Easy to install, configure, and run</h3>  
+        <p class="redpanda-connect-feature-description">Install Redpanda Connect using the rpk command-line tool (CLI), and configure and run your first data pipeline in minutes.</p>
             <div class="redpanda-connect-tabs">
-                <button class="redpanda-connect-tab-button active">Curl</button>
+                <button class="redpanda-connect-tab-button active">Linux</button>
                 <button class="redpanda-connect-tab-button">Homebrew</button>
                 <button class="redpanda-connect-tab-button">Docker</button>
-                <button class="redpanda-connect-tab-button">Asdf</button>
             </div>
             <div class="redpanda-connect-code-snippet">
+              <div id="Linux">
                 <pre><code>
 # Install
 curl -Lsf https://www.benthos.dev/sh/install | bash
 
-# Make a config
+# Make a configuration
 benthos create nats/protobuf/aws_sqs > ./config.yaml
 
-# Run
+# Run your configuration
 benthos -c ./config.yaml
                 </code></pre>
-            </div>
-          </div>
+                </div>
+                <!---<div id="Homebrew">
+                <pre><code>
+# Install
+curl -Lsf https://www.benthos.dev/sh/install | bash
 
+# Make a configuration
+benthos create nats/protobuf/aws_sqs > ./config.yaml
+
+# Run your configuration
+benthos -c ./config.yaml
+                </code></pre>
+                </div>--->
+            </div>
+               <button class="redpanda-connect-cta-button" href="https://docs.redpanda.com/redpanda-connect/about/">Learn more</button>
+          </div>
           <div class="redpanda-connect-feature">
+            <h3 class="redpanda-connect-feature-title">Simple to manage</h3>
+            <p class="redpanda-connect-feature-description">Update your data pipeline with new features, such as data integrations, transforms, and multiplexing whenever you need to. Redpanda Connect uses declarative configuration in a single YAML file so that you can unit test and deploy changes quickly and easily. </p>
             <div class="redpanda-connect-config-example">
                 <div class="redpanda-connect-tabs">
                     <button class="redpanda-connect-tab-button active">Mapping</button>
@@ -48,6 +71,7 @@ benthos -c ./config.yaml
                     <button class="redpanda-connect-tab-button">Windowing</button>
                     <button class="redpanda-connect-tab-button">Enrichments</button>
                 </div>
+                <div class="redpanda-connect-code-snippet">
                 <pre><code>
 input:
   gcp_pubsub:
@@ -67,39 +91,21 @@ output:
     stream: bar
     max_in_flight: 20
                 </code></pre>
-                <button class="redpanda-connect-read-more">Learn more &rarr;</button>
+                
             </div>
-          </div>
-
+            <button class="redpanda-connect-cta-button" href="https://docs.redpanda.com/redpanda-connect/about/">Get started</button>
+            </div>
+            </div> 
           <div class="redpanda-connect-feature">
-            <h3 class="redpanda-connect-feature-title">Efficiently Handles Routine Tasks</h3>
-            <p class="redpanda-connect-feature-description">Redpanda Connect addresses common data engineering challenges such as transformations, integrations, and multiplexing through declarative and unit-testable configurations. Those features allow seamless and incremental adjustments to data pipelines as requirements evolve, so you can focus on your product.</p>
+            <h3 class="redpanda-connect-feature-title">Integrates with your existing infrastructure</h3>
+            <p class="redpanda-connect-feature-description">Drop Redpanda Connect seamlessly into your existing infrastructure. Redpanda Connect integrates with a wide range of sources and sinks, and connects to databases, caches, HTTP APIs, Lambdas, and more.</p>
+                <img src="{{{uiRootPath}}}/img/redpanda-connect-blog.png" alt="Redpanda Connect" class="redpanda-connect-header-image">
           </div>
-
           <div class="redpanda-connect-feature">
-            <h3 class="redpanda-connect-feature-title">Highly Integrated</h3>
-            <p class="redpanda-connect-feature-description">Redpanda Connect can integrate a wide array of sources and sinks and connect to various databases, caches, HTTP APIs, lambdas, and more, facilitating seamless integration with your existing infrastructure.</p>
-            <p class="redpanda-connect-feature-description">Working with disparate APIs and services can be a daunting task, especially in a streaming data context. With Redpanda Connect, it is possible to decompose these tasks and automatically parallelize them as part of a streaming workflow.</p>
+                <h3 class="redpanda-connect-feature-title" >Crash resilient delivery guarantees</h3>
+            <p class="redpanda-connect-feature-description">Delivery guarantees can be complex. Redpanda Connect processes and acknowledges messages using an in-process transaction model with no need for a disk-persisted state. When it connects to at-least-once sources and sinks, Redpanda Connect guarantees at-least-once delivery, even in the event of crashes, disk corruption, or other server faults.</p>
+            <p class="redpanda-connect-feature-description">This default behavior, simplifies the deployment and scaling of Redpanda Connect. It also offers observability by exposing metrics and tracing events to targets of your choice.</p>
           </div>
-
-          <div class="redpanda-connect-video-container">
-            <iframe src="https://www.youtube.com/embed/uvbp2LCmQMY" frameborder="0" allowfullscreen></iframe>
-          </div>
-
-          <div class="redpanda-connect-feature">
-            <h3 class="redpanda-connect-feature-title">Create, Test and Deploy Configurations Visually</h3>
-            <p class="redpanda-connect-feature-description">Declarative YAML is excellent for integrating with version control tools, but managing large configurations can become cumbersome. Benthos Studio is a visual web application that enables you to create, import, edit, test, share, and deploy configurations. It makes configuration management both efficient and enjoyable.</p>
-          </div>
-
-          <div class="redpanda-connect-feature">
-            <h3 class="redpanda-connect-feature-title">Reliable and Operationally Simple</h3>
-            <p class="redpanda-connect-feature-description">Delivery guarantees can be complex. Redpanda Connect processes and acknowledges messages using an in-process transaction model, eliminating the need for disk-persisted state. This ensures at-least-once delivery when connecting to at-least-once sources and sinks, even in the event of crashes, disk corruption, or other server faults.</p>
-            <p class="redpanda-connect-feature-description">This default behavior, free from caveats, simplifies the deployment and scaling of Redpanda Connect. Additionally, it offers observability by exposing metrics and tracing events to targets of your choice.</p>
-          </div>
-
-          <div class="redpanda-connect-feature">
-            <h3 class="redpanda-connect-feature-title">Extensible</h3>
-            <p class="redpanda-connect-feature-description">Sometimes the built-in components of Redpanda Connect aren't sufficient. However, Redpanda Connect is designed for easy extension, allowing you to create custom components. You can either develop plugins directly in Go (recommended) or run your plugin as a subprocess.</p>
           </div>
         </section>
     </div>
