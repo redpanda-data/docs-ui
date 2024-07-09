@@ -53,7 +53,7 @@
 
 .redpanda-connect-video-container iframe {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 15 / 10;
 }
 
 .redpanda-connect-features-grid {
@@ -68,10 +68,10 @@
   padding: 20px;
   border-radius: 5px;
   flex-basis: 48%;
-  min-height: 320px;
+  min-height: 683px;
 }
 
-.redpanda-connect-feature h3 {
+.redpanda-connect-feature h2 {
   margin-top: 0;
 }
 
