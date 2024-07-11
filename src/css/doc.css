@@ -1399,7 +1399,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
   border-radius: 0.25em;
   padding: 0.5em;
   color: var(--body-background);
-  cursor: auto;
+  cursor: pointer;
   opacity: 0;
   transition: opacity 0.5s ease 0.5s;
 }
