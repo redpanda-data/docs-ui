@@ -143,7 +143,8 @@
 .doc a,
 .doc .glossary-term,
 .doc p a > code {
-  color: var(--link-font-color);
+  text-decoration: underline;
+  color: var(--body-font-color);
 }
 
 .doc a:hover,
@@ -160,9 +161,11 @@
   hyphens: none;
 }
 
+/*
 .doc a.unresolved {
   color: var(--link_unresolved-font-color);
 }
+*/
 
 .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
@@ -203,7 +206,7 @@
 }
 
 .doc pre {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   line-height: 1.5;
   margin: 0;
   padding: 1em;
@@ -283,7 +286,7 @@
 }
 
 .doc table.tableblock {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
 .tablecontainer {
@@ -464,7 +467,7 @@
 }
 
 .doc .admonitionblock pre {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
 .doc .admonitionblock > table {
@@ -636,7 +639,7 @@ table code {
 
 .doc .quoteblock .attribution {
   color: var(--quote-attribution-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   margin-top: 0.75rem;
 }
 
@@ -797,7 +800,7 @@ table code {
 .doc .videoblock .title,
 .doc .tableblock caption {
   color: var(--caption-font-color);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   font-style: var(--caption-font-style);
   font-weight: var(--caption-font-weight);
   hyphens: none;
@@ -1014,7 +1017,7 @@ table code {
 
 .doc .choices__inner {
   background-color: var(--body-background);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .tableblock .choices__list--single {
@@ -1093,9 +1096,7 @@ table code {
 }
 
 .doc .button-arrow {
-  color: var(--link-font-color);
-  font-size: 0.9em;
-  font-weight: 700;
+  color: var(--link-highlight-color);
   text-decoration: none;
 }
 
@@ -1281,7 +1282,7 @@ img.dark-mode-filter,
 code[class*=language-],
 pre[class*=language-] {
   color: var(--code-font-color) !important;
-  font-size: 0.88rem !important;
+  font-size: calc(17 / var(--rem-base) * 1rem) !important;
   background: var(--pre-background) !important;
   white-space: pre-wrap !important;
   font-weight: lighter !important;
@@ -1458,7 +1459,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .colist {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   margin: 0.25rem 0 -0.25rem;
 }
 
@@ -1534,7 +1535,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .keyseq {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--body-font-size);
 }
 
 .doc .keyseq kbd {

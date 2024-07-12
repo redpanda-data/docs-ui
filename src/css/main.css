@@ -24,6 +24,7 @@
 
   main > .content {
     display: flex;
+    gap: 150px;
     justify-content: center;
   }
 

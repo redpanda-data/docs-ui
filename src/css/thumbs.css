@@ -3,12 +3,12 @@
   flex-direction: column;
   align-items: center;
   font-size: inherit;
-  color: var(--link-font-color);
+  color: var(--body-font-color);
   margin-top: 20px;
 }
 
 .thumb {
-  color: var(--link-font-color);
+  color: var(--link-highlight-color);
   background: none;
   border: none;
 }

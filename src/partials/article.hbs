@@ -1,11 +1,13 @@
 <article class="doc">
 {{#unless page.attributes.cloud}}
 {{> latest-banner}}
-  {{> page-versions}}
 {{/unless}}
 {{#with page.title}}
 <h1 class="page">{{{this}}}</h1>
 {{/with}}
+{{#unless page.attributes.cloud}}
+  {{> page-versions}}
+{{/unless}}
 {{#if page.attributes.cloud}}
   {{#if page.attributes.beta}}
     <img src="{{{uiRootPath}}}/img/beta.svg"> </img>

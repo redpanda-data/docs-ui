@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: space-between;
   flex-direction: column;
-  color: var(--link-font-color);
+  color: var(--body-font-color);
 }
 
 .feedback-section .material-icons {

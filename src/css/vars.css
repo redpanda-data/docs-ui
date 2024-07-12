@@ -100,13 +100,13 @@ html[data-theme=dark] {
   --color-black: var(--slate-900);
   /* fonts */
   --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
-  --body-font-size: calc(20 / var(--rem-base) * 1rem);
-  --body-font-size--desktop: calc(20 / var(--rem-base) * 1rem);
+  --body-font-size: calc(18 / var(--rem-base) * 1rem);
+  --body-font-size--desktop: var(--body-font-size);
   --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
-  --body-font-family: "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
+  --body-font-family: "Inter", "Open Sans", arial, helvetica, sans-serif;
   --body-font-weight-bold: bold;
-  --body-font-family-bold: "Calibre Medium", "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
+  --body-font-family-bold: "Inter SemiBold", "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
   --monospace-font-family: "IBM Plex Mono", inter, "Courier Prime", courier, monospace;
   --monospace-font-weight-bold: 500;
   --alt-heading-font-weight: 800;
@@ -119,32 +119,34 @@ html[data-theme=dark] {
   --admonition-padding: 1rem;
   /* doc */
   --doc-font-size: inherit;
-  --doc-font-size--desktop: calc(20 / var(--rem-base) * 1rem);
+  --doc-font-size--desktop: var(--body-font-size);
   --doc-line-height: 1.75;
   --heading-font-weight: 700;
-  --heading-font-family: "Patron Medium", georgia, "Times New Roman", "Palatino Linotype", "Book Antiqua", garamond, "Roboto Slab", serif;
+  --heading-font-family: "Inter Medium", georgia, "Times New Roman", "Palatino Linotype", "Book Antiqua", garamond, "Roboto Slab", serif;
   --admonition-label-font-weight: var(--body-font-weight-bold);
   --caption-font-style: normal;
   --caption-font-weight: var(--body-font-weight-bold);
+  --link-highlight-color: #444ce7;
+  --link-highlight-background-color: rgba(68, 76, 231, 0.08);
   /* toc */
   --toc-line-height: 1.2;
   /* footer */
   --footer-line-height: var(--doc-line-height);
   /* dimensions and positioning */
-  --navbar-height: calc(90 / var(--rem-base) * 1rem);
+  --navbar-height: calc(70 / var(--rem-base) * 1rem);
   --toolbar-height: calc(45 / var(--rem-base) * 1rem);
   --drawer-height: var(--toolbar-height);
   --body-top: var(--navbar-height);
   --body-min-height: calc(100vh - var(--body-top));
-  --nav-height: calc(var(--body-min-height) - var(--toolbar-height));
+  --nav-height: calc(var(--body-min-height) - var(--toolbar-height) - 150px);
   --nav-height--desktop: var(--body-min-height);
   --nav-panel-menu-height: calc(100% - var(--drawer-height));
   --nav-panel-explore-height: calc(50% + var(--drawer-height));
   --nav-width: calc(270 / var(--rem-base) * 1rem);
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);
-  --toc-width: calc(162 / var(--rem-base) * 1rem);
-  --toc-width--widescreen: calc(216 / var(--rem-base) * 1rem);
+  --toc-width: calc(200 / var(--rem-base) * 1rem);
+  --toc-width--widescreen: calc(250 / var(--rem-base) * 1rem);
   --doc-max-width: 55rem;
   /* stacking */
   --z-index-page-version-menu: 2;
@@ -174,17 +176,17 @@ html:not([data-theme=dark]) {
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;
-  --search-icon-color: var(--link-font-color);
+  --search-icon-color: unset;
   /* navbar */
   --navbar-background: var(--color-white);
-  --navbar-font-color: var(--body-font-color);
+  --navbar-font-color: #a8b2c7;
   --navbar_hover-background: var(--color-white);
   --navbar-button-background: var(--color-white);
   --navbar-button-border-color: var(--panel-border-color);
   --navbar-button-font-color: var(--body-font-color);
   --navbar-menu-border-color: var(--panel-border-color);
   --navbar-menu-background: var(--color-white);
-  --navbar-menu-font-color: var(--body-font-color);
+  --navbar-menu-font-color: var(--navbar-font-color);
   --navbar-menu_hover-background: var(--color-smoke-50);
   --navbar-boxshadow: 1px 3px 5px var(--ash-50);
   --navbar-dropdown-boxshadow: 0 4px 10px #0003;

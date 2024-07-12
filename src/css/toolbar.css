@@ -3,13 +3,12 @@
   align-items: center;
   background-color: var(--toolbar-background);
   display: flex;
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   height: var(--toolbar-height);
   justify-content: flex-start;
   position: sticky;
   top: var(--navbar-height);
   z-index: var(--z-index-toolbar);
-  border-bottom: 1px solid var(--nav-border-color);
 }
 
 .toolbar a {
