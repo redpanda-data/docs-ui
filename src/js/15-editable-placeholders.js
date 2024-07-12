@@ -7,7 +7,7 @@
     try {
       makePlaceholdersEditable()
       // Rehighlight code block lines.
-      if (Prism) {
+      if (Prism?.highlightAll) {
         Prism.highlightAll();
       }
       // Remove any Prism markup injected inside editable spans.
