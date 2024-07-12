@@ -1,40 +1,28 @@
 <header class="header">
-  <nav class="navbar">
+  <nav class="navbar" {{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}>
     {{> announcement-bar}}
     <div class="navbar-brand" id="brand">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
+      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
       <button class="navbar-burger" data-target="topbar-nav" aria-label="Header navigation menu">
         <span></span>
         <span></span>
         <span></span>
       </button>
     </div>
-    <div id="topbar-nav" class="navbar-menu">
+    <div id="topbar-nav" class="navbar-menu" {{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}>
+      {{#each (sort-components site.components)}}
+      <a target="_blank" class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
+      {{/each}}
       <div class="navbar-end">
-        <a target="_blank" class="navbar-item" href="https://redpanda.com/">Redpanda.com</a>
-        <a target="_blank" class="navbar-item" href="https://redpanda.com/resources/">Resources</a>
-        <a target="_blank" class="navbar-item" href="https://university.redpanda.com/">Training</a>
-        <a target="_blank" class="navbar-item" href="https://redpanda.com/blog/">Blog</a>
-        {{#if (eq page.component.title 'Redpanda Connect')}}
-        <a target="_blank" class="navbar-item" href="https://github.com/redpanda-data/connect/">GitHub</a>
-        {{else}}
-        <a target="_blank" class="navbar-item" href="https://github.com/redpanda-data/redpanda/">GitHub</a>
+        {{> ai-button}}
+        {{#if (and (ne page.layout 'search') (ne page.layout 'labs-search'))}}
+        <div> or </div>
+        <div class="autocomplete" id="autocomplete"></div>
         {{/if}}
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link" href="#">Contact</a>
-          <div class="navbar-dropdown">
-            <ul>
-              <li><a target="_blank" href="https://redpanda.com/contact">Request demo</a></li>
-              <li><a target="_blank" href="https://redpanda.com/slack">Join our Slack</a></li>
-              <li><a target="_blank" href="https://support.redpanda.com/hc/en-us/">Support request</a></li>
-            <ul>
-          </div>
+        <div class="theme-switcher">
+          <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite"><img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
+          </button>
         </div>
-      </div>
-      <div class="theme-switcher">
-        <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite">
-          <img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
-        </button>
       </div>
     </div>
   </nav>
