@@ -5,12 +5,14 @@
 
   var navContainer = document.querySelector('.nav-container')
   var navToggle = document.querySelector('.nav-toggle')
+  var navCollapse = document.querySelector('.nav-collapse')
 
   if (!navContainer) return
 
   var nav = navContainer.querySelector('.nav')
 
-  navToggle.addEventListener('click', showNav)
+  if (navToggle) navToggle.addEventListener('click', showNav)
+  if (navCollapse) navCollapse.addEventListener('click', function (e) { showNav(e, true) })
   navContainer.addEventListener('click', trapEvent)
 
   var menuPanel = navContainer.querySelector('[data-panel=menu]')
@@ -167,26 +169,41 @@
     }
   }
 
-  function showNav (e) {
+  function showNav (e, collapse) {
     if (navToggle.classList.contains('is-active')) return hideNav(e)
+    if (collapse && !navContainer.classList.contains('hidden')) return hideNav(e, collapse)
     trapEvent(e)
     var html = document.documentElement
-    html.classList.add('is-clipped--nav')
-    navToggle.classList.add('is-active')
-    navContainer.classList.add('is-active')
-    var bounds = nav.getBoundingClientRect()
-    var expectedHeight = window.innerHeight - Math.round(bounds.top)
-    if (Math.round(bounds.height) !== expectedHeight) nav.style.height = expectedHeight + 'px'
-    html.addEventListener('click', hideNav)
+    if (!collapse) {
+      html.classList.add('is-clipped--nav')
+      navToggle.classList.add('is-active')
+      navContainer.classList.add('is-active')
+      var bounds = nav.getBoundingClientRect()
+      var expectedHeight = window.innerHeight - Math.round(bounds.top)
+      if (Math.round(bounds.height) !== expectedHeight) nav.style.height = expectedHeight + 'px'
+      html.addEventListener('click', hideNav)
+    } else {
+      navContainer.classList.remove('hidden')
+      navCollapse.classList.remove('collapsed')
+      navCollapse.firstElementChild.nextElementSibling.textContent = 'Collapse'
+      navCollapse.setAttribute('title', 'Collapse navigation')
+    }
   }
 
-  function hideNav (e) {
+  function hideNav (e, collapse) {
     trapEvent(e)
     var html = document.documentElement
-    html.classList.remove('is-clipped--nav')
-    navToggle.classList.remove('is-active')
-    navContainer.classList.remove('is-active')
-    html.removeEventListener('click', hideNav)
+    if (!collapse) {
+      html.classList.remove('is-clipped--nav')
+      navToggle.classList.remove('is-active')
+      navContainer.classList.remove('is-active')
+      html.removeEventListener('click', hideNav)
+    } else {
+      navContainer.classList.add('hidden')
+      navCollapse.classList.add('collapsed')
+      navCollapse.firstElementChild.nextElementSibling.textContent = ''
+      navCollapse.setAttribute('title', 'Expand navigation')
+    }
   }
 
   function trapEvent (e) {
