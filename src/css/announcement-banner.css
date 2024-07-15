@@ -17,8 +17,6 @@
 }
 
 .announcement-bar .announcement-content a {
-  color: var(--link-font-color);
-  text-decoration: underline;
   padding-left: 5px;
 }
 
