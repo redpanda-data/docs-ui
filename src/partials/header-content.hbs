@@ -1,5 +1,6 @@
 <header class="header">
-  <nav class="navbar" {{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}>
+  <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #101828"{{/if}}
+>
     {{> announcement-bar}}
     <div class="navbar-brand" id="brand">
       <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
@@ -9,7 +10,7 @@
         <span></span>
       </button>
     </div>
-    <div id="topbar-nav" class="navbar-menu" {{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}>
+    <div id="topbar-nav" class="navbar-menu" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #101828"{{/if}}>
       {{#each (sort-components site.components)}}
       <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
       {{/each}}
