@@ -18,6 +18,7 @@
 
 .announcement-bar .announcement-content a {
   padding-left: 5px;
+  color: white;
 }
 
 .announcement-bar button.close {
