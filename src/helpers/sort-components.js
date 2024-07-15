@@ -6,7 +6,11 @@
 
 module.exports = (collection) => {
   const sourceCollection = Object.values(collection).reduce((accum, it) => {
-    const headerAttributes = it.latest?.asciidoc?.attributes['page-header-data']
+    const headerAttributes =
+      it.latest &&
+      it.latest.asciidoc &&
+      it.latest.asciidoc.attributes &&
+      it.latest.asciidoc.attributes['page-header-data']
     if (headerAttributes && headerAttributes.order !== undefined) {
       accum.push({
         title: it.latest.title,
