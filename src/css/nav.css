@@ -288,7 +288,7 @@ html.is-clipped--nav {
   height: 36px;
 }
 
-.nav-item[data-depth="0"] .item.dropdown:first-child {
+.nav-item[data-depth="1"] > .item.dropdown {
   height: 36px;
 }
 

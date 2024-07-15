@@ -138,12 +138,12 @@
 }
 
 .toc .toc-menu a:hover {
-  color: var(--link-font-color);
+  color: var(--link-highlight-color);
 }
 
 .toc .toc-menu a.is-active {
-  border-left-color: var(--link-font-color);
-  color: var(--link-font-color);
+  border-left-color: var(--link-highlight-color);
+  color: var(--link-highlight-color);
 }
 
 .sidebar.toc .toc-menu a:focus {

@@ -75,6 +75,13 @@ article.search .header img {
   max-width: 200px;
 }
 
+article.search .results {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
 article.search .header h1 {
   font-size: 2.5em;
   margin-bottom: 0;
@@ -150,8 +157,9 @@ article.search .search-panel__filters:hover .versions {
 }
 
 article.search .ais-Heading > a {
-  color: var(--link-font-color);
   font-size: 1.5rem;
+  font-weight: normal;
+  color: var(--body-font-color);
 }
 
 .ais-Breadcrumbs a,
@@ -232,18 +240,17 @@ article.search .ais-Pagination-list {
 }
 
 .aa-Item[aria-selected=true] .aa-ItemContent mark {
-  color: white !important;
   text-decoration: underline !important;
   font-weight: unset !important;
 }
 
 mark {
-  color: var(--link-font-color) !important;
+  color: var(--link-highlight-color) !important;
   background: none;
 }
 
 .aa-Item[aria-selected=true] a {
-  background-color: var(--link-font-color) !important;
+  background-color: var(--link-highlight-background-color) !important;
 }
 
 kbd.algolia-command {
@@ -335,6 +342,7 @@ kbd.algolia-command {
   font-size: small;
   padding: 0 2px;
   border-radius: 5px;
+  color: var(--link-highlight-color);
   border: 1px solid #dadde1;
 }
 
@@ -400,13 +408,18 @@ li.aa-Item:not([id*="filters"]) {
   padding: 0;
 }
 
+.aa-Preview.aa-Column .breadcrumbs li {
+  min-height: 30px;
+}
+
 .aa-Preview.aa-Column .breadcrumbs li a {
   color: var(--body-font-color);
   padding: 4px;
+  text-decoration: none;
 }
 
 .aa-Preview.aa-Column .breadcrumbs li a:hover {
-  color: var(--link-font-color);
+  background-color: var(--link-highlight-background-color);
 }
 
 .aa-Preview.aa-Column .breadcrumbs ul {
@@ -415,8 +428,8 @@ li.aa-Item:not([id*="filters"]) {
 }
 
 .aa-Item[aria-selected=true] {
-  background-color: var(--link-font-color) !important;
-  color: white !important;
+  background-color: var(--link-highlight-background-color) !important;
+  color: var(--body-font-color) !important;
 }
 
 .aa-ActiveOnly {
@@ -430,6 +443,8 @@ li.aa-Item:not([id*="filters"]) {
 
 .aa-SourceHeaderTitle {
   font-size: 1rem !important;
+  font-weight: normal !important;
+  color: var(--link-highlight-color) !important;
 }
 
 .aa-ItemContentSnippet {

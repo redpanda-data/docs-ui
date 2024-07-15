@@ -126,8 +126,6 @@ html[data-theme=dark] {
   --admonition-label-font-weight: var(--body-font-weight-bold);
   --caption-font-style: normal;
   --caption-font-weight: var(--body-font-weight-bold);
-  --link-highlight-color: #444ce7;
-  --link-highlight-background-color: rgba(68, 76, 231, 0.08);
   /* toc */
   --toc-line-height: 1.2;
   /* footer */
@@ -146,7 +144,7 @@ html[data-theme=dark] {
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);
   --toc-width: calc(200 / var(--rem-base) * 1rem);
-  --toc-width--widescreen: calc(250 / var(--rem-base) * 1rem);
+  --toc-width--widescreen: calc(400 / var(--rem-base) * 1rem);
   --doc-max-width: 55rem;
   /* stacking */
   --z-index-page-version-menu: 2;
@@ -235,8 +233,9 @@ html:not([data-theme=dark]) {
   --heading-font-color: var(--color-jet-80);
   --section-divider-color: var(--panel-border-color);
   --link-font-color: var(--redpanda-800);
-  --link-highlight-background-color: #0000000d;
-  --link_hover-font-color: var(--redpanda-900);
+  --link-highlight-color: #444ce7;
+  --link-highlight-background-color: rgba(68, 76, 231, 0.08);
+  --link_hover-font-color: var(--link-highlight-color);
   --link_unresolved-font-color: var(--redpanda-800);
   --abstract-background: var(--color-smoke-70);
   --abstract-font-color: var(--color-jet-20);
