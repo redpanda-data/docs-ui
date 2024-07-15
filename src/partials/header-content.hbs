@@ -11,7 +11,7 @@
     </div>
     <div id="topbar-nav" class="navbar-menu" {{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}>
       {{#each (sort-components site.components)}}
-      <a target="_blank" class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
+      <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
       {{/each}}
       <div class="navbar-end">
         {{> ai-button}}
