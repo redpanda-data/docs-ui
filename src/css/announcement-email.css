@@ -11,7 +11,6 @@
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 999;
   opacity: 0;
   max-height: 8rem;
 }
@@ -64,6 +63,7 @@
 
 .show-announcement-email-footer {
   opacity: 1;
+  z-index: 9
 }
 
 .announcement-email .close-announcement-email-footer {
