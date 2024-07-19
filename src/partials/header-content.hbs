@@ -14,10 +14,12 @@
       <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
       {{/each}}
       <div class="navbar-end">
-        {{> ai-button}}
-        {{#if (and (ne page.layout 'search') (ne page.layout 'labs-search'))}}
-        <div> or </div>
-        <div class="autocomplete" id="autocomplete"></div>
+        {{#if (ne page.attributes.role 'home')}}
+          {{> ai-button}}
+          {{#if (and (and (ne page.layout 'search') (ne page.layout 'labs-search')) (ne page.layout 'swagger'))}}
+          <div> or </div>
+          <div class="autocomplete" id="autocomplete"></div>
+          {{/if}}
         {{/if}}
         <div class="theme-switcher">
           <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite"><img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>

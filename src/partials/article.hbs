@@ -2,19 +2,37 @@
 {{#unless page.attributes.cloud}}
 {{> latest-banner}}
 {{/unless}}
-{{#with page.title}}
-<h1 class="page">{{{this}}}</h1>
-{{/with}}
+{{#if (eq page.attributes.role 'home')}}
+  <div class="home-header-container">
+    <div class="home-header">
+      {{#with page.title}}
+        <h1 class="page">{{{this}}}</h1>
+      {{/with}}
+      <div class="ask">
+        {{> ai-button}}
+        <div> or </div>
+        <div class="autocomplete" id="autocomplete"></div>
+      </div>
+    </div>
+  </div>
+{{else}}
+  {{#with page.title}}
+    <h1 class="page">{{{this}}}</h1>
+  {{/with}}
+{{/if}}
 {{#unless page.attributes.cloud}}
-  {{> page-versions}}
 {{/unless}}
 {{#if page.attributes.cloud}}
   {{#if page.attributes.beta}}
-    <img src="{{{uiRootPath}}}/img/beta.svg"> </img>
+    <div class="beta-label">
+      <p title="This feature is in beta.">Beta</p>
+    </div>
   {{/if}}
 {{/if}}
-{{#if (eq page.layout 'home')}}
+{{#if (eq page.attributes.role 'home')}}
   {{> home}}
+{{else if (eq page.attributes.role 'component-home')}}
+  {{> component-home}}
 {{else if (eq page.layout 'index')}}
   {{> index}}
 {{else if (eq page.attributes.role 'related-labs')}}
@@ -22,14 +40,20 @@
     {{{listLabs}}}
   {{/with}}
 {{else}}
+  <!--
+  Removing context switchers for now
+  while we evaluate their usefulness
   {{> context-switcher}}
+  -->
   {{#with (add-suggested-labs page.attributes page.contents)  as |suggestedLabs|}}
     {{{suggestedLabs}}}
   {{/with}}
 {{/if}}
+{{#if (ne page.attributes.role 'home')}}
 <div id="back-to-top" class="back-to-top">
   <a href="#" class="button-arrow button-arrow-up">Back to top</a>
 </div>
+{{/if}}
 {{> feedback-footer}}
 {{> pagination}}
 {{> tracking-pixel}}

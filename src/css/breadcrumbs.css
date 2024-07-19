@@ -1,14 +1,7 @@
 .breadcrumbs {
-  display: none;
   flex: 1 1;
   padding: 0 0.5rem 0 0.75rem;
   line-height: var(--nav-line-height);
-}
-
-@media screen and (min-width: 1024px) {
-  .breadcrumbs {
-    display: block;
-  }
 }
 
 a + .breadcrumbs {
@@ -51,6 +44,6 @@ a + .breadcrumbs {
 .breadcrumbs li:last-child a {
   color: var(--link-highlight-color);
   border-radius: 10px;
-  border: 1px solid #a4bcfd;
+  border: 1px solid var(--highlight-border);
   text-decoration: none;
 }

@@ -13,12 +13,11 @@
   font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--body-font-color);
   border-top: 1px solid #e5e9f0;
-  visibility: hidden;
   z-index: 9;
   position: sticky;
-  height: 50px;
+  height: 100px;
   bottom: 0;
-  display: flex;
+  display: none;
   gap: 5px;
   align-items: center;
   justify-content: flex-start;
@@ -27,7 +26,7 @@
 }
 
 .nav-collapse.collapsed {
-  width: calc(var(--nav-width) / 2);
+  width: calc(var(--nav-width) / 3);
   border: none;
 }
 
@@ -126,7 +125,7 @@
   }
 
   .nav-collapse {
-    visibility: visible;
+    display: flex;
   }
 }
 
@@ -146,7 +145,7 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
   overscroll-behavior: none;
-  top: var(--toolbar-height);
+  top: calc(var(--navbar-height) + calc(var(--announcement-bar-height) / 1.5));
   border-right: 1px solid var(--nav-border-color);
   -webkit-clip-path: inset(0);
   clip-path: inset(0);
@@ -160,10 +159,10 @@
 
 @media screen and (min-width: 1024px) {
   .nav {
-    top: var(--navbar-height);
     box-shadow: none;
     position: sticky;
     height: var(--nav-height--desktop);
+    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
   }
 }
 
@@ -172,8 +171,8 @@
 }
 
 .context .container.has-dropdown {
-  border: 1px solid #a4bcfd;
-  width: 70%;
+  border: 1px solid var(--highlight-border);
+  width: 100%;
   border-radius: 10px;
   padding: 10px 6px;
 }
@@ -185,7 +184,7 @@
   margin-top: 11px;
   align-items: center;
   gap: 10px;
-  width: 50%;
+  width: 80%;
   z-index: 2;
   background-color: var(--body-background);
   white-space: nowrap;
@@ -274,6 +273,7 @@ html.is-clipped--nav {
 .nav-list > li > .is-current-page {
   background-color: var(--link-highlight-background-color);
   color: var(--link-highlight-color);
+  font-weight: 500;
 }
 
 .nav-list .is-current-path > div.item:first-child {
@@ -305,20 +305,32 @@ html.is-clipped--nav {
   display: none;
 }
 
-.dropdown a.nav-link,
-.dropdown a.nav-text {
-  max-width: 80%;
+a.nav-link,
+a.nav-text {
+  min-width: 80%;
+}
+
+.item:not(.dropdown) a.nav-link,
+.item:not(.dropdown) a.nav-text {
+  min-width: 100%;
 }
 
 .nav-item-toggle {
-  background: transparent url(../img/nav-tree-chevron.svg) no-repeat center / 100%;
   border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   filter: var(--nav-toggle-filter);
   outline: none;
   line-height: inherit;
   padding: 0;
+  width: 2em;
+  height: 100%;
+}
+
+.nav-item-toggle > img {
+  filter: var(--nav-toggle-filter);
   width: 0.75em;
-  height: 1em;
 }
 
 .nav-item.is-active > .item > .nav-item-toggle {
@@ -342,7 +354,8 @@ html.is-clipped--nav {
 .nav-panel-explore .context {
   font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--link-highlight-color);
-  padding-left: 20px;
+  width: 100%;
+  padding: 6px 10px 6px 20px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -406,10 +419,9 @@ html.is-clipped--nav {
 }
 
 .nav-link.cloud-beta::after {
-  background-image: url(../img/beta.svg);
   height: 20px;
   display: block;
   background-repeat: no-repeat;
   background-size: contain;
-  content: '';
+  content: '(beta)';
 }

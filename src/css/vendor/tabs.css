@@ -20,6 +20,7 @@
 .doc .tabs.is-loading .tablist > ul li:not(:first-child),
 .doc .tabs:not(.is-loading) .tablist > ul li:not(.is-selected) {
   background-color: unset;
+  font-weight: normal;
 }
 
 .tabs:not(.is-loading) .tablist li:not(.is-selected):hover {

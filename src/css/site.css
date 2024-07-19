@@ -5,11 +5,11 @@
 @import "base.css";
 @import "body.css";
 @import "home.css";
+@import "component-home.css";
 @import "nav.css";
 @import "main.css";
 @import "toolbar.css";
 @import "breadcrumbs.css";
-@import "page-versions.css";
 @import "toc.css";
 @import "doc.css";
 @import "pagination.css";

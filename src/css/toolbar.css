@@ -1,13 +1,13 @@
 .toolbar {
   color: var(--toolbar-font-color);
-  align-items: center;
   background-color: var(--toolbar-background);
   display: flex;
   font-size: calc(16 / var(--rem-base) * 1rem);
   height: var(--toolbar-height);
   justify-content: flex-start;
   position: sticky;
-  top: var(--navbar-height);
+  align-items: flex-end;
+  top: calc(var(--navbar-height) + var(--announcement-bar-height));
   z-index: var(--z-index-toolbar);
 }
 
@@ -34,6 +34,10 @@ html[data-theme=dark] .nav-toggle {
 @media screen and (min-width: 1024px) {
   .nav-toggle {
     display: none;
+  }
+
+  .toolbar {
+    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
   }
 }
 

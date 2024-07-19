@@ -66,13 +66,12 @@ article.search .ais-Hits-list {
 
 article.search .header {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10%;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 article.search .header img {
-  max-width: 200px;
+  max-width: 150px;
 }
 
 article.search .results {
@@ -108,7 +107,7 @@ article.search .ais-Hits-list .card a:hover * {
 
 article.search span.ais-Snippet-nonHighlighted {
   color: var(--body-font-color);
-  font-size: large;
+  font-size: initial;
 }
 
 article.search .ais-Hits-item {
@@ -157,8 +156,8 @@ article.search .search-panel__filters:hover .versions {
 }
 
 article.search .ais-Heading > a {
-  font-size: 1.5rem;
-  font-weight: normal;
+  font-size: 1.3rem;
+  font-weight: 500;
   color: var(--body-font-color);
 }
 

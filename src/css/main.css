@@ -5,6 +5,7 @@
 
   main > .content {
     overflow-x: auto;
+    height: 100%;
   }
 }
 
@@ -14,6 +15,11 @@
     width: calc(100% - var(--nav-width));
     padding-top: 0;
     min-width: 0; /* min-width: 0 required for flexbox to constrain overflowing elements */
+  }
+
+  .home main {
+    margin: 0;
+    width: 100%;
   }
 
   main.index {
@@ -33,7 +39,6 @@
   }
 
   aside.toc.sidebar {
-    flex: 0 0 var(--toc-width);
     order: 1;
   }
 }
@@ -41,6 +46,5 @@
 @media screen and (min-width: 1400px) {
   aside.toc.sidebar {
     flex-basis: var(--toc-width--widescreen);
-    margin-right: 1rem;
   }
 }

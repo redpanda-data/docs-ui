@@ -15,13 +15,13 @@
           <div class="content">
             <article class="search labs">
               <div class="header">
-                <img src="{{{uiRootPath}}}/img/redpanda-lab-standing.png">
                 <div>
                   {{#with page.title}}
                   <h1 class="page">{{{this}}}</h1>
                   {{/with}}
                   <p>Labs projects showcase what is possible to achieve with Redpanda as the centerpiece of your streaming data architecture. Some of these projects provide examples, guidance, best practices, and most importantly ideas for how you can use Redpanda in your own projects.</p>
                 </div>
+                <img src="{{{uiRootPath}}}/img/redpanda-lab-standing.png">
               </div>
               <div class="container">
                 <div class="searchbox" id="searchbox"></div>
@@ -46,11 +46,18 @@
                 </div>
               </div>
               {{> tracking-pixel}}
+              <div id="back-to-top" class="back-to-top">
+                <a href="#" class="button-arrow button-arrow-up">Back to top</a>
+              </div>
             </article>
           </div>
+          {{> footer}}
       </main>
     </div>
-    {{> footer}}
+    <div class="nav-collapse" title="Collapse navigation">
+      <img src="{{{uiRootPath}}}/img/collapse-icon.svg" class="menu-icon" alt="Collapse navigation tree">
+      <p>Collapse</p>
+    </div>
     <script>
     if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
       const { algoliasearch, instantsearch } = window

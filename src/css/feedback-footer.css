@@ -16,6 +16,8 @@
 
 .feedback-section a {
   text-decoration: none;
+  display: flex;
+  gap: 5px;
 }
 
 .feedback-section a:hover {

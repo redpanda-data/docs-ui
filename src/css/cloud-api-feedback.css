@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: space-between;
   flex-direction: row;
-  color: var(--link-font-color);
+  color: var(--body-font-color);
   gap: 10px;
   margin-top: -1rem;
 }
@@ -72,7 +72,7 @@
 .cloud-api-feedback-modal-close button {
   background-color: var(--body-background) !important;
   border: 0 !important;
-  color: var(--link-font-color) !important;
+  color: var(--link-highlight-color) !important;
 }
 
 .cloud-api-feedback-modal-input {

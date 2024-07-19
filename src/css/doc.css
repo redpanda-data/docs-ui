@@ -5,7 +5,7 @@
   line-height: var(--doc-line-height);
   max-width: var(--doc-max-width);
   padding: 0 1rem 4rem;
-  margin-top: 2.5rem;
+  margin-top: 4.5rem;
 }
 
 .doc ul.index {
@@ -24,7 +24,6 @@
     min-width: 0;
     margin-right: 0.7rem;
     margin-bottom: 0;
-    margin-top: 2.5rem;
   }
 }
 
@@ -150,7 +149,7 @@
 .doc a:hover,
 .doc .glossary-term:hover,
 .doc p a > code:hover {
-  color: var(--link_hover-font-color);
+  color: var(--link-highlight-color);
 }
 
 .doc .glossary-term {
@@ -195,7 +194,6 @@
   border: 0.1rem solid #0000001a;
   font-weight: lighter;
   border-radius: 0.25em;
-  font-size: 0.88rem;
   padding: 0.125em 0.25em;
 }
 
@@ -428,35 +426,30 @@
 
 .doc .admonitionblock.note {
   background-color: var(--note-background);
-  border: 0 solid var(--note-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.warning {
   background-color: var(--warning-background);
-  border: 0 solid var(--warning-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.tip {
   background-color: var(--tip-background);
-  border: 0 solid var(--tip-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.caution {
   background-color: var(--caution-background);
-  border: 0 solid var(--caution-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.important {
   background-color: var(--important-background);
-  border: 0 solid var(--important-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
@@ -491,7 +484,6 @@
   height: 1.25rem;
   line-height: 1;
   font-weight: var(--admonition-label-font-weight);
-  text-transform: uppercase;
   border-radius: 0.45rem;
   transform: translate(-0.5rem, -50%);
 }
@@ -509,41 +501,43 @@
 }
 
 .icon-note::before {
-  content: "✏️";
+  content: "";
+  background: var(--note-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-tip::before {
-  content: "💡";
+  content: "";
+  background: var(--tip-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-warning::before {
-  content: "🚨";
+  content: "";
+  background: var(--warning-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-caution::before {
-  content: "⚠️";
+  content: "";
+  background: var(--warning-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-important::before {
-  content: "❗";
+  content: "";
+  background: var(--important-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
-}
-
-.doc .admonitionblock.tip .icon {
-  color: var(--tip-on-color);
-}
-
-.doc .admonitionblock.warning .icon {
-  color: var(--warning-on-color);
+  height: 1.4em;
 }
 
 .doc .admonitionblock .icon i {
@@ -793,10 +787,6 @@ table code {
   margin-bottom: -0.5rem;
 }
 
-.doc .imageblock .title,
-.doc .literalblock .title,
-.doc .listingblock .title,
-.doc .openblock .title,
 .doc .videoblock .title,
 .doc .tableblock caption {
   color: var(--caption-font-color);
@@ -829,14 +819,18 @@ table code {
   padding-bottom: 0;
 }
 
-.doc .openblock details > summary.title {
-  display: block;
+.doc details > summary.title {
+  display: flex;
+  align-items: center;
   position: relative;
+  border-radius: 10px;
   line-height: var(--doc-line-height);
-  padding-left: 1rem;
+  background: none;
+  color: var(--body-font-color);
+  font-weight: 500;
+  padding-left: 0;
   padding-top: 0;
   padding-bottom: 0;
-  background-color: unset;
   border-bottom: none;
   margin-bottom: 0;
 }
@@ -845,30 +839,27 @@ table code {
   display: none;
 }
 
-.doc details > summary::before {
+.doc details > summary::after {
   content: "";
-  border: solid transparent;
-  border-left-color: currentColor;
-  border-width: 0.3em 0 0.3em 0.5em;
+  background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
+  width: 1em;
+  height: 1.2em;
   position: absolute;
-  top: calc((var(--doc-line-height) * 0.5 - 0.3) * 1em);
-  left: 0;
-  transform: translateX(15%);
+  right: 0;
 }
 
-.doc details[open] > summary::before {
+.doc details[open] > summary::after {
   border-color: currentColor transparent transparent;
   border-width: 0.5rem 0.3rem 0;
-  transform: translateY(15%);
+  transform: rotate(90deg);
 }
 
 .doc details {
-  border: 1px solid var(--note-color);
   margin: 1rem 0;
-  background-color: var(--note-background);
+  background-color: var(--accordian-background);
   box-shadow: 0 1px 2px 0 #0000001a;
-  padding: 1rem 1rem;
-  border-radius: 1px;
+  padding: 16px 24px;
+  border-radius: 8px 8px 0 0;
 }
 
 .doc details.result {
@@ -1055,19 +1046,19 @@ table code {
   flex: 0.3;
 }
 
-.doc .back-to-top {
+.back-to-top {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 150px;
 }
 
-.doc .button-arrow-up:hover::after {
+.button-arrow-up:hover::after {
   background-image: url(../img/arrow-cta-hover.svg);
   top: -6px;
 }
 
-.doc .button-arrow-up::after,
+.button-arrow-up::after,
 .button-arrow-up:hover::after {
   height: 15px;
   margin-left: 4px;
@@ -1076,7 +1067,7 @@ table code {
   width: 18px;
 }
 
-.doc .button-arrow-up::after {
+.button-arrow-up::after {
   background-image: url(../img/arrow-cta.svg);
   background-position: -1px 0;
   background-repeat: no-repeat;
@@ -1088,14 +1079,14 @@ table code {
   transition: top 0.5s ease-in-out;
 }
 
-.doc .button-arrow:active,
-.doc .button-arrow:focus,
-.doc .button-arrow:hover {
+.button-arrow:active,
+.button-arrow:focus,
+.button-arrow:hover {
   color: var(--link_hover-font-color);
   text-decoration: none;
 }
 
-.doc .button-arrow {
+a.button-arrow {
   color: var(--link-highlight-color);
   text-decoration: none;
 }
@@ -1184,6 +1175,7 @@ img.dark-mode-filter,
 
 .badge-button a {
   color: inherit;
+  text-decoration: none;
 }
 
 .badge-container {
@@ -1295,7 +1287,7 @@ pre.code-first-child {
 html[data-theme=dark] code[class*=language-],
 html[data-theme=dark] pre[class*=language-] {
   text-shadow: none !important;
-  background-color: #282a36 !important;
+  background-color: var(--pre-background) !important;
 }
 
 html[data-theme=dark] code[class*=language-] .token.boolean,

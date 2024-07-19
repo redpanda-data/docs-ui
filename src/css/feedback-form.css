@@ -62,11 +62,17 @@
 
 button[type=submit]:not(.aa-SubmitButton),
 button.close {
-  border: 1px solid #dadce0;
+  border: 1px solid var(--highlight-border);
   margin-top: 10px;
   padding: 5px 20px;
-  color: var(--link-highlight-color);
+  color: var(--body-font-color);
   border-radius: 8px;
+}
+
+button[type=submit]:not(.aa-SubmitButton):hover,
+button.close:hover {
+  background-color: var(--link-highlight-color);
+  color: var(--button-font-color);
 }
 
 .feedback-modal input[type=radio]:checked {

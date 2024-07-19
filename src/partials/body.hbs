@@ -1,8 +1,12 @@
 <div class="body no-keep-markup">
+{{#if (ne page.attributes.role 'home')}}
 {{> nav}}
+{{/if}}
 {{> main}}
 </div>
+{{#if (ne page.attributes.role 'home')}}
 <div class="nav-collapse" title="Collapse navigation">
-  <img src="{{{uiRootPath}}}/img/collapse-icon.svg" class="menu-icon">
+  <img src="{{{uiRootPath}}}/img/collapse-icon.svg" class="menu-icon" alt="Collapse navigation tree">
   <p>Collapse</p>
 </div>
+{{/if}}

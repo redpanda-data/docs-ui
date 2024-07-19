@@ -150,7 +150,7 @@
     var rect = this.getBoundingClientRect()
     var menuPanelRect = menuPanel.getBoundingClientRect()
     var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
-    if (event.target.className === 'nav-item-toggle') {
+    if (event.target.className !== 'nav-link' || event.target.className !== 'nav-text') {
       this.classList.toggle('is-active')
       if (overflowY > 0) {
         menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)

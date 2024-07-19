@@ -83,7 +83,7 @@
     const sortedPlaceholders = placeholders.sort((a, b) => b.length - a.length);
     for (const placeholder of sortedPlaceholders) {
       const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
-      if (processed.has(placeholder) || cleanedPlaceholder === 'none') {
+      if (processed.has(placeholder) || cleanedPlaceholder === 'none' || cleanedPlaceholder.trim() === '') {
         continue;
       }
       const regexString = RegExp.escape(placeholder);

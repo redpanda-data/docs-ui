@@ -1,6 +1,6 @@
 span.editable {
-  font-weight: 450;
   color: var(--editable-code-font-color);
+  font-weight: bolder;
   padding: 0 3px;
   border: 0.1rem solid rgba(0, 0, 0, 0.10196078431372549);
   border-radius: 0.25rem;
@@ -30,7 +30,6 @@ span.editable > *:hover {
 }
 
 span.cursor {
-  font-weight: 450;
   color: var(--editable-code-font-color);
   font-size: 1.1em;
   position: relative;

@@ -3,12 +3,11 @@ html.is-clipped--navbar {
 }
 
 body {
-  padding-top: var(--navbar-height);
+  padding-top: var(--body-top);
 }
 
 .header {
   max-width: 100%;
-  margin-bottom: 30px;
 }
 
 .navbar {
@@ -214,6 +213,7 @@ body {
   flex: auto;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: flex-end;
   padding-right: 1rem;
 }

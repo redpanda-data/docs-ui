@@ -104,7 +104,7 @@ html[data-theme=dark] {
   --body-font-size--desktop: var(--body-font-size);
   --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
-  --body-font-family: "Inter", "Open Sans", arial, helvetica, sans-serif;
+  --body-font-family: "Inter", ui-sans-serif, system-ui, "-apple-system, BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --body-font-weight-bold: bold;
   --body-font-family-bold: "Inter SemiBold", "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
   --monospace-font-family: "IBM Plex Mono", inter, "Courier Prime", courier, monospace;
@@ -114,7 +114,7 @@ html[data-theme=dark] {
   --nav-line-height: 1.35;
   /* admonitions */
   --admonition-border-left-width: 5px;
-  --admonition-border-radius: 1px;
+  --admonition-border-radius: 10px;
   --admonition-box-shadow: 0 1px 2px 0 #0000001a;
   --admonition-padding: 1rem;
   /* doc */
@@ -137,13 +137,15 @@ html[data-theme=dark] {
   --body-top: var(--navbar-height);
   --body-min-height: calc(100vh - var(--body-top));
   --nav-height: calc(var(--body-min-height) - var(--toolbar-height) - 150px);
+  --announcement-bar-height: 50px;
+  --announcement-bar-height--desktop: 30px;
   --nav-height--desktop: var(--body-min-height);
   --nav-panel-menu-height: calc(100% - var(--drawer-height));
   --nav-panel-explore-height: calc(50% + var(--drawer-height));
   --nav-width: calc(270 / var(--rem-base) * 1rem);
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);
-  --toc-width: calc(200 / var(--rem-base) * 1rem);
+  --toc-width: calc(250 / var(--rem-base) * 1rem);
   --toc-width--widescreen: calc(400 / var(--rem-base) * 1rem);
   --doc-max-width: 55rem;
   /* stacking */
@@ -160,17 +162,20 @@ html[data-theme=dark] {
 }
 
 html:not([data-theme=dark]) {
-  --body-font-color: #333;
+  --body-font-color: #181818;
   --body-faint-font-color: #667085;
   --body-footer-font-color: #98a2b3;
   /* base */
   --body-background: var(--color-white);
+  --button-font-color: white;
   --panel-background: #f9fafb;
   --panel-border-color: var(--color-smoke-90);
   --scrollbar-track-color: var(--color-smoke-30);
   --scrollbar-thumb-color: var(--color-gray-10);
   --scrollbar_hover-thumb-color: var(--color-gray-30);
   --sticky-table-header-background: #f6f6f6;
+  --tooltip-background: #101828;
+  --tooltip-font-color: white;
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;
@@ -213,29 +218,30 @@ html:not([data-theme=dark]) {
   /* feedback */
   --feedback-modal-background: #fefefe;
   /* admonitions */
-  --important-color: #a0439c;
-  --important-background: #e5dcf56b;
-  --important-on-color: #a0439c;
-  --warning-color: #e13238;
-  --warning-background: #ffebec;
-  --warning-on-color: #4b1113;
-  --note-color: #4cb3d4;
-  --note-background: #eef9fd;
-  --note-on-color: #193c47;
-  --tip-color: #009400;
-  --tip-background: #e6f6e6;
-  --tip-on-color: #003100;
-  --caution-color: #e6a700;
-  --caution-background: #fff8e6;
-  --caution-on-color: #4d3800;
+  --important-background: #fff6f5;
+  --important-on-color: var(--body-font-color);
+  --important-icon: url(../img/report-red.svg) no-repeat center right / auto 100%;
+  --warning-background: #fef0e7;
+  --warning-on-color: var(--body-font-color);
+  --warning-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
+  --note-background: #e8f5fc;
+  --note-on-color: var(--body-font-color);
+  --note-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
+  --tip-background: #f4fbf6;
+  --tip-on-color: var(--body-font-color);
+  --tip-icon: url(../img/check-circle-green.svg) no-repeat center right / auto 100%;
+  --caution-background: var(--warning-background);
+  --caution-on-color: var(--body-font-color);
   /* doc */
   --doc-font-color: var(--color-jet-50);
   --heading-font-color: var(--color-jet-80);
   --section-divider-color: var(--panel-border-color);
   --link-font-color: var(--redpanda-800);
+  --accordian-background: rgba(0, 0, 0, 0.05);
   --link-highlight-color: #444ce7;
+  --highlight-border: #a4bcfd;
   --link-highlight-background-color: rgba(68, 76, 231, 0.08);
-  --link_hover-font-color: var(--link-highlight-color);
+  --link_hover-font-color: #2c30a0;
   --link_unresolved-font-color: var(--redpanda-800);
   --abstract-background: var(--color-smoke-70);
   --abstract-font-color: var(--color-jet-20);

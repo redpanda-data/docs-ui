@@ -22,6 +22,22 @@ document.documentElement.setAttribute('data-theme',
         setTheme(newTheme);
       });
     }
+    var announcementBar = document.querySelector('.announcement-bar')
+    if (!announcementBar) return
+    // Hide the announcement bar if the session cookie is set
+    if (window.sessionStorage.getItem('announcementClosed')) {
+      announcementBar.style.background = 'var(--body-background)'
+      announcementBar.textContent = ''
+      announcementBar.style.zIndex = "1"
+    }
+    var closeButton = document.getElementById('close-announcement')
+    if (!closeButton) return
+    closeButton.addEventListener('click', function () {
+      announcementBar.style.background = 'var(--body-background)'
+      window.sessionStorage.setItem('announcementClosed', 'true')
+      announcementBar.textContent = ''
+      announcementBar.style.zIndex = "1"
+    })
   });
   function setTheme(theme) {
     const rapidocEl = document.getElementById('api');
