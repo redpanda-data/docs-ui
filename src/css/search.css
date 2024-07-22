@@ -226,12 +226,13 @@ article.search .ais-Pagination-list {
 }
 
 .aa-SubmitIcon {
-  color: unset !important;
+  color: #79797d;
 }
 
 .aa-Form {
   border-radius: 40px !important;
   border: 1px solid var(--search-icon-color) !important;
+  width: unset;
 }
 
 .aa-Input {
@@ -275,6 +276,7 @@ kbd.algolia-command {
 .aa-DetachedFormContainer {
   padding-left: 0 !important;
   padding-right: 0 !important;
+  border-bottom: 0;
 }
 
 .aa-Grid {

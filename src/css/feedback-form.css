@@ -65,7 +65,6 @@ button.close {
   border: 1px solid var(--highlight-border);
   margin-top: 10px;
   padding: 5px 20px;
-  color: var(--body-font-color);
   border-radius: 8px;
 }
 

@@ -1,4 +1,5 @@
 <header class="header">
+    {{> announcement-bar}}
   <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #101828"{{/if}}
 >
     <div class="navbar-brand" id="brand">
@@ -28,5 +29,4 @@
       </div>
     </div>
   </nav>
-  {{> announcement-bar}}
 </header>

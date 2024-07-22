@@ -132,7 +132,7 @@ html[data-theme=dark] {
   --footer-line-height: var(--doc-line-height);
   /* dimensions and positioning */
   --navbar-height: calc(70 / var(--rem-base) * 1rem);
-  --toolbar-height: calc(45 / var(--rem-base) * 1rem);
+  --toolbar-height: calc(80 / var(--rem-base) * 1rem);
   --drawer-height: var(--toolbar-height);
   --body-top: var(--navbar-height);
   --body-min-height: calc(100vh - var(--body-top));
@@ -156,7 +156,6 @@ html[data-theme=dark] {
   /* Algolia */
   --aa-detached-modal-max-width: 1000px;
   --aa-spacing-factor: 1.3;
-  --aa-primary-color-rgb: 241, 93, 97;
   /* Prism */
   --highlight-background: rgba(255, 255, 0, 0.23);
 }
@@ -174,7 +173,7 @@ html:not([data-theme=dark]) {
   --scrollbar-thumb-color: var(--color-gray-10);
   --scrollbar_hover-thumb-color: var(--color-gray-30);
   --sticky-table-header-background: #f6f6f6;
-  --tooltip-background: #101828;
+  --tooltip-background: var(--slate-900);
   --tooltip-font-color: white;
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);

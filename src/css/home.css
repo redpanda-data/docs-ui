@@ -12,7 +12,7 @@
   padding: 0;
 }
 
-.home .feature-row, {
+.home .feature-row {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -46,10 +46,11 @@
   background: #101828;
   align-items: center;
   justify-content: center;
-  height: 178px;
+  min-height: 178px;
   gap: 10px;
   z-index: 2;
   position: relative;
+  margin-top: var(--announcement-bar-height);
 }
 
 .home .home-header {
@@ -60,6 +61,7 @@
 .home .home-header .ask {
   display: flex;
   color: white;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 30px;
 }
@@ -132,6 +134,12 @@ html:not([data-theme=dark]) .home .feature-box:hover {
 .home a.menu-list-item-link {
   color: var(--ifm-font-color-base);
   font-weight: 400;
+}
+
+@media screen and (min-width: 1024px) {
+  .home .home-header-container {
+    margin-top: var(--announcement-bar-height--desktop);
+  }
 }
 
 @media screen and (min-width: 850px) {
