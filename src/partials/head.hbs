@@ -1,44 +1,58 @@
-<!-- This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174-->
-<script defer>
-document.documentElement.setAttribute('data-theme',
-  localStorage.getItem('theme') ||
-  (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-);
-(function() {
-  'use strict';
+<!-- Inline CSS to Hide Announcement Bar Initially -->
+<style>
+  .announcement-bar {
+    display: none;
+    height: 0;
+  }
+</style>
+<script>
+  (function() {
+    'use strict';
 
-  // Initialize theme based on local storage or system preference
-  const initialTheme = localStorage.getItem('theme') ||
-    (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  window.addEventListener('DOMContentLoaded', function() {
-    const switchButton = document.getElementById('switch-theme');
-    if (switchButton) {
-      setTheme(initialTheme);  // Apply initial theme on load
-      switchButton.addEventListener('click', function() {
-        // Toggle theme on button click
-        const currentTheme = document.body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('theme', newTheme);
-        setTheme(newTheme);
+    // Initialize theme based on local storage or system preference
+    const initialTheme = localStorage.getItem('theme') ||
+      (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const hasSeenAnnouncement = window.sessionStorage.getItem('announcementClosed') || false;
+
+    document.documentElement.setAttribute('data-theme', initialTheme);
+
+    if (hasSeenAnnouncement) {
+      document.addEventListener('DOMContentLoaded', function() {
+        const announcementBar = document.querySelector('.announcement-bar');
+        if (announcementBar) {
+          announcementBar.remove();
+          document.documentElement.style.setProperty('--announcement-bar-height', '0.1px');
+          document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0.1px');
+        }
       });
     }
-    var announcementBar = document.querySelector('.announcement-bar')
-    if (!announcementBar) return
-    // Hide the announcement bar if the session cookie is set
-    if (window.sessionStorage.getItem('announcementClosed')) {
-      announcementBar.style.background = 'var(--body-background)'
-      announcementBar.textContent = ''
-      announcementBar.style.zIndex = "1"
-    }
-    var closeButton = document.getElementById('close-announcement')
-    if (!closeButton) return
-    closeButton.addEventListener('click', function () {
-      announcementBar.style.background = 'var(--body-background)'
-      window.sessionStorage.setItem('announcementClosed', 'true')
-      announcementBar.textContent = ''
-      announcementBar.style.zIndex = "1"
-    })
-  });
+    // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
+    window.addEventListener('DOMContentLoaded', function() {
+      const switchButton = document.getElementById('switch-theme');
+      const announcementBar = document.querySelector('.announcement-bar');
+      if (switchButton) {
+        setTheme(initialTheme);  // Apply initial theme on load
+        switchButton.addEventListener('click', function() {
+          // Toggle theme on button click
+          const currentTheme = document.body.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', newTheme);
+          setTheme(newTheme);
+        });
+      }
+      if (!announcementBar) return;
+      if (!hasSeenAnnouncement) {
+        announcementBar.style.display = 'flex';
+      }
+      var closeButton = document.getElementById('close-announcement');
+      if (!closeButton) return;
+      closeButton.addEventListener('click', function () {
+        announcementBar.remove();
+        window.sessionStorage.setItem('announcementClosed', 'true');
+        document.documentElement.style.setProperty('--announcement-bar-height', '0.1px');
+        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0.1px');
+      });
+    });
   function setTheme(theme) {
     const rapidocEl = document.getElementById('api');
     const switchButton = document.getElementById('switch-theme');

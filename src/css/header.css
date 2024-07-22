@@ -16,7 +16,7 @@ body {
   font-size: calc(16 / var(--rem-base) * 1rem);
   height: var(--navbar-height);
   position: fixed;
-  top: 0;
+  top: var(--announcement-bar-height);
   width: 100%;
   z-index: var(--z-index-navbar);
   flex-wrap: wrap;
@@ -231,7 +231,7 @@ body {
   }
 }
 
-@media screen and (max-width: 1040px) {
+@media screen and (max-width: 1024px) {
   .navbar-brand {
     height: inherit;
   }
@@ -259,7 +259,7 @@ body {
   }
 }
 
-@media screen and (min-width: 1040px) {
+@media screen and (min-width: 1024px) {
   .navbar-burger {
     display: none;
   }
@@ -269,6 +269,7 @@ body {
     display: flex;
     flex: auto;
     justify-content: flex-start;
+    top: var(--announcement-bar-height--desktop);
   }
 
   .navbar-menu {

@@ -1,14 +1,15 @@
 .announcement-bar {
   flex-basis: 100%;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   background: #333;
   color: white;
-  font-size: 1rem;
   z-index: var(--z-index-toolbar);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   position: fixed;
+  top: 0;
   width: 100%;
   text-align: center;
   height: var(--announcement-bar-height);
@@ -27,7 +28,7 @@
   margin-top: 0;
   padding: 0;
   position: absolute;
-  right: 10px;
+  right: 20px;
 }
 
 @media screen and (max-width: 550px) {
@@ -39,5 +40,9 @@
 @media screen and (min-width: 1024px) {
   .announcement-bar {
     height: var(--announcement-bar-height--desktop);
+  }
+
+  .announcement-bar button.close {
+    right: 40px;
   }
 }

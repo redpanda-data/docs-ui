@@ -13,7 +13,7 @@
   font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--body-font-color);
   border-top: 1px solid #e5e9f0;
-  z-index: 9;
+  z-index: 8;
   position: sticky;
   height: 100px;
   bottom: 0;
@@ -119,8 +119,7 @@
   .nav-container {
     font-size: calc(16 / var(--rem-base) * 1rem);
     flex: none;
-    position: static;
-    top: 0;
+    position: sticky;
     visibility: visible;
   }
 
@@ -145,7 +144,7 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
   overscroll-behavior: none;
-  top: calc(var(--navbar-height) + calc(var(--announcement-bar-height) / 1.5));
+  top: calc(var(--navbar-height) + var(--announcement-bar-height));
   border-right: 1px solid var(--nav-border-color);
   -webkit-clip-path: inset(0);
   clip-path: inset(0);
@@ -161,7 +160,6 @@
   .nav {
     box-shadow: none;
     position: sticky;
-    height: var(--nav-height--desktop);
     top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
   }
 }
