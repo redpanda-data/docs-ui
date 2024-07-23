@@ -16,6 +16,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-top: 20px;
 }
 
 .home .features {
@@ -43,7 +44,7 @@
 .home .home-header-container {
   display: flex;
   width: 100%;
-  background: #101828;
+  background: #1d2939;
   align-items: center;
   justify-content: center;
   min-height: 178px;

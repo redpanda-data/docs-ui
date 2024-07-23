@@ -21,8 +21,6 @@
         const announcementBar = document.querySelector('.announcement-bar');
         if (announcementBar) {
           announcementBar.remove();
-          document.documentElement.style.setProperty('--announcement-bar-height', '0.1px');
-          document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0.1px');
         }
       });
     }
@@ -42,15 +40,20 @@
       }
       if (!announcementBar) return;
       if (!hasSeenAnnouncement) {
+        document.documentElement.style.setProperty('--announcement-bar-height', '50px');
+        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '30px');
         announcementBar.style.display = 'flex';
+      } else {
+        document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
       }
       var closeButton = document.getElementById('close-announcement');
       if (!closeButton) return;
       closeButton.addEventListener('click', function () {
+        document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
         announcementBar.remove();
         window.sessionStorage.setItem('announcementClosed', 'true');
-        document.documentElement.style.setProperty('--announcement-bar-height', '0.1px');
-        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0.1px');
       });
     });
   function setTheme(theme) {
@@ -65,8 +68,8 @@
       document.body.setAttribute('data-theme', 'dark');
       if (rapidocEl) {
         rapidocEl.setAttribute('theme', 'dark');
-        rapidocEl.setAttribute('nav-bg-color', '#212121');
-        rapidocEl.setAttribute('bg-color', '#212121');
+        rapidocEl.setAttribute('nav-bg-color', '#101828');
+        rapidocEl.setAttribute('bg-color', '#101828');
       }
     } else {
       img.src = img.src.replace('view-moon', 'view-sun');
@@ -85,12 +88,12 @@
 <!-- Load these styles before those in site.css to avoid flashing -->
 <style>
   :root {
-    --background-color: #212121; /* Default to dark background color */
+    --background-color: #101828; /* Default to dark background color */
     --text-color: #ffffff; /* Default to light text color */
   }
 
   html[data-theme="dark"] {
-    --background-color: #212121;
+    --background-color: #101828;
     --text-color: #ffffff;
   }
 

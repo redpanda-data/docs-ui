@@ -50,9 +50,7 @@
   {{/with}}
 {{/if}}
 {{#if (ne page.attributes.role 'home')}}
-<div id="back-to-top" class="back-to-top">
-  <a href="#" class="button-arrow button-arrow-up">Back to top</a>
-</div>
+{{> back-to-top}}
 {{/if}}
 {{> feedback-footer}}
 {{> pagination}}

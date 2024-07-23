@@ -16,6 +16,7 @@ article.search .badge-button#display-filters::after {
   transform: rotate(180deg);
   outline: none;
   line-height: inherit;
+  display: inline-block;
   padding: 0;
   height: calc(var(--nav-line-height) * 1.5em);
   width: calc(var(--nav-line-height) * 1.5em);
@@ -309,7 +310,7 @@ kbd.algolia-command {
 
 .aa-SourceFooter {
   position: sticky;
-  bottom: -10px;
+  bottom: -13px;
   background: var(--body-background);
   padding: 10px;
   font-size: 1rem;
@@ -383,6 +384,11 @@ li.aa-Item:not([id*="filters"]) {
 .aa-Source[data-autocomplete-source-id=tagsPlugin] .aa-Item {
   min-height: unset;
   padding: 0;
+  border-radius: 20px;
+}
+
+li.aa-Item:not([id*=filters]) {
+  border: none;
 }
 
 .aa-Grid .toc.sidebar {
@@ -466,7 +472,7 @@ li.aa-Item:not([id*="filters"]) {
 
 @media screen and (max-width: 1024px) {
   article.search .badge-button#display-filters {
-    display: block;
+    display: flex;
   }
 
   article.search .header img {

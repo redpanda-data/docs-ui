@@ -48,6 +48,7 @@ kbd,
 pre {
   font-family: var(--monospace-font-family) !important;
   font-size: 0.9rem;
+  border: 1px solid var(--code-background);
 }
 
 code {

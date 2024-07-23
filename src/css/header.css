@@ -38,6 +38,10 @@ body {
   display: flex;
 }
 
+.navbar-brand > a:hover {
+  background: none;
+}
+
 .navbar-brand .navbar-item {
   color: var(--navbar-font-color);
 }

@@ -25,6 +25,99 @@
   color: var(--link_hover-font-color);
 }
 
+.swagger .cloud-api-feedback-section {
+  padding: 0 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  color: var(--body-font-color);
+  gap: 10px;
+  margin-top: -1rem;
+}
+
+.swagger .cloud-api-feedback-section .material-icons {
+  vertical-align: middle;
+}
+
+.swagger .cloud-api-feedback-section a {
+  text-decoration: none;
+}
+
+.swagger .cloud-api-feedback-section a:hover {
+  cursor: pointer;
+}
+
+.swagger .cloud-api-feedback-section .col {
+  gap: 8px;
+  margin-top: 20px;
+}
+
+@media screen and (min-width: 1024px) {
+  .swagger .cloud-api-feedback-section {
+    align-items: flex-start;
+    flex-direction: row;
+  }
+}
+
+body .swagger footer.footer {
+  width: 100%;
+}
+
+.swagger .cloud-api-feedback-modal {
+  display: block;
+  position: fixed;
+  z-index: 9;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.swagger .cloud-api-feedback-modal-content {
+  display: flex;
+  font-weight: bold;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+.swagger .cloud-api-feedback-modal-body {
+  background-color: var(--feedback-modal-background);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 350px;
+  position: relative;
+}
+
+.swagger .cloud-api-feedback-modal-close {
+  position: absolute;
+  top: -5px;
+  right: 0;
+}
+
+.swagger .cloud-api-feedback-modal-close button {
+  background-color: var(--body-background) !important;
+  border: 0 !important;
+  color: var(--link-highlight-color) !important;
+}
+
+.swagger .cloud-api-feedback-modal-input {
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 80%;
+  padding: 7px;
+}
+
+.swagger .cloud-api-feedback-modal .successful-sent-email-api-feedback {
+  display: hidden;
+}
+
 /* Dan's edits */
 .rapidoc-container {
   height: 100%;

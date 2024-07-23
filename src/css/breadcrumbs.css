@@ -38,6 +38,7 @@ a + .breadcrumbs {
 
 .breadcrumbs li a {
   padding: 7px;
+  text-decoration: none;
 }
 
 .breadcrumbs li:hover a,

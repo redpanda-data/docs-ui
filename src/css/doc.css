@@ -5,7 +5,7 @@
   line-height: var(--doc-line-height);
   max-width: var(--doc-max-width);
   padding: 0 1rem 4rem;
-  margin-top: 4.5rem;
+  margin-top: 3rem;
 }
 
 .doc ul.index {
@@ -24,6 +24,7 @@
     min-width: 0;
     margin-right: 0.7rem;
     margin-bottom: 0;
+    margin-top: 2rem;
   }
 }
 
@@ -934,9 +935,10 @@ table code {
 }
 
 .badge-button {
-  padding: 3px;
+  padding: 0 12px 0 12px;
   border: 1px solid var(--toolbar-border-color);
   width: fit-content;
+  color: #48484a;
   border-radius: 5px;
   font-size: medium;
   display: flex;
@@ -944,6 +946,12 @@ table code {
   gap: 5px;
   margin-top: 15px;
   margin-bottom: 15px;
+}
+
+.badge-button:hover {
+  background-color: var(--link-highlight-color);
+  color: white;
+  cursor: pointer;
 }
 
 .badge-button img {
@@ -965,10 +973,11 @@ table code {
   margin: 3px;
   padding: 0.3em 0.3em;
   color: var(--body-font-color);
+  text-decoration: none;
 }
 
 .doc .component-card:hover {
-  color: var(--link-font-color);
+  color: var(--link-highlight-color);
   text-decoration: none;
 }
 
@@ -1167,10 +1176,7 @@ img.dark-mode-filter,
 
 .badge-button a:hover {
   text-decoration: none;
-}
-
-.badge-button:hover {
-  cursor: pointer;
+  color: white;
 }
 
 .badge-button a {

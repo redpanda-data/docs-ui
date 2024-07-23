@@ -160,7 +160,7 @@
   .nav {
     box-shadow: none;
     position: sticky;
-    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
+    top: calc(var(--navbar-height) + 15px + var(--announcement-bar-height--desktop));
   }
 }
 
@@ -172,6 +172,8 @@
   border: 1px solid var(--highlight-border);
   width: 100%;
   border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
   padding: 10px 6px;
 }
 
@@ -179,7 +181,7 @@
 .context .container.has-dropdown .versions {
   display: none;
   position: absolute;
-  margin-top: 11px;
+  margin-top: 35px;
   align-items: center;
   gap: 10px;
   width: 80%;
@@ -396,20 +398,6 @@ a.nav-text {
 .nav-panel-explore .context .version,
 .nav-panel-explore .context .component {
   flex: 0 0 25px;
-}
-
-.nav-panel-explore .context .current-version::after {
-  content: "";
-  background: url(../img/version-dropdown-chevron.svg) no-repeat center right / auto 100%;
-  width: 1.25em;
-  height: 0.75em;
-}
-
-.nav-panel-explore .context .container.has-dropdown:has(.components,.versions) .title::after {
-  content: "";
-  background: url(../img/version-dropdown-chevron.svg) no-repeat center right / auto 100%;
-  width: 1.25em;
-  height: 0.75em;
 }
 
 .nav-panel-explore .component .title {

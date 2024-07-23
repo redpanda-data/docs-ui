@@ -8,16 +8,16 @@
   height: 100%;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.4);
-  border-radius: 10px;
-  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1);
 }
 
 .contributors-modal .modal-content {
   background-color: var(--feedback-modal-background);
-  margin: 0 auto;
+  margin: 10vh auto;
   padding: 8px 0 8px 0;
   border: 1px solid #888;
-  max-width: 950px;
+  max-width: 600px;
+  border-radius: 10px;
+  box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1);
   position: relative;
 }
 

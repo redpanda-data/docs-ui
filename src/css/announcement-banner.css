@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  background: #333;
+  background: #101828;
   color: white;
   z-index: var(--z-index-toolbar);
   font-size: calc(16 / var(--rem-base) * 1rem);

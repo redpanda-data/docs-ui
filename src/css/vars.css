@@ -137,8 +137,8 @@ html[data-theme=dark] {
   --body-top: var(--navbar-height);
   --body-min-height: calc(100vh - var(--body-top));
   --nav-height: calc(var(--body-min-height) - var(--toolbar-height) - 150px);
-  --announcement-bar-height: 50px;
-  --announcement-bar-height--desktop: 30px;
+  --announcement-bar-height: 0px; /* stylelint-disable-line */
+  --announcement-bar-height--desktop: 0px; /* stylelint-disable-line */
   --nav-height--desktop: var(--body-min-height);
   --nav-panel-menu-height: calc(100% - var(--drawer-height));
   --nav-panel-explore-height: calc(50% + var(--drawer-height));
@@ -168,7 +168,7 @@ html:not([data-theme=dark]) {
   --body-background: var(--color-white);
   --button-font-color: white;
   --panel-background: #f9fafb;
-  --panel-border-color: var(--color-smoke-90);
+  --panel-border-color: #e5e9f0;
   --scrollbar-track-color: var(--color-smoke-30);
   --scrollbar-thumb-color: var(--color-gray-10);
   --scrollbar_hover-thumb-color: var(--color-gray-30);

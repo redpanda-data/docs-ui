@@ -1,8 +1,10 @@
 {{#with page.versions}}
-<div class="nav-panel-explore{{#unless @root.page.navigation}} is-active{{/unless}}" data-panel="explore" title="View other versions of {{{@root.page.component.name}}}">
+<div class="nav-panel-explore{{#unless @root.page.navigation}} is-active{{/unless}}" data-panel="explore" title="View other versions of Redpanda {{{@root.page.component.title}}}">
   <div class="context">
     <div class="container has-dropdown">
-      <span class="current-version">Version {{@root.page.componentVersion.displayVersion}}</span>
+      <span class="current-version">Version {{@root.page.componentVersion.displayVersion}}</span><span class="material-symbols-outlined">
+keyboard_arrow_down
+</span>
       <div class="versions">
         {{#if (ne @root.page.componentVersion.displayVersion 'default')}}
             {{#each this}}
