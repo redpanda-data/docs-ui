@@ -79,6 +79,7 @@ html:not([data-theme=dark]) .home .feature-box:hover {
 .home .feature-box {
   width: 100%;
   height: 100%;
+  flex: 1;
   border: 1px solid #e5e9f0;
   box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1);
   border-radius: 8px;
