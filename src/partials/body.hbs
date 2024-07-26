@@ -4,9 +4,4 @@
 {{/if}}
 {{> main}}
 </div>
-{{#if (ne page.attributes.role 'home')}}
-<div class="nav-collapse" title="Collapse navigation">
-  <img src="{{{uiRootPath}}}/img/collapse-icon.svg" class="menu-icon" alt="Collapse navigation tree">
-  <p>Collapse</p>
-</div>
-{{/if}}
+<div class="nav-expand hidden" title="Expand navigation tree"><img src="{{{uiRootPath}}}/img/collapse-icon.svg" class="menu-icon" alt="Expand navigation tree"></div>

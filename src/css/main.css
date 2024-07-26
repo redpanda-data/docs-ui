@@ -12,13 +12,16 @@
 @media screen and (min-width: 1024px) {
   main {
     margin: 0 auto;
-    width: calc(100% - var(--nav-width));
-    padding-top: 0;
     min-width: 0; /* min-width: 0 required for flexbox to constrain overflowing elements */
+  }
+
+  main:not(.labs) {
+    width: calc(100% - var(--nav-width));
   }
 
   .home main {
     margin: 0;
+    padding-top: 0;
     width: 100%;
   }
 
@@ -30,7 +33,7 @@
 
   main > .content {
     display: flex;
-    gap: 150px;
+    gap: 50px;
     justify-content: center;
   }
 
@@ -46,5 +49,9 @@
 @media screen and (min-width: 1400px) {
   aside.toc.sidebar {
     flex-basis: var(--toc-width--widescreen);
+  }
+
+  main > .content {
+    gap: 150px;
   }
 }

@@ -429,21 +429,6 @@ window.addEventListener('DOMContentLoaded', function() {
                         })}
                       </div>
                     </div>
-                    ${ item.breadcrumbs
-                      ? html`<div class="aa-ItemContentRow">
-                      <div class="aa-Breadcrumbs">
-                        <ul>
-                        ${item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
-                        html`<li>${breadcrumb.t}</li>`
-                        )}
-                        ${item.breadcrumbs.length === 2 && item.breadcrumbs.slice(1).map(breadcrumb =>
-                        html`<li>${breadcrumb.t}</li>`
-                        )}
-                        </ul>
-                      </div>
-                    </div>`
-                    : ''
-                    }
                     ${ item.text
                     ? html`<div class="aa-ItemContentSnippet">
                       ${components.Snippet({

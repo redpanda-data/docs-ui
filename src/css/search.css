@@ -224,6 +224,7 @@ article.search .ais-Pagination-list {
 
 .aa-DetachedSearchButtonPlaceholder {
   color: var(--aa-text-color-rgb) !important;
+  font-size: 12.5px;
 }
 
 .aa-SubmitIcon {
@@ -329,7 +330,8 @@ kbd.algolia-command {
 
 .aa-ItemContentRow {
   display: flex;
-  gap: 10px;
+  gap: 3px;
+  flex-wrap: wrap;
 }
 
 .aa-ItemLink:hover {
@@ -342,10 +344,12 @@ kbd.algolia-command {
 
 .aa-ItemContentTitle.result-type {
   font-size: small;
-  padding: 0 2px;
-  border-radius: 5px;
-  color: var(--link-highlight-color);
-  border: 1px solid #dadde1;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--panel-background);
+  color: var(--body-font-color);
+  overflow: unset;
+  text-overflow: unset;
 }
 
 li.aa-Item:not([id*="filters"]) {
@@ -388,12 +392,13 @@ li.aa-Item:not([id*="filters"]) {
 }
 
 li.aa-Item:not([id*=filters]) {
-  border: none;
+  border-bottom: 1px solid #dadde1;
 }
 
 .aa-Grid .toc.sidebar {
   position: unset;
   height: unset;
+  max-width: unset;
 }
 
 .aa-Grid .toc.sidebar .toc-menu ul {
@@ -523,7 +528,7 @@ li.aa-Item:not([id*=filters]) {
   .aa-Grid {
     display: grid;
     padding: 0 calc(var(--aa-spacing-half) / 2);
-    column-gap: calc(var(--aa-spacing-half) / 2);
+    column-gap: 25px;
     grid-template-columns: 45% 1fr;
   }
 }

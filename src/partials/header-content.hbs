@@ -3,7 +3,7 @@
   <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #1D2939"{{/if}}
 >
     <div class="navbar-brand" id="brand">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="225px" height= "25px" alt="Redpanda logo"/></a>
+      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="200px" height= "25px" alt="Redpanda logo"/></a>
       <button class="navbar-burger" data-target="topbar-nav" aria-label="Header navigation menu">
         <span></span>
         <span></span>
@@ -15,13 +15,13 @@
       <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
       {{/each}}
       <div class="navbar-end">
-        {{#if (ne page.attributes.role 'home')}}
-          {{> ai-button}}
-          {{#if (and (ne page.layout 'search') (ne page.layout 'labs-search'))}}
-          <div> or </div>
-          <div class="autocomplete" id="autocomplete"></div>
+          {{#if (and (ne page.layout 'search') (ne page.attributes.role 'home'))}}
+            <div class="autocomplete" id="autocomplete" style="max-width:100px;"></div>
+            <div> or </div>
           {{/if}}
-        {{/if}}
+          {{#if (ne page.attributes.role 'home')}}
+            {{> ai-button}}
+          {{/if}}
         <div class="theme-switcher">
           <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite"><img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
           </button>

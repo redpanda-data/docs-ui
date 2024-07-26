@@ -52,7 +52,7 @@
 
 .toc h3 {
   color: var(--toc-heading-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   font-family: var(--body-font-family-bold);
   line-height: 1.3;
   margin: 0 -0.5px;
@@ -74,9 +74,8 @@
 }
 
 .toc.sidebar ul {
-  max-height: 500px;
-  overflow: auto;
-  overscroll-behavior: none;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 
 @supports (scrollbar-width: none) {
@@ -92,16 +91,15 @@
 
 @media screen and (min-width: 1024px) {
   .toc h3 {
-    font-size: calc(16 / var(--rem-base) * 1rem);
+    font-size: var(--secondary-font-size);
   }
 
   .toc ul {
-    font-size: calc(16 / var(--rem-base) * 1rem);
+    font-size: var(--secondary-font-size);
   }
 
   .toc .toc-menu {
-    max-width: var(--toc-width--widescreen);
-    overflow: auto;
+    text-overflow: ellipsis;
     word-wrap: normal;
   }
 }
@@ -156,14 +154,18 @@
 .toc.sidebar {
   position: sticky;
   height: fit-content;
+  max-height: var(--nav-height);
   top: 120px;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   font-weight: 300;
   color: var(--toc-font-color);
   max-width: var(--toc-width);
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
   flex: 0 0 var(--toc-width);
-  margin-right: 1rem;
+  padding-right: 1rem;
+  margin-right: 1em;
   word-wrap: break-word;
 }
 

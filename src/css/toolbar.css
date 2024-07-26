@@ -2,10 +2,11 @@
   color: var(--toolbar-font-color);
   background-color: var(--toolbar-background);
   display: flex;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   height: var(--toolbar-height);
   justify-content: flex-start;
   position: sticky;
+  flex-wrap: wrap;
   align-items: flex-end;
   top: calc(var(--navbar-height) + var(--announcement-bar-height));
   z-index: var(--z-index-toolbar);
@@ -22,8 +23,8 @@
   outline: none;
   line-height: inherit;
   padding: 0;
-  height: calc(var(--toolbar-height) / 2);
-  width: calc(var(--toolbar-height) / 2);
+  height: calc(var(--toolbar-height));
+  width: calc(var(--toolbar-height));
   margin-right: -0.25rem;
 }
 
@@ -44,14 +45,6 @@ html[data-theme=dark] .nav-toggle {
 .nav-toggle.is-active {
   background-image: url(../img/back.svg);
   background-size: 41.5%;
-}
-
-.home-link {
-  display: block;
-  background: url(../img/home.svg) no-repeat center;
-  height: calc(var(--toolbar-height) / 2);
-  width: calc(var(--toolbar-height) / 2);
-  margin: calc(var(--toolbar-height) / 4);
 }
 
 html[data-theme=dark] .home-link {

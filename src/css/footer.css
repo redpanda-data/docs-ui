@@ -7,15 +7,14 @@ footer.footer {
   font-family: var(--body-font-family);
   margin-top: 250px;
   color: var(--body-faint-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
 }
 
 footer nav.footer-nav {
   display: flex;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   width: 100%;
   padding-bottom: 30px;
-  max-width: var(--doc-max-width);
   border-top: 1px solid #c6cecd;
   flex: 1 1 0%;
   flex-direction: row;
@@ -27,7 +26,7 @@ footer .footer-links {
   display: flex;
   flex-direction: column;
   line-height: 1.5rem;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   margin: 0;
 }
 
@@ -38,7 +37,7 @@ footer .footer-links {
   margin-bottom: 20px;
   font-weight: 300;
   color: var(--body-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
 }
 
 .footer-links-list {
@@ -49,7 +48,7 @@ footer .footer-links {
   padding-left: 0;
   gap: 5px;
   margin: 0;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
 }
 
 .footer-links-list-item {
@@ -63,8 +62,8 @@ footer .footer-links {
 }
 
 @media (min-width: 1024px) {
-  body:not(.home) footer.footer {
-    width: 65%;
+  body.home footer nav.footer-nav {
+    max-width: var(--doc-max-width);
   }
 
   footer .footer-links {

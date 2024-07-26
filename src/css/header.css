@@ -2,7 +2,7 @@ html.is-clipped--navbar {
   overflow-y: hidden;
 }
 
-body {
+.body {
   padding-top: var(--body-top);
 }
 
@@ -13,8 +13,9 @@ body {
 .navbar {
   background: var(--navbar-background);
   color: var(--navbar-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   height: var(--navbar-height);
+  align-content: center;
   position: fixed;
   top: var(--announcement-bar-height);
   width: 100%;
@@ -264,6 +265,10 @@ body {
 }
 
 @media screen and (min-width: 1024px) {
+  .body {
+    padding-top: var(--body-top--desktop);
+  }
+
   .navbar-burger {
     display: none;
   }
@@ -281,7 +286,7 @@ body {
   }
 
   .navbar {
-    gap: 20px;
+    gap: 45px;
     padding: 16px;
   }
 

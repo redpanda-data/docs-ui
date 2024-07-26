@@ -6,8 +6,8 @@
   flex-wrap: wrap;
   background: #101828;
   color: white;
-  z-index: var(--z-index-toolbar);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  z-index: var(--z-index-navbar);
+  font-size: var(--secondary-font-size);
   position: fixed;
   top: 0;
   width: 100%;

@@ -43,6 +43,7 @@
 
 .home .home-header-container {
   display: flex;
+  margin-top: 0;
   width: 100%;
   background: #1d2939;
   align-items: center;
@@ -51,7 +52,6 @@
   gap: 10px;
   z-index: 2;
   position: relative;
-  margin-top: var(--announcement-bar-height);
 }
 
 .home .home-header {
@@ -136,12 +136,6 @@ html:not([data-theme=dark]) .home .feature-box:hover {
 .home a.menu-list-item-link {
   color: var(--ifm-font-color-base);
   font-weight: 400;
-}
-
-@media screen and (min-width: 1024px) {
-  .home .home-header-container {
-    margin-top: var(--announcement-bar-height--desktop);
-  }
 }
 
 @media screen and (min-width: 850px) {

@@ -100,8 +100,9 @@ html[data-theme=dark] {
   --color-black: var(--slate-900);
   /* fonts */
   --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
-  --body-font-size: calc(18 / var(--rem-base) * 1rem);
+  --body-font-size: calc(17 / var(--rem-base) * 1rem);
   --body-font-size--desktop: var(--body-font-size);
+  --secondary-font-size: calc(15 / var(--rem-base) * 1rem);
   --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
   --body-font-family: "Inter", ui-sans-serif, system-ui, "-apple-system, BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -111,7 +112,7 @@ html[data-theme=dark] {
   --monospace-font-weight-bold: 500;
   --alt-heading-font-weight: 800;
   /* nav */
-  --nav-line-height: 1.35;
+  --nav-line-height: 1.3;
   /* admonitions */
   --admonition-border-left-width: 5px;
   --admonition-border-radius: 10px;
@@ -132,11 +133,13 @@ html[data-theme=dark] {
   --footer-line-height: var(--doc-line-height);
   /* dimensions and positioning */
   --navbar-height: calc(70 / var(--rem-base) * 1rem);
-  --toolbar-height: calc(80 / var(--rem-base) * 1rem);
+  --toolbar-height: calc(50 / var(--rem-base) * 1rem);
   --drawer-height: var(--toolbar-height);
-  --body-top: var(--navbar-height);
+  --body-top: calc(var(--navbar-height) + var(--announcement-bar-height));
+  --body-top--desktop: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
   --body-min-height: calc(100vh - var(--body-top));
-  --nav-height: calc(var(--body-min-height) - var(--toolbar-height) - 150px);
+  --nav-height: calc(var(--body-min-height) - var(--toolbar-height));
+  --nav-collapse-height: 40px;
   --announcement-bar-height: 0px; /* stylelint-disable-line */
   --announcement-bar-height--desktop: 0px; /* stylelint-disable-line */
   --nav-height--desktop: var(--body-min-height);
@@ -146,15 +149,15 @@ html[data-theme=dark] {
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);
   --toc-width: calc(250 / var(--rem-base) * 1rem);
-  --toc-width--widescreen: calc(400 / var(--rem-base) * 1rem);
-  --doc-max-width: 55rem;
+  --toc-width--widescreen: 25%;
+  --doc-max-width: 75%;
   /* stacking */
   --z-index-page-version-menu: 2;
   --z-index-nav: 3;
   --z-index-toolbar: 4;
   --z-index-navbar: 5;
   /* Algolia */
-  --aa-detached-modal-max-width: 1000px;
+  --aa-detached-modal-max-width: 800px;
   --aa-spacing-factor: 1.3;
   /* Prism */
   --highlight-background: rgba(255, 255, 0, 0.23);
@@ -217,20 +220,21 @@ html:not([data-theme=dark]) {
   /* feedback */
   --feedback-modal-background: #fefefe;
   /* admonitions */
-  --important-background: #fff6f5;
+  --important-background: #e8f5fc;
   --important-on-color: var(--body-font-color);
-  --important-icon: url(../img/report-red.svg) no-repeat center right / auto 100%;
-  --warning-background: #fef0e7;
+  --important-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
+  --warning-background: #fff6f5;
   --warning-on-color: var(--body-font-color);
-  --warning-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
+  --warning-icon: url(../img/report-red.svg) no-repeat center right / auto 100%;
   --note-background: #e8f5fc;
   --note-on-color: var(--body-font-color);
   --note-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
   --tip-background: #f4fbf6;
   --tip-on-color: var(--body-font-color);
   --tip-icon: url(../img/check-circle-green.svg) no-repeat center right / auto 100%;
-  --caution-background: var(--warning-background);
+  --caution-background: #fef0e7;
   --caution-on-color: var(--body-font-color);
+  --caution-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
   /* doc */
   --doc-font-color: var(--color-jet-50);
   --heading-font-color: var(--color-jet-80);

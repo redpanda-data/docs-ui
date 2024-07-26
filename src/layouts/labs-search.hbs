@@ -9,8 +9,7 @@
   <body>
     {{> header}}
     <div class="body">
-      {{> nav}}
-      <main class="article">
+      <main class="article labs">
           {{> toolbar}}
           <div class="content">
             <article class="search labs">
@@ -51,10 +50,6 @@
           </div>
           {{> footer}}
       </main>
-    </div>
-    <div class="nav-collapse" title="Collapse navigation">
-      <img src="{{{uiRootPath}}}/img/collapse-icon.svg" class="menu-icon" alt="Collapse navigation tree">
-      <p>Collapse</p>
     </div>
     <script>
     if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
@@ -106,7 +101,7 @@
 
       search.addWidget(
         instantsearch.widgets.configure({
-          // Filters to only include records where type is "Code Example"
+          // Filters to only include records where type is "Lab"
           filters: 'type:"Lab"'
         })
       )
@@ -118,6 +113,13 @@
           templates: {
             item: (hit, {html, components}) => {
               const isExternal = hit.objectID.startsWith('https') ? true : false
+              const categories = hit.categories && hit.categories.length > 0
+              ? hit.categories.map(category => html`
+                <div class="aa-ItemContentTitle result-type">
+                  ${category}
+                </div>
+              `)
+              : '';
               if (isExternal) return html`
                 <div class="card">
                   <h2 class="ais-Heading"><a href="${hit.objectID}" target="_blank">${components.Highlight({ attribute: 'title', hit })}</a></h2>
@@ -126,8 +128,8 @@
                     ${hit.interactive ? html`
                     <div class="aa-ItemContentTitle result-type">
                       Interactive
-                    </div>` : ''
-                    }
+                    </div>` : ''}
+                    ${categories}
                   </div>
                 </div>
               `
@@ -135,6 +137,9 @@
                 <div class="card">
                   <h2 class="ais-Heading"><a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a></h2>
                   <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
+                  <div class="aa-ItemContentRow">
+                    ${categories}
+                  </div>
                 </div>
               `
             },
@@ -171,20 +176,6 @@
           operator: 'and',
         })
       ]);
-
-      search.addWidget(
-        instantsearch.widgets.toggleRefinement({
-          container: '.interactive',
-          attribute: 'interactive',
-          on: true,
-          off: false,
-          templates: {
-            labelText({ count }, { html }) {
-              return html`Only interactive labs`
-            },
-          }
-        })
-      )
 
       // Start the search
       search.start()
