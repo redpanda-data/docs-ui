@@ -3,7 +3,7 @@
   <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #1D2939"{{/if}}
 >
     <div class="navbar-brand" id="brand">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="200px" height= "25px" alt="Redpanda logo"/></a>
+      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="auto" height="22px" alt="Redpanda logo"/></a>
       <button class="navbar-burger" data-target="topbar-nav" aria-label="Header navigation menu">
         <span></span>
         <span></span>

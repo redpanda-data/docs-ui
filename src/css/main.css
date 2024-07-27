@@ -33,6 +33,8 @@
 
   main > .content {
     display: flex;
+    /* display: grid; */
+    /* grid-template-columns: 3fr 1fr; */
     gap: 50px;
     justify-content: center;
   }

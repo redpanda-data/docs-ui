@@ -1,12 +1,20 @@
+:root {
+  --nav-side-padding: 24px;
+  --nav-item-side-padding: 12px;
+}
+
 .nav-container {
   position: fixed;
-  top: var(--navbar-height);
+  top: calc(var(--navbar-height) + var(--toolbar-height));
   left: 0;
+  bottom: 0;
   width: 100%;
   font-size: var(--secondary-font-size);
   z-index: var(--z-index-nav);
   visibility: hidden;
+  overflow-y: scroll;
 }
+
 
 .nav-collapse,
 .nav-expand {
@@ -45,80 +53,11 @@
   cursor: pointer;
 }
 
-.top-panel {
-  display: block;
-  font-size: 13px;
-  font-weight: 200;
-  margin: 0;
-  position: sticky;
-  z-index: 999;
-  top: 0;
-  background-color: inherit;
-  padding: 10px;
-  width: 100%;
-}
-
-.top-panel .search {
-  padding: 5px;
-  justify-content: space-between;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.top-panel .dropdown .dropdown-content {
-  display: none;
-  flex-direction: column;
-  font-size: 1.1em;
-}
-
-.top-panel .dropdown .dropdown-content.is-active {
-  display: flex;
-  padding: 5px;
-}
-
-.top-panel .dropdown .search-filters {
-  padding: 5px;
-  cursor: pointer;
-  font-size: 1.2em;
-  display: flex;
-  gap: 10px;
-  color: var(--nav-muted-color);
-}
-
-.top-panel .dropdown .search-filters .filter-toggle {
-  display: flex;
-  align-items: center;
-}
-
-.top-panel .dropdown .search-filters .filter-toggle::after {
-  content: "";
-  background: url(../img/nav-tree-chevron.svg) no-repeat 100%/auto 100%;
-  width: 1.1em;
-  height: 0.75em;
-}
-
-.top-panel .dropdown .search-filters .selected-items {
-  font-size: 0.9em;
-  gap: 2px;
-  flex-wrap: wrap;
-  display: flex;
-}
-
-.top-panel .dropdown .search-filters .selected-items span {
-  background-color: var(--page-version-menu-background);
-  border-radius: 5px;
-  color: var(--page-version-font-color);
-  padding: 2px 3px;
-}
-
-.top-panel .autocomplete {
-  flex: 1;
-}
 
 @media screen and (min-width: 769px) {
   .nav-container {
     width: var(--nav-width);
+    top: var(--navbar-height);
   }
 }
 
@@ -127,8 +66,10 @@
     font-size: var(--secondary-font-size);
     flex: none;
     border-right: 1px solid var(--nav-border-color);
+    display: block;
     position: sticky;
     visibility: visible;
+    height: calc(100vh - var(--navbar-height));
   }
 
   .nav-expand:not(.hidden) {
@@ -161,9 +102,9 @@
   scrollbar-width: none;  /* Firefox */
   overscroll-behavior: none;
   overflow-y: scroll;
-  top: calc(var(--navbar-height) + var(--announcement-bar-height));
   -webkit-clip-path: inset(0);
   clip-path: inset(0);
+  height: inherit !important;
 }
 
 @media screen and (min-width: 769px) {
@@ -175,13 +116,6 @@
 @media screen and (min-width: 1024px) {
   .nav {
     box-shadow: none;
-    position: sticky;
-    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
-  }
-
-  .nav-menu {
-    overflow-y: scroll;
-    border-bottom: 1px solid var(--nav-border-color);
   }
 }
 
@@ -192,25 +126,26 @@
 .context .container.has-dropdown {
   border: 1px solid var(--highlight-border);
   width: 100%;
-  border-radius: 10px;
+  border-radius: var(--border-radius-radius-md);
   display: flex;
   justify-content: space-between;
-  padding: 10px 6px;
+  padding: 4px var(--nav-item-side-padding);
+  position: relative;
 }
 
 .context .container.has-dropdown .components,
 .context .container.has-dropdown .versions {
   display: none;
   position: absolute;
+  left: 0;
+  right: 0;
   margin-top: 35px;
   align-items: center;
-  gap: 10px;
-  width: 80%;
   z-index: 2;
   background-color: var(--body-background);
   white-space: nowrap;
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: var(--border-radius-radius-md);
+  padding: 8px 0;
   -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
@@ -223,19 +158,13 @@
 
 .context .container.has-dropdown .components a,
 .context .container.has-dropdown .versions a {
-  padding: 5px;
+  padding: 4px var(--nav-item-side-padding);
 }
 
 .context .container.has-dropdown.is-active .components,
 .context .container.has-dropdown.is-active .versions {
   display: flex;
   flex-direction: column;
-}
-
-.nav .panels {
-  display: flex;
-  flex-direction: column;
-  height: var(--nav-height);
 }
 
 .article.lab .nav .panels {
@@ -246,15 +175,10 @@ html.is-clipped--nav {
   overflow-y: hidden;
 }
 
-.nav-panel-menu {
-  height: var(--nav-panel-menu-height);
-}
-
 .nav-menu {
-  height: 100%;
-  line-height: var(--nav-line-height);
   position: relative;
-  top: 10px;
+  line-height: var(--nav-line-height);
+  padding: calc(var(--toolbar-top-padding) - 8px) var(--nav-side-padding) 32px;
 }
 
 .nav-menu h3.title {
@@ -270,6 +194,13 @@ html.is-clipped--nav {
   margin: 0;
   padding: 0;
   width: 100%;
+  color: var(--color-aliases-static-palette-text-secondary);
+  margin-left: 8px;
+}
+
+/* Target the very first nav-menu and remove the margin-left */
+.nav-menu > .nav-list {
+  margin-left: 0;
 }
 
 li.nav-item {
@@ -277,7 +208,6 @@ li.nav-item {
   flex-wrap: wrap;
   flex: 1;
   cursor: pointer;
-  padding: 2px 8px;
 }
 
 .nav .item {
@@ -286,15 +216,15 @@ li.nav-item {
   min-height: 30px;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 8px;
-  border-radius: 10px;
+  padding: 8px var(--nav-item-side-padding);
+  border-radius: var(--border-radius-radius-md);
+  margin-bottom: 4px;
 }
 
 .nav-list > li > .item:hover,
 .nav-list > li > .is-current-page {
   background-color: var(--link-highlight-background-color);
   color: var(--link-highlight-color);
-  font-weight: 500;
 }
 
 .nav-list .is-current-path > div.item:first-child {
@@ -305,13 +235,7 @@ li.nav-item {
   text-decoration: none !important;
 }
 
-.nav-item[data-depth="0"] {
-  height: 36px;
-}
-
-.nav-item[data-depth="1"] > .item.dropdown {
-  height: 36px;
-}
+/* Note - Dan removed .nav-item setting height - this rule was causing all sorts of issues with nav height due to all nav items being nested inside a single <li> with a height of 36px, this meant there was a lot of extra css needed to override */
 
 .nav-item[data-depth="0"] > .nav-list:first-child {
   display: flex;
@@ -347,11 +271,12 @@ a.nav-text {
   padding: 0;
   width: 2em;
   height: 100%;
+  margin-right: -8px;
 }
 
 .nav-item-toggle > img {
   filter: var(--nav-toggle-filter);
-  width: 0.75em;
+  width: 0.6em;
 }
 
 .nav-item.is-active > .item > .nav-item-toggle {
@@ -359,12 +284,11 @@ a.nav-text {
 }
 
 .nav-panel-explore {
-  background: var(--nav-background);
-  display: flex;
   position: sticky;
-  height: var(--drawer-height);
+  top: 0px;
   z-index: 9;
-  flex-direction: column;
+  background: var(--nav-background);
+  padding: 24px var(--nav-side-padding) 0;
 }
 
 .nav-panel-explore:not(:first-child) {
@@ -376,7 +300,6 @@ a.nav-text {
   font-size: var(--secondary-font-size);
   color: var(--link-highlight-color);
   width: 100%;
-  padding: 6px 10px 6px 20px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -402,7 +325,6 @@ a.nav-text {
 .nav-panel-explore .context .component a:hover {
   background-color: var(--link-highlight-background-color);
   color: var(--body-font-color);
-  border-radius: 3px;
 }
 
 .nav-panel-explore .context .versions a,
