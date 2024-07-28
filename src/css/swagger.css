@@ -14,6 +14,10 @@
   margin: 0 auto;
 }
 
+.swagger .section-gap--read-mode {
+  padding: 24px 50px 12px 50px;
+}
+
 .swagger a,
 .swagger p a > code {
   text-decoration: underline;
@@ -119,6 +123,29 @@ body .swagger footer.footer {
 }
 
 /* Dan's edits */
+.body.swagger {
+  padding-top: 0 !important;
+}
+
+.swagger .loader {
+  position: fixed;
+  bottom: calc(50% - 18px);
+  left: calc(50% - 18px);
+}
+
+.api-toolbar {
+  margin-top: 30px; /* Note - dan - for some reason swagger is off by 2px so we can't use regular measurement of 32px */
+  margin-left: 48px;
+}
+.api-toolbar .breadcrumbs {
+  max-width: 1300px;
+  margin: 0 auto;
+  margin-bottom: 32px;
+}
+.api-toolbar .breadcrumbs ul {
+  margin-left: 0;
+}
+
 .rapidoc-container {
   height: 100%;
   width: 100%;
@@ -135,6 +162,7 @@ body .swagger footer.footer {
 
 .swagger .nav-bar-paths-under-tag {
   max-height: none !important;
+  padding-left: 8px;
 }
 
 .swagger .title,
@@ -154,14 +182,55 @@ body .swagger footer.footer {
   text-transform: capitalize !important;
 }
 
+::part(section-navbar-operations-top) {
+  display: none;
+}
+
 ::part(section-navbar-scroll) {
-  padding-left: 1rem;
-  padding-right: 0.5rem;
+  padding-left: 24px;
+  padding-right: 24px;
   padding-bottom: 2rem;
 }
 
+::part(section-navbar-search) {
+  padding-top: calc(var(--toolbar-top-padding) - 14px);
+  padding-bottom: 0;
+}
+
+::part(textbox-nav-filter) {
+  font-family: var(--body-font-family);
+  font-size: var(--secondary-font-size);
+  line-height: 1.2rem;
+  padding-left: 10px;
+  border-radius: 0;
+  border-top-left-radius: var(--border-radius-radius-md);
+  border-bottom-left-radius: var(--border-radius-radius-md);
+}
+
+::part(btn-search),
+::part(btn-clear-filter) {
+  margin: 0;
+  border-radius: 0;
+  border-top-right-radius: var(--border-radius-radius-md);
+  border-bottom-right-radius: var(--border-radius-radius-md);
+}
+
+::part(btn) {
+  font-family: var(--body-font-family);
+  font-size: var(--secondary-font-size);
+  text-transform: lowercase;
+}
+::part(btn)::first-letter {
+  text-transform: uppercase;
+}
+
 ::part(section-overview-title) {
-  padding-top: 3rem;
+  padding-top: 0;
+  margin-top: -2rem;
+}
+
+::part(section-overview) {
+  max-width: 1000px !important;
 }
 
 ::part(section-servers) > h2,
@@ -185,12 +254,30 @@ body .swagger footer.footer {
   display: none;
 }
 
-::part(section-navbar-item section-navbar-path) {
-  padding-left: 1.5rem;
+::part(section-navbar-item),
+#link-overview {
+  border-radius: var(--border-radius-radius-md);
+  font-size: var(--secondary-font-size);
+  color: var(--color-aliases-static-palette-text-secondary);
+  padding: 8px 10px;
+  margin-bottom: 4px;
+}
+
+#link-overview {
+  margin-top: 24px;
 }
 
 ::part(section-navbar-tag) {
-  padding-left: 1.25rem;
+  font-size: var(--secondary-font-size);
+  color: var(--color-aliases-static-palette-text-secondary);
+  margin-top: 16px;
+}
+
+::part(section-navbar-active-item),
+::part(section-navbar-item):hover,
+#link-overview:hover {
+  background-color: var(--link-highlight-background-color) !important;
+  color: var(--link-highlight-color);
 }
 
 ::part(section-navbar-operations-top) {
@@ -216,7 +303,6 @@ body .swagger footer.footer {
 
 .swagger .left-bar.active {
   border-color: transparent !important;
-  background: var(--nav-hover-bg-color) !important;
 }
 
 .swagger .nav-bar-section {

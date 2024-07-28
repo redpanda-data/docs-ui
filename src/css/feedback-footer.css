@@ -1,6 +1,4 @@
 .feedback-section {
-  border-color: currentcolor #d0d7de #d0d7de;
-  border-top: 1px solid #d0d7de;
   margin-top: 30px;
   padding-top: 10px;
   display: flex;
@@ -8,6 +6,7 @@
   justify-content: space-between;
   flex-direction: column;
   color: var(--body-font-color);
+  font-size: var(--secondary-font-size);
 }
 
 .feedback-section .material-icons {

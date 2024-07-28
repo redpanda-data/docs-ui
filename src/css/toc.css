@@ -169,6 +169,7 @@
 
 @media screen and (min-width: 1350px) {
   .toc.sidebar {
-    max-width: var(--toc-width--widescreen);
+    width: var(--toc-width--widescreen);
+    max-width: 400px;
   }
 }
