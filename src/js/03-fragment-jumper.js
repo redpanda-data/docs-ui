@@ -10,10 +10,6 @@
     return hash && (~hash.indexOf('%') ? decodeURIComponent(hash) : hash).slice(1)
   }
 
-  function computePosition (el, sum) {
-    return article.contains(el) ? computePosition(el.offsetParent, el.offsetTop + sum) : sum
-  }
-
   function jumpToAnchor (e) {
     console.log('Do not hijack scroll behavior')
     // if (e) {

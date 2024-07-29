@@ -123,7 +123,7 @@ html[data-theme=dark] {
   --doc-font-size--desktop: var(--body-font-size);
   --doc-line-height: 1.6;
   --heading-font-weight: 700;
-  --heading-font-family: Inter, sans-serif;
+  --heading-font-family: "Inter", sans-serif;
   --admonition-label-font-weight: var(--body-font-weight-bold);
   --caption-font-style: normal;
   --caption-font-weight: var(--body-font-weight-bold);
@@ -710,6 +710,4 @@ html:not([data-theme=dark]) {
   --spacings-spacing-8xl: 5.5rem;
   --spacings-spacing-9xl: 8rem;
   --spacings-spacing-10xl: 9rem;
-  /* string */
-  --lg: String value;
 }

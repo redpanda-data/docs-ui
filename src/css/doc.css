@@ -473,7 +473,7 @@ html {
   font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
- /* Note - dan - for some bizarre reason tables are used to structure notices, we have to turn all these table elements into block elements to get them to style correctly */
+/* Note - dan - for some bizarre reason tables are used to structure notices, we have to turn all these table elements into block elements to get them to style correctly */
 .doc .admonitionblock > table {
   display: block;
   table-layout: unset;

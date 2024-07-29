@@ -137,11 +137,13 @@ body .swagger footer.footer {
   margin-top: 30px; /* Note - dan - for some reason swagger is off by 2px so we can't use regular measurement of 32px */
   margin-left: 48px;
 }
+
 .api-toolbar .breadcrumbs {
   max-width: 1300px;
   margin: 0 auto;
   margin-bottom: 32px;
 }
+
 .api-toolbar .breadcrumbs ul {
   margin-left: 0;
 }
@@ -220,6 +222,7 @@ body .swagger footer.footer {
   font-size: var(--secondary-font-size);
   text-transform: lowercase;
 }
+
 ::part(btn)::first-letter {
   text-transform: uppercase;
 }
@@ -278,11 +281,6 @@ body .swagger footer.footer {
 #link-overview:hover {
   background-color: var(--link-highlight-background-color) !important;
   color: var(--link-highlight-color);
-}
-
-::part(section-navbar-operations-top) {
-  justify-content: flex-start;
-  margin-left: -6px;
 }
 
 ::part(section-operations-in-tag) {

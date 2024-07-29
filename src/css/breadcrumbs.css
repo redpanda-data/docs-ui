@@ -42,7 +42,7 @@ a + .breadcrumbs {
 .breadcrumbs li a {
   padding: 7px 0;
   text-decoration: none;
-  border: 1px solid rgba(0,0,0,0);
+  border: 1px solid rgba(0, 0, 0, 0);
   color: var(--color-aliases-static-palette-text-secondary);
 }
 

@@ -15,7 +15,6 @@
   overflow-y: scroll;
 }
 
-
 .nav-collapse,
 .nav-expand {
   font-size: var(--secondary-font-size);
@@ -52,7 +51,6 @@
 .nav-expand:hover {
   cursor: pointer;
 }
-
 
 @media screen and (min-width: 769px) {
   .nav-container {
@@ -285,9 +283,9 @@ a.nav-text {
 
 .nav-panel-explore {
   position: sticky;
-  top: 0px;
+  top: 0;
   z-index: 9;
-  background: var(--nav-background);
+  background-color: var(--nav-background);
   padding: 24px var(--nav-side-padding) 0;
 }
 
