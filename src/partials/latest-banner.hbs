@@ -4,7 +4,7 @@
 {{#with (log-missing this ./missing @root.page.url)}}
 {{/with}}
 {{/if}}
-<div class="doc banner-container" id="latest-banner">
+<div class="banner-container" id="latest-banner">
   {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
     <div>You are viewing the {{@root.page.component.title}} <b>v{{@root.page.version}}</b> beta documentation.
     <br>We welcome your feedback at the <a href="https://redpandacommunity.slack.com/archives/C04N3C10VUL">Redpanda Community Slack #beta-feedback channel</a>.
