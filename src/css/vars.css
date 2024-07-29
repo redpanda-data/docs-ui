@@ -211,6 +211,7 @@ html:not([data-theme=dark]) {
   --nav-panel-divider-color: var(--color-smoke-90);
   --nav-secondary-background: var(--color-smoke-70);
   --nav-toggle-filter: '';
+  --color-aliases-static-palette-text-secondary: var(--color-primitives-global-grey-grey-700);
   /* toolbar */
   --toolbar-background: var(--body-background);
   --toolbar-border-color: var(--panel-border-color);
@@ -478,7 +479,6 @@ html:not([data-theme=dark]) {
   --color-aliases-static-palette-divider-weak: var(--color-primitives-global-dark-blue-dark-blue-200);
   --color-aliases-static-palette-text-disabled: var(--color-primitives-global-grey-grey-300);
   --color-aliases-static-palette-text-primary: var(--color-primitives-global-grey-grey-900);
-  --color-aliases-static-palette-text-secondary: var(--color-primitives-global-grey-grey-700);
   --color-aliases-static-palette-text-subtle: var(--color-primitives-global-grey-grey-500);
   --color-aliases-static-palette-text-tertiary: var(--color-primitives-global-grey-grey-600);
   --color-aliases-static-palette-text-action-accent: var(--color-primitives-global-primary-brand-primary-brand-700);
@@ -710,9 +710,4 @@ html:not([data-theme=dark]) {
   --spacings-spacing-8xl: 5.5rem;
   --spacings-spacing-9xl: 8rem;
   --spacings-spacing-10xl: 9rem;
-}
-
-/* Dark theme overrides */
-html[data-theme=dark] {
-  --color-aliases-static-palette-text-secondary: var(--color-primitives-global-grey-grey-200);
 }
