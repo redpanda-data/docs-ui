@@ -1,7 +1,8 @@
 .breadcrumbs {
-  flex: 1 1;
-  padding: 0 0.5rem 0 0.75rem;
   line-height: var(--nav-line-height);
+  width: 100%;
+  display: block;
+  margin-bottom: 32px;
 }
 
 a + .breadcrumbs {
@@ -15,6 +16,8 @@ a + .breadcrumbs {
   padding: 0;
   list-style: none;
   font-size: 0.9rem;
+  padding-left: 0 !important;
+  margin-left: -0.5rem;
 }
 
 .breadcrumbs li {
@@ -37,14 +40,13 @@ a + .breadcrumbs {
 }
 
 .breadcrumbs li a {
-  padding: 7px;
+  padding: 7px 0;
   text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0);
+  color: var(--color-aliases-static-palette-text-secondary);
 }
 
 .breadcrumbs li:hover a,
 .breadcrumbs li:last-child a {
-  color: var(--link-highlight-color);
-  border-radius: 10px;
-  border: 1px solid var(--highlight-border);
   text-decoration: none;
 }

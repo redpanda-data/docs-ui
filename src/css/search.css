@@ -398,7 +398,7 @@ li.aa-Item:not([id*=filters]) {
 .aa-Grid .toc.sidebar {
   position: unset;
   height: unset;
-  max-width: unset;
+  width: unset;
 }
 
 .aa-Grid .toc.sidebar .toc-menu ul {

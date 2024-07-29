@@ -181,9 +181,10 @@
       html.classList.add('is-clipped--nav')
       navToggle.classList.add('is-active')
       navContainer.classList.add('is-active')
-      var bounds = nav.getBoundingClientRect()
-      var expectedHeight = window.innerHeight - Math.round(bounds.top)
-      if (Math.round(bounds.height) !== expectedHeight) nav.style.height = expectedHeight + 'px'
+      // Note - Dan removed the height calculations - this should all be handled by css or we have overrides that work against us
+      // var bounds = nav.getBoundingClientRect()
+      // var expectedHeight = window.innerHeight - Math.round(bounds.top)
+      // if (Math.round(bounds.height) !== expectedHeight) nav.style.height = expectedHeight + 'px'
       html.addEventListener('click', hideNav)
     } else {
       navContainer.classList.remove('hidden')

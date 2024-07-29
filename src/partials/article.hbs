@@ -1,4 +1,7 @@
 <article class="doc">
+{{#if (ne page.attributes.role 'home')}}
+{{> breadcrumbs}}
+{{/if}}
 {{#unless page.attributes.cloud}}
 {{> latest-banner}}
 {{/unless}}

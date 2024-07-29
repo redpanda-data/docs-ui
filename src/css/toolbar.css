@@ -38,7 +38,7 @@ html[data-theme=dark] .nav-toggle {
   }
 
   .toolbar {
-    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
+    display: none;
   }
 }
 

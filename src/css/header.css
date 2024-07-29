@@ -45,6 +45,7 @@ html.is-clipped--navbar {
 
 .navbar-brand .navbar-item {
   color: var(--navbar-font-color);
+  margin-left: 8px;
 }
 
 .navbar-brand .navbar-item:first-child {

@@ -120,7 +120,7 @@
   color: var(--toc-font-color);
   border-left: 2px solid var(--toc-border-color);
   display: inline-block;
-  padding: 0 0 0.75rem 1rem;
+  padding: 6px 0 6px 1rem;
   text-decoration: none;
 }
 
@@ -155,7 +155,6 @@
   position: sticky;
   height: fit-content;
   max-height: var(--nav-height);
-  top: 120px;
   font-size: var(--secondary-font-size);
   font-weight: 300;
   color: var(--toc-font-color);
@@ -164,13 +163,13 @@
   overflow-x: hidden;
   text-overflow: ellipsis;
   flex: 0 0 var(--toc-width);
-  padding-right: 1rem;
-  margin-right: 1em;
   word-wrap: break-word;
+  top: var(--navbar-height);
 }
 
 @media screen and (min-width: 1350px) {
   .toc.sidebar {
-    max-width: var(--toc-width--widescreen);
+    width: var(--toc-width--widescreen);
+    max-width: 400px;
   }
 }

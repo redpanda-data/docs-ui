@@ -35,7 +35,7 @@
         css-file="{{{uiRootPath}}}/css/site.css"  
         css-classes="swagger">
 
-        <div class="toolbar" role="navigation" style="top: 0;">
+        <div class="api-toolbar" role="navigation" style="top: 0;">
           {{> breadcrumbs}}
           {{#if (is-cloud-url page.url)}}
           {{> cloud-api-feedback}}
@@ -44,11 +44,11 @@
         {{#each (get-api-slots page.url)}}
           {{{this}}}
         {{/each}}
+        {{> tracking-pixel}}
         <div slot="footer">
           {{> footer}}
           {{> announcement-email}}
         </div>
-        {{> tracking-pixel}}
       </rapi-doc>
     </div>
 
