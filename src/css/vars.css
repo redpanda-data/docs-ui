@@ -711,3 +711,8 @@ html:not([data-theme=dark]) {
   --spacings-spacing-9xl: 8rem;
   --spacings-spacing-10xl: 9rem;
 }
+
+/* Dark theme overrides */
+html[data-theme=dark] {
+  --color-aliases-static-palette-text-secondary: var(--color-primitives-global-grey-grey-200);
+}
