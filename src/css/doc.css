@@ -1,5 +1,5 @@
 html {
-  scroll-padding-top: 88px;
+  scroll-padding-top: calc(var(--navbar-height) + var(--toolbar-height)); /* 114px */
 }
 
 .doc {
@@ -21,6 +21,10 @@ html {
 }
 
 @media screen and (min-width: 1024px) {
+  html {
+    scroll-padding-top: calc(var(--navbar-height) + 32px); /* 88px */
+  }
+
   .doc {
     flex: auto;
     font-size: var(--doc-font-size--desktop);
