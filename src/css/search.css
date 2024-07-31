@@ -39,8 +39,7 @@ article.search .filters .interactive {
 }
 
 article.search .filters {
-  margin-top: 20px;
-  padding-top: 20px;
+  padding-top: 40px;
 }
 
 article.search .searchbox {
@@ -58,11 +57,10 @@ article.search .search-content {
 }
 
 article.search .ais-Hits-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 20px;
-  margin: 20px;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 40px;
 }
 
 article.search .header {
@@ -76,10 +74,7 @@ article.search .header img {
 }
 
 article.search .results {
-  display: flex;
   width: 100%;
-  align-items: center;
-  justify-content: center;
 }
 
 article.search .header h1 {
@@ -91,19 +86,22 @@ article.search .header p {
   max-width: 600px;
 }
 
-article.search .ais-Hits-list .card {
-  min-height: 300px;
-  max-width: 250px;
-}
-
 article.search .ais-Panel-header {
   font-size: 1em;
   color: var(--body-font-color);
 }
 
+article.search .ais-Hits-list .card {
+  padding: 20px;
+}
+
 article.search .ais-Hits-list .card a:hover,
 article.search .ais-Hits-list .card a:hover * {
   text-decoration: none;
+}
+
+article.search .ais-Heading {
+  margin: 0;
 }
 
 article.search span.ais-Snippet-nonHighlighted {
@@ -114,6 +112,7 @@ article.search span.ais-Snippet-nonHighlighted {
 article.search .ais-Hits-item {
   background: unset;
   box-shadow: var(--search-hits-boxshadow) !important;
+  padding: 0;
 }
 
 article.search .search-panel__filters {
@@ -469,15 +468,13 @@ li.aa-Item:not([id*=filters]) {
   }
 }
 
-@media screen and (max-width: 1224px) {
-  article.search .ais-Hits-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media screen and (max-width: 1024px) {
   article.search .badge-button#display-filters {
     display: flex;
+  }
+
+  article.search .ais-Hits {
+    padding: 25px;
   }
 
   article.search .header img {
@@ -499,12 +496,6 @@ li.aa-Item:not([id*=filters]) {
     flex-basis: 100%;
     display: flex;
     margin-bottom: 0;
-  }
-}
-
-@media screen and (max-width: 900px) {
-  article.search .ais-Hits-list {
-    grid-template-columns: repeat(1, 1fr);
   }
 }
 

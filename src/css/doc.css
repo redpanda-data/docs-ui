@@ -478,9 +478,9 @@ html {
 }
 
 /* Note - dan - for some bizarre reason tables are used to structure notices, we have to turn all these table elements into block elements to get them to style correctly */
+/* I had to change this back to a fixed table layout to avoid the code blocks from escaping the admonition */
 .doc .admonitionblock > table {
-  display: block;
-  table-layout: unset;
+  table-layout: fixed;
   position: relative;
   width: 100%;
 }
@@ -998,7 +998,6 @@ table code {
   border-radius: 10px;
   margin-bottom: 0;
   flex: 0.5;
-  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .tableblock td .enterprise-label-container {
@@ -1029,16 +1028,11 @@ table code {
 
 .doc .choices__inner {
   background-color: var(--body-background);
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  min-height: unset;
 }
 
 .doc .tableblock .choices__list--single {
   padding: 0;
-}
-
-.doc .choices__list--dropdown .choices__item,
-.doc .choices__list[aria-expanded] .choices__item {
-  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .tableblock .choices__list--dropdown,

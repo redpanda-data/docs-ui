@@ -55,7 +55,7 @@
 @media screen and (min-width: 769px) {
   .nav-container {
     width: var(--nav-width);
-    top: var(--navbar-height);
+    top: calc(var(--navbar-height) + var(--announcement-bar-height));
   }
 }
 
@@ -68,6 +68,7 @@
     position: sticky;
     visibility: visible;
     height: calc(100vh - var(--navbar-height));
+    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
   }
 
   .nav-expand:not(.hidden) {

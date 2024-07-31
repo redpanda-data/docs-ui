@@ -389,26 +389,8 @@ window.addEventListener('DOMContentLoaded', function() {
             },
             footer({state, html}) {
               if (state.context.preview) {
-                // Extract tags and format them for URL encoding as array parameters
-                const tag = state.context.tagsPlugin.tags[0];
-                let label = 'docs'; // Default to 'docs'
-
-                // Check if a tag is selected and its first character is not uppercase
-                if (tag && tag.label.charAt(0) !== tag.label.charAt(0).toUpperCase()) {
-                  label = tag.label; // Use the tag label if it doesn't start with an uppercase character
-                }
-
-                // Capitalize the first character of the label
-                label = label.charAt(0).toUpperCase() + label.slice(1);
-
-                // Convert label to singular if it ends with 's'
-                const formattedLabel = label.endsWith('s') ? label.slice(0, -1) : label;
-
-                // Encode as array parameter
-                const type = `type[0]=${encodeURIComponent(formattedLabel)}`;
-                const queryParam = state.query ? `&q=${encodeURIComponent(state.query)}` : '';
-                var queryParams = `${type}${queryParam}`;
-                if (formattedLabel === 'Doc' && VERSION) {
+                var queryParams = state.query ? `q=${encodeURIComponent(state.query)}` : '';
+                if (VERSION) {
                    queryParams += `&version=${VERSION}`
                 }
                 return html`<div class="aa-Footer">

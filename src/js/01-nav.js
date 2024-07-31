@@ -154,22 +154,23 @@
     var rect = this.getBoundingClientRect()
     var menuPanelRect = menuPanel.getBoundingClientRect()
     var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
-    if (event.target.className !== 'nav-link' || event.target.className !== 'nav-text') {
+    if (event.target.classList.contains('nav-link') || event.target.classList.contains('nav-text') || (event.target.classList.contains('item') && !event.target.classList.contains('dropdown'))) {
+      // Follow the link
+      var a = event.target.closest('a')
+      if (!a) {
+        a = event.target.querySelector('a')
+      }
+      console.log(a)
+      if (a && a.href !== window.location.href) {
+        window.location.href = a.href
+      }
+    } else {
+      // Toggle 'is-active' class to open the dropdown
       this.classList.toggle('is-active')
       if (overflowY > 0) {
         menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
       }
       event.stopPropagation()
-    } else {
-      if (this.classList.toggle('is-active')) {
-        if (overflowY > 0) {
-          menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
-        }
-        const a = this.querySelector('a')
-        if (a && a.href !== window.location.href) {
-          window.location.href = a.href
-        }
-      }
     }
   }
 

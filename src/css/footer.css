@@ -17,9 +17,9 @@ footer nav.footer-nav {
   padding-bottom: 30px;
   flex: 1 1 0%;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: space-between;
   font-family: "Calibre Regular", sans-serif;
-  max-width: 1300px;
+  max-width: var(--doc-max-width);
   margin: 0 auto;
 }
 
@@ -69,5 +69,23 @@ footer .footer-links {
 
   footer .footer-links {
     margin-right: 1rem;
+  }
+
+  main:not(.labs):not(.home) footer.footer {
+    width: calc(100% - var(--toc-width));
+    margin-left: 48px;
+  }
+}
+
+@media screen and (min-width: 1350px) {
+  main:not(.labs):not(.home) footer.footer {
+    width: calc(100% - var(--toc-width--widescreen));
+  }
+}
+
+@media (max-width: 1024px) {
+  footer.footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }

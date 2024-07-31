@@ -1,4 +1,4 @@
-<main class="article">
+<main class="article{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}">
 {{#if (ne page.attributes.role 'home')}}
   {{> toolbar}}
 {{/if}}

@@ -102,6 +102,10 @@
     text-overflow: ellipsis;
     word-wrap: normal;
   }
+
+  .toc.sidebar {
+    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
+  }
 }
 
 .toc li {
@@ -164,7 +168,7 @@
   text-overflow: ellipsis;
   flex: 0 0 var(--toc-width);
   word-wrap: break-word;
-  top: var(--navbar-height);
+  top: calc(var(--navbar-height) + var(--announcement-bar-height));
 }
 
 @media screen and (min-width: 1350px) {

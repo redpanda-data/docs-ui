@@ -9,6 +9,10 @@
   }
 }
 
+body.status-404 main > .content {
+  min-height: 100vh;
+}
+
 @media screen and (min-width: 1024px) {
   main {
     margin: 0 auto;
