@@ -11,7 +11,7 @@
     </div>
   {{else if (eq @root.page.attributes.eol true)}}
     <div>
-      This is documentation for {{@root.page.component.title}} <b>v{{@root.page.version}}</b>, which is no longer supported.
+      This is documentation for {{@root.page.component.title}} <b>v{{@root.page.version}}</b>, which is <a href="https://support.redpanda.com/hc/en-us/articles/20617574366743-Redpanda-Supported-Versions">no longer supported</a>.
     </div>
   {{else}}
     <div>
