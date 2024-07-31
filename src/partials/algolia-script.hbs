@@ -11,6 +11,8 @@ const INITIAL_TAG = `
 {{{page.component.title}}}
 {{/if}}`.trim()
 
+const LATEST_ENTERPRISE = `{{{site.components.ROOT.title}}} v{{{site.components.ROOT.latest.version}}}`.trim()
+
 const PRERELEASE = `
 {{#if (and (is-prerelease page) page.displayVersion)}}
 true
@@ -18,14 +20,9 @@ true
 false
 {{/if}}`.trim()
 
-const INITIAL_TAGS=['Labs', 'Connect', 'Enterprise v{{{site.components.ROOT.latest.version}}}']
+var INITIAL_TAGS=['Labs', 'Connect']
 
-const VERSION = `
-{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}
-{{{site.components.ROOT.latest.version}}}
-{{else}}
-{{{page.componentVersion.version}}}
-{{/if}}`.trim()
+const VERSION = `{{{page.componentVersion.version}}}`.trim()
 
 const getVersionDigit = (tag) => {
     const versionRegex = /v(\d+)/;
@@ -34,33 +31,24 @@ const getVersionDigit = (tag) => {
 };
 
 // Get the product name in versioned tags
-// For example Redpanda v24.2
+// For example Enterprise v24.2
 const getProductName = (tag) => {
     const wordBeforeVRegex = /(\S+) v/;
     const match = tag.match(wordBeforeVRegex);
     return match ? match[1] : null;
 };
 
-// Apply all filter tags except when there's a matching initial tag with a different version
 const applyFilterTags = (initialTags, initialTag) => {
-    const initialVersionDigit = getVersionDigit(initialTag);
-    const initialWordBeforeV = getProductName(initialTag);
-    const filteredTags = initialTags.map(tag => {
-        const tagVersionDigit = getVersionDigit(tag);
-        const tagWordBeforeV = getProductName(tag);
-        if (
-            initialVersionDigit &&
-            tagVersionDigit &&
-            initialVersionDigit !== tagVersionDigit &&
-            initialWordBeforeV === tagWordBeforeV
-        ) {
-            return initialTag;
-        }
-        return tag;
-    });
-    return filteredTags.map(tag => ({ label: tag, facet: '_tags' }));
+  if (!initialTag) return initialTags.map(tag => ({ label: tag, facet: '_tags' }));
+  var mergedTags;
+  if (initialTag === 'Home' || initialTag === 'Labs') {
+    mergedTags = [...initialTags, 'Cloud', LATEST_ENTERPRISE];
+  } else {
+    mergedTags = [...initialTags, initialTag];
+  }
+  mergedTags = [...new Set(mergedTags)];
+  return mergedTags.map(tag => ({ label: tag, facet: '_tags' }));
 };
-
 
 // Applies filters to search results
 // https://www.algolia.com/doc-beta/ui-libraries/autocomplete/guides/filtering-results#applying-filters-from-tags

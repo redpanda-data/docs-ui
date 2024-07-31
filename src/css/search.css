@@ -430,7 +430,7 @@ li.aa-Item:not([id*=filters]) {
 }
 
 .aa-Preview.aa-Column .breadcrumbs li a:hover {
-  background-color: var(--link-highlight-background-color);
+  color: var(--link-highlight-color);
 }
 
 .aa-Preview.aa-Column .breadcrumbs ul {
