@@ -283,11 +283,11 @@ html.is-clipped--navbar {
   }
 
   .navbar-menu {
-    gap: 8px;
+    gap: 16px;
   }
 
   .navbar {
-    gap: 45px;
+    gap: 112px;
     padding: 16px;
   }
 
