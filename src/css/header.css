@@ -221,7 +221,6 @@ html.is-clipped--navbar {
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
-  padding-right: 1rem;
 }
 
 @media screen and (max-width: 768.5px) {
