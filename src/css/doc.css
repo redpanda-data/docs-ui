@@ -289,7 +289,11 @@ html {
 .doc .partintro,
 .doc details,
 .doc hr {
-  margin: 1.3rem 0 0;
+  margin: 0.6rem 0 0;
+}
+
+.paragraph > p {
+  margin-top: 1.3rem;
 }
 
 .doc .ulist.two-column {
