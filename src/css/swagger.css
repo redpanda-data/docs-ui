@@ -14,229 +14,47 @@
   margin: 0 auto;
 }
 
-.swagger .glossary-term,
-.swagger p a,
-.swagger table a,
+.swagger .section-gap--read-mode {
+  padding: 24px 50px 12px 50px;
+}
+
+.swagger a,
 .swagger p a > code {
-  color: var(--link-font-color);
+  text-decoration: underline;
+  color: var(--body-font-color);
 }
 
 .swagger a:hover,
-.swagger .glossary-term:hover,
 .swagger p a > code:hover {
   color: var(--link_hover-font-color);
 }
 
-.swagger code,
-.swagger pre,
-.m-markdown-small pre,
-.m-markdown pre {
-  hyphens: none;
-  color: var(--code-font-color);
-  background: var(--pre-background);
-  white-space: pre-wrap !important;
-}
-
-.m-markdown code {
-  color: var(--body-font-color);
-}
-
-.swagger p code,
-.swagger code,
-.swagger thead code,
-.swagger .colist > table code {
-  color: var(--code-font-color);
-  background: var(--code-background);
-  border: 0.1rem solid #0000001a;
-  font-weight: lighter;
-  border-radius: 0.25em;
-  font-size: 0.88rem;
-  padding: 0.125em 0.25em;
-}
-
-/* Override Prism.js styles */
-.swagger code .token.operator,
-.swagger code .token.url {
-  background-color: inherit;
-}
-
-.swagger pre {
-  font-size: calc(16 / var(--rem-base) * 1rem);
-  line-height: 1.5;
-  margin: 0;
-  padding: 1em;
-}
-
-.swagger pre > code {
-  padding-bottom: 1rem;
-  border: none;
-  font-weight: lighter;
-}
-
-.swagger pre > code span {
-  position: relative;
-  z-index: 1;
-}
-
-.swagger .paragraph,
-.swagger .dlist,
-.swagger .hdlist,
-.swagger .olist,
-.swagger .ulist,
-.swagger .exampleblock,
-.swagger .imageblock,
-.swagger .listingblock,
-.swagger .literalblock,
-.swagger .sidebarblock,
-.swagger .verseblock,
-.swagger .videoblock,
-.swagger .quoteblock,
-.swagger .partintro,
-.swagger details,
-.swagger hr {
-  margin: 1rem 0 0;
-}
-
-.swagger .ulist.two-column {
-  column-count: 2;
-}
-
-.swagger table.tableblock {
-  font-size: calc(17 / var(--rem-base) * 1rem);
-}
-
-.tablecontainer {
-  overflow-x: auto;
-}
-
-.swagger .clippedcontainer table.tableblock thead {
-  background: var(--sticky-table-header-background);
-  position: sticky;
-  top: -1px;
-  z-index: var(--z-index-nav);
-}
-
-.content .tablecontainer {
-  margin-bottom: 1.25em;
-}
-
-.content .tablecontainer > table.tableblock {
-  margin-bottom: 0;
-}
-
-.swagger :not(.tablecontainer) > table.tableblock,
-.swagger :not(.tablecontainer) > table.tableblock + * {
-  margin-top: 1.5rem;
-}
-
-.swagger p.tableblock + p.tableblock {
-  margin-top: 0.5rem;
-}
-
-.swagger td.tableblock > .content > :first-child {
-  margin-top: 0;
-}
-
-.swagger table.tableblock th,
-.swagger table.tableblock td {
-  padding: 0.5rem;
-}
-
-.swagger table.tableblock,
-.swagger table.tableblock > * > tr > * {
-  border: 1px solid var(--table-border-color);
-}
-
-.swagger table.tableblock th {
-  text-align: center;
-}
-
-.swagger table.grid-all > * > tr > * {
-  border-width: 1px;
-}
-
-.swagger table.grid-cols > * > tr > * {
-  border-width: 0 1px;
-}
-
-.swagger table.grid-rows > * > tr > * {
-  border-width: 1px 0;
-}
-
-.swagger table.grid-all > thead th,
-.swagger table.grid-rows > thead th {
-  border-bottom-width: 2.5px;
-}
-
-.swagger table.frame-all {
-  border-width: 1px;
-}
-
-.swagger table.frame-ends {
-  border-width: 1px 0;
-}
-
-.swagger table.frame-sides {
-  border-width: 0 1px;
-}
-
-.swagger table.frame-none > colgroup + * > :first-child > *,
-.swagger table.frame-sides > colgroup + * > :first-child > * {
-  border-top-width: 0;
-}
-
-/* NOTE let the grid win in case of frame-none */
-.swagger table.frame-sides > :last-child > :last-child > * {
-  border-bottom-width: 0;
-}
-
-.swagger table.frame-none > * > tr > :first-child,
-.swagger table.frame-ends > * > tr > :first-child {
-  border-left-width: 0;
-}
-
-.swagger table.frame-none > * > tr > :last-child,
-.swagger table.frame-ends > * > tr > :last-child {
-  border-right-width: 0;
-}
-
-.swagger table.stripes-all > tbody > tr,
-.swagger table.stripes-odd > tbody > tr:nth-of-type(odd),
-.swagger table.stripes-even > tbody > tr:nth-of-type(even),
-.swagger table.stripes-hover > tbody > tr:hover,
-.swagger table.tableblock thead {
-  background: var(--table-stripe-background);
-}
-
-.swagger table.tableblock > tfoot {
-  background: var(--table-footer-background);
-}
-
-.swagger .halign-left {
-  text-align: left;
-}
-
-.swagger .halign-right {
-  text-align: right;
-}
-
-.swagger .halign-center {
-  text-align: center;
-}
-
-.swagger .valign-top {
-  vertical-align: top;
-}
-
-.swagger .valign-bottom {
-  vertical-align: bottom;
-}
-
-.swagger .valign-middle {
-  vertical-align: middle;
-}
-
 /* Dan's edits */
+.body.swagger {
+  padding-top: 0 !important;
+}
+
+.swagger .loader {
+  position: fixed;
+  bottom: calc(50% - 18px);
+  left: calc(50% - 18px);
+}
+
+.api-toolbar {
+  margin-top: 30px; /* Note - dan - for some reason swagger is off by 2px so we can't use regular measurement of 32px */
+  margin-left: 48px;
+}
+
+.api-toolbar .breadcrumbs {
+  max-width: 1300px;
+  margin: 0 auto;
+  margin-bottom: 32px;
+}
+
+.api-toolbar .breadcrumbs ul {
+  margin-left: 0;
+}
+
 .rapidoc-container {
   height: 100%;
   width: 100%;
@@ -253,6 +71,7 @@
 
 .swagger .nav-bar-paths-under-tag {
   max-height: none !important;
+  padding-left: 8px;
 }
 
 .swagger .title,
@@ -270,17 +89,58 @@
   font-weight: bold !important;
   font-family: var(--heading-font-family);
   text-transform: capitalize !important;
-  color: red;
+}
+
+::part(section-navbar-operations-top) {
+  display: none;
 }
 
 ::part(section-navbar-scroll) {
-  padding-left: 1rem;
-  padding-right: 0.5rem;
+  padding-left: 24px;
+  padding-right: 24px;
   padding-bottom: 2rem;
 }
 
+::part(section-navbar-search) {
+  padding-top: calc(var(--toolbar-top-padding) - 14px);
+  padding-bottom: 0;
+}
+
+::part(textbox-nav-filter) {
+  font-family: var(--body-font-family);
+  font-size: var(--secondary-font-size);
+  line-height: 1.2rem;
+  padding-left: 10px;
+  border-radius: 0;
+  border-top-left-radius: var(--border-radius-radius-md);
+  border-bottom-left-radius: var(--border-radius-radius-md);
+}
+
+::part(btn-search),
+::part(btn-clear-filter) {
+  margin: 0;
+  border-radius: 0;
+  border-top-right-radius: var(--border-radius-radius-md);
+  border-bottom-right-radius: var(--border-radius-radius-md);
+}
+
+::part(btn) {
+  font-family: var(--body-font-family);
+  font-size: var(--secondary-font-size);
+  text-transform: lowercase;
+}
+
+::part(btn)::first-letter {
+  text-transform: uppercase;
+}
+
 ::part(section-overview-title) {
-  padding-top: 3rem;
+  padding-top: 0;
+  margin-top: -2rem;
+}
+
+::part(section-overview) {
+  max-width: 1000px !important;
 }
 
 ::part(section-servers) > h2,
@@ -304,17 +164,30 @@
   display: none;
 }
 
-::part(section-navbar-item section-navbar-path) {
-  padding-left: 1.5rem;
+::part(section-navbar-item),
+#link-overview {
+  border-radius: var(--border-radius-radius-md);
+  font-size: var(--secondary-font-size);
+  color: var(--color-aliases-static-palette-text-secondary);
+  padding: 8px 10px;
+  margin-bottom: 4px;
+}
+
+#link-overview {
+  margin-top: 24px;
 }
 
 ::part(section-navbar-tag) {
-  padding-left: 1.25rem;
+  font-size: var(--secondary-font-size);
+  color: var(--color-aliases-static-palette-text-secondary);
+  margin-top: 16px;
 }
 
-::part(section-navbar-operations-top) {
-  justify-content: flex-start;
-  margin-left: -6px;
+::part(section-navbar-active-item),
+::part(section-navbar-item):hover,
+#link-overview:hover {
+  background-color: var(--link-highlight-background-color) !important;
+  color: var(--link-highlight-color);
 }
 
 ::part(section-operations-in-tag) {
@@ -335,7 +208,6 @@
 
 .swagger .left-bar.active {
   border-color: transparent !important;
-  background: var(--nav-hover-bg-color) !important;
 }
 
 .swagger .nav-bar-section {
@@ -368,58 +240,6 @@
 
 .m-table .param-type {
   text-align: left;
-}
-
-.swagger .breadcrumbs {
-  display: none;
-  flex: 1 1;
-  padding: 0 0.5rem 0 0.75rem;
-  line-height: var(--nav-line-height);
-}
-
-@media screen and (min-width: 1024px) {
-  .swagger .breadcrumbs {
-    display: block;
-  }
-}
-
-.swagger a + .breadcrumbs {
-  padding-left: 0.05rem;
-}
-
-.swagger .breadcrumbs ul {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.9rem;
-}
-
-.swagger .breadcrumbs li {
-  display: inline;
-  margin: 0;
-}
-
-.swagger .breadcrumbs li::after {
-  content: "\203A";
-  padding: 0 0.5rem;
-}
-
-.swagger .breadcrumbs li:last-of-type::after {
-  content: none;
-}
-
-.swagger .breadcrumbs li a {
-  padding: 7px;
-}
-
-.swagger .breadcrumbs li:hover a,
-.swagger .breadcrumbs li:last-child a {
-  color: var(--link-font-color);
-  border-radius: 1.5rem;
-  background-color: var(--link-highlight-background-color);
-  text-decoration: none;
 }
 
 /*

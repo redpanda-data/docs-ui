@@ -5,18 +5,17 @@
 @import "base.css";
 @import "body.css";
 @import "home.css";
+@import "component-home.css";
 @import "nav.css";
 @import "main.css";
 @import "toolbar.css";
 @import "breadcrumbs.css";
-@import "page-versions.css";
 @import "toc.css";
 @import "doc.css";
 @import "pagination.css";
 @import "header.css";
 @import "footer.css";
 @import "feedback-footer.css";
-@import "cloud-api-feedback.css";
 @import "feedback-form.css";
 @import "thumbs.css";
 @import "highlight.css";
@@ -27,6 +26,7 @@
 @import "expandable-images.css";
 @import "context-switcher.css";
 @import "swagger.css";
+@import "cloud-api-feedback.css";
 @import "switch-theme.css";
 @import "two-column.css";
 @import "typeface-patron-medium.css";
@@ -34,8 +34,8 @@
 @import "typeface-calibre-medium.css";
 @import "typeface-ibmplexmono.css";
 @import "typeface-simplon-mono.css";
+@import "typeface-inter.css";
 @import "contributors-guide.css";
 @import "announcement-banner.css";
-@import "announcement-email.css";
 @import "prism.css";
 @import "tooltips.css";

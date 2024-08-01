@@ -1,8 +1,10 @@
 .tippy-box[data-theme~='redpanda-term'] {
   font-size: 0.9em;
+  background-color: var(--tooltip-background);
+  color: var(--tooltip-font-color);
 }
 
 a.glossary-term {
-  border-bottom: 2px dotted var(--link-font-color);
+  border-bottom: 2px dotted var(--link-highlight-color);
   text-decoration: none !important;
 }

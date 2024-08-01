@@ -9,10 +9,9 @@
 <script defer id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/sorttable.js"></script>
 <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
-{{#if (and env.ALGOLIA_API_KEY (and (ne page.layout 'search') (ne page.layout 'labs-search')))}}
+{{#if (and env.ALGOLIA_API_KEY (ne page.layout 'search'))}}
 {{> algolia-script}}
 {{/if}}
 {{#if (ne page.layout '404') }}
 {{> feedback-form-script}}
-{{> announcement-email-script}}
 {{/if}}

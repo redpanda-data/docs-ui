@@ -2,8 +2,8 @@ html.is-clipped--navbar {
   overflow-y: hidden;
 }
 
-body {
-  padding-top: var(--navbar-height);
+.body {
+  padding-top: var(--body-top);
 }
 
 .header {
@@ -13,14 +13,17 @@ body {
 .navbar {
   background: var(--navbar-background);
   color: var(--navbar-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   height: var(--navbar-height);
+  align-content: center;
   position: fixed;
-  top: 0;
+  top: var(--announcement-bar-height);
   width: 100%;
   z-index: var(--z-index-navbar);
-  box-shadow: var(--navbar-boxshadow);
   flex-wrap: wrap;
+  border: 0, 0, 1px, 0;
+  box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .navbar a {
@@ -28,21 +31,21 @@ body {
 }
 
 .navbar-menu {
-  color: #667085;
-  font-family: "Simplon Mono", monospace;
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  text-transform: uppercase;
+  color: #a8b2c7;
+  justify-content: flex-start;
 }
 
 .navbar-brand {
   display: flex;
-  flex: auto;
-  padding-left: 1.5rem;
+}
+
+.navbar-brand > a:hover {
+  background: none;
 }
 
 .navbar-brand .navbar-item {
   color: var(--navbar-font-color);
+  margin-left: 8px;
 }
 
 .navbar-brand .navbar-item:first-child {
@@ -144,7 +147,16 @@ body {
   color: var(--navbar-menu-font-color);
   display: block;
   line-height: var(--doc-line-height);
-  padding: 0.5rem 1rem;
+  padding: 6px 8px;
+}
+
+.navbar-item.is-current,
+.navbar-item:hover,
+.navbar-link:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+  border-radius: 10px;
+  padding: 6px 8px;
 }
 
 .navbar-item.has-dropdown {
@@ -202,6 +214,15 @@ body {
   white-space: nowrap;
 }
 
+.navbar-end {
+  display: flex;
+  flex: auto;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 @media screen and (max-width: 768.5px) {
   .navbar-brand .navbar-item.search {
     padding-left: 0;
@@ -215,9 +236,13 @@ body {
   }
 }
 
-@media screen and (max-width: 1040px) {
+@media screen and (max-width: 1024px) {
   .navbar-brand {
     height: inherit;
+  }
+
+  .header {
+    margin-bottom: 0;
   }
 
   .navbar-brand .navbar-item {
@@ -237,22 +262,32 @@ body {
   .navbar-menu:not(.is-active) {
     display: none;
   }
-
-  .navbar-menu a.navbar-item:hover,
-  .navbar-menu .navbar-link:hover {
-    background: var(--navbar-menu_hover-background);
-  }
 }
 
-@media screen and (min-width: 1040px) {
+@media screen and (min-width: 1024px) {
+  .body {
+    padding-top: var(--body-top--desktop);
+  }
+
   .navbar-burger {
     display: none;
   }
 
   .navbar,
-  .navbar-menu,
-  .navbar-end {
+  .navbar-menu {
     display: flex;
+    flex: auto;
+    justify-content: flex-start;
+    top: var(--announcement-bar-height--desktop);
+  }
+
+  .navbar-menu {
+    gap: 16px;
+  }
+
+  .navbar {
+    gap: 112px;
+    padding: 16px;
   }
 
   .navbar-item,
@@ -357,8 +392,6 @@ body {
 }
 
 .navbar-dropdown > ul {
-  font-family: 'Calibre Medium', monospace;
-  font-size: 16px;
   text-transform: none;
   letter-spacing: normal;
   list-style: none;

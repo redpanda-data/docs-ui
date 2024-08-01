@@ -1,11 +1,14 @@
+html {
+  scroll-padding-top: calc(var(--navbar-height) + var(--toolbar-height)); /* 114px */
+}
+
 .doc {
   color: var(--body-font-color);
   font-size: var(--doc-font-size);
   hyphens: auto;
   line-height: var(--doc-line-height);
-  max-width: var(--doc-max-width);
   padding: 0 1rem 4rem;
-  margin-top: 2.5rem;
+  margin-top: 3rem;
 }
 
 .doc ul.index {
@@ -18,13 +21,19 @@
 }
 
 @media screen and (min-width: 1024px) {
+  html {
+    scroll-padding-top: calc(var(--navbar-height) + 32px); /* 88px */
+  }
+
   .doc {
     flex: auto;
     font-size: var(--doc-font-size--desktop);
     min-width: 0;
-    margin-right: 0.7rem;
     margin-bottom: 0;
-    margin-top: 2.5rem;
+    margin-top: 2rem;
+    max-width: var(--doc-max-width);
+    padding: 0;
+    margin-left: 48px;
   }
 }
 
@@ -37,8 +46,8 @@
   color: var(--heading-font-color);
   font-family: var(--heading-font-family);
   hyphens: none;
-  line-height: 1.3;
-  margin: 1rem 0 0;
+  line-height: 1.2;
+  margin: 2rem 0 0;
 }
 
 .doc h1 {
@@ -143,13 +152,17 @@
 .doc a,
 .doc .glossary-term,
 .doc p a > code {
-  color: var(--link-font-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--color-aliases-static-palette-text-tertiary);
+  color: var(--body-font-color);
 }
 
 .doc a:hover,
 .doc .glossary-term:hover,
 .doc p a > code:hover {
-  color: var(--link_hover-font-color);
+  color: var(--link-highlight-color);
+  text-decoration-color: var(--link-highlight-color);
 }
 
 .doc .glossary-term {
@@ -160,9 +173,11 @@
   hyphens: none;
 }
 
+/*
 .doc a.unresolved {
   color: var(--link_unresolved-font-color);
 }
+*/
 
 .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
@@ -192,7 +207,6 @@
   border: 0.1rem solid #0000001a;
   font-weight: lighter;
   border-radius: 0.25em;
-  font-size: 0.88rem;
   padding: 0.125em 0.25em;
 }
 
@@ -203,7 +217,7 @@
 }
 
 .doc pre {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   line-height: 1.5;
   margin: 0;
   padding: 1em;
@@ -275,7 +289,15 @@
 .doc .partintro,
 .doc details,
 .doc hr {
-  margin: 1rem 0 0;
+  margin: 0.6rem 0 0;
+}
+
+.paragraph > p {
+  margin-top: 1.3rem;
+}
+
+.doc li .paragraph > p {
+  margin-top: 0;
 }
 
 .doc .ulist.two-column {
@@ -283,7 +305,7 @@
 }
 
 .doc table.tableblock {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
 .tablecontainer {
@@ -418,6 +440,7 @@
 }
 
 .doc .admonitionblock {
+  position: relative;
   margin: 1.4rem 0 0;
   box-shadow: var(--admonition-border-box-shadow);
   padding: var(--admonition-padding);
@@ -425,35 +448,30 @@
 
 .doc .admonitionblock.note {
   background-color: var(--note-background);
-  border: 0 solid var(--note-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.warning {
   background-color: var(--warning-background);
-  border: 0 solid var(--warning-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.tip {
   background-color: var(--tip-background);
-  border: 0 solid var(--tip-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.caution {
   background-color: var(--caution-background);
-  border: 0 solid var(--caution-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
 .doc .admonitionblock.important {
   background-color: var(--important-background);
-  border: 0 solid var(--important-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
@@ -464,9 +482,11 @@
 }
 
 .doc .admonitionblock pre {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
+/* Note - dan - for some bizarre reason tables are used to structure notices, we have to turn all these table elements into block elements to get them to style correctly */
+/* I had to change this back to a fixed table layout to avoid the code blocks from escaping the admonition */
 .doc .admonitionblock > table {
   table-layout: fixed;
   position: relative;
@@ -474,23 +494,19 @@
 }
 
 .doc .admonitionblock td.content {
-  padding: 1rem 1rem 0.75rem;
+  display: block;
   width: 100%;
   word-wrap: anywhere;
+  margin-top: 8px;
+  padding-left: 1.8rem;
 }
 
 .doc .admonitionblock .icon {
-  position: absolute;
-  top: 0;
-  left: 0;
+  display: block;
   font-size: calc(18 / var(--rem-base) * 1rem);
-  padding: 0 0.5rem;
   height: 1.25rem;
   line-height: 1;
   font-weight: var(--admonition-label-font-weight);
-  text-transform: uppercase;
-  border-radius: 0.45rem;
-  transform: translate(-0.5rem, -50%);
 }
 
 .doc .admonitionblock.caution .icon {
@@ -506,41 +522,43 @@
 }
 
 .icon-note::before {
-  content: "✏️";
+  content: "";
+  background: var(--note-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-tip::before {
-  content: "💡";
+  content: "";
+  background: var(--tip-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-warning::before {
-  content: "🚨";
+  content: "";
+  background: var(--warning-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-caution::before {
-  content: "⚠️";
+  content: "";
+  background: var(--caution-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-important::before {
-  content: "❗";
+  content: "";
+  background: var(--important-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
-}
-
-.doc .admonitionblock.tip .icon {
-  color: var(--tip-on-color);
-}
-
-.doc .admonitionblock.warning .icon {
-  color: var(--warning-on-color);
+  height: 1.4em;
 }
 
 .doc .admonitionblock .icon i {
@@ -636,7 +654,7 @@ table code {
 
 .doc .quoteblock .attribution {
   color: var(--quote-attribution-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   margin-top: 0.75rem;
 }
 
@@ -790,14 +808,10 @@ table code {
   margin-bottom: -0.5rem;
 }
 
-.doc .imageblock .title,
-.doc .literalblock .title,
-.doc .listingblock .title,
-.doc .openblock .title,
 .doc .videoblock .title,
 .doc .tableblock caption {
   color: var(--caption-font-color);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   font-style: var(--caption-font-style);
   font-weight: var(--caption-font-weight);
   hyphens: none;
@@ -826,14 +840,18 @@ table code {
   padding-bottom: 0;
 }
 
-.doc .openblock details > summary.title {
-  display: block;
+.doc details > summary.title {
+  display: flex;
+  align-items: center;
   position: relative;
+  border-radius: 10px;
   line-height: var(--doc-line-height);
-  padding-left: 1rem;
+  background: none;
+  color: var(--body-font-color);
+  font-weight: 500;
+  padding-left: 0;
   padding-top: 0;
   padding-bottom: 0;
-  background-color: unset;
   border-bottom: none;
   margin-bottom: 0;
 }
@@ -842,30 +860,27 @@ table code {
   display: none;
 }
 
-.doc details > summary::before {
+.doc details > summary::after {
   content: "";
-  border: solid transparent;
-  border-left-color: currentColor;
-  border-width: 0.3em 0 0.3em 0.5em;
+  background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
+  width: 1em;
+  height: 1.2em;
   position: absolute;
-  top: calc((var(--doc-line-height) * 0.5 - 0.3) * 1em);
-  left: 0;
-  transform: translateX(15%);
+  right: 0;
 }
 
-.doc details[open] > summary::before {
+.doc details[open] > summary::after {
   border-color: currentColor transparent transparent;
   border-width: 0.5rem 0.3rem 0;
-  transform: translateY(15%);
+  transform: rotate(90deg);
 }
 
 .doc details {
-  border: 1px solid var(--note-color);
   margin: 1rem 0;
-  background-color: var(--note-background);
+  background-color: var(--accordian-background);
   box-shadow: 0 1px 2px 0 #0000001a;
-  padding: 1rem 1rem;
-  border-radius: 1px;
+  padding: 16px 24px;
+  border-radius: 8px 8px 0 0;
 }
 
 .doc details.result {
@@ -940,9 +955,10 @@ table code {
 }
 
 .badge-button {
-  padding: 3px;
+  padding: 0 12px 0 12px;
   border: 1px solid var(--toolbar-border-color);
   width: fit-content;
+  color: #48484a;
   border-radius: 5px;
   font-size: medium;
   display: flex;
@@ -950,6 +966,12 @@ table code {
   gap: 5px;
   margin-top: 15px;
   margin-bottom: 15px;
+}
+
+.badge-button:hover {
+  background-color: var(--link-highlight-color);
+  color: white;
+  cursor: pointer;
 }
 
 .badge-button img {
@@ -971,10 +993,11 @@ table code {
   margin: 3px;
   padding: 0.3em 0.3em;
   color: var(--body-font-color);
+  text-decoration: none;
 }
 
 .doc .component-card:hover {
-  color: var(--link-font-color);
+  color: var(--link-highlight-color);
   text-decoration: none;
 }
 
@@ -983,7 +1006,6 @@ table code {
   border-radius: 10px;
   margin-bottom: 0;
   flex: 0.5;
-  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .tableblock td .enterprise-label-container {
@@ -1014,16 +1036,11 @@ table code {
 
 .doc .choices__inner {
   background-color: var(--body-background);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  min-height: unset;
 }
 
 .doc .tableblock .choices__list--single {
   padding: 0;
-}
-
-.doc .choices__list--dropdown .choices__item,
-.doc .choices__list[aria-expanded] .choices__item {
-  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .tableblock .choices__list--dropdown,
@@ -1052,19 +1069,19 @@ table code {
   flex: 0.3;
 }
 
-.doc .back-to-top {
+.back-to-top {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 150px;
 }
 
-.doc .button-arrow-up:hover::after {
+.button-arrow-up:hover::after {
   background-image: url(../img/arrow-cta-hover.svg);
   top: -6px;
 }
 
-.doc .button-arrow-up::after,
+.button-arrow-up::after,
 .button-arrow-up:hover::after {
   height: 15px;
   margin-left: 4px;
@@ -1073,7 +1090,7 @@ table code {
   width: 18px;
 }
 
-.doc .button-arrow-up::after {
+.button-arrow-up::after {
   background-image: url(../img/arrow-cta.svg);
   background-position: -1px 0;
   background-repeat: no-repeat;
@@ -1085,17 +1102,15 @@ table code {
   transition: top 0.5s ease-in-out;
 }
 
-.doc .button-arrow:active,
-.doc .button-arrow:focus,
-.doc .button-arrow:hover {
+.button-arrow:active,
+.button-arrow:focus,
+.button-arrow:hover {
   color: var(--link_hover-font-color);
   text-decoration: none;
 }
 
-.doc .button-arrow {
-  color: var(--link-font-color);
-  font-size: 0.9em;
-  font-weight: 700;
+a.button-arrow {
+  color: var(--link-highlight-color);
   text-decoration: none;
 }
 
@@ -1175,14 +1190,12 @@ img.dark-mode-filter,
 
 .badge-button a:hover {
   text-decoration: none;
-}
-
-.badge-button:hover {
-  cursor: pointer;
+  color: white;
 }
 
 .badge-button a {
   color: inherit;
+  text-decoration: none;
 }
 
 .badge-container {
@@ -1281,7 +1294,7 @@ img.dark-mode-filter,
 code[class*=language-],
 pre[class*=language-] {
   color: var(--code-font-color) !important;
-  font-size: 0.88rem !important;
+  font-size: calc(17 / var(--rem-base) * 1rem) !important;
   background: var(--pre-background) !important;
   white-space: pre-wrap !important;
   font-weight: lighter !important;
@@ -1294,7 +1307,7 @@ pre.code-first-child {
 html[data-theme=dark] code[class*=language-],
 html[data-theme=dark] pre[class*=language-] {
   text-shadow: none !important;
-  background-color: #282a36 !important;
+  background-color: var(--pre-background) !important;
 }
 
 html[data-theme=dark] code[class*=language-] .token.boolean,
@@ -1458,7 +1471,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .colist {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   margin: 0.25rem 0 -0.25rem;
 }
 
@@ -1534,7 +1547,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .keyseq {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--body-font-size);
 }
 
 .doc .keyseq kbd {

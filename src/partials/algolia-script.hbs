@@ -11,6 +11,8 @@ const INITIAL_TAG = `
 {{{page.component.title}}}
 {{/if}}`.trim()
 
+const LATEST_ENTERPRISE = `{{{site.components.ROOT.title}}} v{{{site.components.ROOT.latest.version}}}`.trim()
+
 const PRERELEASE = `
 {{#if (and (is-prerelease page) page.displayVersion)}}
 true
@@ -18,14 +20,9 @@ true
 false
 {{/if}}`.trim()
 
-const INITIAL_TAGS=['labs','Redpanda Connect', 'Redpanda v{{{site.components.ROOT.latest.version}}}']
+var INITIAL_TAGS=['Labs', 'Connect']
 
-const VERSION = `
-{{#if (or (eq page.component.title home) (eq page.component.layout 404) (eq page.component.name 'redpanda-labs'))}}
-{{{site.components.ROOT.latest.version}}}
-{{else}}
-{{{page.componentVersion.version}}}
-{{/if}}`.trim()
+const VERSION = `{{{page.componentVersion.version}}}`.trim()
 
 const getVersionDigit = (tag) => {
     const versionRegex = /v(\d+)/;
@@ -34,33 +31,24 @@ const getVersionDigit = (tag) => {
 };
 
 // Get the product name in versioned tags
-// For example Redpanda v24.2
+// For example Enterprise v24.2
 const getProductName = (tag) => {
     const wordBeforeVRegex = /(\S+) v/;
     const match = tag.match(wordBeforeVRegex);
     return match ? match[1] : null;
 };
 
-// Apply all filter tags except when there's a matching initial tag with a different version
 const applyFilterTags = (initialTags, initialTag) => {
-    const initialVersionDigit = getVersionDigit(initialTag);
-    const initialWordBeforeV = getProductName(initialTag);
-    const filteredTags = initialTags.map(tag => {
-        const tagVersionDigit = getVersionDigit(tag);
-        const tagWordBeforeV = getProductName(tag);
-        if (
-            initialVersionDigit &&
-            tagVersionDigit &&
-            initialVersionDigit !== tagVersionDigit &&
-            initialWordBeforeV === tagWordBeforeV
-        ) {
-            return initialTag;
-        }
-        return tag;
-    });
-    return filteredTags.map(tag => ({ label: tag, facet: '_tags' }));
+  if (!initialTag) return initialTags.map(tag => ({ label: tag, facet: '_tags' }));
+  var mergedTags;
+  if (initialTag === 'Home' || initialTag === 'Labs') {
+    mergedTags = [...initialTags, 'Cloud', LATEST_ENTERPRISE];
+  } else {
+    mergedTags = [...initialTags, initialTag];
+  }
+  mergedTags = [...new Set(mergedTags)];
+  return mergedTags.map(tag => ({ label: tag, facet: '_tags' }));
 };
-
 
 // Applies filters to search results
 // https://www.algolia.com/doc-beta/ui-libraries/autocomplete/guides/filtering-results#applying-filters-from-tags
@@ -389,26 +377,8 @@ window.addEventListener('DOMContentLoaded', function() {
             },
             footer({state, html}) {
               if (state.context.preview) {
-                // Extract tags and format them for URL encoding as array parameters
-                const tag = state.context.tagsPlugin.tags[0];
-                let label = 'docs'; // Default to 'docs'
-
-                // Check if a tag is selected and its first character is not uppercase
-                if (tag && tag.label.charAt(0) !== tag.label.charAt(0).toUpperCase()) {
-                  label = tag.label; // Use the tag label if it doesn't start with an uppercase character
-                }
-
-                // Capitalize the first character of the label
-                label = label.charAt(0).toUpperCase() + label.slice(1);
-
-                // Convert label to singular if it ends with 's'
-                const formattedLabel = label.endsWith('s') ? label.slice(0, -1) : label;
-
-                // Encode as array parameter
-                const type = `type[0]=${encodeURIComponent(formattedLabel)}`;
-                const queryParam = state.query ? `&q=${encodeURIComponent(state.query)}` : '';
-                var queryParams = `${type}${queryParam}`;
-                if (formattedLabel === 'Doc' && VERSION) {
+                var queryParams = state.query ? `q=${encodeURIComponent(state.query)}` : '';
+                if (VERSION) {
                    queryParams += `&version=${VERSION}`
                 }
                 return html`<div class="aa-Footer">
@@ -429,21 +399,6 @@ window.addEventListener('DOMContentLoaded', function() {
                         })}
                       </div>
                     </div>
-                    ${ item.breadcrumbs
-                      ? html`<div class="aa-ItemContentRow">
-                      <div class="aa-Breadcrumbs">
-                        <ul>
-                        ${item.breadcrumbs.length > 2 && item.breadcrumbs.slice(1, item.breadcrumbs.length - 1).map(breadcrumb =>
-                        html`<li>${breadcrumb.t}</li>`
-                        )}
-                        ${item.breadcrumbs.length === 2 && item.breadcrumbs.slice(1).map(breadcrumb =>
-                        html`<li>${breadcrumb.t}</li>`
-                        )}
-                        </ul>
-                      </div>
-                    </div>`
-                    : ''
-                    }
                     ${ item.text
                     ? html`<div class="aa-ItemContentSnippet">
                       ${components.Snippet({

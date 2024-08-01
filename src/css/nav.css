@@ -1,97 +1,86 @@
+:root {
+  --nav-side-padding: 24px;
+  --nav-item-side-padding: 12px;
+}
+
 .nav-container {
   position: fixed;
-  top: var(--navbar-height);
+  top: calc(var(--navbar-height) + var(--toolbar-height));
   left: 0;
+  bottom: 0;
   width: 100%;
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   z-index: var(--z-index-nav);
   visibility: hidden;
+  overflow-y: scroll;
 }
 
-.top-panel {
-  display: block;
-  font-size: 13px;
-  font-weight: 200;
-  margin: 0;
+.nav-collapse,
+.nav-expand {
+  font-size: var(--secondary-font-size);
+  color: var(--body-font-color);
+  z-index: 8;
   position: sticky;
-  z-index: 999;
-  top: 0;
-  background-color: inherit;
-  padding: 10px;
-  width: 100%;
-}
-
-.top-panel .search {
-  padding: 5px;
-  justify-content: space-between;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.top-panel .dropdown .dropdown-content {
+  height: var(--nav-collapse-height);
+  bottom: 0;
   display: none;
-  flex-direction: column;
-  font-size: 1.1em;
+  gap: 5px;
+  align-items: flex-end;
+  justify-content: flex-start;
+  width: calc(var(--nav-width) / 1.5);
+  left: calc(var(--nav-width) / 6);
 }
 
-.top-panel .dropdown .dropdown-content.is-active {
-  display: flex;
-  padding: 5px;
+.nav-collapse p {
+  margin: 0;
 }
 
-.top-panel .dropdown .search-filters {
-  padding: 5px;
+.nav-collapse.collapsed,
+.nav-expand {
+  width: calc(var(--nav-width) / 3);
+  border: none;
+  left: 5px;
+  bottom: 30px;
+}
+
+.nav-expand img {
+  transform: rotate(180deg);
+}
+
+.nav-collapse:hover,
+.nav-expand:hover {
   cursor: pointer;
-  font-size: 1.2em;
-  display: flex;
-  gap: 10px;
-  color: var(--nav-muted-color);
-}
-
-.top-panel .dropdown .search-filters .filter-toggle {
-  display: flex;
-  align-items: center;
-}
-
-.top-panel .dropdown .search-filters .filter-toggle::after {
-  content: "";
-  background: url(../img/chevron.svg) no-repeat 100%/auto 100%;
-  width: 1.1em;
-  height: 0.75em;
-}
-
-.top-panel .dropdown .search-filters .selected-items {
-  font-size: 0.9em;
-  gap: 2px;
-  flex-wrap: wrap;
-  display: flex;
-}
-
-.top-panel .dropdown .search-filters .selected-items span {
-  background-color: var(--page-version-menu-background);
-  border-radius: 5px;
-  color: var(--page-version-font-color);
-  padding: 2px 3px;
-}
-
-.top-panel .autocomplete {
-  flex: 1;
 }
 
 @media screen and (min-width: 769px) {
   .nav-container {
     width: var(--nav-width);
+    top: calc(var(--navbar-height) + var(--announcement-bar-height));
   }
 }
 
 @media screen and (min-width: 1024px) {
   .nav-container {
-    font-size: calc(18 / var(--rem-base) * 1rem);
+    font-size: var(--secondary-font-size);
     flex: none;
-    position: static;
-    top: 0;
+    border-right: 1px solid var(--nav-border-color);
+    display: block;
+    position: sticky;
     visibility: visible;
+    height: calc(100vh - var(--navbar-height));
+    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
+  }
+
+  .nav-expand:not(.hidden) {
+    display: flex;
+  }
+
+  .nav {
+    overflow-y: hidden;
+  }
+
+  .nav-collapse {
+    display: flex;
   }
 }
 
@@ -106,17 +95,15 @@
 
 .nav {
   background: var(--nav-background);
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: var(--secondary-font-size);
   position: relative;
-  overflow-y: scroll;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
   overscroll-behavior: none;
-  top: var(--toolbar-height);
-  height: var(--nav-height);
-  border-right: 1px solid var(--nav-border-color);
+  overflow-y: scroll;
   -webkit-clip-path: inset(0);
   clip-path: inset(0);
+  height: inherit !important;
 }
 
 @media screen and (min-width: 769px) {
@@ -127,10 +114,7 @@
 
 @media screen and (min-width: 1024px) {
   .nav {
-    top: var(--navbar-height);
     box-shadow: none;
-    position: sticky;
-    height: var(--nav-height--desktop);
   }
 }
 
@@ -138,34 +122,48 @@
   color: inherit;
 }
 
+.context .container.has-dropdown {
+  border: 1px solid var(--highlight-border);
+  width: 100%;
+  border-radius: var(--border-radius-radius-md);
+  display: flex;
+  justify-content: space-between;
+  padding: 4px var(--nav-item-side-padding);
+  position: relative;
+}
+
 .context .container.has-dropdown .components,
 .context .container.has-dropdown .versions {
   display: none;
   position: absolute;
-  margin-top: 2px;
-  gap: 10px;
+  left: 0;
+  right: 0;
+  margin-top: 35px;
+  align-items: center;
   z-index: 2;
   background-color: var(--body-background);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  padding-left: 0;
+  white-space: nowrap;
+  border-radius: var(--border-radius-radius-md);
+  padding: 8px 0;
+  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  color: var(--body-font-color);
+}
+
+.context:hover {
+  cursor: pointer;
 }
 
 .context .container.has-dropdown .components a,
 .context .container.has-dropdown .versions a {
-  padding: 5px;
+  padding: 4px var(--nav-item-side-padding);
 }
 
 .context .container.has-dropdown.is-active .components,
 .context .container.has-dropdown.is-active .versions {
   display: flex;
   flex-direction: column;
-}
-
-.nav .panels {
-  display: flex;
-  flex-direction: column;
-  height: inherit;
 }
 
 .article.lab .nav .panels {
@@ -176,15 +174,10 @@ html.is-clipped--nav {
   overflow-y: hidden;
 }
 
-.nav-panel-menu {
-  height: var(--nav-panel-menu-height);
-}
-
 .nav-menu {
-  min-height: 100%;
-  padding: 0.5rem 0.75rem;
-  line-height: var(--nav-line-height);
   position: relative;
+  line-height: var(--nav-line-height);
+  padding: calc(var(--toolbar-top-padding) - 8px) var(--nav-side-padding) 32px;
 }
 
 .nav-menu h3.title {
@@ -197,12 +190,19 @@ html.is-clipped--nav {
 
 .nav-list {
   list-style: none;
-  margin: 0 0 0 0.5rem;
+  margin: 0;
   padding: 0;
   width: 100%;
+  color: var(--color-aliases-static-palette-text-secondary);
+  margin-left: 8px;
 }
 
-.nav-item {
+/* Target the very first nav-menu and remove the margin-left */
+.nav-menu > .nav-list {
+  margin-left: 0;
+}
+
+li.nav-item {
   display: flex;
   flex-wrap: wrap;
   flex: 1;
@@ -215,37 +215,26 @@ html.is-clipped--nav {
   min-height: 30px;
   justify-content: space-between;
   align-items: center;
-  margin-top: 2px;
-  border-radius: 3px;
-}
-
-ul.nav-list > li:first-child[data-depth="2"],
-ul.nav-list > li:first-child[data-depth="3"],
-ul.nav-list > li:first-child[data-depth="4"],
-ul.nav-list > li:first-child[data-depth="5"],
-ul.nav-list > li:first-child[data-depth="6"] {
-  margin-top: 0.5em;
+  padding: 8px var(--nav-item-side-padding);
+  border-radius: var(--border-radius-radius-md);
+  margin-bottom: 4px;
 }
 
 .nav-list > li > .item:hover,
 .nav-list > li > .is-current-page {
-  background-color: #0000000d;
-  color: var(--link-font-color);
+  background-color: var(--link-highlight-background-color);
+  color: var(--link-highlight-color);
 }
 
 .nav-list .is-current-path > div.item:first-child {
-  color: var(--link-font-color);
+  color: var(--link-highlight-color);
 }
 
 .nav-list a {
   text-decoration: none !important;
 }
 
-.nav-list .nav-link,
-.nav-list .nav-text {
-  padding: 5px;
-  font-weight: 300;
-}
+/* Note - Dan removed .nav-item setting height - this rule was causing all sorts of issues with nav height due to all nav items being nested inside a single <li> with a height of 36px, this meant there was a lot of extra css needed to override */
 
 .nav-item[data-depth="0"] > .nav-list:first-child {
   display: flex;
@@ -260,35 +249,45 @@ ul.nav-list > li:first-child[data-depth="6"] {
   display: none;
 }
 
-.dropdown a.nav-link,
-.dropdown a.nav-text {
-  max-width: 80%;
+a.nav-link,
+a.nav-text {
+  min-width: 80%;
+}
+
+.item:not(.dropdown) a.nav-link,
+.item:not(.dropdown) a.nav-text {
+  min-width: 100%;
 }
 
 .nav-item-toggle {
-  background: transparent url(../img/caret.svg) no-repeat center / 100%;
   border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   filter: var(--nav-toggle-filter);
-  transform: rotate(90deg);
   outline: none;
   line-height: inherit;
   padding: 0;
-  height: calc(var(--nav-line-height) * 1.5em);
-  width: calc(var(--nav-line-height) * 1.5em);
+  width: 2em;
+  height: 100%;
+  margin-right: -8px;
 }
 
-.nav-item-toggle:hover {
-  background-color: #0000000d;
+.nav-item-toggle > img {
+  filter: var(--nav-toggle-filter);
+  width: 0.6em;
 }
 
 .nav-item.is-active > .item > .nav-item-toggle {
-  transform: rotate(180deg);
+  transform: rotate(90deg);
 }
 
 .nav-panel-explore {
-  background: var(--nav-background);
-  display: flex;
-  flex-direction: column;
+  position: sticky;
+  top: 0;
+  z-index: 9;
+  background-color: var(--nav-background);
+  padding: 24px var(--nav-side-padding) 0;
 }
 
 .nav-panel-explore:not(:first-child) {
@@ -297,16 +296,13 @@ ul.nav-list > li:first-child[data-depth="6"] {
 }
 
 .nav-panel-explore .context {
-  font-size: calc(18 / var(--rem-base) * 1rem);
-  flex-shrink: 0;
-  color: var(--nav-muted-color);
-  padding: 0 0.5rem;
+  font-size: var(--secondary-font-size);
+  color: var(--link-highlight-color);
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   line-height: 1;
-  height: var(--drawer-height);
-  border-bottom: 1px solid var(--toolbar-border-color);
 }
 
 .nav-panel-explore:not(:first-child) .context .container.has-dropdown:has(.components,.versions) {
@@ -317,6 +313,7 @@ ul.nav-list > li:first-child[data-depth="6"] {
 .nav-panel-explore .context .title {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .nav-panel-explore .context .version.is-latest,
@@ -326,8 +323,7 @@ ul.nav-list > li:first-child[data-depth="6"] {
 .nav-panel-explore .context .version a:hover,
 .nav-panel-explore .context .component a:hover {
   background-color: var(--link-highlight-background-color);
-  color: var(--link-font-color);
-  border-radius: 3px;
+  color: var(--body-font-color);
 }
 
 .nav-panel-explore .context .versions a,
@@ -345,29 +341,14 @@ ul.nav-list > li:first-child[data-depth="6"] {
   flex: 0 0 25px;
 }
 
-.nav-panel-explore .context .current-version::after {
-  content: "";
-  background: url(../img/chevron.svg) no-repeat center right / auto 100%;
-  width: 1.25em;
-  height: 0.75em;
-}
-
-.nav-panel-explore .context .container.has-dropdown:has(.components,.versions) .title::after {
-  content: "";
-  background: url(../img/chevron.svg) no-repeat center right / auto 100%;
-  width: 1.25em;
-  height: 0.75em;
-}
-
 .nav-panel-explore .component .title {
   font-family: var(--body-font-family-bold);
 }
 
 .nav-link.cloud-beta::after {
-  background-image: url(../img/beta.svg);
   height: 20px;
   display: block;
   background-repeat: no-repeat;
   background-size: contain;
-  content: '';
+  content: '(beta)';
 }

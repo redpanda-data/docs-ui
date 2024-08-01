@@ -3,6 +3,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     const backToTopButton = document.querySelector('#back-to-top')
+    if (!backToTopButton) return
     backToTopButton.addEventListener('click', function (event) {
       event.preventDefault()
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -80,17 +81,7 @@
     // Handle ToC link clicks within the dropdown
     tocMenuDropdown.querySelectorAll('.toc-menu a').forEach(function (link) {
       link.addEventListener('click', function (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        var targetId = this.getAttribute('href').substring(1)
-        var targetElement = document.getElementById(targetId)
-        if (targetElement) {
-          var targetPosition = targetElement.getBoundingClientRect().top
-          window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth',
-          })
-        }
+        // Note - Dan removed preventDefault as it was hijacking default browser behavior, and not appending the url with the correct # needed to navigate correctly
         // Hide the dropdown menu after click
         tocMenu.classList.toggle('hidden')
       })

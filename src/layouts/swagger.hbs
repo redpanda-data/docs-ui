@@ -19,28 +19,23 @@
         id="api" 
         spec-url="{{resolve-resource page.attributes.api-spec-url}}" 
         {{!-- spec-url="https://docs.redpanda.com/api/_attachments/cloud-api.yaml" --}}
-        primary-color="#e2401b"
+        primary-color="#444ce7"
         show-header=false 
         {{#if page.attributes.try-it}} allow-try=true {{else}} allow-try=false {{/if}} 
         show-curl-before-try=true 
         show-method-in-nav-bar="false" 
         show-info="true" 
         render-style="read" 
-        regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" 
+        regular-font="Inter, 'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" 
         fill-request-fields-with-example="true" 
-        nav-bg-color="#fff"  
-        bg-color="#fff" 
+        nav-bg-color="var(--body-background)"  
+        bg-color="var(--body-background)" 
         nav-item-spacing="relaxed" 
         font-size="largest"
         css-file="{{{uiRootPath}}}/css/site.css"  
         css-classes="swagger">
 
-        <div class="toolbar" role="navigation" style="top: 0;">
-          {{#with site.homeUrl}}
-          {{#if (ne @root.page.component.name 'redpanda-labs')}}
-          <a href="{{{relativize this}}}" aria-label="Go to home page" class="home-link{{#if @root.page.home}} is-current{{/if}}"></a>
-          {{/if}}
-          {{/with}}
+        <div class="api-toolbar" role="navigation" style="top: 0;">
           {{> breadcrumbs}}
           {{#if (is-cloud-url page.url)}}
           {{> cloud-api-feedback}}
@@ -49,8 +44,11 @@
         {{#each (get-api-slots page.url)}}
           {{{this}}}
         {{/each}}
-
         {{> tracking-pixel}}
+        <div slot="footer">
+          {{> footer}}
+          {{> announcement-email}}
+        </div>
       </rapi-doc>
     </div>
 

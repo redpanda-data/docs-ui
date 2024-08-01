@@ -1,25 +1,24 @@
 .announcement-bar {
   flex-basis: 100%;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
-  background: #333;
+  flex-wrap: wrap;
+  background: #101828;
   color: white;
-  font-size: 1rem;
-  position: relative;
+  z-index: var(--z-index-navbar);
+  font-size: var(--secondary-font-size);
+  position: fixed;
+  top: 0;
+  width: 100%;
   text-align: center;
-}
-
-@media screen and (min-width: 1024px) {
-  .announcement-bar {
-    height: 30px;
-  }
+  height: var(--announcement-bar-height);
 }
 
 .announcement-bar .announcement-content a {
-  color: var(--link-font-color);
-  text-decoration: underline;
   padding-left: 5px;
+  color: white;
+  text-decoration: underline;
 }
 
 .announcement-bar button.close {
@@ -29,11 +28,21 @@
   margin-top: 0;
   padding: 0;
   position: absolute;
-  right: 10px;
+  right: 20px;
 }
 
 @media screen and (max-width: 550px) {
   .announcement-bar button.close {
     margin-top: 1.2rem;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .announcement-bar {
+    height: var(--announcement-bar-height--desktop);
+  }
+
+  .announcement-bar button.close {
+    right: 40px;
   }
 }

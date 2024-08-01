@@ -10,17 +10,14 @@
     return hash && (~hash.indexOf('%') ? decodeURIComponent(hash) : hash).slice(1)
   }
 
-  function computePosition (el, sum) {
-    return article.contains(el) ? computePosition(el.offsetParent, el.offsetTop + sum) : sum
-  }
-
   function jumpToAnchor (e) {
-    if (e) {
-      if (e.altKey || e.ctrlKey) return
-      window.location.hash = '#' + this.id
-      e.preventDefault()
-    }
-    window.scrollTo(0, computePosition(this, 0) - toolbar.getBoundingClientRect().bottom)
+    console.log('Do not hijack scroll behavior')
+    // if (e) {
+    //   if (e.altKey || e.ctrlKey) return
+    //   window.location.hash = '#' + this.id
+    //   e.preventDefault()
+    // }
+    // window.scrollTo(0, computePosition(this, 0))
   }
 
   window.addEventListener('load', function jumpOnLoad (e) {
