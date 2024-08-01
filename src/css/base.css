@@ -126,7 +126,7 @@ object[type="image/svg+xml"]:not([width]) {
     }
 
     body * {
-      scrollbar-width: thin;
+      scrollbar-width: none;
       scrollbar-color: var(--scrollbar-thumb-color) transparent;
     }
   }
