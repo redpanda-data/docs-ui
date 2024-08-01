@@ -296,6 +296,10 @@ html {
   margin-top: 1.3rem;
 }
 
+.doc li .paragraph > p {
+  margin-top: 0;
+}
+
 .doc .ulist.two-column {
   column-count: 2;
 }
