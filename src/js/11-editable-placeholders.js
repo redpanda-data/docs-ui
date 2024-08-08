@@ -1,15 +1,50 @@
 /* eslint-disable */
 
+function addPencilSpans() {
+  const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
+  editableSpans.forEach(span => {
+    if (span.nextElementSibling?.classList.contains('cursor') || (span.parentElement.nodeName !== 'CODE' && span.parentElement.querySelector('cursor'))) return
+    const pencilSpan = document.createElement('span');
+    pencilSpan.className = 'fa fa-pencil cursor';
+    pencilSpan.setAttribute('aria-hidden', 'true');
+    span.insertAdjacentElement('afterend', pencilSpan);
+  });
+}
+
+function removeNestedSpans(editableElement) {
+  if (!editableElement || !editableElement.hasAttribute('contenteditable')) {
+    console.error('The provided element is not a valid contenteditable element.');
+    return;
+  }
+  const cursors = editableElement.closest('code').querySelectorAll('.cursor')
+  cursors.forEach(cursor => {
+    cursor.remove()
+  })
+  // Extract the text content from the nested spans
+  let textContent = '';
+  editableElement.childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      textContent += node.textContent;
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN') {
+      textContent += node.textContent;
+    }
+  });
+
+  // Remove all child nodes
+  while (editableElement.firstChild) {
+    editableElement.removeChild(editableElement.firstChild);
+  }
+
+  // Set the text content to the outer span
+  editableElement.textContent = textContent.trim();
+}
+
 (function () {
   'use strict'
-
-  window.addEventListener('load', function () {
+  window.addEventListener('DOMContentLoaded', function () {
     try {
       makePlaceholdersEditable()
-      // Rehighlight code block lines.
-      if (Prism?.highlightAll) {
-        Prism.highlightAll();
-      }
+      Prism && Prism.highlightAll()
       // Remove any Prism markup injected inside editable spans.
       const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
       editableSpans.forEach(span => removeNestedSpans(span));
@@ -25,16 +60,6 @@
     unnestPlaceholders()
     addClasses(element)
     addEvents(element)
-  }
-
-  function addPencilSpans() {
-    const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
-    editableSpans.forEach(span => {
-      const pencilSpan = document.createElement('span');
-      pencilSpan.className = 'fa fa-pencil cursor';
-      pencilSpan.setAttribute('aria-hidden', 'true');
-      span.insertAdjacentElement('afterend', pencilSpan);
-    });
   }
 
   function createEditablePlaceholders(parentElement) {
@@ -99,7 +124,7 @@
     }
     // This pattern matches parentheses that are wrapped in `span` tags.
     let pattern = /<span class="token punctuation">(\()<\/span>|<span class="token punctuation">(\))<\/span>/g;
-  
+
     let codeContent = element.innerHTML;
     // Replace the matched patterns by removing the span tags and leaving the parentheses.
     let processedContent = codeContent.replace(pattern, function(match, openParen, closeParen) {
@@ -209,29 +234,5 @@
       const savedText = sessionStorage.getItem(dataType);
       placeholder.textContent = savedText ? savedText : `<${dataType}>`;
     })
-  }
-  function removeNestedSpans(editableElement) {
-    if (!editableElement || !editableElement.hasAttribute('contenteditable')) {
-      console.error('The provided element is not a valid contenteditable element.');
-      return;
-    }
-
-    // Extract the text content from the nested spans
-    let textContent = '';
-    editableElement.childNodes.forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        textContent += node.textContent;
-      } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN') {
-        textContent += node.textContent;
-      }
-    });
-
-    // Remove all child nodes
-    while (editableElement.firstChild) {
-      editableElement.removeChild(editableElement.firstChild);
-    }
-
-    // Set the text content to the outer span
-    editableElement.textContent = textContent.trim();
   }
 })()
