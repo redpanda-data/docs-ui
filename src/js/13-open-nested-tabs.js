@@ -66,25 +66,17 @@
         setTimeout(function() {
           // Defer highlighting using requestIdleCallback
           requestIdleCallback(function() {
-            console.time('Prism.highlightSpecific');
             const elementsToHighlight = document.querySelectorAll('.tabs.is-loaded pre.highlight');
             elementsToHighlight.forEach((element) => {
               Prism.plugins.lineNumbers.resize(element);
             });
             Prism.highlightAll()
-            console.timeEnd('Prism.highlightSpecific');
           });
-          console.time('Query editableSpans');
           const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
-          console.timeEnd('Query editableSpans');
-          console.time('Process editableSpans');
           editableSpans.forEach(span => {
             removeNestedSpans(span);
           });
-          console.timeEnd('Process editableSpans');
-          console.time('addPencilSpans');
           addPencilSpans();
-          console.timeEnd('addPencilSpans');
         }, 0);
       }, true)
     })
