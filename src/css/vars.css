@@ -181,6 +181,7 @@ html:not([data-theme=dark]) {
   --sticky-table-header-background: #f6f6f6;
   --tooltip-background: var(--slate-900);
   --tooltip-font-color: white;
+  --feature-background-color: white;
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;
