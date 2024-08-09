@@ -1,6 +1,7 @@
 html[data-theme=dark] {
   /* base */
   --body-background: var(--slate-900);
+  --home-background: var(--body-background);
   --panel-background: #ffffff12;
   --panel-border-color: var(--color-white);
   --scrollbar-track-color: var(--color-white);

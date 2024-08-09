@@ -88,6 +88,7 @@ html:not([data-theme=dark]) .home .feature-box:hover {
   padding: 1rem;
   align-content: flex-start;
   transition: 100ms ease all;
+  background-color: var(--body-background-color);
 }
 
 .home .feature-image {

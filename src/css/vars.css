@@ -171,6 +171,7 @@ html:not([data-theme=dark]) {
   --body-footer-font-color: #98a2b3;
   /* base */
   --body-background: var(--color-white);
+  --home-background: rgba(245, 245, 245, 1);
   --button-font-color: white;
   --panel-background: #f9fafb;
   --panel-border-color: #e5e9f0;
