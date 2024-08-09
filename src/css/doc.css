@@ -71,7 +71,7 @@ html {
 
 @media screen and (min-width: 769px) {
   .doc h1 {
-    font-size: calc(48 / var(--rem-base) * 1rem);
+    font-size: calc(44 / var(--rem-base) * 1rem);
   }
 }
 
@@ -106,6 +106,11 @@ html {
 
 .doc h4:not(.discrete) {
   font-size: calc(19 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.doc h5:not(.discrete) {
+  font-size: calc(17.5 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
@@ -296,7 +301,8 @@ html {
   margin-top: 1.3rem;
 }
 
-.doc li .paragraph > p {
+.doc li .paragraph > p,
+.doc td .paragraph > p {
   margin-top: 0;
 }
 

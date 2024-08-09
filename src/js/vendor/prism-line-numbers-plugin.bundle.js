@@ -156,6 +156,9 @@
 			for (var i = 0; i < lineHeights.length; i++) {
 				if (lineHeights[i] === undefined) {
 					lineHeights[i] = lineNumberSizer.children[childIndex++].getBoundingClientRect().height;
+					if (!lineHeights[i]) {
+						lineHeights[i] = 24.96875 // Default in cases where it's 0 and line numbers appear squished together in the top left corner.
+					}
 				}
 			}
 		});
