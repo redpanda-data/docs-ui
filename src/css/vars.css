@@ -223,9 +223,9 @@ html:not([data-theme=dark]) {
   /* feedback */
   --feedback-modal-background: #fefefe;
   /* admonitions */
-  --important-background: #e8f5fc;
+  --important-background: rgba(68, 76, 231, 0.08);
   --important-on-color: var(--body-font-color);
-  --important-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
+  --important-icon: url(../img/info-purple.svg) no-repeat center right / auto 100%;
   --warning-background: #fff6f5;
   --warning-on-color: var(--body-font-color);
   --warning-icon: url(../img/report-red.svg) no-repeat center right / auto 100%;

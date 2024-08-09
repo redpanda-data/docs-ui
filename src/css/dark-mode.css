@@ -49,19 +49,19 @@ html[data-theme=dark] {
   /* feedback */
   --feedback-modal-background: var(--body-background);
   /* admonitions */
-  --important-background: #45ade8;
+  --important-background: rgba(68, 76, 231, 0.48);
   --important-on-color: var(--body-font-color);
   --important-icon: url(../img/info-white.svg) no-repeat center right / auto 100%;
-  --warning-background: #cd372c;
+  --warning-background: rgba(205, 55, 44, 0.5);
   --warning-on-color: var(--body-font-color);
   --warning-icon: url(../img/report-white.svg) no-repeat center right / auto 100%;
-  --note-background: #45ade8;
+  --note-background: rgba(69, 173, 232, 0.5);
   --note-on-color: var(--body-font-color);
   --note-icon: url(../img/info-white.svg) no-repeat center right / auto 100%;
-  --tip-background: #38a169;
+  --tip-background: rgba(56, 161, 105, 0.5);
   --tip-on-color: var(--body-font-color);
   --tip-icon: url(../img/check-circle-white.svg) no-repeat center right / auto 100%;
-  --caution-background: #f9a165;
+  --caution-background: rgba(249, 161, 101, 0.5);
   --caution-on-color: #181818;
   --caution-icon: url(../img/warning-black.svg) no-repeat center right / auto 100%;
   /* doc */
