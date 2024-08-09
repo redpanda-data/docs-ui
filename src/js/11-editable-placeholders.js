@@ -13,7 +13,6 @@ function addPencilSpans() {
 
 function removeNestedSpans(editableElement) {
   if (!editableElement || !editableElement.hasAttribute('contenteditable')) {
-    console.error('The provided element is not a valid contenteditable element.');
     return;
   }
   const cursors = editableElement.closest('code').querySelectorAll('.cursor')
