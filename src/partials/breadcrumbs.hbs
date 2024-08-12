@@ -3,16 +3,21 @@
     {{#with site.homeUrl}}
     <li><a href="{{{relativize this}}}" aria-label="Go to home page">Docs</a></li>
     {{/with}}
-    {{#if page.breadcrumbs}}
-    {{#each page.breadcrumbs}}
     <li>
-    {{~#if (and ./url (eq ./urlType 'internal'))~}}
-    <a href="{{{relativize ./url}}}">{{{./content}}}</a>
-    {{~else~}}
-    {{{./content}}}
-    {{~/if~}}
+      <a href="{{{relativize page.component.url}}}">{{{page.component.title}}}</a>
     </li>
-    {{/each}}
+    {{#if page.breadcrumbs}}
+      {{#each page.breadcrumbs}}
+        {{#if (ne (relativize ./url) (relativize @root.page.component.url))}}
+          <li>
+          {{~#if (and ./url (eq ./urlType 'internal'))~}}
+          <a href="{{{relativize ./url}}}">{{{./content}}}</a>
+          {{~else~}}
+          {{{./content}}}
+          {{~/if~}}
+          </li>
+        {{/if}}
+      {{/each}}
     {{/if}}
   </ul>
 </nav>
