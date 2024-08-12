@@ -225,19 +225,19 @@ html:not([data-theme=dark]) {
   /* feedback */
   --feedback-modal-background: #fefefe;
   /* admonitions */
-  --important-background: rgba(68, 76, 231, 0.08);
+  --important-background: rgba(68, 76, 231, 0.1);
   --important-on-color: var(--body-font-color);
   --important-icon: url(../img/info-purple.svg) no-repeat center right / auto 100%;
-  --warning-background: #fff6f5;
+  --warning-background: rgba(205, 55, 44, 0.1);
   --warning-on-color: var(--body-font-color);
   --warning-icon: url(../img/report-red.svg) no-repeat center right / auto 100%;
-  --note-background: #e8f5fc;
+  --note-background: rgba(69, 173, 232, 0.1);
   --note-on-color: var(--body-font-color);
   --note-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
-  --tip-background: #f4fbf6;
+  --tip-background: rgba(56, 161, 105, 0.1);
   --tip-on-color: var(--body-font-color);
   --tip-icon: url(../img/check-circle-green.svg) no-repeat center right / auto 100%;
-  --caution-background: #fef0e7;
+  --caution-background: rgba(249, 161, 101, 0.1);
   --caution-on-color: var(--body-font-color);
   --caution-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
   /* doc */

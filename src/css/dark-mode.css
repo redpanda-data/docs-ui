@@ -51,21 +51,21 @@ html[data-theme=dark] {
   /* feedback */
   --feedback-modal-background: var(--body-background);
   /* admonitions */
-  --important-background: rgba(68, 76, 231, 0.48);
+  --important-background: rgba(68, 76, 231, 0.2);
   --important-on-color: var(--body-font-color);
   --important-icon: url(../img/info-white.svg) no-repeat center right / auto 100%;
-  --warning-background: rgba(205, 55, 44, 0.5);
+  --warning-background: rgba(205, 55, 44, 0.2);
   --warning-on-color: var(--body-font-color);
   --warning-icon: url(../img/report-white.svg) no-repeat center right / auto 100%;
-  --note-background: rgba(69, 173, 232, 0.5);
+  --note-background: rgba(69, 173, 232, 0.2);
   --note-on-color: var(--body-font-color);
   --note-icon: url(../img/info-white.svg) no-repeat center right / auto 100%;
-  --tip-background: rgba(56, 161, 105, 0.5);
+  --tip-background: rgba(56, 161, 105, 0.2);
   --tip-on-color: var(--body-font-color);
   --tip-icon: url(../img/check-circle-white.svg) no-repeat center right / auto 100%;
-  --caution-background: rgba(249, 161, 101, 0.5);
-  --caution-on-color: #181818;
-  --caution-icon: url(../img/warning-black.svg) no-repeat center right / auto 100%;
+  --caution-background: rgba(249, 161, 101, 0.2);
+  --caution-on-color: var(--body-font-color);
+  --caution-icon: url(../img/warning-white.svg) no-repeat center right / auto 100%;
   /* doc */
   --doc-font-color: var(--body-font-color);
   --heading-font-color: var(--body-font-color);
