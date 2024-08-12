@@ -46,7 +46,6 @@
   display: flex;
   margin-top: 0;
   width: 100%;
-  background: #1d2939;
   align-items: center;
   justify-content: center;
   min-height: 178px;
@@ -62,7 +61,6 @@
 
 .home .home-header .ask {
   display: flex;
-  color: white;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
@@ -70,7 +68,6 @@
 }
 
 .home .home-header-container h1 {
-  color: white;
   font-size: 32px;
 }
 
@@ -91,6 +88,7 @@ html:not([data-theme=dark]) .home .feature-box:hover {
   padding: 1rem;
   align-content: flex-start;
   transition: 100ms ease all;
+  background-color: var(--feature-background-color);
 }
 
 .home .feature-image {

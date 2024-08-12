@@ -150,6 +150,11 @@ html.is-clipped--navbar {
   padding: 6px 8px;
 }
 
+.home .navbar-item,
+.home .navbar-link {
+  color: #f5f5f5;
+}
+
 .navbar-item.is-current,
 .navbar-item:hover,
 .navbar-link:hover {

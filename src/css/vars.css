@@ -171,6 +171,7 @@ html:not([data-theme=dark]) {
   --body-footer-font-color: #98a2b3;
   /* base */
   --body-background: var(--color-white);
+  --home-background: rgba(245, 245, 245, 1);
   --button-font-color: white;
   --panel-background: #f9fafb;
   --panel-border-color: #e5e9f0;
@@ -180,6 +181,7 @@ html:not([data-theme=dark]) {
   --sticky-table-header-background: #f6f6f6;
   --tooltip-background: var(--slate-900);
   --tooltip-font-color: white;
+  --feature-background-color: white;
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;
@@ -223,19 +225,19 @@ html:not([data-theme=dark]) {
   /* feedback */
   --feedback-modal-background: #fefefe;
   /* admonitions */
-  --important-background: #e8f5fc;
+  --important-background: rgba(68, 76, 231, 0.1);
   --important-on-color: var(--body-font-color);
-  --important-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
-  --warning-background: #fff6f5;
+  --important-icon: url(../img/info-purple.svg) no-repeat center right / auto 100%;
+  --warning-background: rgba(205, 55, 44, 0.1);
   --warning-on-color: var(--body-font-color);
   --warning-icon: url(../img/report-red.svg) no-repeat center right / auto 100%;
-  --note-background: #e8f5fc;
+  --note-background: rgba(69, 173, 232, 0.1);
   --note-on-color: var(--body-font-color);
   --note-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
-  --tip-background: #f4fbf6;
+  --tip-background: rgba(56, 161, 105, 0.1);
   --tip-on-color: var(--body-font-color);
   --tip-icon: url(../img/check-circle-green.svg) no-repeat center right / auto 100%;
-  --caution-background: #fef0e7;
+  --caution-background: rgba(249, 161, 101, 0.1);
   --caution-on-color: var(--body-font-color);
   --caution-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
   /* doc */
