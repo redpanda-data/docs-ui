@@ -151,7 +151,11 @@ html.is-clipped--navbar {
 }
 
 .home .navbar-item,
-.home .navbar-link {
+.home .navbar-link,
+.api .navbar-item,
+.api .navbar-link,
+.status-404 .navbar-item,
+.status-404 .navbar-link {
   color: #f5f5f5;
 }
 

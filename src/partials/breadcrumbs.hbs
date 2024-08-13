@@ -3,9 +3,11 @@
     {{#with site.homeUrl}}
     <li><a href="{{{relativize this}}}" aria-label="Go to home page">Docs</a></li>
     {{/with}}
+    {{#if (ne page.component.name 'api')}}
     <li>
       <a href="{{{relativize page.component.url}}}">{{{page.component.title}}}</a>
     </li>
+    {{/if}}
     {{#if page.breadcrumbs}}
       {{#each page.breadcrumbs}}
         {{#if (ne (relativize ./url) (relativize @root.page.component.url))}}
