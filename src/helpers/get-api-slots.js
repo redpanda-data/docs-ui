@@ -41,8 +41,8 @@ module.exports = (url, { data }) => {
 
 function wrapHtmlWithSlot (htmlContent, slotName) {
   if (slotName) {
-    // Replace all instances of '&#47;' with '/'
-    const modifiedSlotName = slotName.replace(/&#47;/g, '/')
+    // Replace all instances of '9' with '/'
+    const modifiedSlotName = slotName.replace(/9/g, '/')
     return `<div slot="${modifiedSlotName}">${htmlContent}</div>`
   }
   // Return the content without wrapping if the slot does not match
