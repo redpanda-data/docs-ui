@@ -445,61 +445,61 @@ html {
   vertical-align: middle;
 }
 
-.doc .admonitionblock {
+.admonitionblock {
   position: relative;
   margin: 1.4rem 0 0;
   box-shadow: var(--admonition-border-box-shadow);
   padding: var(--admonition-padding);
 }
 
-.doc .admonitionblock.note {
+.admonitionblock.note {
   background-color: var(--note-background);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.warning {
+.admonitionblock.warning {
   background-color: var(--warning-background);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.tip {
+.admonitionblock.tip {
   background-color: var(--tip-background);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.caution {
+.admonitionblock.caution {
   background-color: var(--caution-background);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.important {
+.admonitionblock.important {
   background-color: var(--important-background);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock td.content > :not(.title):first-child,
-.doc .admonitionblock td.content > .title + * {
+.admonitionblock td.content > :not(.title):first-child,
+.admonitionblock td.content > .title + * {
   margin-top: 0;
 }
 
-.doc .admonitionblock pre {
+.admonitionblock pre {
   font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
 /* Note - dan - for some bizarre reason tables are used to structure notices, we have to turn all these table elements into block elements to get them to style correctly */
 /* I had to change this back to a fixed table layout to avoid the code blocks from escaping the admonition */
-.doc .admonitionblock > table {
+.admonitionblock > table {
   table-layout: fixed;
   position: relative;
   width: 100%;
 }
 
-.doc .admonitionblock td.content {
+.admonitionblock td.content {
   display: block;
   width: 100%;
   word-wrap: anywhere;
@@ -507,7 +507,7 @@ html {
   padding-left: 1.8rem;
 }
 
-.doc .admonitionblock .icon {
+.admonitionblock .icon {
   display: block;
   font-size: calc(18 / var(--rem-base) * 1rem);
   height: 1.25rem;
@@ -515,15 +515,15 @@ html {
   font-weight: var(--admonition-label-font-weight);
 }
 
-.doc .admonitionblock.caution .icon {
+.admonitionblock.caution .icon {
   color: var(--caution-on-color);
 }
 
-.doc .admonitionblock.important .icon {
+.admonitionblock.important .icon {
   color: var(--important-on-color);
 }
 
-.doc .admonitionblock.note .icon {
+.admonitionblock.note .icon {
   color: var(--note-on-color);
 }
 
@@ -567,14 +567,14 @@ html {
   height: 1.4em;
 }
 
-.doc .admonitionblock .icon i {
+.admonitionblock .icon i {
   display: inline-flex;
   align-items: center;
   height: 100%;
   font: unset;
 }
 
-.doc .admonitionblock .icon i::after {
+.admonitionblock .icon i::after {
   content: attr(title);
 }
 
@@ -797,11 +797,11 @@ table code {
 
 .doc .ulist .listingblock,
 .doc .olist .listingblock,
-.doc .admonitionblock .listingblock {
+.admonitionblock .listingblock {
   padding: 0;
 }
 
-.doc .admonitionblock .title {
+.admonitionblock .title {
   font-weight: bold;
 }
 
@@ -831,7 +831,7 @@ table code {
 }
 
 /* immediate sibling of an element with the class title, where this title class element is a direct child of a td element with the class content */
-.doc .admonitionblock td.content > .title + * {
+.admonitionblock td.content > .title + * {
   margin-top: 20px;
 }
 
