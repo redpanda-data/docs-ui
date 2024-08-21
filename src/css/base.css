@@ -8,15 +8,10 @@ html {
   box-sizing: border-box;
   font-size: var(--body-font-size);
   height: 100%;
-  scroll-behavior: smooth;
   max-width: 100%;
   overflow-x: hidden;
   padding: 0;
   margin: 0;
-}
-
-html.no-smooth-scroll {
-  scroll-behavior: unset;
 }
 
 @media screen and (min-width: 1024px) {
