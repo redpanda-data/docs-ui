@@ -1,0 +1,178 @@
+.component-home-v2 .features .container {
+  width: 100%;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.component-home-v2 .doc h2,
+.component-home-v2 .doc h3 {
+  margin: 0;
+}
+
+.component-home-v2 .grid-primary {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.component-home-v2 .grid-secondary {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.component-home-v2 .grid-tertiary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding-left: 20px;
+}
+
+.component-home-v2 .features {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.component-home-v2 h2.feature-title {
+  padding-top: 0 !important;
+  margin-top: 0;
+}
+
+.component-home-v2 a.feature-link {
+  height: inherit;
+  text-decoration: none;
+  display: flex;
+  box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.component-home-v2 .feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.component-home-v2 .grid-primary .feature-text {
+  min-height: 230px;
+}
+
+.component-home-v2 .grid-secondary .feature-text {
+  min-height: 150px;
+}
+
+.component-home-v2 .feature-box {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  align-content: flex-start;
+  transition: 100ms ease all;
+}
+
+.component-home-v2 .feature-image {
+  width: 50px;
+  height: 50px;
+}
+
+.component-home-v2 .feature-image img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.component-home-v2 .feature-text h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.component-home-v2 .home-intro {
+  display: flex;
+  justify-content: space-between;
+}
+
+.component-home-v2 .feature-text p {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--body-font-color);
+}
+
+.component-home-v2 .feature-link-text {
+  color: var(--link-highlight-color) !important;
+  margin-top: auto; /* Pushes this element to the bottom */
+}
+
+.component-home-v2 .feature-link-text.get-started:hover {
+  background-color: var(--link-highlight-color);
+  color: white !important;
+  cursor: pointer;
+}
+
+.component-home-v2 .feature-link-text.get-started {
+  padding: 0 8px;
+  border-radius: 6px;
+  width: fit-content;
+  border: 1px solid rgba(164, 188, 253, 1);
+}
+
+.component-home-v2 div.menu-container {
+  padding: 2rem;
+  background: var(--highlight-container-background);
+}
+
+.component-home-v2 div.menu-container a:hover {
+  text-decoration: none;
+}
+
+.component-home-v2 ul.menu-list {
+  padding: 0;
+  list-style-type: none;
+}
+
+.component-home-v2 li.menu-list-item {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.component-home-v2 a.menu-list-item-link {
+  color: var(--ifm-font-color-base);
+  font-weight: 400;
+}
+
+.component-home-v2 .footer-menu-header {
+  display: flex;
+}
+
+.component-home-v2 .footer-menu-header img {
+  margin-right: 1rem;
+  filter: var(--svg-dark-mode-filter);
+}
+
+.component-home-v2 .footer-menu-header img.default {
+  height: 1.3rem;
+}
+
+.component-home-v2 .footer-menu-header img.wider {
+  height: 1rem;
+}
+
+.component-home-v2 .footer-menu-header img.higher {
+  height: 1.3rem;
+}
+
+.component-home-v2 .footer-menu-header h3 {
+  display: inline-block;
+  margin: 0;
+}
+
+@media screen and (min-width: 997px) {
+  .component-home-v2 .feature-description {
+    min-height: 70px;
+  }
+}

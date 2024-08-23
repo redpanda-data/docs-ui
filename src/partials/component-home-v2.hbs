@@ -1,0 +1,73 @@
+<div id="preamble">
+  <div class="sectionbody">
+    <div class="paragraph home-intro">
+      <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{{relativize (resolvePageURL this)}}}">Learn more</a>.{{/with}}
+      </p>
+      <img style="height: 150px" src='../_images/{{page.attributes.home-image}}' alt={{{page.title}}} loading="lazy"/>
+    </div>
+  </div>
+</div>
+<section class="sect1 features">
+  {{#with page.attributes.home-primary-row-title}}
+    <h2 id="{{{this}}}">{{{this}}}<a class="anchor" href="#{{{this}}}"></a></h2>
+  {{/with}}
+  <div class='sectionbody container'>
+    <div class="grid-primary boxes">
+      {{#each page.attributes.home-primary-row}}
+      <a href="{{{relativize (resolvePageURL url)}}}" class="feature-link">
+        <div class="feature-box">
+          <div class="feature-text">
+            <h3 id="{{{title}}}" class="feature-title">{{{title}}}</h2>
+            {{#if description}}
+              <p class="feature-description">{{{description}}}</p>
+            {{/if}}
+            {{#if link-text}}
+              <p class="feature-link-text get-started">{{{link-text}}}</p>
+            {{/if}}
+          </div>
+        </div>
+      </a>
+      {{/each}}
+    </div>
+  </div>
+</section>
+<section class="sect1 features">
+  {{#with page.attributes.home-secondary-row-title}}
+    <h2 id="{{{this}}}">{{{this}}}<a class="anchor" href="#{{{this}}}"></a></h2>
+  {{/with}}
+  <div class='sectionbody container'>
+    <div class="grid-secondary boxes">
+      {{#each page.attributes.home-secondary-row}}
+      <a href="{{{relativize (resolvePageURL url)}}}" class="feature-link">
+        <div class="feature-box">
+          <div class="feature-text">
+            <h3 id="{{{title}}}" class="feature-title">{{{title}}}</h2>
+            {{#if description}}
+              <p class="feature-description">{{{description}}}</p>
+            {{/if}}
+            {{#if link-text}}
+              <p class="feature-link-text">{{{link-text}}}</p>
+            {{/if}}
+          </div>
+        </div>
+      </a>
+      {{/each}}
+    </div>
+  </div>
+</section>
+<section class="sect1 features">
+  {{#with page.attributes.home-tertiary-row-title}}
+    <h2 id="{{{this}}}">{{{this}}}<a class="anchor" href="#{{{this}}}"></a></h2>
+  {{/with}}
+  <div class='sectionbody container'>
+    <div>
+      <ul class="grid-tertiary">
+      {{#each page.attributes.home-tertiary-row}}
+      <li>
+      <a href="{{{relativize (resolvePageURL url)}}}">{{{title}}}</a>
+      </li>
+      {{/each}}
+      </ul>
+    </div>
+  </div>
+</section>
