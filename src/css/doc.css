@@ -48,6 +48,7 @@ html {
   hyphens: none;
   line-height: 1.2;
   margin: 2rem 0 0;
+  font-weight: var(--heading-font-weight);
 }
 
 .doc h1 {
@@ -961,10 +962,10 @@ table code {
 }
 
 .badge-button {
-  padding: 0 12px 0 12px;
+  padding: 0 8px 0 8px;
   border: 1px solid var(--toolbar-border-color);
   width: fit-content;
-  color: #48484a;
+  color: var(--link-highlight-color);
   border-radius: 5px;
   font-size: medium;
   display: flex;
