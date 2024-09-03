@@ -1498,6 +1498,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
   border-radius: 100%;
   display: inline-block;
   font-family: var(--body-font-family);
+  font-weight: 500;
   font-size: calc(13.5 / var(--rem-base) * 1rem);
   font-style: normal;
   line-height: 1.1;

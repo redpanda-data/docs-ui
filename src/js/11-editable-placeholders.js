@@ -1,161 +1,220 @@
 /* eslint-disable */
 
+const REGEX_EDITABLE_SPAN = /&lt;.[^&A-Z]+&gt;/g;
+const REGEX_ESCAPE = /[\\^$*+?.()|[\]{}]/g;
+const REGEX_HTML_TAG = /<[^>]*>/g;
+const REGEX_LT_GT = /&lt;|&gt;/g;
+const REGEX_PREPROCESS_PUNCTUATION = /<span class="token punctuation">(\()<\/span>|<span class="token punctuation">(\))<\/span>/g;
+const REGEX_CONUM_SPAN = /(\s\(<span class="token number">(\d+)<\/span>\)|(\s)\((\d+)\))$/gm;
+
 function addPencilSpans() {
   const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
+
   editableSpans.forEach(span => {
-    if (span.nextElementSibling?.classList.contains('cursor') || (span.parentElement.nodeName !== 'CODE' && span.parentElement.querySelector('cursor'))) return
-    const pencilSpan = document.createElement('span');
-    pencilSpan.className = 'fa fa-pencil cursor';
-    pencilSpan.setAttribute('aria-hidden', 'true');
-    span.insertAdjacentElement('afterend', pencilSpan);
+    let nextSibling = span.nextElementSibling;
+
+    while (nextSibling && !nextSibling.textContent.trim() && !nextSibling.classList.contains('cursor')) {
+      const siblingToRemove = nextSibling;
+      nextSibling = nextSibling.nextElementSibling;
+      siblingToRemove.remove();
+    }
+
+    if (!nextSibling?.classList.contains('cursor')) {
+      const pencilSpan = document.createElement('span');
+      pencilSpan.className = 'fa fa-pencil cursor';
+      pencilSpan.setAttribute('aria-hidden', 'true');
+      span.insertAdjacentElement('afterend', pencilSpan);
+    }
   });
 }
 
-function removeNestedSpans(editableElement) {
-  if (!editableElement || !editableElement.hasAttribute('contenteditable')) {
-    return;
-  }
-  const cursors = editableElement.closest('code').querySelectorAll('.cursor')
-  cursors.forEach(cursor => {
-    cursor.remove()
-  })
-  // Extract the text content from the nested spans
-  let textContent = '';
-  editableElement.childNodes.forEach(node => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      textContent += node.textContent;
-    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN') {
-      textContent += node.textContent;
+function processEditableSpans() {
+  const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
+
+  editableSpans.forEach(span => {
+    const codeParent = span.closest('code');
+
+    if (codeParent && span.parentElement !== codeParent) {
+      let currentParent = span.parentElement;
+
+      while (currentParent && currentParent !== codeParent) {
+        const grandParent = currentParent.parentElement;
+
+        if (grandParent && grandParent === codeParent) {
+          grandParent.insertBefore(span, currentParent.nextSibling);
+        } else {
+          grandParent.insertBefore(span, currentParent);
+        }
+
+        if (currentParent.textContent.trim() === '' && !currentParent.classList.contains('cursor')) {
+          currentParent.remove();
+        }
+
+        currentParent = span.parentElement;
+      }
     }
+
+    let textContent = '';
+    span.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        textContent += node.textContent;
+      } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN') {
+        textContent += node.textContent;
+      }
+    });
+
+    span.textContent = textContent.trim();
   });
 
-  // Remove all child nodes
-  while (editableElement.firstChild) {
-    editableElement.removeChild(editableElement.firstChild);
-  }
-
-  // Set the text content to the outer span
-  editableElement.textContent = textContent.trim();
+  addPencilSpans();
 }
 
 (function () {
-  'use strict'
+  'use strict';
+
+  function observeCodeBlocksForConumRestoration() {
+    const codeElems = document.querySelectorAll('code');
+
+    codeElems.forEach(code => {
+      let mutationInProgress = false;
+
+      const observer = new MutationObserver(mutations => {
+        if (mutationInProgress) return;
+        mutationInProgress = true;
+
+        mutations.forEach(mutation => {
+          mutation.removedNodes.forEach(removedNode => {
+            if (removedNode.nodeType === Node.ELEMENT_NODE && removedNode.classList.contains('conum')) {
+              if (!mutation.target.querySelector(`i.conum[data-value="${removedNode.getAttribute('data-value')}"]`)) {
+                mutation.target.appendChild(removedNode);
+              }
+            }
+          });
+          mutation.addedNodes.forEach(addedNode => {
+            if (addedNode.nodeType === Node.ELEMENT_NODE && addedNode.classList.contains('conum')) {
+              const dataValue = addedNode.getAttribute('data-value');
+              const duplicates = mutation.target.querySelectorAll(`i.conum[data-value="${dataValue}"]`);
+              if (duplicates.length > 1) {
+                duplicates.forEach((dup, index) => {
+                  if (index > 0) dup.remove();
+                });
+              }
+            }
+          });
+        });
+        mutationInProgress = false;
+      });
+      observer.observe(code, { childList: true, subtree: true });
+    });
+  }
+
   window.addEventListener('DOMContentLoaded', function () {
     try {
-      makePlaceholdersEditable()
-      Prism && Prism.highlightAll()
-      // Remove any Prism markup injected inside editable spans.
-      const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
-      editableSpans.forEach(span => removeNestedSpans(span));
-      // Add pencil icons next to editable placeholders
-      addPencilSpans();
+      observeCodeBlocksForConumRestoration();
+      makePlaceholdersEditable();
+      Prism && Prism.highlightAll();
+      processEditableSpans();
     } catch (error) {
-      console.error('An error occurred while making placeholders editable:', error)
+      console.error('An error occurred while making placeholders editable:', error);
     }
-  })
+  });
 
   function makePlaceholdersEditable(element) {
     createEditablePlaceholders(element);
-    unnestPlaceholders()
-    addClasses(element)
-    addEvents(element)
+    unnestPlaceholders();
+    addClasses(element);
+    addEvents(element);
   }
 
   function createEditablePlaceholders(parentElement) {
     const baseElement = parentElement || document;
     const codeElements = baseElement.querySelectorAll("pre > code");
-    for (let i = 0; i < codeElements.length; i++) {
-      const codeElement = codeElements[i];
+
+    codeElements.forEach(codeElement => {
       const preElement = codeElement.parentElement;
       const contentDivElement = preElement.parentElement;
       const listingBlockElement = contentDivElement.parentElement;
-      // Check if the grandparent has the class 'no-placeholders'
+
       if (listingBlockElement.classList.contains('no-placeholders')) {
-        continue;
+        return;
       }
-      // Tries to stop Prism from removing our HTML markup such as conum spans or editable spans. It doesn't always work, so we do removeNestedSpans to remove any Prism markup injected inside our editable spans.
-      // https://prismjs.com/plugins/keep-markup/
-      codeElement.classList.add('keep-markup')
-      preprocessParentheses(codeElement)
+
+      codeElement.classList.add('keep-markup');
+      preprocessParentheses(codeElement);
       addConumSpans(codeElement);
-      if(codeElement.dataset.lang !== 'xml' && codeElement.dataset.lang !== 'html' && codeElement.dataset.lang !== 'rust' && codeElement.dataset.lang !== 'coffeescript' && codeElement.dataset.lang !== 'text') {
-        addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
-      }
-    }
-  }
-  if (!RegExp.escape) {
-    RegExp.escape = function(s) {
-      return s.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
-    };
-  }
-  function unnestPlaceholders() {
-    const editables = document.querySelectorAll('[contenteditable="true"]');
-    editables.forEach(editable => {
-      if (editable.parentElement && editable.parentElement.getAttribute('contenteditable') === 'true') {
-        editable.parentElement.replaceWith(editable);
+
+      if (!['xml', 'html', 'rust', 'coffeescript', 'text'].includes(codeElement.dataset.lang)) {
+        addEditableSpan(REGEX_EDITABLE_SPAN, codeElement);
       }
     });
   }
+
+  if (!RegExp.escape) {
+    RegExp.escape = function(s) {
+      return s.replace(REGEX_ESCAPE, '\\$&');
+    };
+  }
+
+  function unnestPlaceholders() {
+    const editables = document.querySelectorAll('[contenteditable="true"]');
+    editables.forEach(editable => {
+      if (editable.parentElement?.getAttribute('contenteditable') === 'true') {
+        editable.replaceWith(editable);
+      }
+    });
+  }
+
   function addEditableSpan(regex, element) {
     if (!element || !element.textContent) {
       return;
     }
+
     const text = element.innerHTML;
     const placeholders = text.match(regex) || [];
     const processed = new Set();
     let newHTML = text;
-    const sortedPlaceholders = placeholders.sort((a, b) => b.length - a.length);
-    for (const placeholder of sortedPlaceholders) {
-      const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
-      if (processed.has(placeholder) || cleanedPlaceholder === 'none' || cleanedPlaceholder.trim() === '') {
-        continue;
-      }
-      const regexString = RegExp.escape(placeholder);
-      const globalRegex = new RegExp(regexString, 'g');
-      newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" aria-label="Edit ${cleanedPlaceholder}" title="Edit ${cleanedPlaceholder}" role="textbox" aria-multiline="false">&lt;${cleanedPlaceholder}&gt;</span>`);
-      processed.add(placeholder);
-    }
+
+    placeholders
+      .sort((a, b) => b.length - a.length)
+      .forEach(placeholder => {
+        const cleanedPlaceholder = placeholder.replace(REGEX_HTML_TAG, '').replace(REGEX_LT_GT, '');
+        if (processed.has(placeholder) || cleanedPlaceholder.trim() === 'none') {
+          return;
+        }
+        const regexString = RegExp.escape(placeholder);
+        const globalRegex = new RegExp(regexString, 'g');
+        newHTML = newHTML.replace(globalRegex, `<span contenteditable="true" data-type="${cleanedPlaceholder}" aria-label="Edit ${cleanedPlaceholder}" title="Edit ${cleanedPlaceholder}" role="textbox" aria-multiline="false">&lt;${cleanedPlaceholder}&gt;</span>`);
+        processed.add(placeholder);
+      });
+
     element.innerHTML = newHTML;
   }
+
   function preprocessParentheses(element) {
     if (!element || !element.textContent) {
-        return;
+      return;
     }
-    // This pattern matches parentheses that are wrapped in `span` tags.
-    let pattern = /<span class="token punctuation">(\()<\/span>|<span class="token punctuation">(\))<\/span>/g;
 
-    let codeContent = element.innerHTML;
-    // Replace the matched patterns by removing the span tags and leaving the parentheses.
-    let processedContent = codeContent.replace(pattern, function(match, openParen, closeParen) {
-      if (openParen) {
-        return openParen;
-      }
-      if (closeParen) {
-        return closeParen;
-      }
-      return match;
+    element.innerHTML = element.innerHTML.replace(REGEX_PREPROCESS_PUNCTUATION, (match, openParen, closeParen) => {
+      return openParen || closeParen || match;
     });
-    element.innerHTML = processedContent;
   }
+
   function addConumSpans(element) {
-      if (!element || !element.textContent) {
-          return;
-      }
-      let codeContent = element.innerHTML;
-      let pattern = /(\s\(<span class="token number">(\d+)<\/span>\)|\((\d+)\))\s*$/gm;
-      let replaced = codeContent.replace(pattern, function(match, p1, p2, p3) {
-          // Determine which group captured the digit, and use it for the data-value.
-          let digit = p2 || p3;
-          return `<i class="conum" data-value="${digit}"></i>`;
-      });
-      element.innerHTML = replaced;
+    if (!element || !element.textContent) {
+      return;
+    }
+
+    element.innerHTML = element.innerHTML.replace(REGEX_CONUM_SPAN, (match, p1, p2, p3, p4) => {
+      return p3 ? `${p3}<i class="conum" data-value="${p4}"></i>` : `<i class="conum" data-value="${p2}"></i>`;
+    });
   }
 
   function addClasses(parentElement) {
     const baseElement = parentElement || document;
     const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"]');
 
-    editablePlaceholders.forEach((placeholder) => {
+    editablePlaceholders.forEach(placeholder => {
       placeholder.classList.add('editable');
     });
   }
@@ -163,75 +222,84 @@ function removeNestedSpans(editableElement) {
   function addEvents(parentElement) {
     const baseElement = parentElement || document;
     const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"]');
-    editablePlaceholders.forEach((placeholder) => {
-      placeholder.addEventListener('input', function(event) {
-        const dataType = event.target.dataset.type;
-        const newText = event.target.textContent;
 
-        document.querySelectorAll(`[data-type="${dataType}"][contenteditable="true"]`).forEach(span => {
-          // Check if the span is within a hidden tab
-          let hasHiddenAncestor = false
-          let ancestor = span.parentElement
-          while (ancestor) {
-              if (ancestor.classList.contains('tabpanel') && ancestor.classList.contains('is-hidden')) {
-                  hasHiddenAncestor = true
-                  break
-              }
-              ancestor = ancestor.parentElement
-          }
-          // Update the text if the span isn't within a hidden tab
-          if (!hasHiddenAncestor && span !== event.target) {
-              span.textContent = newText
-          }
-        });
-      });
-      // Handle the Enter key
-      placeholder.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-          // Prevent the default Enter key behavior (newline)
-          event.preventDefault()
-          // Exit the editable mode and move the focus out
-          event.target.blur()
-        }
-      });
-      placeholder.addEventListener('blur', function() {
-        const cursor = this.nextElementSibling
-        if (cursor && cursor.classList.contains('cursor')) {
-          cursor.style.display = 'inline'
-        }
-        const currentText = this.textContent.trim()
-        const dataType = this.getAttribute('data-type')
-        // Reset to default if empty and propagate the reset
-        if (!currentText) {
-          const defaultText = `<${dataType}>`
-          this.textContent = defaultText
-          // Update all placeholders of the same data-type with the default text
-          document.querySelectorAll(`[data-type="${dataType}"][contenteditable="true"]`).forEach(span => {
-            span.textContent = defaultText
-          })
-        } else {
-          sessionStorage.setItem(dataType, currentText)
-        }
-      })
-      placeholder.addEventListener('focus', function() {
-      const cursor = this.nextElementSibling;
-        if (cursor && cursor.classList.contains('cursor')) {
-          cursor.style.display = 'none';
-        }
-        // Select all text inside the placeholder when it receives focus
-        const range = document.createRange();
-        const selection = window.getSelection();
-        range.selectNodeContents(this);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      });
-      const dataType = placeholder.getAttribute('data-type')
+    editablePlaceholders.forEach(placeholder => {
+      placeholder.addEventListener('input', handleInputEvent);
+      placeholder.addEventListener('keydown', handleEnterKey);
+      placeholder.addEventListener('blur', handleBlurEvent);
+      placeholder.addEventListener('focus', handleFocusEvent);
+
+      const dataType = placeholder.getAttribute('data-type');
       if (!dataType) {
-        console.error('Data type attribute is missing on the placeholder.')
-        return
+        console.error('Data type attribute is missing on the placeholder.');
+        return;
       }
+
       const savedText = sessionStorage.getItem(dataType);
       placeholder.textContent = savedText ? savedText : `<${dataType}>`;
-    })
+    });
   }
-})()
+
+  function handleInputEvent(event) {
+    const dataType = event.target.dataset.type;
+    const newText = event.target.textContent;
+
+    document.querySelectorAll(`[data-type="${dataType}"][contenteditable="true"]`).forEach(span => {
+      if (!isWithinHiddenTab(span) && span !== event.target) {
+        span.textContent = newText;
+      }
+    });
+  }
+
+  function handleEnterKey(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.target.blur();
+    }
+  }
+
+  function handleBlurEvent() {
+    const cursor = this.nextElementSibling;
+    if (cursor?.classList.contains('cursor')) {
+      cursor.style.display = 'inline';
+    }
+
+    const currentText = this.textContent.trim();
+    const dataType = this.getAttribute('data-type');
+
+    if (!currentText) {
+      const defaultText = `<${dataType}>`;
+      this.textContent = defaultText;
+
+      document.querySelectorAll(`[data-type="${dataType}"][contenteditable="true"]`).forEach(span => {
+        span.textContent = defaultText;
+      });
+    } else {
+      sessionStorage.setItem(dataType, currentText);
+    }
+  }
+
+  function handleFocusEvent() {
+    const cursor = this.nextElementSibling;
+    if (cursor?.classList.contains('cursor')) {
+      cursor.style.display = 'none';
+    }
+
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(this);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  function isWithinHiddenTab(element) {
+    let ancestor = element.parentElement;
+    while (ancestor) {
+      if (ancestor.classList.contains('tabpanel') && ancestor.classList.contains('is-hidden')) {
+        return true;
+      }
+      ancestor = ancestor.parentElement;
+    }
+    return false;
+  }
+})();
