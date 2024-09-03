@@ -1,10 +1,16 @@
 /* eslint-disable */
 
+const REGEX_EDITABLE_SPAN = /&lt;.[^&A-Z]+&gt;/g;
+const REGEX_ESCAPE = /[\\^$*+?.()|[\]{}]/g;
+const REGEX_HTML_TAG = /<[^>]*>/g;
+const REGEX_LT_GT = /&lt;|&gt;/g;
+const REGEX_PREPROCESS_PUNCTUATION = /<span class="token punctuation">(\()<\/span>|<span class="token punctuation">(\))<\/span>/g;
+const REGEX_CONUM_SPAN = /(\s\(<span class="token number">(\d+)<\/span>\)|(\s)\((\d+)\))$/gm;
+
 function addPencilSpans() {
   const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
 
   editableSpans.forEach(span => {
-    // Check if there's already a cursor after the current span
     let nextSibling = span.nextElementSibling;
 
     while (nextSibling && !nextSibling.textContent.trim() && !nextSibling.classList.contains('cursor')) {
@@ -13,7 +19,6 @@ function addPencilSpans() {
       siblingToRemove.remove();
     }
 
-    // Add a pencil cursor if one doesn't exist
     if (!nextSibling?.classList.contains('cursor')) {
       const pencilSpan = document.createElement('span');
       pencilSpan.className = 'fa fa-pencil cursor';
@@ -30,30 +35,25 @@ function processEditableSpans() {
     const codeParent = span.closest('code');
 
     if (codeParent && span.parentElement !== codeParent) {
-      // Move the editable span to be a direct child of the code element
       let currentParent = span.parentElement;
 
       while (currentParent && currentParent !== codeParent) {
         const grandParent = currentParent.parentElement;
 
-        // Insert the span directly into the codeParent
         if (grandParent && grandParent === codeParent) {
           grandParent.insertBefore(span, currentParent.nextSibling);
         } else {
           grandParent.insertBefore(span, currentParent);
         }
 
-        // Remove the previous parent if it's empty and not needed
         if (currentParent.textContent.trim() === '' && !currentParent.classList.contains('cursor')) {
           currentParent.remove();
         }
 
-        // Move up the DOM tree
         currentParent = span.parentElement;
       }
     }
 
-    // Remove any nested spans within the editable span itself
     let textContent = '';
     span.childNodes.forEach(node => {
       if (node.nodeType === Node.TEXT_NODE) {
@@ -63,11 +63,9 @@ function processEditableSpans() {
       }
     });
 
-    // Clear all child nodes and set the cleaned text content
     span.textContent = textContent.trim();
   });
 
-  // Now, add pencil spans after ensuring the spans are properly nested
   addPencilSpans();
 }
 
@@ -81,26 +79,22 @@ function processEditableSpans() {
       let mutationInProgress = false;
 
       const observer = new MutationObserver(mutations => {
-        if (mutationInProgress) return; // Prevent recursion
+        if (mutationInProgress) return;
         mutationInProgress = true;
 
         mutations.forEach(mutation => {
-          // Check for removed nodes that are conum elements
           mutation.removedNodes.forEach(removedNode => {
             if (removedNode.nodeType === Node.ELEMENT_NODE && removedNode.classList.contains('conum')) {
-              // Only reinsert if it was actually removed and not reinserted elsewhere
               if (!mutation.target.querySelector(`i.conum[data-value="${removedNode.getAttribute('data-value')}"]`)) {
                 mutation.target.appendChild(removedNode);
               }
             }
           });
-          // Optionally, check for added nodes to ensure conum elements were correctly reinserted
           mutation.addedNodes.forEach(addedNode => {
             if (addedNode.nodeType === Node.ELEMENT_NODE && addedNode.classList.contains('conum')) {
               const dataValue = addedNode.getAttribute('data-value');
               const duplicates = mutation.target.querySelectorAll(`i.conum[data-value="${dataValue}"]`);
               if (duplicates.length > 1) {
-                // Remove duplicates, keeping the first one
                 duplicates.forEach((dup, index) => {
                   if (index > 0) dup.remove();
                 });
@@ -116,11 +110,10 @@ function processEditableSpans() {
 
   window.addEventListener('DOMContentLoaded', function () {
     try {
-      observeCodeBlocksForConumRestoration()
+      observeCodeBlocksForConumRestoration();
       makePlaceholdersEditable();
       Prism && Prism.highlightAll();
-      // Remove any Prism markup injected inside editable spans.
-      processEditableSpans()
+      processEditableSpans();
     } catch (error) {
       console.error('An error occurred while making placeholders editable:', error);
     }
@@ -151,14 +144,14 @@ function processEditableSpans() {
       addConumSpans(codeElement);
 
       if (!['xml', 'html', 'rust', 'coffeescript', 'text'].includes(codeElement.dataset.lang)) {
-        addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
+        addEditableSpan(REGEX_EDITABLE_SPAN, codeElement);
       }
     });
   }
 
   if (!RegExp.escape) {
     RegExp.escape = function(s) {
-      return s.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+      return s.replace(REGEX_ESCAPE, '\\$&');
     };
   }
 
@@ -166,7 +159,7 @@ function processEditableSpans() {
     const editables = document.querySelectorAll('[contenteditable="true"]');
     editables.forEach(editable => {
       if (editable.parentElement?.getAttribute('contenteditable') === 'true') {
-        editable.replaceWith(editable); // Unnest by replacing the parent with the child
+        editable.replaceWith(editable);
       }
     });
   }
@@ -184,7 +177,7 @@ function processEditableSpans() {
     placeholders
       .sort((a, b) => b.length - a.length)
       .forEach(placeholder => {
-        const cleanedPlaceholder = placeholder.replace(/<[^>]*>/g, '').replace(/&lt;|&gt;/g, '');
+        const cleanedPlaceholder = placeholder.replace(REGEX_HTML_TAG, '').replace(REGEX_LT_GT, '');
         if (processed.has(placeholder) || cleanedPlaceholder.trim() === 'none') {
           return;
         }
@@ -202,8 +195,7 @@ function processEditableSpans() {
       return;
     }
 
-    const pattern = /<span class="token punctuation">(\()<\/span>|<span class="token punctuation">(\))<\/span>/g;
-    element.innerHTML = element.innerHTML.replace(pattern, (match, openParen, closeParen) => {
+    element.innerHTML = element.innerHTML.replace(REGEX_PREPROCESS_PUNCTUATION, (match, openParen, closeParen) => {
       return openParen || closeParen || match;
     });
   }
@@ -213,8 +205,7 @@ function processEditableSpans() {
       return;
     }
 
-    const pattern = /(\s\(<span class="token number">(\d+)<\/span>\)|(\s)\((\d+)\))$/gm;
-    element.innerHTML = element.innerHTML.replace(pattern, (match, p1, p2, p3, p4) => {
+    element.innerHTML = element.innerHTML.replace(REGEX_CONUM_SPAN, (match, p1, p2, p3, p4) => {
       return p3 ? `${p3}<i class="conum" data-value="${p4}"></i>` : `<i class="conum" data-value="${p2}"></i>`;
     });
   }
@@ -294,7 +285,6 @@ function processEditableSpans() {
       cursor.style.display = 'none';
     }
 
-    // Select all text inside the placeholder when it receives focus
     const range = document.createRange();
     const selection = window.getSelection();
     range.selectNodeContents(this);
