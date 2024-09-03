@@ -14,7 +14,7 @@ span.editable {
   z-index: 1;
 }
 
-span.editable > * {
+span.editable span.token {
   position: relative;
   z-index: 1;
   color: var(--editable-code-font-color) !important;

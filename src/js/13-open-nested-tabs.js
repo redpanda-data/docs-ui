@@ -71,12 +71,8 @@
               Prism.plugins.lineNumbers.resize(element);
             });
             Prism.highlightAll()
+            addPencilSpans()
           });
-          const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
-          editableSpans.forEach(span => {
-            removeNestedSpans(span);
-          });
-          addPencilSpans();
         }, 0);
       }, true)
     })

@@ -1,5 +1,12 @@
 /* eslint-disable */
 
+const REGEX_EDITABLE_SPAN = /&lt;.[^&A-Z]+&gt;/g;
+const REGEX_ESCAPE = /[\\^$*+?.()|[\]{}]/g;
+const REGEX_HTML_TAG = /<[^>]*>/g;
+const REGEX_LT_GT = /&lt;|&gt;/g;
+const REGEX_PREPROCESS_PUNCTUATION = /<span class="token punctuation">(\()<\/span>|<span class="token punctuation">(\))<\/span>/g;
+const REGEX_CONUM_SPAN = /(\s\(<span class="token number">(\d+)<\/span>\)|(\s)\((\d+)\))$/gm;
+
 function addPencilSpans() {
   const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
 
