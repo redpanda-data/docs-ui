@@ -73,12 +73,8 @@
         url.hash = id;
         url.searchParams.set('tab', id);
         window.history.pushState(null, null, url);
-        setTimeout(function() {
-          requestIdleCallback(function() {
-            debouncedHighlightAll();
-            debouncedAddPencilSpans();
-          });
-        }, 0);
+        debouncedHighlightAll();
+        debouncedAddPencilSpans();
       }, true);
     });
   });
