@@ -8,74 +8,59 @@ const REGEX_PREPROCESS_PUNCTUATION = /<span class="token punctuation">(\()<\/spa
 const REGEX_CONUM_SPAN = /(\s\(<span class="token number">(\d+)<\/span>\)|(\s)\((\d+)\))$/gm;
 
 function addPencilSpans() {
-  const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
+  // Get all code blocks that contain editable spans
+  const codeBlocks = document.querySelectorAll('pre code');
 
-  editableSpans.forEach(span => {
-    // Check if there's already a cursor after the current span
-    let nextSibling = span.nextElementSibling;
+  codeBlocks.forEach(codeBlock => {
+    const editableSpans = codeBlock.querySelectorAll('[contenteditable="true"].editable');
 
-    while (nextSibling && !nextSibling.textContent.trim() && !nextSibling.classList.contains('cursor')) {
-      const siblingToRemove = nextSibling;
-      nextSibling = nextSibling.nextElementSibling;
-      siblingToRemove.remove();
-    }
+    if (editableSpans.length === 0) return; // Skip if no editable spans found
 
-    // Add a pencil cursor if one doesn't exist
-    if (!nextSibling?.classList.contains('cursor')) {
+    // Create a DocumentFragment to batch DOM updates
+    const fragment = document.createDocumentFragment();
+
+    editableSpans.forEach(span => {
+      let parent = span.parentElement;
+
+      // Unnest if the contenteditable span is nested within other spans
+      while (parent && parent.tagName.toLowerCase() === 'span' && !parent.hasAttribute('contenteditable')) {
+        const grandParent = parent.parentElement;
+        grandParent.insertBefore(span, parent);
+
+        // If the parent becomes empty after unnesting, remove the parent element
+        if (parent.innerHTML.trim() === '' || parent.querySelector('.cursor')) {
+          parent.remove();
+        }
+
+        parent = grandParent; // Move up the tree and repeat the check
+      }
+
+      // Remove empty siblings that aren't cursors
+      let nextSibling = span.nextElementSibling;
+      while (nextSibling && !nextSibling.classList.contains('cursor')) {
+        if (nextSibling.innerHTML.trim() === '') {
+          const siblingToRemove = nextSibling;
+          nextSibling = nextSibling.nextElementSibling;
+          siblingToRemove.remove();
+        } else {
+          break;
+        }
+      }
+
+      // Check if the next sibling is already a cursor
+      if (nextSibling?.classList.contains('cursor')) return;
+
+      // Create and add the pencil cursor using the fragment
       const pencilSpan = document.createElement('span');
       pencilSpan.className = 'fa fa-pencil cursor';
       pencilSpan.setAttribute('aria-hidden', 'true');
+      fragment.appendChild(pencilSpan);
       span.insertAdjacentElement('afterend', pencilSpan);
-    }
-  });
-}
-
-function processEditableSpans() {
-  const editableSpans = document.querySelectorAll('[contenteditable="true"].editable');
-
-  editableSpans.forEach(span => {
-    const codeParent = span.closest('code');
-
-    if (codeParent && span.parentElement !== codeParent) {
-      // Move the editable span to be a direct child of the code element
-      let currentParent = span.parentElement;
-
-      while (currentParent && currentParent !== codeParent) {
-        const grandParent = currentParent.parentElement;
-
-        // Insert the span directly into the codeParent
-        if (grandParent && grandParent === codeParent) {
-          grandParent.insertBefore(span, currentParent.nextSibling);
-        } else {
-          grandParent.insertBefore(span, currentParent);
-        }
-
-        // Remove the previous parent if it's empty and not needed
-        if (currentParent.textContent.trim() === '' && !currentParent.classList.contains('cursor')) {
-          currentParent.remove();
-        }
-
-        // Move up the DOM tree
-        currentParent = span.parentElement;
-      }
-    }
-
-    // Remove any nested spans within the editable span itself
-    let textContent = '';
-    span.childNodes.forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        textContent += node.textContent;
-      } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN') {
-        textContent += node.textContent;
-      }
     });
 
-    // Clear all child nodes and set the cleaned text content
-    span.textContent = textContent.trim();
+    // Append the fragment to the DOM in one go
+    codeBlock.appendChild(fragment);
   });
-
-  // Now, add pencil spans after ensuring the spans are properly nested
-  addPencilSpans();
 }
 
 (function () {
@@ -127,7 +112,7 @@ function processEditableSpans() {
       makePlaceholdersEditable();
       Prism && Prism.highlightAll();
       // Remove any Prism markup injected inside editable spans.
-      processEditableSpans()
+      addPencilSpans()
     } catch (error) {
       console.error('An error occurred while making placeholders editable:', error);
     }
@@ -172,8 +157,18 @@ function processEditableSpans() {
   function unnestPlaceholders() {
     const editables = document.querySelectorAll('[contenteditable="true"]');
     editables.forEach(editable => {
-      if (editable.parentElement?.getAttribute('contenteditable') === 'true') {
-        editable.replaceWith(editable); // Unnest by replacing the parent with the child
+      let parent = editable.parentElement;
+      // If the parent is also contenteditable, move the child out of the nested structure
+      while (parent && parent.getAttribute('contenteditable') === 'true') {
+        const grandParent = parent.parentElement;
+        // Move the current editable element before the parent to "unnest" it
+        grandParent.insertBefore(editable, parent);
+        // If the parent becomes empty, remove the parent element
+        if (parent.childNodes.length === 0) {
+          parent.remove();
+        }
+        // Continue checking up the chain if the parent is also contenteditable
+        parent = grandParent;
       }
     });
   }

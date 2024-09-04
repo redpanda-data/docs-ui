@@ -8,6 +8,10 @@ Author Name
 
 link:./cloud-api.html[API preview]
 
+```bash
+alias internal-rpk="kubectl --namespace <namespace> exec -i -t redpanda-0 -c redpanda -- rpk"
+```
+
 [.float-group]
 --
 image:multirepo-ssg.svg[Multirepo SSG,180,135,float=right,role=float-gap]
