@@ -14,6 +14,14 @@ span.editable {
   z-index: 1;
 }
 
+/* stylelint-disable font-family-no-missing-generic-family-keyword */
+span.editable::after {
+  content: "\f040";
+  font-family: 'FontAwesome';
+  margin-left: 5px;
+}
+/* stylelint-enable font-family-no-missing-generic-family-keyword */
+
 span.editable span.token {
   position: relative;
   z-index: 1;
@@ -27,11 +35,4 @@ span.editable span.token {
 span.editable:hover,
 span.editable > *:hover {
   cursor: pointer;
-}
-
-span.cursor {
-  color: var(--editable-code-font-color);
-  font-size: 1.1em;
-  position: relative;
-  z-index: 1;
 }

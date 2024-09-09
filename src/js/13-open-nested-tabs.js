@@ -15,7 +15,7 @@
  */
 
 (function () {
-  'use strict'
+  'use strict';
 
   function debounce(func, wait) {
     let timeout;
@@ -25,19 +25,17 @@
     };
   }
 
-  const debouncedHighlightAll = debounce(() => {
+  const debouncedHighlightAll = debounce(async () => {
     const elementsToHighlight = document.querySelectorAll('.tabs.is-loaded pre.highlight');
-    elementsToHighlight.forEach((element) => {
-      Prism.plugins.lineNumbers.resize(element);
+    elementsToHighlight && await Prism.highlightAll();
+    elementsToHighlight.forEach(async (element) => {
+      await Prism.plugins.lineNumbers.resize(element);
     });
-    Prism.highlightAll();
-  }, 300); // Adjust debounce wait time as needed
+  }, 300);
 
-  const debouncedAddPencilSpans = debounce(addPencilSpans, 300);
-
-  window.addEventListener('DOMContentLoaded', function (event) {
+  window.addEventListener('DOMContentLoaded', function () {
     const url = new URL(window.location.href);
-    const tabId = url.searchParams.get('tab') || url.hash.replace('#', '');
+    const tabParam = url.searchParams.get('tab');
 
     function getClosestSyncGroupId(element) {
       if (element) {
@@ -46,35 +44,33 @@
       return null;
     }
 
-    if (tabId) {
-      url.hash = `#${tabId}`;
-      url.searchParams.delete('tab');
-      window.history.replaceState({}, document.title, url.toString());
-      const element = document.getElementById(tabId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-      setTimeout(() => {
-        const tabToClick = document.getElementById(tabId);
-        const syncGroup = getClosestSyncGroupId(tabToClick);
-        if (tabToClick) {
-          if (syncGroup && !syncGroup.classList.contains('is-loaded')) tabToClick.click();
+    // Handle deep linking when tabParam exists
+    if (tabParam) {
+      const targetTab = document.getElementById(tabParam);
+      if (targetTab) {
+        const syncGroup = getClosestSyncGroupId(targetTab);
+        if (!syncGroup.classList.contains('is-loaded')) {
+          targetTab.click();
         }
-      }, 0);
+        setTimeout(() => {
+          targetTab.scrollIntoView({ behavior: 'smooth' });
+        }, 0);
+      }
     }
 
     const tabs = document.querySelectorAll('li.tab');
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function (event) {
         const currentTab = event.target.closest('li.tab');
-        const id = currentTab.id;
+        const tabId = currentTab.getAttribute('id');
 
+        // Update the URL query parameter for the active tab
         const url = new URL(window.location.href);
-        url.hash = id;
-        url.searchParams.set('tab', id);
+        url.searchParams.set('tab', tabId);
         window.history.pushState(null, null, url);
+
+        // Perform syntax highlighting and re-add pencil spans
         debouncedHighlightAll();
-        debouncedAddPencilSpans();
       }, true);
     });
   });
