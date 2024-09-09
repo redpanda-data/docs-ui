@@ -1046,6 +1046,10 @@ table code {
   min-height: unset;
 }
 
+.doc .choices__input {
+  background-color: var(--body-background);
+}
+
 .doc .tableblock .choices__list--single {
   padding: 0;
 }
@@ -1145,6 +1149,7 @@ a.button-arrow {
   display: flex;
   margin-top: 1rem;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 480px) {
@@ -1154,7 +1159,7 @@ a.button-arrow {
 }
 
 .doc .table-filters .table-search {
-  flex: 0.75;
+  flex-basis: 100%;
   padding: 10px;
   font-size: 1rem;
   border-radius: 10px;
