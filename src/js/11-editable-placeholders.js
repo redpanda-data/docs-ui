@@ -12,13 +12,20 @@ function unnestPlaceholders() {
 
   editables.forEach(editable => {
 
-    // Remove empty siblings
+    // Remove empty siblings, but don't remove conum elements
     let nextSibling = editable.nextElementSibling;
     while (nextSibling && nextSibling.innerHTML.trim() === '') {
-      const siblingToRemove = nextSibling;
-      nextSibling = nextSibling.nextElementSibling;
-      siblingToRemove.remove();
+      // Check if the sibling has a conum class, if so, skip removal
+      if (!nextSibling.classList.contains('conum')) {
+        const siblingToRemove = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        siblingToRemove.remove();
+      } else {
+        // If it's a conum, move to the next sibling without removing it
+        nextSibling = nextSibling.nextElementSibling;
+      }
     }
+
 
     let parent = editable.parentElement;
 
