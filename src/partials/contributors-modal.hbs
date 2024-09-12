@@ -17,7 +17,7 @@
         {{/if}}
         </div>
         <p>Or, open an issue to let us know about something that you want us to change.</p>
-        {{#with (get-page-info page.url page.component.name)}}
+        {{#with (get-page-info null)}}
         <div class="badge-button">
         <a href="{{this.webUrl}}/issues/new?title=Docs: Feedback for {{{this.title}}}&template=01_doc_request.yml&link=[{{this.title}}]({{@root.site.url}}{{this.url}}) [Page source]({{this.editUrl}})" target="_blank" rel="noopener noreferrer">Open an issue</a>
         </div>

@@ -1,7 +1,6 @@
 'use strict'
 
 module.exports = (spec, { data, hash: context }) => {
-  if (!spec) return
   if (spec.startsWith('http')) {
     return spec
   }
