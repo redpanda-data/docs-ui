@@ -15,8 +15,8 @@ module.exports = (navUrl, { data: { root } }) => {
   }
 
   // Iterate through cached pages and check for beta status
-  for (let i = 0; i < navGroupCache.length; i++) {
-    if (navGroupCache[i].pub.url === navUrl && navGroupCache[i].asciidoc.attributes['page-beta']) {
+  for (const navGroup of navGroupCache) {
+    if (navGroup.pub.url === navUrl && navGroup.asciidoc.attributes['page-beta']) {
       return true
     }
   }
