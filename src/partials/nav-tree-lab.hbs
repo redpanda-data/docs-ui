@@ -51,7 +51,7 @@
       {{#if (ne page.layout 'labs-search')}}
         <li class="nav-item" data-depth="1">
           <div class="item">
-            {{#with (get-page-info page.url page.component.name)}}
+            {{#with (get-page-info null)}}
             <a class="nav-link" href="{{this.webUrl}}/tree/{{this.branch}}/{{this.path}}">Source Code<img class="dark-mode-filter" src="{{{@root.uiRootPath}}}/img/github.svg" width="30px" height= "20px" alt="GitHub logo" style="margin-bottom:-3px;"/></a>
             {{/with}}
           </div>

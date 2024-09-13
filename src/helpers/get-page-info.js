@@ -4,28 +4,68 @@
  * Retrieves page information based on the provided URL and component.
  * If no component is provided, it searches all components for the page.
  * @param {string} url - The URL of the page.
- * @param {string} component - The component name.
  * @param {object} context - The context object containing the content catalog.
  * @param {object} context.data - The data object from the context.
  * @param {object} context.data.root - The root object containing the content catalog.
  * @returns {object} - An object containing page information.
  */
 
-module.exports = (url, component, { data: { root } }) => {
-  const { contentCatalog } = root
+// Memoization cache to store page info for repeated lookups
+const memoizedPageInfo = new Map()
+
+module.exports = (url, { data: { root } }) => {
+  const { contentCatalog, page } = root
+
+  // Return immediately if contentCatalog is undefined
   if (!contentCatalog) return
-  const pages = component ? contentCatalog.findBy({ component, family: 'page' }) : contentCatalog.findBy({ family: 'page' })
-  for (let i = 0; i < pages.length; i++) {
-    if (!url || pages[i].pub.url === url) {
-      return {
-        title: pages[i].asciidoc.doctitle,
-        description: pages[i].asciidoc.attributes.description,
-        url: pages[i].pub.url,
-        webUrl: pages[i].src.origin.webUrl,
-        editUrl: pages[i].src.editUrl,
-        path: pages[i].src.origin.startPath.substring(0, pages[i].src.origin.startPath.lastIndexOf('/')) || '/',
-        branch: pages[i].src.origin.branch,
-      }
-    }
+
+  // Get component name
+  const component = page.component.name
+
+  // Generate a cache key using URL and component for memoization
+  const cacheKey = `${component}-${url || page.url}`
+
+  // Check if the result is already memoized
+  if (memoizedPageInfo.has(cacheKey)) {
+    return memoizedPageInfo.get(cacheKey)
   }
+
+  let pageInfo
+
+  // If a URL is provided, search for the specific page by URL
+  if (url) {
+    const pages = contentCatalog.findBy({ component, family: 'page' })
+    pageInfo = pages.find((p) => p.pub.url === url) // Find the page by URL
+
+    if (!pageInfo) return // If no matching page is found, return early
+  } else {
+    // If no URL is provided, use the current page's information
+    const { version, module, relativeSrcPath } = page
+
+    pageInfo = contentCatalog.getById({
+      component,
+      version,
+      module,
+      family: 'page',
+      relative: relativeSrcPath,
+    })
+
+    if (!pageInfo) return // Return early if no page info is found
+  }
+
+  // Construct the result object
+  const result = {
+    title: pageInfo.asciidoc.doctitle,
+    description: pageInfo.asciidoc.attributes.description,
+    url: pageInfo.pub.url,
+    webUrl: pageInfo.src.origin.webUrl,
+    editUrl: pageInfo.src.editUrl,
+    path: pageInfo.src.origin.startPath.substring(0, pageInfo.src.origin.startPath.lastIndexOf('/')) || '/',
+    branch: pageInfo.src.origin.branch,
+  }
+
+  // Store the result in the cache for future lookups
+  memoizedPageInfo.set(cacheKey, result)
+
+  return result
 }
