@@ -1187,6 +1187,7 @@ a.button-arrow {
   gap: 10px; /* Add space between filter elements */
   align-items: center; /* Align vertically */
   margin-bottom: 15px; /* Add space between the filters and the table */
+  margin-top: 15px;
   font-size: 14px;
 }
 
