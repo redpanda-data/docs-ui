@@ -171,6 +171,14 @@ html {
   text-decoration-color: var(--link-highlight-color);
 }
 
+.doc .metadata-block span.current-version,
+.doc .metadata-block span:not(.current-version):hover {
+  color: var(--link-highlight-color);
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .doc .glossary-term {
   cursor: pointer;
 }
@@ -1015,6 +1023,30 @@ table code {
   flex: 0.5;
 }
 
+.doc .choices:first-of-type {
+  flex: 100%;
+}
+
+.doc .metadata-block {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.3rem;
+  gap: 6px;
+  border-radius: 6px;
+  background-color: var(--note-background);
+  color: var(--note-on-color);
+}
+
+.doc .metadata-block .choices {
+  flex: 0.3;
+}
+
+.metadata-block .choices__list--dropdown .choices__item,
+.metadata-block .choices__list[aria-expanded] .choices__item {
+  padding: 5px 0 0 5px !important;
+  height: 30px;
+}
+
 .doc .tableblock td .enterprise-label-container {
   display: flex;
 }
@@ -1044,6 +1076,12 @@ table code {
 .doc .choices__inner {
   background-color: var(--body-background);
   min-height: unset;
+  border-radius: 4px;
+}
+
+.doc .metadata-block .choices__inner {
+  height: 30px;
+  padding: unset;
 }
 
 .doc .choices__input {
@@ -1062,7 +1100,6 @@ table code {
 .doc .table-filters .choices__list[aria-expanded] {
   background-color: var(--body-background);
   color: var(--body-font-color);
-  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .page-type-dropdown .choices[data-type*=select-one] .choices__inner {
@@ -1128,12 +1165,11 @@ a.button-arrow {
 .doc .choices__list--dropdown .choices__item--selectable.is-highlighted,
 .doc .choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
   background-color: var(--panel-background);
-  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .choices__placeholder {
   opacity: 9;
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: 14px;
 }
 
 .doc .type-dropdown {
@@ -1147,14 +1183,23 @@ a.button-arrow {
 
 .doc .table-filters {
   display: flex;
-  margin-top: 1rem;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
+  gap: 10px; /* Add space between filter elements */
+  align-items: center; /* Align vertically */
+  margin-bottom: 15px; /* Add space between the filters and the table */
+  font-size: 14px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .doc .table-filters {
-    flex-direction: column;
+    flex-direction: column; /* Stack filters on smaller screens */
+    align-items: stretch; /* Make filters fill the container on smaller screens */
+    gap: 0;
+  }
+
+  .doc .choices,
+  .doc .table-filters input[type="text"] {
+    width: 100%; /* Ensure inputs take full width on small screens */
   }
 }
 
