@@ -25,12 +25,10 @@
 {{/if}}
 {{#unless page.attributes.cloud}}
 {{/unless}}
-{{#if page.attributes.cloud}}
-  {{#if page.attributes.beta}}
-    <div class="beta-label">
-      <p title="This feature is in beta.">Beta</p>
-    </div>
-  {{/if}}
+{{#if page.attributes.beta}}
+  <div class="beta-label">
+    <p title="This feature is in beta.">Beta</p>
+  </div>
 {{/if}}
 {{#if (eq page.attributes.role 'home')}}
   {{> home}}
