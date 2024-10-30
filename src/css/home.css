@@ -40,6 +40,7 @@
   height: inherit;
   text-decoration: none;
   flex: 1;
+  white-space: normal;
 }
 
 .home .home-header-container {
