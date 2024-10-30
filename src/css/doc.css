@@ -162,6 +162,7 @@ html {
   text-underline-offset: 2px;
   text-decoration-color: var(--color-aliases-static-palette-text-tertiary);
   color: var(--body-font-color);
+  white-space: nowrap;
 }
 
 .doc a:hover,

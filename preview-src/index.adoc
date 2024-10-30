@@ -439,6 +439,12 @@ The fog comes
 on little cat feet.
 ____
 
+== External links
+
+External links include an icon like so: link:https://awscli.amazonaws.com/v2/documentation/api/latest/reference/sts/get-caller-identity.html[AWS CLI reference].
+
+The link should not wrap, keeping the icon and the link text together and avoiding a single period on one line.
+
 == Fin
 
 That's all, folks!
