@@ -36,6 +36,7 @@
 .component-home a.feature-link {
   height: inherit;
   text-decoration: none;
+  white-space: normal;
 }
 
 .component-home a.feature-link:hover h2,
