@@ -1562,6 +1562,8 @@ html[data-theme=dark] code[class*=language-] .token.function {
   height: 1.25em;
   letter-spacing: -0.25ex;
   text-indent: -0.25ex;
+  color: var(--body-font-color);
+  margin-left: 4px;
 }
 
 .doc .conum[data-value]::after {
