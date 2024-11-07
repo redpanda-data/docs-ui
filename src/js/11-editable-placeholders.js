@@ -178,7 +178,7 @@ function unnestPlaceholders() {
       return;
     }
     // Handle standalone numbers in parentheses, avoiding function-like patterns
-    const standalonePattern = /(?<!\w)\((\d+)\)(?!\w)$/g;
+    const standalonePattern = /(?<!\w)\((\d+)\)(?!\w)/g;
     element.innerHTML = element.innerHTML.replace(standalonePattern, (match, num) => {
       return `<i class="conum" data-value="${num}"></i>`;
     });
