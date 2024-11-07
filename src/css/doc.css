@@ -74,6 +74,10 @@ html {
   .doc h1 {
     font-size: calc(44 / var(--rem-base) * 1rem);
   }
+
+  .doc p:not(.tableblock) a {
+    white-space: nowrap;
+  }
 }
 
 .doc > h2#name + .sectionbody {
@@ -162,10 +166,6 @@ html {
   text-underline-offset: 2px;
   text-decoration-color: var(--color-aliases-static-palette-text-tertiary);
   color: var(--body-font-color);
-}
-
-.doc p:not(.tableblock) a {
-  white-space: nowrap;
 }
 
 .doc a:hover,
@@ -1562,6 +1562,8 @@ html[data-theme=dark] code[class*=language-] .token.function {
   height: 1.25em;
   letter-spacing: -0.25ex;
   text-indent: -0.25ex;
+  color: var(--body-font-color);
+  margin-left: 4px;
 }
 
 .doc .conum[data-value]::after {

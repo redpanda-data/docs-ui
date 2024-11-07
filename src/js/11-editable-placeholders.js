@@ -177,9 +177,13 @@ function unnestPlaceholders() {
     if (!element || !element.textContent) {
       return;
     }
-
-    const pattern = /(\s\(<span class="token number">(\d+)<\/span>\)|(\s)\((\d+)\))$/gm;
-    element.innerHTML = element.innerHTML.replace(pattern, (match, p1, p2, p3, p4) => {
+    // Handle standalone numbers in parentheses, avoiding function-like patterns
+    const standalonePattern = /(?<!\w)\((\d+)\)(?!\w)$/g;
+    element.innerHTML = element.innerHTML.replace(standalonePattern, (match, num) => {
+      return `<i class="conum" data-value="${num}"></i>`;
+    });
+    const complexPattern = /(\s\(<span class="token number">(\d+)<\/span>\)|(\s)\((\d+)\))$/gm;
+    element.innerHTML = element.innerHTML.replace(complexPattern, (match, p1, p2, p3, p4) => {
       return p3 ? `${p3}<i class="conum" data-value="${p4}"></i>` : `<i class="conum" data-value="${p2}"></i>`;
     });
   }
