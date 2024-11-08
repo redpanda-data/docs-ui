@@ -42,7 +42,7 @@ code,
 kbd,
 pre {
   font-family: var(--monospace-font-family) !important;
-  font-size: 0.9rem;
+  font-size: 0.9em;
   border: 1px solid var(--code-background);
 }
 
