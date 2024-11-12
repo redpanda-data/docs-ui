@@ -78,6 +78,10 @@ html {
   .doc p:not(.tableblock) a {
     white-space: nowrap;
   }
+
+  .admonitionblock .content a {
+    white-space: normal; /* Allows links to wrap within admonition blocks */
+  }
 }
 
 .doc > h2#name + .sectionbody {

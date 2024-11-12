@@ -120,6 +120,14 @@
   padding-left: 2rem;
 }
 
+.toc li[data-level="4"] a {
+  padding-left: 2.5rem;
+}
+
+.toc li[data-level="5"] a {
+  padding-left: 3rem;
+}
+
 .toc a {
   color: var(--toc-font-color);
   border-left: 2px solid var(--toc-border-color);
