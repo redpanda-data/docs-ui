@@ -80,7 +80,7 @@ html {
   }
 
   .admonitionblock .content a {
-    white-space: normal; /* Allows links to wrap within admonition blocks */
+    white-space: normal !important; /* Allows links to wrap within admonition blocks */
   }
 }
 
@@ -120,6 +120,11 @@ html {
 
 .doc h5:not(.discrete) {
   font-size: calc(17.5 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.doc h6:not(.discrete) {
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 

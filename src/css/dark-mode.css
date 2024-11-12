@@ -9,7 +9,7 @@ html[data-theme=dark] {
   --scrollbar_hover-thumb-color: var(--color-gray-30);
   --body-font-color: var(--color-white);
   --button-font-color: #181818;
-  --alt-heading-font-weight: 500;
+  --alt-heading-font-weight: bold;
   --sticky-table-header-background: #545454;
   --tooltip-background: white;
   --tooltip-font-color: #181818;
