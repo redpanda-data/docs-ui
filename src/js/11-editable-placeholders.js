@@ -202,16 +202,15 @@ function unnestPlaceholders() {
     const editablePlaceholders = baseElement.querySelectorAll('[contenteditable="true"]');
 
     editablePlaceholders.forEach(placeholder => {
+      const dataType = placeholder.getAttribute('data-type');
+      if (!dataType) {
+        console.info('Data type attribute is missing on the placeholder.');
+        return;
+      }
       placeholder.addEventListener('input', handleInputEvent);
       placeholder.addEventListener('keydown', handleEnterKey);
       placeholder.addEventListener('blur', handleBlurEvent);
       placeholder.addEventListener('focus', handleFocusEvent);
-
-      const dataType = placeholder.getAttribute('data-type');
-      if (!dataType) {
-        console.error('Data type attribute is missing on the placeholder.');
-        return;
-      }
 
       const savedText = sessionStorage.getItem(dataType);
       placeholder.textContent = savedText ? savedText : `<${dataType}>`;

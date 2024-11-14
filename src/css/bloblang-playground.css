@@ -1,0 +1,101 @@
+.bloblang-playground .doc {
+  max-width: unset;
+  margin-right: 48px;
+}
+
+/* Main container setup */
+.bloblang-playground .playground-container {
+  display: flex;
+  font-family: var(--body-font-family);
+}
+
+/* Editor section (left side) */
+.bloblang-playground .editors {
+  flex: 1 1 60%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--code-background);
+  color: var(--code-font-color);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.bloblang-playground .button-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.bloblang-playground .button {
+  padding: 5px 15px;
+  background: #444;
+  border: 1px solid #888;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 'background 0.3s';
+}
+
+.bloblang-playground .button:hover {
+  background: #555;
+}
+
+/* Editor container */
+.bloblang-playground .editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Tab style for sections */
+.bloblang-playground .editor-container details {
+  background: var(--body-background);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0;
+}
+
+.bloblang-playground .editor-container summary {
+  padding: 10px;
+  cursor: pointer;
+  background: var(--body-background);
+  color: var(--body-font-color);
+  font-weight: bold;
+}
+
+.bloblang-playground .editor-container summary::after {
+  display: none;
+}
+
+/* Editor areas */
+.bloblang-playground .editor {
+  font-size: 14pt;
+  height: 250px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* Output section (right side) */
+.bloblang-playground .output-section {
+  flex: 1 1 35%;
+  display: flex;
+  flex-direction: column;
+  background: var(--code-background);
+  color: var(--code-background);
+  padding: 20px;
+  box-sizing: border-box;
+  border-left: 1px solid #444;
+}
+
+.bloblang-playground .output-console {
+  background: #222;
+  flex: 1;
+  padding: 15px;
+  font-size: 14pt;
+  overflow-y: auto;
+  border-radius: 4px;
+  box-sizing: border-box;
+}

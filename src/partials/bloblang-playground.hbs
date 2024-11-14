@@ -1,0 +1,109 @@
+<div class="playground-container">
+  <!-- Left section: Editors -->
+  <section class="editors">
+    <!-- Action buttons -->
+    <div class="button-bar">
+      <button id="run" class="button">Run</button>
+      <button id="clear" class="button">Clear</button>
+      <button id="default" class="button">Reset</button>
+    </div>
+
+    <!-- Editor containers -->
+    <div class="editor-container">
+      <!-- Input Editor -->
+      <details open>
+        <summary>Input (JSON)</summary>
+        <div class="editor" id="ace-input" contenteditable="true">{ "message": "hello world" }</div>
+      </details>
+
+      <!-- Mapping Editor -->
+      <details open>
+        <summary>Mapping</summary>
+        <div class="editor" id="ace-mapping" contenteditable="true">root = this</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Right section: Output preview -->
+  <section class="output-section">
+    <h2 class="output-header">Output</h2>
+    <div class="output-console" id="outputConsole">Output will appear here...</div>
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.15.0/src-min-noconflict/ace.js"
+    integrity="sha256-LDAbbBwaA1DWzagfX4uwqj9iddOjEYwTiV1xQeKVdEg=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.15.0/src-min-noconflict/theme-monokai.js"
+    integrity="sha256-eBZhzA3IYQvEVQnnT67zSIZegWYQdXDJoLr6IAOXY4M=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.15.0/src-min-noconflict/mode-coffee.js"
+    integrity="sha256-KfNo+n6fdx9+bT4hbsyp+2n4XDp8gRIqYFdDjVRHlNQ=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.15.0/src-min-noconflict/mode-json.js"
+    integrity="sha256-NRrS1x8Lu3yntlnkoj1sViPUV/Tyahtm7i1g4llyRYQ=" crossorigin="anonymous"></script>
+<script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
+<script>
+    let aceInputEditor, aceMappingEditor;
+    const outputConsole = document.getElementById("outputConsole");
+
+    function getInput() {
+        return aceInputEditor ? aceInputEditor.getValue() : "";
+    }
+
+    function getMapping() {
+        return aceMappingEditor ? aceMappingEditor.getValue() : "";
+    }
+
+    // Default values for input and mapping editors
+    const defaultInput = '{ "message": "hello world" }';
+    const defaultMapping = "root = this";
+
+    // Function to display output or error messages
+    function execute() {
+        outputConsole.innerHTML = ""; // Clear previous output
+        try {
+            const result = blobl(getMapping(), getInput());
+            outputConsole.textContent = result;
+        } catch (error) {
+            outputConsole.textContent = "Error: " + error.message;
+        }
+    }
+
+    document.getElementById("run").addEventListener("click", execute);
+    document.getElementById("clear").addEventListener("click", () => {
+        aceInputEditor.setValue("");
+        aceMappingEditor.setValue("");
+        outputConsole.textContent = "Output will appear here...";
+    });
+    document.getElementById("default").addEventListener("click", () => {
+      aceInputEditor.setValue(defaultInput, 1);
+      aceMappingEditor.setValue(defaultMapping, 1);
+      execute(); // Run with default values
+    });
+
+    const go = new Go();
+    WebAssembly.instantiateStreaming(fetch("{{{siteRootPath}}}/blobl.wasm"), go.importObject).then(result => {
+        go.run(result.instance);
+        execute(); // Initial run
+    }).catch(console.error);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        aceInputEditor = ace.edit("ace-input");
+        aceInputEditor.setTheme("ace/theme/monokai");
+        aceInputEditor.session.setMode("ace/mode/json");
+        aceInputEditor.session.setTabSize(4);
+        aceInputEditor.session.setUseSoftTabs(true);
+        aceInputEditor.session.setUseWorker(false);
+        aceInputEditor.setValue('{ "message": "hello world" }', 1);
+
+        aceMappingEditor = ace.edit("ace-mapping");
+        aceMappingEditor.setTheme("ace/theme/monokai");
+        aceMappingEditor.session.setMode("ace/mode/coffee");
+        aceMappingEditor.session.setTabSize(4);
+        aceMappingEditor.session.setUseSoftTabs(true);
+        aceMappingEditor.session.setUseWorker(false);
+        aceMappingEditor.setValue("root = this", 1);
+
+        // Trigger execute on editor changes
+        /*[aceInputEditor, aceMappingEditor].forEach(editor => {
+            editor.on("change", execute);
+        });*/
+    });
+</script>

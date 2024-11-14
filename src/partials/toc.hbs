@@ -1,4 +1,4 @@
-{{#if (ne page.attributes.role 'two-column')}}
+{{#if (and (ne page.attributes.role 'two-column') (not page.attributes.no-toc))}}
 <aside class="toc sidebar" data-title="{{{page.attributes.toctitle}}}" data-levels="{{{or page.attributes.toclevels 2}}}">
   {{#if (eq page.component.name 'redpanda-labs')}}
     <img src="{{{@root.uiRootPath}}}/img/redpanda-lab-sitting.png" width="150px" height= "150px" alt="Redpanda sitting at a desk mixing chemicals"/>
