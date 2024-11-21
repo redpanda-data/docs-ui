@@ -50,6 +50,11 @@ function unnestPlaceholders() {
 (function () {
   'use strict';
 
+  // Check if Prism is available, exit if not
+  if (!Prism.highlightAll) {
+    return;
+  }
+
   function observeCodeBlocksForConumRestoration() {
     const codeElems = document.querySelectorAll('code');
 
