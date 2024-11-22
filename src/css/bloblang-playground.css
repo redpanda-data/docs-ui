@@ -177,4 +177,12 @@
   .button-bar .choices {
     width: 100%;
   }
+
+  .bloblang-playground .doc .choices {
+    flex: 100% !important;
+  }
+
+  .bloblang-playground .playground-container {
+    flex-direction: column;
+  }
 }

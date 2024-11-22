@@ -4,7 +4,7 @@
   <button id="prettify" class="button">Format input</button>
   <select id="sample-dropdown" class="button">
     <option value="">Select a sample</option>
-    {{#each (obj page.componentVersion.asciidoc.attributes.page-bloblang-samples) }}
+    {{#each (obj page.attributes.bloblang-samples) }}
     <option value="{{this.title}}">{{this.title}}</option>
     {{/each}}
   </select>
@@ -112,7 +112,7 @@ document.getElementById("prettify").addEventListener("click", () => {
   }
 });
 
-const samples = {{{page.componentVersion.asciidoc.attributes.page-bloblang-samples}}};
+const samples = {{{page.attributes.bloblang-samples}}};
 
 document.getElementById("sample-dropdown").addEventListener("change", (event) => {
   const selectedSample = event.target.value;
