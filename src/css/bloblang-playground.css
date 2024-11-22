@@ -115,6 +115,10 @@
   font-weight: bold;
 }
 
+.bloblang-playground .choices[data-type*=select-one] .choices__inner {
+  padding: 0;
+}
+
 /* Custom background color for Ace editor */
 #ace-input,
 #ace-mapping,
