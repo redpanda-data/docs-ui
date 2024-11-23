@@ -3,7 +3,6 @@
   <button id="clear" class="button">Clear</button>
   <button id="prettify" class="button">Format input</button>
   <select id="sample-dropdown" class="button">
-    <option value="">Select a sample</option>
     {{#each (obj page.attributes.bloblang-samples) }}
     <option value="{{this.title}}">{{this.title}}</option>
     {{/each}}
@@ -153,6 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     new Choices(document.getElementById("sample-dropdown"), {
       searchEnabled: true,
+      searchPlaceholderValue: 'Search examples',
+      placeholderValue: 'Select an example',
       allowHTML: true
     });
 

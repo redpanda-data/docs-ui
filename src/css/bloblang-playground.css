@@ -23,7 +23,12 @@
 
 .bloblang-playground .doc .choices {
   flex: 0.4 !important;
-  z-index: 9;
+  z-index: 4;
+}
+
+.bloblang-playground .doc .choices[data-type*=select-one] .choices__input {
+  background: var(--body-background);
+  color: var(--body-font-color);
 }
 
 .button-bar {
@@ -36,17 +41,21 @@
 
 .button-bar .button {
   padding: 6px 8px;
-  background: #2d3a53;
-  border: 1px solid rgba(48, 48, 50, 1);
+  background: rgba(68, 76, 231, 0);
+  border: 1px solid rgba(128, 152, 249, 1);
   border-radius: 6px;
-  color: #fff;
+  color: var(--body-font-color);
   cursor: pointer;
   font-size: 14px;
   transition: 'background 0.3s';
 }
 
 .button-bar .button:hover {
-  background: rgba(22, 30, 45, 1);
+  background: rgba(68, 76, 231, 0.06);
+}
+
+html[data-theme=dark] .button-bar .button:hover {
+  background: rgba(68, 76, 231);
 }
 
 /* Editor container */
@@ -83,7 +92,7 @@
 
 /* Editor areas */
 .bloblang-playground .editor {
-  font-size: 14pt;
+  font-size: 12pt;
   height: 250px;
   padding: 10px;
   overflow-y: auto;
@@ -130,6 +139,7 @@
 .ace-github .ace_gutter {
   background: var(--pre-background);
   color: var(--code-font-color);
+  z-index: 3;
 }
 
 .ace_gutter-layer {
@@ -188,5 +198,9 @@
 
   .bloblang-playground .playground-container {
     flex-direction: column;
+  }
+
+  .bloblang-playground .doc {
+    margin-right: unset;
   }
 }
