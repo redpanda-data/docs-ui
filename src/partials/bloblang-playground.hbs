@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize output editor
   aceOutputEditor = ace.edit("ace-output");
   aceOutputEditor.setTheme("ace/theme/github");
-  aceOutputEditor.session.setMode("ace/mode/json"); // JSON syntax highlighting
+  aceOutputEditor.session.setMode("ace/mode/text"); // JSON syntax highlighting
   aceOutputEditor.setReadOnly(true); // Make output read-only
   aceOutputEditor.session.setTabSize(4);
   aceOutputEditor.session.setUseSoftTabs(true);
