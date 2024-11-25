@@ -23,7 +23,7 @@
 
 .bloblang-playground .doc .choices {
   flex: 0.4 !important;
-  z-index: 4;
+  z-index: 2;
 }
 
 .bloblang-playground .doc .choices[data-type*=select-one] .choices__input {
@@ -139,7 +139,7 @@ html[data-theme=dark] .button-bar .button:hover {
 .ace-github .ace_gutter {
   background: var(--pre-background);
   color: var(--code-font-color);
-  z-index: 3;
+  z-index: 1;
 }
 
 .ace_gutter-layer {
