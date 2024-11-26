@@ -36,7 +36,7 @@
         <summary>Output</summary>
         <div class="editor" id="ace-output" contenteditable="true">"Output will appear here..."</div>
       </details>
-      <details>
+      <details id="metadata-details">
       <summary>Metadata output</summary>
         <div class="editor" id="ace-metadata" contenteditable="true">"Metadata will appear here..."</div>
       </details>
@@ -44,7 +44,7 @@
   </section>
 </div>
 <script>
-let aceInputEditor, aceMappingEditor, aceOutputEditor;
+let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails;
 
 // Keys for localStorage
 const localStorageKeys = {
@@ -58,63 +58,9 @@ const defaultMapping = "root = this";
 const defaultOutput = "Output will appear here...";
 const defaultMeta = "Output metadata will appear here...";
 
-// Function to get input and mapping values
-function getInput() {
-  return aceInputEditor ? aceInputEditor.getValue() : "";
-}
-
-function getMapping() {
-  return aceMappingEditor ? aceMappingEditor.getValue() : "";
-}
-
-// Function to execute the mapping
-function execute() {
-  aceOutputEditor.setValue("");
-  aceMetadataEditor.setValue("");
-
-  try {
-    const result = blobl(getMapping(), getInput());
-    try {
-      const parsedResult = JSON.parse(result);
-      // Separate message and metadata
-      const message = parsedResult.msg || parsedResult;
-      const metadata = parsedResult.meta || {};
-      aceOutputEditor.session.setMode("ace/mode/json");
-      aceOutputEditor.setValue(JSON.stringify(message, null, 2), 1);
-      aceMetadataEditor.session.setMode("ace/mode/json");
-      aceMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
-    } catch (error) {
-      aceOutputEditor.session.setMode("ace/mode/text");
-      aceOutputEditor.setValue(result, 1); // Display raw result if not JSON
-    }
-  } catch (error) {
-    aceOutputEditor.session.setMode("ace/mode/text");
-    aceOutputEditor.setValue("Error: " + error.message, 1);
-
-    aceMetadataEditor.session.setMode("ace/mode/text");
-    aceMetadataEditor.setValue("Error: " + error.message, 1);
-  }
-}
-
-
-// Save editor content to localStorage
-function saveToLocalStorage() {
-  localStorage.setItem(localStorageKeys.input, aceInputEditor.getValue());
-  localStorage.setItem(localStorageKeys.mapping, aceMappingEditor.getValue());
-}
-
-// Restore editor content from localStorage
-function restoreFromLocalStorage() {
-  const savedInput = localStorage.getItem(localStorageKeys.input);
-  const savedMapping = localStorage.getItem(localStorageKeys.mapping);
-
-  aceInputEditor.setValue(savedInput || defaultInput, 1);
-  aceMappingEditor.setValue(savedMapping || defaultMapping, 1);
-  aceOutputEditor.setValue(defaultOutput, 1);
-  aceMetadataEditor.setValue(defaultMeta, 1);
-}
-
 document.addEventListener("DOMContentLoaded", () => {
+  metadataDetails = document.getElementById("metadata-details");
+
   // Initialize input editor
   aceInputEditor = ace.edit("ace-input");
   aceInputEditor.setTheme("ace/theme/github");
@@ -147,14 +93,54 @@ document.addEventListener("DOMContentLoaded", () => {
   aceMetadataEditor.session.setUseSoftTabs(true);
 
   new Choices(document.getElementById("sample-dropdown"), {
-      searchEnabled: true,
-      searchPlaceholderValue: 'Search examples',
-      placeholderValue: 'Select an example',
-      allowHTML: true
-    });
+    searchEnabled: true,
+    searchPlaceholderValue: 'Search examples',
+    placeholderValue: 'Select an example',
+    allowHTML: true
+  });
 
-  // Restore editor content from localStorage
-  restoreFromLocalStorage();
+  const go = new Go();
+  WebAssembly.instantiateStreaming(fetch("{{{siteRootPath}}}/blobl.wasm"), go.importObject)
+    .then((result) => {
+      go.run(result.instance);
+      restoreFromLocalStorage();
+      execute();
+    })
+    .catch(console.error);
+
+  // Handle clear button
+  document.getElementById("clear").addEventListener("click", () => {
+    aceInputEditor.setValue("");
+    aceMappingEditor.setValue("");
+    aceOutputEditor.setValue(defaultOutput, 1);
+    aceMetadataEditor.setValue(defaultMeta, 1);
+    saveToLocalStorage();
+  });
+
+  // Handle prettify button
+  document.getElementById("prettify").addEventListener("click", () => {
+    try {
+      const formatted = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
+      aceInputEditor.setValue(formatted, 1);
+      saveToLocalStorage();
+    } catch (error) {
+      aceOutputEditor.setValue("Error: Invalid JSON input", 1);
+    }
+  });
+
+  const samples = {{{page.attributes.bloblang-samples}}};
+
+  // Handle dropdown for examples
+  document.getElementById("sample-dropdown").addEventListener("change", (event) => {
+    const selectedSample = event.target.value;
+    const sample = Object.values(samples).find((sample) => sample.title === selectedSample);
+
+    if (sample) {
+      aceInputEditor.setValue(sample.input, 1);
+      aceMappingEditor.setValue(sample.mapping, 1);
+      execute();
+    }
+  });
 
   // Save content to localStorage and execute on changes
   [aceInputEditor, aceMappingEditor].forEach((editor) => {
@@ -163,47 +149,90 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-const samples = {{{page.attributes.bloblang-samples}}};
+// Function to get input and mapping values
+function getInput() {
+  return aceInputEditor ? aceInputEditor.getValue() : "";
+}
 
-// Handle dropdown for examples
-document.getElementById("sample-dropdown").addEventListener("change", (event) => {
-  const selectedSample = event.target.value;
-  const sample = Object.values(samples).find((sample) => sample.title === selectedSample);
+function getMapping() {
+  return aceMappingEditor ? aceMappingEditor.getValue() : "";
+}
 
-  if (sample) {
-    aceInputEditor.setValue(sample.input, 1);
-    aceMappingEditor.setValue(sample.mapping, 1);
-    execute();
+function isValidJSON(str) {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
   }
-});
+}
 
-// Handle clear button
-document.getElementById("clear").addEventListener("click", () => {
-  aceInputEditor.setValue("");
-  aceMappingEditor.setValue("");
+// Function to execute the mapping
+function execute() {
+  if (!metadataDetails) metadataDetails = document.getElementById("metadata-details");
+
+  aceOutputEditor.setValue("");
+  aceMetadataEditor.setValue("");
+
+  try {
+    const result = blobl(getMapping(), getInput());
+
+    if (isValidJSON(result)) {
+      const parsedResult = JSON.parse(result);
+
+      // Separate message and metadata
+      const message = parsedResult.msg || parsedResult;
+      const metadata = parsedResult.meta || {};
+
+      // Display message output
+      aceOutputEditor.session.setMode("ace/mode/json");
+      aceOutputEditor.setValue(JSON.stringify(message, null, 2), 1);
+
+      // Display metadata
+      if (Object.keys(metadata).length > 0) {
+        aceMetadataEditor.session.setMode("ace/mode/json");
+        aceMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
+        metadataDetails.setAttribute("open", "true");
+      } else {
+        aceMetadataEditor.session.setMode("ace/mode/text");
+        aceMetadataEditor.setValue("{}", 1);
+        metadataDetails.removeAttribute("open");
+      }
+    } else {
+      // If the result is not JSON, handle it as raw text
+      aceOutputEditor.session.setMode("ace/mode/text");
+      aceOutputEditor.setValue(result, 1);
+
+      aceMetadataEditor.session.setMode("ace/mode/text");
+      aceMetadataEditor.setValue("No metadata available", 1);
+      metadataDetails.removeAttribute("open");
+    }
+  } catch (error) {
+    // Handle general errors
+    aceOutputEditor.session.setMode("ace/mode/text");
+    aceOutputEditor.setValue("Error: " + error.message, 1);
+
+    aceMetadataEditor.session.setMode("ace/mode/text");
+    aceMetadataEditor.setValue("Error: " + error.message, 1);
+    metadataDetails.removeAttribute("open");
+  }
+}
+
+// Save editor content to localStorage
+function saveToLocalStorage() {
+  localStorage.setItem(localStorageKeys.input, aceInputEditor.getValue());
+  localStorage.setItem(localStorageKeys.mapping, aceMappingEditor.getValue());
+}
+
+// Restore editor content from localStorage
+function restoreFromLocalStorage() {
+  const savedInput = localStorage.getItem(localStorageKeys.input);
+  const savedMapping = localStorage.getItem(localStorageKeys.mapping);
+
+  aceInputEditor.setValue(savedInput || defaultInput, 1);
+  aceMappingEditor.setValue(savedMapping || defaultMapping, 1);
   aceOutputEditor.setValue(defaultOutput, 1);
   aceMetadataEditor.setValue(defaultMeta, 1);
-  saveToLocalStorage();
-});
-
-// Handle prettify button
-document.getElementById("prettify").addEventListener("click", () => {
-  try {
-    const formatted = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
-    aceInputEditor.setValue(formatted, 1);
-    saveToLocalStorage();
-  } catch (error) {
-    aceOutputEditor.setValue("Error: Invalid JSON input", 1);
-  }
-});
-
-const go = new Go();
-WebAssembly.instantiateStreaming(fetch("{{{siteRootPath}}}/blobl.wasm"), go.importObject)
-  .then((result) => {
-    go.run(result.instance);
-    restoreFromLocalStorage();
-    execute();
-  })
-  .catch(console.error);
+}
 
 </script>
