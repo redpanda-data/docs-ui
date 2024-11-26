@@ -832,10 +832,6 @@ table code {
   background-color: none;
 }
 
-.doc .listingblock .title {
-  margin-bottom: -0.5rem;
-}
-
 .doc .videoblock .title,
 .doc .tableblock caption {
   color: var(--caption-font-color);
@@ -1368,6 +1364,7 @@ pre[class*=language-] {
   font-size: calc(17 / var(--rem-base) * 1rem) !important;
   background: var(--pre-background) !important;
   white-space: pre-wrap !important;
+  margin-top: 0 !important;
   font-weight: lighter !important;
 }
 
