@@ -1,8 +1,10 @@
 # WebAssembly Bloblang Editor
 
-This is a WASM implementation of `benthos blobl server`.
+This directory hosts the source code for the Wasm module that provides the Redpanda docs with the ability to execute Bloblang mappings.
 
-## Build Wasm module
+The Wasm module is built automatically when you bundle the UI with `gulp bundle`.
+
+To build the Wasm module manually:
 
 ```shell
 GOOS=js GOARCH=wasm go build -o ./src/static/blobl.wasm ./cmd/wasm
