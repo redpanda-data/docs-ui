@@ -1,3 +1,4 @@
+{{{page.contents}}}
 <!-- Action buttons -->
 <div class="button-bar">
   <button id="clear" class="button">Clear</button>
@@ -31,9 +32,15 @@
   <!-- Output -->
   <section class="output-section">
     <div class="editor-container">
-        <P>Output</P>
-        <div class="editor" id="ace-output">"Output will appear here..."</div>
-      </div>
+      <details open>
+        <summary>Output</summary>
+        <div class="editor" id="ace-output" contenteditable="true">"Output will appear here..."</div>
+      </details>
+      <details>
+      <summary>Metadata output</summary>
+        <div class="editor" id="ace-metadata" contenteditable="true">"Metadata will appear here..."</div>
+      </details>
+    </div>
   </section>
 </div>
 <script>
@@ -49,6 +56,7 @@ const localStorageKeys = {
 const defaultInput = '{ "message": "hello world" }';
 const defaultMapping = "root = this";
 const defaultOutput = "Output will appear here...";
+const defaultMeta = "Output metadata will appear here...";
 
 // Function to get input and mapping values
 function getInput() {
@@ -61,22 +69,33 @@ function getMapping() {
 
 // Function to execute the mapping
 function execute() {
-  aceOutputEditor.setValue(""); // Clear output editor
+  aceOutputEditor.setValue("");
+  aceMetadataEditor.setValue("");
+
   try {
     const result = blobl(getMapping(), getInput());
     try {
-      const prettyResult = JSON.stringify(JSON.parse(result), null, 2);
+      const parsedResult = JSON.parse(result);
+      // Separate message and metadata
+      const message = parsedResult.msg || parsedResult;
+      const metadata = parsedResult.meta || {};
       aceOutputEditor.session.setMode("ace/mode/json");
-      aceOutputEditor.setValue(prettyResult, 1); // Display formatted JSON
+      aceOutputEditor.setValue(JSON.stringify(message, null, 2), 1);
+      aceMetadataEditor.session.setMode("ace/mode/json");
+      aceMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
     } catch (error) {
       aceOutputEditor.session.setMode("ace/mode/text");
       aceOutputEditor.setValue(result, 1); // Display raw result if not JSON
     }
   } catch (error) {
     aceOutputEditor.session.setMode("ace/mode/text");
-    aceOutputEditor.setValue("Error: " + error.message, 1); // Display error message
+    aceOutputEditor.setValue("Error: " + error.message, 1);
+
+    aceMetadataEditor.session.setMode("ace/mode/text");
+    aceMetadataEditor.setValue("Error: " + error.message, 1);
   }
 }
+
 
 // Save editor content to localStorage
 function saveToLocalStorage() {
@@ -92,6 +111,7 @@ function restoreFromLocalStorage() {
   aceInputEditor.setValue(savedInput || defaultInput, 1);
   aceMappingEditor.setValue(savedMapping || defaultMapping, 1);
   aceOutputEditor.setValue(defaultOutput, 1);
+  aceMetadataEditor.setValue(defaultMeta, 1);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -106,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aceMappingEditor = ace.edit("ace-mapping");
   aceMappingEditor.setTheme("ace/theme/github");
   aceMappingEditor.session.setMode("ace/mode/coffee");
+  aceMappingEditor.session.setOption("useWorker", false);
   aceMappingEditor.session.setTabSize(4);
   aceMappingEditor.session.setUseSoftTabs(true);
 
@@ -116,6 +137,14 @@ document.addEventListener("DOMContentLoaded", () => {
   aceOutputEditor.setReadOnly(true); // Make output read-only
   aceOutputEditor.session.setTabSize(4);
   aceOutputEditor.session.setUseSoftTabs(true);
+
+  // Initialize metadata editor
+  aceMetadataEditor = ace.edit("ace-metadata");
+  aceMetadataEditor.setTheme("ace/theme/github");
+  aceMetadataEditor.session.setMode("ace/mode/json"); // Use JSON mode for metadata
+  aceMetadataEditor.setReadOnly(true); // Make metadata read-only
+  aceMetadataEditor.session.setTabSize(4);
+  aceMetadataEditor.session.setUseSoftTabs(true);
 
   new Choices(document.getElementById("sample-dropdown"), {
       searchEnabled: true,
@@ -153,6 +182,7 @@ document.getElementById("clear").addEventListener("click", () => {
   aceInputEditor.setValue("");
   aceMappingEditor.setValue("");
   aceOutputEditor.setValue(defaultOutput, 1);
+  aceMetadataEditor.setValue(defaultMeta, 1);
   saveToLocalStorage();
 });
 

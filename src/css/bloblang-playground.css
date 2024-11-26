@@ -60,7 +60,7 @@ html[data-theme=dark] .button-bar .button:hover {
 
 /* Editor container */
 .bloblang-playground .editor-container {
-  flex: 1 1 auto;
+  flex: 1 1 50%;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -93,6 +93,8 @@ html[data-theme=dark] .button-bar .button:hover {
 /* Editor areas */
 .bloblang-playground .editor {
   font-size: 12pt;
+  background-color: var(--pre-background) !important;
+  color: var(--code-font-color) !important;
   height: 250px;
   padding: 10px;
   overflow-y: auto;
@@ -103,37 +105,16 @@ html[data-theme=dark] .button-bar .button:hover {
   min-height: 100px;
 }
 
-.bloblang-playground .editor#ace-output {
-  height: 100%;
-}
-
 /* Output section (right side) */
 .bloblang-playground .output-section {
   flex: 1 1 35%;
+  gap: 20px;
   display: flex;
   flex-direction: column;
-  border-color: currentColor transparent transparent;
-  border-width: 0.5rem 0.3rem 0;
-  box-shadow: 0 1px 2px 0 #0000001a;
-  padding: 16px 24px;
-  border-radius: 8px 8px 0 0;
-}
-
-.bloblang-playground .output-section p {
-  color: var(--body-font-color);
-  font-weight: bold;
 }
 
 .bloblang-playground .choices[data-type*=select-one] .choices__inner {
   padding: 0;
-}
-
-/* Custom background color for Ace editor */
-#ace-input,
-#ace-mapping,
-#ace-output {
-  background-color: var(--pre-background) !important;
-  color: var(--code-font-color) !important;
 }
 
 .ace-github .ace_gutter {

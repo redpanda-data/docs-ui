@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"syscall/js"
 
@@ -31,8 +32,28 @@ func blobl(_ js.Value, args []js.Value) any {
 		return fmt.Sprintf("Failed to execute mapping: %s", err)
 	}
 
-	output, err := msg.AsBytes()
+	message, err := msg.AsStructured()
 	if err != nil {
+		return fmt.Sprintf("Failed to marshal message: %s", err)
+	}
+
+	var metadata map[string]any
+	msg.MetaWalkMut(func(key string, value any) error {
+		if metadata == nil {
+			metadata = make(map[string]any)
+		}
+		metadata[key] = value
+		return nil
+	})
+
+	var output []byte
+	if output, err = json.MarshalIndent(struct {
+		Msg  any            `json:"msg"`
+		Meta map[string]any `json:"meta,omitempty"`
+	}{
+		Msg:  message,
+		Meta: metadata,
+	}, "", "  "); err != nil {
 		return fmt.Sprintf("Failed to marshal output: %s", err)
 	}
 
