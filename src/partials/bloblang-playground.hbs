@@ -45,6 +45,7 @@
 </div>
 <script>
 let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails;
+const TAB_SIZE = 2;
 
 // Keys for localStorage
 const localStorageKeys = {
@@ -65,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aceInputEditor = ace.edit("ace-input");
   aceInputEditor.setTheme("ace/theme/github");
   aceInputEditor.session.setMode("ace/mode/json");
-  aceInputEditor.session.setTabSize(4);
+  aceInputEditor.session.setTabSize(TAB_SIZE);
   aceInputEditor.session.setUseSoftTabs(true);
 
   // Initialize mapping editor
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aceMappingEditor.setTheme("ace/theme/github");
   aceMappingEditor.session.setMode("ace/mode/coffee");
   aceMappingEditor.session.setOption("useWorker", false);
-  aceMappingEditor.session.setTabSize(4);
+  aceMappingEditor.session.setTabSize(TAB_SIZE);
   aceMappingEditor.session.setUseSoftTabs(true);
 
   // Initialize output editor
@@ -81,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aceOutputEditor.setTheme("ace/theme/github");
   aceOutputEditor.session.setMode("ace/mode/text"); // JSON syntax highlighting
   aceOutputEditor.setReadOnly(true); // Make output read-only
-  aceOutputEditor.session.setTabSize(4);
+  aceOutputEditor.session.setTabSize(TAB_SIZE);
   aceOutputEditor.session.setUseSoftTabs(true);
 
   // Initialize metadata editor
@@ -89,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aceMetadataEditor.setTheme("ace/theme/github");
   aceMetadataEditor.session.setMode("ace/mode/json"); // Use JSON mode for metadata
   aceMetadataEditor.setReadOnly(true); // Make metadata read-only
-  aceMetadataEditor.session.setTabSize(4);
+  aceMetadataEditor.session.setTabSize(TAB_SIZE);
   aceMetadataEditor.session.setUseSoftTabs(true);
 
   new Choices(document.getElementById("sample-dropdown"), {

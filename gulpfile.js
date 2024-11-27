@@ -75,7 +75,7 @@ const buildWasmTask = createTask({
         done(err)
         return
       }
-      log('WebAssembly built successfully:', stdout)
+      log.info('WebAssembly built successfully:', stdout)
       done()
     })
   },
