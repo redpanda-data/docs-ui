@@ -4,6 +4,7 @@ const { parallel, series, watch } = require('gulp')
 const createTask = require('./gulp.d/lib/create-task')
 const exportTasks = require('./gulp.d/lib/export-tasks')
 const log = require('fancy-log')
+const { exec } = require('child_process') // Import to run shell commands
 
 const bundleName = 'ui'
 const buildDir = 'build'
@@ -11,6 +12,8 @@ const previewSrcDir = 'preview-src'
 const previewDestDir = 'public'
 const srcDir = 'src'
 const destDir = `${previewDestDir}/_`
+const wasmOutput = `${srcDir}/static/blobl.wasm` // Output path for the .wasm file
+const wasmMain = './blobl-editor/wasm/main.go' // Path to the Go entry point
 const { reload: livereload } = process.env.LIVERELOAD === 'true' ? require('gulp-connect') : {}
 const serverConfig = { host: '0.0.0.0', port: 5252, livereload }
 
@@ -61,9 +64,26 @@ const buildTask = createTask({
   ),
 })
 
+const buildWasmTask = createTask({
+  name: 'build:wasm',
+  desc: 'Build the WebAssembly (.wasm) file using Go',
+  call: (done) => {
+    const command = `GOOS=js GOARCH=wasm go build -o ${wasmOutput} ${wasmMain}`
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        log.error('Error building wasm:', stderr)
+        done(err)
+        return
+      }
+      log.info('WebAssembly built successfully:', stdout)
+      done()
+    })
+  },
+})
+
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildTask),
+  call: series(cleanTask, lintTask, buildTask, buildWasmTask),
 })
 
 const bundlePackTask = createTask({
@@ -118,6 +138,7 @@ module.exports = exportTasks(
   formatTask,
   buildTask,
   bundleTask,
+  buildWasmTask,
   bundlePackTask,
   previewTask,
   previewBuildTask,

@@ -27,7 +27,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-recent-searches.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-query-suggestions.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-algolia-insights.js"></script>
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
 <script>
   var uiRootPath="{{{uiRootPath}}}"
 </script>
@@ -45,7 +44,19 @@ data-user-analytics-fingerprint-enabled="true"
 data-user-analytics-store-ip="true"
 data-modal-disclaimer="This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions."
 ></script>
+{{#if (ne page.attributes.role 'bloblang-playground')}}
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
 <!-- Prism scripts for code blocks -->
-<script defer src="{{{uiRootPath}}}/js/vendor/prism-core.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-highlight-plugin.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-core.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-numbers-plugin.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-highlight-plugin.js"></script>
+{{/if}}
+{{#if (eq page.attributes.role 'bloblang-playground')}}
+<script defer src="{{{uiRootPath}}}/js/vendor/ace/ace.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/ace/theme-github.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-json.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-coffee.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/ace/worker-json.js"></script>
+<script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
+{{/if}}
+

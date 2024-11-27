@@ -95,6 +95,19 @@ gulp -v
 
 Now that you have the prerequisites installed, you can fetch and build the UI project.
 
+==== Golang
+
+Part of the bundle process uses Golang (Go) to build a WebAssembly (`.wasm`) file. As a result, you need Go installed on your machine.
+
+Verify that Go is installed:
+
+[,bash]
+----
+go version
+----
+
+If Go is not installed, https://go.dev/doc/install[download and install it].
+
 === Clone and Initialize the UI Project
 
 Clone the UI project using git:
