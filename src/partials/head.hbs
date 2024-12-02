@@ -8,22 +8,35 @@
 <script>
   (function() {
     'use strict';
+    function handleBanner(bannerId, sessionKey) {
+      const banner = document.getElementById(bannerId);
+      if (!banner) return;
+
+      const hasSeenBanner = window.sessionStorage.getItem(sessionKey) || window.localStorage.getItem(sessionKey) || false;
+      if (hasSeenBanner) {
+        banner.remove();
+      } else {
+        banner.style.display = 'flex';
+        const closeButton = banner.querySelector('.close-button');
+        if (closeButton) {
+          closeButton.addEventListener('click', function () {
+            banner.remove();
+            window.sessionStorage.setItem(sessionKey, 'true');
+          });
+        }
+      }
+    }
 
     // Initialize theme based on local storage or system preference
     const initialTheme = localStorage.getItem('theme') ||
       (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    const hasSeenAnnouncement = window.sessionStorage.getItem('announcementClosed') || false;
 
     document.documentElement.setAttribute('data-theme', initialTheme);
 
-    if (hasSeenAnnouncement) {
-      document.addEventListener('DOMContentLoaded', function() {
-        const announcementBar = document.querySelector('.announcement-bar');
-        if (announcementBar) {
-          announcementBar.remove();
-        }
-      });
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      handleBanner('announcement-bar', 'announcementClosed');
+      handleBanner('bloblang-banner', 'bloblangBannerDismissed');
+    });
     // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
     window.addEventListener('DOMContentLoaded', function() {
       const switchButton = document.getElementById('switch-theme');

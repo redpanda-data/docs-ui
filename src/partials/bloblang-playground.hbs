@@ -18,13 +18,13 @@
       <!-- Input editor -->
       <details open>
         <summary>Input (JSON)</summary>
-        <div class="editor" id="ace-input" contenteditable="true">{ "message": "hello world" }</div>
+        <div class="editor" id="ace-input" contenteditable="true"></div>
       </details>
 
       <!-- Mapping editor -->
       <details open>
         <summary>Mapping</summary>
-        <div class="editor" id="ace-mapping" contenteditable="true">root = this</div>
+        <div class="editor" id="ace-mapping" contenteditable="true"></div>
       </details>
     </div>
   </section>
@@ -36,12 +36,20 @@
         <summary>Output</summary>
         <div class="editor" id="ace-output" contenteditable="true">"Output will appear here..."</div>
       </details>
-      <details id="metadata-details">
+      <details open>
       <summary>Metadata output</summary>
         <div class="editor" id="ace-metadata" contenteditable="true">"Metadata will appear here..."</div>
       </details>
     </div>
   </section>
+</div>
+<div id="bloblang-banner" class="banner">
+  Enjoying the Bloblang playground? Sign up to get updates about new features:
+  <form  data-netlify="true" name="bloblang-emails" method="POST" netlify-honeypot="bot-field" id="bloblang-form" class="banner-form">
+    <input type="email" name="email" id="bloblang-email" placeholder="Enter your email" required />
+    <button class="button" type="submit">Sign up</button>
+    <button  class="button" type="button" id="dismiss-banner">No thanks</button>
+  </form>
 </div>
 <script>
 let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails;
@@ -54,13 +62,22 @@ const localStorageKeys = {
 };
 
 // Default values for editors
-const defaultInput = '{ "message": "hello world" }';
-const defaultMapping = "root = this";
+const defaultInput = `{
+  "numbers": [1, 2, 3, 4, 5]
+}`;
+const defaultMapping = `root.even_numbers = this.numbers.filter(n -> n % 2 == 0)
+root.sum = this.numbers.sum()`;
 const defaultOutput = "Output will appear here...";
 const defaultMeta = "Output metadata will appear here...";
 
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
+  const banner = document.getElementById("bloblang-banner");
+  const form = document.getElementById("bloblang-form");
+  const dismissButton = document.getElementById("dismiss-banner");
+  if (localStorage.getItem("bloblangBannerDismissed") === "true" && banner) {
+    banner.style.display = "none";
+  }
 
   // Initialize input editor
   aceInputEditor = ace.edit("ace-input");
@@ -140,6 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
       aceInputEditor.setValue(sample.input, 1);
       aceMappingEditor.setValue(sample.mapping, 1);
       execute();
+      saveToLocalStorage();
     }
   });
 
@@ -148,6 +166,40 @@ document.addEventListener("DOMContentLoaded", () => {
     editor.on("change", saveToLocalStorage);
     editor.on("change", execute);
   });
+  if (dismissButton) {
+    dismissButton.addEventListener("click", () => {
+      banner.style.display = "none";
+      localStorage.setItem("bloblangBannerDismissed", "true");
+    });
+  }
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const email = form.querySelector('input[name="email"]').value;
+
+      if (!email) {
+        return;
+      }
+
+      formData.set("email", email);
+
+      fetch("{{page.url}}", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formData).toString(),
+      })
+        .then(() => {
+          console.log("Form submission success");
+          banner.style.display = "none";
+          localStorage.setItem("bloblangBannerDismissed", "true");
+        })
+        .catch((error) => {
+          console.error("Form submission error:", error);
+        });
+    });
+  }
 });
 
 // Function to get input and mapping values
@@ -193,11 +245,9 @@ function execute() {
       if (Object.keys(metadata).length > 0) {
         aceMetadataEditor.session.setMode("ace/mode/json");
         aceMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
-        metadataDetails.setAttribute("open", "true");
       } else {
         aceMetadataEditor.session.setMode("ace/mode/text");
         aceMetadataEditor.setValue("{}", 1);
-        metadataDetails.removeAttribute("open");
       }
     } else {
       // If the result is not JSON, handle it as raw text
@@ -206,7 +256,6 @@ function execute() {
 
       aceMetadataEditor.session.setMode("ace/mode/text");
       aceMetadataEditor.setValue("No metadata available", 1);
-      metadataDetails.removeAttribute("open");
     }
   } catch (error) {
     // Handle general errors
@@ -215,7 +264,6 @@ function execute() {
 
     aceMetadataEditor.session.setMode("ace/mode/text");
     aceMetadataEditor.setValue("Error: " + error.message, 1);
-    metadataDetails.removeAttribute("open");
   }
 }
 

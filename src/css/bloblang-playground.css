@@ -3,6 +3,40 @@
   margin-right: 48px;
 }
 
+/* Form */
+.bloblang-playground .banner {
+  position: fixed;
+  flex-direction: row;
+  bottom: 0;
+  width: calc(100% - var(--nav-width));
+  margin-left: -48px;
+  background-color: var(--banner-background);
+  padding: 10px 20px;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  z-index: 1000;
+}
+
+.bloblang-playground .banner span {
+  margin: 0;
+  flex-grow: 1;
+}
+
+.bloblang-playground .banner-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.bloblang-playground #contact-email {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 /* Main container setup */
 .bloblang-playground .playground-container {
   display: flex;
@@ -31,7 +65,7 @@
   color: var(--body-font-color);
 }
 
-.button-bar {
+.bloblang-playground .button-bar {
   display: flex;
   gap: 10px;
   margin-top: 10px;
@@ -39,23 +73,42 @@
   flex-wrap: wrap;
 }
 
-.button-bar .button {
+.bloblang-playground input#bloblang-email {
+  padding: 6px 8px;
+  background: rgba(68, 76, 231, 0);
+  border: 1px solid #8098f9;
+  border-radius: 6px;
+  color: var(--body-font-color);
+  margin-top: 0;
+  font-size: 14px;
+}
+
+.bloblang-playground .button,
+.bloblang-playground button.close,
+.bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
   padding: 6px 8px;
   background: rgba(68, 76, 231, 0);
   border: 1px solid rgba(128, 152, 249, 1);
   border-radius: 6px;
   color: var(--body-font-color);
+  margin-top: 0;
   cursor: pointer;
   font-size: 14px;
   transition: 'background 0.3s';
 }
 
-.button-bar .button:hover {
+.bloblang-playground .button:hover,
+.bloblang-playground button.close:hover,
+.bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
   background: rgba(68, 76, 231, 0.06);
+  color: var(--body-font-color);
 }
 
-html[data-theme=dark] .button-bar .button:hover {
+html[data-theme=dark] .bloblang-playground .button:hover,
+html[data-theme=dark] .bloblang-playground button.close:hover,
+html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
   background: rgba(68, 76, 231);
+  color: var(--body-font-color);
 }
 
 /* Editor container */
@@ -161,6 +214,13 @@ html[data-theme=dark] .button-bar .button:hover {
 }
 
 @media (max-width: 1024px) {
+  .bloblang-playground .banner {
+    margin-left: -1rem;
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .output-section {
     flex: 1 1 100%;
   }
