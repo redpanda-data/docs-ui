@@ -298,5 +298,5 @@ As such, the use of the software is granted under the terms of the https://www.m
 
 === Branding and Design
 
-Copyright (C) {url-redpanda}[Redpanda] 2023.
+Copyright (C) {url-redpanda}[Redpanda] 2024.
 All rights reserved.
