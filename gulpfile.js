@@ -13,7 +13,7 @@ const previewDestDir = 'public'
 const srcDir = 'src'
 const destDir = `${previewDestDir}/_`
 const wasmOutput = `${srcDir}/static/blobl.wasm` // Output path for the .wasm file
-const wasmMain = './blobl-editor/wasm/main.go' // Path to the Go entry point
+const wasmMain = 'blobl-editor/wasm/main.go' // Path to the Go entry point
 const { reload: livereload } = process.env.LIVERELOAD === 'true' ? require('gulp-connect') : {}
 const serverConfig = { host: '0.0.0.0', port: 5252, livereload }
 
@@ -83,7 +83,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildTask, buildWasmTask),
+  call: series(cleanTask, lintTask, buildWasmTask, buildTask),
 })
 
 const bundlePackTask = createTask({
@@ -136,9 +136,9 @@ module.exports = exportTasks(
   cleanTask,
   lintTask,
   formatTask,
+  buildWasmTask,
   buildTask,
   bundleTask,
-  buildWasmTask,
   bundlePackTask,
   previewTask,
   previewBuildTask,
