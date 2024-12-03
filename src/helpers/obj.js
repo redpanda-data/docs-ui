@@ -1,3 +1,9 @@
 'use strict'
 
-module.exports = (a) => JSON.parse(a)
+module.exports = (a) => {
+  if (typeof a === 'undefined' || a === null) {
+    return {}
+  }
+  
+  return JSON.parse(a)
+}
