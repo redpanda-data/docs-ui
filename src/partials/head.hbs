@@ -34,13 +34,13 @@
     document.documentElement.setAttribute('data-theme', initialTheme);
 
     document.addEventListener('DOMContentLoaded', function() {
-      handleBanner('announcement-bar', 'announcementClosed');
+      handleBanner('announcement', 'announcementClosed');
       handleBanner('bloblang-banner', 'bloblangBannerDismissed');
     });
     // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
     window.addEventListener('DOMContentLoaded', function() {
       const switchButton = document.getElementById('switch-theme');
-      const announcementBar = document.querySelector('.announcement-bar');
+      const announcementBar = document.getElementById('announcement');
       if (switchButton) {
         setTheme(initialTheme);  // Apply initial theme on load
         switchButton.addEventListener('click', function() {
@@ -52,6 +52,7 @@
         });
       }
       if (!announcementBar) return;
+      const hasSeenAnnouncement = window.sessionStorage.getItem('announcementClosed') || window.localStorage.getItem('announcementClosed') || false;
       if (!hasSeenAnnouncement) {
         document.documentElement.style.setProperty('--announcement-bar-height', '50px');
         document.documentElement.style.setProperty('--announcement-bar-height--desktop', '30px');
