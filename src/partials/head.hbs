@@ -12,7 +12,7 @@
       const banner = document.getElementById(bannerId);
       if (!banner) return;
 
-      const hasSeenBanner = window.sessionStorage.getItem(sessionKey) || window.localStorage.getItem(sessionKey) || false;
+      const hasSeenBanner = window.sessionStorage.getItem(sessionKey) || false;
       if (hasSeenBanner) {
         banner.remove();
       } else {
