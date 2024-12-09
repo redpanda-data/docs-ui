@@ -52,11 +52,11 @@
   </form>
 </div>
 <script>
-let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails;
+let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails, choices;
 const TAB_SIZE = 2;
 
-// Keys for localStorage
-const localStorageKeys = {
+// Keys for sessionStorage
+const sessionStorageKeys = {
   input: "blobl-editor-input",
   mapping: "blobl-editor-mapping",
 };
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const banner = document.getElementById("bloblang-banner");
   const form = document.getElementById("bloblang-form");
   const dismissButton = document.getElementById("dismiss-banner");
-  if (localStorage.getItem("bloblangBannerDismissed") === "true" && banner) {
+  if (sessionStorage.getItem("bloblangBannerDismissed") === "true" && banner) {
     banner.style.display = "none";
   }
 
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aceMetadataEditor.session.setTabSize(TAB_SIZE);
   aceMetadataEditor.session.setUseSoftTabs(true);
 
-  new Choices(document.getElementById("sample-dropdown"), {
+  choices = new Choices(document.getElementById("sample-dropdown"), {
     searchEnabled: true,
     searchPlaceholderValue: 'Search examples',
     placeholderValue: 'Select an example',
@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
   WebAssembly.instantiateStreaming(fetch("{{{siteRootPath}}}/blobl.wasm"), go.importObject)
     .then((result) => {
       go.run(result.instance);
-      restoreFromLocalStorage();
+      restoreFromStorage();
       execute();
     })
     .catch(console.error);
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     aceMappingEditor.setValue("");
     aceOutputEditor.setValue(defaultOutput, 1);
     aceMetadataEditor.setValue(defaultMeta, 1);
-    saveToLocalStorage();
+    saveTosessionStorage();
   });
 
   // Handle prettify button
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const formatted = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
       aceInputEditor.setValue(formatted, 1);
-      saveToLocalStorage();
+      saveTosessionStorage();
     } catch (error) {
       aceOutputEditor.setValue("Error: Invalid JSON input", 1);
     }
@@ -157,19 +157,19 @@ document.addEventListener("DOMContentLoaded", () => {
       aceInputEditor.setValue(sample.input, 1);
       aceMappingEditor.setValue(sample.mapping, 1);
       execute();
-      saveToLocalStorage();
+      saveTosessionStorage();
     }
   });
 
-  // Save content to localStorage and execute on changes
+  // Save content to sessionStorage and execute on changes
   [aceInputEditor, aceMappingEditor].forEach((editor) => {
-    editor.on("change", saveToLocalStorage);
+    editor.on("change", saveTosessionStorage);
     editor.on("change", execute);
   });
   if (dismissButton) {
     dismissButton.addEventListener("click", () => {
       banner.style.display = "none";
-      localStorage.setItem("bloblangBannerDismissed", "true");
+      sessionStorage.setItem("bloblangBannerDismissed", "true");
     });
   }
   if (form) {
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
           banner.innerHTML = "Thank you! Your email has been submitted.";
           setTimeout(() => {
             banner.style.display = "none";
-            localStorage.setItem("bloblangBannerDismissed", "true");
+            sessionStorage.setItem("bloblangBannerDismissed", "true");
           }, 3000);
         })
         .catch((error) => {
@@ -270,19 +270,50 @@ function execute() {
   }
 }
 
-// Save editor content to localStorage
-function saveToLocalStorage() {
-  localStorage.setItem(localStorageKeys.input, aceInputEditor.getValue());
-  localStorage.setItem(localStorageKeys.mapping, aceMappingEditor.getValue());
+// Save editor content to sessionStorage
+function saveTosessionStorage() {
+  sessionStorage.setItem(sessionStorageKeys.input, aceInputEditor.getValue());
+  sessionStorage.setItem(sessionStorageKeys.mapping, aceMappingEditor.getValue());
 }
 
-// Restore editor content from localStorage
-function restoreFromLocalStorage() {
-  const savedInput = localStorage.getItem(localStorageKeys.input);
-  const savedMapping = localStorage.getItem(localStorageKeys.mapping);
+// Restore editor content from sessionStorage
+function restoreFromStorage() {
+  const savedInput = sessionStorage.getItem(sessionStorageKeys.input);
+  const savedMapping = sessionStorage.getItem(sessionStorageKeys.mapping);
+  const dropdownElement = document.getElementById("sample-dropdown");
 
-  aceInputEditor.setValue(savedInput || defaultInput, 1);
-  aceMappingEditor.setValue(savedMapping || defaultMapping, 1);
+  const samples = {{{page.attributes.bloblang-samples}}};
+
+  if (!savedInput && !savedMapping) {
+    // Default to "Array processing" if storage is empty
+    const defaultSample = Object.values(samples).find((sample) => sample.title === "Array processing");
+
+    if (defaultSample) {
+      aceInputEditor.setValue(defaultSample.input, 1);
+      aceMappingEditor.setValue(defaultSample.mapping, 1);
+      choices.setChoiceByValue(defaultSample.title)
+    } else {
+      aceInputEditor.setValue(defaultInput, 1);
+      aceMappingEditor.setValue(defaultMapping, 1);
+      choices.setChoiceByValue("");
+    }
+  } else {
+    // Restore values from storage
+    aceInputEditor.setValue(savedInput || defaultInput, 1);
+    aceMappingEditor.setValue(savedMapping || defaultMapping, 1);
+
+    // Find and select the corresponding dropdown option
+    const matchingSample = Object.values(samples).find(
+      (sample) => sample.input === savedInput && sample.mapping === savedMapping
+    );
+
+    if (matchingSample) {
+      choices.setChoiceByValue(matchingSample.title);
+    } else {
+      choices.setChoiceByValue("");
+    }
+  }
+
   aceOutputEditor.setValue(defaultOutput, 1);
   aceMetadataEditor.setValue(defaultMeta, 1);
 }
