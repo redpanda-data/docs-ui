@@ -9,6 +9,13 @@
     {{/each}}
   </select>
 </div>
+<button
+  id="custom-ai-help"
+  type="button"
+  style="color: rgb(225, 66, 37);border-radius: 10px;border:1px solid;background:none;display:none"
+>
+  Need help? Ask AI
+</button>
 <div class="playground-container">
   <!-- Editors -->
   <section class="editors">
@@ -34,7 +41,8 @@
     <div class="editor-container">
       <details open>
         <summary>Output</summary>
-        <div class="editor" id="ace-output" contenteditable="true">"Output will appear here..."</div>
+        <div class="editor" id="ace-output" contenteditable="true">"Output will appear here..."
+        </div>
       </details>
       <details open>
       <summary>Metadata output</summary>
@@ -52,7 +60,7 @@
   </form>
 </div>
 <script>
-let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails, choices;
+let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails, choices, customAIButton;
 const TAB_SIZE = 2;
 
 // Keys for sessionStorage
@@ -70,9 +78,26 @@ root.sum = this.numbers.sum()`;
 const defaultOutput = "Output will appear here...";
 const defaultMeta = "Output metadata will appear here...";
 
+function simulateEnterKey(element) {
+  // Create a KeyboardEvent for the Enter key
+  const event = new KeyboardEvent("keydown", {
+    key: "Enter",
+    code: "Enter",
+    keyCode: 13,
+    charCode: 13,
+    bubbles: true,
+    cancelable: true
+  });
+
+  // Dispatch the event on the target element
+  element.dispatchEvent(event);
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
   const banner = document.getElementById("bloblang-banner");
+  customAIButton = document.getElementById("custom-ai-help");
   const form = document.getElementById("bloblang-form");
   const dismissButton = document.getElementById("dismiss-banner");
   if (sessionStorage.getItem("bloblangBannerDismissed") === "true" && banner) {
@@ -133,6 +158,36 @@ document.addEventListener("DOMContentLoaded", () => {
     aceOutputEditor.setValue(defaultOutput, 1);
     aceMetadataEditor.setValue(defaultMeta, 1);
     saveTosessionStorage();
+  });
+
+  customAIButton.addEventListener("click", () => {
+    const input = aceInputEditor.getValue();
+    const mapping = aceMappingEditor.getValue();
+    const output = aceOutputEditor.getValue();
+    // Simulate a click on the AI modal trigger
+    const kapaButton = document.querySelector(".custom-class-kapa");
+    if (kapaButton) {
+      kapaButton.click(); // Simulate the click to open the modal
+      // Wait for the modal and textarea to be created
+      const waitForTextarea = () => {
+        const modal = document.getElementById("kapa-widget-portal");
+        if (modal) {
+          const aiPromptTextarea = modal.querySelector("textarea");
+          if (aiPromptTextarea) {
+            aiPromptTextarea.style.height = '300px !important'
+            // Populate the AI prompt textarea with input, mapping, and output details
+            aiPromptTextarea.value = `I encountered an error with the following configuration:\nInput:\n${input}\nMapping:\n${mapping}\nOutput:\n${output}\nCan you help debug this?`;
+            simulateEnterKey(aiPromptTextarea);
+            return; // Exit once the textarea is populated
+          }
+        }
+        // Retry after a short delay if the textarea is not yet available
+        setTimeout(waitForTextarea, 100);
+      };
+      waitForTextarea();
+    } else {
+      console.error("AI modal trigger button not found.");
+    }
   });
 
   // Handle prettify button
@@ -234,6 +289,7 @@ function execute() {
     const result = blobl(getMapping(), getInput());
 
     if (isValidJSON(result)) {
+      customAIButton.style.display = "none";
       const parsedResult = JSON.parse(result);
 
       // Separate message and metadata
@@ -256,6 +312,7 @@ function execute() {
       // If the result is not JSON, handle it as raw text
       aceOutputEditor.session.setMode("ace/mode/text");
       aceOutputEditor.setValue(result, 1);
+      customAIButton.style.display = "inline-block";
 
       aceMetadataEditor.session.setMode("ace/mode/text");
       aceMetadataEditor.setValue("No metadata available", 1);
@@ -264,6 +321,7 @@ function execute() {
     // Handle general errors
     aceOutputEditor.session.setMode("ace/mode/text");
     aceOutputEditor.setValue("Error: " + error.message, 1);
+    customAIButton.style.display = "inline-block";
 
     aceMetadataEditor.session.setMode("ace/mode/text");
     aceMetadataEditor.setValue("Error: " + error.message, 1);
