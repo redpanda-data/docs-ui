@@ -1,32 +1,25 @@
-name: Publish Bundle
+---
+name: publish-release
 on:
   push:
-    tags:
-      - v*
+    tags: ['v*']
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Cache node_modules
-        uses: actions/cache@v2
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v2
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: Install Dependencies
-        run: npm install
-      - name: Run Gulp Bundle
-        run: gulp bundle
-      - name: Create Release
+      - run: npm install
+      - run: gulp bundle
+      - run: |
+          gh release create \
+            "${{ github.ref_name }}" ./build/ui-bundle.zip --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${{ github.ref_name }}" ./build/ui-bundle.zip \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="${{ github.ref_name }}" \
-              --generate-notes
       - name: Trigger Netlify Build Hook
         run: curl -X POST -d {} https://api.netlify.com/build_hooks/64e4682992f9ec30865c7c0b
