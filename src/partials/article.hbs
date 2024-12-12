@@ -1,4 +1,4 @@
-<article class="doc">
+<article class="doc {{#if page.attributes.no-toc}}no-toc{{/if}}">
 {{#if (ne page.attributes.role 'home')}}
 {{> breadcrumbs}}
 {{/if}}
@@ -30,6 +30,7 @@
 {{/if}}
 {{#if (eq page.attributes.role 'home')}}
   {{> home}}
+  {{{page.contents}}}
 {{else if (eq page.attributes.role 'component-home')}}
   {{> component-home}}
 {{else if (eq page.attributes.role 'component-home-v2')}}

@@ -35,6 +35,10 @@ html {
     padding: 0;
     margin-left: 48px;
   }
+
+  .doc.no-toc {
+    margin-right: 48px;
+  }
 }
 
 .doc h1,
@@ -73,10 +77,6 @@ html {
 @media screen and (min-width: 769px) {
   .doc h1 {
     font-size: calc(44 / var(--rem-base) * 1rem);
-  }
-
-  .doc p:not(.tableblock) a {
-    white-space: nowrap;
   }
 
   .admonitionblock .content a {
