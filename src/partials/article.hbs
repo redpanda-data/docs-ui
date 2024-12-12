@@ -36,6 +36,8 @@
   {{> component-home-v2}}
 {{else if (eq page.attributes.role 'bloblang-playground')}}
   {{> bloblang-playground}}
+{{else if (eq page.attributes.role 'index-list')}}
+  {{> index-list}}
 {{else if (eq page.layout 'index')}}
   {{> index}}
 {{else if (eq page.attributes.role 'related-labs')}}

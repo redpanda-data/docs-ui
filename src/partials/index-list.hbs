@@ -1,0 +1,18 @@
+{{{page.contents}}}
+
+{{#with (get-index-data) as |indexData|}}
+  {{#if indexData}}
+    <ul class="index">
+      {{#each indexData}}
+        <li class="index">
+          <a href="{{{relativize this.url}}}">{{{this.title}}}</a>
+          {{#if (ne this.title this.description)}}
+            <p class="index">{{{this.description}}}</p>
+          {{/if}}
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No index data found.</p>
+  {{/if}}
+{{/with}}
