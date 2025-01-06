@@ -73,8 +73,15 @@ const buildWasmTask = createTask({
   name: 'build:wasm',
   desc: 'Build the WebAssembly (.wasm) file using Go',
   call: (done) => {
-    const command = `GOOS=js GOARCH=wasm go build -o ${wasmOutput} ${wasmMain}`
-    exec(command, (err, stdout, stderr) => {
+    const envVars = {
+      ...process.env, // preserve existing env vars
+      GOOS: 'js',
+      GOARCH: 'wasm',
+    }
+
+    const command = `go build -o ${wasmOutput} ${wasmMain}`
+
+    exec(command, { env: envVars }, (err, stdout, stderr) => {
       if (err) {
         log.error('Error building wasm:', stderr)
         done(err)
