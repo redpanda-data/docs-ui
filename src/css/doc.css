@@ -250,7 +250,8 @@ html {
   padding: 1em;
 }
 
-.doc pre > code {
+.doc pre > code,
+.doc details .listingblock .content pre > code {
   padding-bottom: 1rem;
   border: none;
   white-space: pre-wrap;
@@ -884,6 +885,10 @@ table code {
   display: none;
 }
 
+details[open] > summary {
+  padding-bottom: 16px;
+}
+
 .doc details > summary::after {
   content: "";
   background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
@@ -900,7 +905,7 @@ table code {
 }
 
 .doc details {
-  margin: 1rem 0;
+  margin: 0.5rem 0;
   background-color: var(--accordian-background);
   box-shadow: 0 1px 2px 0 #0000001a;
   padding: 16px 24px;
