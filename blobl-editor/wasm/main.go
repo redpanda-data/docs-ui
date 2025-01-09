@@ -23,41 +23,82 @@ func main() {
 }
 
 func blobl(_ js.Value, args []js.Value) any {
-	if len(args) != 2 {
-		return fmt.Sprintf("Expected two arguments, received %d instead", len(args))
+	if len(args) < 2 || len(args) > 3 {
+		return fmt.Sprintf("Expected 2 or 3 arguments, received %d instead", len(args))
 	}
 
+	// Parse the mapping
 	mapping, err := globalEnv.Parse(args[0].String())
 	if err != nil {
 		return fmt.Sprintf("Failed to parse mapping: %s", err)
 	}
 
-	msg, err := service.NewMessage([]byte(args[1].String())).BloblangQuery(mapping)
+	// Parse the payload JSON
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(args[1].String()), &payload); err != nil {
+		return fmt.Sprintf("Failed to parse payload: %s", err)
+	}
+
+	// Parse the optional metadata
+	metadata := map[string]string{}
+	if len(args) == 3 {
+		var meta map[string]any
+		if err := json.Unmarshal([]byte(args[2].String()), &meta); err != nil {
+			return fmt.Sprintf("Failed to parse metadata: %s", err)
+		}
+		for k, v := range meta {
+			if strVal, ok := v.(string); ok {
+				metadata[k] = strVal
+			} else {
+				return fmt.Sprintf("Metadata value for key '%s' must be a string", k)
+			}
+		}
+	}
+
+	// Serialize the payload for the message
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Sprintf("Failed to serialize payload: %s", err)
+	}
+
+	// Create a new message with the payload
+	msg := service.NewMessage(payloadBytes)
+
+	// Apply metadata to the message
+	for key, value := range metadata {
+		msg.MetaSet(key, value)
+	}
+
+	// Execute the mapping
+	result, err := msg.BloblangQuery(mapping)
 	if err != nil {
 		return fmt.Sprintf("Failed to execute mapping: %s", err)
 	}
 
-	message, err := msg.AsStructured()
+	// Extract the structured message
+	message, err := result.AsStructured()
 	if err != nil {
 		return fmt.Sprintf("Failed to marshal message: %s", err)
 	}
 
-	var metadata map[string]any
-	msg.MetaWalkMut(func(key string, value any) error {
-		if metadata == nil {
-			metadata = make(map[string]any)
+	// Extract metadata
+	var extractedMetadata map[string]any
+	result.MetaWalkMut(func(key string, value any) error {
+		if extractedMetadata == nil {
+			extractedMetadata = make(map[string]any)
 		}
-		metadata[key] = value
+		extractedMetadata[key] = value
 		return nil
 	})
 
+	// Marshal the final output
 	var output []byte
 	if output, err = json.MarshalIndent(struct {
 		Msg  any            `json:"msg"`
 		Meta map[string]any `json:"meta,omitempty"`
 	}{
 		Msg:  message,
-		Meta: metadata,
+		Meta: extractedMetadata,
 	}, "", "  "); err != nil {
 		return fmt.Sprintf("Failed to marshal output: %s", err)
 	}
