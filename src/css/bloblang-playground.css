@@ -144,7 +144,7 @@ html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitBut
   font-size: var(--body-font-size);
   background-color: var(--pre-background) !important;
   color: var(--code-font-color) !important;
-  height: 250px;
+  min-height: 130px;
   padding: 10px;
   overflow-y: auto;
   border-radius: 5px;
@@ -160,6 +160,10 @@ html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitBut
   gap: 20px;
   display: flex;
   flex-direction: column;
+}
+
+.bloblang-playground #ace-input-metadata {
+  min-height: unset;
 }
 
 .bloblang-playground .choices[data-type*=select-one] .choices__inner {

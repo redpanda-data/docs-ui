@@ -40,20 +40,13 @@ func blobl(_ js.Value, args []js.Value) any {
 	}
 
 	// Parse the optional metadata
-	metadata := map[string]string{}
+	metadata := map[string]any{}
 	if len(args) == 3 {
-		var meta map[string]any
-		if err := json.Unmarshal([]byte(args[2].String()), &meta); err != nil {
+		if err := json.Unmarshal([]byte(args[2].String()), &metadata); err != nil {
 			return fmt.Sprintf("Failed to parse metadata: %s", err)
 		}
-		for k, v := range meta {
-			if strVal, ok := v.(string); ok {
-				metadata[k] = strVal
-			} else {
-				return fmt.Sprintf("Metadata value for key '%s' must be a string", k)
-			}
-		}
 	}
+
 
 	// Serialize the payload for the message
 	payloadBytes, err := json.Marshal(payload)
@@ -66,7 +59,11 @@ func blobl(_ js.Value, args []js.Value) any {
 
 	// Apply metadata to the message
 	for key, value := range metadata {
-		msg.MetaSet(key, value)
+    strValue, ok := value.(string)
+    if !ok {
+			return fmt.Errorf("metadata value for key '%s' must be a string, got %T", key, value)
+    }
+    msg.MetaSet(key, strValue)
 	}
 
 	// Execute the mapping

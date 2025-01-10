@@ -87,7 +87,7 @@ function initializeAceEditor(editorId, mode, readOnly = false, initialValue = ''
   editor.session.setUseSoftTabs(true);
   editor.setOptions({
     minLines: 1, // Minimum height
-    maxLines: Infinity, // Allow unlimited growth
+    maxLines: 50, // Allow growth
   });
   return editor;
 }
