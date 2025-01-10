@@ -17,8 +17,12 @@
     <div class="editor-container">
       <!-- Input editor -->
       <details open>
-        <summary>Input (JSON)</summary>
+        <summary>Input</summary>
         <div class="editor" id="ace-input" contenteditable="true"></div>
+      </details>
+      <details open>
+        <summary>Input metadata</summary>
+        <div class="editor" id="ace-input-metadata" contenteditable="true"></div>
       </details>
 
       <!-- Mapping editor -->
@@ -34,11 +38,11 @@
     <div class="editor-container">
       <details open>
         <summary>Output</summary>
-        <div class="editor" id="ace-output" contenteditable="true">"Output will appear here..."</div>
+        <div class="editor" id="ace-output">"Output will appear here..."</div>
       </details>
       <details open>
-      <summary>Metadata output</summary>
-        <div class="editor" id="ace-metadata" contenteditable="true">"Metadata will appear here..."</div>
+      <summary>Output metadata</summary>
+        <div class="editor" id="ace-metadata">"Metadata will appear here..."</div>
       </details>
     </div>
   </section>
@@ -58,6 +62,7 @@ const TAB_SIZE = 2;
 // Keys for sessionStorage
 const sessionStorageKeys = {
   input: "blobl-editor-input",
+  metadata: "blobl-editor-metadata",
   mapping: "blobl-editor-mapping",
 };
 
@@ -65,10 +70,35 @@ const sessionStorageKeys = {
 const defaultInput = `{
   "numbers": [1, 2, 3, 4, 5]
 }`;
+const defaultMetaInput = "{}";
 const defaultMapping = `root.even_numbers = this.numbers.filter(n -> n % 2 == 0)
 root.sum = this.numbers.sum()`;
 const defaultOutput = "Output will appear here...";
-const defaultMeta = "Output metadata will appear here...";
+const defaultMetaOutput = "Output metadata will appear here...";
+
+// Initialize ACE Editors
+function initializeAceEditor(editorId, mode, readOnly = false, initialValue = '') {
+  const editor = ace.edit(editorId);
+  editor.setTheme('ace/theme/github');
+  editor.session.setMode(mode);
+  editor.setReadOnly(readOnly);
+  editor.setValue(prettifyJSON(initialValue), 1);
+  editor.session.setTabSize(TAB_SIZE);
+  editor.session.setUseSoftTabs(true);
+  editor.setOptions({
+    minLines: 1, // Minimum height
+    maxLines: 50, // Allow growth
+  });
+  return editor;
+}
+
+function prettifyJSON(json) {
+  try {
+    return JSON.stringify(JSON.parse(json), null, 2);
+  } catch (error) {
+    return json; // Return original value if it's not valid JSON
+  }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
@@ -80,35 +110,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Initialize input editor
-  aceInputEditor = ace.edit("ace-input");
-  aceInputEditor.setTheme("ace/theme/github");
-  aceInputEditor.session.setMode("ace/mode/json");
-  aceInputEditor.session.setTabSize(TAB_SIZE);
-  aceInputEditor.session.setUseSoftTabs(true);
+  aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, defaultInput);
+
+  // Initialize input metadata editor
+  aceInputMetadataEditor = initializeAceEditor("ace-input-metadata", 'ace/mode/json', false, defaultMetaInput);
 
   // Initialize mapping editor
-  aceMappingEditor = ace.edit("ace-mapping");
-  aceMappingEditor.setTheme("ace/theme/github");
-  aceMappingEditor.session.setMode("ace/mode/coffee");
-  aceMappingEditor.session.setOption("useWorker", false);
-  aceMappingEditor.session.setTabSize(TAB_SIZE);
-  aceMappingEditor.session.setUseSoftTabs(true);
+  aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/coffee', false, defaultMapping);
 
   // Initialize output editor
-  aceOutputEditor = ace.edit("ace-output");
-  aceOutputEditor.setTheme("ace/theme/github");
-  aceOutputEditor.session.setMode("ace/mode/text"); // JSON syntax highlighting
-  aceOutputEditor.setReadOnly(true); // Make output read-only
-  aceOutputEditor.session.setTabSize(TAB_SIZE);
-  aceOutputEditor.session.setUseSoftTabs(true);
+  aceOutputEditor = initializeAceEditor("ace-output", 'ace/mode/text', true, defaultMapping);
 
   // Initialize metadata editor
-  aceMetadataEditor = ace.edit("ace-metadata");
-  aceMetadataEditor.setTheme("ace/theme/github");
-  aceMetadataEditor.session.setMode("ace/mode/json"); // Use JSON mode for metadata
-  aceMetadataEditor.setReadOnly(true); // Make metadata read-only
-  aceMetadataEditor.session.setTabSize(TAB_SIZE);
-  aceMetadataEditor.session.setUseSoftTabs(true);
+  aceOutputMetadataEditor = initializeAceEditor("ace-metadata", 'ace/mode/text', true, defaultMetaOutput);
 
   choices = new Choices(document.getElementById("sample-dropdown"), {
     searchEnabled: true,
@@ -130,16 +144,20 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("clear").addEventListener("click", () => {
     aceInputEditor.setValue("");
     aceMappingEditor.setValue("");
+    aceInputMetadataEditor.setValue("")
     aceOutputEditor.setValue(defaultOutput, 1);
-    aceMetadataEditor.setValue(defaultMeta, 1);
+    aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
     saveTosessionStorage();
   });
 
   // Handle prettify button
   document.getElementById("prettify").addEventListener("click", () => {
     try {
-      const formatted = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
-      aceInputEditor.setValue(formatted, 1);
+      const formattedInput = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
+      const formattedInputMetadata = JSON.stringify(JSON.parse(aceInputMetadataEditor.getValue()), null, 2);
+      aceInputEditor.setValue(formattedInput, 1);
+      saveTosessionStorage();
+      aceInputMetadataEditor.setValue(formattedInputMetadata, 1);
       saveTosessionStorage();
     } catch (error) {
       aceOutputEditor.setValue("Error: Invalid JSON input", 1);
@@ -156,13 +174,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (sample) {
       aceInputEditor.setValue(sample.input, 1);
       aceMappingEditor.setValue(sample.mapping, 1);
+      aceInputMetadataEditor.setValue(sample.metadata || defaultMetaInput, 1);
       execute();
       saveTosessionStorage();
     }
   });
 
   // Save content to sessionStorage and execute on changes
-  [aceInputEditor, aceMappingEditor].forEach((editor) => {
+  [aceInputEditor, aceInputMetadataEditor, aceMappingEditor].forEach((editor) => {
     editor.on("change", saveTosessionStorage);
     editor.on("change", execute);
   });
@@ -214,6 +233,10 @@ function getMapping() {
   return aceMappingEditor ? aceMappingEditor.getValue() : "";
 }
 
+function getInputMetadata() {
+  return aceInputMetadataEditor ? aceInputMetadataEditor.getValue() : "";
+}
+
 function isValidJSON(str) {
   try {
     JSON.parse(str);
@@ -228,10 +251,10 @@ function execute() {
   if (!metadataDetails) metadataDetails = document.getElementById("metadata-details");
 
   aceOutputEditor.setValue("");
-  aceMetadataEditor.setValue("");
+  aceOutputMetadataEditor.setValue("");
 
   try {
-    const result = blobl(getMapping(), getInput());
+    const result = blobl(getMapping(), getInput(), getInputMetadata());
 
     if (isValidJSON(result)) {
       const parsedResult = JSON.parse(result);
@@ -246,27 +269,27 @@ function execute() {
 
       // Display metadata
       if (Object.keys(metadata).length > 0) {
-        aceMetadataEditor.session.setMode("ace/mode/json");
-        aceMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
+        aceOutputMetadataEditor.session.setMode("ace/mode/json");
+        aceOutputMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
       } else {
-        aceMetadataEditor.session.setMode("ace/mode/text");
-        aceMetadataEditor.setValue("{}", 1);
+        aceOutputMetadataEditor.session.setMode("ace/mode/text");
+        aceOutputMetadataEditor.setValue("{}", 1);
       }
     } else {
       // If the result is not JSON, handle it as raw text
       aceOutputEditor.session.setMode("ace/mode/text");
       aceOutputEditor.setValue(result, 1);
 
-      aceMetadataEditor.session.setMode("ace/mode/text");
-      aceMetadataEditor.setValue("No metadata available", 1);
+      aceOutputMetadataEditor.session.setMode("ace/mode/text");
+      aceOutputMetadataEditor.setValue("No metadata available", 1);
     }
   } catch (error) {
     // Handle general errors
     aceOutputEditor.session.setMode("ace/mode/text");
     aceOutputEditor.setValue("Error: " + error.message, 1);
 
-    aceMetadataEditor.session.setMode("ace/mode/text");
-    aceMetadataEditor.setValue("Error: " + error.message, 1);
+    aceOutputMetadataEditor.session.setMode("ace/mode/text");
+    aceOutputMetadataEditor.setValue("Error: " + error.message, 1);
   }
 }
 
@@ -274,12 +297,14 @@ function execute() {
 function saveTosessionStorage() {
   sessionStorage.setItem(sessionStorageKeys.input, aceInputEditor.getValue());
   sessionStorage.setItem(sessionStorageKeys.mapping, aceMappingEditor.getValue());
+  sessionStorage.setItem(sessionStorageKeys.metadata, aceInputMetadataEditor.getValue());
 }
 
 // Restore editor content from sessionStorage
 function restoreFromStorage() {
   const savedInput = sessionStorage.getItem(sessionStorageKeys.input);
   const savedMapping = sessionStorage.getItem(sessionStorageKeys.mapping);
+  const savedMeta = sessionStorage.getItem(sessionStorageKeys.metadata);
   const dropdownElement = document.getElementById("sample-dropdown");
 
   const samples = {{{page.attributes.bloblang-samples}}};
@@ -291,16 +316,19 @@ function restoreFromStorage() {
     if (defaultSample) {
       aceInputEditor.setValue(defaultSample.input, 1);
       aceMappingEditor.setValue(defaultSample.mapping, 1);
+      defaultSample.metadata ? aceInputMetadataEditor.setValue(defaultSample.metadata, 1) : aceInputMetadataEditor.setValue(defaultMetaInput, 1)
       choices.setChoiceByValue(defaultSample.title)
     } else {
       aceInputEditor.setValue(defaultInput, 1);
       aceMappingEditor.setValue(defaultMapping, 1);
+      aceInputMetadataEditor.setValue(defaultMetaInput, 1);
       choices.setChoiceByValue("");
     }
   } else {
     // Restore values from storage
     aceInputEditor.setValue(savedInput || defaultInput, 1);
     aceMappingEditor.setValue(savedMapping || defaultMapping, 1);
+    aceInputMetadataEditor.setValue(savedMeta || defaultMetaInput, 1);
 
     // Find and select the corresponding dropdown option
     const matchingSample = Object.values(samples).find(
@@ -315,7 +343,7 @@ function restoreFromStorage() {
   }
 
   aceOutputEditor.setValue(defaultOutput, 1);
-  aceMetadataEditor.setValue(defaultMeta, 1);
+  aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
 }
 
 </script>

@@ -51,7 +51,7 @@ data-modal-disclaimer="This is a custom LLM for Redpanda with access to all deve
 <script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-numbers-plugin.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-highlight-plugin.js"></script>
 {{/if}}
-{{#if (eq page.attributes.role 'bloblang-playground')}}
+{{#if (or (eq page.attributes.role 'bloblang-playground')(eq page.attributes.role 'bloblang-snippets'))}}
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/ace.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/theme-github.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-json.js"></script>
