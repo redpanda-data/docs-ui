@@ -4,23 +4,39 @@
 {{#with (log-missing this ./missing @root.page.url)}}
 {{/with}}
 {{/if}}
-<div class="banner-container" id="latest-banner">
+<div class="banner-container {{#if @root.page.attributes.is-nearing-eol}} nearing-eol{{else @root.page.attributes.is-past-eol}} past-eol{{/if}}" id="latest-banner">
   {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
-    <div>You are viewing the {{@root.page.component.title}} <b>v{{@root.page.version}}</b> beta documentation.
+    <div>You are viewing the {{@root.page.component.title}} <b>v{{@root.page.version}} beta</b> documentation.
     <br>We welcome your feedback at the <a href="https://redpandacommunity.slack.com/archives/C04N3C10VUL">Redpanda Community Slack #beta-feedback channel</a>.
+    </div>
+    <div>
+      To view the latest available version of the docs, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
+    </div>
+  {{else if @root.page.attributes.is-nearing-eol}}
+    <div>
+      This version will reach its <a href="{{ @root.page.attributes.eol-doc}}" target="_blank"><b>end of life</b></a> on <b>{{ @root.page.attributes.eol-date}}</b>.
+      Please <a href="{{resolve-resource  @root.page.attributes.upgrade-doc}}">upgrade to a supported version</a>.
+    </div>
+  {{else if  @root.page.attributes.is-past-eol}}
+    <div>
+      This version is <a href="{{ @root.page.attributes.eol-doc}}" target="_blank"><b>no longer supported</b>. It reached its end of life on <b>{{ @root.page.attributes.eol-date}}</b>.
+      Please <a href="{{resolve-resource  @root.page.attributes.upgrade-doc}}">upgrade to a supported version</a>.
     </div>
   {{else if (eq @root.page.attributes.eol true)}}
     <div>
-      This is documentation for {{@root.page.component.title}} <b>v{{@root.page.version}}</b>, which is <a href="https://support.redpanda.com/hc/en-us/articles/20617574366743-Redpanda-Supported-Versions">no longer supported</a>.
+      This is documentation for {{@root.page.component.title}} <b>v{{@root.page.version}}</b>, which is <a href="https://support.redpanda.com/hc/en-us/articles/20617574366743-Redpanda-Supported-Versions"><b>no longer supported</b></a>.
+    </div>
+    <div>
+      To view the latest available version of the docs, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
     </div>
   {{else}}
     <div>
       This is documentation for {{@root.page.component.title}} <b>v{{@root.page.version}}</b>.
     </div>
+    <div>
+      To view the latest available version of the docs, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
+    </div>
   {{/if}}
-  <div>
-    To view the latest available version of the docs, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
-  </div>
 </div>
 {{/with}}
 {{/unless}}
