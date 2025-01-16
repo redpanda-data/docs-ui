@@ -12,14 +12,14 @@
     <div>
       To view the latest available version of the docs, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
     </div>
-  {{else if @root.page.attributes.is-nearing-eol}}
+  {{else if (eq @root.page.attributes.is-nearing-eol 'true')}}
     <div>
       This version will reach its <a href="{{ @root.page.attributes.eol-doc}}" target="_blank"><b>end of life</b></a> on <b>{{ @root.page.attributes.eol-date}}</b>.
       Please <a href="{{resolve-resource  @root.page.attributes.upgrade-doc}}">upgrade to a supported version</a>.
     </div>
-  {{else if  @root.page.attributes.is-past-eol}}
+  {{else if (eq @root.page.attributes.is-past-eol 'true')}}
     <div>
-      This version is <a href="{{ @root.page.attributes.eol-doc}}" target="_blank"><b>no longer supported</b>. It reached its end of life on <b>{{ @root.page.attributes.eol-date}}</b>.
+      This version is <a href="{{ @root.page.attributes.eol-doc}}" target="_blank"><b>no longer supported</b></a>. It reached its end of life on <b>{{ @root.page.attributes.eol-date}}</b>.
       Please <a href="{{resolve-resource  @root.page.attributes.upgrade-doc}}">upgrade to a supported version</a>.
     </div>
   {{else if (eq @root.page.attributes.eol true)}}
