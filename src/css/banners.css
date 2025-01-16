@@ -7,3 +7,11 @@
   margin-top: 0;
   margin-bottom: 10px;
 }
+
+.banner-container.nearing-eol {
+  background-color: var(--caution-background);
+}
+
+.banner-container.past-eol {
+  background-color: var(--warning-background);
+}
