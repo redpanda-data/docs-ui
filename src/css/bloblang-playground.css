@@ -24,10 +24,18 @@
   flex-grow: 1;
 }
 
+.bloblang-playground .banner-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
 .bloblang-playground .banner-form {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .bloblang-playground #contact-email {

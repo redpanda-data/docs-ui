@@ -5,6 +5,9 @@
 {{#unless page.attributes.cloud}}
 {{> latest-banner}}
 {{/unless}}
+{{#if (eq page.attributes.role 'bloblang-playground')}}
+{{> bloblang-signup-form}}
+{{/if}}
 {{#if (eq page.attributes.role 'home')}}
   <div class="home-header-container">
     <div class="home-header">
