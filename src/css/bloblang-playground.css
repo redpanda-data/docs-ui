@@ -92,11 +92,11 @@
 }
 
 .bloblang-playground .button,
-.bloblang-playground button.close,
+.bloblang-playground button#dismiss-banner,
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
   padding: 6px 8px;
   background: rgba(68, 76, 231, 0);
-  border: 1px solid rgba(128, 152, 249, 1);
+  border: none;
   border-radius: 6px;
   color: var(--body-font-color);
   margin-top: 0;
@@ -105,18 +105,24 @@
   transition: 'background 0.3s';
 }
 
-.bloblang-playground .button:hover,
-.bloblang-playground button.close:hover,
-.bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
-  background: rgba(68, 76, 231, 0.06);
-  color: var(--body-font-color);
+.bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
+  background-color: #4474e7;
+  color: #ffffff;
 }
 
-html[data-theme=dark] .bloblang-playground .button:hover,
-html[data-theme=dark] .bloblang-playground button.close:hover,
-html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
-  background: rgba(68, 76, 231);
-  color: var(--body-font-color);
+.bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
+  background-color: #365bd6;
+  transform: translateY(-2px);
+}
+
+.bloblang-playground button#dismiss-banner {
+  background-color: #e0e0e0;
+  color: #000000;
+}
+
+.bloblang-playground button#dismiss-banner:hover {
+  background-color: #bdbdbd;
+  transform: translateY(-2px);
 }
 
 /* Editor container */
