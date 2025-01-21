@@ -26,9 +26,27 @@
 
 .bloblang-playground .banner-container {
   display: flex;
+  position: relative;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+}
+
+.bloblang-playground .banner-container .close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #555555;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.bloblang-playground .banner-container .close-button:hover {
+  color: #000000;
+  transform: scale(1.2);
 }
 
 .bloblang-playground .banner-form {
@@ -92,7 +110,6 @@
 }
 
 .bloblang-playground .button,
-.bloblang-playground button#dismiss-banner,
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
   padding: 6px 8px;
   background: rgba(68, 76, 231, 0);
@@ -112,16 +129,6 @@
 
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
   background-color: #365bd6;
-  transform: translateY(-2px);
-}
-
-.bloblang-playground button#dismiss-banner {
-  background-color: #e0e0e0;
-  color: #000000;
-}
-
-.bloblang-playground button#dismiss-banner:hover {
-  background-color: #bdbdbd;
   transform: translateY(-2px);
 }
 
@@ -301,5 +308,13 @@
 
   .bloblang-snippet .row {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .bloblang-playground .banner-container .close-button {
+    top: 5px;
+    right: 5px;
+    font-size: 18px;
   }
 }

@@ -1,9 +1,9 @@
 <div class="banner-container" id="bloblang-banner">
-  Sign up for updates about new features in the playground:
+  <button class="close-button" id="dismiss-banner" aria-label="Dismiss">&times;</button>
+  <p>Sign up for updates about new features in the playground:</p>
   <form  data-netlify="true" name="bloblang-emails" method="POST" netlify-honeypot="bot-field" id="bloblang-form" class="banner-form">
     <input type="email" name="email" id="bloblang-email" placeholder="Enter your email..." required />
     <button class="button" type="submit">Sign up</button>
-    <button  class="button" type="button" id="dismiss-banner">No thanks</button>
   </form>
 </div>
 <script>
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
           setTimeout(() => {
             banner.style.display = "none";
             sessionStorage.setItem("bloblangBannerDismissed", "true");
-          }, 3000);
+          }, 2000);
         })
         .catch((error) => {
           console.error("Form submission error:", error);
