@@ -30,13 +30,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script>
   var uiRootPath="{{{uiRootPath}}}"
 </script>
-{{#if (ne page.attributes.role 'bloblang-playground')}}
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
-<!-- Prism scripts for code blocks -->
-<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-core.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-numbers-plugin.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-highlight-plugin.js"></script>
-{{/if}}
 {{#if (or (eq page.attributes.role 'bloblang-playground')(eq page.attributes.role 'bloblang-snippets'))}}
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/ace.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/theme-github.js"></script>
@@ -45,7 +38,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/worker-json.js"></script>
 <script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
 {{/if}}
-<script async
+<script defer
 src="https://widget.kapa.ai/kapa-widget.bundle.js"
 data-website-id="fe00d579-9e9a-4f83-8f9f-0ca7672262a6"
 data-project-name="Redpanda"
@@ -59,4 +52,12 @@ data-user-analytics-fingerprint-enabled="true"
 data-user-analytics-store-ip="true"
 data-modal-disclaimer="This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions."
 ></script>
+{{#if (ne page.attributes.role 'bloblang-playground')}}
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
+<!-- Prism scripts for code blocks -->
+<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-core.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-numbers-plugin.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-highlight-plugin.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
+{{/if}}
 
