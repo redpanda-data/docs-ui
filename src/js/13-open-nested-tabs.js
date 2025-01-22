@@ -13,7 +13,6 @@
  * - Re-run Prism for syntax highlighting when tab content becomes visible.
  * - Scroll to the selected tab.
  */
-
 (function () {
   'use strict';
 
@@ -25,111 +24,48 @@
    */
   function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), wait);
     };
   }
 
   /**
-   * Debounced function to highlight all code blocks using Prism.js.
+   * Debounced function to highlight targeted code blocks using Prism.js.
    * This ensures that highlighting does not occur excessively during rapid tab switches.
+   * @param {HTMLElement[]} codeElements - Array of code elements to highlight.
    */
-  const debouncedHighlightAll = debounce(() => {
-    if (typeof Prism !== 'undefined' && Prism.highlightAll) {
-      Prism.highlightAll();
-      // If using line numbers plugin, resize them accordingly
-      const lineNumberElements = document.querySelectorAll('.line-numbers');
-      lineNumberElements.forEach(element => {
-        if (Prism.plugins.lineNumbers) {
-          Prism.plugins.lineNumbers.resize(element);
-        }
-      });
-    }
-  }, 200);
-
-  /**
-   * Retrieves the closest ancestor element with a 'data-sync-group-id' attribute.
-   * @param {HTMLElement} element - The element to start searching from.
-   * @returns {HTMLElement|null} - The closest ancestor with 'data-sync-group-id', or null if not found.
-   */
-  function getClosestSyncGroupElement(element) {
-    if (element) {
-      return element.closest('[data-sync-group-id]');
-    }
-    return null;
-  }
-
-  /**
-   * Activates a tab by its ID across all synchronization groups it belongs to.
-   * @param {string} tabId - The ID of the tab to activate.
-   */
-  function activateTab(tabId) {
-
-    const targetTab = document.getElementById(tabId);
-    if (!targetTab) {
-      return;
-    }
-
-    const syncGroupElement = getClosestSyncGroupElement(targetTab);
-    if (!syncGroupElement) {
-      return;
-    }
-
-    const syncGroupIds = syncGroupElement.dataset.syncGroupId.split('|').map(id => id.trim());
-
-    syncGroupIds.forEach(syncGroupId => {
-      // Select all tab groups with this synchronization group ID
-      const tabGroups = document.querySelectorAll(`[data-sync-group-id="${syncGroupId}"]`);
-      tabGroups.forEach(group => {
-        // Deactivate all tabs in this group
-        const tabs = group.querySelectorAll('li.tab');
-        tabs.forEach(tab => {
-          tab.classList.remove('active');
-          tab.setAttribute('aria-selected', 'false');
-          tab.setAttribute('tabindex', '-1');
-        });
-
-        // Hide all tab panels in this group
-        const panels = group.querySelectorAll('.tabpanel');
-        panels.forEach(panel => {
-          panel.classList.add('is-hidden');
-          panel.setAttribute('hidden', '');
-        });
-
-        // Activate the target tab in this group
-        const currentTab = group.querySelector(`#${tabId}`);
-        if (currentTab) {
-          currentTab.classList.add('active');
-          currentTab.setAttribute('aria-selected', 'true');
-          currentTab.setAttribute('tabindex', '0');
-
-          // Show the corresponding tab panel
-          const panelId = `${tabId}--panel`;
-          const targetPanel = group.querySelector(`#${panelId}`);
-          if (targetPanel) {
-            targetPanel.classList.remove('is-hidden');
-            targetPanel.removeAttribute('hidden');
-
-            // Optionally, scroll to the activated tab panel
-            targetPanel.scrollIntoView({ behavior: 'smooth' });
+  const debouncedHighlight = debounce((codeElements) => {
+    if (typeof Prism !== 'undefined' && Prism.highlightElement) {
+      requestAnimationFrame(() => {
+        codeElements.forEach(pre => {
+          const code = pre.querySelector('code');
+          if (code) {
+            // https://prismjs.com/docs/Prism.html#.highlightElement
+            Prism.highlightElement(code, true);
+            Prism.plugins.lineNumbers.resize(code)
           }
-        }
-      });
-    });
+        });
+      })
+    } else {
+      console.warn('Prism.highlightElement() is not available. Ensure Prism.js is correctly loaded.');
+    }
+  }, 100);
 
-    // Update the URL with the active tab ID
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', tabId);
-    window.history.pushState(null, '', url);
-
-    // Trigger Prism.js highlighting
-    debouncedHighlightAll();
+  /**
+   * Simulates a click on the specified tab element.
+   * @param {HTMLElement} tabElement - The tab element to click.
+   */
+  function simulateTabClick(tabElement) {
+    if (tabElement) {
+      tabElement.click();
+    }
   }
 
   /**
    * Removes the 'tab' query parameter from the URL if an anchor is present.
    * Ensures that the hash fragment takes precedence over the 'tab' parameter.
+   * @param {URL} url - The current URL object.
    */
   function stripTabParamIfHashPresent(url) {
     if (url.hash && url.searchParams.has('tab')) {
@@ -150,26 +86,34 @@
     const updatedTabParam = updatedUrl.searchParams.get('tab');
     const hash = updatedUrl.hash.substring(1); // Remove the '#' character
 
+    // Define a valid hash pattern (adjust as needed)
+    const validHashPattern = /^[a-zA-Z0-9-_]+$/;
+
     // Prioritize hash fragment over query parameter
-    if (hash) {
+    if (hash && validHashPattern.test(hash)) {
       const targetTab = document.getElementById(hash);
       if (targetTab) {
-        activateTab(hash);
+        simulateTabClick(targetTab);
         return;
+      } else {
+        console.warn(`No tab found for hash "${hash}".`);
       }
     }
 
-    if (updatedTabParam) {
+    if (updatedTabParam && validHashPattern.test(updatedTabParam)) {
       const targetTab = document.getElementById(updatedTabParam);
       if (targetTab) {
-        activateTab(updatedTabParam);
+        simulateTabClick(targetTab);
         return;
+      } else {
+        console.warn(`No tab found for query parameter "${updatedTabParam}".`);
       }
     }
   }
 
   /**
    * Sets up event listeners for tab clicks to handle activation and synchronization.
+   * Utilizes an external library to manage synchronized tab activation.
    */
   function setupTabListeners() {
     const tabs = document.querySelectorAll('li.tab');
@@ -179,7 +123,17 @@
         event.preventDefault();
         const clickedTab = event.currentTarget;
         const tabId = clickedTab.id;
-        activateTab(tabId);
+
+        // Let the external library handle synchronization
+        // After synchronization, highlight code blocks within active tabs
+        // Use a short timeout to allow the external library to activate tabs
+        setTimeout(() => {
+          const activePanels = document.querySelectorAll('.tabpanel:not(.is-hidden)');
+          const codeBlocks = Array.from(activePanels).flatMap(panel => Array.from(panel.querySelectorAll('pre.highlight, pre.line-numbers.highlight')));
+          if (codeBlocks.length > 0) {
+            debouncedHighlight(codeBlocks);
+          }
+        }, 100); // Adjust delay as needed based on external library's behavior
       });
     });
   }
