@@ -123,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((result) => {
       go.run(result.instance);
       let loaded = restoreEditorsFromUrl()
-      console.log(loaded)
       if (!loaded)  restoreFromStorage();
       execute();
     })
