@@ -3,6 +3,7 @@
 <div class="button-bar">
   <button id="clear" class="button">Clear</button>
   <button id="prettify" class="button">Format input</button>
+  <button id="share" class="button">Share link</button>
   <select id="sample-dropdown" class="button">
     {{#each (obj page.attributes.bloblang-samples) }}
     <option value="{{this.title}}">{{this.title}}</option>
@@ -121,10 +122,42 @@ document.addEventListener("DOMContentLoaded", () => {
   WebAssembly.instantiateStreaming(fetch("{{{siteRootPath}}}/blobl.wasm"), go.importObject)
     .then((result) => {
       go.run(result.instance);
-      restoreFromStorage();
+      let loaded = restoreEditorsFromUrl()
+      if (!loaded)  restoreFromStorage();
       execute();
     })
     .catch(console.error);
+
+  const shareButton = document.getElementById("share");
+
+  // Create a Tippy instance on the button
+  const tippyInstance = tippy(shareButton, {
+    trigger: 'manual',
+    arrow: true,
+  });
+
+  // On click, copy to clipboard and show tooltip
+  shareButton.addEventListener("click", async () => {
+    const shareUrl = generateShareableUrl();
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      tippyInstance.setContent("Copied!");
+      tippyInstance.show();
+
+      setTimeout(() => {
+        tippyInstance.hide();
+      }, 2000);
+    } catch (err) {
+      console.error("Failed to copy shareable URL:", err);
+      tippyInstance.setContent("Failed to copy URL.");
+      tippyInstance.show();
+
+      setTimeout(() => {
+        tippyInstance.hide();
+      }, 2000);
+    }
+  });
 
   // Handle clear button
   document.getElementById("clear").addEventListener("click", () => {
@@ -295,4 +328,64 @@ function restoreFromStorage() {
   aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
 }
 
+function generateShareableUrl() {
+  const currentInput = aceInputEditor.getValue() || "";
+  const currentMetadata = aceInputMetadataEditor.getValue() || "";
+  const currentMapping = aceMappingEditor.getValue() || "";
+
+  // Build a new URL object based on the current location
+  const newUrl = new URL(window.location);
+
+  // Clear any existing search params
+  newUrl.search = "";
+
+  // Add Base64-encoded editor content
+  if (currentInput) {
+    newUrl.searchParams.set("input", btoa(currentInput));
+  }
+  if (currentMetadata) {
+    newUrl.searchParams.set("meta", btoa(currentMetadata));
+  }
+  if (currentMapping) {
+    newUrl.searchParams.set("map", btoa(currentMapping));
+  }
+  return newUrl.toString();
+}
+
+// Check the URL for any Base64-encoded parameters and, if present,
+// decode them to restore the editors.
+function restoreEditorsFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  let loadedFromUrl = false;
+
+  const i   = params.get('input');
+  const md  = params.get('meta');
+  const map = params.get('map');
+
+  if (i !== null) {
+    try {
+      aceInputEditor.setValue(atob(i), 1);
+      loadedFromUrl = true;
+    } catch {
+      console.warn("Invalid Base64 in 'input' param");
+    }
+  }
+  if (md !== null) {
+    try {
+      aceInputMetadataEditor.setValue(atob(md), 1);
+      loadedFromUrl = true;
+    } catch {
+      console.warn("Invalid Base64 in 'meta' param");
+    }
+  }
+  if (map !== null) {
+    try {
+      aceMappingEditor.setValue(atob(map), 1);
+      loadedFromUrl = true;
+    } catch {
+      console.warn("Invalid Base64 in 'map' param");
+    }
+  }
+  return loadedFromUrl;
+}
 </script>
