@@ -12,7 +12,10 @@
       const banner = document.getElementById(bannerId);
       if (!banner) return;
 
-      const hasSeenBanner = window.sessionStorage.getItem(sessionKey) || false;
+      const pagePath = window.location.pathname;
+      const pageSpecificKey = `${sessionKey}-${pagePath}`;
+
+      const hasSeenBanner = window.sessionStorage.getItem(pageSpecificKey) || false;
       if (hasSeenBanner) {
         banner.remove();
       } else {
@@ -21,7 +24,7 @@
         if (closeButton) {
           closeButton.addEventListener('click', function () {
             banner.remove();
-            window.sessionStorage.setItem(sessionKey, 'true');
+            window.sessionStorage.setItem(pageSpecificKey, 'true');
           });
         }
       }
