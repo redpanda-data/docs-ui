@@ -12,10 +12,7 @@
       const banner = document.getElementById(bannerId);
       if (!banner) return;
 
-      // Check if this is a domain-wide announcement
-      const domain = banner.getAttribute('data-domain');
-      const storageKey = domain ? `${sessionKey}-${domain}` : sessionKey;
-
+      const storageKey = sessionKey;
       const hasSeenBanner = window.sessionStorage.getItem(storageKey) || false;
       if (hasSeenBanner) {
         banner.remove();

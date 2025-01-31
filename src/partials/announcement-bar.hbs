@@ -1,6 +1,5 @@
 {{#if (and (ne page.component.name 'api') (or site.keys.announcement page.component.latest.asciidoc.attributes.announcement-text))}}
-<div class="announcement-bar" role="banner" id="announcement"
-     {{#if page.component.latest.asciidoc.attributes.domain-wide}}data-domain="{{page.component.name}}"{{/if}}>
+<div class="announcement-bar" role="banner" id="announcement">
   <div class="announcement-content">
     {{#if page.component.latest.asciidoc.attributes.announcement-text}}
       {{page.component.latest.asciidoc.attributes.announcement-text}}
