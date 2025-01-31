@@ -8,11 +8,11 @@
 <script>
   (function() {
     'use strict';
-    function handleBanner(bannerId, sessionKey) {
+    function handleBanner(bannerId, sessionKey, announcementType) {
       const banner = document.getElementById(bannerId);
       if (!banner) return;
 
-      const storageKey = sessionKey;
+      const storageKey = `${sessionKey}-${announcementType}`; // Use the announcement type to differentiate between different banners
       const hasSeenBanner = window.sessionStorage.getItem(storageKey) || false;
       if (hasSeenBanner) {
         banner.remove();
@@ -35,8 +35,12 @@
     document.documentElement.setAttribute('data-theme', initialTheme);
 
     document.addEventListener('DOMContentLoaded', function() {
-      handleBanner('announcement', 'announcementClosed');
-      handleBanner('bloblang-banner', 'bloblangBannerDismissed');
+      const announcementBar = document.getElementById('announcement');
+      if (!announcementBar) return;
+
+      const announcementLevel = announcementBar.getAttribute('data-announcement-key');
+      handleBanner('announcement', 'announcementClosed', announcementLevel);
+      handleBanner('bloblang-banner', 'bloblangBannerDismissed', 'bloblang');
     });
     // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
     window.addEventListener('DOMContentLoaded', function() {

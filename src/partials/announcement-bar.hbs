@@ -1,5 +1,6 @@
 {{#if (and (ne page.component.name 'api') (or page.attributes.announcement page.component.latest.asciidoc.attributes.announcement site.keys.announcement))}}
-<div class="announcement-bar" role="banner" id="announcement">
+<div class="announcement-bar" role="banner" id="announcement"
+     data-announcement-key="{{#if page.attributes.announcement}}page-{{page.component.name}}-{{page.relativeSrcPath}}{{else if page.component.latest.asciidoc.attributes.announcement}}component-{{page.component.name}}{{else if site.keys.announcement}}site-global{{/if}}">
   <div class="announcement-content">
     {{#if page.attributes.announcement}}
       {{page.attributes.announcement-text}}
