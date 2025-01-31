@@ -36,6 +36,7 @@ jobs:
 
       - name: Update dependencies
         run: |
+          cd blobl-editor/wasm
           go get -u ./...
           go mod tidy
 
