@@ -1,16 +1,13 @@
-{{#if (and (ne page.component.name 'api') (or page.attributes.announcementText site.keys.announcementText))}}
-<div class="announcement-bar" role="banner" id="announcement">
+{{#if (and (ne page.component.name 'api') (or site.keys.announcement page.attributes.announcementText))}}
+<div class="announcement-bar" role="banner" id="announcement"
+     {{#if page.attributes.domainWide}}data-domain="{{page.component.name}}"{{/if}}>
   <div class="announcement-content">
     {{#if page.attributes.announcementText}}
       {{page.attributes.announcementText}}
-      {{#if page.attributes.announcementLink}}
-        <a href="{{{page.attributes.announcementLink}}}">{{page.attributes.announcementLinkText}}</a>
-      {{/if}}
+      <a href="{{{page.attributes.announcementLink}}}">{{page.attributes.announcementLinkText}}</a>
     {{else}}
       {{site.keys.announcementText}}
-      {{#if site.keys.announcementLink}}
-        <a href="{{{site.keys.announcementLink}}}">{{site.keys.announcementLinkText}}</a>
-      {{/if}}
+      <a href="{{{site.keys.announcementLink}}}">{{site.keys.announcementLinkText}}</a>
     {{/if}}
   </div>
   <button id="close-announcement" type="button" aria-label="close" class="close">
