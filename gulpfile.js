@@ -64,7 +64,6 @@ const buildTask = createTask({
   ),
 })
 
-
 const buildWasmTask = createTask({
   name: 'build:wasm',
   desc: 'Build the WebAssembly (.wasm) file using Go and the go.mod in blobl-editor/wasm',
