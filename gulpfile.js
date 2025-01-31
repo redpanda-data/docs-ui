@@ -4,7 +4,8 @@ const { parallel, series, watch } = require('gulp')
 const createTask = require('./gulp.d/lib/create-task')
 const exportTasks = require('./gulp.d/lib/export-tasks')
 const log = require('fancy-log')
-const { exec } = require('child_process') // Import to run shell commands
+const { exec } = require('child_process')
+const path = require('path')
 
 const bundleName = 'ui'
 const buildDir = 'build'
@@ -12,8 +13,7 @@ const previewSrcDir = 'preview-src'
 const previewDestDir = 'public'
 const srcDir = 'src'
 const destDir = `${previewDestDir}/_`
-const wasmOutput = `${srcDir}/static/blobl.wasm` // Output path for the .wasm file
-const wasmMain = 'blobl-editor/wasm/main.go' // Path to the Go entry point
+
 const { reload: livereload } = process.env.LIVERELOAD === 'true' ? require('gulp-connect') : {}
 const serverConfig = { host: '0.0.0.0', port: 5252, livereload }
 
@@ -64,21 +64,27 @@ const buildTask = createTask({
   ),
 })
 
+
 const buildWasmTask = createTask({
   name: 'build:wasm',
-  desc: 'Build the WebAssembly (.wasm) file using Go',
+  desc: 'Build the WebAssembly (.wasm) file using Go and the go.mod in blobl-editor/wasm',
   call: (done) => {
+    const wasmDir = path.join(__dirname, 'blobl-editor', 'wasm')
+    // Absolute path for the output file (go build -o requires a file path).
+    const wasmOutputPath = path.join(__dirname, srcDir, 'static', 'blobl.wasm')
+
     const envVars = {
-      ...process.env, // preserve existing env vars
+      ...process.env,
       GOOS: 'js',
       GOARCH: 'wasm',
     }
 
-    const command = `go build -o ${wasmOutput} ${wasmMain}`
+    // We build main.go from within the wasmDir so that the local go.mod is used
+    const command = `go build -o "${wasmOutputPath}" main.go`
 
-    exec(command, { env: envVars }, (err, stdout, stderr) => {
+    exec(command, { cwd: wasmDir, env: envVars }, (err, stdout, stderr) => {
       if (err) {
-        log.error('Error building wasm:', stderr)
+        log.error('Error building WASM:', stderr)
         done(err)
         return
       }
@@ -138,6 +144,7 @@ const previewTask = createTask({
   call: series(previewBuildTask, previewServeTask),
 })
 
+// Export your tasks
 module.exports = exportTasks(
   bundleTask,
   cleanTask,
