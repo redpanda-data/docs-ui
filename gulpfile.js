@@ -78,7 +78,6 @@ const buildWasmTask = createTask({
       GOARCH: 'wasm',
     }
 
-    // We build main.go from within the wasmDir so that the local go.mod is used
     const command = `go build -o "${wasmOutputPath}" main.go`
 
     exec(command, { cwd: wasmDir, env: envVars }, (err, stdout, stderr) => {
@@ -143,7 +142,6 @@ const previewTask = createTask({
   call: series(previewBuildTask, previewServeTask),
 })
 
-// Export your tasks
 module.exports = exportTasks(
   bundleTask,
   cleanTask,
