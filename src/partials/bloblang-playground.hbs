@@ -289,7 +289,7 @@ function restoreFromStorage() {
   const savedMeta = sessionStorage.getItem(sessionStorageKeys.metadata);
   const dropdownElement = document.getElementById("sample-dropdown");
 
-  const samples = {{{page.attributes.bloblang-samples}}};
+  const samples = {{{page.attributes.bloblang-samples}}} || '';
 
   if (!savedInput && !savedMapping) {
     // Default to "Array processing" if storage is empty
