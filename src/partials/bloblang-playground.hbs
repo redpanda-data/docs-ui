@@ -118,8 +118,20 @@ document.addEventListener("DOMContentLoaded", () => {
     allowHTML: true
   });
 
+/**
+ * Dynamically loads the `blobl.wasm` file using a Handlebars template condition.
+ *
+ * Why the conditional?
+ * - When we're building the "UI Preview" of our docs/site (`site.title` in `preview-src/ui-model.yml is "UI Preview"),
+ *   the WASM file (`blobl.wasm`) gets placed under the `_/` directory rather than the site root.
+ * - For normal builds (anything other than "UI Preview"), `blobl.wasm` is moved to the root,
+ *   so the path is just `{{{siteRootPath}}}/blobl.wasm`.
+ * - In the UI preview setup, we don't pull in a fully bundled JavaScript file.
+ *   Instead, the template files are loaded directly, so we have to reference the
+ *   WASM file where it's actually generated (under `_/`).
+*/
   const go = new Go();
-  WebAssembly.instantiateStreaming(fetch("{{{siteRootPath}}}/blobl.wasm"), go.importObject)
+  WebAssembly.instantiateStreaming(fetch("{{#if (eq site.title 'UI Preview')}}{{{siteRootPath}}}/_/blobl.wasm{{else}}{{{siteRootPath}}}/blobl.wasm{{/if}}"), go.importObject)
     .then((result) => {
       go.run(result.instance);
       let loaded = restoreEditorsFromUrl()
@@ -289,7 +301,7 @@ function restoreFromStorage() {
   const savedMeta = sessionStorage.getItem(sessionStorageKeys.metadata);
   const dropdownElement = document.getElementById("sample-dropdown");
 
-  const samples = {{{page.attributes.bloblang-samples}}} || '';
+  const samples = {{{page.attributes.bloblang-samples}}};
 
   if (!savedInput && !savedMapping) {
     // Default to "Array processing" if storage is empty
