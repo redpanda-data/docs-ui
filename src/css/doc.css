@@ -248,6 +248,7 @@ html {
   line-height: 1.5;
   margin: 0;
   padding: 1em;
+  padding-top: 1.5em;
 }
 
 .doc pre > code,
@@ -1421,6 +1422,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
   display: flex;
   visibility: hidden;
   position: absolute;
+  gap: 5px;
   top: 0.25rem;
   right: 0.5rem;
   color: var(--pre-annotation-font-color);
@@ -1444,6 +1446,20 @@ html[data-theme=dark] code[class*=language-] .token.function {
   content: "|";
   letter-spacing: 0;
   padding: 0 1ch;
+}
+
+.doc .source-toolbox .run-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  outline: none;
+  font-size: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  padding: 0;
+  line-height: inherit;
 }
 
 .doc .source-toolbox .copy-button {

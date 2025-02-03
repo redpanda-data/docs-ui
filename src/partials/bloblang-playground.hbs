@@ -353,13 +353,13 @@ function generateShareableUrl() {
 
   // Add Base64-encoded editor content
   if (currentInput) {
-    newUrl.searchParams.set("input", btoa(currentInput));
+    newUrl.searchParams.set("input", encodeBase64(currentInput));
   }
   if (currentMetadata) {
-    newUrl.searchParams.set("meta", btoa(currentMetadata));
+    newUrl.searchParams.set("meta", encodeBase64(currentMetadata));
   }
   if (currentMapping) {
-    newUrl.searchParams.set("map", btoa(currentMapping));
+    newUrl.searchParams.set("map", encodeBase64(currentMapping));
   }
   return newUrl.toString();
 }
@@ -376,7 +376,7 @@ function restoreEditorsFromUrl() {
 
   if (i !== null) {
     try {
-      aceInputEditor.setValue(atob(i), 1);
+      aceInputEditor.setValue(decodeBase64(i), 1);
       loadedFromUrl = true;
     } catch {
       console.warn("Invalid Base64 in 'input' param");
@@ -384,7 +384,7 @@ function restoreEditorsFromUrl() {
   }
   if (md !== null) {
     try {
-      aceInputMetadataEditor.setValue(atob(md), 1);
+      aceInputMetadataEditor.setValue(decodeBase64(md), 1);
       loadedFromUrl = true;
     } catch {
       console.warn("Invalid Base64 in 'meta' param");
@@ -392,12 +392,40 @@ function restoreEditorsFromUrl() {
   }
   if (map !== null) {
     try {
-      aceMappingEditor.setValue(atob(map), 1);
+      aceMappingEditor.setValue(decodeBase64(map), 1);
       loadedFromUrl = true;
     } catch {
       console.warn("Invalid Base64 in 'map' param");
     }
   }
   return loadedFromUrl;
+}
+/**
+ * Encodes a string as base64 using UTF-8.
+ * Replaces legacy `btoa`, which only handles ASCII cleanly.
+ */
+function encodeBase64(str) {
+  // Convert string -> UTF-8 bytes
+  const utf8Bytes = new TextEncoder().encode(str)
+  // Convert bytes -> binary string
+  let binaryStr = ''
+  for (let i = 0; i < utf8Bytes.length; i++) {
+    binaryStr += String.fromCharCode(utf8Bytes[i])
+  }
+  return window.btoa(binaryStr)
+}
+
+/**
+ * Decodes a base64 string back into a normal JavaScript string using UTF-8.
+ */
+function decodeBase64(base64Str) {
+  // atob gives us the binary string back
+  const binaryStr = window.atob(base64Str)
+  // Convert binary string -> Uint8Array
+  const bytes = new Uint8Array(binaryStr.length)
+  for (let i = 0; i < binaryStr.length; i++) {
+    bytes[i] = binaryStr.charCodeAt(i)
+  }
+  return new TextDecoder().decode(bytes)
 }
 </script>
