@@ -1422,7 +1422,6 @@ html[data-theme=dark] code[class*=language-] .token.function {
   display: flex;
   visibility: hidden;
   position: absolute;
-  gap: 5px;
   top: 0.25rem;
   right: 0.5rem;
   color: var(--pre-annotation-font-color);
