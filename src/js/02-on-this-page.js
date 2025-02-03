@@ -1,6 +1,15 @@
 ;(function () {
   'use strict'
 
+  document.addEventListener('DOMContentLoaded', function () {
+    const backToTopButton = document.querySelector('#back-to-top')
+    if (!backToTopButton) return
+    backToTopButton.addEventListener('click', function (event) {
+      event.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  })
+
   var sidebar = document.querySelector('aside.toc.sidebar')
   if (!sidebar) return
   if (document.querySelector('body.-toc')) return sidebar.parentNode.removeChild(sidebar)
@@ -65,10 +74,17 @@
       startOfContent.parentNode.insertBefore(embeddedToc, startOfContent)
     }
     tocMenuDropdown.querySelector('.toc-menu').classList.add('hidden')
-
+    const tocMenu = tocMenuDropdown.querySelector('.toc-menu')
     tocMenuDropdown.addEventListener('click', function (e) {
-      const tocMenu = tocMenuDropdown.querySelector('.toc-menu')
       tocMenu.classList.toggle('hidden')
+    })
+    // Handle ToC link clicks within the dropdown
+    tocMenuDropdown.querySelectorAll('.toc-menu a').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        // Note - Dan removed preventDefault as it was hijacking default browser behavior, and not appending the url with the correct # needed to navigate correctly
+        // Hide the dropdown menu after click
+        tocMenu.classList.toggle('hidden')
+      })
     })
   }
 
@@ -78,7 +94,7 @@
   })
 
   function onScroll () {
-    var scrolledBy = window.pageYOffset
+    var scrolledBy = window.scrollY
     var buffer = getNumericStyleVal(document.documentElement, 'fontSize') * 1.15
     var ceil = article.offsetTop
     if (scrolledBy && window.innerHeight + scrolledBy + 2 >= document.documentElement.scrollHeight) {

@@ -1,222 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-{{> head defaultPageTitle='Search Redpanda Labs'}}
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/satellite-min.css">
-<script src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
-<script src="{{{uiRootPath}}}/js/vendor/algolia/instantsearch.production.min.js"></script>
+  {{> head defaultPageTitle='Search Redpanda Labs'}}
+  <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/satellite-min.css">
+  <script src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
+  <script src="{{{uiRootPath}}}/js/vendor/algolia/instantsearch.production.min.js"></script>
   </head>
   <body>
-{{> header}}
-<article class="search labs">
-  <div class="header">
-    <img src="{{{uiRootPath}}}/img/redpanda-lab-standing.png">
-    <div>
-      {{#with page.title}}
-      <h1 class="page">{{{this}}}</h1>
-      {{/with}}
-      <p>Labs projects showcase what is possible to achieve with Redpanda as the centerpiece of your streaming data architecture. Some of these projects provide examples, guidance, best practices, and most importantly ideas for how you can use Redpanda in your own projects.</p>
-    </div>
-  </div>
-  <div class="container">
-    <div class="searchbox" id="searchbox"></div>
-    <div class="search-content">
-      <div class="badge-button" id="display-filters">Filters </div>
-      <div class="filters" id="filters">
-      <!-- Filters will be dynamically inserted here -->
-        <div class="interactive">
-        </div>
-        <div>
-          <div class="categories">
+    {{> header}}
+    <div class="body">
+      <main class="article labs">
+          {{> toolbar}}
+          <div class="content">
+            <article class="search labs">
+              <div class="header">
+                <div>
+                  {{#with page.title}}
+                  <h1 class="page">{{{this}}}</h1>
+                  {{/with}}
+                  <p>Labs projects showcase what is possible with Redpanda as the centerpiece of your streaming data architecture. Some of these projects provide examples, guidance, best practices, and most importantly ideas for how you can use Redpanda in your own apps.</p>
+                </div>
+                <img src="{{{uiRootPath}}}/img/redpanda-lab-standing.png">
+              </div>
+              <div class="container">
+                <div class="searchbox" id="searchbox"></div>
+                <div class="search-content">
+                  <div class="badge-button" id="display-filters">Filters </div>
+                  <div class="filters" id="filters">
+                  <!-- Filters will be dynamically inserted here -->
+                    <div class="interactive">
+                    </div>
+                    <div>
+                      <div class="categories">
+                      </div>
+                    </div>
+                    <div>
+                      <div class="deployment">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="results">
+                    <ul id="hits-list"></ul>
+                    <div id="pagination"></div>
+                  </div>
+                </div>
+              </div>
+              {{> tracking-pixel}}
+              {{> back-to-top}}
+            </article>
           </div>
-        </div>
-        <div>
-          <div class="deployment">
-          </div>
-        </div>
-      </div>
-      <div class="results">
-        <!-- Search results will be displayed here -->
-      </div>
+          {{> footer}}
+      </main>
     </div>
-  </div>
-{{> tracking-pixel}}
-</article>
-{{> footer}}
-<script>
-if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
-  const { algoliasearch, instantsearch } = window
+    <script>
+    if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
+      const { algoliasearch, instantsearch } = window;
 
-  const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}')
-  const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}'
+      const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
+      const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
 
-  const search = instantsearch({
-    indexName,
-    searchClient,
-    insights: true,
-    routing: {
-      stateMapping: {
-        // Convert UI state to URL parameters
-        stateToRoute(uiState) {
-          const indexUiState = uiState[indexName] || {}
-          return {
-            q: indexUiState.query, // query parameter
-            category: indexUiState.refinementList && indexUiState.refinementList.categories,
-            deployment: indexUiState.refinementList && indexUiState.refinementList.deployment
-          }
-        },
-        // Convert URL parameters back to UI state
-        routeToState(routeState) {
-          return {
-            [indexName]: {
-              query: routeState.q,
-              refinementList: {
-                categories: routeState.category ?
-                  (Array.isArray(routeState.category) ? routeState.category : [routeState.category]) : [],
-                deployment: routeState.deployment ?
-                  (Array.isArray(routeState.deployment) ? routeState.deployment : [routeState.deployment]) : []
-              }
+      const search = instantsearch({
+        indexName,
+        searchClient,
+        insights: true,
+        routing: {
+          stateMapping: {
+            // Convert UI state to URL parameters
+            stateToRoute(uiState) {
+              const indexUiState = uiState[indexName] || {};
+              return {
+                q: indexUiState.query, // query parameter
+                category: indexUiState.refinementList && indexUiState.refinementList.categories,
+                deployment: indexUiState.refinementList && indexUiState.refinementList.deployment
+              };
+            },
+            // Convert URL parameters back to UI state
+            routeToState(routeState) {
+              return {
+                [indexName]: {
+                  query: routeState.q,
+                  refinementList: {
+                    categories: routeState.category ?
+                      (Array.isArray(routeState.category) ? routeState.category : [routeState.category]) : [],
+                    deployment: routeState.deployment ?
+                      (Array.isArray(routeState.deployment) ? routeState.deployment : [routeState.deployment]) : []
+                  }
+                }
+              };
             }
           }
         }
-      }
-    }
-  })
+      });
 
-  // Add search bar widget
-  search.addWidget(
-    instantsearch.widgets.searchBox({
-      container: '#searchbox',
-      placeholder: 'Search for labs',
-    })
-  )
+       search.addWidget(
+        instantsearch.widgets.configure({
+          // Filters to only include records where type is "Lab"
+          filters: 'type:"Lab"'
+        })
+      )
 
-  search.addWidget(
-    instantsearch.widgets.configure({
-      // Filters to only include records where type is "Code Example"
-      filters: 'type:"Lab"'
-    })
-  )
+      // Add search bar widget
+      search.addWidget(
+        instantsearch.widgets.searchBox({
+          container: '#searchbox',
+          placeholder: 'Search for labs',
+        })
+      );
 
-  // Add results widget
-  search.addWidget(
-    instantsearch.widgets.hits({
-      container: '.results',
-      templates: {
-        item: (hit, {html, components}) => {
-          const isExternal = hit.objectID.startsWith('https') ? true : false
-          if (isExternal) return html`
-            <div class="card">
-              <h2 class="ais-Heading"><a href="${hit.objectID}" target="_blank">${components.Highlight({ attribute: 'title', hit })}</a></h2>
-              <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
-              <div class="aa-ItemContentRow">
-                ${hit.interactive ? html`
+      search.addWidget(
+        instantsearch.widgets.configure({
+          hitsPerPage: 10, // Limit results to 10 per page
+        })
+      );
+
+      // Add results widget
+      search.addWidget(
+        instantsearch.widgets.hits({
+          container: '#hits-list',
+          templates: {
+            item: (hit, {html, components}) => {
+              const isExternal = hit.objectID.startsWith('https') ? true : false;
+              const categories = hit.categories && hit.categories.length > 0
+              ? hit.categories.map(category => html`
                 <div class="aa-ItemContentTitle result-type">
-                  Interactive
-                </div>` : ''
-                }
-              </div>
-            </div>
-          `
-          if (!isExternal) return html`
-            <div class="card">
-              <h2 class="ais-Heading"><a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a></h2>
-              <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
-            </div>
-          `
+                  ${category}
+                </div>
+              `)
+              : '';
+              if (isExternal) return html`
+                <li>
+                  <div class="card">
+                    <h2 class="ais-Heading"><a href="${hit.objectID}" target="_blank">${components.Highlight({ attribute: 'title', hit })}</a></h2>
+                    <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
+                    <div class="aa-ItemContentRow">
+                      ${hit.interactive ? html`
+                      <div class="aa-ItemContentTitle result-type">
+                        Interactive
+                      </div>` : ''}
+                      ${categories}
+                    </div>
+                  </div>
+                </li>
+              `;
+              if (!isExternal) return html`
+                <li>
+                  <div class="card">
+                    <h2 class="ais-Heading"><a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a></h2>
+                    <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
+                    <div class="aa-ItemContentRow">
+                      ${categories}
+                    </div>
+                  </div>
+                </li>
+              `;
+            },
+          },
+        })
+      );
+
+      const categoriesPanel = instantsearch.widgets.panel({
+        templates: {
+          header: 'Category',
         },
-      },
-    })
-  )
+      })(instantsearch.widgets.refinementList);
 
-  const categoriesPanel = instantsearch.widgets.panel({
-    templates: {
-      header: 'Category',
-    },
-  })(instantsearch.widgets.refinementList);
-
-  const deploymentPanel = instantsearch.widgets.panel({
-    templates: {
-      header: 'Deployment',
-    },
-  })(instantsearch.widgets.refinementList);
-
-  search.addWidgets([
-    categoriesPanel({
-      container: '.categories',
-      attribute: 'categories',
-      operator: 'and',
-      limit: 5,
-      showMore: true,
-      searchable: true,
-      searchablePlaceholder: 'Search all categories',
-      searchableIsAlwaysActive: false,
-    }),
-    deploymentPanel({
-      container: '.deployment',
-      attribute: 'deployment',
-      operator: 'and',
-    })
-  ]);
-
-  search.addWidget(
-    instantsearch.widgets.toggleRefinement({
-      container: '.interactive',
-      attribute: 'interactive',
-      on: true,
-      off: false,
-      templates: {
-        labelText({ count }, { html }) {
-          return html`Only interactive labs`
+      const deploymentPanel = instantsearch.widgets.panel({
+        templates: {
+          header: 'Deployment',
         },
-      }
-    })
-  )
+      })(instantsearch.widgets.refinementList);
 
-  // Start the search
-  search.start()
-}
+      search.addWidgets([
+        categoriesPanel({
+          container: '.categories',
+          attribute: 'categories',
+          operator: 'and',
+          limit: 5,
+          showMore: true,
+          searchable: true,
+          searchablePlaceholder: 'Search all categories',
+          searchableIsAlwaysActive: false,
+        }),
+        deploymentPanel({
+          container: '.deployment',
+          attribute: 'deployment',
+          operator: 'and',
+        }),
+        instantsearch.widgets.pagination({
+          container: '#pagination',
+          totalPages: 5, // Set the total number of pages (if known)
+        })
+      ]);
 
-document.addEventListener('DOMContentLoaded', function(event) {
-  const button = document.getElementById('display-filters')
-  const filters = document.getElementById('filters')
-
-  function checkWindowSize() {
-    if (window.innerWidth <= 1024) {
-      filters.classList.add('hidden')
-    } else {
-      filters.classList.remove('hidden')
+      // Start the search
+      search.start();
     }
-  }
 
-  // Debounce function to limit the rate of function execution
-  function debounce(func, wait, immediate) {
-    let timeout
-    return function() {
-      const context = this, args = arguments
-      const later = function() {
-        timeout = null
-        if (!immediate) func.apply(context, args)
+    document.addEventListener('DOMContentLoaded', function(event) {
+      const button = document.getElementById('display-filters');
+      const filters = document.getElementById('filters');
+
+      function checkWindowSize() {
+        if (window.innerWidth <= 1024) {
+          filters.classList.add('hidden');
+        } else {
+          filters.classList.remove('hidden');
+        }
       }
-      const callNow = immediate && !timeout
-      clearTimeout(timeout)
-      timeout = setTimeout(later, wait)
-      if (callNow) func.apply(context, args)
-    }
-  }
 
-  const debouncedCheckWindowSize = debounce(checkWindowSize, 250)
+      // Debounce function to limit the rate of function execution
+      function debounce(func, wait, immediate) {
+        let timeout;
+        return function() {
+          const context = this, args = arguments;
+          const later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+          };
+          const callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) func.apply(context, args);
+        };
+      }
 
-  // Initial check
-  checkWindowSize()
+      const debouncedCheckWindowSize = debounce(checkWindowSize, 250);
 
-  // Event listener for window resize
-  window.addEventListener('resize', debouncedCheckWindowSize)
+      // Initial check
+      checkWindowSize();
 
-  button.addEventListener('click', function (event) {
-    filters.classList.toggle('hidden')
-  })
-})
-</script>
+      // Event listener for window resize
+      window.addEventListener('resize', debouncedCheckWindowSize);
+
+      button.addEventListener('click', function (event) {
+        filters.classList.toggle('hidden');
+      });
+    });
+    </script>
   </body>
 </html>

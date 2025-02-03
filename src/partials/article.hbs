@@ -1,25 +1,65 @@
-<article class="doc">
+<article class="doc {{#if page.attributes.no-toc}}no-toc{{/if}}">
+{{#if (ne page.attributes.role 'home')}}
+{{> breadcrumbs}}
+{{/if}}
 {{#unless page.attributes.cloud}}
 {{> latest-banner}}
-  {{> page-versions}}
 {{/unless}}
-{{#with page.title}}
-<h1 class="page">{{{this}}}</h1>
-{{/with}}
-{{#if page.attributes.cloud}}
-  {{#if page.attributes.beta}}
-    <img src="{{{uiRootPath}}}/img/cloud-beta.svg"> </img>
-  {{/if}}
+{{#if (eq page.attributes.role 'bloblang-playground')}}
+{{> bloblang-signup-form}}
 {{/if}}
-{{#if (eq page.layout 'home')}}
+{{#if (eq page.attributes.role 'home')}}
+  <div class="home-header-container">
+    <div class="home-header">
+      {{#with page.title}}
+        <h1 class="page">{{{this}}}</h1>
+      {{/with}}
+      <div class="ask">
+        {{> ai-button}}
+        <div> or </div>
+        <div class="autocomplete" id="autocomplete"></div>
+      </div>
+    </div>
+  </div>
+{{else}}
+  {{#with page.title}}
+    <h1 class="page">{{{this}}}</h1>
+  {{/with}}
+{{/if}}
+{{#if page.attributes.beta}}
+  <div class="beta-label">
+    <p title="This feature is in beta.">Beta</p>
+  </div>
+{{/if}}
+{{#if (eq page.attributes.role 'home')}}
   {{> home}}
+  {{{page.contents}}}
+{{else if (eq page.attributes.role 'component-home')}}
+  {{> component-home}}
+{{else if (eq page.attributes.role 'component-home-v2')}}
+  {{> component-home-v2}}
+{{else if (eq page.attributes.role 'bloblang-playground')}}
+  {{> bloblang-playground}}
+{{else if (eq page.attributes.role 'index-list')}}
+  {{> index-list}}
 {{else if (eq page.layout 'index')}}
   {{> index}}
+{{else if (eq page.attributes.role 'related-labs')}}
+  {{#with (list-related-labs page.title page.attributes page.contents)  as |listLabs|}}
+    {{{listLabs}}}
+  {{/with}}
 {{else}}
+  <!--
+  Removing context switchers for now
+  while we evaluate their usefulness
   {{> context-switcher}}
+  -->
   {{#with (add-suggested-labs page.attributes page.contents)  as |suggestedLabs|}}
     {{{suggestedLabs}}}
   {{/with}}
+{{/if}}
+{{#if (ne page.attributes.role 'home')}}
+{{> back-to-top}}
 {{/if}}
 {{> feedback-footer}}
 {{> pagination}}

@@ -5,12 +5,18 @@
 
   var navContainer = document.querySelector('.nav-container')
   var navToggle = document.querySelector('.nav-toggle')
+  var navCollapse = document.querySelector('.nav-collapse')
+  var navExpand = document.querySelector('.nav-expand')
+  var main = document.querySelector('main.article')
+  var toolbar = document.querySelector('.toolbar')
 
   if (!navContainer) return
 
   var nav = navContainer.querySelector('.nav')
 
-  navToggle.addEventListener('click', showNav)
+  if (navToggle) navToggle.addEventListener('click', showNav)
+  if (navCollapse) navCollapse.addEventListener('click', function (e) { hideNav(e, true) })
+  if (navExpand) navExpand.addEventListener('click', function (e) { showNav(e, true) })
   navContainer.addEventListener('click', trapEvent)
 
   var menuPanel = navContainer.querySelector('[data-panel=menu]')
@@ -148,45 +154,62 @@
     var rect = this.getBoundingClientRect()
     var menuPanelRect = menuPanel.getBoundingClientRect()
     var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
-    if (event.target.className === 'nav-item-toggle') {
+    if (event.target.classList.contains('nav-link') || event.target.classList.contains('nav-text') || (event.target.classList.contains('item') && !event.target.classList.contains('dropdown'))) {
+      // Follow the link
+      var a = event.target.closest('a')
+      if (!a) {
+        a = event.target.querySelector('a')
+      }
+      console.log(a)
+      if (a && a.href !== window.location.href) {
+        window.location.href = a.href
+      }
+    } else {
+      // Toggle 'is-active' class to open the dropdown
       this.classList.toggle('is-active')
       if (overflowY > 0) {
         menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
       }
       event.stopPropagation()
-    } else {
-      if (this.classList.toggle('is-active')) {
-        if (overflowY > 0) {
-          menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
-        }
-        const a = this.querySelector('a')
-        if (a && a.href !== window.location.href) {
-          window.location.href = a.href
-        }
-      }
     }
   }
 
-  function showNav (e) {
+  function showNav (e, collapse) {
     if (navToggle.classList.contains('is-active')) return hideNav(e)
     trapEvent(e)
     var html = document.documentElement
-    html.classList.add('is-clipped--nav')
-    navToggle.classList.add('is-active')
-    navContainer.classList.add('is-active')
-    var bounds = nav.getBoundingClientRect()
-    var expectedHeight = window.innerHeight - Math.round(bounds.top)
-    if (Math.round(bounds.height) !== expectedHeight) nav.style.height = expectedHeight + 'px'
-    html.addEventListener('click', hideNav)
+    if (!collapse) {
+      html.classList.add('is-clipped--nav')
+      navToggle.classList.add('is-active')
+      navContainer.classList.add('is-active')
+      // Note - Dan removed the height calculations - this should all be handled by css or we have overrides that work against us
+      // var bounds = nav.getBoundingClientRect()
+      // var expectedHeight = window.innerHeight - Math.round(bounds.top)
+      // if (Math.round(bounds.height) !== expectedHeight) nav.style.height = expectedHeight + 'px'
+      html.addEventListener('click', hideNav)
+    } else {
+      navContainer.classList.remove('hidden')
+      navExpand.classList.add('hidden')
+      if (toolbar) toolbar.style.paddingLeft = 'unset'
+      main.style.width = 'unset'
+    }
   }
 
-  function hideNav (e) {
+  function hideNav (e, collapse) {
     trapEvent(e)
     var html = document.documentElement
-    html.classList.remove('is-clipped--nav')
-    navToggle.classList.remove('is-active')
-    navContainer.classList.remove('is-active')
-    html.removeEventListener('click', hideNav)
+    if (!collapse) {
+      html.classList.remove('is-clipped--nav')
+      navToggle.classList.remove('is-active')
+      navContainer.classList.remove('is-active')
+      nav.style.height = ''
+      html.removeEventListener('click', hideNav)
+    } else {
+      navContainer.classList.add('hidden')
+      navExpand.classList.remove('hidden')
+      if (toolbar) toolbar.style.paddingLeft = '10px'
+      main.style.width = '100%'
+    }
   }
 
   function trapEvent (e) {

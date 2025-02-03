@@ -1,9 +1,13 @@
-{{!-- Add header scripts here --}}
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 {{#with site.keys.googleAnalytics}}
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{this}}"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 {{/with}}
+<!-- Injected by the '@sntke/antora-mermaid-extension' extension -->
+<!--  https://github.com/snt/antora-mermaid-extension -->
+{{> mermaid-scripts}}

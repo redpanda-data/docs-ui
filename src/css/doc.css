@@ -1,11 +1,14 @@
+html {
+  scroll-padding-top: calc(var(--navbar-height) + var(--toolbar-height)); /* 114px */
+}
+
 .doc {
   color: var(--body-font-color);
   font-size: var(--doc-font-size);
   hyphens: auto;
   line-height: var(--doc-line-height);
-  max-width: var(--doc-max-width);
   padding: 0 1rem 4rem;
-  margin-top: 2.5rem;
+  margin-top: 3rem;
 }
 
 .doc ul.index {
@@ -18,13 +21,23 @@
 }
 
 @media screen and (min-width: 1024px) {
+  html {
+    scroll-padding-top: calc(var(--navbar-height) + 32px); /* 88px */
+  }
+
   .doc {
     flex: auto;
     font-size: var(--doc-font-size--desktop);
     min-width: 0;
-    margin-right: 0.7rem;
     margin-bottom: 0;
-    margin-top: 2.5rem;
+    margin-top: 2rem;
+    max-width: var(--doc-max-width);
+    padding: 0;
+    margin-left: 48px;
+  }
+
+  .doc.no-toc {
+    margin-right: 48px;
   }
 }
 
@@ -37,8 +50,9 @@
   color: var(--heading-font-color);
   font-family: var(--heading-font-family);
   hyphens: none;
-  line-height: 1.3;
-  margin: 1rem 0 0;
+  line-height: 1.2;
+  margin: 2rem 0 0;
+  font-weight: var(--heading-font-weight);
 }
 
 .doc h1 {
@@ -62,7 +76,11 @@
 
 @media screen and (min-width: 769px) {
   .doc h1 {
-    font-size: calc(48 / var(--rem-base) * 1rem);
+    font-size: calc(44 / var(--rem-base) * 1rem);
+  }
+
+  .admonitionblock .content a {
+    white-space: normal !important; /* Allows links to wrap within admonition blocks */
   }
 }
 
@@ -97,6 +115,16 @@
 
 .doc h4:not(.discrete) {
   font-size: calc(19 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.doc h5:not(.discrete) {
+  font-size: calc(17.5 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.doc h6:not(.discrete) {
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
@@ -143,13 +171,25 @@
 .doc a,
 .doc .glossary-term,
 .doc p a > code {
-  color: var(--link-font-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--color-aliases-static-palette-text-tertiary);
+  color: var(--body-font-color);
 }
 
 .doc a:hover,
 .doc .glossary-term:hover,
 .doc p a > code:hover {
-  color: var(--link_hover-font-color);
+  color: var(--link-highlight-color);
+  text-decoration-color: var(--link-highlight-color);
+}
+
+.doc .metadata-block span.current-version,
+.doc .metadata-block span:not(.current-version):hover {
+  color: var(--link-highlight-color);
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .doc .glossary-term {
@@ -160,9 +200,11 @@
   hyphens: none;
 }
 
+/*
 .doc a.unresolved {
   color: var(--link_unresolved-font-color);
 }
+*/
 
 .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
@@ -192,7 +234,6 @@
   border: 0.1rem solid #0000001a;
   font-weight: lighter;
   border-radius: 0.25em;
-  font-size: 0.88rem;
   padding: 0.125em 0.25em;
 }
 
@@ -203,17 +244,19 @@
 }
 
 .doc pre {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   line-height: 1.5;
   margin: 0;
   padding: 1em;
 }
 
-.doc pre > code {
+.doc pre > code,
+.doc details .listingblock .content pre > code {
   padding-bottom: 1rem;
   border: none;
   white-space: pre-wrap;
   font-weight: lighter;
+  line-height: 1.7;
 }
 
 .doc blockquote {
@@ -274,7 +317,16 @@
 .doc .partintro,
 .doc details,
 .doc hr {
-  margin: 1rem 0 0;
+  margin: 0.6rem 0 0;
+}
+
+.paragraph > p {
+  margin-top: 1.3rem;
+}
+
+.doc li .paragraph > p,
+.doc td .paragraph > p {
+  margin-top: 0;
 }
 
 .doc .ulist.two-column {
@@ -282,7 +334,7 @@
 }
 
 .doc table.tableblock {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
 .tablecontainer {
@@ -416,140 +468,136 @@
   vertical-align: middle;
 }
 
-.doc .admonitionblock {
+.admonitionblock {
+  position: relative;
   margin: 1.4rem 0 0;
   box-shadow: var(--admonition-border-box-shadow);
   padding: var(--admonition-padding);
 }
 
-.doc .admonitionblock.note {
+.admonitionblock.note {
   background-color: var(--note-background);
-  border: 0 solid var(--note-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.warning {
+.admonitionblock.warning {
   background-color: var(--warning-background);
-  border: 0 solid var(--warning-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.tip {
+.admonitionblock.tip {
   background-color: var(--tip-background);
-  border: 0 solid var(--tip-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.caution {
+.admonitionblock.caution {
   background-color: var(--caution-background);
-  border: 0 solid var(--caution-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock.important {
+.admonitionblock.important {
   background-color: var(--important-background);
-  border: 0 solid var(--important-color);
   border-left-width: var(--admonition-border-left-width);
   border-radius: var(--admonition-border-radius);
 }
 
-.doc .admonitionblock td.content > :not(.title):first-child,
-.doc .admonitionblock td.content > .title + * {
+.admonitionblock td.content > :not(.title):first-child,
+.admonitionblock td.content > .title + * {
   margin-top: 0;
 }
 
-.doc .admonitionblock pre {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+.admonitionblock pre {
+  font-size: calc(17 / var(--rem-base) * 1rem);
 }
 
-.doc .admonitionblock > table {
+/* Note - dan - for some bizarre reason tables are used to structure notices, we have to turn all these table elements into block elements to get them to style correctly */
+/* I had to change this back to a fixed table layout to avoid the code blocks from escaping the admonition */
+.admonitionblock > table {
   table-layout: fixed;
   position: relative;
   width: 100%;
 }
 
-.doc .admonitionblock td.content {
-  padding: 1rem 1rem 0.75rem;
+.admonitionblock td.content {
+  display: block;
   width: 100%;
   word-wrap: anywhere;
+  margin-top: 8px;
+  padding-left: 1.8rem;
 }
 
-.doc .admonitionblock .icon {
-  position: absolute;
-  top: 0;
-  left: 0;
+.admonitionblock .icon {
+  display: block;
   font-size: calc(18 / var(--rem-base) * 1rem);
-  padding: 0 0.5rem;
   height: 1.25rem;
   line-height: 1;
   font-weight: var(--admonition-label-font-weight);
-  text-transform: uppercase;
-  border-radius: 0.45rem;
-  transform: translate(-0.5rem, -50%);
 }
 
-.doc .admonitionblock.caution .icon {
+.admonitionblock.caution .icon {
   color: var(--caution-on-color);
 }
 
-.doc .admonitionblock.important .icon {
+.admonitionblock.important .icon {
   color: var(--important-on-color);
 }
 
-.doc .admonitionblock.note .icon {
+.admonitionblock.note .icon {
   color: var(--note-on-color);
 }
 
 .icon-note::before {
-  content: "✏️";
+  content: "";
+  background: var(--note-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-tip::before {
-  content: "💡";
+  content: "";
+  background: var(--tip-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-warning::before {
-  content: "🚨";
+  content: "";
+  background: var(--warning-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-caution::before {
-  content: "⚠️";
+  content: "";
+  background: var(--caution-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
 .icon-important::before {
-  content: "❗";
+  content: "";
+  background: var(--important-icon);
+  width: 1.4em;
   margin-right: 5px;
-  margin-left: -5px;
+  height: 1.4em;
 }
 
-.doc .admonitionblock.tip .icon {
-  color: var(--tip-on-color);
-}
-
-.doc .admonitionblock.warning .icon {
-  color: var(--warning-on-color);
-}
-
-.doc .admonitionblock .icon i {
+.admonitionblock .icon i {
   display: inline-flex;
   align-items: center;
   height: 100%;
   font: unset;
 }
 
-.doc .admonitionblock .icon i::after {
+.admonitionblock .icon i::after {
   content: attr(title);
 }
 
@@ -602,6 +650,7 @@ table code {
   height: auto;
   max-width: 100%;
   vertical-align: middle;
+  background: white;
 }
 
 .doc .image:not(.left):not(.right) > img {
@@ -634,7 +683,7 @@ table code {
 
 .doc .quoteblock .attribution {
   color: var(--quote-attribution-font-color);
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   margin-top: 0.75rem;
 }
 
@@ -771,11 +820,11 @@ table code {
 
 .doc .ulist .listingblock,
 .doc .olist .listingblock,
-.doc .admonitionblock .listingblock {
+.admonitionblock .listingblock {
   padding: 0;
 }
 
-.doc .admonitionblock .title {
+.admonitionblock .title {
   font-weight: bold;
 }
 
@@ -784,18 +833,10 @@ table code {
   background-color: none;
 }
 
-.doc .listingblock .title {
-  margin-bottom: -0.5rem;
-}
-
-.doc .imageblock .title,
-.doc .literalblock .title,
-.doc .listingblock .title,
-.doc .openblock .title,
 .doc .videoblock .title,
 .doc .tableblock caption {
   color: var(--caption-font-color);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   font-style: var(--caption-font-style);
   font-weight: var(--caption-font-weight);
   hyphens: none;
@@ -809,7 +850,7 @@ table code {
 }
 
 /* immediate sibling of an element with the class title, where this title class element is a direct child of a td element with the class content */
-.doc .admonitionblock td.content > .title + * {
+.admonitionblock td.content > .title + * {
   margin-top: 20px;
 }
 
@@ -824,14 +865,18 @@ table code {
   padding-bottom: 0;
 }
 
-.doc .openblock details > summary.title {
-  display: block;
+.doc details > summary.title {
+  display: flex;
+  align-items: center;
   position: relative;
+  border-radius: 10px;
   line-height: var(--doc-line-height);
-  padding-left: 1rem;
+  background: none;
+  color: var(--body-font-color);
+  font-weight: 500;
+  padding-left: 0;
   padding-top: 0;
   padding-bottom: 0;
-  background-color: unset;
   border-bottom: none;
   margin-bottom: 0;
 }
@@ -840,30 +885,31 @@ table code {
   display: none;
 }
 
-.doc details > summary::before {
-  content: "";
-  border: solid transparent;
-  border-left-color: currentColor;
-  border-width: 0.3em 0 0.3em 0.5em;
-  position: absolute;
-  top: calc((var(--doc-line-height) * 0.5 - 0.3) * 1em);
-  left: 0;
-  transform: translateX(15%);
+details[open] > summary {
+  padding-bottom: 16px;
 }
 
-.doc details[open] > summary::before {
+.doc details > summary::after {
+  content: "";
+  background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
+  width: 1em;
+  height: 1.2em;
+  position: absolute;
+  right: 0;
+}
+
+.doc details[open] > summary::after {
   border-color: currentColor transparent transparent;
   border-width: 0.5rem 0.3rem 0;
-  transform: translateY(15%);
+  transform: rotate(90deg);
 }
 
 .doc details {
-  border: 1px solid var(--note-color);
-  margin: 1rem 0;
-  background-color: var(--note-background);
+  margin: 0.5rem 0;
+  background-color: var(--accordian-background);
   box-shadow: 0 1px 2px 0 #0000001a;
-  padding: 1rem 1rem;
-  border-radius: 1px;
+  padding: 16px 24px;
+  border-radius: 8px 8px 0 0;
 }
 
 .doc details.result {
@@ -938,9 +984,10 @@ table code {
 }
 
 .badge-button {
-  padding: 3px;
+  padding: 0 8px 0 8px;
   border: 1px solid var(--toolbar-border-color);
   width: fit-content;
+  color: var(--link-highlight-color);
   border-radius: 5px;
   font-size: medium;
   display: flex;
@@ -950,13 +997,251 @@ table code {
   margin-bottom: 15px;
 }
 
+.badge-button:hover {
+  background-color: var(--link-highlight-color);
+  color: white;
+  cursor: pointer;
+}
+
 .badge-button img {
   margin-left: 5px;
   margin-bottom: -2px;
   filter: var(--svg-dark-mode-filter);
 }
 
-.doc .nav-image img.dark-mode-filter,
+.doc .two-column-grid {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr;
+}
+
+.doc .component-card {
+  background-color: var(--panel-background);
+  border: 1px solid var(--page-version-menu-background);
+  border-radius: 0.4rem;
+  display: inline-block;
+  margin: 3px;
+  padding: 0.3em 0.3em;
+  color: var(--body-font-color);
+  text-decoration: none;
+}
+
+.doc .component-card:hover {
+  color: var(--link-highlight-color);
+  text-decoration: none;
+}
+
+.doc .choices {
+  overflow: visible;
+  border-radius: 10px;
+  margin-bottom: 0;
+  flex: 0.5;
+}
+
+.doc .choices:first-of-type {
+  flex: 100%;
+}
+
+.doc .metadata-block {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.3rem;
+  gap: 6px;
+  border-radius: 6px;
+  background-color: var(--note-background);
+  color: var(--note-on-color);
+}
+
+.doc .metadata-block .choices {
+  flex: 0.3;
+}
+
+.metadata-block .choices__list--dropdown .choices__item,
+.metadata-block .choices__list[aria-expanded] .choices__item {
+  padding: 5px 0 0 5px !important;
+  height: 30px;
+}
+
+.doc .tableblock td .enterprise-label-container {
+  display: flex;
+}
+
+.doc .tableblock td .enterprise-label {
+  background-color: var(--redpanda-1000);
+  color: #fff;
+  padding: 0.2em 0.2em;
+  line-height: normal;
+  border-radius: 3px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
+}
+
+.doc .inline-enterprise-label {
+  background-color: var(--redpanda-1000);
+  color: #fff;
+  padding: 0.2em 0.2em;
+  border-radius: 3px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
+}
+
+.doc .tableblock td .enterprise-label-container:hover,
+.doc .tableblock td .enterprise-label {
+  cursor: pointer;
+}
+
+.doc .choices__inner {
+  background-color: var(--body-background);
+  min-height: unset;
+  border-radius: 4px;
+}
+
+.doc .metadata-block .choices__inner {
+  height: 30px;
+  padding: unset;
+}
+
+.doc .choices__input {
+  background-color: var(--body-background);
+}
+
+.doc .tableblock .choices__list--single {
+  padding: 0;
+}
+
+.doc .tableblock .choices__list--dropdown,
+.doc .tableblock .choices__list[aria-expanded],
+.doc .choices__list--dropdown,
+.doc .choices__list[aria-expanded],
+.doc .table-filters .choices__list--dropdown,
+.doc .table-filters .choices__list[aria-expanded] {
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.doc .page-type-dropdown .choices[data-type*=select-one] .choices__inner {
+  padding: 0;
+}
+
+.doc .page-type-dropdown {
+  display: flex;
+  margin-top: 10px;
+  gap: 5px;
+  align-items: center;
+}
+
+.doc .page-type-dropdown .choices {
+  flex: 0.3;
+}
+
+.back-to-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 150px;
+}
+
+.button-arrow-up:hover::after {
+  background-image: url(../img/arrow-cta-hover.svg);
+  top: -6px;
+}
+
+.button-arrow-up::after,
+.button-arrow-up:hover::after {
+  height: 15px;
+  margin-left: 4px;
+  -webkit-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+  width: 18px;
+}
+
+.button-arrow-up::after {
+  background-image: url(../img/arrow-cta.svg);
+  background-position: -1px 0;
+  background-repeat: no-repeat;
+  content: "";
+  display: inline-block;
+  position: relative;
+  top: 0;
+  -webkit-transition: top 0.5s ease-in-out;
+  transition: top 0.5s ease-in-out;
+}
+
+.button-arrow:active,
+.button-arrow:focus,
+.button-arrow:hover {
+  color: var(--link_hover-font-color);
+  text-decoration: none;
+}
+
+a.button-arrow {
+  color: var(--link-highlight-color);
+  text-decoration: none;
+}
+
+.doc .choices__list--dropdown .choices__item--selectable.is-highlighted,
+.doc .choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+  background-color: var(--panel-background);
+}
+
+.doc .choices__placeholder {
+  opacity: 9;
+  font-size: 14px;
+}
+
+.doc .type-dropdown {
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.doc .table-filters {
+  display: flex;
+  flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
+  gap: 10px; /* Add space between filter elements */
+  align-items: center; /* Align vertically */
+  margin-bottom: 15px; /* Add space between the filters and the table */
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .doc .table-filters {
+    flex-direction: column; /* Stack filters on smaller screens */
+    align-items: stretch; /* Make filters fill the container on smaller screens */
+    gap: 0;
+  }
+
+  .doc .choices,
+  .doc .table-filters input[type="text"] {
+    width: 100%; /* Ensure inputs take full width on small screens */
+  }
+}
+
+.doc .table-filters .table-search {
+  flex-basis: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.doc .table-filters .table-search::placeholder,
+.doc .table-filters .table-search::-moz-placeholder,
+.doc .table-filters .table-search::-webkit-input-placeholder {
+  opacity: 0.9;
+  color: var(--body-font-color);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.doc .tableblock.component-table {
+  margin-top: 1rem;
+}
+
+img.dark-mode-filter,
 .nav .nav-image img.dark-mode-filter {
   filter: var(--svg-dark-mode-filter);
 }
@@ -977,14 +1262,12 @@ table code {
 
 .badge-button a:hover {
   text-decoration: none;
-}
-
-.badge-button:hover {
-  cursor: pointer;
+  color: white;
 }
 
 .badge-button a {
   color: inherit;
+  text-decoration: none;
 }
 
 .badge-container {
@@ -1083,9 +1366,10 @@ table code {
 code[class*=language-],
 pre[class*=language-] {
   color: var(--code-font-color) !important;
-  font-size: 0.88rem !important;
+  font-size: calc(17 / var(--rem-base) * 1rem) !important;
   background: var(--pre-background) !important;
   white-space: pre-wrap !important;
+  margin-top: 0 !important;
   font-weight: lighter !important;
 }
 
@@ -1096,7 +1380,7 @@ pre.code-first-child {
 html[data-theme=dark] code[class*=language-],
 html[data-theme=dark] pre[class*=language-] {
   text-shadow: none !important;
-  background-color: #282a36 !important;
+  background-color: var(--pre-background) !important;
 }
 
 html[data-theme=dark] code[class*=language-] .token.boolean,
@@ -1201,7 +1485,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
   border-radius: 0.25em;
   padding: 0.5em;
   color: var(--body-background);
-  cursor: auto;
+  cursor: pointer;
   opacity: 0;
   transition: opacity 0.5s ease 0.5s;
 }
@@ -1260,7 +1544,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .colist {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   margin: 0.25rem 0 -0.25rem;
 }
 
@@ -1280,6 +1564,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
   border-radius: 100%;
   display: inline-block;
   font-family: var(--body-font-family);
+  font-weight: 500;
   font-size: calc(13.5 / var(--rem-base) * 1rem);
   font-style: normal;
   line-height: 1.1;
@@ -1288,6 +1573,8 @@ html[data-theme=dark] code[class*=language-] .token.function {
   height: 1.25em;
   letter-spacing: -0.25ex;
   text-indent: -0.25ex;
+  color: var(--body-font-color);
+  margin-left: 4px;
 }
 
 .doc .conum[data-value]::after {
@@ -1336,7 +1623,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .keyseq {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: var(--body-font-size);
 }
 
 .doc .keyseq kbd {

@@ -1,13 +1,16 @@
-<main class="article">
-{{> toolbar}}
+<main class="article{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}">
+{{#if (ne page.attributes.role 'home')}}
+  {{> toolbar}}
+{{/if}}
   <div class="content">
     {{#if (eq page.layout '404')}}
     {{> article-404}}
-    {{else if (eq page.layout 'home')}}
+    {{else if (eq page.attributes.role 'home')}}
     {{> article}}
     {{else}}
     {{> toc}}
     {{> article}}
     {{/if}}
   </div>
+  {{> footer}}
 </main>

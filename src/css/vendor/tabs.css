@@ -20,6 +20,7 @@
 .doc .tabs.is-loading .tablist > ul li:not(:first-child),
 .doc .tabs:not(.is-loading) .tablist > ul li:not(.is-selected) {
   background-color: unset;
+  font-weight: normal;
 }
 
 .tabs:not(.is-loading) .tablist li:not(.is-selected):hover {
@@ -28,10 +29,10 @@
 
 .doc .tabs.is-loading .tablist > ul li:first-child,
 .doc .tabs:not(.is-loading) .tablist > ul li.is-selected {
-  border-bottom: 5px solid var(--link-font-color);
+  border-bottom: 2px solid var(--link-highlight-color);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  color: var(--link-font-color);
+  color: var(--link-highlight-color);
 }
 
 .tabs.is-loading .tablist li:first-child::after,

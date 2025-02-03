@@ -1,31 +1,43 @@
-.context-switcher {
+.context-switcher,
+.beta-label {
   display: flex;
+  flex-wrap: wrap;
   margin-bottom: 15px;
   margin-top: 15px;
   gap: 10px;
+  font-size: var(--secondary-font-size);
+}
+
+.beta-label {
+  margin: 0;
 }
 
 .context-switcher button {
-  background-color: inherit;
+  background: none;
   color: inherit;
   border: none;
 }
 
-.context-switcher .context-link {
+.context-switcher .context-link,
+.beta-label > p {
   flex: 0 1 auto;
-  width: 100px;
-  border: 1px solid grey;
-  border-width: 1px;
-  border-radius: 5px;
+  border-radius: 10px;
   text-align: center;
-  border-color: rgb(208 213 221/1);
-  background-color: #fff;
+  border: 1px solid var(--highlight-border);
+  background-color: inherit;
   color: rgb(102 112 133/1);
 }
 
 .context-switcher .context-link.active {
-  font-weight: bold;
-  border: none;
-  background-color: rgb(226 64 27/1);
-  color: rgb(255 255 255/1) !important;
+  color: var(--link-highlight-color);
+  font-weight: 500;
+}
+
+.beta-label > p {
+  color: var(--link-highlight-color);
+  padding: 3px;
+}
+
+.beta-label > p:hover {
+  cursor: default;
 }

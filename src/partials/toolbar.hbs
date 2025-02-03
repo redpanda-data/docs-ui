@@ -1,9 +1,3 @@
 <div class="toolbar" role="navigation">
 {{> nav-toggle}}
-  {{#with site.homeUrl}}
-  {{#if (ne @root.page.component.name 'redpanda-labs')}}
-  <a href="{{{relativize this}}}" aria-label="Go to home page" class="home-link{{#if @root.page.home}} is-current{{/if}}"></a>
-  {{/if}}
-  {{/with}}
-{{> breadcrumbs}}
 </div>

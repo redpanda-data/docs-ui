@@ -3,119 +3,221 @@
   <head>
     {{> head defaultPageTitle='API Reference'}}
     <meta charset="utf-8">
-    <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+
+    <link rel="dns-prefetch" href="https://unpkg.com" />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+    <script type="module" defer src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+
     {{> header-scripts}}
-  </head>
-  <body class="body swagger" style="padding-top:0; height:100vh;">
-    <rapi-doc id="api" spec-url="{{resolve-resource page.attributes.api-spec-url}}" primary-color="#e2401b"
-        show-header=false {{#if page.attributes.try-it}}allow-try=true {{else}} allow-try=false {{/if}} show-curl-before-try=true show-method-in-nav-bar="as-colored-block" show-info="true" render-style="read" regular-font="'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" fill-request-fields-with-example="true" nav-bg-color="#fff"  bg-color="#fff" nav-item-spacing="relaxed" font-size="largest" fetch-credentials="include" css-file="{{{uiRootPath}}}/css/site.css"  css-classes="swagger">
-    <div class="toolbar" role="navigation" style="top:-5px;">
-      {{#with site.homeUrl}}
-      {{#if (ne @root.page.component.name 'redpanda-labs')}}
-      <a href="{{{relativize this}}}" aria-label="Go to home page" class="home-link{{#if @root.page.home}} is-current{{/if}}"></a>
-      {{/if}}
-      {{/with}}
-    {{> breadcrumbs}}
-      <div class="theme-switcher">
-        <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite">
-          <img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
-        </button>
-      </div>
-    </div>
-    <div slot="nav-logo" style="display: flex; align-items: center; justify-content: center;">
-      <a class="navbar-item" href="{{{or site.url siteRootPath}}}" aria-label="Go to home page"><img src="{{{uiRootPath}}}/img/redpanda-docs-logo.svg" width="250px" height= "30px" alt="Redpanda logo"/></a>
-    </div>
-    {{#each (get-api-slots page.url)}}
-        {{{this}}}
-    {{/each}}
-    <div slot="footer">
-      {{> footer}}
-    </div>
-    {{> tracking-pixel}}
-    </rapi-doc>
-    <script defer>
-      function getNavbarHeight() {
-          const navbar = document.querySelector('.toolbar');
-          if (!navbar) {
-            console.error('Toolbar not found.');
-            return null;
-          }
-          const style = window.getComputedStyle(navbar);
-          const height = parseFloat(style.height);
-          return height;
+    <style>
+      td.tableblock>.content>: first-child {
+        margin-top: 0;
       }
 
-      window.addEventListener('DOMContentLoaded', function() {
-        const height = getNavbarHeight();
-        const rapidoc = document.querySelector('rapi-doc#api');
-        if (rapidoc && rapidoc.shadowRoot) {
-          // Hide the client ID
-          const observer = new MutationObserver(function(mutationsList, observer) {
-            mutationsList.forEach(mutation => {
-              mutation.addedNodes.forEach(node => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                  const targetElement = node.querySelector('.oauth2.implicit.auth0.oauth-client-id');
-                  if (targetElement) {
-                    targetElement.style.display = 'none';
-                    observer.disconnect();
-                  }
-                  const subTitleDivs = node.querySelectorAll('.sub-title');
-                  subTitleDivs.forEach(div => {
-                    const h2 = document.createElement('h2');
-                    h2.innerHTML = div.innerHTML;
-                    const partAttribute = div.getAttribute('part');
-                    if (partAttribute) {
-                      h2.setAttribute('part', partAttribute);
-                    }
-                    div.parentNode.replaceChild(h2, div);
-                  });
-                  const headingElements = Array.from(node.querySelectorAll('h2:not(div.sect > h2), h3:not(div.sect > h3), h4:not(div.sect > h4)'));
-                  headingElements.forEach(heading => {
-                    if (!heading.closest('.sect')) {
-                      heading.style.fontSize = 'revert';
-                      heading.style.paddingTop = 'revert';
-                      heading.style.marginBlockEnd = 'revert';
-                    }
-                  });
-                  const tables = node.querySelectorAll('table');
-                  tables.forEach(table => {
-                    table.classList.add('tableblock', 'stripes-odd');
-                    table.style.width = '100%';
-                  });
+      .rapidoc-container {
+        min-height: 600px; /* avoid page jump */
+      }
+    </style>
+  </head>
+  <body style="padding-top:0; height:100vh;" class="api">
+{{> header}}
+
+    <div class="rapidoc-container swagger">
+      <rapi-doc 
+        id="api" 
+        spec-url="{{resolve-resource page.attributes.api-spec-url}}" 
+        {{!-- spec-url="https://docs.redpanda.com/api/_attachments/cloud-api.yaml" --}}
+        primary-color="#444ce7"
+        show-header=false 
+        {{#if page.attributes.try-it}} allow-try=true {{else}} allow-try=false {{/if}} 
+        show-curl-before-try=true 
+        show-method-in-nav-bar="false" 
+        show-info="true" 
+        render-style="read" 
+        regular-font="Inter, 'Calibre Regular', 'Open Sans', arial, helvetica, sans-serif" 
+        fill-request-fields-with-example="true" 
+        nav-bg-color="var(--body-background)"  
+        bg-color="var(--body-background)" 
+        nav-item-spacing="relaxed" 
+        font-size="largest"
+        css-file="{{{uiRootPath}}}/css/site.css"  
+        css-classes="swagger">
+
+        <div class="api-toolbar" role="navigation" style="top: 0;">
+          {{> breadcrumbs}}
+          {{#if (is-cloud-url page.url)}}
+          {{> cloud-api-feedback}}
+          {{/if}}
+        </div>
+        {{#each (get-api-slots page.url)}}
+          {{{this}}}
+        {{/each}}
+        {{> tracking-pixel}}
+        <div slot="footer">
+          {{> footer}}
+          {{> announcement-email}}
+        </div>
+      </rapi-doc>
+    </div>
+
+    {{> cloud-api-feedback-modal}}
+  </body>
+  
+  <script defer>
+    window.addEventListener('DOMContentLoaded', function () {
+      const rapidoc = document.querySelector('rapi-doc#api');
+      if (rapidoc && rapidoc.shadowRoot) {
+        // Hide the client ID
+        const observer1 = new MutationObserver(function (mutationsList, observer) {
+          mutationsList.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                const targetElement = node.querySelector('.oauth2.implicit.auth0.oauth-client-id');
+                if (targetElement) {
+                  targetElement.style.display = 'none';
                 }
-              });
+                const subTitleDivs = node.querySelectorAll('.sub-title');
+                subTitleDivs.forEach(div => {
+                  const h2 = document.createElement('h2');
+                  h2.innerHTML = div.innerHTML;
+                  const partAttribute = div.getAttribute('part');
+                  if (partAttribute) {
+                    h2.setAttribute('part', partAttribute);
+                  }
+                  div.parentNode.replaceChild(h2, div);
+                });
+                const headingElements = Array.from(node.querySelectorAll('h2:not(div.sect > h2), h3:not(div.sect > h3), h4:not(div.sect > h4)'));
+                headingElements.forEach(heading => {
+                  if (!heading.closest('.sect')) {
+                    heading.style.fontSize = 'revert';
+                    heading.style.paddingTop = 'revert';
+                    heading.style.marginBlockEnd = 'revert';
+                  }
+                });
+                const tables = rapidoc.shadowRoot.querySelectorAll('table');
+                // Filter tables to include only those that contain 'Region' in their innerHTML
+                const filteredTables = Array.from(tables).filter(table => table.innerHTML.includes('Region'));
+                if (filteredTables.length > 0) {
+                  processTables(filteredTables);
+                }
+                const anchors = node.querySelectorAll('p a');
+                anchors.forEach(anchor => {
+                  anchor.style.color = 'var(--link-font-color)';
+                });
+                // Traverse into nested shadow roots to change white-space property for pre elements
+                const nestedShadowRoots = rapidoc.shadowRoot.querySelectorAll('*');
+                nestedShadowRoots.forEach(element => {
+                  if (element.shadowRoot) {
+                    const preElements = element.shadowRoot.querySelectorAll('pre');
+                    preElements.forEach(pre => {
+                      pre.style.whiteSpace = 'pre-wrap';
+                    });
+                    const anchors = element.shadowRoot.querySelectorAll('p a');
+                    anchors.forEach(anchor => {
+                      anchor.style.color = 'var(--link-font-color)';
+                    });
+                  }
+                })
+              }
             });
           });
-          observer.observe(rapidoc.shadowRoot, { childList: true, subtree: true });
-          rapidoc.style.marginTop = height + 'px'; // Adjusts the top margin based on the navbar's height
-          rapidoc.addEventListener('before-try', (e) => {
-            const message = "Warning: API calls are executed against a real environment, not a sandbox.\nAre you sure you want to send this Delete request?"
-            if (e.detail.request.method === 'DELETE') {
-              if (!confirm(message)) {
-                e.detail.controller.abort();
-              }
+        });
+        observer1.observe(rapidoc.shadowRoot, { childList: true, subtree: true });
+        rapidoc.addEventListener('before-try', (e) => {
+          const message = "Warning: API calls are executed against a real environment, not a sandbox.\nAre you sure you want to send this Delete request?"
+          if (e.detail.request.method === 'DELETE') {
+            if (!confirm(message)) {
+              e.detail.controller.abort();
+            }
+          }
+        });
+      }
+    });
+
+    let resizeTimeout;
+    function debouncedApplyMobileLogic() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(applyMobileLogic, 250);
+    }
+
+    function applyMobileLogic() {
+      const rapidocEl = document.getElementById('api');
+      if (window.innerWidth <= 768) {
+        rapidocEl.setAttribute('render-style', 'view');
+      } else {
+        rapidocEl.setAttribute('render-style', 'read');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', applyMobileLogic);
+    window.addEventListener('resize', debouncedApplyMobileLogic);
+
+      function createTable(data, originalTable) {
+        // Create a new table element
+        const newTable = document.createElement('table');
+        newTable.style.width = '100%';
+        newTable.className = 'tableblock stripes-even';
+        newTable.innerHTML = '<thead><tr><th>Region</th><th>Zones</th><th>Throughput Tiers</th></thead>';
+
+        const tbody = document.createElement('tbody');
+
+        // Loop through each region to create rows
+        data.regions.forEach(region => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td class="tableblock halign-left valign-top"><div class="content">${region.region}</div></td>
+                              <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist" style="margin-top:0;"><ul style="margin-top:0;">${region.zones.map(zone => `<li>${zone}</li>`).join('')}</ul></div></div></td>
+                              <td class="tableblock halign-left valign-top"><div class="content"><div class="ulist" style="margin-top:0;"><ul style="margin-top:0;">${region.tiers.map(tier => `<li>${tier}</li>`).join('')}</ul></div></div></td>`;
+          tbody.appendChild(row);
+        });
+
+        newTable.appendChild(tbody);
+
+        // Create collapsible container
+        const details = document.createElement('details');
+
+        const summary = document.createElement('summary');
+        summary.innerText = `Reveal regions for ${data.platform}`;
+
+        const content = document.createElement('div');
+        content.className = 'content';
+        content.appendChild(newTable);
+
+        details.appendChild(summary);
+        details.appendChild(content);
+
+        // Replace the original table with the collapsible container
+        originalTable.parentNode.replaceChild(details, originalTable);
+      }
+
+      function processTables(tables) {
+        tables.forEach((table, index) => {
+          if (table.classList.contains('tableblock')) return;
+          if (!table.innerHTML.includes('Region')) return;
+          const platform = index === 0 ? 'Google Cloud Platform (GCP)' : index === 1 ? 'Amazon Web Services (AWS)' : 'Microsoft Azure';
+          const rows = table.querySelectorAll('tr');
+          let regions = [];
+
+          rows.forEach((row, rowIndex) => {
+            if (rowIndex > 0) { // Skip header row
+              const cells = row.querySelectorAll('td');
+              const region = cells[0].textContent.trim();
+              const zones = cells[1].textContent.split(',').map(zone => zone.trim());
+              const tiers = cells[2].innerHTML.split('<br>').filter(tier => tier.trim() !== '');
+
+              regions.push({
+                region,
+                zones,
+                tiers
+              });
             }
           });
-        }
-      });
 
-      let resizeTimeout;
-      function debouncedApplyMobileLogic() {
-          clearTimeout(resizeTimeout);
-          resizeTimeout = setTimeout(applyMobileLogic, 250);
+          const regionsData = {
+            platform,
+            regions
+          };
+          createTable(regionsData, table);
+        });
       }
-
-      function applyMobileLogic() {
-          const rapidocEl = document.getElementById('api');
-          if (window.innerWidth <= 768) {
-            rapidocEl.setAttribute('render-style', 'view');
-          } else {
-            rapidocEl.setAttribute('render-style', 'read');
-          }
-      }
-
-      window.addEventListener('DOMContentLoaded', applyMobileLogic);
-      window.addEventListener('resize', debouncedApplyMobileLogic);
-    </script>
-  </body>
+  </script>
 </html>

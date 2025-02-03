@@ -1,19 +1,36 @@
-@media screen and (max-width: 1023.5px) {
+@media screen and (max-width: 1024px) {
   aside.toc.sidebar {
     display: none;
   }
 
   main > .content {
     overflow-x: auto;
+    height: 100%;
   }
+}
+
+body.status-404 main > .content {
+  min-height: 100vh;
+}
+
+.home main {
+  background-color: var(--home-background);
 }
 
 @media screen and (min-width: 1024px) {
   main {
     margin: 0 auto;
-    width: calc(100% - var(--nav-width));
-    padding-top: 20px;
     min-width: 0; /* min-width: 0 required for flexbox to constrain overflowing elements */
+  }
+
+  main:not(.labs) {
+    width: calc(100% - var(--nav-width));
+  }
+
+  .home main {
+    margin: 0;
+    padding-top: 0;
+    width: 100%;
   }
 
   main.index {
@@ -24,6 +41,9 @@
 
   main > .content {
     display: flex;
+    /* display: grid; */
+    /* grid-template-columns: 3fr 1fr; */
+    gap: 50px;
     justify-content: center;
   }
 
@@ -32,14 +52,16 @@
   }
 
   aside.toc.sidebar {
-    flex: 0 0 var(--toc-width);
     order: 1;
   }
 }
 
-@media screen and (min-width: 1216px) {
+@media screen and (min-width: 1400px) {
   aside.toc.sidebar {
     flex-basis: var(--toc-width--widescreen);
-    margin-right: 1rem;
+  }
+
+  main > .content {
+    gap: 150px;
   }
 }

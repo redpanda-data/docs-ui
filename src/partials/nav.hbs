@@ -3,16 +3,7 @@
 {{/if}}
 <div class="nav-container"{{#if page.component}} data-component="{{page.component.name}}" data-version="{{page.version}}"{{/if}}>
   <aside class="nav">
-    <div class="top-panel">
-    {{#if (and (ne page.layout 'search') (ne page.layout 'labs-search'))}}
-      <div class="search hide-for-print">
-        <div id="autocomplete"></div>
-      </div>
-    {{/if}}
     {{> nav-explore}}
-    </div>
-    <div class="panels">
-{{> nav-menu}}
-    </div>
+    {{> nav-menu}}
   </aside>
 </div>

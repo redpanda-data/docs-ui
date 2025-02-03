@@ -1,0 +1,391 @@
+{{{page.contents}}}
+<!-- Action buttons -->
+<div class="button-bar">
+  <button id="clear" class="button">Clear</button>
+  <button id="prettify" class="button">Format input</button>
+  <button id="share" class="button">Share link</button>
+  <select id="sample-dropdown" class="button">
+    {{#each (obj page.attributes.bloblang-samples) }}
+    <option value="{{this.title}}">{{this.title}}</option>
+    {{/each}}
+  </select>
+</div>
+<div class="playground-container">
+  <!-- Editors -->
+  <section class="editors">
+
+    <!-- Editor containers -->
+    <div class="editor-container">
+      <!-- Input editor -->
+      <details open>
+        <summary>Input</summary>
+        <div class="editor" id="ace-input" contenteditable="true"></div>
+      </details>
+      <details open>
+        <summary>Input metadata</summary>
+        <div class="editor" id="ace-input-metadata" contenteditable="true"></div>
+      </details>
+
+      <!-- Mapping editor -->
+      <details open>
+        <summary>Mapping</summary>
+        <div class="editor" id="ace-mapping" contenteditable="true"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Output -->
+  <section class="output-section">
+    <div class="editor-container">
+      <details open>
+        <summary>Output</summary>
+        <div class="editor" id="ace-output">"Output will appear here..."</div>
+      </details>
+      <details open>
+      <summary>Output metadata</summary>
+        <div class="editor" id="ace-metadata">"Metadata will appear here..."</div>
+      </details>
+    </div>
+  </section>
+</div>
+<script>
+let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails, choices;
+const TAB_SIZE = 2;
+
+// Keys for sessionStorage
+const sessionStorageKeys = {
+  input: "blobl-editor-input",
+  metadata: "blobl-editor-metadata",
+  mapping: "blobl-editor-mapping",
+};
+
+// Default values for editors
+const defaultInput = `{
+  "numbers": [1, 2, 3, 4, 5]
+}`;
+const defaultMetaInput = "{}";
+const defaultMapping = `root.even_numbers = this.numbers.filter(n -> n % 2 == 0)
+root.sum = this.numbers.sum()`;
+const defaultOutput = "Output will appear here...";
+const defaultMetaOutput = "Output metadata will appear here...";
+
+// Initialize ACE Editors
+function initializeAceEditor(editorId, mode, readOnly = false, initialValue = '') {
+  const editor = ace.edit(editorId);
+  editor.setTheme('ace/theme/github');
+  editor.session.setMode(mode);
+  editor.setReadOnly(readOnly);
+  editor.setValue(prettifyJSON(initialValue), 1);
+  editor.session.setTabSize(TAB_SIZE);
+  editor.session.setUseSoftTabs(true);
+  editor.setOptions({
+    minLines: 1, // Minimum height
+    maxLines: 50, // Allow growth
+  });
+  return editor;
+}
+
+function prettifyJSON(json) {
+  try {
+    return JSON.stringify(JSON.parse(json), null, 2);
+  } catch (error) {
+    return json; // Return original value if it's not valid JSON
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  metadataDetails = document.getElementById("metadata-details");
+
+  // Initialize input editor
+  aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, defaultInput);
+
+  // Initialize input metadata editor
+  aceInputMetadataEditor = initializeAceEditor("ace-input-metadata", 'ace/mode/json', false, defaultMetaInput);
+
+  // Initialize mapping editor
+  aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/coffee', false, defaultMapping);
+
+  // Initialize output editor
+  aceOutputEditor = initializeAceEditor("ace-output", 'ace/mode/text', true, defaultMapping);
+
+  // Initialize metadata editor
+  aceOutputMetadataEditor = initializeAceEditor("ace-metadata", 'ace/mode/text', true, defaultMetaOutput);
+
+  choices = new Choices(document.getElementById("sample-dropdown"), {
+    searchEnabled: true,
+    searchPlaceholderValue: 'Search examples',
+    placeholderValue: 'Select an example',
+    allowHTML: true
+  });
+
+  const go = new Go();
+  WebAssembly.instantiateStreaming(fetch("{{{siteRootPath}}}/blobl.wasm"), go.importObject)
+    .then((result) => {
+      go.run(result.instance);
+      let loaded = restoreEditorsFromUrl()
+      if (!loaded)  restoreFromStorage();
+      execute();
+    })
+    .catch(console.error);
+
+  const shareButton = document.getElementById("share");
+
+  // Create a Tippy instance on the button
+  const tippyInstance = tippy(shareButton, {
+    trigger: 'manual',
+    arrow: true,
+  });
+
+  // On click, copy to clipboard and show tooltip
+  shareButton.addEventListener("click", async () => {
+    const shareUrl = generateShareableUrl();
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      tippyInstance.setContent("Copied!");
+      tippyInstance.show();
+
+      setTimeout(() => {
+        tippyInstance.hide();
+      }, 2000);
+    } catch (err) {
+      console.error("Failed to copy shareable URL:", err);
+      tippyInstance.setContent("Failed to copy URL.");
+      tippyInstance.show();
+
+      setTimeout(() => {
+        tippyInstance.hide();
+      }, 2000);
+    }
+  });
+
+  // Handle clear button
+  document.getElementById("clear").addEventListener("click", () => {
+    aceInputEditor.setValue("");
+    aceMappingEditor.setValue("");
+    aceInputMetadataEditor.setValue("")
+    aceOutputEditor.setValue(defaultOutput, 1);
+    aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
+    saveTosessionStorage();
+  });
+
+  // Handle prettify button
+  document.getElementById("prettify").addEventListener("click", () => {
+    try {
+      const formattedInput = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
+      const formattedInputMetadata = JSON.stringify(JSON.parse(aceInputMetadataEditor.getValue()), null, 2);
+      aceInputEditor.setValue(formattedInput, 1);
+      saveTosessionStorage();
+      aceInputMetadataEditor.setValue(formattedInputMetadata, 1);
+      saveTosessionStorage();
+    } catch (error) {
+      aceOutputEditor.setValue("Error: Invalid JSON input", 1);
+    }
+  });
+
+  const samples = {{{page.attributes.bloblang-samples}}};
+
+  // Handle dropdown for examples
+  document.getElementById("sample-dropdown").addEventListener("change", (event) => {
+    const selectedSample = event.target.value;
+    const sample = Object.values(samples).find((sample) => sample.title === selectedSample);
+
+    if (sample) {
+      aceInputEditor.setValue(sample.input, 1);
+      aceMappingEditor.setValue(sample.mapping, 1);
+      aceInputMetadataEditor.setValue(sample.metadata || defaultMetaInput, 1);
+      execute();
+      saveTosessionStorage();
+    }
+  });
+
+  // Save content to sessionStorage and execute on changes
+  [aceInputEditor, aceInputMetadataEditor, aceMappingEditor].forEach((editor) => {
+    editor.on("change", saveTosessionStorage);
+    editor.on("change", execute);
+  });
+});
+
+// Function to get input and mapping values
+function getInput() {
+  return aceInputEditor ? aceInputEditor.getValue() : "";
+}
+
+function getMapping() {
+  return aceMappingEditor ? aceMappingEditor.getValue() : "";
+}
+
+function getInputMetadata() {
+  return aceInputMetadataEditor ? aceInputMetadataEditor.getValue() : "";
+}
+
+function isValidJSON(str) {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Function to execute the mapping
+function execute() {
+  if (!metadataDetails) metadataDetails = document.getElementById("metadata-details");
+
+  aceOutputEditor.setValue("");
+  aceOutputMetadataEditor.setValue("");
+
+  try {
+    const result = blobl(getMapping(), getInput(), getInputMetadata());
+
+    if (isValidJSON(result)) {
+      const parsedResult = JSON.parse(result);
+
+      // Separate message and metadata
+      const message = parsedResult.msg || parsedResult;
+      const metadata = parsedResult.meta || {};
+
+      // Display message output
+      aceOutputEditor.session.setMode("ace/mode/json");
+      aceOutputEditor.setValue(JSON.stringify(message, null, 2), 1);
+
+      // Display metadata
+      if (Object.keys(metadata).length > 0) {
+        aceOutputMetadataEditor.session.setMode("ace/mode/json");
+        aceOutputMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
+      } else {
+        aceOutputMetadataEditor.session.setMode("ace/mode/text");
+        aceOutputMetadataEditor.setValue("{}", 1);
+      }
+    } else {
+      // If the result is not JSON, handle it as raw text
+      aceOutputEditor.session.setMode("ace/mode/text");
+      aceOutputEditor.setValue(result, 1);
+
+      aceOutputMetadataEditor.session.setMode("ace/mode/text");
+      aceOutputMetadataEditor.setValue("No metadata available", 1);
+    }
+  } catch (error) {
+    // Handle general errors
+    aceOutputEditor.session.setMode("ace/mode/text");
+    aceOutputEditor.setValue("Error: " + error.message, 1);
+
+    aceOutputMetadataEditor.session.setMode("ace/mode/text");
+    aceOutputMetadataEditor.setValue("Error: " + error.message, 1);
+  }
+}
+
+// Save editor content to sessionStorage
+function saveTosessionStorage() {
+  sessionStorage.setItem(sessionStorageKeys.input, aceInputEditor.getValue());
+  sessionStorage.setItem(sessionStorageKeys.mapping, aceMappingEditor.getValue());
+  sessionStorage.setItem(sessionStorageKeys.metadata, aceInputMetadataEditor.getValue());
+}
+
+// Restore editor content from sessionStorage
+function restoreFromStorage() {
+  const savedInput = sessionStorage.getItem(sessionStorageKeys.input);
+  const savedMapping = sessionStorage.getItem(sessionStorageKeys.mapping);
+  const savedMeta = sessionStorage.getItem(sessionStorageKeys.metadata);
+  const dropdownElement = document.getElementById("sample-dropdown");
+
+  const samples = {{{page.attributes.bloblang-samples}}};
+
+  if (!savedInput && !savedMapping) {
+    // Default to "Array processing" if storage is empty
+    const defaultSample = Object.values(samples).find((sample) => sample.title === "Array processing");
+
+    if (defaultSample) {
+      aceInputEditor.setValue(defaultSample.input, 1);
+      aceMappingEditor.setValue(defaultSample.mapping, 1);
+      defaultSample.metadata ? aceInputMetadataEditor.setValue(defaultSample.metadata, 1) : aceInputMetadataEditor.setValue(defaultMetaInput, 1)
+      choices.setChoiceByValue(defaultSample.title)
+    } else {
+      aceInputEditor.setValue(defaultInput, 1);
+      aceMappingEditor.setValue(defaultMapping, 1);
+      aceInputMetadataEditor.setValue(defaultMetaInput, 1);
+      choices.setChoiceByValue("");
+    }
+  } else {
+    // Restore values from storage
+    aceInputEditor.setValue(savedInput || defaultInput, 1);
+    aceMappingEditor.setValue(savedMapping || defaultMapping, 1);
+    aceInputMetadataEditor.setValue(savedMeta || defaultMetaInput, 1);
+
+    // Find and select the corresponding dropdown option
+    const matchingSample = Object.values(samples).find(
+      (sample) => sample.input === savedInput && sample.mapping === savedMapping
+    );
+
+    if (matchingSample) {
+      choices.setChoiceByValue(matchingSample.title);
+    } else {
+      choices.setChoiceByValue("");
+    }
+  }
+
+  aceOutputEditor.setValue(defaultOutput, 1);
+  aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
+}
+
+function generateShareableUrl() {
+  const currentInput = aceInputEditor.getValue() || "";
+  const currentMetadata = aceInputMetadataEditor.getValue() || "";
+  const currentMapping = aceMappingEditor.getValue() || "";
+
+  // Build a new URL object based on the current location
+  const newUrl = new URL(window.location);
+
+  // Clear any existing search params
+  newUrl.search = "";
+
+  // Add Base64-encoded editor content
+  if (currentInput) {
+    newUrl.searchParams.set("input", btoa(currentInput));
+  }
+  if (currentMetadata) {
+    newUrl.searchParams.set("meta", btoa(currentMetadata));
+  }
+  if (currentMapping) {
+    newUrl.searchParams.set("map", btoa(currentMapping));
+  }
+  return newUrl.toString();
+}
+
+// Check the URL for any Base64-encoded parameters and, if present,
+// decode them to restore the editors.
+function restoreEditorsFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  let loadedFromUrl = false;
+
+  const i   = params.get('input');
+  const md  = params.get('meta');
+  const map = params.get('map');
+
+  if (i !== null) {
+    try {
+      aceInputEditor.setValue(atob(i), 1);
+      loadedFromUrl = true;
+    } catch {
+      console.warn("Invalid Base64 in 'input' param");
+    }
+  }
+  if (md !== null) {
+    try {
+      aceInputMetadataEditor.setValue(atob(md), 1);
+      loadedFromUrl = true;
+    } catch {
+      console.warn("Invalid Base64 in 'meta' param");
+    }
+  }
+  if (map !== null) {
+    try {
+      aceMappingEditor.setValue(atob(map), 1);
+      loadedFromUrl = true;
+    } catch {
+      console.warn("Invalid Base64 in 'map' param");
+    }
+  }
+  return loadedFromUrl;
+}
+</script>

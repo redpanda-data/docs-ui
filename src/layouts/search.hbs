@@ -8,33 +8,35 @@
   </head>
   <body>
 {{> header}}
-<article class="search">
-{{#with page.title}}
-<h1 class="page">{{{this}}}</h1>
-{{/with}}
-<div class="container">
-  <div class="searchbox" id="searchbox"></div>
-    <div class="search-content">
-      <div class="badge-button" id="display-filters">Filters </div>
-      <div class="filters" id="filters">
-      <!-- Filters will be dynamically inserted here -->
-        <div>
-          <div class="type">
+<div class="body">
+  <article class="search">
+  {{#with page.title}}
+  <h1 class="page">{{{this}}}</h1>
+  {{/with}}
+  <div class="container">
+    <div class="searchbox" id="searchbox"></div>
+      <div class="search-content">
+        <div class="badge-button" id="display-filters">Filters </div>
+        <div class="filters" id="filters">
+        <!-- Filters will be dynamically inserted here -->
+          <div>
+            <div class="type">
+            </div>
+          </div>
+          <div>
+            <div class="version">
+            </div>
           </div>
         </div>
-        <div>
-          <div class="version">
-          </div>
+        <div class="results">
+          <!-- Search results will be displayed here -->
         </div>
-      </div>
-      <div class="results">
-        <!-- Search results will be displayed here -->
-      </div>
+    </div>
+    <div id="pagination"></div>
   </div>
-  <div id="pagination"></div>
-</div>
-{{> tracking-pixel}}
-</article>
+  {{> tracking-pixel}}
+  </article>
+  </div>
 {{> footer}}
 <script>
 if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {

@@ -1,9 +1,16 @@
-{{#if (ne page.attributes.role 'two-column')}}
+{{#if (and (ne page.attributes.role 'two-column') (not page.attributes.no-toc))}}
 <aside class="toc sidebar" data-title="{{{page.attributes.toctitle}}}" data-levels="{{{or page.attributes.toclevels 2}}}">
   {{#if (eq page.component.name 'redpanda-labs')}}
     <img src="{{{@root.uiRootPath}}}/img/redpanda-lab-sitting.png" width="150px" height= "150px" alt="Redpanda sitting at a desk mixing chemicals"/>
   {{/if}}
   <div class="toc-menu"></div>
-  {{> thumbs id='thumbs-toc'}}
+  <div class="thumbs">
+    <ul style="list-style:none">
+      {{#each page.attributes.additional-resources}}
+      <li><a target="_blank" href="{{{this.url}}}">{{{this.label}}}</a></li>
+      {{/each}}
+    </ul>
+  </div>
+    {{> thumbs id='thumbs-toc'}}
 </aside>
 {{/if}}

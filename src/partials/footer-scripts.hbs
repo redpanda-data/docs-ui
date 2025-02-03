@@ -1,43 +1,10 @@
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-numbers-plugin.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/prism-line-highlight-plugin.js"></script>
-<script async src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
+<!-- Site-specific scripts -->
 <script defer id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/sorttable.js"></script>
 <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const seeMoreBtn = document.getElementById('see-more-btn');
-  if (seeMoreBtn) {
-    seeMoreBtn.addEventListener('click', function() {
-      const hiddenItems = document.querySelectorAll('.ulist li.to-hide');
-      let anyItemWasHidden = false;
-      hiddenItems.forEach(function(item) {
-        if (item.classList.contains('hidden')) {
-          anyItemWasHidden = true;
-        }
-        item.classList.toggle('hidden');
-      });
-      hiddenItemsVisible = anyItemWasHidden;
-      seeMoreBtn.textContent = hiddenItemsVisible ? "See Less" : "See More";
-    });
-  }
-});
-</script>
-{{#if (and env.ALGOLIA_API_KEY (and (ne page.layout 'search') (ne page.layout 'labs-search')))}}
+{{#if (and env.ALGOLIA_API_KEY (ne page.layout 'search'))}}
 {{> algolia-script}}
 {{/if}}
 {{#if (ne page.layout '404') }}
 {{> feedback-form-script}}
-{{> announcement-email-script}}
-{{> editable-placeholders-script}}
 {{/if}}
-<script>
-tippy('[data-tippy-content]', {
-  animation: 'scale',
-  theme: 'redpanda-term',
-  touch: 'hold',
-  interactive: true,
-  allowHTML: true
-});
-</script>

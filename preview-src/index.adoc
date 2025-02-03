@@ -6,6 +6,12 @@ Author Name
 :!table-caption:
 :page-pagination:
 
+link:./cloud-api.html[API preview]
+
+```bash
+alias internal-rpk="kubectl --namespace <namespace> exec -i -t redpanda-0 -c redpanda -- rpk"
+```
+
 [.float-group]
 --
 image:multirepo-ssg.svg[Multirepo SSG,180,135,float=right,role=float-gap]
@@ -39,8 +45,9 @@ Mauris eget leo nunc, nec tempus mi? Curabitur id nisl mi, ut vulputate urna.
 | Chris | 33 | Photographer
 |===
 
-This table is larger than 1000px, so we clip it to 500px and allow the user to expand it.
+You can add `sortable` class to create a sortable table. This will make all headers clickable, and sortable upon click.
 
+[.sortable]
 |===
 | Name | Age | Occupation
 
@@ -51,75 +58,6 @@ This table is larger than 1000px, so we clip it to 500px and allow the user to e
 | Sarah | 30 | Writer
 | Michael | 55 | Chef
 | Amy | 29 | Scientist
-| Mark | 38 | Lawyer
-| Laura | 26 | Designer
-| Chris | 33 | Photographer
-| Alex | 27 | Nurse
-| Jenna | 40 | Teacher
-| Brian | 31 | Architect
-| Olivia | 25 | Accountant
-| Ethan | 48 | Mechanic
-| Sophia | 37 | Pharmacist
-| Mason | 29 | Engineer
-| Ava | 45 | Editor
-| Logan | 32 | Graphic Designer
-| Mia | 23 | Research Assistant
-| Jacob | 36 | Consultant
-| Zoe | 39 | HR Manager
-| Lucas | 41 | Sales Manager
-| Lily | 34 | Event Planner
-| Aiden | 50 | Police Officer
-| Ella | 28 | Social Worker
-| James | 47 | Pilot
-| Chloe | 44 | Nutritionist
-| Benjamin | 52 | Judge
-| Isabella | 29 | Interior Designer
-| Noah | 33 | Software Developer
-| Madison | 26 | Marketing Specialist
-| Jack | 37 | Film Director
-| Harper | 31 | Fashion Designer
-|===
-
-This large table won't be clipped because it has the `no-clip` class.
-
-[.no-clip]
-|===
-| Name | Age | Occupation
-
-| John | 28 | Engineer
-| Emily | 34 | Artist
-| David | 22 | Student
-| Lisa | 42 | Doctor
-| Sarah | 30 | Writer
-| Michael | 55 | Chef
-| Amy | 29 | Scientist
-| Mark | 38 | Lawyer
-| Laura | 26 | Designer
-| Chris | 33 | Photographer
-| Alex | 27 | Nurse
-| Jenna | 40 | Teacher
-| Brian | 31 | Architect
-| Olivia | 25 | Accountant
-| Ethan | 48 | Mechanic
-| Sophia | 37 | Pharmacist
-| Mason | 29 | Engineer
-| Ava | 45 | Editor
-| Logan | 32 | Graphic Designer
-| Mia | 23 | Research Assistant
-| Jacob | 36 | Consultant
-| Zoe | 39 | HR Manager
-| Lucas | 41 | Sales Manager
-| Lily | 34 | Event Planner
-| Aiden | 50 | Police Officer
-| Ella | 28 | Social Worker
-| James | 47 | Pilot
-| Chloe | 44 | Nutritionist
-| Benjamin | 52 | Judge
-| Isabella | 29 | Interior Designer
-| Noah | 33 | Software Developer
-| Madison | 26 | Marketing Specialist
-| Jack | 37 | Film Director
-| Harper | 31 | Fashion Designer
 |===
 
 
@@ -133,7 +71,7 @@ Eum an doctus <<liber-recusabo,maiestatis efficiantur>>.
 Eu mea inani iriure.footnote:[Quisque porta facilisis tortor, vitae bibendum velit fringilla vitae! Lorem ipsum dolor sit amet, consectetur adipiscing elit.]
 
 .`package.json`
-[,json]
+[,json,lines=5]
 ----
 {
   "name": "module-name",
@@ -146,6 +84,28 @@ Eu mea inani iriure.footnote:[Quisque porta facilisis tortor, vitae bibendum vel
   }
 }
 ----
+
+++++
+<pre class="highlightjs highlight code-first-child line-numbers linkable-line-numbers language-yaml" tabindex="0" id="code-0yga220" data-line="4,6,7,8"><code class="hljs language-yaml" data-lang="yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> cluster.redpanda.com/v1alpha1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Redpanda
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+<span contenteditable="true" data-type="namespace" aria-label="Edit namespace" title="Edit namespace" role="textbox" aria-multiline="false" class="editable">&lt;namespace&gt;</span>
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+<span class="token key atrule">chartRef</span><span class="token punctuation">:</span>
+  <span class="token key atrule">chartVersion</span><span class="token punctuation">:</span> 5.8.8
+<span class="token key atrule">clusterSpec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">statefulset</span><span class="token punctuation">:</span>
+    <span class="token key atrule">extraVolumes</span><span class="token punctuation">:</span> <span class="token punctuation">|</span><span class="token punctuation">-</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+        <span class="token key atrule">configMap</span><span class="token punctuation">:</span>
+          <span class="token key atrule">name</span><span class="token punctuation">:</span> redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+    <span class="token key atrule">extraVolumeMounts</span><span class="token punctuation">:</span> <span class="token punctuation">|</span><span class="token punctuation">-</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+        <span class="token key atrule">mountPath</span><span class="token punctuation">:</span> /etc/redpanda<span class="token punctuation">-</span>io<span class="token punctuation">-</span>config
+    <span class="token key atrule">additionalRedpandaCmdFlags</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"--io-properties-file=/etc/redpanda-io-config/io-config.yaml"</span>
+      </code></pre>
+++++
 
 .Optional title
 [example]
@@ -235,6 +195,14 @@ Here we just have some plain text.
 [source]
 ----
 plain text
+----
+
+
+==== Ignored placeholders
+
+[source,bash,role="no-placeholders"]
+----
+<this-placeholder-will-be-unchanged>
 ----
 
 ==== Side-by-side code
@@ -470,6 +438,12 @@ ____
 The fog comes
 on little cat feet.
 ____
+
+== External links
+
+External links include an icon like so: link:https://awscli.amazonaws.com/v2/documentation/api/latest/reference/sts/get-caller-identity.html[AWS CLI reference].
+
+The link should not wrap, keeping the icon and the link text together and avoiding a single period on one line.
 
 == Fin
 

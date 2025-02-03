@@ -3,6 +3,10 @@
     <!--{{#with @root.page.componentVersion}}
     <h3 class="title"><a href="{{{relativize ./url}}}">{{./title}}</a></h3>
     {{/with}}-->
+{{#if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
+{{> nav-tree-lab}}
+{{else}}
 {{> nav-tree navigation=page.navigation}}
+{{/if}}
   </nav>
 </div>

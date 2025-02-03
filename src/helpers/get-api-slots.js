@@ -40,9 +40,10 @@ module.exports = (url, { data }) => {
 }
 
 function wrapHtmlWithSlot (htmlContent, slotName) {
-  // Check if the slotName is 'auth' or 'overview'
-  if (slotName === 'auth' || slotName === 'overview') {
-    return `<div slot="${slotName}">${htmlContent}</div>`
+  if (slotName) {
+    // Replace all instances of '9' with '/'
+    const modifiedSlotName = slotName.replace(/9/g, '/')
+    return `<div slot="${modifiedSlotName}">${htmlContent}</div>`
   }
   // Return the content without wrapping if the slot does not match
   return htmlContent

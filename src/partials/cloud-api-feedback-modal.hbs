@@ -1,0 +1,60 @@
+<div id="cloud-api-feedback-modal" class="cloud-api-feedback-modal hidden">
+  <form data-netlify="true" name="cloud-api-feedback" method="POST" netlify-honeypot="bot-field" onSubmit="handleFeedbackSubmit(event)">
+    <div id="cloud-api-feedback-modal-body" class="cloud-api-feedback-modal-body">
+      <div class="cloud-api-feedback-modal-close">
+          <button id="close-announcement" type="button" onclick="handleModal(event)" class="close"><svg viewBox="0 0 15 15" width="14" height="14"><g stroke="currentColor" stroke-width="3.1"><path d="M.75.75l13.5 13.5M14.25.75L.75 14.25"></path></g></svg></button>
+        </div>
+      <div id="cloud-api-feedback-modal-content" class="cloud-api-feedback-modal-content">
+        <span>Sign up for updates:</span>
+        <input class="cloud-api-feedback-modal-input" type="text" name="email" id="email" placeholder="email@example.com">
+        <div class="form-field wrapper">
+          <button type="submit" class="submitButton">Submit</button>
+        </div>
+      </div>
+      <div id="successful-sent-email-api-feedback" name="successful-sent-email-api-feedback" class="successful-sent-email-api-feedback hidden">
+        <span>Subscribed!</span>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+var modal = document.getElementById("cloud-api-feedback-modal");
+var currentForm;
+const successfulSentFeedbackEmail = document.getElementById('successful-sent-email-api-feedback')
+const cloudApiFeedbackModalContent = document.getElementById('cloud-api-feedback-modal-content')
+
+function handleModal(event) {
+  event.preventDefault();
+  modal.classList.toggle('hidden');
+  return false;
+}
+
+const handleFeedbackSubmit = function (event) {
+  event.preventDefault();
+  const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
+  const form = event.target;
+  var formData = new FormData(form);
+
+  formData.set('url', currentUrl)
+  formData.set('email', (form.querySelector('input[name="email"]').value))
+  formData.set('date', new Date())
+
+  fetch("{{page.url}}", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(formData).toString(),
+  }).then(() => {
+      console.log('Form submission success')
+      clearFeedbackModal()
+    })
+    .catch(error => {
+      console.error('Form submission error:', error)
+    })
+}
+function clearFeedbackModal() {
+  cloudApiFeedbackModalContent.style.display='none' //hide content
+  successfulSentFeedbackEmail.classList.toggle("hidden"); //display thank you note
+}
+
+</script>

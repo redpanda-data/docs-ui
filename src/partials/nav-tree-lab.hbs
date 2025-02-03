@@ -1,12 +1,19 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
     <ul class="nav-list">
+      {{#with page.component}}
+        <li class="nav-item" data-depth="0">
+          <div class="item">
+            <a class="nav-link" href="{{this.url}}">Labs Home</a>
+          </div>
+        </li>
+      {{/with}}
       {{#with (parse-json page.attributes.related-docs) as |relatedDocs| }}
       {{#if relatedDocs.length}}
       <li class="nav-item" data-depth="1">
         <div class="item dropdown">
           <span class="nav-text">Related Docs</span>
-          <button aria-label="Expand navigation" class="nav-item-toggle"></button>
+          <div aria-label="Expand navigation" class="nav-item-toggle"><img src="{{{@root.uiRootPath}}}/img/nav-tree-chevron.svg"></img></div>
         </div>
         <ul class="nav-list">
         {{#each relatedDocs}}
@@ -25,7 +32,7 @@
       <li class="nav-item" data-depth="1">
         <div class="item dropdown">
           <span class="nav-text">Related Labs</span>
-          <button aria-label="Expand navigation" class="nav-item-toggle"></button>
+          <div aria-label="Expand navigation" class="nav-item-toggle"><img src="{{{@root.uiRootPath}}}/img/nav-tree-chevron.svg"></img></div>
         </div>
         <ul class="nav-list">
         {{#each relatedLabs}}
@@ -41,13 +48,15 @@
       </li>
       {{/if}}
       {{/with}}
-      <li class="nav-item" data-depth="1">
-        <div class="item">
-          {{#with (get-page-info page.url)}}
-          <a class="nav-link" href="{{this.webUrl}}/tree/{{this.branch}}/{{this.path}}">Source Code<img class="dark-mode-filter" src="{{{@root.uiRootPath}}}/img/github.svg" width="30px" height= "20px" alt="GitHub logo" style="margin-bottom:-3px;"/></a>
-          {{/with}}
-        </div>
-      </li>
+      {{#if (ne page.layout 'labs-search')}}
+        <li class="nav-item" data-depth="1">
+          <div class="item">
+            {{#with (get-page-info null)}}
+            <a class="nav-link" href="{{this.webUrl}}/tree/{{this.branch}}/{{this.path}}">Source Code<img class="dark-mode-filter" src="{{{@root.uiRootPath}}}/img/github.svg" width="30px" height= "20px" alt="GitHub logo" style="margin-bottom:-3px;"/></a>
+            {{/with}}
+          </div>
+        </li>
+      {{/if}}
     </ul>
   </li>
 </ul>

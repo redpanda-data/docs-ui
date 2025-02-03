@@ -1,53 +1,21 @@
-<div class="nav-panel-explore{{#unless page.navigation}} is-active{{/unless}}" data-panel="explore">
+{{#with page.versions}}
+<div class="nav-panel-explore{{#unless @root.page.navigation}} is-active{{/unless}}" data-panel="explore" title="View other versions of Redpanda {{{@root.page.component.title}}}">
   <div class="context">
-     <div class="container has-dropdown">
-    {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
-    {{#with site.components.ROOT}}
-    <span class="title">{{./latest.title}}</span>
-    {{/with}}
-    {{else}}
-    <span class="title">{{page.component.title}}</span>
-    {{/if}}
-      {{#if (ne (length site.components) 1)}}
-      <div class="components">
-        {{#each site.components}}
-        {{#if (and (ne this.asciidoc.attributes.page-exclude-from-dropdown-selector true) (ne this.title @root.page.component.title))}}
-        <span class="component">
-          <a href="{{{relativize ./url}}}">{{{./title}}}</a>
-        </span>
-        {{/if}}
-        {{/each}}
-      </div>
-      {{/if}}
-    </div>
-    {{#unless page.attributes.cloud}}
     <div class="container has-dropdown">
-      {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
-      {{#with site.components.ROOT}}
-      <span class="current-version">{{./latest.displayVersion}}</span>
-      {{/with}}
-      {{else if (ne page.componentVersion.displayVersion 'default')}}
-      <span class="current-version">{{page.componentVersion.displayVersion}}</span>
-      {{/if}}
+      <span class="current-version">Version {{@root.page.componentVersion.displayVersion}}</span><span class="material-symbols-outlined">
+keyboard_arrow_down
+</span>
       <div class="versions">
-        {{#if (or (eq page.attributes.exclude-from-dropdown-selector true) (eq page.layout '404'))}}
-          {{#each site.components.ROOT.versions}}
-          <span class="version">
-            <a href="{{{relativize this.url}}}">{{this.displayVersion}}</a>
-          </span>
-          {{/each}}
-        {{else if (ne page.componentVersion.displayVersion 'default')}}
-          {{#with page.versions}}
+        {{#if (ne @root.page.componentVersion.displayVersion 'default')}}
             {{#each this}}
               {{#if (ne ./version @root.page.version)}}
                 <a class="version
                 {{~#if ./missing}} is-missing{{/if}}" href="{{{relativize ./url}}}">{{./displayVersion}}</a>
               {{/if}}
             {{/each}}
-          {{/with}}
         {{/if}}
       </div>
     </div>
-    {{/unless}}
   </div>
 </div>
+{{/with}}
