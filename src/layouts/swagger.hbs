@@ -21,61 +21,6 @@
   </head>
   <body style="padding-top:0; height:100vh;" class="api">
 {{> header}}
-{{#if (eq page.attributes.relative-src-path 'cloud-api.adoc')}}
-<script>
-  (function() {
-  // We split the Cloud API reference into two separate files: one for the Control Plane API and one for the Data Plane API. To continue supporting old links and bookmarks, this script maps the old anchor links to their new location.
-  const anchorRedirects = {
-    "#tag--PipelineService": "/api/cloud-dataplane-api#tag--PipelineService",
-    "#post-/v1beta2/networks": "/api/cloud-controlplane-api#post-/v1beta2/networks",
-    "#get-/v1beta2/networks/-id-": "/api/cloud-controlplane-api#get-/v1beta2/networks/-id-",
-    "#post-/v1beta2/clusters": "/api/cloud-controlplane-api#post-/v1beta2/clusters",
-    "#get-/v1beta2/operations/-id-": "/api/cloud-controlplane-api#get-/v1beta2/operations/-id-",
-    "#patch-/v1beta2/clusters/-cluster.id-": "/api/cloud-controlplane-api#patch-/v1beta2/clusters/-cluster.id-",
-    "#get-/v1beta2/clusters/-id-": "/api/cloud-controlplane-api#get-/v1beta2/clusters/-id-",
-    "#post-/v1beta2/resource-groups": "/api/cloud-controlplane-api#post-/v1beta2/resource-groups",
-    "#delete-/v1beta2/clusters/-id-": "/api/cloud-controlplane-api#delete-/v1beta2/clusters/-id-",
-    "#delete-/v1beta2/networks/-id-": "/api/cloud-controlplane-api#delete-/v1beta2/networks/-id-",
-    "#delete-/v1beta2/resource-groups/-id-": "/api/cloud-controlplane-api#delete-/v1beta2/resource-groups/-id-",
-    "#get-/v1beta2/serverless/clusters/-id-": "/api/cloud-controlplane-api#get-/v1beta2/serverless/clusters/-id-",
-    "#post-/v1alpha2/users": "/api/cloud-dataplane-api#post-/v1alpha2/users",
-    "#post-/v1alpha2/acls": "/api/cloud-dataplane-api#post-/v1alpha2/acls",
-    "#post-/v1alpha2/topics": "/api/cloud-dataplane-api#post-/v1alpha2/topics",
-    "#get-/v1alpha2/redpanda-connect/pipelines/-id-": "/api/cloud-dataplane-api#get-/v1alpha2/redpanda-connect/pipelines/-id-",
-    "#put-/v1alpha2/redpanda-connect/pipelines/-id-/stop": "/api/cloud-dataplane-api#put-/v1alpha2/redpanda-connect/pipelines/-id-/stop",
-    "#put-/v1alpha2/redpanda-connect/pipelines/-id-/start": "/api/cloud-dataplane-api#put-/v1alpha2/redpanda-connect/pipelines/-id-/start",
-    "#put-/v1alpha2/redpanda-connect/pipelines/-id-": "/api/cloud-dataplane-api#put-/v1alpha2/redpanda-connect/pipelines/-id-",
-    "#post-/v1alpha2/kafka-connect/clusters/-cluster_name-/secrets":
-      "/api/cloud-dataplane-api#post-/v1alpha2/kafka-connect/clusters/-cluster_name-/secrets",
-    "#post-/v1alpha2/kafka-connect/clusters/-cluster_name-/connectors":
-      "/api/cloud-dataplane-api#post-/v1alpha2/kafka-connect/clusters/-cluster_name-/connectors",
-    "#post-/v1alpha2/kafka-connect/clusters/-cluster_name-/connectors/-name-/restart":
-      "/api/cloud-dataplane-api#post-/v1alpha2/kafka-connect/clusters/-cluster_name-/connectors/-name-/restart",
-    "#tag--ClusterService": "/api/cloud-controlplane-api#tag--ClusterService",
-    "#tag--NetworkService": "/api/cloud-controlplane-api#tag--NetworkService",
-    "#tag--OperationService": "/api/cloud-controlplane-api#tag--OperationService",
-    "#tag--ResourceGroupService": "/api/cloud-controlplane-api#tag--ResourceGroupService",
-    "#tag--ServerlessClusterService": "/api/cloud-controlplane-api#tag--ServerlessClusterService",
-    "#tag--ServerlessRegionService": "/api/cloud-controlplane-api#tag--ServerlessRegionService",
-    "#get-/v1beta2/resource-groups": "/api/cloud-controlplane-api#get-/v1beta2/resource-groups",
-    "#get-/v1beta2/serverless/regions": "/api/cloud-controlplane-api#get-/v1beta2/serverless/regions",
-    "#post-/v1beta2/serverless/clusters": "/api/cloud-controlplane-api#post-/v1beta2/serverless/clusters",
-    "#delete-/v1beta2/serverless/clusters/-id-": "/api/cloud-controlplane-api#delete-/v1beta2/serverless/clusters/-id-",
-    "#get-/v1alpha2/redpanda-connect/pipelines": "/api/cloud-dataplane-api#get-/v1alpha2/redpanda-connect/pipelines",
-    "#post-/v1alpha2/secrets": "/api/cloud-dataplane-api#post-/v1alpha2/secrets",
-    "#put-/v1alpha2/secrets/-id-": "/api/cloud-dataplane-api#put-/v1alpha2/secrets/-id-",
-    "#delete-/v1alpha2/secrets/-id-": "/api/cloud-dataplane-api#delete-/v1alpha2/secrets/-id-"
-  };
-
-  const anchor = window.location.hash;
-
-  // If there's a match, do a client-side redirect
-  if (anchorRedirects[anchor]) {
-    window.location.replace(anchorRedirects[anchor]);
-  }
-})();
-</script>
-{{/if}}
 
     <div class="rapidoc-container swagger">
       <rapi-doc 
