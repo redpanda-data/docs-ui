@@ -6,8 +6,6 @@ Author Name
 :!table-caption:
 :page-pagination:
 
-link:./cloud-api.html[API preview]
-
 ```bash
 alias internal-rpk="kubectl --namespace <namespace> exec -i -t redpanda-0 -c redpanda -- rpk"
 ```
@@ -27,6 +25,14 @@ Vestibulum consectetur nec urna a luctus.
 Quisque pharetra tristique arcu fringilla dapibus.
 https://example.org[Curabitur,role=unresolved] ut massa aliquam, cursus enim et, accumsan lectus.
 Mauris eget leo nunc, nec tempus mi? Curabitur id nisl mi, ut vulputate urna.
+
+== API preview
+
+link:./cloud-api.html[Cloud API]
+
+== Bloblang playground preview
+
+link:./playground.html[Playground]
 
 == Tables
 
