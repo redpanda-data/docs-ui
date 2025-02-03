@@ -108,6 +108,8 @@ go version
 
 If Go is not installed, https://go.dev/doc/install[download and install it].
 
+NOTE: For Netlify previews, we set the `GO_VERSION` https://docs.netlify.com/configure-builds/manage-dependencies/#go[environment variable] to 1.23.4 to match the version in the `go.mod` file.
+
 === Clone and Initialize the UI Project
 
 Clone the UI project using git:
