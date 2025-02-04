@@ -1,7 +1,7 @@
 # Bloblang Playground
 
 This directory hosts the source code for the Wasm module that allows the Redpanda docs to execute Bloblang mappings.
-The Wasm module is used in the Bloblang playground defined in [`/src/partials/bloblang-playground.hbs](/src/partials/bloblang-playground.hbs). 
+The Wasm module is used in the Bloblang playground defined in [`/src/partials/bloblang-playground.hbs`](/src/partials/bloblang-playground.hbs). 
 
 The Wasm module is built automatically when you bundle the UI with `gulp bundle`.
 
