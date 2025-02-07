@@ -15,6 +15,14 @@ For more details about this bundle and for the source code, see https://github.c
     {{/each}}
   </select>
 </div>
+<button
+  id="custom-ai-help"
+  type="button"
+  class="custom-ai-help-button"
+>
+  Get help from AI
+</button>
+
 <div class="playground-container">
   <!-- Editors -->
   <section class="editors">
@@ -54,7 +62,7 @@ For more details about this bundle and for the source code, see https://github.c
   </section>
 </div>
 <script>
-let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails, choices;
+let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails, choices, customAIButton;
 const TAB_SIZE = 2;
 
 // Keys for sessionStorage
@@ -98,8 +106,11 @@ function prettifyJSON(json) {
   }
 }
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
+  customAIButton = document.getElementById("custom-ai-help");
 
   // Initialize input editor
   aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, defaultInput);
@@ -186,6 +197,39 @@ document.addEventListener("DOMContentLoaded", () => {
     saveTosessionStorage();
   });
 
+  customAIButton.addEventListener("click", () => {
+    const input = aceInputEditor.getValue();
+    const mapping = aceMappingEditor.getValue();
+    const meta = aceInputMetadataEditor.getValue();
+    const output = aceOutputEditor.getValue();
+    const kapa = window.Kapa
+
+    // Simulate a click on the AI modal trigger
+    if (kapa) {
+      let aiPromptText = "I am using the Bloblang playground to test my Bloblang mappings for Redpanda Connect. I encountered an error with the following configuration:\n\n";
+      if (input && input !== "{}") {
+        aiPromptText += `Input:\n\n${input}\n\n`;
+      }
+      if (meta && meta !== "{}") {
+        aiPromptText += `Input Metadata:\n\n${meta}\n\n`;
+      }
+      if (mapping) {
+        aiPromptText += `Mapping:\n\n${mapping}\n\n`;
+      }
+      if (output) {
+        aiPromptText += `Output:\n\n${output}\n\n`;
+      }
+      aiPromptText += "Can you help debug this?";
+      kapa.open({
+        mode: 'ai',
+        query: aiPromptText,
+        submit: true
+      })
+    } else {
+      console.warn('Kapa AI is not available. Please check your configuration.')
+    }
+  });
+
   // Handle prettify button
   document.getElementById("prettify").addEventListener("click", () => {
     try {
@@ -256,6 +300,7 @@ function execute() {
     const result = blobl(getMapping(), getInput(), getInputMetadata());
 
     if (isValidJSON(result)) {
+      customAIButton.style.display = "none";
       const parsedResult = JSON.parse(result);
 
       // Separate message and metadata
@@ -278,6 +323,7 @@ function execute() {
       // If the result is not JSON, handle it as raw text
       aceOutputEditor.session.setMode("ace/mode/text");
       aceOutputEditor.setValue(result, 1);
+      customAIButton.style.display = "inline-block";
 
       aceOutputMetadataEditor.session.setMode("ace/mode/text");
       aceOutputMetadataEditor.setValue("No metadata available", 1);
@@ -286,6 +332,7 @@ function execute() {
     // Handle general errors
     aceOutputEditor.session.setMode("ace/mode/text");
     aceOutputEditor.setValue("Error: " + error.message, 1);
+    customAIButton.style.display = "inline-block";
 
     aceOutputMetadataEditor.session.setMode("ace/mode/text");
     aceOutputMetadataEditor.setValue("Error: " + error.message, 1);
