@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         aiPromptText += `Output:\n\n${output}\n\n`;
       }
       aiPromptText += "Can you help debug this?";
-      window.Kapa.open({
+      kapa.open({
         mode: 'ai',
         query: aiPromptText,
         submit: true
