@@ -106,20 +106,6 @@ function prettifyJSON(json) {
   }
 }
 
-function simulateEnterKey(element) {
-  // Create a KeyboardEvent for the Enter key
-  const event = new KeyboardEvent("keydown", {
-    key: "Enter",
-    code: "Enter",
-    keyCode: 13,
-    charCode: 13,
-    bubbles: true,
-    cancelable: true
-  });
-
-  // Dispatch the event on the target element
-  element.dispatchEvent(event);
-}
 
 
 document.addEventListener("DOMContentLoaded", () => {
