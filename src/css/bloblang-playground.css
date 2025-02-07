@@ -26,11 +26,12 @@
   border: none;
   color: white;
   height: 32px;
+  display: none;
   font-size: var(--secondary-font-size);
 }
 
 .bloblang-playground .custom-ai-help-button:hover {
-  background-color: #ff5733;
+  background-color: #cc4626;
   color: white;
   cursor: pointer;
 }
