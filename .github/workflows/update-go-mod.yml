@@ -49,6 +49,6 @@ jobs:
           branch: update-go-mod
           title: "auto-docs: Update Go modules"
           body: |
-            This PR updates the Go modules for the Bloblang playground spec.
+            This PR updates the Go modules for the Bloblang playground Wasm code.
           labels: auto-docs
           reviewers: JakeSCahill
