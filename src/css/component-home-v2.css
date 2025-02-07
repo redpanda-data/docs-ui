@@ -42,6 +42,10 @@
   margin-top: 0;
 }
 
+.component-home-v2 .paragraph.home-intro {
+  gap: 30px;
+}
+
 .component-home-v2 a.feature-link {
   height: inherit;
   text-decoration: none;

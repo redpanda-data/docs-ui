@@ -24,10 +24,36 @@
   flex-grow: 1;
 }
 
+.bloblang-playground .banner-container {
+  display: flex;
+  position: relative;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.bloblang-playground .banner-container .close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #555555;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.bloblang-playground .banner-container .close-button:hover {
+  color: #000000;
+  transform: scale(1.2);
+}
+
 .bloblang-playground .banner-form {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .bloblang-playground #contact-email {
@@ -84,11 +110,10 @@
 }
 
 .bloblang-playground .button,
-.bloblang-playground button.close,
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
   padding: 6px 8px;
   background: rgba(68, 76, 231, 0);
-  border: 1px solid rgba(128, 152, 249, 1);
+  border: none;
   border-radius: 6px;
   color: var(--body-font-color);
   margin-top: 0;
@@ -97,16 +122,28 @@
   transition: 'background 0.3s';
 }
 
-.bloblang-playground .button:hover,
-.bloblang-playground button.close:hover,
+.bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
+  background-color: #4474e7;
+  color: #ffffff;
+}
+
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
+  background-color: #365bd6;
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+.bloblang-playground .button {
+  border: 1px solid rgba(128, 152, 249, 1);
+  border-radius: 6px;
+}
+
+.bloblang-playground .button:hover {
   background: rgba(68, 76, 231, 0.06);
   color: var(--body-font-color);
 }
 
-html[data-theme=dark] .bloblang-playground .button:hover,
-html[data-theme=dark] .bloblang-playground button.close:hover,
-html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
+html[data-theme=dark] .bloblang-playground .button:hover {
   background: rgba(68, 76, 231);
   color: var(--body-font-color);
 }
@@ -127,10 +164,6 @@ html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitBut
   margin: 0;
 }
 
-.bloblang-playground .output-section .editor-container details {
-  height: 100%;
-}
-
 .bloblang-playground .editor-container summary {
   padding: 10px;
   cursor: pointer;
@@ -145,25 +178,29 @@ html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitBut
 
 /* Editor areas */
 .bloblang-playground .editor {
-  font-size: 12pt;
+  font-size: var(--body-font-size);
   background-color: var(--pre-background) !important;
   color: var(--code-font-color) !important;
-  height: 250px;
+  min-height: 130px;
   padding: 10px;
   overflow-y: auto;
+  border-radius: 5px;
   position: relative;
   border: 1px solid rgb(204, 204, 204);
-  resize: both;
+  resize: horizontal;
   min-width: 200px;
-  min-height: 100px;
 }
 
 /* Output section (right side) */
 .bloblang-playground .output-section {
-  flex: 1 1 35%;
+  flex: 1 1 45%;
   gap: 20px;
   display: flex;
   flex-direction: column;
+}
+
+.bloblang-playground #ace-input-metadata {
+  min-height: unset;
 }
 
 .bloblang-playground .choices[data-type*=select-one] .choices__inner {
@@ -213,6 +250,46 @@ html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitBut
   gap: 5px;
 }
 
+.bloblang-snippet {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding: 1.5em;
+  border: 1px solid rgb(204, 204, 204);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 2em 0;
+}
+
+.bloblang-snippet .bloblang-editor {
+  font-family: var(--monospace-font-family);
+  font-size: var(--body-font-size);
+  resize: horizontal;
+}
+
+.bloblang-snippet .row {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+}
+
+.bloblang-snippet .box {
+  flex: 1;
+}
+
+.bloblang-snippet .box.full-width {
+  flex: 0 0 100%;
+}
+
+.bloblang-snippet .ace-editor {
+  width: 100%;
+  border: 1px solid rgb(204, 204, 204);
+  border-radius: 5px;
+  min-height: 75px;
+  color: var(--code-font-color);
+  background-color: var(--pre-background);
+}
+
 @media (max-width: 1024px) {
   .bloblang-playground .banner {
     margin-left: -1rem;
@@ -243,5 +320,17 @@ html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitBut
 
   .bloblang-playground .doc {
     margin-right: unset;
+  }
+
+  .bloblang-snippet .row {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .bloblang-playground .banner-container .close-button {
+    top: 5px;
+    right: 5px;
+    font-size: 18px;
   }
 }

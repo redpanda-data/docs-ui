@@ -1,10 +1,13 @@
-<article class="doc">
+<article class="doc {{#if page.attributes.no-toc}}no-toc{{/if}}">
 {{#if (ne page.attributes.role 'home')}}
 {{> breadcrumbs}}
 {{/if}}
 {{#unless page.attributes.cloud}}
 {{> latest-banner}}
 {{/unless}}
+{{#if (eq page.attributes.role 'bloblang-playground')}}
+{{> bloblang-signup-form}}
+{{/if}}
 {{#if (eq page.attributes.role 'home')}}
   <div class="home-header-container">
     <div class="home-header">
@@ -30,12 +33,15 @@
 {{/if}}
 {{#if (eq page.attributes.role 'home')}}
   {{> home}}
+  {{{page.contents}}}
 {{else if (eq page.attributes.role 'component-home')}}
   {{> component-home}}
 {{else if (eq page.attributes.role 'component-home-v2')}}
   {{> component-home-v2}}
 {{else if (eq page.attributes.role 'bloblang-playground')}}
   {{> bloblang-playground}}
+{{else if (eq page.attributes.role 'index-list')}}
+  {{> index-list}}
 {{else if (eq page.layout 'index')}}
   {{> index}}
 {{else if (eq page.attributes.role 'related-labs')}}

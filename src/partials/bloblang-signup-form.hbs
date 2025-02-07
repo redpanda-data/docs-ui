@@ -1,0 +1,55 @@
+<div class="banner-container" id="bloblang-banner">
+  <button class="close-button" id="dismiss-banner" aria-label="Dismiss">&times;</button>
+  <p>Sign up for updates about new features in the playground:</p>
+  <form  data-netlify="true" name="bloblang-emails" method="POST" netlify-honeypot="bot-field" id="bloblang-form" class="banner-form">
+    <input type="email" name="email" id="bloblang-email" placeholder="Enter your email..." required />
+    <button class="button" type="submit">Sign up</button>
+  </form>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const banner = document.getElementById("bloblang-banner");
+  const form = document.getElementById("bloblang-form");
+  const dismissButton = document.getElementById("dismiss-banner");
+  if (sessionStorage.getItem("bloblangBannerDismissed") === "true" && banner) {
+    banner.style.display = "none";
+  }
+    if (dismissButton) {
+    dismissButton.addEventListener("click", () => {
+      banner.style.display = "none";
+      sessionStorage.setItem("bloblangBannerDismissed", "true");
+    });
+  }
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const email = form.querySelector('input[name="email"]').value;
+
+      if (!email) {
+        return;
+      }
+
+      formData.set("email", email);
+
+      fetch("{{page.url}}", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formData).toString(),
+      })
+        .then(() => {
+          console.log("Form submission success");
+          banner.innerHTML = "Thank you! Your email has been submitted.";
+          setTimeout(() => {
+            banner.style.display = "none";
+            sessionStorage.setItem("bloblangBannerDismissed", "true");
+          }, 2000);
+        })
+        .catch((error) => {
+          console.error("Form submission error:", error);
+        });
+    });
+  }
+})
+</script>
