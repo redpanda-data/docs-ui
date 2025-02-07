@@ -18,10 +18,11 @@ For more details about this bundle and for the source code, see https://github.c
 <button
   id="custom-ai-help"
   type="button"
-  style="color: rgb(225, 66, 37);border-radius: 10px;border:1px solid;background:none;display:none"
+  class="custom-ai-help-button"
 >
-  Need help? Ask AI
+  Get help from AI
 </button>
+
 <div class="playground-container">
   <!-- Editors -->
   <section class="editors">
@@ -123,13 +124,7 @@ function simulateEnterKey(element) {
 
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
-  const banner = document.getElementById("bloblang-banner");
   customAIButton = document.getElementById("custom-ai-help");
-  const form = document.getElementById("bloblang-form");
-  const dismissButton = document.getElementById("dismiss-banner");
-  if (sessionStorage.getItem("bloblangBannerDismissed") === "true" && banner) {
-    banner.style.display = "none";
-  }
 
   // Initialize input editor
   aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, defaultInput);
@@ -219,30 +214,33 @@ document.addEventListener("DOMContentLoaded", () => {
   customAIButton.addEventListener("click", () => {
     const input = aceInputEditor.getValue();
     const mapping = aceMappingEditor.getValue();
+    const meta = aceInputMetadataEditor.getValue();
     const output = aceOutputEditor.getValue();
+    const kapa = window.Kapa
+
     // Simulate a click on the AI modal trigger
-    const kapaButton = document.querySelector(".custom-class-kapa");
-    if (kapaButton) {
-      kapaButton.click(); // Simulate the click to open the modal
-      // Wait for the modal and textarea to be created
-      const waitForTextarea = () => {
-        const modal = document.getElementById("kapa-widget-portal");
-        if (modal) {
-          const aiPromptTextarea = modal.querySelector("textarea");
-          if (aiPromptTextarea) {
-            aiPromptTextarea.style.height = '300px !important'
-            // Populate the AI prompt textarea with input, mapping, and output details
-            aiPromptTextarea.value = `I encountered an error with the following configuration:\nInput:\n${input}\nMapping:\n${mapping}\nOutput:\n${output}\nCan you help debug this?`;
-            simulateEnterKey(aiPromptTextarea);
-            return; // Exit once the textarea is populated
-          }
-        }
-        // Retry after a short delay if the textarea is not yet available
-        setTimeout(waitForTextarea, 100);
-      };
-      waitForTextarea();
+    if (kapa) {
+      let aiPromptText = "I am using the Bloblang playground to test my Bloblang mappings for Redpanda Connect. I encountered an error with the following configuration:\n\n";
+      if (input && input !== "{}") {
+        aiPromptText += `Input:\n\n${input}\n\n`;
+      }
+      if (meta && meta !== "{}") {
+        aiPromptText += `Input Metadata:\n\n${meta}\n\n`;
+      }
+      if (mapping) {
+        aiPromptText += `Mapping:\n\n${mapping}\n\n`;
+      }
+      if (output) {
+        aiPromptText += `Output:\n\n${output}\n\n`;
+      }
+      aiPromptText += "Can you help debug this?";
+      window.Kapa.open({
+        mode: 'ai',
+        query: aiPromptText,
+        submit: true
+      })
     } else {
-      console.error("AI modal trigger button not found.");
+      console.warn('Kapa AI is not available. Please check your configuration.')
     }
   });
 

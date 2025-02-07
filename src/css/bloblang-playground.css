@@ -19,6 +19,22 @@
   z-index: 1000;
 }
 
+.bloblang-playground .custom-ai-help-button {
+  background-color: rgb(225, 66, 37);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  height: 32px;
+  font-size: var(--secondary-font-size);
+}
+
+.bloblang-playground .custom-ai-help-button:hover {
+  background-color: #ff5733;
+  color: white;
+  cursor: pointer;
+}
+
 .bloblang-playground .banner span {
   margin: 0;
   flex-grow: 1;
