@@ -613,8 +613,8 @@ github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 h1:N/ElC8H3+5X
 github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/redpanda-data/benthos/v4 v4.44.1 h1:DFopBRGGePA4ZWNHeBK9TrI2zHJBWtyotzxMxzxEMqY=
 github.com/redpanda-data/benthos/v4 v4.44.1/go.mod h1:jmRBIp9UpV8gx+1jJpZuGVt5vdq/zJCYCn/uZb8+csU=
-github.com/redpanda-data/connect/v4 v4.46.0 h1:MSXQwpw1FjmZYBJznedX1LEbiQulvZwqD34StT9oPEE=
-github.com/redpanda-data/connect/v4 v4.46.0/go.mod h1:4ZUrJ0RjizXRlpO635elLn1HQU6mhcUI4ZZQEoE9maY=
+github.com/redpanda-data/connect/v4 v4.47.0 h1:eJI2A+GtK/svIttiLzj3Rmrkof2aa/aVSmP9PsezRS8=
+github.com/redpanda-data/connect/v4 v4.47.0/go.mod h1:7sjmE73viDt11V5rrUk/1p9q6GdE6LZ3WIWg6pbKEw8=
 github.com/rickb777/period v1.0.8 h1:lEo9kb7kpA6TNYG9u8ddFfwrVK+ftHQokt7UKNY+jFc=
 github.com/rickb777/period v1.0.8/go.mod h1:M13FB5SGZf4zJmF/zfLDqwfQ0XafHxgOsw6DAL0EFw0=
 github.com/rickb777/plural v1.4.2 h1:Kl/syFGLFZ5EbuV8c9SVud8s5HI2HpCCtOMw2U1kS+A=
@@ -761,8 +761,8 @@ golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88/go.mod h1:IxCIyHEi3zRg3s0
 golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.7.0/go.mod h1:pYwdfH91IfpZVANVyUOhSIPZaFoJGxTFbZhFTx+dXZU=
 golang.org/x/crypto v0.9.0/go.mod h1:yrmDGqONDYtNj3tH8X9dzUun2m2lzPa9ngI6/RUPGR0=
-golang.org/x/crypto v0.32.0 h1:euUpcYgM8WcP71gNpTqQCn6rC2t6ULUPiOzfWaXVVfc=
-golang.org/x/crypto v0.32.0/go.mod h1:ZnnJkOaASj8g0AjIduWNlq2NRxL0PlBrbKVyZ6V/Ugc=
+golang.org/x/crypto v0.33.0 h1:IOBPskki6Lysi0lo9qQvbxiQ+FvsCC/YWOecCHAixus=
+golang.org/x/crypto v0.33.0/go.mod h1:bVdXmD7IV/4GdElGPozy6U7lWdRXA4qyRVGJV57uQ5M=
 golang.org/x/exp v0.0.0-20180321215751-8460e604b9de/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20180807140117-3d87b88a115f/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
@@ -777,8 +777,8 @@ golang.org/x/exp v0.0.0-20191227195350-da58074b4299/go.mod h1:2RIsYlXP63K8oxa1u0
 golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a/go.mod h1:2RIsYlXP63K8oxa1u096TMicItID8zy7Y6sNkU49FU4=
 golang.org/x/exp v0.0.0-20200207192155-f17229e696bd/go.mod h1:J/WKrq2StrnmMY6+EHIKF9dgMWnmCNThgcyBT1FY9mM=
 golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6/go.mod h1:3jZMyOhIsHpP37uCMkUooju7aAi5cS1Q23tOzKc+0MU=
-golang.org/x/exp v0.0.0-20250128182459-e0ece0dbea4c h1:KL/ZBHXgKGVmuZBZ01Lt57yE5ws8ZPSkkihmEyq7FXc=
-golang.org/x/exp v0.0.0-20250128182459-e0ece0dbea4c/go.mod h1:tujkw807nyEEAamNbDrEGzRav+ilXA7PCRAd6xsmwiU=
+golang.org/x/exp v0.0.0-20250207012021-f9890c6ad9f3 h1:qNgPs5exUA+G0C96DrPwNrvLSj7GT/9D+3WMWUcUg34=
+golang.org/x/exp v0.0.0-20250207012021-f9890c6ad9f3/go.mod h1:tujkw807nyEEAamNbDrEGzRav+ilXA7PCRAd6xsmwiU=
 golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81/go.mod h1:ux5Hcp/YLpHSI86hEcLt0YII63i6oz57MZXIpbrjZUs=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/image v0.0.0-20190802002840-cff245a6509b/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
