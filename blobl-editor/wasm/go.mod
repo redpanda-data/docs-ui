@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/redpanda-data/benthos/v4 v4.44.1
-	github.com/redpanda-data/connect/v4 v4.47.0
+	github.com/redpanda-data/connect/v4 v4.47.1
 )
 
 require (
@@ -34,7 +34,7 @@ require (
 	github.com/go-faker/faker/v4 v4.6.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/gofrs/uuid/v5 v5.3.0 // indirect
+	github.com/gofrs/uuid/v5 v5.3.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -90,8 +90,8 @@ require (
 	go.opentelemetry.io/otel/metric v1.34.0 // indirect
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/exp v0.0.0-20250207012021-f9890c6ad9f3 // indirect
-	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
+	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
