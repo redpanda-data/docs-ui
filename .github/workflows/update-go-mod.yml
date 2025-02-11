@@ -34,6 +34,9 @@ jobs:
         with:
           go-version: stable
 
+      - name: Wait for registry update
+        run: sleep 180
+
       - name: Update dependencies
         run: |
           cd ./redpanda-docs/blobl-editor/wasm
