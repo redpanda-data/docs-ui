@@ -32,6 +32,10 @@ span.editable span.token {
   margin: 0;
 }
 
+.doc pre > code[class*=language-] span.editable span.token {
+  color: var(--editable-code-font-color) !important;
+}
+
 span.editable:hover,
 span.editable > *:hover {
   cursor: pointer;
