@@ -48,3 +48,8 @@ pre .line-highlight {
   position: absolute;
   background-color: var(--highlight-background);
 }
+
+.doc pre > code[class*=language-] span.token.entity {
+  background: unset !important;
+  cursor: unset;
+}
