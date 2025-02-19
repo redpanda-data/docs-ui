@@ -59,6 +59,7 @@
 .modal-scroll-container svg {
   width: 90vw;
   object-fit: unset;
+  font-size: smaller !important;
 }
 
 .modal-close {

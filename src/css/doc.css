@@ -649,6 +649,7 @@ table code {
 .doc .image > svg {
   display: inline-block;
   height: auto;
+  font-size: inherit !important;
   max-width: 100%;
   vertical-align: middle;
   background: white;
