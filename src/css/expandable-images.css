@@ -14,7 +14,8 @@
   position: relative;
 }
 
-.imageblock .content img {
+.imageblock .content img,
+.imageblock .content svg {
   max-width: 100%;
   max-height: 100%;
   -webkit-transition: all 0.3s ease;
@@ -22,22 +23,59 @@
   cursor: pointer;
 }
 
-.imageblock .content img.active {
+.modal-overlay {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: none; /* Shown when active */
+  align-items: center;
+  justify-content: center;
+  overflow: auto;  /* Allows scrolling if content is too tall */
+  padding: 1rem;
   z-index: 9999;
-  cursor: zoom-out;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-scroll-container {
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.modal-scroll-container img,
+.modal-scroll-container svg {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   border-radius: 5px;
 }
 
+.modal-scroll-container svg {
+  width: 90vw;
+  object-fit: unset;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10000;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .imageblock .content img {
+  .imageblock .content img,
+  .imageblock .content svg {
     -webkit-transition: none;
     transition: none;
   }
