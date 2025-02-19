@@ -1,22 +1,42 @@
-;(function () {
+(function () {
   'use strict'
-  const images = document.querySelectorAll('.imageblock img')
 
-  if (!images) return
+  const modalOverlay = document.createElement('div')
+  modalOverlay.id = 'modal-overlay'
+  modalOverlay.className = 'modal-overlay'
+  // Create the inner HTML (close button and container for media)
+  modalOverlay.innerHTML = `
+    <button id="modal-close" class="modal-close">&times;</button>
+    <div class="modal-scroll-container"></div>
+  `
+  document.body.appendChild(modalOverlay)
 
-  images.forEach((image) => {
-    image.addEventListener('click', (e) => {
-      image.classList.toggle('active')
+  const blocks = document.querySelectorAll('.imageblock')
+  const modalContainer = document.querySelector('.modal-scroll-container')
+  const modalClose = document.getElementById('modal-close')
+
+  if (!blocks.length || !modalOverlay) return
+
+  blocks.forEach((block) => {
+    block.addEventListener('click', function (e) {
+      const media = block.querySelector('img, svg')
+      if (!media) return
+
+      const clone = media.cloneNode(true)
+      modalContainer.innerHTML = ''
+      modalContainer.appendChild(clone)
+      modalOverlay.classList.add('active')
     })
+    block.addEventListener('touchmove', (e) => e.preventDefault())
+  })
 
-    image.addEventListener('touchmove', function (e) {
-      e.preventDefault()
-    })
+  modalClose.addEventListener('click', () => {
+    modalOverlay.classList.remove('active')
+  })
 
-    image.addEventListener('touchend', function (e) {
-      if (!e.target.classList.contains('active')) {
-        e.preventDefault()
-      }
-    })
+  modalOverlay.addEventListener('click', function (e) {
+    if (e.target === modalOverlay) {
+      modalOverlay.classList.remove('active')
+    }
   })
 })()
