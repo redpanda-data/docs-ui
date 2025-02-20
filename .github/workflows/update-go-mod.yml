@@ -35,7 +35,7 @@ jobs:
           go-version: stable
 
       - name: Wait for registry update
-        run: sleep 180
+        run: sleep 300
 
       - name: Update dependencies
         run: |
