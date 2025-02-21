@@ -19,7 +19,7 @@
 
   blocks.forEach((block) => {
     block.addEventListener('click', function (e) {
-      const media = block.querySelector('img')
+      const media = block.querySelector('img, svg')
       if (!media) return
 
       const clone = media.cloneNode(true)
