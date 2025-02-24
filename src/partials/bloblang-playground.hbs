@@ -62,7 +62,7 @@ For more details about this bundle and for the source code, see https://github.c
   </section>
 </div>
 <script>
-let aceInputEditor, aceMappingEditor, aceOutputEditor,metadataDetails, choices, customAIButton;
+let aceInputEditor, aceMappingEditor, aceOutputEditor, metadataDetails, choices, customAIButton;
 const TAB_SIZE = 2;
 
 // Keys for sessionStorage
@@ -81,6 +81,18 @@ const defaultMapping = `root.even_numbers = this.numbers.filter(n -> n % 2 == 0)
 root.sum = this.numbers.sum()`;
 const defaultOutput = "Output will appear here...";
 const defaultMetaOutput = "Output metadata will appear here...";
+
+// Check for URL parameters or saved state
+const params = new URLSearchParams(window.location.search);
+const hasUrlData = params.has("input") || params.has("meta") || params.has("map");
+const hasSavedState = sessionStorage.getItem(sessionStorageKeys.input) ||
+                      sessionStorage.getItem(sessionStorageKeys.mapping) ||
+                      sessionStorage.getItem(sessionStorageKeys.metadata);
+const loadingPlaceholder = "Loading...";
+
+const initialInput   = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultInput;
+const initialMeta    = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultMetaInput;
+const initialMapping = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultMapping;
 
 // Initialize ACE Editors
 function initializeAceEditor(editorId, mode, readOnly = false, initialValue = '') {
@@ -106,25 +118,17 @@ function prettifyJSON(json) {
   }
 }
 
-
-
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
   customAIButton = document.getElementById("custom-ai-help");
 
-  // Initialize input editor
-  aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, defaultInput);
+  // Initialize editors using the initial placeholders if URL/saved state exists
+  aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, initialInput);
+  aceInputMetadataEditor = initializeAceEditor("ace-input-metadata", 'ace/mode/json', false, initialMeta);
+  aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/coffee', false, initialMapping);
 
-  // Initialize input metadata editor
-  aceInputMetadataEditor = initializeAceEditor("ace-input-metadata", 'ace/mode/json', false, defaultMetaInput);
-
-  // Initialize mapping editor
-  aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/coffee', false, defaultMapping);
-
-  // Initialize output editor
+  // Output editors always start with the defaults
   aceOutputEditor = initializeAceEditor("ace-output", 'ace/mode/text', true, defaultOutput);
-
-  // Initialize metadata editor
   aceOutputMetadataEditor = initializeAceEditor("ace-metadata", 'ace/mode/text', true, defaultMetaOutput);
 
   choices = new Choices(document.getElementById("sample-dropdown"), {
@@ -134,24 +138,27 @@ document.addEventListener("DOMContentLoaded", () => {
     allowHTML: true
   });
 
-/**
- * Dynamically loads the `blobl.wasm` file using a Handlebars template condition.
- *
- * Why the conditional?
- * - When we're building the "UI Preview" of our docs/site (`site.title` in `preview-src/ui-model.yml is "UI Preview"),
- *   the WASM file (`blobl.wasm`) gets placed under the `_/` directory rather than the site root.
- * - For normal builds (anything other than "UI Preview"), `blobl.wasm` is moved to the root,
- *   so the path is just `{{{siteRootPath}}}/blobl.wasm`.
- * - In the UI preview setup, we don't pull in a fully bundled JavaScript file.
- *   Instead, the template files are loaded directly, so we have to reference the
- *   WASM file where it's actually generated (under `_/`).
-*/
+  /**
+   * Dynamically loads the `blobl.wasm` file using a Handlebars template condition.
+   *
+   * Why the conditional?
+   * - When we're building the "UI Preview" of our docs/site (`site.title` in `preview-src/ui-model.yml is "UI Preview"),
+   *   the WASM file (`blobl.wasm`) gets placed under the `_/` directory rather than the site root.
+   * - For normal builds (anything other than "UI Preview"), `blobl.wasm` is moved to the root,
+   *   so the path is just `{{{siteRootPath}}}/blobl.wasm`.
+   * - In the UI preview setup, we don't pull in a fully bundled JavaScript file.
+   *   Instead, the template files are loaded directly, so we have to reference the
+   *   WASM file where it's actually generated (under `_/`).
+  */
   const go = new Go();
-  WebAssembly.instantiateStreaming(fetch("{{#if (eq site.title 'UI Preview')}}{{{siteRootPath}}}/_/blobl.wasm{{else}}{{{siteRootPath}}}/blobl.wasm{{/if}}"), go.importObject)
+  WebAssembly.instantiateStreaming(
+    fetch("{{#if (eq site.title 'UI Preview')}}{{{siteRootPath}}}/_/blobl.wasm{{else}}{{{siteRootPath}}}/blobl.wasm{{/if}}"),
+    go.importObject
+  )
     .then((result) => {
       go.run(result.instance);
-      let loaded = restoreEditorsFromUrl()
-      if (!loaded)  restoreFromStorage();
+      let loaded = restoreEditorsFromUrl();
+      if (!loaded) restoreFromStorage();
       execute();
     })
     .catch(console.error);
@@ -191,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("clear").addEventListener("click", () => {
     aceInputEditor.setValue("");
     aceMappingEditor.setValue("");
-    aceInputMetadataEditor.setValue("")
+    aceInputMetadataEditor.setValue("");
     aceOutputEditor.setValue(defaultOutput, 1);
     aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
     saveTosessionStorage();
@@ -202,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mapping = aceMappingEditor.getValue();
     const meta = aceInputMetadataEditor.getValue();
     const output = aceOutputEditor.getValue();
-    const kapa = window.Kapa
+    const kapa = window.Kapa;
 
     // Simulate a click on the AI modal trigger
     if (kapa) {
@@ -224,9 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
         mode: 'ai',
         query: aiPromptText,
         submit: true
-      })
+      });
     } else {
-      console.warn('Kapa AI is not available. Please check your configuration.')
+      console.warn('Kapa AI is not available. Please check your configuration.');
     }
   });
 
@@ -362,8 +369,8 @@ function restoreFromStorage() {
     if (defaultSample) {
       aceInputEditor.setValue(defaultSample.input, 1);
       aceMappingEditor.setValue(defaultSample.mapping, 1);
-      defaultSample.metadata ? aceInputMetadataEditor.setValue(defaultSample.metadata, 1) : aceInputMetadataEditor.setValue(defaultMetaInput, 1)
-      choices.setChoiceByValue(defaultSample.title)
+      defaultSample.metadata ? aceInputMetadataEditor.setValue(defaultSample.metadata, 1) : aceInputMetadataEditor.setValue(defaultMetaInput, 1);
+      choices.setChoiceByValue(defaultSample.title);
     } else {
       aceInputEditor.setValue(defaultInput, 1);
       aceMappingEditor.setValue(defaultMapping, 1);
@@ -452,19 +459,20 @@ function restoreEditorsFromUrl() {
   }
   return loadedFromUrl;
 }
+
 /**
  * Encodes a string as base64 using UTF-8.
  * Replaces legacy `btoa`, which only handles ASCII cleanly.
  */
 function encodeBase64(str) {
   // Convert string -> UTF-8 bytes
-  const utf8Bytes = new TextEncoder().encode(str)
+  const utf8Bytes = new TextEncoder().encode(str);
   // Convert bytes -> binary string
-  let binaryStr = ''
+  let binaryStr = '';
   for (let i = 0; i < utf8Bytes.length; i++) {
-    binaryStr += String.fromCharCode(utf8Bytes[i])
+    binaryStr += String.fromCharCode(utf8Bytes[i]);
   }
-  return window.btoa(binaryStr)
+  return window.btoa(binaryStr);
 }
 
 /**
@@ -472,12 +480,12 @@ function encodeBase64(str) {
  */
 function decodeBase64(base64Str) {
   // atob gives us the binary string back
-  const binaryStr = window.atob(base64Str)
+  const binaryStr = window.atob(base64Str);
   // Convert binary string -> Uint8Array
-  const bytes = new Uint8Array(binaryStr.length)
+  const bytes = new Uint8Array(binaryStr.length);
   for (let i = 0; i < binaryStr.length; i++) {
-    bytes[i] = binaryStr.charCodeAt(i)
+    bytes[i] = binaryStr.charCodeAt(i);
   }
-  return new TextDecoder().decode(bytes)
+  return new TextDecoder().decode(bytes);
 }
 </script>
