@@ -100,7 +100,7 @@ function initializeAceEditor(editorId, mode, readOnly = false, initialValue = ''
   editor.setTheme('ace/theme/github');
   editor.session.setMode(mode);
   editor.setReadOnly(readOnly);
-  editor.setValue(prettifyJSON(initialValue), 1);
+  editor.setValue(initialValue, 1);
   editor.session.setTabSize(TAB_SIZE);
   editor.session.setUseSoftTabs(true);
   editor.setOptions({
