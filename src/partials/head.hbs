@@ -1,8 +1,10 @@
-<!-- Inline CSS to Hide Announcement Bar Initially -->
 <style>
   .announcement-bar {
     display: none;
     height: 0;
+  }
+  .bloblang-playground .banner-container {
+    display: none;
   }
 </style>
 <script>
@@ -15,12 +17,22 @@
       const storageKey = `${sessionKey}-${announcementType}`; // Use the announcement type to differentiate between different banners
       const hasSeenBanner = window.sessionStorage.getItem(storageKey) || false;
       if (hasSeenBanner) {
+        if (announcementType !== 'bloblang') {
+          document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+          document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
+        }
         banner.remove();
       } else {
+          if (announcementType !== 'bloblang') {
+            document.documentElement.style.setProperty('--announcement-bar-height', '50px');
+            document.documentElement.style.setProperty('--announcement-bar-height--desktop', '30px');
+          }
         banner.style.display = 'flex';
-        const closeButton = banner.querySelector('.close-button');
+        const closeButton = banner.querySelector('.close');
         if (closeButton) {
           closeButton.addEventListener('click', function () {
+            document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+            document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
             banner.remove();
             window.sessionStorage.setItem(storageKey, 'true');
           });
@@ -33,19 +45,11 @@
       (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
     document.documentElement.setAttribute('data-theme', initialTheme);
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const announcementBar = document.getElementById('announcement');
-      if (!announcementBar) return;
-
-      const announcementLevel = announcementBar.getAttribute('data-announcement-key');
-      handleBanner('announcement', 'announcementClosed', announcementLevel);
-      handleBanner('bloblang-banner', 'bloblangBannerDismissed', 'bloblang');
-    });
     // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
     window.addEventListener('DOMContentLoaded', function() {
       const switchButton = document.getElementById('switch-theme');
       const announcementBar = document.getElementById('announcement');
+      let announcementLevel = '';
       if (switchButton) {
         setTheme(initialTheme);  // Apply initial theme on load
         switchButton.addEventListener('click', function() {
@@ -56,24 +60,11 @@
           setTheme(newTheme);
         });
       }
-      if (!announcementBar) return;
-      const hasSeenAnnouncement = window.sessionStorage.getItem('announcementClosed') || window.localStorage.getItem('announcementClosed') || false;
-      if (!hasSeenAnnouncement) {
-        document.documentElement.style.setProperty('--announcement-bar-height', '50px');
-        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '30px');
-        announcementBar.style.display = 'flex';
-      } else {
-        document.documentElement.style.setProperty('--announcement-bar-height', '0px');
-        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
+      if (announcementBar) {
+        announcementLevel = announcementBar.getAttribute('data-announcement-key');
+        handleBanner('announcement', 'announcementClosed', announcementLevel);
       }
-      var closeButton = document.getElementById('close-announcement');
-      if (!closeButton) return;
-      closeButton.addEventListener('click', function () {
-        document.documentElement.style.setProperty('--announcement-bar-height', '0px');
-        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
-        announcementBar.remove();
-        window.sessionStorage.setItem('announcementClosed', 'true');
-      });
+      handleBanner('bloblang-banner', 'bloblangBannerDismissed', 'bloblang');
     });
   function setTheme(theme) {
     const rapidocEl = document.getElementById('api');
