@@ -9,7 +9,6 @@ module.exports = (title, attributes, content, { data: { root } }) => {
   const relatedLabs = attributes['related-labs'] ? JSON.parse(attributes['related-labs']) : []
   if (!relatedLabs.length) return content
 
-  // Append "Suggested labs" heading if there are matching labs
   let contentString = content.toString('utf8')
   contentString += '<div class="ulist">\n<ul>'
 

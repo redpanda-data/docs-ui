@@ -3,6 +3,7 @@
 module.exports = (attributes, content, { data: { root } }) => {
   const { contentCatalog } = root
   if (attributes['component-name'] === 'redpanda-labs') return content
+  if (attributes['exclude-related-labs'] === 'true') return content
   if (!contentCatalog) return content
 
   // Extract related labs from attributes
