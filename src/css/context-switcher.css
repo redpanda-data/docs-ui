@@ -12,6 +12,10 @@
   margin: 0;
 }
 
+.beta-label > p:hover {
+  cursor: pointer;
+}
+
 .context-switcher button {
   background: none;
   color: inherit;
@@ -36,8 +40,4 @@
 .beta-label > p {
   color: var(--link-highlight-color);
   padding: 3px;
-}
-
-.beta-label > p:hover {
-  cursor: default;
 }
