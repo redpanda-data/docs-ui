@@ -28,8 +28,20 @@
 {{/if}}
 {{#if page.attributes.beta}}
   <div class="beta-label">
-    <p title="This feature is in beta.">Beta</p>
+    <p>Beta</p>
   </div>
+  <script>
+  const betaButton = document.querySelector('.beta-label p');
+  // Create a Tippy instance on the button
+  const tippyInstance = tippy(betaButton, {
+    content: 'This feature is in beta. Features in beta are available for testing and feedback. They are not supported by Redpanda and should not be used in production environments.',
+    animation: 'scale',
+    theme: 'redpanda-term',
+    touch: 'hold',
+    interactive: true,
+    allowHTML: true,
+  });
+  </script>
 {{/if}}
 {{#if (eq page.attributes.role 'home')}}
   {{> home}}
