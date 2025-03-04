@@ -41,7 +41,3 @@
   color: var(--link-highlight-color);
   padding: 3px;
 }
-
-.beta-label > p:hover {
-  cursor: default;
-}
