@@ -984,6 +984,8 @@ details[open] > summary {
 .doc div.no-wrap pre code {
   white-space: pre !important;
   overflow-x: auto !important;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
 }
 
 .doc .literalblock pre {
