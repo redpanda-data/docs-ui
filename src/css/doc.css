@@ -981,6 +981,13 @@ details[open] > summary {
   font-weight: 300;
 }
 
+.doc div.no-wrap pre code {
+  white-space: pre !important;
+  overflow-x: auto !important;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
 .doc .literalblock pre {
   padding-left: 1em;
 }
