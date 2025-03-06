@@ -161,6 +161,44 @@ article.search .ais-Heading > a {
   color: var(--body-font-color);
 }
 
+.aa-Header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;          /* Space between the button and link */
+  padding: 12px;
+}
+
+.aa-Header .ask-ai {
+  display: flex;
+  align-items: center;
+  background-color: rgb(225, 66, 37);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
+  border-radius: 10px;
+  padding: 10px;
+  border: none;
+  color: white;
+  height: 32px;
+  font-size: var(--secondary-font-size);
+  text-transform: none;
+}
+
+.aa-Header .ask-ai svg {
+  margin-right: 6px;
+}
+
+.aa-Header .view-all {
+  color: var(--link-highlight-color);
+  font-size: 16px;
+  text-decoration: none;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.aa-Header .view-all:hover {
+  text-decoration: underline;
+}
+
 .ais-Breadcrumbs a,
 .aa-Breadcrumbs a {
   color: var(--body-font-color);
