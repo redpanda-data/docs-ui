@@ -157,7 +157,7 @@ Uglify can only work with buffers, not streams.
 
 This code won't wrap. It'll scroll.
 
-[role="no-wrap"]
+[,bash,role="no-wrap"]
 ----
 +-----------------------------------+---------+--------------+--------------------------+
 | redpanda                          | user_id | event_type   | ts                       |
