@@ -34,6 +34,10 @@ link:./cloud-api.html[Cloud API]
 
 link:./playground.html[Playground]
 
+== Site search
+
+link:./search.html[Search]
+
 == Tables
 
 |===

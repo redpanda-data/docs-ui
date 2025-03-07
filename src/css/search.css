@@ -161,6 +161,46 @@ article.search .ais-Heading > a {
   color: var(--body-font-color);
 }
 
+.aa-Header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;          /* Space between the button and link */
+  padding: 12px;
+}
+
+.aa-Header .ask-ai {
+  display: flex;
+  align-items: center;
+  background-color: rgb(225, 66, 37);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
+  border-radius: 10px;
+  padding: 10px;
+  border: none;
+  color: white;
+  height: 32px;
+  font-size: var(--secondary-font-size);
+  text-transform: none;
+}
+
+.aa-Header .ask-ai svg {
+  margin-right: 6px;
+}
+
+.search-footer .view-all {
+  color: var(--link-highlight-color);
+  font-size: 16px;
+  text-decoration: none;
+  padding: 4px 0;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 50px;
+}
+
+.search-footer .view-all:hover {
+  text-decoration: underline;
+}
+
 .ais-Breadcrumbs a,
 .aa-Breadcrumbs a {
   color: var(--body-font-color);
@@ -294,7 +334,10 @@ kbd.algolia-command {
 }
 
 .search-footer {
-  display: none;
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: column;
+  padding: 10px;
 }
 
 .aa-Footer {
@@ -306,6 +349,11 @@ kbd.algolia-command {
 .aa-Footer > a {
   width: fit-content;
   display: block;
+}
+
+.aa-DetachedContainer .aa-Panel {
+  overflow: auto;
+  height: fit-content;
 }
 
 .aa-SourceFooter {
@@ -500,11 +548,6 @@ li.aa-Item:not([id*=filters]) {
 }
 
 @media screen and (min-width: 900px) {
-  .search-footer {
-    display: flex;
-    justify-content: space-evenly;
-  }
-
   .aa-Preview.aa-Column {
     display: flex;
     flex-direction: column;

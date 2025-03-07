@@ -2,7 +2,7 @@ antoraVersion: '1.0.0'
 site:
   url: http://localhost:5252
   title: UI Preview
-  homeUrl: &home_url /xyz/23.2/index.html
+  homeUrl: &home_url /xyz/24.3/index.html
   components:
   - name: abc
     title: Project ABC
@@ -28,8 +28,8 @@ site:
     - &component_version
       title: *component_title
       url: '#'
-      version: '23.2'
-      displayVersion: '23.2'
+      version: '24.3'
+      displayVersion: '24.3'
     - url: '#'
       version: '5.1'
       displayVersion: '5.1'
@@ -58,8 +58,8 @@ page:
   title: Brand&#8217;s Hardware &amp; Software Requirements
   component: *component
   componentVersion: *component_version
-  version: '23.2'
-  displayVersion: '23.2'
+  version: '24.3'
+  displayVersion: '24.3'
   module: ROOT
   relativeSrcPath: index.adoc
   editUrl: http://example.com/project-xyz/blob/main/index.adoc
@@ -78,14 +78,14 @@ page:
     url: '#'
     urlType: internal
   - content: Brand&#8217;s Hardware &amp; Software Requirements
-    url: /xyz/23.2/index.html
+    url: /xyz/24.3/index.html
     urlType: internal
   versions:
   - version: '6.0'
     displayVersion: '6.0'
     url: '#'
-  - version: '23.2'
-    displayVersion: '23.2'
+  - version: '24.3'
+    displayVersion: '24.3'
     url: '#'
   - version: '5.1'
     displayVersion: '5.1'
@@ -102,12 +102,12 @@ page:
       urlType: internal
       items:
       - content: Brand&#8217;s Hardware &amp; Software Requirements
-        url: /xyz/23.2/index.html
+        url: /xyz/24.3/index.html
         urlType: internal
       - content: Cloud API
-        url: /xyz/23.2/cloud-api.html
+        url: /xyz/24.3/cloud-api.html
         urlType: internal
       - content: Bloblang Playground
-        url: /xyz/23.2/playground.html
+        url: /xyz/24.3/playground.html
         urlType: internal
 

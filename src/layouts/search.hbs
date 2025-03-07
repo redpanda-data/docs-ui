@@ -1,206 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-{{> head defaultPageTitle='Search the Documentation'}}
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/satellite-min.css">
-<script src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
-<script src="{{{uiRootPath}}}/js/vendor/algolia/instantsearch.production.min.js"></script>
+    {{> head defaultPageTitle='Search the Documentation'}}
+    <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/satellite-min.css">
+    <script src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
+    <script src="{{{uiRootPath}}}/js/vendor/algolia/instantsearch.production.min.js"></script>
   </head>
   <body>
-{{> header}}
-<div class="body">
-  <article class="search">
-  {{#with page.title}}
-  <h1 class="page">{{{this}}}</h1>
-  {{/with}}
-  <div class="container">
-    <div class="searchbox" id="searchbox"></div>
-      <div class="search-content">
-        <div class="badge-button" id="display-filters">Filters </div>
-        <div class="filters" id="filters">
-        <!-- Filters will be dynamically inserted here -->
-          <div>
-            <div class="type">
+    {{> header}}
+    <div class="body">
+      <article class="search">
+        {{#with page.title}}
+          <h1 class="page">{{{this}}}</h1>
+        {{/with}}
+        <div class="container">
+          <div class="searchbox" id="searchbox"></div>
+          <div class="search-content">
+            <div class="badge-button" id="display-filters">Filters </div>
+            <div class="filters" id="filters">
+              <!-- Filters will be dynamically inserted here -->
+              <div>
+                <div class="type"></div>
+              </div>
+              <div>
+                <div class="version"></div>
+              </div>
+              <div>
+                <div class="product"></div>
+              </div>
+              <div>
+                <div class="categories"></div>
+              </div>
+            </div>
+            <div class="results">
+              <!-- Search results will be displayed here -->
             </div>
           </div>
-          <div>
-            <div class="version">
-            </div>
-          </div>
+          <div id="pagination"></div>
         </div>
-        <div class="results">
-          <!-- Search results will be displayed here -->
-        </div>
+        {{> tracking-pixel}}
+      </article>
     </div>
-    <div id="pagination"></div>
-  </div>
-  {{> tracking-pixel}}
-  </article>
-  </div>
-{{> footer}}
-<script>
-if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
-  const { algoliasearch, instantsearch } = window;
-  const { searchBox } = instantsearch.widgets;
+    {{> footer}}
+    <script>
+      if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
+        const { algoliasearch, instantsearch } = window;
+        const { searchBox } = instantsearch.widgets;
 
-  const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
-  const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
+        const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
+        const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
 
-  const search = instantsearch({
-    searchClient,
-    indexName,
-    routing: {
-      stateMapping: {
-        // Convert UI state to URL parameters
-        stateToRoute(uiState) {
-          const indexUiState = uiState[indexName] || {};
-          return {
-            q: indexUiState.query, // Use 'q' for the query parameter in the URL
-            type: indexUiState.refinementList && indexUiState.refinementList.type,
-            version: indexUiState.refinementList && indexUiState.refinementList.version
-          };
-        },
-        // Convert URL parameters back to UI state
-        routeToState(routeState) {
-          return {
-            [indexName]: {
-              query: routeState.q,
-              refinementList: {
-                type: routeState.type ? // Corrected from 'type' to 'types' to match URL parameters
-                  (Array.isArray(routeState.type) ? routeState.type : [routeState.type]) : [],
-                version: routeState.version ? // Corrected from 'version' to 'versions' to match URL parameters
-                  (Array.isArray(routeState.version) ? routeState.version : [routeState.version]) : []
+        const search = instantsearch({
+          searchClient,
+          indexName,
+          routing: {
+            stateMapping: {
+              // Convert UI state to URL parameters
+              stateToRoute(uiState) {
+                const indexUiState = uiState[indexName] || {};
+                return {
+                  q: indexUiState.query, // 'q' for the query parameter
+                  type: indexUiState.refinementList && indexUiState.refinementList.type,
+                  version: indexUiState.refinementList && indexUiState.refinementList.version,
+                  product: indexUiState.refinementList && indexUiState.refinementList.product,
+                  categories: indexUiState.refinementList && indexUiState.refinementList.categories
+                };
+              },
+              // Convert URL parameters back to UI state
+              routeToState(routeState) {
+                return {
+                  [indexName]: {
+                    query: routeState.q,
+                    refinementList: {
+                      type: routeState.type ? (Array.isArray(routeState.type) ? routeState.type : [routeState.type]) : [],
+                      version: routeState.version ? (Array.isArray(routeState.version) ? routeState.version : [routeState.version]) : [],
+                      product: routeState.product ? (Array.isArray(routeState.product) ? routeState.product : [routeState.product]) : [],
+                      categories: routeState.categories ? (Array.isArray(routeState.categories) ? routeState.categories : [routeState.categories]) : []
+                    }
+                  }
+                };
               }
             }
+          }
+        });
+
+        const productPanel = instantsearch.widgets.panel({
+          templates: { header: 'Product' },
+          hidden(options) { return options.results.nbHits === 0; },
+        })(instantsearch.widgets.refinementList);
+
+        const versionPanel = instantsearch.widgets.panel({
+          templates: { header: 'Version' },
+          hidden(options) { return options.results.nbHits === 0; },
+        })(instantsearch.widgets.refinementList);
+
+        // Create panels for facets with a header label
+        const typePanel = instantsearch.widgets.panel({
+          templates: { header: 'Content Type' },
+          hidden(options) { return options.results.nbHits === 0; },
+        })(instantsearch.widgets.refinementList);
+
+        const categoriesPanel = instantsearch.widgets.panel({
+          templates: { header: 'Categories' },
+          hidden(options) { return options.results.nbHits === 0; },
+        })(instantsearch.widgets.refinementList);
+
+        search.addWidgets([
+          instantsearch.widgets.hits({
+            container: '.results',
+            templates: {
+              item: (hit, { html, components }) => {
+                const isExternal = hit.objectID.startsWith('https');
+                if (isExternal) {
+                  return html`
+                    <div class="card">
+                      <h2 class="ais-Heading">
+                        <a href="${hit.objectID}" target="_blank">
+                          ${components.Highlight({ attribute: 'title', hit })}
+                        </a>
+                      </h2>
+                      <p>
+                        <a href="${hit.objectID}">
+                          ${components.Snippet({ attribute: 'intro', hit })}
+                        </a>
+                      </p>
+                      <div class="aa-ItemContentRow">
+                        ${hit.interactive ? html`
+                          <div class="aa-ItemContentTitle result-type">Interactive</div>
+                        ` : ''}
+                        <div class="aa-ItemContentTitle result-type">${hit.type}</div>
+                      </div>
+                    </div>
+                  `;
+                }
+                return html`
+                  <div class="card">
+                    <h2 class="ais-Heading">
+                      <a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a>
+                    </h2>
+                    <p>
+                      <a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a>
+                    </p>
+                    <div class="aa-ItemContentRow">
+                      <div class="aa-ItemContentTitle result-type">${hit.type}</div>
+                      ${hit.version ? html`
+                        <div class="aa-ItemContentTitle result-type">${hit.version}</div>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              },
+            },
+          }),
+          typePanel({
+            container: '.type',
+            attribute: 'type',
+            operator: 'and',
+          }),
+          versionPanel({
+            container: '.version',
+            attribute: 'version',
+            operator: 'or',
+          }),
+          productPanel({
+            container: '.product',
+            attribute: 'product',
+            operator: 'or',
+          }),
+          categoriesPanel({
+            container: '.categories',
+            attribute: 'categories',
+            operator: 'and',
+          }),
+          instantsearch.widgets.configure({
+            hitsPerPage: 20,
+          }),
+          instantsearch.widgets.pagination({
+            container: '#pagination',
+          }),
+          searchBox({
+            container: '#searchbox',
+          }),
+        ]);
+
+        search.start();
+      }
+
+      document.addEventListener('DOMContentLoaded', function(event) {
+        const button = document.getElementById('display-filters');
+        const filters = document.getElementById('filters');
+
+        function checkWindowSize() {
+          if (window.innerWidth <= 1024) {
+            filters.classList.add('hidden');
+          } else {
+            filters.classList.remove('hidden');
+          }
+        }
+
+        // Debounce function to limit the rate of function execution
+        function debounce(func, wait, immediate) {
+          let timeout;
+          return function() {
+            const context = this, args = arguments;
+            const later = function() {
+              timeout = null;
+              if (!immediate) func.apply(context, args);
+            };
+            const callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
           };
         }
-      }
-    }
-  });
 
-    const typePanel = instantsearch.widgets.panel({
-    templates: {
-      header: 'Content Type',
-    },
-    hidden(options) {
-    return options.results.nbHits === 0;
-    },
-  })(instantsearch.widgets.refinementList);
+        const debouncedCheckWindowSize = debounce(checkWindowSize, 250);
 
-  const versionPanel = instantsearch.widgets.panel({
-    templates: {
-      header: 'Version',
-    },
-    hidden(options) {
-    return options.results.nbHits === 0;
-    },
-  })(instantsearch.widgets.refinementList);
+        // Initial check
+        checkWindowSize();
 
-  search.addWidgets([
-    instantsearch.widgets.hits({
-      container: '.results',
-      templates: {
-        item: (hit, {html, components}) => {
-          const isExternal = hit.objectID.startsWith('https') ? true : false
-          if (isExternal) return html`
-            <div class="card">
-              <h2 class="ais-Heading"><a href="${hit.objectID}" target="_blank">${components.Highlight({ attribute: 'title', hit })}</a></h2>
-              <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
-              <div class="aa-ItemContentRow">
-                ${hit.interactive ? html`
-                <div class="aa-ItemContentTitle result-type">
-                  Interactive
-                </div>` : ''
-                }
-                <div class="aa-ItemContentTitle result-type">
-                  ${hit.type}
-                </div>
-              </div>
-            </div>
-          `
-          if (!isExternal) return html`
-            <div class="card">
-              <h2 class="ais-Heading"><a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a></h2>
-              <p><a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a></p>
-              <div class="aa-ItemContentRow">
-                <div class="aa-ItemContentTitle result-type">
-                  ${hit.type}
-                </div>
-                ${hit.version ? html`
-                <div class="aa-ItemContentTitle result-type">
-                  ${hit.version}
-                </div>` : ''
-                }
-              </div>
-            </div>
-          `
-        },
-      },
-    }),
-    typePanel({
-      container: '.type',
-      attribute: 'type',
-      operator: 'and',
-    }),
-    versionPanel({
-      container: '.version',
-      attribute: 'version',
-      operator: 'and',
-    }),
-    instantsearch.widgets.configure({
-        hitsPerPage: 20,
-    }),
-    instantsearch.widgets.pagination({
-        container: '#pagination',
-    }),
-    searchBox({
-      container: '#searchbox',
-    }),
-  ]);
+        // Event listener for window resize
+        window.addEventListener('resize', debouncedCheckWindowSize);
 
-  search.start();
-}
-
-document.addEventListener('DOMContentLoaded', function(event) {
-  const button = document.getElementById('display-filters')
-  const filters = document.getElementById('filters')
-
-  function checkWindowSize() {
-    if (window.innerWidth <= 1024) {
-      filters.classList.add('hidden')
-    } else {
-      filters.classList.remove('hidden')
-    }
-  }
-
-  // Debounce function to limit the rate of function execution
-  function debounce(func, wait, immediate) {
-    let timeout
-    return function() {
-      const context = this, args = arguments
-      const later = function() {
-        timeout = null
-        if (!immediate) func.apply(context, args)
-      }
-      const callNow = immediate && !timeout
-      clearTimeout(timeout)
-      timeout = setTimeout(later, wait)
-      if (callNow) func.apply(context, args)
-    }
-  }
-
-  const debouncedCheckWindowSize = debounce(checkWindowSize, 250)
-
-  // Initial check
-  checkWindowSize()
-
-  // Event listener for window resize
-  window.addEventListener('resize', debouncedCheckWindowSize)
-
-  button.addEventListener('click', function (event) {
-    filters.classList.toggle('hidden')
-  })
-})
-</script>
+        button.addEventListener('click', function (event) {
+          filters.classList.toggle('hidden');
+        });
+      });
+    </script>
   </body>
 </html>
