@@ -33,7 +33,7 @@ const getVersionDigit = (tag) => {
 };
 
 // Get the product name in versioned tags
-// For example Enterprise v24.2
+// For example Self-Managed v24.2
 const getProductName = (tag) => {
     const wordBeforeVRegex = /(\S+) v/;
     const match = tag.match(wordBeforeVRegex);
@@ -151,8 +151,12 @@ window.addEventListener('DOMContentLoaded', function() {
       Ask AI about "${currentQuery}"
       </button>`
         : '';
+      const componentTitle = '{{{page.component.title}}}';
+      const productParams = componentTitle === 'Cloud'
+        ? '&product[0]=Cloud&product[1]=Connect'
+      : '&product[0]=Self-Managed&product[1]=Connect';
       const viewAllLink = currentQuery
-        ? html`<a class="view-all" href="{{{relativize '/search' }}}?q=${encodeURIComponent(currentQuery)}${VERSION ? `&version=${VERSION}` : ''}">
+        ? html`<a class="view-all" href="{{{relativize '/search' }}}?q=${encodeURIComponent(currentQuery)}${VERSION ? `&version=${VERSION}` : ''}${productParams}">
             View all results
           </a>`
         : '';
