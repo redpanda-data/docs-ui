@@ -187,15 +187,17 @@ article.search .ais-Heading > a {
   margin-right: 6px;
 }
 
-.aa-Header .view-all {
+.search-footer .view-all {
   color: var(--link-highlight-color);
   font-size: 16px;
   text-decoration: none;
   padding: 4px 0;
   cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 50px;
 }
 
-.aa-Header .view-all:hover {
+.search-footer .view-all:hover {
   text-decoration: underline;
 }
 
@@ -332,7 +334,10 @@ kbd.algolia-command {
 }
 
 .search-footer {
-  display: none;
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: column;
+  padding: 10px;
 }
 
 .aa-Footer {
@@ -344,6 +349,11 @@ kbd.algolia-command {
 .aa-Footer > a {
   width: fit-content;
   display: block;
+}
+
+.aa-DetachedContainer .aa-Panel {
+  overflow: auto;
+  height: fit-content;
 }
 
 .aa-SourceFooter {
@@ -538,11 +548,6 @@ li.aa-Item:not([id*=filters]) {
 }
 
 @media screen and (min-width: 900px) {
-  .search-footer {
-    display: flex;
-    justify-content: space-evenly;
-  }
-
   .aa-Preview.aa-Column {
     display: flex;
     flex-direction: column;
