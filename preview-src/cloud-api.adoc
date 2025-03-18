@@ -1,4 +1,4 @@
 = API
 :page-layout: swagger
 :page-try-it: true
-:page-api-spec-url: https://docs.redpanda.com/api/_attachments/cloud-api.yaml
+:page-api-spec-url: https://docs.redpanda.com/api/_attachments/cloud-dataplane-api.yaml
