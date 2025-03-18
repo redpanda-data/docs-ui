@@ -1,0 +1,59 @@
+{{! Usage: Include this partial in any article or page where you want to provide a migration tool for Redpanda Console configuration. }}
+{{! }}
+{{! --> }}
+<script>
+  const go = new Go();
+  WebAssembly.instantiateStreaming(fetch("{{#if (eq site.title 'UI Preview')}}{{{siteRootPath}}}/_/console-config-migrator.wasm{{else}}{{{siteRootPath}}}/console-config-migrator.wasm{{/if}}"), go.importObject)
+    .then((result) => {
+      go.run(result.instance);
+    })
+    .catch((err) => {
+      console.error("Error loading WASM module:", err);
+    });
+
+  let aceInputEditor, aceOutputEditor;
+  document.addEventListener("DOMContentLoaded", () => {
+    const copyButton = document.getElementById("copyConfig");
+
+    // Create a Tippy instance on the button
+    const tippyInstance = tippy(copyButton, {
+      trigger: 'manual',
+      arrow: true,
+    });
+
+    aceInputEditor = ace.edit("ace-config-input");
+    aceInputEditor.setTheme("ace/theme/github");
+    aceInputEditor.session.setMode("ace/mode/yaml");
+    aceInputEditor.session.setTabSize(2);
+    aceInputEditor.session.setUseSoftTabs(true);
+    aceInputEditor.setValue("# Paste your v2 YAML configuration here...", 1);
+
+    aceOutputEditor = ace.edit("ace-config-output");
+    aceOutputEditor.setTheme("ace/theme/github");
+    aceOutputEditor.session.setMode("ace/mode/yaml");
+    aceOutputEditor.session.setTabSize(2);
+    aceOutputEditor.session.setUseSoftTabs(true);
+    aceOutputEditor.setReadOnly(true);
+    aceOutputEditor.setValue("# The migrated v3 configuration will appear here...", 1);
+    copyButton.addEventListener("click", async () => {
+      try {
+        const content = aceOutputEditor.getValue();
+        await navigator.clipboard.writeText(content);
+        tippyInstance.setContent("Copied!");
+        tippyInstance.show();
+
+        setTimeout(() => {
+          tippyInstance.hide();
+        }, 2000);
+      } catch (err) {
+        console.error("Error copying content to clipboard:", err);
+      }
+    });
+    // Convert button event handler: call the WASM module's convertYAML function.
+    document.getElementById("convertConfig").addEventListener("click", () => {
+      const input = aceInputEditor.getValue();
+      const output = convertYAML(input);
+      aceOutputEditor.setValue(output, 1);
+    });
+  });
+</script>

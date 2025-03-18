@@ -43,6 +43,7 @@ svg .node.clickable span {
 
 .modal-overlay.active {
   display: flex;
+  flex-direction: column;
 }
 
 .modal-scroll-container {
@@ -66,7 +67,7 @@ svg .node.clickable span {
 }
 
 .modal-close {
-  position: absolute;
+  position: sticky;
   top: 1rem;
   right: 1rem;
   background: transparent;

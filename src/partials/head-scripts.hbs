@@ -30,12 +30,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script>
   var uiRootPath="{{{uiRootPath}}}"
 </script>
-{{#if (or (eq page.attributes.role 'bloblang-playground')(eq page.attributes.role 'bloblang-snippets'))}}
+{{#if (or (eq page.attributes.role 'bloblang-playground')(eq page.attributes.role 'bloblang-snippets') (eq page.attributes.role 'enable-ace-editor'))}}
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/ace.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/theme-github.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-json.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-coffee.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/worker-json.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/ace/worker-yaml.js"></script>
 <script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
 {{/if}}
 <script defer

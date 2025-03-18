@@ -1147,6 +1147,36 @@ details[open] > summary {
   margin-top: 150px;
 }
 
+.doc .button-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.doc .doc-button {
+  border: 1px solid rgba(128, 152, 249, 1);
+  padding: 6px 8px;
+  background: rgba(68, 76, 231, 0);
+  border-radius: 6px;
+  color: var(--body-font-color);
+  margin-top: 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 'background 0.3s';
+}
+
+.doc .doc-button:hover {
+  background: rgba(68, 76, 231, 0.06);
+  color: var(--body-font-color);
+}
+
+html[data-theme=dark] .doc .doc-button:hover {
+  background: rgba(68, 76, 231);
+  color: var(--body-font-color);
+}
+
 .button-arrow-up:hover::after {
   background-image: url(../img/arrow-cta-hover.svg);
   top: -6px;
