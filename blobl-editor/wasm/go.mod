@@ -3,8 +3,8 @@ module blobl-playground
 go 1.23.4
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.45.0
-	github.com/redpanda-data/connect/v4 v4.48.1
+	github.com/redpanda-data/benthos/v4 v4.45.1
+	github.com/redpanda-data/connect/v4 v4.50.0
 )
 
 require (
@@ -37,7 +37,7 @@ require (
 	github.com/gofrs/uuid/v5 v5.3.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
+	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
