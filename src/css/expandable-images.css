@@ -66,8 +66,8 @@ svg .node.clickable span {
   font-size: smaller !important;
 }
 
-.modal-close {
-  position: sticky;
+.modal-overlay .modal-close {
+  position: absolute;
   top: 1rem;
   right: 1rem;
   background: transparent;
