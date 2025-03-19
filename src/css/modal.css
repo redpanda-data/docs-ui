@@ -1,0 +1,95 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 1rem;
+  z-index: 9999;
+}
+
+.modal.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content {
+  background: var(--body-background);
+  color: var(--body-font-color);
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+  margin-top: 0 !important;
+}
+
+.modal-content .button-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.modal-content button,
+.modal-content button[type=submit]:not(.aa-SubmitButton) {
+  padding: 6px 8px;
+  background: rgba(68, 76, 231, 0);
+  border: none;
+  border-radius: 6px;
+  color: var(--body-font-color);
+  margin-top: 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 'background 0.3s';
+}
+
+.modal-content button[type=submit]:not(.aa-SubmitButton) {
+  background-color: #4474e7;
+  color: #ffffff;
+}
+
+.modal-content button[type=submit]:not(.aa-SubmitButton):hover {
+  background-color: #365bd6;
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+.modal-content button {
+  border: 1px solid rgba(128, 152, 249, 1);
+  border-radius: 6px;
+}
+
+.modal-content button:hover {
+  background: rgba(68, 76, 231, 0.06);
+  color: var(--body-font-color);
+}
+
+html[data-theme=dark] .modal-content button:hover {
+  background: rgba(68, 76, 231);
+  color: var(--body-font-color);
+}
+
+.close,
+.close-modal {
+  position: sticky;
+  top: 1rem;
+  left: 100%;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: var(--body-font-color);
+  cursor: pointer;
+  z-index: 10000;
+}

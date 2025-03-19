@@ -43,6 +43,7 @@ svg .node.clickable span {
 
 .modal-overlay.active {
   display: flex;
+  flex-direction: column;
 }
 
 .modal-scroll-container {
@@ -65,7 +66,7 @@ svg .node.clickable span {
   font-size: smaller !important;
 }
 
-.modal-close {
+.modal-overlay .modal-close {
   position: absolute;
   top: 1rem;
   right: 1rem;

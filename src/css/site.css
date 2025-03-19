@@ -5,6 +5,8 @@
 @import "base.css";
 @import "bloblang-playground.css";
 @import "body.css";
+@import "ace-editor.css";
+@import "modal.css";
 @import "home.css";
 @import "mermaid.css";
 @import "component-home.css";

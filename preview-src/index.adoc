@@ -38,6 +38,10 @@ link:./playground.html[Playground]
 
 link:./search.html[Search]
 
+== Console migration tool
+
+link:./console-migrator.html[Console Migration Tool]
+
 == Tables
 
 |===

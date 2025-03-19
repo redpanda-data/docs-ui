@@ -43,6 +43,9 @@
   });
   </script>
 {{/if}}
+{{#if page.attributes.console-config-migrator}}
+{{> console-config-migrator}}
+{{/if}}
 {{#if (eq page.attributes.role 'home')}}
   {{> home}}
   {{{page.contents}}}
