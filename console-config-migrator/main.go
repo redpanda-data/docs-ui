@@ -44,6 +44,12 @@ func Convert(v2 map[string]interface{}) (map[string]interface{}, string, error) 
 		return nil, "", fmt.Errorf("kafka migration: %w", err)
 	}
 	warnings = append(warnings, warnKafka...)
+
+	// Extract schemaRegistry from kafka and add it as a top-level key.
+	if sr, ok := kafka["schemaRegistry"]; ok {
+		v3["schemaRegistry"] = sr
+		delete(kafka, "schemaRegistry")
+	}
 	v3["kafka"] = kafka
 
 	// Rename connect to kafkaConnect.
@@ -112,7 +118,7 @@ func migrateAuthentication(v2 map[string]interface{}) (map[string]interface{}, [
 				auth["basic"] = map[string]interface{}{"enabled": true}
 			}
 		}
-		// Check various OIDC provider blocks in priority order.
+		// Check various OIDC provider blocks.
 		if oidc, ok := login["oidc"].(map[string]interface{}); ok {
 			if enabled, ok := oidc["enabled"].(bool); ok && enabled {
 				oidcCandidate = oidc
@@ -165,7 +171,7 @@ func migrateKafka(v2 map[string]interface{}) (map[string]interface{}, []string, 
 		"impersonateUser": true,
 	}
 	if oldKafka, ok := v2["kafka"].(map[string]interface{}); ok {
-		// Process schemaRegistry.
+		// Process schemaRegistry from v2 (which is under kafka) and later promote it to top-level.
 		if srRaw, ok := oldKafka["schemaRegistry"].(map[string]interface{}); ok {
 			newSR := make(map[string]interface{})
 			authBlock := make(map[string]interface{})
@@ -194,6 +200,7 @@ func migrateKafka(v2 map[string]interface{}) (map[string]interface{}, []string, 
 			for k, v := range srRaw {
 				newSR[k] = v
 			}
+			// Instead of adding newSR into kafka, we'll let Convert() extract it.
 			kafka["schemaRegistry"] = newSR
 		}
 
@@ -257,7 +264,7 @@ func migrateRoleBindings(v2 map[string]interface{}) ([]interface{}, []string, er
 								continue
 							}
 							user := make(map[string]interface{})
-							// Map provider: "Plain" becomes "basic", all others default to "oidc".
+							// Map provider: if "Plain", set loginType to "basic"; otherwise, use "oidc".
 							if prov, ok := subjMap["provider"].(string); ok {
 								if prov == "Plain" {
 									user["loginType"] = "basic"
