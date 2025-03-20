@@ -3,7 +3,7 @@ module blobl-playground
 go 1.23.4
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.45.1
+	github.com/redpanda-data/benthos/v4 v4.46.0
 	github.com/redpanda-data/connect/v4 v4.50.0
 )
 
