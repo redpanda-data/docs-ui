@@ -14,6 +14,9 @@
   let aceInputEditor, aceOutputEditor;
   document.addEventListener("DOMContentLoaded", () => {
     const copyButton = document.getElementById("copyConfig");
+    const showExampleButton = document.getElementById("showExample");
+    const migrateButton = document.getElementById("convertConfig");
+    const clearButton = document.getElementById("clearInput");
 
     // Create a Tippy instance on the button
     const tippyInstance = tippy(copyButton, {
@@ -35,6 +38,9 @@
     aceOutputEditor.session.setUseSoftTabs(true);
     aceOutputEditor.setReadOnly(true);
     aceOutputEditor.setValue("# The migrated v3 configuration will appear here...", 1);
+    clearButton.addEventListener("click", () => {
+      aceInputEditor.setValue("# Paste your v2 YAML configuration here...", 1);
+    });
     copyButton.addEventListener("click", async () => {
       try {
         const content = aceOutputEditor.getValue();
@@ -50,10 +56,38 @@
       }
     });
     // Convert button event handler: call the WASM module's convertYAML function.
-    document.getElementById("convertConfig").addEventListener("click", () => {
+    migrateButton.addEventListener("click", () => {
       const input = aceInputEditor.getValue();
       const output = convertYAML(input);
       aceOutputEditor.setValue(output, 1);
+    });
+    showExampleButton.addEventListener("click", () => {
+      const sample = `login:
+  jwtSecret: "example-secret"
+  useSecureCookies: true
+  plain:
+    enabled: true
+    credentials:
+      - username: "alice"
+        password: "alice-password"
+
+kafka:
+  brokers:
+    - "broker1:9092"
+  schemaRegistry:
+    enabled: true
+    urls:
+      - "http://schema-registry.example.com:8081"
+
+roleBindings:
+  - roleName: admin
+    metadata:
+      name: "Admin Users"
+    subjects:
+      - kind: user
+        provider: Plain
+        name: "alice"`;
+      aceInputEditor.setValue(sample, 1);
     });
   });
 </script>
