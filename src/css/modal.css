@@ -81,7 +81,6 @@ html[data-theme=dark] .modal-content button:hover {
   color: var(--body-font-color);
 }
 
-.close,
 .close-modal {
   position: sticky;
   top: 1rem;
