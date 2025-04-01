@@ -6,6 +6,7 @@ const exportTasks = require('./gulp.d/lib/export-tasks')
 const log = require('fancy-log')
 const { exec } = require('child_process')
 const path = require('path')
+const gulp = require('gulp')
 
 const bundleName = 'ui'
 const buildDir = 'build'
@@ -22,6 +23,14 @@ const glob = {
   all: [srcDir, previewSrcDir],
   css: `${srcDir}/css/**/*.css`,
   js: ['gulpfile.js', 'gulp.d/**/*.js', `${srcDir}/{helpers,js}/**/*.js`],
+}
+
+const rapidocSrc = 'node_modules/rapidoc/dist/rapidoc-min.js'
+const rapidocDest = path.join(srcDir, 'static')
+
+function copyRapidoc () {
+  return gulp.src(rapidocSrc)
+    .pipe(gulp.dest(rapidocDest))
 }
 
 const cleanTask = createTask({
@@ -94,7 +103,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildWasmTask, buildTask),
+  call: series(cleanTask, lintTask, buildWasmTask, copyRapidoc, buildTask),
 })
 
 const bundlePackTask = createTask({
