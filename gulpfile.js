@@ -137,7 +137,7 @@ const buildPreviewPagesTask = createTask({
 const previewBuildTask = createTask({
   name: 'preview:build',
   desc: 'Process and stage the UI assets and generate pages for the preview',
-  call: series(buildWasmTask, parallel(buildTask, buildPreviewPagesTask)),
+  call: series(buildWasmTask, copyRapidoc, parallel(buildTask, buildPreviewPagesTask)),
 })
 
 const previewServeTask = createTask({
