@@ -9,18 +9,8 @@
 {{> bloblang-signup-form}}
 {{/if}}
 {{#if (eq page.attributes.role 'home')}}
-  <div class="home-header-container">
-    <div class="home-header">
-      {{#with page.title}}
-        <h1 class="page">{{{this}}}</h1>
-      {{/with}}
-      <div class="ask">
-        {{> ai-button}}
-        <div> or </div>
-        <div class="autocomplete" id="autocomplete"></div>
-      </div>
-    </div>
-  </div>
+  {{> home}}
+  {{page.contents}}
 {{else}}
   {{#with page.title}}
     <h1 class="page">{{{this}}}</h1>
@@ -46,10 +36,7 @@
 {{#if page.attributes.console-config-migrator}}
 {{> console-config-migrator}}
 {{/if}}
-{{#if (eq page.attributes.role 'home')}}
-  {{> home}}
-  {{{page.contents}}}
-{{else if (eq page.attributes.role 'component-home')}}
+{{#if (eq page.attributes.role 'component-home')}}
   {{> component-home}}
 {{else if (eq page.attributes.role 'component-home-v2')}}
   {{> component-home-v2}}

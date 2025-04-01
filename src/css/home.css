@@ -6,6 +6,14 @@
   flex-direction: column;
 }
 
+.home #kapa-button {
+  display: none !important;
+}
+
+.home #kapa-modal-content {
+  /* placeholder */
+}
+
 .home .doc {
   max-width: unset;
   margin: 0;
@@ -57,15 +65,8 @@
 
 .home .home-header {
   max-width: 800px;
+  margin-top: 50px;
   width: 100%;
-}
-
-.home .home-header .ask {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 30px;
 }
 
 .home .home-header-container h1 {
@@ -142,11 +143,5 @@ html:not([data-theme=dark]) .home .feature-box:hover {
 @media screen and (min-width: 850px) {
   .home .feature-row {
     flex-direction: row;
-  }
-}
-
-@media screen and (min-width: 560px) {
-  .home .ask #autocomplete {
-    width: 70%;
   }
 }
