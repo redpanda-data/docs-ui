@@ -4,19 +4,19 @@
     {{> head defaultPageTitle='API Reference'}}
     <meta charset="utf-8">
 
-<!-->
-   * Dynamically loads the `blobl.wasm` file using a Handlebars template condition.
+<!--
+   * Dynamically loads the `rapidoc-min.js` file using a Handlebars template condition.
    *
    * Why the conditional?
    * - When we're building the "UI Preview" of our docs/site (`site.title` in `preview-src/ui-model.yml is "UI Preview"),
-   *   the WASM file (`blobl.wasm`) gets placed under the `_/` directory rather than the site root.
-   * - For normal builds (anything other than "UI Preview"), `blobl.wasm` is moved to the root,
-   *   so the path is just `{{{siteRootPath}}}/blobl.wasm`.
+   *   the JS file (`rapidoc-min.js`) gets placed under the `_/` directory rather than the site root.
+   * - For normal builds (anything other than "UI Preview"), `rapidoc-min.js` is moved to the root,
+   *   so the path is just `{{{siteRootPath}}}/rapidoc-min.js`.
    * - In the UI preview setup, we don't pull in a fully bundled JavaScript file.
    *   Instead, the template files are loaded directly, so we have to reference the
-   *   WASM file where it's actually generated (under `_/`).
+   *   JS file where it's actually generated (under `_/`).
   */
-<-->
+-->
     <script type="module" src="{{#if (eq site.title 'UI Preview')}}{{{siteRootPath}}}/_/rapidoc-min.js{{else}}{{{siteRootPath}}}/rapidoc-min.js{{/if}}"></script>
 
     {{> header-scripts}}
