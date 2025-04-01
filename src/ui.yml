@@ -1,3 +1,4 @@
 static_files:
 - blobl.wasm
 - console-config-migrator.wasm
+- rapidoc-min.js
