@@ -76,13 +76,24 @@ func Convert(v2 map[string]interface{}) (map[string]interface{}, string, error) 
 		}
 	}
 
-	// Migrate redpanda.adminApi credentials.
-	redpanda, err := migrateAdminAPI(v2)
-	if err != nil {
-		return nil, "", fmt.Errorf("adminApi migration: %w", err)
-	}
-	if redpanda != nil {
-		v3["redpanda"] = redpanda
+	// Migrate redpanda.adminApi credentials while preserving the entire redpanda stanza.
+	if rp, ok := v2["redpanda"].(map[string]interface{}); ok {
+		v3Redpanda := make(map[string]interface{})
+		// Copy all keys from the original redpanda block.
+		for k, v := range rp {
+			v3Redpanda[k] = v
+		}
+		// If there's an adminApi key, migrate it and update that key.
+		if _, exists := rp["adminApi"]; exists {
+			migratedAdminApi, err := migrateAdminAPI(v2)
+			if err != nil {
+				return nil, "", fmt.Errorf("adminApi migration: %w", err)
+			}
+			if migratedAdminApi != nil {
+				v3Redpanda["adminApi"] = migratedAdminApi
+			}
+		}
+		v3["redpanda"] = v3Redpanda
 	}
 
 	// Copy any remaining top-level fields.
