@@ -618,7 +618,6 @@ table code {
 
 .listingblock .title {
   margin-top: 0.5rem;
-  margin-top: .5rem;
   font-style: italic;
   background: var(--code-background);
   padding: 5px;
