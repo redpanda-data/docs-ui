@@ -318,7 +318,7 @@ func migrateAdminAPI(v2 map[string]interface{}) (map[string]interface{}, error) 
 			for k, v := range adminApiRaw {
 				newAdminApi[k] = v
 			}
-			return redpandaRaw, nil
+			return newAdminApi, nil
 		}
 	}
 	return nil, nil
