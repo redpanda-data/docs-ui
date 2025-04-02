@@ -618,6 +618,11 @@ table code {
 
 .listingblock .title {
   margin-top: 0.5rem;
+  margin-top: .5rem;
+  font-style: italic;
+  background: var(--code-background);
+  padding: 5px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .doc .imageblock,
