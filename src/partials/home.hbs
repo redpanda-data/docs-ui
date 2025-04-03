@@ -9,11 +9,16 @@
       style="height: 400px; width: 100%; border-radius: 0; border: none;"
     >
     </iframe>
+    <div class="suggestion-chips">
+      {{#each page.attributes.ai-suggestions}}
+      <div class="chip">{{this}}</div>
+      {{/each}}
+    </div>
   </div>
 </div>
 <section class="features">
   <div class='container'>
-    {{#each page.attributes.rows}}
+    {{#each page.attributes.row}}
       {{#with this.title}}
         <h2>{{this}}</h2>
       {{/with}}

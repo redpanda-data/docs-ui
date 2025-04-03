@@ -14,6 +14,21 @@
   /* placeholder */
 }
 
+.home .doc .suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.home .doc .chip {
+  background: var(--panel-border-color);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  flex: 1;
+}
+
 .home .doc {
   max-width: unset;
   margin: 0;
