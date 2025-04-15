@@ -3,6 +3,10 @@ html[data-theme=dark] {
   --body-background: var(--slate-900);
   --banner-background: #54478c;
   --home-background: var(--body-background);
+  --card-color: #1e2128;
+  --chip-color: #1e2128;
+  --chip-text-color: #a0a0a0;
+  --card-border-color: rgba(58, 63, 72, 0);
   --panel-background: #ffffff12;
   --panel-border-color: var(--color-white);
   --scrollbar-track-color: var(--color-white);
@@ -14,7 +18,7 @@ html[data-theme=dark] {
   --sticky-table-header-background: #545454;
   --tooltip-background: white;
   --tooltip-font-color: #181818;
-  --feature-background-color: var(--body-background);
+  --feature-background-color: var(--card-color);
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 3px 0 rgba(255, 255, 255, 0.15);
   --search-detached-mode-background: #0a0908;
