@@ -46,7 +46,7 @@
   <div class="modal-overlay" id="modal-overlay">
   </div>
 </form>
-<form id="negative" class="hidden" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmit(event)">
+<form id="negative" class="hidden"  data-netlify-recaptcha="true" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmit(event)">
   <div class="feedback-modal">
     <div class="feedback-modal-body">
       <h4>What did you not like about this doc?</h4>
@@ -83,6 +83,7 @@
           <h4>Let us contact you about your feedback:</h4>
           <input type="text" name="email" id="email" placeholder="email@example.com">
         </div>
+        <div data-netlify-recaptcha="true"></div>
       </div>
       <div class="form-field wrapper">
         <button type="submit" class="submitButton">Submit</button>
