@@ -244,6 +244,11 @@ body.article.home {
   outline: 2px solid var(--color-primitives-global-orange-orange-900);
 }
 
+.home .scroll-down-button:focus-visible {
+  outline: 2px solid var(--color-primitives-global-orange-orange-900);
+  outline-offset: 2px;
+}
+
 .home .scroll-down-button svg.lucide {
   width: 24px;
   height: 24px;
@@ -305,6 +310,7 @@ body.article.home {
   color: var(--chip-text-color);
   padding: 12px;
   font-size: 12px;
+  cursor: pointer;
   flex: 1;
 }
 
@@ -381,21 +387,6 @@ body.article.home {
   outline: none;
 }
 
-.home .suggestion-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 40px;
-}
-
-.home .chip {
-  background: var(--card-color);
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 12px;
-  flex: 1;
-}
-
 .home .features {
   display: flex;
   align-items: center;
@@ -441,10 +432,6 @@ body.article.home {
 .home .feature-image {
   width: 50px;
   height: 50px;
-}
-
-.home .suggestion-chips .chip {
-  cursor: pointer;
 }
 
 .home .feature-image img {

@@ -67258,7 +67258,7 @@ function ChatInterface() {
   (0, _react.useEffect)(function () {
     window.submitKapaQuery = doQuery;
     return function () {
-      delete window.submitKapaQuery;
+      window.submitKapaQuery = undefined;
     };
   }, [doQuery]);
   var handleSubmit = function handleSubmit(e) {
@@ -67270,11 +67270,33 @@ function ChatInterface() {
     setMessage('');
     setStoppedIds(new Set());
   };
-  var handleCopy = function handleCopy() {
-    return navigator.clipboard.writeText(conversation.map(function (q) {
-      return "Question: ".concat(q.question, "\nAnswer: ").concat(q.answer);
-    }).join('\n---\n'));
-  };
+  var handleCopy = /*#__PURE__*/function () {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.prev = 0;
+            _context2.next = 3;
+            return navigator.clipboard.writeText(conversation.map(function (q) {
+              return "Question: ".concat(q.question, "\nAnswer: ").concat(q.answer);
+            }).join('\n---\n'));
+          case 3:
+            _context2.next = 8;
+            break;
+          case 5:
+            _context2.prev = 5;
+            _context2.t0 = _context2["catch"](0);
+            throw new Error('Clipboard API not available');
+          case 8:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2, null, [[0, 5]]);
+    }));
+    return function handleCopy() {
+      return _ref5.apply(this, arguments);
+    };
+  }();
   var handleStop = function handleStop() {
     var _conversation$idx$id, _conversation$idx;
     stopGeneration();

@@ -230,7 +230,7 @@ export default function ChatInterface() {
   // expose for chips
   useEffect(() => {
     window.submitKapaQuery = doQuery
-    return () => { delete window.submitKapaQuery }
+    return () => { window.submitKapaQuery = undefined }
   }, [doQuery])
 
   const handleSubmit = e => {
@@ -244,10 +244,15 @@ export default function ChatInterface() {
     setStoppedIds(new Set())
   }
 
-  const handleCopy = () =>
-    navigator.clipboard.writeText(
-      conversation.map(q => `Question: ${q.question}\nAnswer: ${q.answer}`).join('\n---\n')
-    )
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        conversation.map(q => `Question: ${q.question}\nAnswer: ${q.answer}`).join('\n---\n')
+      )
+    } catch {
+      throw new Error('Clipboard API not available')
+    }
+  }
 
   const handleStop = () => {
     stopGeneration()

@@ -84,7 +84,11 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.suggestion-chips .chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const text = chip.textContent.trim();
-      window.submitKapaQuery(text)
+      if (typeof window.submitKapaQuery === 'function') {
+        window.submitKapaQuery(text)
+      } else {
+        console.warn('Chat interface not ready: submitKapaQuery function not found')
+      }
     });
   });
 })

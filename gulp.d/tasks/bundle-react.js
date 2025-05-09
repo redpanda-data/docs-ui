@@ -27,7 +27,7 @@ function bundleAllReactTask ({ srcDir, destDir }) {
         sourceMaps: true,
       })
       .bundle()
-      .on('error', (err) => {
+      .on('error', function (err) {
         log.error(err)
         this.emit('end')
       })

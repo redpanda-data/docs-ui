@@ -98338,7 +98338,7 @@ function ChatInterface() {
   (0, _react.useEffect)(function () {
     window.submitKapaQuery = doQuery;
     return function () {
-      delete window.submitKapaQuery;
+      window.submitKapaQuery = undefined;
     };
   }, [doQuery]);
   var handleSubmit = function handleSubmit(e) {
@@ -98350,11 +98350,33 @@ function ChatInterface() {
     setMessage('');
     setStoppedIds(new Set());
   };
-  var handleCopy = function handleCopy() {
-    return navigator.clipboard.writeText(conversation.map(function (q) {
-      return "Question: ".concat(q.question, "\nAnswer: ").concat(q.answer);
-    }).join('\n---\n'));
-  };
+  var handleCopy = /*#__PURE__*/function () {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.prev = 0;
+            _context2.next = 3;
+            return navigator.clipboard.writeText(conversation.map(function (q) {
+              return "Question: ".concat(q.question, "\nAnswer: ").concat(q.answer);
+            }).join('\n---\n'));
+          case 3:
+            _context2.next = 8;
+            break;
+          case 5:
+            _context2.prev = 5;
+            _context2.t0 = _context2["catch"](0);
+            throw new Error('Clipboard API not available');
+          case 8:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2, null, [[0, 5]]);
+    }));
+    return function handleCopy() {
+      return _ref5.apply(this, arguments);
+    };
+  }();
   var handleStop = function handleStop() {
     var _conversation$idx$id, _conversation$idx;
     stopGeneration();
@@ -98436,25 +98458,15 @@ function ChatInterface() {
 },{"@kapaai/react-sdk":6,"dompurify":52,"highlight.js":55,"lucide-react":241,"marked":243,"marked-highlight":242,"react":253}],260:[function(require,module,exports){
 "use strict";
 
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-var _react = _interopRequireWildcard(require("react"));
+var _react = _interopRequireDefault(require("react"));
 var _client = require("react-dom/client");
 var _reactSdk = require("@kapaai/react-sdk");
 var _ChatInterface = _interopRequireDefault(require("./ChatInterface.jsx"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-function _interopRequireWildcard(e, t) { if ("function" == typeof WeakMap) var r = new WeakMap(), n = new WeakMap(); return (_interopRequireWildcard = function _interopRequireWildcard(e, t) { if (!t && e && e.__esModule) return e; var o, i, f = { __proto__: null, default: e }; if (null === e || "object" != _typeof(e) && "function" != typeof e) return f; if (o = t ? n : r) { if (o.has(e)) return o.get(e); o.set(e, f); } for (var _t in e) "default" !== _t && {}.hasOwnProperty.call(e, _t) && ((i = (o = Object.defineProperty) && Object.getOwnPropertyDescriptor(e, _t)) && (i.get || i.set) ? o(f, _t, i) : f[_t] = e[_t]); return f; })(e, t); }
 function App() {
   var integrationId = window.UI_INTEGRATION_ID;
   return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("h2", null, "Ask anything about Redpanda"), /*#__PURE__*/_react.default.createElement(_reactSdk.KapaProvider, {
-    integrationId: integrationId,
-    callbacks: {
-      askAI: {
-        onQuerySubmit: function onQuerySubmit(_ref) {
-          var question = _ref.question;
-          return console.log('Question asked:', question);
-        }
-      }
-    }
+    integrationId: integrationId
   }, /*#__PURE__*/_react.default.createElement(_ChatInterface.default, null)));
 }
 document.addEventListener('DOMContentLoaded', function () {

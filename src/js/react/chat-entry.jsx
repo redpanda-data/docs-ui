@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { KapaProvider } from '@kapaai/react-sdk'
 import ChatInterface from './ChatInterface.jsx'
@@ -8,15 +8,9 @@ function App() {
 
   return (
     <>
-    <h2>Ask anything about Redpanda</h2>
+      <h2>Ask anything about Redpanda</h2>
       <KapaProvider
         integrationId={integrationId}
-        callbacks={{
-          askAI: {
-            onQuerySubmit: ({ question }) =>
-              console.log('Question asked:', question)
-          },
-        }}
       >
         <ChatInterface />
       </KapaProvider>
