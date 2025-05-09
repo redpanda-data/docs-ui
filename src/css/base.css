@@ -114,6 +114,23 @@ object[type="image/svg+xml"]:not([width]) {
   opacity: 0.5;
 }
 
+.captcha-hint {
+  margin: 0.5em 0;
+  color: #555;
+  font-size: small;
+  text-align: center;
+}
+
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button[disabled]:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (pointer: fine) {
   @supports (scrollbar-width: thin) {
     html {

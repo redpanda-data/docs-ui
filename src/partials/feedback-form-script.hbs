@@ -1,98 +1,118 @@
 <script>
-const form = document.getElementById('feedbackForm');
-const thumbs = document.querySelectorAll('.thumb');
-const feedbackDetails = document.getElementById('feedback-details');
-const feedbackOptions = document.getElementById('feedback-options');
-const feedbackPrompt = document.getElementById('feedback-prompt');
-let positive = null;
+;
+(() => {
+  const SELECTORS = {
+    form: '#feedbackForm',
+    thumbs: '.thumb',
+    feedbackDetails: '#feedback-details',
+    feedbackOptions: '#feedback-options',
+    feedbackPrompt: '#feedback-prompt',
+    submitButton: '#submitButton',
+    captchaHint: '#captchaHint',
+    captchaField: 'textarea[name="g-recaptcha-response"]',
+    toast: '#feedback-toast',
+    modalOverlay: '#modal-overlay',
+    thumbsToc: '#thumbs-toc'
+  };
 
-// Scroll visibility toggle for thumbs
-// `passive` signals we never call preventDefault, letting the browser optimise.
-// `requestAnimationFrame` throttles DOM writes to one per frame.
-document.addEventListener(
-  'scroll',
-  () => requestAnimationFrame(() => {
-    const feedback = document.getElementById('thumbs-toc');
-    if (!feedback) return;
-    const modifier = 700;
-    const documentHeight = document.body.scrollHeight;
-    const currentScroll = window.scrollY + window.innerHeight;
-    feedback.style.display =
-      currentScroll + modifier > documentHeight ? 'none' : 'block';
-  }),
-  { passive: true }
-);
+  const POLL_INTERVAL = 300;            // ms between captcha checks
+  const POLL_TIMEOUT = 5 * 60 * 1000;   // stop polling after 5 minutes
+  const SCROLL_HIDE_OFFSET = 700;       // px before bottom to hide thumbs
 
-// Handle thumbs click
-thumbs.forEach(thumb => {
-  thumb.addEventListener('click', () => {
-    positive = thumb.id.includes('up');
-    form.querySelector('input[name="positiveFeedback"]').value = positive;
+  let positive = null;
 
-    feedbackOptions.innerHTML = positive
-      ? `
-        <label><input type="radio" name="feedback" value="Solved my problem" checked> Solved my problem</label>
-        <label><input type="radio" name="feedback" value="Easy to understand"> Easy to understand</label>
-        <label><input type="radio" name="feedback" value="other"> Other</label>
-      `
-      : `
-        <label><input type="radio" name="feedback" value="Not helpful" checked> Not helpful</label>
-        <label><input type="radio" name="feedback" value="Too complex"> Too complex</label>
-        <label><input type="radio" name="feedback" value="other"> Other</label>
-      `;
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector(SELECTORS.form);
+    if (!form) return;
+    const thumbs = document.querySelectorAll(SELECTORS.thumbs);
+    const details = document.querySelector(SELECTORS.feedbackDetails);
+    const options = document.querySelector(SELECTORS.feedbackOptions);
+    const prompt = document.querySelector(SELECTORS.feedbackPrompt);
+    const submitBtn = document.querySelector(SELECTORS.submitButton);
+    const hint = document.querySelector(SELECTORS.captchaHint);
+    const toast = document.querySelector(SELECTORS.toast);
 
-    feedbackPrompt.textContent = positive
-      ? "Let us know what we do well:"
-      : "Let us know what could be improved:";
+    // Hide thumbs when scrolling to the bottom
+    document.addEventListener(
+      'scroll',
+      event => requestAnimationFrame(() => {
+        const toc = document.querySelector(SELECTORS.thumbsToc);
+        if (!toc) return;
+        const docH = document.body.scrollHeight;
+        const scrollPos = window.scrollY + window.innerHeight;
+        toc.style.display = (scrollPos + SCROLL_HIDE_OFFSET > docH) ? 'none' : 'block';
+      }),
+      { passive: true }
+    );
 
-    feedbackDetails.classList.remove('hidden');
-    form.classList.remove('hidden');
-  });
-});
+    thumbs.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        positive = thumb.id.includes('up');
+        form.elements['positiveFeedback'].value = positive;
 
-// Fill hidden metadata
-form.addEventListener('submit', () => {
-  const version = "{{{ page.attributes.version }}}" || "";
-  const beta = Boolean({{ is-prerelease page }} || false);
-  const url = window.location.href;
-  const nav = navigator.userAgent + ', ' + navigator.language;
-  const selectedFeedback = form.querySelector('input[name="feedback"]:checked');
+        // Safely build radio options
+        const items = positive
+          ? [ 'Solved my problem', 'Easy to understand', 'Other' ]
+          : [ 'Not helpful', 'Too complex', 'Other' ];
+        options.innerHTML = items.map((txt, i) =>
+          `<label><input type="radio" name="feedback" value="${txt}"${i===0? ' checked':''}> ${txt}</label>`
+        ).join('');
 
+        prompt.textContent = positive
+          ? 'Let us know what we do well:'
+          : 'Let us know what could be improved:';
 
-  if (selectedFeedback) {
-    form.querySelector('input[name="feedback"]').value = selectedFeedback.value;
-  }
-  form.querySelector('input[name="version"]').value = version;
-  form.querySelector('input[name="url"]').value = url;
-  form.querySelector('input[name="positiveFeedback"]').value = positive;
-  form.querySelector('input[name="beta"]').value = beta;
-  form.querySelector('input[name="date"]').value = new Date().toISOString();
-  form.querySelector('input[name="navigator"]').value = nav;
+        details.classList.remove('hidden');
+        form.classList.remove('hidden');
+      });
+    });
 
-  sessionStorage.setItem("feedbackType", positive ? "positive" : "negative");
-});
+    form.addEventListener('submit', () => {
+      const version = form.dataset.version || '';
+      const beta = form.dataset.beta === 'true';
+      form.elements['url'].value = window.location.href;
+      form.elements['positiveFeedback'].value = positive;
+      form.elements['version'].value = version;
+      form.elements['beta'].value = beta;
+      form.elements['date'].value = new Date().toISOString();
+      form.elements['navigator'].value = `${navigator.userAgent}, ${navigator.language}`;
+      // Store feedback type
+      sessionStorage.setItem('feedbackType', positive ? 'positive' : 'negative');
+    });
 
-// Handle cancel/close
-function closeForm(event) {
-  event.preventDefault();
-  form.classList.add("hidden");
-}
+    window.closeForm = event => {
+      event.preventDefault();
+      form.classList.add('hidden');
+    };
 
-window.addEventListener('DOMContentLoaded', () => {
-  const toast = document.getElementById('feedback-toast');
-  const modal = document.getElementById('feedbackForm');
-
-  if (window.location.search.includes('success')) {
-    if (modal) modal.classList.add('hidden');
-    if (toast) {
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 5000); // auto-hide after 5s
+    if (submitBtn && hint) {
+      submitBtn.disabled = true;
+      hint.style.display = 'block';
+      const start = Date.now();
+      const intervalId = setInterval(() => {
+        const captcha = document.querySelector(SELECTORS.captchaField);
+        if (captcha && captcha.value.trim() !== '') {
+          submitBtn.disabled = false;
+          hint.style.display = 'none';
+          clearInterval(intervalId);
+        }
+        if (Date.now() - start > POLL_TIMEOUT) {
+          clearInterval(intervalId);
+          console.warn('reCAPTCHA token polling timed out');
+        }
+      }, POLL_INTERVAL);
     }
 
-    // Remove ?success=true from URL without reload
-    const url = new URL(window.location);
-    url.searchParams.delete('success');
-    window.history.replaceState({}, document.title, url.toString());
-  }
-});
+    if (toast && window.location.search.includes('success')) {
+      const modal = document.querySelector(SELECTORS.form);
+      modal.classList.add('hidden');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 5000);
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete('success');
+      window.history.replaceState({}, document.title, url);
+    }
+  });
+})();
 </script>

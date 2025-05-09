@@ -33,8 +33,11 @@
         <div data-netlify-recaptcha="true"></div>
 
         <div class="form-field wrapper">
-          <button type="submit" class="submitButton">Submit</button>
+          <button type="submit" id="submitButton" class="submitButton">Submit</button>
         </div>
+        <p id="captchaHint" class="hint" style="display:none;" aria-describedby="captchaHint" aria-live="polite">
+          Please complete the “I'm not a robot” checkbox to submit.
+        </p>
       </div>
     </div>
   </div>
