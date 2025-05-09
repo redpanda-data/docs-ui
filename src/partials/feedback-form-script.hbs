@@ -7,16 +7,21 @@ const feedbackPrompt = document.getElementById('feedback-prompt');
 let positive = null;
 
 // Scroll visibility toggle for thumbs
-document.addEventListener('scroll', function() {
-  const feedback = document.getElementById('thumbs-toc');
-  if (!feedback) return;
-
-  const modifier = 700;
-  const documentHeight = document.body.scrollHeight;
-  const currentScroll = window.scrollY + window.innerHeight;
-
-  feedback.style.display = (currentScroll + modifier > documentHeight) ? 'none' : 'block';
-});
+// `passive` signals we never call preventDefault, letting the browser optimise.
+// `requestAnimationFrame` throttles DOM writes to one per frame.
+document.addEventListener(
+  'scroll',
+  () => requestAnimationFrame(() => {
+    const feedback = document.getElementById('thumbs-toc');
+    if (!feedback) return;
+    const modifier = 700;
+    const documentHeight = document.body.scrollHeight;
+    const currentScroll = window.scrollY + window.innerHeight;
+    feedback.style.display =
+      currentScroll + modifier > documentHeight ? 'none' : 'block';
+  }),
+  { passive: true }
+);
 
 // Handle thumbs click
 thumbs.forEach(thumb => {
@@ -48,7 +53,7 @@ thumbs.forEach(thumb => {
 // Fill hidden metadata
 form.addEventListener('submit', () => {
   const version = "{{{ page.attributes.version }}}" || "";
-  const beta = {{ is-prerelease page }};
+  const beta = Boolean({{ is-prerelease page }} || false);
   const url = window.location.href;
   const nav = navigator.userAgent + ', ' + navigator.language;
   const selectedFeedback = form.querySelector('input[name="feedback"]:checked');
