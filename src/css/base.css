@@ -114,7 +114,7 @@ object[type="image/svg+xml"]:not([width]) {
   opacity: 0.5;
 }
 
-.captcha-hint {
+.hint {
   margin: 0.5em 0;
   color: #555;
   font-size: small;
