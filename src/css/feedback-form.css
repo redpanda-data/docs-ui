@@ -61,6 +61,7 @@
 .feedback-modal .radio-buttons.form-field {
   display: flex;
   flex-direction: column;
+  gap: 15px;
 }
 
 .feedback-modal .form-field {
