@@ -68,21 +68,6 @@ function closeForm(event) {
   form.classList.add("hidden");
 }
 
-// Show thank-you modal on redirect
-function clearFeedbackModal() {
-  const modalBody = form.querySelector('.feedback-modal-body');
-  const type = sessionStorage.getItem("feedbackType");
-  sessionStorage.removeItem("feedbackType");
-
-  modalBody.innerHTML = `
-    <div class="feedback-success">
-      <h4>🎉 Thank you for your ${type === "positive" ? "positive" : "honest"} feedback!</h4>
-      <p>We appreciate your help improving our documentation.</p>
-      <button type="button" onclick="closeForm(event)">Close</button>
-    </div>
-  `;
-}
-
 window.addEventListener('DOMContentLoaded', () => {
   const toast = document.getElementById('feedback-toast');
   const modal = document.getElementById('feedbackForm');
