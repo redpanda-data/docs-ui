@@ -51,7 +51,12 @@ form.addEventListener('submit', () => {
   const beta = {{ is-prerelease page }};
   const url = window.location.href;
   const nav = navigator.userAgent + ', ' + navigator.language;
+  const selectedFeedback = form.querySelector('input[name="feedback"]:checked');
 
+
+  if (selectedFeedback) {
+    form.querySelector('input[name="feedback"]').value = selectedFeedback.value;
+  }
   form.querySelector('input[name="version"]').value = version;
   form.querySelector('input[name="url"]').value = url;
   form.querySelector('input[name="positiveFeedback"]').value = positive;
