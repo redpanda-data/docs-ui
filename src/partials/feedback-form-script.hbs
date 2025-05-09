@@ -89,6 +89,8 @@
       submitBtn.disabled = true;
       hint.style.display = 'block';
       const start = Date.now();
+      // Enable the submit button when the reCAPTCHA token is available
+      // https://answers.netlify.com/t/recaptcha-integration-in-forms-configuration/6181/3
       const intervalId = setInterval(() => {
         const captcha = document.querySelector(SELECTORS.captchaField);
         if (captcha && captcha.value.trim() !== '') {
