@@ -1,7 +1,5 @@
 <article class="doc {{#if page.attributes.no-toc}}no-toc{{/if}}">
-  <div id="feedback-toast" class="feedback-toast hidden" role="status" aria-live="polite">
-  🎉 Thanks for your feedback!
-  </div>
+  {{> feedback-success}}
 {{#if (ne page.attributes.role 'home')}}
 {{> breadcrumbs}}
 {{/if}}
