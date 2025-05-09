@@ -1,6 +1,8 @@
 <div class="home-header-container">
   <div class="navbar">
-    <img src="{{{uiRootPath}}}/img/home-logo.svg" width="auto" height="28px" alt="Redpanda logo"/>
+    <h1>
+      <img src="{{{uiRootPath}}}/img/home-logo.svg" width="auto" height="28px" alt="Redpanda documentation home page"/>
+    </h1>
     <div class="theme-switcher">
       <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite"><img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
       </button>
@@ -8,12 +10,11 @@
     <p>{{page.attributes.intro}}</p>
   </div>
   <div class="home-header">
-    <iframe
-      title="Kapa AI Widget"
-      src="/ask-ai.html"
-      style="height: 400px; width: 100%; border-radius: 0; border: none;"
-    >
-    </iframe>
+    <script>
+      window.UI_INTEGRATION_ID = 'bc719cfb-2fd5-4c76-acde-de9a905f13b3';
+    </script>
+    <div id="kapa-chat-root"></div>
+    <script src="{{{uiRootPath}}}/js/chat-entry.bundle.js"></script>
     <div class="suggestion-chips">
       {{#each page.attributes.ai-suggestions}}
       <div class="chip">{{this}}</div>
@@ -80,31 +81,10 @@
 </section>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const iframe = document.querySelector('iframe');
-
-  iframe.addEventListener('load', function () {
-    const iframeDoc = iframe.contentWindow.document;
-
-    const modalBody = iframeDoc.querySelector(".mantine-Modal-body > div:nth-child(3)");
-    const modalHeader = iframeDoc.querySelector(".mantine-Modal-header");
-
-    if (modalBody) {
-      modalBody.style.display = "none";
-    }
-
-    if (modalHeader) {
-      modalHeader.style.paddingLeft = "0";
-    }
-  });
-
   document.querySelectorAll('.suggestion-chips .chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const text = chip.textContent.trim();
-      iframe.contentWindow.Kapa.open({
-        mode: "ai",
-        query: text,
-        submit: true,
-      });
+      window.submitKapaQuery(text)
     });
   });
 })

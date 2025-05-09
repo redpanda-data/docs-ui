@@ -14,14 +14,22 @@
     "last 2 versions"
   ],
   "devDependencies": {
+    "@algolia/autocomplete-plugin-tags": "^1.12.2",
     "@asciidoctor/core": "~2.2",
     "@asciidoctor/tabs": "^1.0.0-beta.5",
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
+    "@docsearch/js": "^3.3.3",
     "@fontsource/roboto": "~4.5",
     "@fontsource/roboto-mono": "~4.5",
+    "@kapaai/react-sdk": "^0.0.3",
     "autoprefixer": "~9.7",
+    "babelify": "^10.0.0",
     "browser-pack-flat": "~3.4",
     "browserify": "~16.5",
     "cssnano": "~4.1",
+    "dompurify": "^3.2.5",
     "eslint": "~6.8",
     "eslint-config-standard": "~14.1",
     "eslint-plugin-import": "~2.20",
@@ -37,26 +45,32 @@
     "gulp-if": "^3.0.0",
     "gulp-imagemin": "~6.2",
     "gulp-postcss": "~8.0",
+    "gulp-sourcemaps": "^3.0.0",
     "gulp-stylelint": "~13.0",
     "gulp-uglify": "~3.0",
     "gulp-vinyl-zip": "~2.2",
     "handlebars": "~4.7",
     "highlight.js": "9.18.3",
     "js-yaml": "~3.13",
+    "lucide-react": "^0.508.0",
+    "marked": "^15.0.11",
     "merge-stream": "~2.0",
     "postcss-calc": "~7.0",
     "postcss-custom-properties": "~9.1",
     "postcss-import": "~12.0",
     "postcss-url": "~8.0",
     "prettier-eslint": "~9.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "require-directory": "~2.1",
     "require-from-string": "~2.0",
     "stylelint": "~13.3",
     "stylelint-config-standard": "~20.0",
-    "vinyl-fs": "~3.0"
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-fs": "~3.0",
+    "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "@algolia/autocomplete-plugin-tags": "^1.12.2",
-    "@docsearch/js": "^3.3.3"
+    "marked-highlight": "^2.2.1"
   }
 }
