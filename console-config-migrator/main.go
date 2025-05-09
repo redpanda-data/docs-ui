@@ -39,7 +39,7 @@ func Convert(v2 map[string]interface{}) (map[string]interface{}, string, error) 
 	}
 
 	// Migrate Kafka settings (including schemaRegistry and serde).
-	kafka, warnKafka, err := migrateKafka(v2)
+	kafka, serdeFromKafka, warnKafka, err := migrateKafka(v2)
 	if err != nil {
 		return nil, "", fmt.Errorf("kafka migration: %w", err)
 	}
@@ -58,11 +58,24 @@ func Convert(v2 map[string]interface{}) (map[string]interface{}, string, error) 
 	}
 
 	// Migrate console settings into serde.
-	serde, err := migrateConsole(v2)
+	serdeConsole, err := migrateConsole(v2)
 	if err != nil {
 		return nil, "", fmt.Errorf("console migration: %w", err)
 	}
-	v3["serde"] = serde
+
+	mergedSerde := make(map[string]interface{})
+	// Add serde settings from Kafka migration.
+	for key, val := range serdeFromKafka {
+		mergedSerde[key] = val
+	}
+	// Add or override with console settings.
+	for key, val := range serdeConsole {
+		mergedSerde[key] = val
+	}
+
+	if len(mergedSerde) > 0 {
+		v3["serde"] = mergedSerde
+	}
 
 	// Migrate roleBindings.
 	roleBindings, warnRB, err := migrateRoleBindings(v2)
@@ -76,13 +89,24 @@ func Convert(v2 map[string]interface{}) (map[string]interface{}, string, error) 
 		}
 	}
 
-	// Migrate redpanda.adminApi credentials.
-	redpanda, err := migrateAdminAPI(v2)
-	if err != nil {
-		return nil, "", fmt.Errorf("adminApi migration: %w", err)
-	}
-	if redpanda != nil {
-		v3["redpanda"] = redpanda
+	// Migrate redpanda.adminApi credentials while preserving the entire redpanda stanza.
+	if rp, ok := v2["redpanda"].(map[string]interface{}); ok {
+		v3Redpanda := make(map[string]interface{})
+		// Copy all keys from the original redpanda block.
+		for k, v := range rp {
+			v3Redpanda[k] = v
+		}
+		// If there's an adminApi key, migrate it and update that key.
+		if _, exists := rp["adminApi"]; exists {
+			migratedAdminApi, err := migrateAdminAPI(v2)
+			if err != nil {
+				return nil, "", fmt.Errorf("adminApi migration: %w", err)
+			}
+			if migratedAdminApi != nil {
+				v3Redpanda["adminApi"] = migratedAdminApi
+			}
+		}
+		v3["redpanda"] = v3Redpanda
 	}
 
 	// Copy any remaining top-level fields.
@@ -108,7 +132,7 @@ func migrateAuthentication(v2 map[string]interface{}) (map[string]interface{}, [
 	if login, ok := v2["login"].(map[string]interface{}); ok {
 		auth := make(map[string]interface{})
 		if jwt, ok := login["jwtSecret"]; ok {
-			auth["jwtSigningSecret"] = jwt
+			auth["jwtSigningKey"] = jwt
 		}
 		if sc, ok := login["useSecureCookies"]; ok {
 			auth["useSecureCookies"] = sc
@@ -163,15 +187,19 @@ func migrateAuthentication(v2 map[string]interface{}) (map[string]interface{}, [
 }
 
 // migrateKafka handles the migration of Kafka settings and schemaRegistry.
-func migrateKafka(v2 map[string]interface{}) (map[string]interface{}, []string, error) {
+func migrateKafka(v2 map[string]interface{}) (map[string]interface{}, map[string]interface{}, []string, error) {
 	var warnings []string
 	kafka := make(map[string]interface{})
+	// Default SASL settings.
 	kafka["sasl"] = map[string]interface{}{
 		"enabled":         true,
 		"impersonateUser": true,
 	}
+	// This will hold serde settings from kafka stanza.
+	serde := make(map[string]interface{})
+
 	if oldKafka, ok := v2["kafka"].(map[string]interface{}); ok {
-		// Process schemaRegistry from v2 (which is under kafka) and later promote it to top-level.
+		// Process schemaRegistry from v2 (which is under kafka)...
 		if srRaw, ok := oldKafka["schemaRegistry"].(map[string]interface{}); ok {
 			newSR := make(map[string]interface{})
 			authBlock := make(map[string]interface{})
@@ -200,12 +228,10 @@ func migrateKafka(v2 map[string]interface{}) (map[string]interface{}, []string, 
 			for k, v := range srRaw {
 				newSR[k] = v
 			}
-			// Instead of adding newSR into kafka, we'll let Convert() extract it.
 			kafka["schemaRegistry"] = newSR
 		}
 
 		// Migrate serde settings.
-		serde := make(map[string]interface{})
 		if proto, ok := oldKafka["protobuf"]; ok {
 			serde["protobuf"] = proto
 		}
@@ -223,21 +249,21 @@ func migrateKafka(v2 map[string]interface{}) (map[string]interface{}, []string, 
 			kafka[key] = val
 		}
 	}
-	return kafka, warnings, nil
+	return kafka, serde, warnings, nil
 }
 
-// migrateConsole moves console.maxDeserializationPayloadSize into a serde.console block.
+
+// migrateConsole moves console.maxDeserializationPayloadSize into a serde block.
 func migrateConsole(v2 map[string]interface{}) (map[string]interface{}, error) {
 	serde := make(map[string]interface{})
 	if console, ok := v2["console"].(map[string]interface{}); ok {
 		if maxPayload, ok := console["maxDeserializationPayloadSize"]; ok {
-			serde["console"] = map[string]interface{}{
-				"maxDeserializationPayloadSize": maxPayload,
-			}
+			serde["maxDeserializationPayloadSize"] = maxPayload
 		}
 	}
 	return serde, nil
 }
+
 
 // migrateRoleBindings converts v2 roleBindings into v3 authorization.roleBindings.
 func migrateRoleBindings(v2 map[string]interface{}) ([]interface{}, []string, error) {
@@ -318,7 +344,7 @@ func migrateAdminAPI(v2 map[string]interface{}) (map[string]interface{}, error) 
 			for k, v := range adminApiRaw {
 				newAdminApi[k] = v
 			}
-			return redpandaRaw, nil
+			return newAdminApi, nil
 		}
 	}
 	return nil, nil

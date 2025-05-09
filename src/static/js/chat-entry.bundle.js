@@ -6419,6 +6419,7 @@ __export(index_exports, {
   notifyManager: () => import_notifyManager.notifyManager,
   onlineManager: () => import_onlineManager.onlineManager,
   replaceEqualDeep: () => import_utils.replaceEqualDeep,
+  shouldThrowError: () => import_utils.shouldThrowError,
   skipToken: () => import_utils.skipToken
 });
 module.exports = __toCommonJS(index_exports);
@@ -6468,6 +6469,7 @@ var import_mutation = require("./mutation.cjs");
   notifyManager,
   onlineManager,
   replaceEqualDeep,
+  shouldThrowError,
   skipToken,
   ...require("./types.cjs")
 });
@@ -9712,6 +9714,7 @@ __export(utils_exports, {
   resolveEnabled: () => resolveEnabled,
   resolveStaleTime: () => resolveStaleTime,
   shallowEqualObjects: () => shallowEqualObjects,
+  shouldThrowError: () => shouldThrowError,
   skipToken: () => skipToken,
   sleep: () => sleep,
   timeUntilStale: () => timeUntilStale
@@ -9936,6 +9939,12 @@ function ensureQueryFn(options, fetchOptions) {
   }
   return options.queryFn;
 }
+function shouldThrowError(throwOnError, params) {
+  if (typeof throwOnError === "function") {
+    return throwOnError(...params);
+  }
+  return !!throwOnError;
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   addToEnd,
@@ -9958,6 +9967,7 @@ function ensureQueryFn(options, fetchOptions) {
   resolveEnabled,
   resolveStaleTime,
   shallowEqualObjects,
+  shouldThrowError,
   skipToken,
   sleep,
   timeUntilStale
@@ -10294,7 +10304,7 @@ __export(errorBoundaryUtils_exports, {
 });
 module.exports = __toCommonJS(errorBoundaryUtils_exports);
 var React = __toESM(require("react"), 1);
-var import_utils = require("./utils.cjs");
+var import_query_core = require("@tanstack/query-core");
 var ensurePreventErrorBoundaryRetry = (options, errorResetBoundary) => {
   if (options.suspense || options.throwOnError || options.experimental_prefetchInRender) {
     if (!errorResetBoundary.isReset()) {
@@ -10314,7 +10324,7 @@ var getHasError = ({
   query,
   suspense
 }) => {
-  return result.isError && !errorResetBoundary.isReset() && !result.isFetching && query && (suspense && result.data === void 0 || (0, import_utils.shouldThrowError)(throwOnError, [result.error, query]));
+  return result.isError && !errorResetBoundary.isReset() && !result.isFetching && query && (suspense && result.data === void 0 || (0, import_query_core.shouldThrowError)(throwOnError, [result.error, query]));
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
@@ -10323,7 +10333,7 @@ var getHasError = ({
   useClearResetErrorBoundary
 });
 
-},{"./utils.cjs":51,"react":253}],34:[function(require,module,exports){
+},{"@tanstack/query-core":9,"react":253}],34:[function(require,module,exports){
 "use strict";
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -10861,7 +10871,7 @@ function useMutation(options, queryClient) {
     },
     [observer]
   );
-  if (result.error && (0, import_utils.shouldThrowError)(observer.options.throwOnError, [result.error])) {
+  if (result.error && (0, import_query_core.shouldThrowError)(observer.options.throwOnError, [result.error])) {
     throw result.error;
   }
   return { ...result, mutate, mutateAsync: result.mutate };
@@ -11398,22 +11408,14 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/utils.ts
 var utils_exports = {};
 __export(utils_exports, {
-  noop: () => noop,
-  shouldThrowError: () => shouldThrowError
+  noop: () => noop
 });
 module.exports = __toCommonJS(utils_exports);
-function shouldThrowError(throwError, params) {
-  if (typeof throwError === "function") {
-    return throwError(...params);
-  }
-  return !!throwError;
-}
 function noop() {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  noop,
-  shouldThrowError
+  noop
 });
 
 },{}],52:[function(require,module,exports){
@@ -98418,7 +98420,9 @@ function ChatInterface() {
     className: "submit-button flex items-center gap-1"
   }, /*#__PURE__*/_react.default.createElement(_lucideReact.CircleStop, {
     className: "h-5 w-5"
-  }), /*#__PURE__*/_react.default.createElement("span", null, "Stop")) : /*#__PURE__*/_react.default.createElement("button", {
+  }), /*#__PURE__*/_react.default.createElement("span", {
+    className: "button-text"
+  }, "Stop")) : /*#__PURE__*/_react.default.createElement("button", {
     type: "submit",
     disabled: isGeneratingAnswer,
     className: "submit-button"

@@ -38,10 +38,10 @@
     aceOutputEditor.session.setUseSoftTabs(true);
     aceOutputEditor.setReadOnly(true);
     aceOutputEditor.setValue("# The migrated v3 configuration will appear here...", 1);
-    clearButton.addEventListener("click", () => {
+    clearButton && clearButton.addEventListener("click", () => {
       aceInputEditor.setValue("# Paste your v2 YAML configuration here...", 1);
     });
-    copyButton.addEventListener("click", async () => {
+    copyButton && copyButton.addEventListener("click", async () => {
       try {
         const content = aceOutputEditor.getValue();
         await navigator.clipboard.writeText(content);
@@ -56,12 +56,12 @@
       }
     });
     // Convert button event handler: call the WASM module's convertYAML function.
-    migrateButton.addEventListener("click", () => {
+    migrateButton && migrateButton.addEventListener("click", () => {
       const input = aceInputEditor.getValue();
       const output = convertYAML(input);
       aceOutputEditor.setValue(output, 1);
     });
-    showExampleButton.addEventListener("click", () => {
+    showExampleButton && showExampleButton.addEventListener("click", () => {
       const sample = `login:
   jwtSecret: "example-secret"
   useSecureCookies: true

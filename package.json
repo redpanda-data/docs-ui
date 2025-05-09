@@ -68,9 +68,8 @@
     "stylelint-config-standard": "~20.0",
     "vinyl-buffer": "^1.0.1",
     "vinyl-fs": "~3.0",
-    "vinyl-source-stream": "^2.0.0"
-  },
-  "dependencies": {
-    "marked-highlight": "^2.2.1"
+    "vinyl-source-stream": "^2.0.0",
+    "marked-highlight": "^2.2.1",
+    "rapidoc": "^9.3.8"
   }
 }

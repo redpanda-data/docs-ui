@@ -325,7 +325,7 @@ export default function ChatInterface() {
                 className="submit-button flex items-center gap-1"
               >
                 <CircleStop className="h-5 w-5" />
-                <span>Stop</span>
+                <span className="button-text">Stop</span>
               </button>
             ) : (
               <button
