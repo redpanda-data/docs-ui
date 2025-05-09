@@ -1,77 +1,103 @@
 <script>
+const form = document.getElementById('feedbackForm');
 const thumbs = document.querySelectorAll('.thumb');
-const positiveModal = document.getElementById('positive');
-const negativeModal = document.getElementById('negative');
-var currentForm;
-var positive;
+const feedbackDetails = document.getElementById('feedback-details');
+const feedbackOptions = document.getElementById('feedback-options');
+const feedbackPrompt = document.getElementById('feedback-prompt');
+let positive = null;
 
-thumbs.forEach(function(thumb) {
-  thumb.addEventListener('click', function() {
-    if (thumb.id.indexOf('up') !== -1) {
-      positiveModal.classList.toggle("hidden");
-      currentForm = positiveModal
-      positive = true;
-    } else if (thumb.id.indexOf('down') !== -1) {
-      negativeModal.classList.toggle("hidden");
-      currentForm = negativeModal
-      positive = false;
-    }
+// Scroll visibility toggle for thumbs
+document.addEventListener('scroll', function() {
+  const feedback = document.getElementById('thumbs-toc');
+  if (!feedback) return;
+
+  const modifier = 700;
+  const documentHeight = document.body.scrollHeight;
+  const currentScroll = window.scrollY + window.innerHeight;
+
+  feedback.style.display = (currentScroll + modifier > documentHeight) ? 'none' : 'block';
+});
+
+// Handle thumbs click
+thumbs.forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    positive = thumb.id.includes('up');
+    form.querySelector('input[name="positiveFeedback"]').value = positive;
+
+    feedbackOptions.innerHTML = positive
+      ? `
+        <label><input type="radio" name="feedback" value="Solved my problem" checked> Solved my problem</label>
+        <label><input type="radio" name="feedback" value="Easy to understand"> Easy to understand</label>
+        <label><input type="radio" name="feedback" value="other"> Other</label>
+      `
+      : `
+        <label><input type="radio" name="feedback" value="Not helpful" checked> Not helpful</label>
+        <label><input type="radio" name="feedback" value="Too complex"> Too complex</label>
+        <label><input type="radio" name="feedback" value="other"> Other</label>
+      `;
+
+    feedbackPrompt.textContent = positive
+      ? "Let us know what we do well:"
+      : "Let us know what could be improved:";
+
+    feedbackDetails.classList.remove('hidden');
+    form.classList.remove('hidden');
   });
 });
 
-const handleSubmit = function (event) {
+// Fill hidden metadata
+form.addEventListener('submit', () => {
+  const version = "{{{ page.attributes.version }}}" || "";
+  const beta = {{ is-prerelease page }};
+  const url = window.location.href;
+  const nav = navigator.userAgent + ', ' + navigator.language;
+
+  form.querySelector('input[name="version"]').value = version;
+  form.querySelector('input[name="url"]').value = url;
+  form.querySelector('input[name="positiveFeedback"]').value = positive;
+  form.querySelector('input[name="beta"]').value = beta;
+  form.querySelector('input[name="date"]').value = new Date().toISOString();
+  form.querySelector('input[name="navigator"]').value = nav;
+
+  sessionStorage.setItem("feedbackType", positive ? "positive" : "negative");
+});
+
+// Handle cancel/close
+function closeForm(event) {
   event.preventDefault();
-  const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
-  const beta = {{ is-prerelease page }}
-  var version = '';
-  {{#if page.attributes.version }}
-  version = {{{ page.attributes.version }}}
-  {{/if}}
-
-  const form = event.target;
-  var formData = new FormData(form);
-
-  formData.set('version', version)
-  formData.set('url', currentUrl)
-  formData.set('positiveFeedback', positive);
-  formData.set('beta', beta)
-
-  const formFields = event.target.closest('form')
-  const feedback = formFields.querySelector('input[name="feedback"]:checked').value
-
-  formData.set('feedback', feedback)
-  formData.set('otherText', (form.querySelector('textarea[name="otherText"]').value))
-
-  formData.set('email', (form.querySelector('input[name="email"]').value))
-
-  formData.set('date', new Date())
-  const nav = window.navigator
-  const navigatorString =
-      nav.userAgent + ', ' + nav.language
-
-  formData.set('navigator', navigatorString)
-
-  fetch("{{page.url}}", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(formData).toString(),
-  }).then(() => {
-      console.log('Form submission success')
-      clearFeedbackModal()
-    })
-    .catch(error => {
-      console.error('Form submission error:', error)
-    })
+  form.classList.add("hidden");
 }
+
+// Show thank-you modal on redirect
 function clearFeedbackModal() {
-  var modalBody = currentForm.querySelector('.feedback-modal-body');
+  const modalBody = form.querySelector('.feedback-modal-body');
+  const type = sessionStorage.getItem("feedbackType");
+  sessionStorage.removeItem("feedbackType");
+
   modalBody.innerHTML = `
-  {{> feedback-success-modal}}
+    <div class="feedback-success">
+      <h4>🎉 Thank you for your ${type === "positive" ? "positive" : "honest"} feedback!</h4>
+      <p>We appreciate your help improving our documentation.</p>
+      <button type="button" onclick="closeForm(event)">Close</button>
+    </div>
   `;
 }
 
-function closeForm(event) {
-  event.preventDefault()
-  currentForm.classList.toggle("hidden");
-}
+window.addEventListener('DOMContentLoaded', () => {
+  const toast = document.getElementById('feedback-toast');
+  const modal = document.getElementById('feedbackForm');
+
+  if (window.location.search.includes('success')) {
+    if (modal) modal.classList.add('hidden');
+    if (toast) {
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 5000); // auto-hide after 5s
+    }
+
+    // Remove ?success=true from URL without reload
+    const url = new URL(window.location);
+    url.searchParams.delete('success');
+    window.history.replaceState({}, document.title, url.toString());
+  }
+});
 </script>

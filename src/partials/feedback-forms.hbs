@@ -1,94 +1,44 @@
-<form id="positive" class="hidden" data-netlify-recaptcha="true" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmit(event)">
+<form id="feedbackForm" class="hidden" name="feedbackForm" method="POST" netlify-honeypot="bot-field" data-netlify="true" data-netlify-recaptcha="true" action="{{ page.url }}?success=true">
+  <input type="hidden" name="form-name" value="feedbackForm">
+
+  <!-- Honeypot -->
+  <p class="hidden">
+    <label>Beep-Boop. Bot-field: <input name="bot-field"></label>
+  </p>
+
+  <!-- Hidden metadata -->
+  <input type="hidden" name="version">
+  <input type="hidden" name="url">
+  <input type="hidden" name="positiveFeedback">
+  <input type="hidden" name="beta">
+  <input type="hidden" name="date">
+  <input type="hidden" name="navigator">
+
   <div class="feedback-modal">
     <div class="feedback-modal-body">
-      <h4>What do you like about this doc?</h4>
-      <div>
-        <div class="radio-buttons form-field">
-          <input type="hidden" name="form-name" value="feedbackForm">
-          <p class="hidden">
-            <label class="hidden">Beep-Boop. Bot-field <input name="bot-field"></label>
-          </p>
-          <input class="hidden" name="version">
-          <input class="hidden" name="url">
-          <input class="hidden" name="positiveFeedback">
-          <input class="hidden" name="beta">
-          <input class="hidden" name="date">
-          <input class="hidden" name="navigator">
-          <input class="hidden" name="feedback">
-          <label>
-            <input type="radio" name="feedback" id="solvedProblem" value="Solved my problem" checked="">
-            <span class="radio-label">Solved my problem</span>
-          </label>
-          <label>
-            <input type="radio" name="feedback" id="easyToUnderstand" value="Easy to understand">
-            <span class="radio-label">Easy to understand</span>
-          </label>
-          <label>
-            <input type="radio" name="feedback" id="other" value="other">
-            <span class="radio-label">Other</span>
-          </label>
-        </div>
+      <h4>What do you think of this page?</h4>
+
+      <div id="feedback-details" class="hidden">
+        <div class="radio-buttons form-field" id="feedback-options"></div>
+
         <div class="form-field">
-          <h4>Let us know what we do well:</h4>
-          <textarea id="otherText" name="otherText" rows="4" cols="50" placeholder="Please share details or suggestions for this topic."></textarea>
+          <h4><span id="feedback-prompt">Let us know more:</span></h4>
+          <textarea name="otherText" rows="4" cols="50" placeholder="Please share details or suggestions."></textarea>
         </div>
+
         <div class="form-field">
           <h4>Let us contact you about your feedback:</h4>
-          <input type="text" name="email" id="email" placeholder="email@example.com">
+          <input type="text" name="email" placeholder="email@example.com">
         </div>
+
         <div data-netlify-recaptcha="true"></div>
-      </div>
-      <div class="form-field wrapper">
-        <button type="submit" class="submitButton">Submit</button>
+
+        <div class="form-field wrapper">
+          <button type="submit" class="submitButton">Submit</button>
+        </div>
       </div>
     </div>
   </div>
-  <div class="modal-overlay" id="modal-overlay">
-  </div>
-</form>
-<form id="negative" class="hidden" data-netlify="true" name="feedbackForm" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmit(event)">
-  <div class="feedback-modal">
-    <div class="feedback-modal-body">
-      <h4>What did you not like about this doc?</h4>
-      <div>
-        <div class="radio-buttons form-field">
-          <input type="hidden" name="form-name" value="feedbackForm">
-          <p class="hidden">
-            <label class="hidden">Beep-Boop. Bot-field <input name="bot-field"></label>
-          </p>
-          <input class="hidden" name="version">
-          <input class="hidden" name="url">
-          <input class="hidden" name="feedback">
-          <input class="hidden" name="beta">
-          <input class="hidden" name="date">
-          <input class="hidden" name="navigator">
-          <label>
-            <input type="radio" name="feedback" id="solvedProblem" value="Did not solve my problem" checked="">
-            <span class="radio-label">Did not solve my problem</span>
-          </label>
-          <label>
-            <input type="radio" name="feedback" id="easyToUnderstand" value="Hard to understand">
-            <span class="radio-label">Hard to understand</span>
-          </label>
-          <label>
-            <input type="radio" name="feedback" id="other" value="other">
-            <span class="radio-label">Other</span>
-          </label>
-        </div>
-        <div class="form-field">
-          <h4>Let us know what we can improve:</h4>
-          <textarea id="otherText" name="otherText" rows="4" cols="50" placeholder="Please share details or suggestions for this topic."></textarea>
-        </div>
-        <div class="form-field">
-          <h4>Let us contact you about your feedback:</h4>
-          <input type="text" name="email" id="email" placeholder="email@example.com">
-        </div>
-      </div>
-      <div class="form-field wrapper">
-        <button type="submit" class="submitButton">Submit</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="modal-overlay">
-  </div>
+
+  <div class="modal-overlay" id="modal-overlay"></div>
 </form>
