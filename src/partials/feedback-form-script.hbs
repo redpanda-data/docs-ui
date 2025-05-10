@@ -1,77 +1,120 @@
 <script>
-const thumbs = document.querySelectorAll('.thumb');
-const positiveModal = document.getElementById('positive');
-const negativeModal = document.getElementById('negative');
-var currentForm;
-var positive;
+;
+(() => {
+  const SELECTORS = {
+    form: '#feedbackForm',
+    thumbs: '.thumb',
+    feedbackDetails: '#feedback-details',
+    feedbackOptions: '#feedback-options',
+    feedbackPrompt: '#feedback-prompt',
+    submitButton: '#submitButton',
+    captchaHint: '#captchaHint',
+    captchaField: 'textarea[name="g-recaptcha-response"]',
+    toast: '#feedback-toast',
+    modalOverlay: '#modal-overlay',
+    thumbsToc: '#thumbs-toc'
+  };
 
-thumbs.forEach(function(thumb) {
-  thumb.addEventListener('click', function() {
-    if (thumb.id.indexOf('up') !== -1) {
-      positiveModal.classList.toggle("hidden");
-      currentForm = positiveModal
-      positive = true;
-    } else if (thumb.id.indexOf('down') !== -1) {
-      negativeModal.classList.toggle("hidden");
-      currentForm = negativeModal
-      positive = false;
+  const POLL_INTERVAL = 300;            // ms between captcha checks
+  const POLL_TIMEOUT = 5 * 60 * 1000;   // stop polling after 5 minutes
+  const SCROLL_HIDE_OFFSET = 700;       // px before bottom to hide thumbs
+
+  let positive = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector(SELECTORS.form);
+    if (!form) return;
+    const thumbs = document.querySelectorAll(SELECTORS.thumbs);
+    const details = document.querySelector(SELECTORS.feedbackDetails);
+    const options = document.querySelector(SELECTORS.feedbackOptions);
+    const prompt = document.querySelector(SELECTORS.feedbackPrompt);
+    const submitBtn = document.querySelector(SELECTORS.submitButton);
+    const hint = document.querySelector(SELECTORS.captchaHint);
+    const toast = document.querySelector(SELECTORS.toast);
+
+    // Hide thumbs when scrolling to the bottom
+    document.addEventListener(
+      'scroll',
+      event => requestAnimationFrame(() => {
+        const toc = document.querySelector(SELECTORS.thumbsToc);
+        if (!toc) return;
+        const docH = document.body.scrollHeight;
+        const scrollPos = window.scrollY + window.innerHeight;
+        toc.style.display = (scrollPos + SCROLL_HIDE_OFFSET > docH) ? 'none' : 'block';
+      }),
+      { passive: true }
+    );
+
+    thumbs.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        positive = thumb.id.includes('up');
+        form.elements['positiveFeedback'].value = positive;
+
+        // Safely build radio options
+        const items = positive
+          ? [ 'Solved my problem', 'Easy to understand', 'Other' ]
+          : [ 'Not helpful', 'Too complex', 'Other' ];
+        options.innerHTML = items.map((txt, i) =>
+          `<label><input type="radio" name="feedback" value="${txt}"${i===0? ' checked':''}> ${txt}</label>`
+        ).join('');
+
+        prompt.textContent = positive
+          ? 'Let us know what we do well:'
+          : 'Let us know what could be improved:';
+
+        details.classList.remove('hidden');
+        form.classList.remove('hidden');
+      });
+    });
+
+    form.addEventListener('submit', () => {
+      const version = form.dataset.version || '';
+      const beta = form.dataset.beta === 'true';
+      form.elements['url'].value = window.location.href;
+      form.elements['positiveFeedback'].value = positive;
+      form.elements['version'].value = version;
+      form.elements['beta'].value = beta;
+      form.elements['date'].value = new Date().toISOString();
+      form.elements['navigator'].value = `${navigator.userAgent}, ${navigator.language}`;
+      // Store feedback type
+      sessionStorage.setItem('feedbackType', positive ? 'positive' : 'negative');
+    });
+
+    window.closeForm = event => {
+      event.preventDefault();
+      form.classList.add('hidden');
+    };
+
+    if (submitBtn && hint) {
+      submitBtn.disabled = true;
+      hint.style.display = 'block';
+      const start = Date.now();
+      // Enable the submit button when the reCAPTCHA token is available
+      // https://answers.netlify.com/t/recaptcha-integration-in-forms-configuration/6181/3
+      const intervalId = setInterval(() => {
+        const captcha = document.querySelector(SELECTORS.captchaField);
+        if (captcha && captcha.value.trim() !== '') {
+          submitBtn.disabled = false;
+          hint.style.display = 'none';
+          clearInterval(intervalId);
+        }
+        if (Date.now() - start > POLL_TIMEOUT) {
+          clearInterval(intervalId);
+          console.warn('reCAPTCHA token polling timed out');
+        }
+      }, POLL_INTERVAL);
+    }
+
+    if (toast && window.location.search.includes('success')) {
+      const modal = document.querySelector(SELECTORS.form);
+      modal.classList.add('hidden');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 5000);
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete('success');
+      window.history.replaceState({}, document.title, url);
     }
   });
-});
-
-const handleSubmit = function (event) {
-  event.preventDefault();
-  const currentUrl = '{{{ or site.url siteRootPath }}}{{{ page.url }}}'
-  const beta = {{ is-prerelease page }}
-  var version = '';
-  {{#if page.attributes.version }}
-  version = {{{ page.attributes.version }}}
-  {{/if}}
-
-  const form = event.target;
-  var formData = new FormData(form);
-
-  formData.set('version', version)
-  formData.set('url', currentUrl)
-  formData.set('positiveFeedback', positive);
-  formData.set('beta', beta)
-
-  const formFields = event.target.closest('form')
-  const feedback = formFields.querySelector('input[name="feedback"]:checked').value
-
-  formData.set('feedback', feedback)
-  formData.set('otherText', (form.querySelector('textarea[name="otherText"]').value))
-
-  formData.set('email', (form.querySelector('input[name="email"]').value))
-
-  formData.set('date', new Date())
-  const nav = window.navigator
-  const navigatorString =
-      nav.userAgent + ', ' + nav.language
-
-  formData.set('navigator', navigatorString)
-
-  fetch("{{page.url}}", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(formData).toString(),
-  }).then(() => {
-      console.log('Form submission success')
-      clearFeedbackModal()
-    })
-    .catch(error => {
-      console.error('Form submission error:', error)
-    })
-}
-function clearFeedbackModal() {
-  var modalBody = currentForm.querySelector('.feedback-modal-body');
-  modalBody.innerHTML = `
-  {{> feedback-success-modal}}
-  `;
-}
-
-function closeForm(event) {
-  event.preventDefault()
-  currentForm.classList.toggle("hidden");
-}
+})();
 </script>
