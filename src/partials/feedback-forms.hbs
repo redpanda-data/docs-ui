@@ -1,4 +1,5 @@
-<form id="feedbackForm" class="hidden" name="feedbackForm" method="POST" netlify-honeypot="bot-field" data-netlify="true" data-netlify-recaptcha="true" action="?success=true">
+<form id="feedbackForm" class="hidden" name="feedbackForm" method="POST" netlify-honeypot="bot-field" data-netlify="true" data-netlify-recaptcha="true" action="{{strip-trailing-slash page.url}}?success=true">
+    <input type="hidden" name="form-name" value="feedbackForm" />
 
   <!-- Honeypot -->
   <p class="hidden">
