@@ -1,6 +1,30 @@
+<div class="home-header-container">
+  <div class="navbar">
+    <h1>
+      <img src="{{{uiRootPath}}}/img/home-logo.svg" width="auto" height="28px" alt="Redpanda documentation home page"/>
+    </h1>
+    <div class="theme-switcher">
+      <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite"><img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
+      </button>
+    </div>
+    <p>{{page.attributes.intro}}</p>
+  </div>
+  <div class="home-header">
+    <script>
+      window.UI_INTEGRATION_ID = 'bc719cfb-2fd5-4c76-acde-de9a905f13b3';
+    </script>
+    <div id="kapa-chat-root"></div>
+    <script src="{{{uiRootPath}}}/js/chat-entry.bundle.js"></script>
+    <div class="suggestion-chips">
+      {{#each page.attributes.ai-suggestions}}
+      <div class="chip">{{this}}</div>
+      {{/each}}
+    </div>
+  </div>
+</div>
 <section class="features">
   <div class='container'>
-    {{#each page.attributes.rows}}
+    {{#each page.attributes.row}}
       {{#with this.title}}
         <h2>{{this}}</h2>
       {{/with}}
@@ -55,3 +79,17 @@
     {{/each}}
   </div>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.suggestion-chips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const text = chip.textContent.trim();
+      if (typeof window.submitKapaQuery === 'function') {
+        window.submitKapaQuery(text)
+      } else {
+        console.warn('Chat interface not ready: submitKapaQuery function not found')
+      }
+    });
+  });
+})
+</script>

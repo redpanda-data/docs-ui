@@ -39,6 +39,15 @@ const cleanTask = createTask({
   call: task.remove(['build', 'public']),
 })
 
+const bundleReactTask = createTask({
+  name: 'bundle:react',
+  desc: 'Compile every React module under src/js/react',
+  call: task.bundleReact({
+    srcDir: path.join(__dirname, srcDir, 'js', 'react'),
+    destDir: path.join(__dirname, srcDir, 'static', 'js'),
+  }),
+})
+
 const lintCssTask = createTask({
   name: 'lint:css',
   desc: 'Lint the CSS source files using stylelint (standard config)',
@@ -103,7 +112,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildWasmTask, copyRapidoc, buildTask),
+  call: series(cleanTask, lintTask, buildWasmTask, bundleReactTask, copyRapidoc, buildTask),
 })
 
 const bundlePackTask = createTask({
@@ -157,6 +166,7 @@ module.exports = exportTasks(
   lintTask,
   formatTask,
   buildWasmTask,
+  bundleReactTask,
   buildTask,
   bundleTask,
   bundlePackTask,
