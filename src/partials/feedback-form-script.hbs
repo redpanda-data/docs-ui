@@ -68,6 +68,10 @@
     });
 
     form.addEventListener('submit', () => {
+      const selectedFeedback = form.querySelector('input[name="feedback"]:checked');
+      if (selectedFeedback) {
+        form.querySelector('input[name="feedback"]').value = selectedFeedback.value;
+      }
       const version = form.dataset.version || '';
       const beta = form.dataset.beta === 'true';
       form.elements['url'].value = window.location.href;

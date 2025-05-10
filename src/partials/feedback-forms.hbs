@@ -1,4 +1,4 @@
-<form id="feedbackForm" class="hidden" name="feedbackForm" method="POST" netlify-honeypot="bot-field" data-netlify="true" data-netlify-recaptcha="true" action="{{page.url}}?success=true">
+<form id="feedbackForm" class="hidden" name="feedbackForm" method="POST" netlify-honeypot="bot-field" data-netlify="true" data-netlify-recaptcha="true" action="{{strip-trailing-slash page.url}}?success=true">
     <input type="hidden" name="form-name" value="feedbackForm" />
 
   <!-- Honeypot -->
@@ -12,6 +12,7 @@
   <input type="hidden" name="positiveFeedback">
   <input type="hidden" name="beta">
   <input type="hidden" name="date">
+  <input type="hidden" name="feedback">
   <input type="hidden" name="navigator">
 
   <div class="feedback-modal">
