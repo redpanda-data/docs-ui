@@ -1,206 +1,227 @@
 package main
 
 import (
-    "encoding/json"
-    "fmt"
-    "syscall/js"
+	"encoding/json"
+	"fmt"
+	"syscall/js"
 
-    "github.com/redpanda-data/benthos/v4/public/bloblang"
-    "github.com/redpanda-data/benthos/v4/public/service"
-    _ "github.com/redpanda-data/connect/v4/public/components/pure/extended"
+	"github.com/redpanda-data/benthos/v4/public/bloblang"
+	"github.com/redpanda-data/benthos/v4/public/service"
+	_ "github.com/redpanda-data/connect/v4/public/components/pure/extended"
 )
 
 var globalEnv *bloblang.Environment
 
 func main() {
-    // Initialize the global Bloblang environment
-    globalEnv = createMockEnvironment()
+	// Initialize the global Bloblang environment
+	globalEnv = createMockEnvironment()
 
-    js.Global().Set("blobl", js.FuncOf(blobl))
+	js.Global().Set("blobl", js.FuncOf(blobl))
 
-    // Wait for a signal to shut down
-    select {}
+	// Wait for a signal to shut down
+	select {}
 }
 
-func blobl(_ js.Value, args []js.Value) any {
-    if len(args) < 2 || len(args) > 3 {
-        return fmt.Sprintf("Expected 2 or 3 arguments, received %d instead", len(args))
-    }
+func blobl(_ js.Value, args []js.Value) (output any) {
+	defer func() {
+		// Make sure we return a string instead of an error
+		if o, ok := output.(error); ok {
+			output = "Error: " + o.Error()
+		}
+	}()
 
-    // Parse the mapping
-    mapping, err := globalEnv.Parse(args[0].String())
-    if err != nil {
-        return fmt.Sprintf("Failed to parse mapping: %s", err)
-    }
+	if len(args) < 2 || len(args) > 3 {
+		return fmt.Errorf("expected 2 or 3 arguments, received %d instead", len(args))
+	}
 
-    // Take the raw data without unmarshaling
-    payloadBytes := []byte(args[1].String())
+	// Parse the mapping
+	mapping, err := globalEnv.Parse(args[0].String())
+	if err != nil {
+		return fmt.Errorf("failed to parse mapping: %s", err)
+	}
 
-    // Create the message from the raw bytes
-    msg := service.NewMessage(payloadBytes)
+	// Take the raw data without unmarshaling
+	payloadBytes := []byte(args[1].String())
 
-    // Parse the optional metadata (this can still be JSON)
-    metadata := map[string]any{}
-    if len(args) == 3 {
-        if err := json.Unmarshal([]byte(args[2].String()), &metadata); err != nil {
-            return fmt.Sprintf("Failed to parse metadata: %s", err)
-        }
-    }
+	// Create the message from the raw bytes
+	msg := service.NewMessage(payloadBytes)
 
-    // Apply metadata to the message
-    for key, value := range metadata {
-        strValue, ok := value.(string)
-        if !ok {
-            return fmt.Errorf("metadata value for key '%s' must be a string, got %T", key, value)
-        }
-        msg.MetaSet(key, strValue)
-    }
+	// Parse the optional metadata (this can still be JSON)
+	metadata := map[string]any{}
+	if len(args) == 3 {
+		if err := json.Unmarshal([]byte(args[2].String()), &metadata); err != nil {
+			return fmt.Errorf("failed to parse metadata: %s", err)
+		}
+	}
 
-    // Execute the mapping
-    result, err := msg.BloblangQuery(mapping)
-    if err != nil {
-        return fmt.Sprintf("Failed to execute mapping: %s", err)
-    }
+	// Apply metadata to the message
+	for key, value := range metadata {
+		strValue, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("metadata value for key '%s' must be a string, got %T", key, value)
+		}
+		msg.MetaSetMut(key, strValue)
+	}
 
-    message, err := result.AsStructured()
-    if err != nil {
-        return fmt.Sprintf("Failed to marshal message: %s", err)
-    }
+	// Execute the mapping
+	result, err := msg.BloblangQuery(mapping)
+	if err != nil {
+		return fmt.Errorf("failed to execute mapping: %s", err)
+	}
 
-    // Extract metadata
-    var extractedMetadata map[string]any
-    result.MetaWalkMut(func(key string, value any) error {
-        if extractedMetadata == nil {
-            extractedMetadata = make(map[string]any)
-        }
-        extractedMetadata[key] = value
-        return nil
-    })
+	message, err := result.AsStructured()
+	if err != nil {
+		res, err := result.AsBytes()
+		if err != nil {
+			return fmt.Errorf("failed to extract message: %s", err)
+		}
+		message = string(res)
+	}
 
-    output, err := json.MarshalIndent(struct {
-        Msg  any            `json:"msg"`
-        Meta map[string]any `json:"meta,omitempty"`
-    }{
-        Msg:  message,
-        Meta: extractedMetadata,
-    }, "", "  ")
-    if err != nil {
-        return fmt.Sprintf("Failed to marshal output: %s", err)
-    }
+	// Extract metadata
+	var extractedMetadata map[string]any
+	if err = result.MetaWalkMut(func(key string, value any) error {
+		if extractedMetadata == nil {
+			extractedMetadata = make(map[string]any)
+		}
+		extractedMetadata[key] = value
+		return nil
+	}); err != nil {
+		return fmt.Errorf("failed to extract metadata: %s", err)
+	}
 
-    return string(output)
+	payload, err := json.MarshalIndent(struct {
+		Msg  any            `json:"msg"`
+		Meta map[string]any `json:"meta,omitempty"`
+	}{
+		Msg:  message,
+		Meta: extractedMetadata,
+	}, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal output: %s", err)
+	}
+
+	return string(payload)
 }
 
 // createMockEnvironment creates a shared Bloblang environment with mocked I/O functions.
 func createMockEnvironment() *bloblang.Environment {
-    env := bloblang.NewEnvironment()
+	env := bloblang.NewEnvironment()
 
-    // Mock `env` function
-    env.RegisterFunction("env", func(args ...any) (bloblang.Function, error) {
-        return func() (any, error) {
-            var name string
-            var noCache bool
+	// Mock `env` function
+	if err := env.RegisterFunction("env", func(args ...any) (bloblang.Function, error) {
+		return func() (any, error) {
+			var name string
+			var noCache bool
 
-            if len(args) == 1 {
-                name, _ = args[0].(string)
-            } else if len(args) == 2 {
-                switch v := args[0].(type) {
-                case string:
-                    name = v
-                    noCache, _ = args[1].(bool)
-                case map[string]any:
-                    name, _ = v["name"].(string)
-                    noCache, _ = v["no_cache"].(bool)
-                default:
-                    return nil, fmt.Errorf("invalid argument format for `env`")
-                }
-            } else {
-                return nil, fmt.Errorf("invalid number of arguments for `env`")
-            }
+			if len(args) == 1 {
+				name, _ = args[0].(string)
+			} else if len(args) == 2 {
+				switch v := args[0].(type) {
+				case string:
+					name = v
+					noCache, _ = args[1].(bool)
+				case map[string]any:
+					name, _ = v["name"].(string)
+					noCache, _ = v["no_cache"].(bool)
+				default:
+					return nil, fmt.Errorf("invalid argument format for `env`")
+				}
+			} else {
+				return nil, fmt.Errorf("invalid number of arguments for `env`")
+			}
 
-            mockValues := map[string]string{
-                "key": "mocked_value",
-            }
-            if val, exists := mockValues[name]; exists {
-                if noCache {
-                    return val + " (no cache)", nil
-                }
-                return val, nil
-            }
-            return nil, nil
-        }, nil
-    })
+			mockValues := map[string]string{
+				"key": "mocked_value",
+			}
+			if val, exists := mockValues[name]; exists {
+				if noCache {
+					return val + " (no cache)", nil
+				}
+				return val, nil
+			}
+			return nil, nil
+		}, nil
+	}); err != nil {
+		panic(err)
+	}
 
-    // Mock `file` function
-    env.RegisterFunction("file", func(args ...any) (bloblang.Function, error) {
-        return func() (any, error) {
-            var path string
-            var noCache bool
+	// Mock `file` function
+	if err := env.RegisterFunction("file", func(args ...any) (bloblang.Function, error) {
+		return func() (any, error) {
+			var path string
+			var noCache bool
 
-            if len(args) == 1 {
-                path, _ = args[0].(string)
-            } else if len(args) == 2 {
-                params, ok := args[0].(map[string]any)
-                if !ok {
-                    return nil, fmt.Errorf("invalid argument format for `file`")
-                }
-                path, _ = params["path"].(string)
-                noCache, _ = params["no_cache"].(bool)
-            } else {
-                return nil, fmt.Errorf("invalid number of arguments for `file`")
-            }
+			if len(args) == 1 {
+				path, _ = args[0].(string)
+			} else if len(args) == 2 {
+				params, ok := args[0].(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid argument format for `file`")
+				}
+				path, _ = params["path"].(string)
+				noCache, _ = params["no_cache"].(bool)
+			} else {
+				return nil, fmt.Errorf("invalid number of arguments for `file`")
+			}
 
-            mockFiles := map[string]string{
-                "/mock/path/file.json": `{"hello": "world"}`,
-            }
-            if content, exists := mockFiles[path]; exists {
-                if noCache {
-                    return content + " (no_cache)", nil
-                }
-                return content, nil
-            }
-            return nil, fmt.Errorf("file not found: %s", path)
-        }, nil
-    })
+			mockFiles := map[string]string{
+				"/mock/path/file.json": `{"hello": "world"}`,
+			}
+			if content, exists := mockFiles[path]; exists {
+				if noCache {
+					return content + " (no_cache)", nil
+				}
+				return content, nil
+			}
+			return nil, fmt.Errorf("file not found: %s", path)
+		}, nil
+	}); err != nil {
+		panic(err)
+	}
 
-    // Mock `file_rel` function
-    env.RegisterFunction("file_rel", func(args ...any) (bloblang.Function, error) {
-        return func() (any, error) {
-            var path string
-            var noCache bool
+	// Mock `file_rel` function
+	if err := env.RegisterFunction("file_rel", func(args ...any) (bloblang.Function, error) {
+		return func() (any, error) {
+			var path string
+			var noCache bool
 
-            if len(args) == 1 {
-                path, _ = args[0].(string)
-            } else if len(args) == 2 {
-                params, ok := args[0].(map[string]any)
-                if !ok {
-                    return nil, fmt.Errorf("invalid argument format for `file_rel`")
-                }
-                path, _ = params["path"].(string)
-                noCache, _ = params["no_cache"].(bool)
-            } else {
-                return nil, fmt.Errorf("invalid number of arguments for `file_rel`")
-            }
+			if len(args) == 1 {
+				path, _ = args[0].(string)
+			} else if len(args) == 2 {
+				params, ok := args[0].(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid argument format for `file_rel`")
+				}
+				path, _ = params["path"].(string)
+				noCache, _ = params["no_cache"].(bool)
+			} else {
+				return nil, fmt.Errorf("invalid number of arguments for `file_rel`")
+			}
 
-            mockFiles := map[string]string{
-                "relative/path/file.json": `{"hello": "world"}`,
-            }
-            if content, exists := mockFiles[path]; exists {
-                if noCache {
-                    return content + " (no_cache)", nil
-                }
-                return content, nil
-            }
-            return nil, fmt.Errorf("file not found: %s", path)
-        }, nil
-    })
+			mockFiles := map[string]string{
+				"relative/path/file.json": `{"hello": "world"}`,
+			}
+			if content, exists := mockFiles[path]; exists {
+				if noCache {
+					return content + " (no_cache)", nil
+				}
+				return content, nil
+			}
+			return nil, fmt.Errorf("file not found: %s", path)
+		}, nil
+	}); err != nil {
+		panic(err)
+	}
 
-    // Mock `hostname` function
-    env.RegisterFunction("hostname", func(args ...any) (bloblang.Function, error) {
-        return func() (any, error) {
-            return "mocked-hostname", nil
-        }, nil
-    })
+	// Mock `hostname` function
+	if err := env.RegisterFunction("hostname", func(args ...any) (bloblang.Function, error) {
+		return func() (any, error) {
+			return "mocked-hostname", nil
+		}, nil
+	}); err != nil {
+		panic(err)
+	}
 
-    return env
+	return env
 }

@@ -311,7 +311,7 @@ function execute() {
       const parsedResult = JSON.parse(result);
 
       // Separate message and metadata
-      const message = parsedResult.msg || parsedResult;
+      const message = parsedResult.msg;
       const metadata = parsedResult.meta || {};
 
       // Display message output
