@@ -1,6 +1,5 @@
 <script>
-;
-(() => {
+;(function() {
   const SELECTORS = {
     form: '#feedbackForm',
     thumbs: '.thumb',
@@ -10,115 +9,135 @@
     submitButton: '#submitButton',
     captchaHint: '#captchaHint',
     captchaField: 'textarea[name="g-recaptcha-response"]',
-    toast: '#feedback-toast',
-    modalOverlay: '#modal-overlay',
+    successMessage: '#feedback-toast',
+    successMessageToc: '#feedback-toast-thumbs-toc',
     thumbsToc: '#thumbs-toc'
   };
 
   const POLL_INTERVAL = 300;            // ms between captcha checks
-  const POLL_TIMEOUT = 5 * 60 * 1000;   // stop polling after 5 minutes
+  const POLL_TIMEOUT = 5 * 60 * 1000;   // ms to give up on captcha polling
   const SCROLL_HIDE_OFFSET = 700;       // px before bottom to hide thumbs
 
   let positive = null;
+  let fromToc = false;  // track if last click was in TOC
 
   document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector(SELECTORS.form);
-    if (!form) return;
-    const thumbs = document.querySelectorAll(SELECTORS.thumbs);
-    const details = document.querySelector(SELECTORS.feedbackDetails);
-    const options = document.querySelector(SELECTORS.feedbackOptions);
-    const prompt = document.querySelector(SELECTORS.feedbackPrompt);
+    const form      = document.querySelector(SELECTORS.form);
     const submitBtn = document.querySelector(SELECTORS.submitButton);
-    const hint = document.querySelector(SELECTORS.captchaHint);
-    const toast = document.querySelector(SELECTORS.toast);
+    const hint      = document.querySelector(SELECTORS.captchaHint);
+    const successMsg    = document.querySelector(SELECTORS.successMessage);
+    const successMsgToc = document.querySelector(SELECTORS.successMessageToc);
+    if (!form) return;
 
-    // Hide thumbs when scrolling to the bottom
-    document.addEventListener(
-      'scroll',
-      event => requestAnimationFrame(() => {
-        const toc = document.querySelector(SELECTORS.thumbsToc);
-        if (!toc) return;
-        const docH = document.body.scrollHeight;
-        const scrollPos = window.scrollY + window.innerHeight;
-        toc.style.display = (scrollPos + SCROLL_HIDE_OFFSET > docH) ? 'none' : 'block';
-      }),
-      { passive: true }
-    );
-
-    thumbs.forEach(thumb => {
+    // Show form on thumbs click
+    document.querySelectorAll(SELECTORS.thumbs).forEach(thumb => {
       thumb.addEventListener('click', () => {
         positive = thumb.id.includes('up');
+        fromToc = !!thumb.closest(SELECTORS.thumbsToc);
         form.elements['positiveFeedback'].value = positive;
-
-        // Safely build radio options
         const items = positive
-          ? [ 'Solved my problem', 'Easy to understand', 'Other' ]
-          : [ 'Not helpful', 'Too complex', 'Other' ];
-        options.innerHTML = items.map((txt, i) =>
-          `<label><input type="radio" name="feedback" value="${txt}"${i===0? ' checked':''}> ${txt}</label>`
-        ).join('');
-
-        prompt.textContent = positive
-          ? 'Let us know what we do well:'
-          : 'Let us know what could be improved:';
-
-        details.classList.remove('hidden');
+          ? ['Solved my problem','Easy to understand','Other']
+          : ['Not helpful','Too complex','Other'];
+        document.querySelector(SELECTORS.feedbackOptions).innerHTML =
+          items.map((txt,i) =>
+            `<label><input type=\"radio\" name=\"feedback\" value=\"${txt}\"${i===0?' checked':''}> ${txt}</label>`
+          ).join('');
+        document.querySelector(SELECTORS.feedbackPrompt).textContent =
+          positive ? 'Let us know what we do well:' : 'Let us know what could be improved:';
+        document.querySelector(SELECTORS.feedbackDetails).classList.remove('hidden');
+        form.hidden = false;
         form.classList.remove('hidden');
       });
     });
 
-    form.addEventListener('submit', () => {
-      const selectedFeedback = form.querySelector('input[name="feedback"]:checked');
-      if (selectedFeedback) {
-        form.querySelector('input[name="feedback"]').value = selectedFeedback.value;
-      }
-      const version = form.dataset.version || '';
-      const beta = form.dataset.beta === 'true';
-      form.elements['url'].value = window.location.href;
-      form.elements['positiveFeedback'].value = positive;
-      form.elements['version'].value = version;
-      form.elements['beta'].value = beta;
-      form.elements['date'].value = new Date().toISOString();
-      form.elements['navigator'].value = `${navigator.userAgent}, ${navigator.language}`;
-      // Store feedback type
-      sessionStorage.setItem('feedbackType', positive ? 'positive' : 'negative');
-    });
+    // Hide thumbs near bottom
+    document.addEventListener('scroll', () => requestAnimationFrame(() => {
+      const toc = document.querySelector(SELECTORS.thumbsToc);
+      if (!toc) return;
+      const docH = document.body.scrollHeight;
+      const scrollPos = window.scrollY + window.innerHeight;
+      toc.style.display = (scrollPos + SCROLL_HIDE_OFFSET > docH) ? 'none' : 'block';
+    }), { passive: true });
 
-    window.closeForm = event => {
-      event.preventDefault();
-      form.classList.add('hidden');
-    };
-
+    // Poll reCAPTCHA token
     if (submitBtn && hint) {
       submitBtn.disabled = true;
       hint.style.display = 'block';
       const start = Date.now();
-      // Enable the submit button when the reCAPTCHA token is available
-      // https://answers.netlify.com/t/recaptcha-integration-in-forms-configuration/6181/3
-      const intervalId = setInterval(() => {
+      const checkId = setInterval(() => {
         const captcha = document.querySelector(SELECTORS.captchaField);
-        if (captcha && captcha.value.trim() !== '') {
+        if (captcha && captcha.value.trim()) {
           submitBtn.disabled = false;
           hint.style.display = 'none';
-          clearInterval(intervalId);
+          clearInterval(checkId);
         }
         if (Date.now() - start > POLL_TIMEOUT) {
-          clearInterval(intervalId);
-          console.warn('reCAPTCHA token polling timed out');
+          clearInterval(checkId);
+          console.warn('reCAPTCHA polling timed out');
         }
       }, POLL_INTERVAL);
     }
 
-    if (toast && window.location.search.includes('success')) {
-      const modal = document.querySelector(SELECTORS.form);
-      modal.classList.add('hidden');
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 5000);
+    // AJAX submit with URL-encoded body
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      submitBtn.disabled = true;
 
-      const url = new URL(window.location.href);
-      url.searchParams.delete('success');
-      window.history.replaceState({}, document.title, url);
-    }
+      // Copy selected radio into hidden feedback input
+      const checked = Array.from(
+        form.querySelectorAll('input[name="feedback"]:checked')
+      ).map(el => el.value);
+      // pick the first non-empty
+      const first = checked.find(v => v.trim() !== '') || '';
+      form.elements['feedback'].value = first;
+
+      // Populate hidden metadata
+      form.elements['url'].value             = window.location.href;
+      form.elements['positiveFeedback'].value = positive;
+      form.elements['version'].value         = form.dataset.version || '';
+      form.elements['beta'].value            = form.dataset.beta === 'true';
+      form.elements['date'].value            = new Date().toISOString();
+      form.elements['navigator'].value       = `${navigator.userAgent}, ${navigator.language}`;
+      sessionStorage.setItem('feedbackType', positive ? 'positive' : 'negative');
+
+      // Build URL-encoded body per Netlify AJAX requirements
+      const formData = new FormData(form);
+      const body = new URLSearchParams();
+      for (const [key, value] of formData.entries()) {
+        body.append(key, value);
+      }
+
+      try {
+        const resp = await fetch(window.location.pathname, {
+          method:  'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+          },
+          body:    body.toString()
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        // On success, show custom message
+        form.hidden = true;
+        if (successMsg)    successMsg.classList.add('hidden');
+        if (successMsgToc) successMsgToc.classList.add('hidden');
+        const toastToShow = fromToc ? successMsgToc : successMsg;
+        if (toastToShow) {
+          toastToShow.classList.remove('hidden');
+          setTimeout(() => toastToShow.classList.add('hidden'), 5000);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Submission failed—please try again later.');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    window.closeForm = ev => {
+      ev.preventDefault();
+      form.classList.add('hidden');
+    };
   });
 })();
 </script>
