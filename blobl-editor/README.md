@@ -1,15 +1,16 @@
 # Bloblang Playground
 
 This directory hosts the source code for the Wasm module that allows the Redpanda docs to execute Bloblang mappings.
-The Wasm module is used in the Bloblang playground defined in [`/src/partials/bloblang-playground.hbs`](/src/partials/bloblang-playground.hbs). 
+The Wasm module is used in the Bloblang playground defined in [`/src/partials/bloblang-playground.hbs`](/src/partials/bloblang-playground.hbs).
 
 The Wasm module is built automatically when you bundle the UI with `gulp bundle`.
 
 To build the Wasm module manually:
 
 ```shell
-GOOS=js GOARCH=wasm go build -o ./src/static/blobl.wasm ./cmd/wasm
-cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" ./static
+cd ./blobl-editor/wasm
+GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .
+cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" ../../src/js/vendor
 ```
 
 ## Update Go modules for the Wasm module

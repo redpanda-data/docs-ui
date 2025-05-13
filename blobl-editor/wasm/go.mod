@@ -1,4 +1,4 @@
-module blobl-playground
+module blobl
 
 go 1.24.1
 
