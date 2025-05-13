@@ -304,6 +304,9 @@ function execute() {
   aceOutputMetadataEditor.setValue("");
 
   try {
+    if (typeof blobl !== 'function') {
+      throw new Error("WebAssembly module not properly loaded. Please refresh the page.");
+    }
     const result = blobl(getMapping(), getInput(), getInputMetadata());
 
     if (isValidJSON(result)) {
