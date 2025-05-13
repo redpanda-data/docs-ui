@@ -25,7 +25,7 @@ jobs:
           diff -q $(go env GOROOT)/lib/wasm/wasm_exec.js ./src/js/vendor/wasm_exec.js &>/dev/null || { >&2 echo "Stale wasm_exec.js detected."; exit 1; }
       - uses: actions/setup-node@v4
         with:
-          node-version: 10
+          node-version: 18
       - name: Bundle UI
         run: |
           npm i
