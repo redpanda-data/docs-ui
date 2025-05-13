@@ -309,34 +309,35 @@ function execute() {
     }
     const result = blobl(getMapping(), getInput(), getInputMetadata());
 
-    if (isValidJSON(result)) {
-      customAIButton.style.display = "none";
-      const parsedResult = JSON.parse(result);
+    customAIButton.style.display = "none";
 
-      // Separate message and metadata
-      const message = parsedResult.msg;
-      const metadata = parsedResult.meta || {};
+    // TODO: Fix `root = "3" -> "e.match is not a function"
+    // TODO: Prevent the output of `root = "[3,4,5]"` from being interpreted as a JSON
+    const parsedResult = JSON.parse(result);
 
-      // Display message output
+    if (parsedResult.err !== "") {
+      throw new Error(parsedResult.err);
+    }
+
+    // Display message output
+    const message = parsedResult.msg
+    if (typeof message === "object") {
       aceOutputEditor.session.setMode("ace/mode/json");
       aceOutputEditor.setValue(JSON.stringify(message, null, 2), 1);
-
-      // Display metadata
-      if (Object.keys(metadata).length > 0) {
-        aceOutputMetadataEditor.session.setMode("ace/mode/json");
-        aceOutputMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
-      } else {
-        aceOutputMetadataEditor.session.setMode("ace/mode/text");
-        aceOutputMetadataEditor.setValue("{}", 1);
-      }
     } else {
       // If the result is not JSON, handle it as raw text
       aceOutputEditor.session.setMode("ace/mode/text");
-      aceOutputEditor.setValue(result, 1);
+      aceOutputEditor.setValue(message, 1);
       customAIButton.style.display = "inline-block";
+    }
 
-      aceOutputMetadataEditor.session.setMode("ace/mode/text");
-      aceOutputMetadataEditor.setValue("No metadata available", 1);
+    // Display metadata
+    const metadata = parsedResult.meta || {};
+    aceOutputMetadataEditor.session.setMode("ace/mode/json");
+    if (Object.keys(metadata).length > 0) {
+      aceOutputMetadataEditor.setValue(JSON.stringify(metadata, null, 2), 1);
+    } else {
+      aceOutputMetadataEditor.setValue("{}", 1);
     }
   } catch (error) {
     // Handle general errors
@@ -345,7 +346,7 @@ function execute() {
     customAIButton.style.display = "inline-block";
 
     aceOutputMetadataEditor.session.setMode("ace/mode/text");
-    aceOutputMetadataEditor.setValue("Error: " + error.message, 1);
+    aceOutputMetadataEditor.setValue("No metadata available", 1);
   }
 }
 
