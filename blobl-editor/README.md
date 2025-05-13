@@ -10,7 +10,7 @@ To build the Wasm module manually:
 ```shell
 cd ./blobl-editor/wasm
 GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .
-cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" ../../src/static
+cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" ../../src/js/vendor
 ```
 
 ## Update Go modules for the Wasm module
