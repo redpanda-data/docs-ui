@@ -7,7 +7,6 @@
     feedbackOptions: '#feedback-options',
     feedbackPrompt: '#feedback-prompt',
     submitButton: '#submitButton',
-    captchaHint: '#captchaHint',
     captchaField: 'textarea[name="g-recaptcha-response"]',
     successMessage: '#feedback-toast',
     successMessageToc: '#feedback-toast-thumbs-toc',
@@ -24,7 +23,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     const form      = document.querySelector(SELECTORS.form);
     const submitBtn = document.querySelector(SELECTORS.submitButton);
-    const hint      = document.querySelector(SELECTORS.captchaHint);
     const successMsg    = document.querySelector(SELECTORS.successMessage);
     const successMsgToc = document.querySelector(SELECTORS.successMessageToc);
     if (!form) return;
@@ -59,29 +57,9 @@
       toc.style.display = (scrollPos + SCROLL_HIDE_OFFSET > docH) ? 'none' : 'block';
     }), { passive: true });
 
-    // Poll reCAPTCHA token
-    if (submitBtn && hint) {
-      submitBtn.disabled = true;
-      hint.style.display = 'block';
-      const start = Date.now();
-      const checkId = setInterval(() => {
-        const captcha = document.querySelector(SELECTORS.captchaField);
-        if (captcha && captcha.value.trim()) {
-          submitBtn.disabled = false;
-          hint.style.display = 'none';
-          clearInterval(checkId);
-        }
-        if (Date.now() - start > POLL_TIMEOUT) {
-          clearInterval(checkId);
-          console.warn('reCAPTCHA polling timed out');
-        }
-      }, POLL_INTERVAL);
-    }
-
     // AJAX submit with URL-encoded body
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      submitBtn.disabled = true;
 
       // Copy selected radio into hidden feedback input
       const checked = Array.from(
@@ -129,8 +107,6 @@
       } catch (err) {
         console.error(err);
         alert('Submission failed—please try again later.');
-      } finally {
-        submitBtn.disabled = false;
       }
     });
 
