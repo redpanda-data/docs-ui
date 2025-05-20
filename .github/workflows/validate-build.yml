@@ -9,9 +9,23 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Lint Go code
+        uses: golangci/golangci-lint-action@v8
+        with:
+          working-directory: "./blobl-editor/wasm"
+        env:
+          GOOS: js
+          GOARCH: wasm
+      - name: Ensure wasm_exec.js is up to date
+        run: |
+          diff -q $(go env GOROOT)/lib/wasm/wasm_exec.js ./src/js/vendor/wasm_exec.js &>/dev/null || { >&2 echo "Stale wasm_exec.js detected."; exit 1; }
       - uses: actions/setup-node@v4
         with:
-          node-version: 10
+          node-version: 18
       - name: Bundle UI
         run: |
           npm i

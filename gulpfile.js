@@ -87,7 +87,7 @@ const buildWasmTask = createTask({
       GOARCH: 'wasm',
     }
 
-    const command = `go build -o "${wasmOutputPath}" main.go`
+    const command = `go build -o "${wasmOutputPath}" .`
 
     exec(command, { cwd: wasmDir, env: envVars }, (err, stdout, stderr) => {
       if (err) {
