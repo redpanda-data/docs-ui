@@ -1,40 +1,34 @@
-{{#if (ne page.attributes.role 'home')}}
-  <header class="header">
-      {{> announcement-bar}}
-    <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #d73d23"{{/if}}
-  >
-      <div class="navbar-brand" id="brand">
-        {{#with site.homeUrl}}
-        <a class="navbar-item" href="{{{relativize this}}}" aria-label="Go to home page"><img src="{{{@root.uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="auto" height="22px" alt="Redpanda logo"/></a>
-        {{/with}}
-        <button class="navbar-burger" data-target="topbar-nav" aria-label="Header navigation menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-      <div id="topbar-nav" class="navbar-menu" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #d73d23"{{/if}}>
-        {{#each (sort-components site.components)}}
-        <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
-        {{/each}}
-        <div class="navbar-end">
-            {{#if (and (ne page.layout 'search') (ne page.attributes.role 'home'))}}
-              <div class="autocomplete" id="autocomplete" style="max-width:100px;"></div>
-              <div> or </div>
-            {{/if}}
-            {{#if (ne page.attributes.role 'home')}}
-              {{> ai-button}}
-            {{/if}}
-          <div class="theme-switcher">
-            <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite"><img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
-            </button>
-          </div>
+<header class="header">
+    {{> announcement-bar}}
+  <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #d73d23"{{/if}}
+>
+    <div class="navbar-brand" id="brand">
+      {{#with site.homeUrl}}
+      <a class="navbar-item" href="{{{relativize this}}}" aria-label="Go to home page"><img src="{{{@root.uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="auto" height="22px" alt="Redpanda logo"/></a>
+      {{/with}}
+      <button class="navbar-burger" data-target="topbar-nav" aria-label="Header navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: #d73d23"{{/if}}>
+      {{#each (sort-components site.components)}}
+      <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" href="{{{this.url}}}">{{this.title}}</a>
+      {{/each}}
+      <div class="navbar-end">
+          {{#if (and (ne page.layout 'search') (ne page.attributes.role 'home'))}}
+            <div class="autocomplete" id="autocomplete" style="max-width:100px;"></div>
+            <div> or </div>
+          {{/if}}
+          {{#if (ne page.attributes.role 'home')}}
+            {{> ai-button}}
+          {{/if}}
+        <div class="theme-switcher">
+          <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite"><img class="theme-image" src="{{{uiRootPath}}}/img/octicons-24.svg#view-sun" alt=""></img>
+          </button>
         </div>
       </div>
-    </nav>
-  </header>
-{{else}}
-  <header class="header">
-      {{> announcement-bar}}
-  </header>
-{{/if}}
+    </div>
+  </nav>
+</header>

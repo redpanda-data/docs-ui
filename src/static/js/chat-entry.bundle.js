@@ -98400,16 +98400,22 @@ function ChatInterface() {
       className: "qa-pair"
     }, /*#__PURE__*/_react.default.createElement("div", {
       className: "question"
-    }, qa.question), /*#__PURE__*/_react.default.createElement(Answer, {
+    }, qa.question), isLast && isGeneratingAnswer && /*#__PURE__*/_react.default.createElement("button", {
+      onClick: handleStop,
+      className: "main-button",
+      type: "button"
+    }, /*#__PURE__*/_react.default.createElement(_lucideReact.CircleStop, {
+      className: "h-4 w-4 inline-block mr-1"
+    }), /*#__PURE__*/_react.default.createElement("span", {
+      className: "button-text"
+    }, "Stop")), /*#__PURE__*/_react.default.createElement(Answer, {
       md: qa.answer
-    }), !wasStopped && !isPreparingAnswer && !isGeneratingAnswer && (isLast ? /*#__PURE__*/_react.default.createElement("div", {
-      className: "actions-feedback"
+    }), isLast && !isPreparingAnswer && !isGeneratingAnswer && /*#__PURE__*/_react.default.createElement("div", {
+      className: "actions-feedback flex justify-between items-center"
     }, /*#__PURE__*/_react.default.createElement(ActionButtons, {
       onReset: handleReset,
       onCopy: handleCopy
-    }), /*#__PURE__*/_react.default.createElement(FeedbackButtons, {
-      questionAnswerId: qa.id
-    })) : /*#__PURE__*/_react.default.createElement(FeedbackButtons, {
+    }), !wasStopped && /*#__PURE__*/_react.default.createElement(FeedbackButtons, {
       questionAnswerId: qa.id
     })));
   }), isPreparingAnswer && /*#__PURE__*/_react.default.createElement("div", {
@@ -98436,10 +98442,10 @@ function ChatInterface() {
     disabled: isGeneratingAnswer || isPreparingAnswer
   })), /*#__PURE__*/_react.default.createElement("div", {
     className: "chat-footer"
-  }, isPreparingAnswer || isGeneratingAnswer ? /*#__PURE__*/_react.default.createElement("button", {
+  }, isPreparingAnswer ? /*#__PURE__*/_react.default.createElement("button", {
     type: "button",
     onClick: handleStop,
-    className: "submit-button flex items-center gap-1"
+    className: "main-button flex items-center gap-1"
   }, /*#__PURE__*/_react.default.createElement(_lucideReact.CircleStop, {
     className: "h-5 w-5"
   }), /*#__PURE__*/_react.default.createElement("span", {
@@ -98447,7 +98453,7 @@ function ChatInterface() {
   }, "Stop")) : /*#__PURE__*/_react.default.createElement("button", {
     type: "submit",
     disabled: isGeneratingAnswer,
-    className: "submit-button"
+    className: "main-button"
   }, /*#__PURE__*/_react.default.createElement(_lucideReact.ArrowUp, {
     className: "button-icon"
   }), /*#__PURE__*/_react.default.createElement("span", {
@@ -98465,8 +98471,26 @@ var _ChatInterface = _interopRequireDefault(require("./ChatInterface.jsx"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function App() {
   var integrationId = window.UI_INTEGRATION_ID;
-  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("h2", null, "Ask anything about Redpanda"), /*#__PURE__*/_react.default.createElement(_reactSdk.KapaProvider, {
-    integrationId: integrationId
+  return /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, /*#__PURE__*/_react.default.createElement("h1", null, "Ask anything about Redpanda"), /*#__PURE__*/_react.default.createElement("div", {
+    className: "paragraph"
+  }, /*#__PURE__*/_react.default.createElement("p", null, "For best results, include the name of the product you're interested in as well as the version. For example, \"In Redpanda Cloud, how do I connect to my cluster?\""), /*#__PURE__*/_react.default.createElement("p", null, "Responses are generated using AI and may contain mistakes.")), /*#__PURE__*/_react.default.createElement("div", {
+    className: "paragraph"
+  }, /*#__PURE__*/_react.default.createElement("p", null, "Review the ", /*#__PURE__*/_react.default.createElement("a", {
+    href: "https://www.redpanda.com/legal/privacy-policy",
+    target: "_blank",
+    rel: "noopener"
+  }, "Redpanda privacy policy"), " to understand how your data is used.")), /*#__PURE__*/_react.default.createElement("hr", {
+    className: "section-divider"
+  }), /*#__PURE__*/_react.default.createElement(_reactSdk.KapaProvider, {
+    integrationId: integrationId,
+    callbacks: {
+      askAI: {
+        onQuerySubmit: function onQuerySubmit(_ref) {
+          var question = _ref.question;
+          return console.log('Question asked:', question);
+        }
+      }
+    }
   }, /*#__PURE__*/_react.default.createElement(_ChatInterface.default, null)));
 }
 document.addEventListener('DOMContentLoaded', function () {

@@ -67320,16 +67320,22 @@ function ChatInterface() {
       className: "qa-pair"
     }, /*#__PURE__*/_react.default.createElement("div", {
       className: "question"
-    }, qa.question), /*#__PURE__*/_react.default.createElement(Answer, {
+    }, qa.question), isLast && isGeneratingAnswer && /*#__PURE__*/_react.default.createElement("button", {
+      onClick: handleStop,
+      className: "main-button",
+      type: "button"
+    }, /*#__PURE__*/_react.default.createElement(_lucideReact.CircleStop, {
+      className: "h-4 w-4 inline-block mr-1"
+    }), /*#__PURE__*/_react.default.createElement("span", {
+      className: "button-text"
+    }, "Stop")), /*#__PURE__*/_react.default.createElement(Answer, {
       md: qa.answer
-    }), !wasStopped && !isPreparingAnswer && !isGeneratingAnswer && (isLast ? /*#__PURE__*/_react.default.createElement("div", {
-      className: "actions-feedback"
+    }), isLast && !isPreparingAnswer && !isGeneratingAnswer && /*#__PURE__*/_react.default.createElement("div", {
+      className: "actions-feedback flex justify-between items-center"
     }, /*#__PURE__*/_react.default.createElement(ActionButtons, {
       onReset: handleReset,
       onCopy: handleCopy
-    }), /*#__PURE__*/_react.default.createElement(FeedbackButtons, {
-      questionAnswerId: qa.id
-    })) : /*#__PURE__*/_react.default.createElement(FeedbackButtons, {
+    }), !wasStopped && /*#__PURE__*/_react.default.createElement(FeedbackButtons, {
       questionAnswerId: qa.id
     })));
   }), isPreparingAnswer && /*#__PURE__*/_react.default.createElement("div", {
@@ -67356,10 +67362,10 @@ function ChatInterface() {
     disabled: isGeneratingAnswer || isPreparingAnswer
   })), /*#__PURE__*/_react.default.createElement("div", {
     className: "chat-footer"
-  }, isPreparingAnswer || isGeneratingAnswer ? /*#__PURE__*/_react.default.createElement("button", {
+  }, isPreparingAnswer ? /*#__PURE__*/_react.default.createElement("button", {
     type: "button",
     onClick: handleStop,
-    className: "submit-button flex items-center gap-1"
+    className: "main-button flex items-center gap-1"
   }, /*#__PURE__*/_react.default.createElement(_lucideReact.CircleStop, {
     className: "h-5 w-5"
   }), /*#__PURE__*/_react.default.createElement("span", {
@@ -67367,7 +67373,7 @@ function ChatInterface() {
   }, "Stop")) : /*#__PURE__*/_react.default.createElement("button", {
     type: "submit",
     disabled: isGeneratingAnswer,
-    className: "submit-button"
+    className: "main-button"
   }, /*#__PURE__*/_react.default.createElement(_lucideReact.ArrowUp, {
     className: "button-icon"
   }), /*#__PURE__*/_react.default.createElement("span", {

@@ -160,7 +160,7 @@ function ActionButtons({ onReset, onCopy }) {
   return (
     <div className="action-buttons">
       <button type="button" onClick={onReset} className="action-button">
-        <RefreshCcw /> Reset
+        <RefreshCcw /> Clear
       </button>
       <button type="button" onClick={safeCopy} className="action-button">
         <ClipboardCopy /> Copy
@@ -273,19 +273,24 @@ export default function ChatInterface() {
             return (
               <div key={key} className="qa-pair">
                 <div className="question">{qa.question}</div>
+                {isLast && isGeneratingAnswer && (
+                    <button
+                      onClick={handleStop}
+                      className="main-button"
+                      type="button"
+                    >
+                      <CircleStop className="h-4 w-4 inline-block mr-1" />
+                      <span className='button-text'>Stop</span>
+                    </button>
+                  )}
                 <Answer md={qa.answer} />
 
-                {!wasStopped &&
-                  !isPreparingAnswer &&
-                  !isGeneratingAnswer && (
-                  isLast ? (
-                    <div className="actions-feedback">
-                      <ActionButtons onReset={handleReset} onCopy={handleCopy} />
-                      <FeedbackButtons questionAnswerId={qa.id} />
-                    </div>
-                  ) : (
-                    <FeedbackButtons questionAnswerId={qa.id} />
-                  )
+                {isLast && !isPreparingAnswer && !isGeneratingAnswer && (
+                  <div className="actions-feedback flex justify-between items-center">
+                    <ActionButtons onReset={handleReset} onCopy={handleCopy} />
+                    {/* only show thumbs if this answer wasn’t stopped */}
+                    {!wasStopped && <FeedbackButtons questionAnswerId={qa.id} />}
+                  </div>
                 )}
               </div>
             )
@@ -323,11 +328,11 @@ export default function ChatInterface() {
 
             <div className="chat-footer">
               {/* Toggle between Send and Stop */}
-            {isPreparingAnswer || isGeneratingAnswer ? (
+            {isPreparingAnswer ? (
               <button
                 type="button"
                 onClick={handleStop}
-                className="submit-button flex items-center gap-1"
+                className="main-button flex items-center gap-1"
               >
                 <CircleStop className="h-5 w-5" />
                 <span className="button-text">Stop</span>
@@ -336,7 +341,7 @@ export default function ChatInterface() {
               <button
                 type="submit"
                 disabled={isGeneratingAnswer}
-                className="submit-button"
+                className="main-button"
               >
                 <ArrowUp className="button-icon" />
                 <span className="button-text">Submit</span>

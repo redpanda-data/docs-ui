@@ -2,62 +2,6 @@ body.article.home {
   background-color: var(--home-background);
 }
 
-.home .header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-}
-
-.home .navbar {
-  display: flex;
-  justify-content: space-between;
-  background-color: var(--home-background);
-  align-items: center;
-  padding: 0;
-  height: auto;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  padding-left: 1rem;
-  border: none;
-  box-shadow: none;
-  gap: 0;
-  font-size: var(--secondary-font-size);
-  position: unset;
-}
-
-.home .theme-switcher {
-  display: flex;
-  align-items: center;
-}
-
-.home #switch-theme {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.home #switch-theme:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.home .theme-image {
-  width: 20px;
-  height: 20px;
-  filter: invert(1);
-}
-
-.home .theme-image:not(.moon) {
-  filter: none !important;
-}
-
 .home .chat-container {
   display: flex;
   flex-direction: column;
@@ -72,8 +16,22 @@ body.article.home {
   line-height: 1.8;
 }
 
+.home .paragraph {
+  font-size: 14px;
+}
+
 .home .grecaptcha-badge {
   z-index: 9999 !important;
+}
+
+.home .section-divider {
+  border: none;
+  border-top: 1px solid var(--panel-border-color);
+  margin: var(--spacings-spacing-xl) 0;
+}
+
+.home .kapa-chat-root {
+  padding-top: var(--spacings-spacing-lg);
 }
 
 .home .qa-pair {
@@ -150,7 +108,7 @@ body.article.home {
   padding: 0 var(--spacings-spacing-lg) var(--spacings-spacing-lg);
 }
 
-.home .submit-button {
+.home .main-button {
   height: 24.6px;
   padding: 0 var(--spacings-spacing-sm);
   background-color: var(--color-primitives-global-orange-orange-800);
@@ -168,12 +126,12 @@ body.article.home {
   transition: all 0.2s ease-in-out;
 }
 
-.home .submit-button:hover {
+.home .main-button:hover {
   background-color: var(--color-primitives-global-orange-orange-900) !important;
   color: white !important;
 }
 
-.home .submit-button:disabled {
+.home .main-button:disabled {
   background-color: var(--color-aliases-static-palette-text-disabled);
   cursor: not-allowed;
 }
@@ -184,29 +142,12 @@ body.article.home {
 }
 
 .home .feedback-button {
-  height: var(--aa-search-input-height);
-  font-size: var(--aa-font-size);
-  font-family: var(--aa-font-family);
-  color: rgba(var(--aa-text-color-rgb), var(--aa-text-color-alpha));
-  background-color: rgba(var(--aa-input-background-color-rgb), var(--aa-input-background-color-alpha));
-  border: 1px solid rgba(var(--aa-input-border-color-rgb), var(--aa-input-border-color-alpha));
-  border-radius: 0.25rem;
+  border: none;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   cursor: pointer;
-}
-
-.home .feedback-button:hover,
-.home .feedback-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(var(--aa-primary-color-rgb), var(--aa-primary-color-alpha));
-  background-color: rgba(var(--aa-muted-color-rgb), var(--aa-muted-color-alpha));
-}
-
-.home .feedback-icon {
-  width: var(--aa-icon-size);
-  height: var(--aa-icon-size);
+  background-color: unset;
 }
 
 .home .actions-feedback {
@@ -221,6 +162,7 @@ body.article.home {
 
 .home .action-buttons {
   display: flex;
+  background-color: unset;
   align-items: center;
   gap: 5px;
 }
@@ -256,27 +198,12 @@ body.article.home {
 
 .home .action-button {
   display: inline-flex;
+  background-color: unset;
+  border: none;
   align-items: center;
   gap: 5px;
-  padding: calc(var(--aa-search-input-height) / 2 - 1px) var(--aa-base-unit);
-  font-size: var(--aa-font-size);
-  background-color: rgba(var(--aa-input-background-color-rgb), var(--aa-input-background-color-alpha));
-  border: 1px solid rgba(var(--aa-input-border-color-rgb), var(--aa-input-border-color-alpha));
   border-radius: 0.25rem;
-  color: rgba(var(--aa-text-color-rgb), var(--aa-text-color-alpha));
   cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.home .action-button:hover,
-.home .action-button:focus {
-  outline: none;
-  background-color: rgba(var(--aa-muted-color-rgb), var(--aa-muted-color-alpha));
-}
-
-.home .action-button .action-icon {
-  width: var(--aa-icon-size);
-  height: var(--aa-icon-size);
 }
 
 .home .button-icon {
@@ -324,7 +251,7 @@ body.article.home {
 /* Header */
 .home .home-header-container {
   display: flex;
-  margin-top: 0;
+  margin-top: 70px;
   width: 100%;
   align-items: center;
   justify-content: center;
@@ -343,7 +270,7 @@ body.article.home {
 }
 
 .home .home-header h1 {
-  font-size: 18px;
+  font-size: calc(36 / var(--rem-base) * 1rem);
   font-weight: 500;
   letter-spacing: -0.2px;
   line-height: 28px;
@@ -401,6 +328,7 @@ body.article.home {
 .home .features .container {
   width: 100%;
   margin: 0 auto;
+  margin-bottom: 50px;
   max-width: 100%;
   display: flex;
   flex-direction: column;
