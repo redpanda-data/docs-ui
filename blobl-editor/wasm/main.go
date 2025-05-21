@@ -22,22 +22,37 @@ func main() {
 	select {}
 }
 
-func blobl(_ js.Value, args []js.Value) (output any) {
-	defer func() {
-		// Make sure we return a string instead of an error
-		if o, ok := output.(error); ok {
-			output = "Error: " + o.Error()
-		}
-	}()
+func blobl(_ js.Value, args []js.Value) any {
+	msg, meta, err := bloblImpl(args)
+	var bloblErr string
+	if err != nil {
+		bloblErr = err.Error()
+	}
+	payload, err := json.Marshal(struct {
+		Msg  any            `json:"msg"`
+		Meta map[string]any `json:"meta,omitempty"`
+		Err  string         `json:"err"`
+	}{
+		Msg:  msg,
+		Meta: meta,
+		Err:  bloblErr,
+	})
+	if err != nil {
+		return fmt.Sprintf(`{"err": "Error: failed to marshal output: %s"`, err)
+	}
 
+	return string(payload)
+}
+
+func bloblImpl(args []js.Value) (message any, metadata map[string]any, err error) {
 	if len(args) < 2 || len(args) > 3 {
-		return fmt.Errorf("expected 2 or 3 arguments, received %d instead", len(args))
+		return nil, nil, fmt.Errorf("expected 2 or 3 arguments, received %d instead", len(args))
 	}
 
 	// Parse the mapping
 	mapping, err := globalEnv.Parse(args[0].String())
 	if err != nil {
-		return fmt.Errorf("failed to parse mapping: %s", err)
+		return nil, nil, fmt.Errorf("failed to parse mapping: %s", err)
 	}
 
 	// Take the raw data without unmarshaling
@@ -47,18 +62,18 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 	msg := service.NewMessage(payloadBytes)
 
 	// Parse the optional metadata (this can still be JSON)
-	metadata := map[string]any{}
+	inputMetadata := map[string]any{}
 	if len(args) == 3 {
-		if err := json.Unmarshal([]byte(args[2].String()), &metadata); err != nil {
-			return fmt.Errorf("failed to parse metadata: %s", err)
+		if err := json.Unmarshal([]byte(args[2].String()), &inputMetadata); err != nil {
+			return nil, nil, fmt.Errorf("failed to parse metadata: %s", err)
 		}
 	}
 
 	// Apply metadata to the message
-	for key, value := range metadata {
+	for key, value := range inputMetadata {
 		strValue, ok := value.(string)
 		if !ok {
-			return fmt.Errorf("metadata value for key '%s' must be a string, got %T", key, value)
+			return nil, nil, fmt.Errorf("metadata value for key '%s' must be a string, got %T", key, value)
 		}
 		msg.MetaSetMut(key, strValue)
 	}
@@ -66,42 +81,28 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 	// Execute the mapping
 	result, err := msg.BloblangQuery(mapping)
 	if err != nil {
-		return fmt.Errorf("failed to execute mapping: %s", err)
+		return nil, nil, fmt.Errorf("failed to execute mapping: %s", err)
 	}
 
-	message, err := result.AsStructured()
+	message, err = result.AsStructured()
 	if err != nil {
 		res, err := result.AsBytes()
 		if err != nil {
-			return fmt.Errorf("failed to extract message: %s", err)
+			return nil, nil, fmt.Errorf("failed to extract message: %s", err)
 		}
 		message = string(res)
 	}
 
 	// Extract metadata
-	var extractedMetadata map[string]any
+	metadata = map[string]any{}
 	if err = result.MetaWalkMut(func(key string, value any) error {
-		if extractedMetadata == nil {
-			extractedMetadata = make(map[string]any)
-		}
-		extractedMetadata[key] = value
+		metadata[key] = value
 		return nil
 	}); err != nil {
-		return fmt.Errorf("failed to extract metadata: %s", err)
+		return nil, nil, fmt.Errorf("failed to extract metadata: %s", err)
 	}
 
-	payload, err := json.MarshalIndent(struct {
-		Msg  any            `json:"msg"`
-		Meta map[string]any `json:"meta,omitempty"`
-	}{
-		Msg:  message,
-		Meta: extractedMetadata,
-	}, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal output: %s", err)
-	}
-
-	return string(payload)
+	return message, metadata, nil
 }
 
 // createMockEnvironment creates a shared Bloblang environment with mocked I/O functions.
