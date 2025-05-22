@@ -69,13 +69,18 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 		return fmt.Errorf("failed to execute mapping: %s", err)
 	}
 
-	message, err := result.AsStructured()
-	if err != nil {
-		res, err := result.AsBytes()
+	var message any
+	if result == nil {
+		message = nil
+	} else {
+		message, err = result.AsStructured()
 		if err != nil {
-			return fmt.Errorf("failed to extract message: %s", err)
+			res, err := result.AsBytes()
+			if err != nil {
+				return fmt.Errorf("failed to extract message: %s", err)
+			}
+			message = string(res)
 		}
-		message = string(res)
 	}
 
 	// Extract metadata
