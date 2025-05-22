@@ -85,17 +85,17 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 
   // Extract metadata (only if we got a non‐nil result)
   var extractedMetadata map[string]any
-   if result != nil {
-       if err = result.MetaWalkMut(func(key string, value any) error {
-           if extractedMetadata == nil {
-               extractedMetadata = make(map[string]any)
-           }
-           extractedMetadata[key] = value
-           return nil
-       }); err != nil {
-           return fmt.Errorf("failed to extract metadata: %s", err)
-       }
-   }
+  if result != nil {
+     if err = result.MetaWalkMut(func(key string, value any) error {
+         if extractedMetadata == nil {
+             extractedMetadata = make(map[string]any)
+         }
+         extractedMetadata[key] = value
+         return nil
+     }); err != nil {
+         return fmt.Errorf("failed to extract metadata: %s", err)
+     }
+  }
 
 	payload, err := json.MarshalIndent(struct {
 		Msg  any            `json:"msg"`
