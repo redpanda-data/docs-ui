@@ -69,26 +69,33 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 		return fmt.Errorf("failed to execute mapping: %s", err)
 	}
 
-	message, err := result.AsStructured()
-	if err != nil {
-		res, err := result.AsBytes()
+	var message any
+	if result == nil {
+		message = nil
+	} else {
+		message, err = result.AsStructured()
 		if err != nil {
-			return fmt.Errorf("failed to extract message: %s", err)
+			res, err := result.AsBytes()
+			if err != nil {
+				return fmt.Errorf("failed to extract message: %s", err)
+			}
+			message = string(res)
 		}
-		message = string(res)
 	}
 
-	// Extract metadata
-	var extractedMetadata map[string]any
-	if err = result.MetaWalkMut(func(key string, value any) error {
-		if extractedMetadata == nil {
-			extractedMetadata = make(map[string]any)
-		}
-		extractedMetadata[key] = value
-		return nil
-	}); err != nil {
-		return fmt.Errorf("failed to extract metadata: %s", err)
-	}
+  // Extract metadata (only if we got a non‐nil result)
+  var extractedMetadata map[string]any
+  if result != nil {
+     if err = result.MetaWalkMut(func(key string, value any) error {
+         if extractedMetadata == nil {
+             extractedMetadata = make(map[string]any)
+         }
+         extractedMetadata[key] = value
+         return nil
+     }); err != nil {
+         return fmt.Errorf("failed to extract metadata: %s", err)
+     }
+  }
 
 	payload, err := json.MarshalIndent(struct {
 		Msg  any            `json:"msg"`
