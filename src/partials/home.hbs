@@ -1,29 +1,45 @@
 <div class="home-header-container">
   <div class="home-header">
+    <h1>Ask anything about Redpanda</h1>
+    <div className='paragraph'>
+      <p>For best results, include the name of the product you're interested in as well as the version. For example, "In Redpanda Cloud, how do I connect to my cluster?"</p>
+    </div>
     <script>
       window.UI_INTEGRATION_ID = 'bc719cfb-2fd5-4c76-acde-de9a905f13b3';
     </script>
     <div id="kapa-chat-root"></div>
-    <script src="{{{uiRootPath}}}/js/chat-entry.bundle.js"></script>
-    <div class="suggestion-chips">
-      {{#each page.attributes.ai-suggestions}}
-      <div class="chip">{{this}}</div>
-      {{/each}}
-    </div>
+    <script src="{{{uiRootPath}}}/js/AskAI.bundle.js"></script>
+    <script>
+      window.AI_SUGGESTIONS = {{{json page.attributes.ai-suggestions}}};
+    </script>
   </div>
-</div>
-<section class="features">
-  <div class='container'>
-    {{#each page.attributes.row}}
-      {{#with this.title}}
-        <h2>{{this}}</h2>
-      {{/with}}
-      <div class="feature-row">
-        {{#each this.items}}
-          {{#if (eq (array-length this.urls) 1)}}
-            {{#each this.urls}}
-              <a href="{{{relativize (resolvePageURL this.url)}}}" class="feature-link">
-            {{/each}}
+    <section class="features">
+    <div class='container'>
+      {{#each page.attributes.row}}
+        <div class="feature-row">
+          {{#each this.items}}
+            {{#if (eq (array-length this.urls) 1)}}
+              {{#each this.urls}}
+                <a href="{{{relativize (resolvePageURL this.url)}}}" class="feature-link">
+              {{/each}}
+                <div class="feature-box">
+                  {{#if this.image}}
+                  <div class="feature-image">
+                    <img src='./_images/{{this.image}}' alt={{{this.title}}} loading="lazy"/>
+                  </div>
+                  {{/if}}
+                  <div class="feature-text">
+                    <h2 class="discrete feature-title">{{{this.title}}}</h2>
+                    {{#if this.description}}
+                      <p class="feature-description">{{{this.description}}}</p>
+                    {{/if}}
+                    {{#if this.learn-text}}
+                      <p class="feature-learn-text">Learn more &rarr;</p>
+                    {{/if}}
+                  </div>
+                </div>
+                </a>
+            {{else}}
               <div class="feature-box">
                 {{#if this.image}}
                 <div class="feature-image">
@@ -38,48 +54,17 @@
                   {{#if this.learn-text}}
                     <p class="feature-learn-text">Learn more &rarr;</p>
                   {{/if}}
+                  <ul>
+                    {{#each this.urls}}
+                      <li><a href="{{{relativize (resolvePageURL this.url)}}}">{{this.text}}</a></li>
+                    {{/each}}
+                  </ul>
                 </div>
               </div>
-              </a>
-          {{else}}
-            <div class="feature-box">
-              {{#if this.image}}
-              <div class="feature-image">
-                <img src='./_images/{{this.image}}' alt={{{this.title}}} loading="lazy"/>
-              </div>
-              {{/if}}
-              <div class="feature-text">
-                <h2 class="discrete feature-title">{{{this.title}}}</h2>
-                {{#if this.description}}
-                  <p class="feature-description">{{{this.description}}}</p>
-                {{/if}}
-                {{#if this.learn-text}}
-                  <p class="feature-learn-text">Learn more &rarr;</p>
-                {{/if}}
-                <ul>
-                  {{#each this.urls}}
-                    <li><a href="{{{relativize (resolvePageURL this.url)}}}">{{this.text}}</a></li>
-                  {{/each}}
-                </ul>
-              </div>
-            </div>
-          {{/if}}
-        {{/each}}
-      </div>
-    {{/each}}
-  </div>
-</section>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.suggestion-chips .chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const text = chip.textContent.trim();
-      if (typeof window.submitKapaQuery === 'function') {
-        window.submitKapaQuery(text)
-      } else {
-        console.warn('Chat interface not ready: submitKapaQuery function not found')
-      }
-    });
-  });
-})
-</script>
+            {{/if}}
+          {{/each}}
+        </div>
+      {{/each}}
+    </div>
+  </section>
+</div>

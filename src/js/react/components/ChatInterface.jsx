@@ -1,0 +1,382 @@
+import React, { useState, useEffect, useRef, Component } from 'react'
+import { useChat } from '@kapaai/react-sdk'
+import {
+  ArrowUp,
+  ArrowDown,
+  ThumbsUp,
+  ThumbsDown,
+  RefreshCcw,
+  ClipboardCopy,
+  CircleStop,
+  RotateCcwSquareIcon,
+  RotateCwSquareIcon,
+} from 'lucide-react'
+import DOMPurify from 'dompurify'
+import { Marked } from 'marked'
+import { markedHighlight } from 'marked-highlight'
+import hljs from 'highlight.js'
+
+// ——— ErrorBoundary ——————————————————————————————————————————————————
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  componentDidCatch(err, info) {
+    console.error('Render error in ChatInterface:', err, info)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary">
+          Something went wrong. Try refreshing the page.
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+const marked = new Marked(
+  markedHighlight({
+    // if no language is specified, get the `.hljs` class
+    emptyLangClass: 'hljs',
+    // prefix for non-empty langs (<code class="hljs language-xxx">)
+    langPrefix:     'hljs language-',
+    highlight(code, info = '') {
+      const rawLang = info.split(/\s+/)[0]
+        .replace(/[^A-Za-z0-9]/g, '')
+        .toLowerCase();
+      try {
+        return hljs.highlightAuto(code).value;
+      } catch (err) {
+        return code;
+      }
+    },
+  })
+)
+
+
+// ——— Answer component ———————————————————————————————————————————————————
+function Answer({ md }) {
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    try {
+      const rawHtml = marked.parse(md || '')
+      const clean   = DOMPurify.sanitize(rawHtml)
+      if (containerRef.current) {
+        containerRef.current.innerHTML = clean
+      }
+    } catch (err) {
+      console.error('Markdown render error:', err)
+      if (containerRef.current) {
+        // fallback to plain text
+        containerRef.current.textContent = md
+      }
+    }
+  }, [md])
+
+  return <div ref={containerRef} className="answer" />
+}
+
+// ——— FeedbackButtons —————————————————————————————————————————————————————
+function FeedbackButtons({ questionAnswerId, setFeedbackToast }) {
+  const { addFeedback } = useChat()
+
+  // Unified handler for both upvote/downvote
+  const handleFeedback = async (reaction) => {
+    try {
+      await addFeedback(questionAnswerId, reaction)
+      setFeedbackToast(
+        reaction === 'upvote'
+          ? "Thanks! Glad you found that helpful."
+          : "We've got your feedback."
+      )
+    } catch (err) {
+      console.error('Feedback error', err)
+      setFeedbackToast('⚠️ Could not send your feedback. Try again.')
+    }
+    setTimeout(() => setFeedbackToast(null), 3000)
+  }
+
+  return (
+    <div className="feedback-container">
+      <div className="feedback-group">
+        <button
+          className="feedback-button"
+          type="button"
+          onClick={() => handleFeedback('upvote')}
+        >
+          <ThumbsUp className="feedback-icon" />
+        </button>
+        <button
+          className="feedback-button"
+          type="button"
+          onClick={() => handleFeedback('downvote')}
+        >
+          <ThumbsDown className="feedback-icon" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ——— ActionButtons ———————————————————————————————————————————————————————
+function ActionButtons({ onReset, onCopy, setCopyToast }) {
+
+  const safeCopy = () => {
+    try {
+      onCopy()
+      setCopyToast('Copied to clipboard!')
+    } catch (e) {
+      console.error('Copy error:', e)
+      setCopyToast('⚠️ Copy failed.')
+    }
+    setTimeout(() => setCopyToast(null), 2000)
+  }
+
+  return (
+    <div className="action-buttons">
+      <button type="button" onClick={onReset} className="action-button">
+        <RefreshCcw /> Clear
+      </button>
+      <button type="button" onClick={safeCopy} className="action-button">
+        <ClipboardCopy /> Copy
+      </button>
+    </div>
+  )
+}
+
+// ——— Main ChatInterface ————————————————————————————————————————————————————
+export default function ChatInterface() {
+  const [message, setMessage]             = useState('')
+  const [dots, setDots]                   = useState('')
+  const [showScrollDown, setShowScrollDown] = useState(false)
+  const [stoppedIds, setStoppedIds]       = useState(new Set())
+  const [suggestions, setSuggestions] = useState([])
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [copyToast, setCopyToast] = useState(null)
+  const [feedbackToast, setFeedbackToast] = useState(null)
+
+  useEffect(() => {
+    if (window.AI_SUGGESTIONS) {
+      setSuggestions(window.AI_SUGGESTIONS)
+    }
+  }, [])
+
+  const {
+    conversation,
+    submitQuery,
+    isGeneratingAnswer,
+    stopGeneration,
+    resetConversation,
+    isPreparingAnswer,
+  } = useChat()
+
+  const latestQA = conversation.getLatest()
+
+  // scroll-down button
+  useEffect(() => {
+    if (!hasInteracted || isPreparingAnswer) return
+    const THRESHOLD = 300
+
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      const innerH   = window.innerHeight
+      const scrollH  = document.documentElement.scrollHeight
+      const canScroll    = scrollH > innerH
+      const atOrNearBottom = scrollTop + innerH >= scrollH - THRESHOLD
+
+      if (!canScroll) {
+        setShowScrollDown(false)
+        return
+      }
+
+      setShowScrollDown(!atOrNearBottom)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('resize', handleScroll)
+
+    handleScroll()
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+    }
+  }, [hasInteracted, isPreparingAnswer, isGeneratingAnswer])
+
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    })
+  }
+
+  useEffect(() => {
+    let timer
+    if (isPreparingAnswer) {
+      timer = setInterval(() => setDots(d => (d.length < 3 ? d + '.' : '')), 500)
+    } else {
+      setDots('')
+    }
+    return () => clearInterval(timer)
+  }, [isPreparingAnswer])
+
+  useEffect(() => {
+    const footerEl = document.querySelector('footer.footer')
+    const homeHeaderEl = document.querySelector('.home-header-container')
+    if (!footerEl || !homeHeaderEl) return
+
+    if (hasInteracted) {
+      footerEl.style.display = 'none'
+      homeHeaderEl.style.height = 'unset'
+    } else {
+      footerEl.style.display = ''
+      homeHeaderEl.style.height = '100vh'
+    }
+  }, [hasInteracted])
+
+  // shared query logic
+  const doQuery = q => {
+    if (!q.trim()) return
+    if (!hasInteracted) setHasInteracted(true);
+    submitQuery(q)
+    setMessage('')
+  }
+
+  const handleSubmit = e => {
+    e.preventDefault()
+    doQuery(message)
+  }
+
+  const handleReset = () => {
+    resetConversation()
+    setMessage('')
+    setStoppedIds(new Set())
+    setHasInteracted(false);
+    setShowScrollDown(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        conversation.map(q => `Question: ${q.question}\nAnswer: ${q.answer}`).join('\n---\n')
+      )
+    } catch {
+      throw new Error('Clipboard API not available')
+    }
+  }
+
+  const handleStop = () => {
+    stopGeneration()
+    const idx     = conversation.length - 1
+    const lastKey = conversation[idx]?.id ?? `temp-${idx}`
+    setStoppedIds(s => new Set(s).add(lastKey))
+  }
+
+  return (
+    <ErrorBoundary>
+      <div className="chat-container">
+        <div className="conversation-area" style={hasInteracted ? { paddingBottom: '300px' } : {paddingBottom: '0px'}}>
+          <div className="conversation">
+            {conversation.map((qa, idx) => {
+              const key = qa.id ?? `temp-${idx}`
+              const wasStopped = stoppedIds.has(key)
+              const isLast = latestQA?.id === qa.id
+              return (
+                <div key={key} className="qa-pair">
+                  <hr className='section-divider'></hr>
+                  <div className="question">{qa.question}</div>
+                  <Answer md={qa.answer} />
+                  {isLast && !isPreparingAnswer && !isGeneratingAnswer && (
+                    <div className="actions-feedback flex justify-between items-center">
+                      <ActionButtons onReset={handleReset} onCopy={handleCopy} setCopyToast={setCopyToast} />
+                      {!wasStopped && <FeedbackButtons questionAnswerId={qa.id} setFeedbackToast={setFeedbackToast} />}
+                    </div>
+                  )}
+                  {/* render whichever toast is active */}
+                  {(copyToast || feedbackToast) && (
+                    <div className="toast-inline">
+                      {copyToast || feedbackToast}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            {isPreparingAnswer && (
+              <div className="loading">Preparing answer{dots}</div>
+            )}
+          </div>
+        </div>
+        <div className={`chat-footer-wrapper ${hasInteracted ? 'fixed-bottom' : ''}`}>
+        {/* Optional Scroll Down Button */}
+        {showScrollDown && (
+            <button
+              className="scroll-down-button"
+              onClick={scrollToBottom}
+              aria-label="Scroll to input"
+            >
+              <ArrowDown />
+            </button>
+          )}
+        <form onSubmit={handleSubmit}>
+            <div className="chat-card">
+              <div className="chat-content">
+                <input
+                  className="chat-input"
+                  type="text"
+                  placeholder="How can we help you with Redpanda today?"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  disabled={isGeneratingAnswer || isPreparingAnswer}
+                />
+              </div>
+              <div className="chat-footer">
+                {isPreparingAnswer || isGeneratingAnswer ? (
+                  <button
+                    type="button"
+                    onClick={handleStop}
+                    className="main-button flex items-center gap-1"
+                  >
+                    <CircleStop className="h-5 w-5" />
+                    <span className="button-text">Stop</span>
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="main-button"
+                  >
+                    <ArrowUp className="button-icon" />
+                    <span className="button-text">Submit</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </form>
+          {suggestions.length > 0 && (
+            <div className="suggestion-chips" style={hasInteracted ? { display: 'none' } : {display: 'flex'}}>
+            {suggestions.map((s, i) => (
+              <div
+                key={i}
+                className="chip"
+                onClick={() => doQuery(s)}
+              >
+                {s}
+              </div>
+            ))}
+          </div>
+          )}
+          <div className='disclaimer'>
+            <p>Responses are generated using AI and may contain mistakes. Review the <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener">Redpanda privacy policy</a> to understand how your data is used.</p>
+          </div>
+        </div>
+      </div>
+    </ErrorBoundary>
+  )
+}

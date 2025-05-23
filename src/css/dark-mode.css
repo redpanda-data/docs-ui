@@ -5,9 +5,11 @@ html[data-theme=dark] {
   --home-background: var(--body-background);
   --card-color: #1e2128;
   --chip-color: #1e2128;
+  --input-color: #1e2128;
   --chip-text-color: #a0a0a0;
   --card-border-color: rgba(58, 63, 72, 0);
   --panel-background: #ffffff12;
+  --kapa-question-color: #ffffff12;
   --panel-border-color: var(--color-white);
   --scrollbar-track-color: var(--color-white);
   --scrollbar-thumb-color: var(--color-gray-10);
