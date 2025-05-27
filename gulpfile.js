@@ -28,6 +28,13 @@ const glob = {
 const rapidocSrc = 'node_modules/rapidoc/dist/rapidoc-min.js'
 const rapidocDest = path.join(srcDir, 'static')
 
+/**
+ * Compiles Handlebars partial templates by executing a Node.js script for each specified partial.
+ *
+ * @param {Function} cb - Callback to signal task completion or failure.
+ *
+ * @throws {Error} If any partial compilation fails, the callback is invoked with an error.
+ */
 function compileWidgets (cb) {
   const partialsToCompile = [
     { name: 'header-content', context: 'context/header-content.json' },
@@ -49,6 +56,11 @@ function compileWidgets (cb) {
   }
 }
 
+/**
+ * Copies the Rapidoc JavaScript file from the source location to the static assets directory.
+ *
+ * @returns {Stream} A Gulp stream representing the copy operation.
+ */
 function copyRapidoc () {
   return gulp.src(rapidocSrc)
     .pipe(gulp.dest(rapidocDest))

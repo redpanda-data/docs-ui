@@ -13,6 +13,14 @@ if (fs.existsSync(helpersDir)) {
   });
 }
 
+/**
+ * Reads and parses a JSON file from the specified path.
+ *
+ * If the file cannot be read or parsed, returns an empty object.
+ *
+ * @param {string} filepath - Path to the JSON file.
+ * @returns {Object} The parsed JSON object, or an empty object if reading or parsing fails.
+ */
 function readJson(filepath) {
   try {
     return JSON.parse(fs.readFileSync(filepath, 'utf8'));
