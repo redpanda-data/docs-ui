@@ -1,0 +1,9 @@
+{
+  "site": {
+    "keys": {
+      "googleAnalytics": "GTM-WB2CSV5"
+    }
+  },
+  "isStandaloneWidget": true,
+  "uiRootPath": "/_"
+}
