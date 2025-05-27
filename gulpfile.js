@@ -38,7 +38,6 @@ function compileWidgets (cb) {
 
   try {
     for (const { name, context } of partialsToCompile) {
-      console.log(`🔧 Compiling partial: ${name}`)
       const cmd = context
         ? `node compile-partial.js ${name} ${context}`
         : `node compile-partial.js ${name}`

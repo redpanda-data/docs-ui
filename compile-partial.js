@@ -59,5 +59,3 @@ const outDir = path.join(__dirname, 'src', 'static', 'assets', 'widgets');
 const outFile = path.join(outDir, `${partialName}.html`);
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(outFile, html);
-
-console.log(`✅ Compiled '${partialName}.hbs' to '${outFile}'`);
