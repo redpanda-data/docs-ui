@@ -142,6 +142,7 @@ html[data-theme=dark] {
   --body-min-height: calc(100vh - var(--body-top));
   --nav-height: calc(var(--body-min-height) - var(--toolbar-height));
   --nav-collapse-height: 40px;
+  --default-header-color: var(--redpanda-800);
   --announcement-bar-height: 0px; /* stylelint-disable-line */
   --announcement-bar-height--desktop: 0px; /* stylelint-disable-line */
   --nav-height--desktop: var(--body-min-height);

@@ -1,0 +1,81 @@
+{
+  "isStandaloneWidget": true,
+  "site": {
+    "homeUrl": "/",
+    "components": {
+      "redpanda-labs": {
+        "latest": {
+          "title": "Labs",
+          "url": "/redpanda-labs/",
+          "asciidoc": {
+            "attributes": {
+              "page-header-data": {
+                "order": 4
+              }
+            }
+          }
+        }
+      },
+      "api": {
+        "latest": {
+          "title": "API",
+          "url": "/api/"
+        }
+      },
+      "redpanda-cloud": {
+        "latest": {
+          "title": "Cloud",
+          "url": "/redpanda-cloud/home/",
+          "asciidoc": {
+            "attributes": {
+              "page-header-data": {
+                "order": 2              }
+            }
+          }
+        }
+      },
+      "redpanda-connect": {
+        "latest": {
+          "title": "Connect",
+          "url": "/redpanda-connect/home/",
+          "asciidoc": {
+            "attributes": {
+              "page-header-data": {
+                "order": 3
+              }
+            }
+          }
+        }
+      },
+      "ROOT": {
+        "latest": {
+          "title": "Self-Managed",
+          "url": "/current/home/",
+          "asciidoc": {
+            "attributes": {
+              "page-header-data": {
+                "order": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "page": {
+    "component": {
+      "title": "API",
+      "latest": {
+        "asciidoc": {
+          "attributes": {
+            "page-header-data": {
+              "color": "#d73d23"
+            }
+          }
+        }
+      }
+    }
+  },
+  "uiRootPath": "/_"
+}
+

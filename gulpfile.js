@@ -4,7 +4,7 @@ const { parallel, series, watch } = require('gulp')
 const createTask = require('./gulp.d/lib/create-task')
 const exportTasks = require('./gulp.d/lib/export-tasks')
 const log = require('fancy-log')
-const { exec } = require('child_process')
+const { exec, execSync } = require('child_process')
 const path = require('path')
 const gulp = require('gulp')
 
@@ -27,6 +27,28 @@ const glob = {
 
 const rapidocSrc = 'node_modules/rapidoc/dist/rapidoc-min.js'
 const rapidocDest = path.join(srcDir, 'static')
+
+function compileWidgets (cb) {
+  const partialsToCompile = [
+    { name: 'header-content', context: 'context/header-content.json' },
+    { name: 'footer' },
+    { name: 'head-styles' },
+    { name: 'head-scripts' },
+  ]
+
+  try {
+    for (const { name, context } of partialsToCompile) {
+      console.log(`🔧 Compiling partial: ${name}`)
+      const cmd = context
+        ? `node compile-partial.js ${name} ${context}`
+        : `node compile-partial.js ${name}`
+      execSync(cmd, { stdio: 'inherit' })
+    }
+    cb()
+  } catch (err) {
+    cb(new Error(`Failed to compile Handlebars partials: ${err.message}`))
+  }
+}
 
 function copyRapidoc () {
   return gulp.src(rapidocSrc)
@@ -103,7 +125,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildWasmTask, copyRapidoc, buildTask),
+  call: series(cleanTask, lintTask, buildWasmTask, copyRapidoc, compileWidgets, buildTask),
 })
 
 const bundlePackTask = createTask({
