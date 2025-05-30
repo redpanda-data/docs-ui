@@ -1,14 +1,125 @@
+<style>
+  .announcement-bar {
+    display: none;
+    height: 0;
+  }
+  .bloblang-playground .banner-container {
+    display: none;
+  }
+</style>
+<script>
+  (function() {
+    'use strict';
+    function handleBanner(bannerId, sessionKey, announcementType) {
+      const banner = document.getElementById(bannerId);
+      if (!banner) return;
+
+      const storageKey = `${sessionKey}-${announcementType}`; // Use the announcement type to differentiate between different banners
+      const hasSeenBanner = window.sessionStorage.getItem(storageKey) || false;
+      if (hasSeenBanner) {
+        if (announcementType !== 'bloblang') {
+          document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+          document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
+        }
+        banner.remove();
+      } else {
+          if (announcementType !== 'bloblang') {
+            document.documentElement.style.setProperty('--announcement-bar-height', '50px');
+            document.documentElement.style.setProperty('--announcement-bar-height--desktop', '30px');
+          }
+        banner.style.display = 'flex';
+        const closeButton = banner.querySelector('.close');
+        if (closeButton) {
+          closeButton.addEventListener('click', function () {
+            document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+            document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
+            banner.remove();
+            window.sessionStorage.setItem(storageKey, 'true');
+          });
+        }
+      }
+    }
+
+    // Initialize theme based on local storage or system preference
+    const initialTheme = localStorage.getItem('theme') ||
+      (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
+    window.addEventListener('DOMContentLoaded', function() {
+      const switchButton = document.getElementById('switch-theme');
+      const announcementBar = document.getElementById('announcement');
+      let announcementLevel = '';
+      if (switchButton) {
+        setTheme(initialTheme);  // Apply initial theme on load
+        switchButton.addEventListener('click', function() {
+          // Toggle theme on button click
+          const currentTheme = document.body.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', newTheme);
+          setTheme(newTheme);
+        });
+      }
+      if (!localStorage.getItem('theme')) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+          const newTheme = e.matches ? 'dark' : 'light';
+          setTheme(newTheme);
+        });
+      }
+      if (announcementBar) {
+        announcementLevel = announcementBar.getAttribute('data-announcement-key');
+        handleBanner('announcement', 'announcementClosed', announcementLevel);
+      }
+      handleBanner('bloblang-banner', 'bloblangBannerDismissed', 'bloblang');
+    });
+  function setTheme(theme) {
+    const switchButton = document.getElementById('switch-theme');
+    const img = switchButton.querySelector('img:first-child');
+
+    if (theme === 'dark') {
+      img.src = img.src.replace('view-sun', 'view-moon');
+      img.classList.add('moon');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.classList.add('dark-theme');
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      img.src = img.src.replace('view-moon', 'view-sun');
+      img.classList.remove('moon');
+      document.documentElement.removeAttribute('data-theme');
+      document.documentElement.classList.remove('dark-theme');
+      document.body.removeAttribute('data-theme');
+    }
+  }
+})();
+</script>
+<!-- Load these styles before those in site.css to avoid flashing -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GTM-WB2CSV5">
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPF6N5WXMW&amp;l=dataLayer&amp;cx=c"></script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WB2CSV5');</script>
+<!-- End Google Tag Manager -->
 <meta name="google-site-verification" content="QcL-pD81oJatgKXQ3Wquvk_Ku3RRtUljxKoMaicySQA" />
 
 <script defer src="https://plausible.io/js/plausible.js" data-domain="redpanda.com"></script>
 
-<script defer src="/js/vendor/algolia/autocomplete-plugin-tags.js"></script>
-<link rel="stylesheet" href="/css/vendor/algolia/autocomplete-tags-plugin.css">
-<script defer src="/js/vendor/algolia/autocomplete-plugin-recent-searches.js"></script>
-<script defer src="/js/vendor/algolia/autocomplete-plugin-query-suggestions.js"></script>
-<script defer src="/js/vendor/algolia/autocomplete-plugin-algolia-insights.js"></script>
+<script defer src="/_/js/vendor/algolia/autocomplete-js.js"></script>
+<script defer src="/_/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
+<link
+  rel="stylesheet"
+  href="/_/css/vendor/algolia/autocomplete-theme-classic.css"
+/>
+<script defer src="/_/js/vendor/algolia/autocomplete-plugin-tags.js"></script>
+<link rel="stylesheet" href="/_/css/vendor/algolia/autocomplete-tags-plugin.css">
+<script defer src="/_/js/vendor/algolia/autocomplete-plugin-recent-searches.js"></script>
+<script defer src="/_/js/vendor/algolia/autocomplete-plugin-query-suggestions.js"></script>
+<script defer src="/_/js/vendor/algolia/autocomplete-plugin-algolia-insights.js"></script>
 <script>
-  var uiRootPath=""
+  var uiRootPath="/_"
 </script>
 <script defer
 src="https://widget.kapa.ai/kapa-widget.bundle.js"
@@ -24,12 +135,6 @@ data-user-analytics-fingerprint-enabled="true"
 data-user-analytics-store-ip="true"
 data-modal-disclaimer="This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions. Review the [Redpanda privacy policy](https://www.redpanda.com/legal/privacy-policy) to understand how your data is used."
 ></script>
-<link rel="stylesheet" href="/css/vendor/prism/prism.min.css">
-<!-- Prism scripts for code blocks -->
-<script defer src="/js/vendor/prism/prism-core.js"></script>
-<script defer src="/js/vendor/prism/prism-line-numbers-plugin.js"></script>
-<script defer src="/js/vendor/prism/prism-line-highlight-plugin.js"></script>
-<script defer src="/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
 <!-- Start VWO Async SmartCode -->
 <link rel="preconnect" href="https://dev.visualwebsiteoptimizer.com" />
 <script type='text/javascript' id='vwoCode'>

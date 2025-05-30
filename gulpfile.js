@@ -37,17 +37,16 @@ const rapidocDest = path.join(srcDir, 'static')
  */
 function compileWidgets (cb) {
   const partialsToCompile = [
-    { name: 'header-content', context: 'context/header-content.json' },
-    { name: 'footer' },
-    { name: 'head-styles' },
-    { name: 'head-scripts' },
+    { name: 'header', context: 'context/header.json' },
+    { name: 'footer', context: 'context/footer.json', scripts: ['05-mobile-navbar.js'] },
+    { name: 'head-scripts', context: 'context/head.json' },
   ]
 
   try {
-    for (const { name, context } of partialsToCompile) {
-      const cmd = context
-        ? `node compile-partial.js ${name} ${context}`
-        : `node compile-partial.js ${name}`
+    for (const { name, context, scripts } of partialsToCompile) {
+      const jsArg = scripts ? ` --jsScripts='${JSON.stringify(scripts)}'` : ''
+      const ctxArg = context ? `${context}` : ''
+      const cmd = `node compile-partial.js ${name} ${ctxArg}${jsArg}`.trim()
       execSync(cmd, { stdio: 'inherit' })
     }
     cb()

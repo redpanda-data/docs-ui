@@ -1,5 +1,6 @@
 {
-  "isStandaloneWidget": true,
+  "isStandaloneWidget": "true",
+  "includeAlgoliaScript": "true",
   "site": {
     "homeUrl": "/",
     "components": {

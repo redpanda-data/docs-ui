@@ -1,20 +1,44 @@
-html.is-clipped--navbar {
-  overflow-y: hidden;
-}
-
-.body {
-  padding-top: var(--body-top);
+:root {
+  --navbar-height: calc(70 / 18 * 1rem);
+  --announcement-bar-height: 0px;
+  --announcement-bar-height--desktop: 0px;
+  --navbar-background: #fff;
+  --navbar-font-color: #a8b2c7;
+  --navbar-button-background: #fff;
+  --navbar-button-border-color: #e5e9f0;
+  --navbar-button-font-color: #181818;
+  --navbar-menu-border-color: #e5e9f0;
+  --navbar-menu-background: #fff;
+  --navbar-menu-font-color: #a8b2c7;
+  --navbar_hover-background: #fff;
+  --navbar-dropdown-boxshadow: 0 4px 10px #0003;
+  --navbar-menu_hover-background: #f4f4f4;
+  --navbar-dropdown-background-hover-color: #0000000d;
+  --body-top: calc(var(--navbar-height) + var(--announcement-bar-height));
+  --body-top--desktop: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
+  --body-font-color: #181818;
+  --secondary-font-size: calc(15.5 / 18 * 1rem);
+  --doc-line-height: 1.6;
+  --navbar-menu-background: #fff;
+  --toolbar-muted-color: #696969;
+  --transition-fast: 200ms;
+  --transition-timing-default: cubic-bezier(0.08, 0.52, 0.52, 1);
+  --link_hover-font-color: #2c30a0;
+  --z-index-navbar: 5;
+  --rem-base: 18;
+  --body-font-family: "Inter", sans-serif;
 }
 
 .header {
   max-width: 100%;
+  height: var(--navbar-height);
+  font-family: var(--body-font-family);
 }
 
 .navbar {
   background: var(--navbar-background);
   color: var(--navbar-font-color);
   font-size: var(--secondary-font-size);
-  height: var(--navbar-height);
   align-content: center;
   position: fixed;
   top: var(--announcement-bar-height);
@@ -22,6 +46,7 @@ html.is-clipped--navbar {
   z-index: var(--z-index-navbar);
   flex-wrap: wrap;
   border: 0, 0, 1px, 0;
+  box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
@@ -273,10 +298,6 @@ html.is-clipped--navbar {
 }
 
 @media screen and (min-width: 1024px) {
-  .body {
-    padding-top: var(--body-top--desktop);
-  }
-
   .navbar-burger {
     display: none;
   }
