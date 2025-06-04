@@ -30,7 +30,7 @@
           "asciidoc": {
             "attributes": {
               "page-header-data": {
-                "order": 2              }
+                "order": 1              }
             }
           }
         }
@@ -55,7 +55,7 @@
           "asciidoc": {
             "attributes": {
               "page-header-data": {
-                "order": 1
+                "order": 2
               }
             }
           }
