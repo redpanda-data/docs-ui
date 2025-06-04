@@ -94,6 +94,32 @@
 </script>
 <!-- Load these styles before those in site.css to avoid flashing -->
 {{#if isStandaloneWidget}}
+<link
+  rel="stylesheet"
+  href="/assets/widgets/css/base.css"
+/>
+<link
+  rel="stylesheet"
+  href="/assets/widgets/css/vars.css"
+/>
+<link
+  rel="stylesheet"
+  href="/assets/widgets/css/header.css"
+/>
+<link
+  rel="stylesheet"
+  href="/assets/widgets/css/footer.css"
+/>
+<link
+  rel="stylesheet"
+  href="/assets/widgets/css/dark-mode.css"
+/>
+
+<!-- load Inter‐font definitions (instead of manually @font-face) -->
+<link
+  rel="stylesheet"
+  href="/assets/widgets/css/typeface-inter-bump.css"
+/>
 {{else}}
 <style>
   :root {
