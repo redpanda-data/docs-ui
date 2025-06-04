@@ -8,6 +8,10 @@ if (fs.existsSync(helpersDir)) {
     if (file.endsWith('.js')) {
       const name = path.basename(file, '.js');
       const helperFn = require(path.join(helpersDir, file));
+      if (typeof helperFn !== 'function') {
+        console.warn(`⚠️ Skipping ${file}: not a function`);
+        return;
+      }
       Handlebars.registerHelper(name, helperFn);
     }
   });
