@@ -172,7 +172,7 @@ data-user-analytics-fingerprint-enabled="true"
 data-user-analytics-store-ip="true"
 data-modal-disclaimer="This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions. Review the [Redpanda privacy policy](https://www.redpanda.com/legal/privacy-policy) to understand how your data is used."
 ></script>
-{{#if (and (ne page.attributes.role 'bloblang-playground') isStandaloneWidget)}}
+{{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true'))}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
 <!-- Prism scripts for code blocks -->
 <script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-core.js"></script>
