@@ -136,6 +136,10 @@
   min-width: 0;
 }
 
+.navbar-burger:hover {
+  cursor: pointer;
+}
+
 .navbar-burger span {
   background-color: var(--navbar-font-color);
   height: 1.5px;
@@ -271,7 +275,7 @@
 
 @media screen and (max-width: 1024px) {
   .navbar-brand {
-    height: inherit;
+    height: var(--navbar-height)
   }
 
   .header {
