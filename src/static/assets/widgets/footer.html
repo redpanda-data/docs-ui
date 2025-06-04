@@ -3,7 +3,7 @@
         <div class="footer-links">
             <h6 class="footer-links-heading">RESOURCES</h6>
             <ul class="footer-links-list">
- <a class="footer-links-list-item-detail" aria-label="Capabilities" target="_blank" rel="noopener noreferrer" href="https://redpanda.com/">Redpanda.com</a>
+                <li class="footer-links-list-item"><a class="footer-links-list-item-detail" aria-label="Capabilities" target="_blank" href="https://redpanda.com/">Redpanda.com</a></li>
                 <li class="footer-links-list-item"><a class="footer-links-list-item-detail" aria-label="Redpanda University" target="_blank" href="https://university.redpanda.com">Redpanda University</a></li>
                 <li class="footer-links-list-item"><a class="footer-links-list-item-detail" aria-label="Kafka vs Redpanda" target="_blank" href="https://redpanda.com/blog/redpanda-vs-kafka-faster-safer">Kafka vs Redpanda</a></li>
                 <li class="footer-links-list-item"><a class="footer-links-list-item-detail" aria-label="Jepsen report " target="_blank" href="https://redpanda.com/blog/redpanda-official-jepsen-report-and-analysis">Jepsen report </a></li>
@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
   const searchClient = algoliasearch(
     '',
-    'test'
+    ''
   );
 
   const { createLocalStorageRecentSearchesPlugin } = window[
@@ -167,7 +167,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if (state.context.preview && !state.context.preview.insightsInitialized) {
         aa('init',{
           appId: '',
-          apiKey: 'test',
+          apiKey: '',
         });
         state.context.preview.insightsInitialized = true
       }
@@ -736,5 +736,6 @@ window.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
+<link rel="stylesheet" href="/assets/widgets/css/typeface-inter-bump.css">
 <link rel="stylesheet" href="/assets/widgets/css/footer-bump.css">
 <script src="/assets/widgets/js/05-mobile-navbar.js"></script>

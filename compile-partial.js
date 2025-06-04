@@ -79,7 +79,7 @@ const context = jsonPath ? readJson(path.resolve(jsonPath)) : {};
 let html = template(context);
 
 // 🔽 Inject CSS if exists
-const sharedCssFiles = [];
+const sharedCssFiles = ['typeface-inter-bump.css'];
 const allCssFiles = [...sharedCssFiles, `${partialName}-bump.css`];
 const cssTags = [];
 
