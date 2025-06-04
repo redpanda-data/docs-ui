@@ -100,9 +100,11 @@ allCssFiles.forEach(cssFile => {
   }
 });
 
-// Prepend styles
-if (cssTags.length) {
-  html = `${html}\n${cssTags.join('\n')}`;
+if (partialName === 'head-scripts') {
+  // Prepend styles
+  if (cssTags.length) {
+    html = `${html}\n${cssTags.join('\n')}`;
+  }
 }
 
 // 🔽 Inject JS scripts
@@ -122,8 +124,10 @@ if (Array.isArray(jsScripts)) {
     }
   }).filter(Boolean).join('\n  ');
 
-  if (scriptTags) {
-    html = `${html}\n${scriptTags}`;
+  if (partialName === 'head-scripts') {
+    if (scriptTags) {
+      html = `${html}\n${scriptTags}`;
+    }
   }
 }
 
