@@ -5,12 +5,12 @@ go 1.24.1
 toolchain go1.24.2
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.51.0
-	github.com/redpanda-data/connect/v4 v4.55.0
+	github.com/redpanda-data/benthos/v4 v4.52.0
+	github.com/redpanda-data/connect/v4 v4.56.0
 )
 
 require (
-	cuelang.org/go v0.12.1 // indirect
+	cuelang.org/go v0.13.0 // indirect
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
 	github.com/Jeffail/grok v1.1.0 // indirect
 	github.com/Jeffail/shutdown v1.0.0 // indirect
@@ -19,7 +19,7 @@ require (
 	github.com/PaesslerAG/jsonpath v0.1.1 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
-	github.com/apache/thrift v0.21.0 // indirect
+	github.com/apache/thrift v0.22.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/benhoyt/goawk v1.29.1 // indirect
 	github.com/bufbuild/protocompile v0.14.1 // indirect
@@ -62,14 +62,14 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/nsf/jsondiff v0.0.0-20230430225905-43f6cf3098c1 // indirect
-	github.com/oklog/ulid v1.3.1 // indirect
+	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/parquet-go/parquet-go v0.25.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/quipo/dependencysolver v0.0.0-20170801134659-2b009cb4ddcc // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
-	github.com/rickb777/period v1.0.12 // indirect
-	github.com/rickb777/plural v1.4.3 // indirect
+	github.com/rickb777/period v1.0.14 // indirect
+	github.com/rickb777/plural v1.4.4 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -88,12 +88,11 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/otel v1.35.0 // indirect
-	go.opentelemetry.io/otel/metric v1.35.0 // indirect
-	go.opentelemetry.io/otel/trace v1.35.0 // indirect
+	go.opentelemetry.io/otel v1.36.0 // indirect
+	go.opentelemetry.io/otel/metric v1.36.0 // indirect
+	go.opentelemetry.io/otel/trace v1.36.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
-	golang.org/x/net v0.39.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
