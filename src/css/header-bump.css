@@ -27,6 +27,11 @@
   --z-index-navbar: 5;
   --rem-base: 18;
   --body-font-family: "Inter", sans-serif;
+  --body-line-height: 1.15;
+}
+
+html[data-theme=dark] {
+  --body-font-color: white;
 }
 
 .header {
@@ -37,6 +42,7 @@
 
 .navbar {
   background: var(--navbar-background);
+  max-height: var(--navbar-height);
   color: var(--navbar-font-color);
   font-size: var(--secondary-font-size);
   align-content: center;
@@ -52,6 +58,15 @@
 
 .navbar a {
   text-decoration: none;
+}
+
+.custom-class-kapa {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: var(--body-line-height);
+  padding-inline: 6px;
+  margin: 0;
 }
 
 .navbar-menu {
@@ -176,6 +191,7 @@
   display: block;
   line-height: var(--doc-line-height);
   padding: 6px 8px;
+  font-weight: 600;
 }
 
 .home .navbar-item,
@@ -457,6 +473,7 @@
 #switch-theme {
   border: none;
   background: none;
+  padding-inline: 6px;
 }
 
 #switch-theme label {

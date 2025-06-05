@@ -9,6 +9,10 @@
   --toc-width--widescreen: 25%;
 }
 
+html[data-theme=dark] {
+  --body-font-color: white;
+}
+
 footer.footer {
   display: flex;
   width: 100%;

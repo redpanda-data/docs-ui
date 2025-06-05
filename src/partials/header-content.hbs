@@ -17,7 +17,7 @@
       <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" {{#if @root.isStandaloneWidget}}style="color: white;"{{/if}} href="{{{this.url}}}">{{this.title}}</a>
       {{/each}}
       <div class="navbar-end">
-          {{#if (and (ne page.layout 'search') (ne page.attributes.role 'home'))}}
+          {{#if (and (ne page.layout 'search') (ne page.attributes.role 'home') (ne isStandaloneWidget 'true'))}}
             <div class="autocomplete" id="autocomplete" style="max-width:100px;"></div>
             <div> or </div>
           {{/if}}

@@ -10,6 +10,10 @@ html.is-clipped--navbar {
   max-width: 100%;
 }
 
+.custom-class-kapa {
+  cursor: pointer;
+}
+
 .navbar {
   background: var(--navbar-background);
   color: var(--navbar-font-color);
