@@ -1,10 +1,13 @@
 <!-- Site-specific scripts -->
+{{#if isStandaloneWidget}}
+{{else}}
 <script defer id="site-script" src="{{{uiRootPath}}}/js/site.js" data-ui-root-path="{{{uiRootPath}}}"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/sorttable.js"></script>
-<!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
-{{#if (or (and env.ALGOLIA_API_KEY (ne page.layout 'search')) includeAlgoliaScript) }}
-{{> algolia-script}}
-{{/if}}
-{{#if (ne page.layout '404') }}
-{{> feedback-form-script}}
+  <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
+  {{#if (or (and env.ALGOLIA_API_KEY (ne page.layout 'search')) includeAlgoliaScript) }}
+  {{> algolia-script}}
+  {{/if}}
+  {{#if (ne page.layout '404') }}
+  {{> feedback-form-script}}
+  {{/if}}
 {{/if}}
