@@ -124,10 +124,8 @@ if (Array.isArray(jsScripts)) {
     }
   }).filter(Boolean).join('\n  ');
 
-  if (partialName === 'head-scripts') {
-    if (scriptTags) {
-      html = `${html}\n${scriptTags}`;
-    }
+  if (scriptTags) {
+    html = `${html}\n${scriptTags}`;
   }
 }
 
