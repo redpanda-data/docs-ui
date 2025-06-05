@@ -2,7 +2,7 @@
   <div class="home-header">
     <h1>Ask anything about Redpanda</h1>
     <div className='paragraph'>
-      <p>For best results, include the name of the product you're interested in as well as the version. For example, "In Redpanda Cloud, how do I connect to my cluster?"</p>
+      <p>For best results, include the name of the product you're interested in as well as the version.</p>
     </div>
     <script>
       window.UI_INTEGRATION_ID = 'bc719cfb-2fd5-4c76-acde-de9a905f13b3';
@@ -16,6 +16,7 @@
     <section class="features">
     <div class='container'>
       {{#each page.attributes.row}}
+        <h2 style="margin-top: 0;font-size: calc(28 / var(--rem-base) * 1rem);padding-top: 0;margin-bottom: 24px;">{{this.title}}</h2>
         <div class="feature-row">
           {{#each this.items}}
             {{#if (eq (array-length this.urls) 1)}}

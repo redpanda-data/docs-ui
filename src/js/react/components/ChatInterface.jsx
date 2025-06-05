@@ -162,10 +162,30 @@ export default function ChatInterface() {
   const [copyToast, setCopyToast] = useState(null)
   const [feedbackToast, setFeedbackToast] = useState(null)
 
+  // NEW: track mobile vs. desktop
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1150)
+  // NEW: toggle to show all suggestions on mobile
+  const [showAllSuggestions, setShowAllSuggestions] = useState(false)
+
   useEffect(() => {
     if (window.AI_SUGGESTIONS) {
       setSuggestions(window.AI_SUGGESTIONS)
     }
+  }, [])
+
+  // ——— HANDLE WINDOW RESIZE TO UPDATE `isMobile` ————————————————————————————————————
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1150)
+      // If we switch back to desktop, ensure we reset the "showAll" flag
+      if (window.innerWidth >= 1150) {
+        setShowAllSuggestions(false)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    // run once on mount
+    handleResize()
+    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   const {
@@ -280,6 +300,12 @@ export default function ChatInterface() {
     setStoppedIds(s => new Set(s).add(lastKey))
   }
 
+  // ——— Compute which suggestions to show ——————————————————————————————————————————————
+  const displayedSuggestions =
+    isMobile && !showAllSuggestions
+      ? suggestions.slice(0, 2)
+      : suggestions
+
   return (
     <ErrorBoundary>
       <div className="chat-container">
@@ -315,8 +341,8 @@ export default function ChatInterface() {
           </div>
         </div>
         <div className={`chat-footer-wrapper ${hasInteracted ? 'fixed-bottom' : ''}`}>
-        {/* Optional Scroll Down Button */}
-        {showScrollDown && (
+          {/* Optional Scroll Down Button */}
+          {showScrollDown && (
             <button
               className="scroll-down-button"
               onClick={scrollToBottom}
@@ -325,7 +351,7 @@ export default function ChatInterface() {
               <ArrowDown />
             </button>
           )}
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <div className="chat-card">
               <div className="chat-content">
                 <input
@@ -359,19 +385,35 @@ export default function ChatInterface() {
               </div>
             </div>
           </form>
+
+          {/* ——— SUGGESTION CHIPS ————————————————————————————————————————————————— */}
           {suggestions.length > 0 && (
-            <div className="suggestion-chips" style={hasInteracted ? { display: 'none' } : {display: 'flex'}}>
-            {suggestions.map((s, i) => (
-              <div
-                key={i}
-                className="chip"
-                onClick={() => doQuery(s)}
-              >
-                {s}
-              </div>
-            ))}
-          </div>
+            <div
+              className="suggestion-chips"
+              style={hasInteracted ? { display: 'none' } : { display: 'flex' }}
+            >
+              {displayedSuggestions.map((s, i) => (
+                <div
+                  key={i}
+                  className="chip"
+                  onClick={() => doQuery(s)}
+                >
+                  {s}
+                </div>
+              ))}
+
+              {/* If on mobile and there are more than 2 suggestions, show a toggle */}
+              {isMobile && suggestions.length > 2 && (
+                <div
+                  className="chip show-more-chip"
+                  onClick={() => setShowAllSuggestions(prev => !prev)}
+                >
+                  {showAllSuggestions ? 'Show less…' : 'Show more…'}
+                </div>
+              )}
+            </div>
           )}
+
           <div className='disclaimer'>
             <p>Responses are generated using AI and may contain mistakes. Review the <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener">Redpanda privacy policy</a> to understand how your data is used.</p>
           </div>

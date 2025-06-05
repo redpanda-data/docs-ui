@@ -15,6 +15,10 @@ body.article.home {
   padding-bottom: 50px;
 }
 
+.chat-footer-wrapper > form {
+  margin-right: 20px;
+}
+
 .chat-footer-wrapper.fixed-bottom {
   position: fixed;
   bottom: 0;
@@ -331,6 +335,8 @@ body.article.home {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 1rem;
+  margin-right: 20px;
+  flex-direction: row;
 }
 
 .home .doc .chip {
@@ -369,6 +375,7 @@ body.article.home {
   position: relative;
   width: 100%;
   margin: 0 auto;
+  padding: 0 20px;
   flex: 3;
 }
 
@@ -424,7 +431,7 @@ body.article.home {
   visibility: visible;
   height: fit-content;
   top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop) + 70px);
-  margin-right: 60px;
+  margin-right: 100px;
 }
 
 .home .feature-row {
@@ -505,7 +512,7 @@ body.article.home {
     align-items: center;
   }
 
-  .home .scroll-down-button {
-    bottom: 300px;
+  .home .doc .suggestion-chips {
+    flex-direction: column;
   }
 }
