@@ -3,3 +3,4 @@
 /public/
 .DS_Store
 blobl.wasm
+src/static/
