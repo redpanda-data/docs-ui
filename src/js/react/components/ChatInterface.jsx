@@ -8,8 +8,6 @@ import {
   RefreshCcw,
   ClipboardCopy,
   CircleStop,
-  RotateCcwSquareIcon,
-  RotateCwSquareIcon,
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { Marked } from 'marked'
@@ -42,18 +40,13 @@ class ErrorBoundary extends Component {
 
 const marked = new Marked(
   markedHighlight({
-    // if no language is specified, get the `.hljs` class
     emptyLangClass: 'hljs',
-    // prefix for non-empty langs (<code class="hljs language-xxx">)
     langPrefix:     'hljs language-',
     highlight(code, info = '') {
-      const rawLang = info.split(/\s+/)[0]
-        .replace(/[^A-Za-z0-9]/g, '')
-        .toLowerCase();
       try {
-        return hljs.highlightAuto(code).value;
-      } catch (err) {
-        return code;
+        return hljs.highlightAuto(code).value
+      } catch {
+        return code
       }
     },
   })
@@ -74,7 +67,6 @@ function Answer({ md }) {
     } catch (err) {
       console.error('Markdown render error:', err)
       if (containerRef.current) {
-        // fallback to plain text
         containerRef.current.textContent = md
       }
     }
@@ -87,7 +79,6 @@ function Answer({ md }) {
 function FeedbackButtons({ questionAnswerId, setFeedbackToast }) {
   const { addFeedback } = useChat()
 
-  // Unified handler for both upvote/downvote
   const handleFeedback = async (reaction) => {
     try {
       await addFeedback(questionAnswerId, reaction)
@@ -127,7 +118,6 @@ function FeedbackButtons({ questionAnswerId, setFeedbackToast }) {
 
 // ——— ActionButtons ———————————————————————————————————————————————————————
 function ActionButtons({ onReset, onCopy, setCopyToast }) {
-
   const safeCopy = () => {
     try {
       onCopy()
@@ -153,19 +143,19 @@ function ActionButtons({ onReset, onCopy, setCopyToast }) {
 
 // ——— Main ChatInterface ————————————————————————————————————————————————————
 export default function ChatInterface() {
-  const [message, setMessage]             = useState('')
-  const [dots, setDots]                   = useState('')
+  const [message, setMessage]               = useState('')
+  const [dots, setDots]                     = useState('')
   const [showScrollDown, setShowScrollDown] = useState(false)
-  const [stoppedIds, setStoppedIds]       = useState(new Set())
-  const [suggestions, setSuggestions] = useState([])
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [copyToast, setCopyToast] = useState(null)
-  const [feedbackToast, setFeedbackToast] = useState(null)
+  const [stoppedIds, setStoppedIds]         = useState(new Set())
+  const [suggestions, setSuggestions]       = useState([])
+  const [hasInteracted, setHasInteracted]   = useState(false)
+  const [copyToast, setCopyToast]           = useState(null)
+  const [feedbackToast, setFeedbackToast]   = useState(null)
 
-  // NEW: track mobile vs. desktop
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1150)
-  // NEW: toggle to show all suggestions on mobile
-  const [showAllSuggestions, setShowAllSuggestions] = useState(false)
+  // Detect mobile vs. desktop breakpoint
+  const [isMobile, setIsMobile]         = useState(window.innerWidth < 1150)
+  // Track whether “⋯” dropdown is open (both mobile & desktop share this)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => {
     if (window.AI_SUGGESTIONS) {
@@ -173,17 +163,17 @@ export default function ChatInterface() {
     }
   }, [])
 
-  // ——— HANDLE WINDOW RESIZE TO UPDATE `isMobile` ————————————————————————————————————
+  // Update isMobile on resize. Close dropdown if switching breakpoints.
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1150)
-      // If we switch back to desktop, ensure we reset the "showAll" flag
-      if (window.innerWidth >= 1150) {
-        setShowAllSuggestions(false)
+      const nowMobile = window.innerWidth < 1150
+      setIsMobile(nowMobile)
+      if (!nowMobile) {
+        // closing dropdown when going to desktop ensures we can recalc properly
+        setDropdownOpen(false)
       }
     }
     window.addEventListener('resize', handleResize)
-    // run once on mount
     handleResize()
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -199,31 +189,28 @@ export default function ChatInterface() {
 
   const latestQA = conversation.getLatest()
 
-  // scroll-down button
+  // Show/hide “scroll down” button
   useEffect(() => {
     if (!hasInteracted || isPreparingAnswer) return
     const THRESHOLD = 300
 
     const handleScroll = () => {
       const scrollTop = window.scrollY
-      const innerH   = window.innerHeight
-      const scrollH  = document.documentElement.scrollHeight
-      const canScroll    = scrollH > innerH
-      const atOrNearBottom = scrollTop + innerH >= scrollH - THRESHOLD
+      const innerH    = window.innerHeight
+      const scrollH   = document.documentElement.scrollHeight
+      const canScroll = scrollH > innerH
+      const atBottom  = scrollTop + innerH >= scrollH - THRESHOLD
 
       if (!canScroll) {
         setShowScrollDown(false)
         return
       }
-
-      setShowScrollDown(!atOrNearBottom)
+      setShowScrollDown(!atBottom)
     }
 
     window.addEventListener('scroll', handleScroll)
     window.addEventListener('resize', handleScroll)
-
     handleScroll()
-
     return () => {
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
@@ -237,39 +224,44 @@ export default function ChatInterface() {
     })
   }
 
+  // “Preparing answer…” dots animation
   useEffect(() => {
     let timer
     if (isPreparingAnswer) {
-      timer = setInterval(() => setDots(d => (d.length < 3 ? d + '.' : '')), 500)
+      timer = setInterval(() => {
+        setDots((d) => (d.length < 3 ? d + '.' : ''))
+      }, 500)
     } else {
       setDots('')
     }
     return () => clearInterval(timer)
   }, [isPreparingAnswer])
 
+  // Hide header/footer until user interacts
   useEffect(() => {
-    const footerEl = document.querySelector('footer.footer')
-    const homeHeaderEl = document.querySelector('.home-header-container')
+    const footerEl      = document.querySelector('footer.footer')
+    const homeHeaderEl  = document.querySelector('.home-header-container')
     if (!footerEl || !homeHeaderEl) return
 
     if (hasInteracted) {
-      footerEl.style.display = 'none'
-      homeHeaderEl.style.height = 'unset'
+      footerEl.style.display      = 'none'
+      homeHeaderEl.style.height   = 'unset'
     } else {
-      footerEl.style.display = ''
-      homeHeaderEl.style.height = '100vh'
+      footerEl.style.display      = ''
+      homeHeaderEl.style.height   = '100vh'
     }
   }, [hasInteracted])
 
-  // shared query logic
-  const doQuery = q => {
+  // Common: run a query
+  const doQuery = (q) => {
     if (!q.trim()) return
-    if (!hasInteracted) setHasInteracted(true);
+    if (!hasInteracted) setHasInteracted(true)
     submitQuery(q)
     setMessage('')
+    setDropdownOpen(false) // close dropdown once you tap anything
   }
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     doQuery(message)
   }
@@ -278,15 +270,18 @@ export default function ChatInterface() {
     resetConversation()
     setMessage('')
     setStoppedIds(new Set())
-    setHasInteracted(false);
+    setHasInteracted(false)
     setShowScrollDown(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    setDropdownOpen(false)
   }
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(
-        conversation.map(q => `Question: ${q.question}\nAnswer: ${q.answer}`).join('\n---\n')
+        conversation
+          .map((q) => `Question: ${q.question}\nAnswer: ${q.answer}`)
+          .join('\n---\n')
       )
     } catch {
       throw new Error('Clipboard API not available')
@@ -297,36 +292,130 @@ export default function ChatInterface() {
     stopGeneration()
     const idx     = conversation.length - 1
     const lastKey = conversation[idx]?.id ?? `temp-${idx}`
-    setStoppedIds(s => new Set(s).add(lastKey))
+    setStoppedIds((s) => new Set(s).add(lastKey))
   }
 
-  // ——— Compute which suggestions to show ——————————————————————————————————————————————
-  const displayedSuggestions =
-    isMobile && !showAllSuggestions
-      ? suggestions.slice(0, 2)
-      : suggestions
+  // ——— RENDERING FUNCTIONS ————————————————————————————————————————————————
+
+  // On desktop: show first two, then “⋯” with dropdown of the rest
+  const renderDesktopChips = () => {
+    if (suggestions.length === 0) return null
+
+    // Always show up to the first two suggestions as chips
+    const firstTwo  = suggestions.slice(0, 2)
+    const theRest   = suggestions.slice(2)
+
+    return (
+      <div className="chip-group-desktop" style={{ display: 'flex', position: 'relative', flexWrap: 'wrap', gap: '8px' }}>
+        {firstTwo.map((s, i) => (
+          <div key={i} className="chip" onClick={() => doQuery(s)}>
+            {s}
+          </div>
+        ))}
+
+        {theRest.length > 0 && (
+          <>
+            <div
+              className="chip more-chip"
+              title="Show more suggestions"
+              aria-label="Show more suggestions"
+              onClick={() => setDropdownOpen((open) => !open)}
+            >
+              ...Show more
+            </div>
+
+            {dropdownOpen && (
+              <div className="pulldown-menu-desktop">
+                {theRest.map((s, i) => (
+                  <div
+                    key={i}
+                    className="pulldown-item"
+                    onClick={() => doQuery(s)}
+                  >
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    )
+  }
+
+  // 2) On mobile: show first one, then “⋯” with dropdown of the rest
+  const renderMobileChips = () => {
+    if (suggestions.length === 0) return null
+
+    const first    = suggestions[0]
+    const theRest  = suggestions.slice(1)
+
+    return (
+      <div className="chip-group-mobile" style={{ display: 'flex', position: 'relative', flexWrap: 'wrap', gap: '8px' }}>
+        <div className="chip" onClick={() => doQuery(first)}>
+          {first}
+        </div>
+
+        {theRest.length > 0 && (
+          <>
+            <div
+              className="chip more-chip"
+              onClick={() => setDropdownOpen((open) => !open)}
+            >
+              ...Show more
+            </div>
+
+            {dropdownOpen && (
+              <div className="pulldown-menu-mobile">
+                {theRest.map((s, i) => (
+                  <div
+                    key={i}
+                    className="pulldown-item"
+                    onClick={() => doQuery(s)}
+                  >
+                    {s}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    )
+  }
 
   return (
     <ErrorBoundary>
       <div className="chat-container">
-        <div className="conversation-area" style={hasInteracted ? { paddingBottom: '300px' } : {paddingBottom: '0px'}}>
+        <div
+          className="conversation-area"
+          style={hasInteracted ? { paddingBottom: '300px' } : { paddingBottom: '0px' }}
+        >
           <div className="conversation">
             {conversation.map((qa, idx) => {
-              const key = qa.id ?? `temp-${idx}`
+              const key        = qa.id ?? `temp-${idx}`
               const wasStopped = stoppedIds.has(key)
-              const isLast = latestQA?.id === qa.id
+              const isLast     = latestQA?.id === qa.id
               return (
                 <div key={key} className="qa-pair">
-                  <hr className='section-divider'></hr>
+                  <hr className="section-divider" />
                   <div className="question">{qa.question}</div>
                   <Answer md={qa.answer} />
                   {isLast && !isPreparingAnswer && !isGeneratingAnswer && (
                     <div className="actions-feedback flex justify-between items-center">
-                      <ActionButtons onReset={handleReset} onCopy={handleCopy} setCopyToast={setCopyToast} />
-                      {!wasStopped && <FeedbackButtons questionAnswerId={qa.id} setFeedbackToast={setFeedbackToast} />}
+                      <ActionButtons
+                        onReset={handleReset}
+                        onCopy={handleCopy}
+                        setCopyToast={setCopyToast}
+                      />
+                      {!wasStopped && (
+                        <FeedbackButtons
+                          questionAnswerId={qa.id}
+                          setFeedbackToast={setFeedbackToast}
+                        />
+                      )}
                     </div>
                   )}
-                  {/* render whichever toast is active */}
                   {(copyToast || feedbackToast) && (
                     <div className="toast-inline">
                       {copyToast || feedbackToast}
@@ -340,6 +429,7 @@ export default function ChatInterface() {
             )}
           </div>
         </div>
+
         <div className={`chat-footer-wrapper ${hasInteracted ? 'fixed-bottom' : ''}`}>
           {/* Optional Scroll Down Button */}
           {showScrollDown && (
@@ -351,6 +441,7 @@ export default function ChatInterface() {
               <ArrowDown />
             </button>
           )}
+
           <form onSubmit={handleSubmit}>
             <div className="chat-card">
               <div className="chat-content">
@@ -374,10 +465,7 @@ export default function ChatInterface() {
                     <span className="button-text">Stop</span>
                   </button>
                 ) : (
-                  <button
-                    type="submit"
-                    className="main-button"
-                  >
+                  <button type="submit" className="main-button">
                     <ArrowUp className="button-icon" />
                     <span className="button-text">Submit</span>
                   </button>
@@ -392,30 +480,24 @@ export default function ChatInterface() {
               className="suggestion-chips"
               style={hasInteracted ? { display: 'none' } : { display: 'flex' }}
             >
-              {displayedSuggestions.map((s, i) => (
-                <div
-                  key={i}
-                  className="chip"
-                  onClick={() => doQuery(s)}
-                >
-                  {s}
-                </div>
-              ))}
-
-              {/* If on mobile and there are more than 2 suggestions, show a toggle */}
-              {isMobile && suggestions.length > 2 && (
-                <div
-                  className="chip show-more-chip"
-                  onClick={() => setShowAllSuggestions(prev => !prev)}
-                >
-                  {showAllSuggestions ? 'Show less…' : 'Show more…'}
-                </div>
-              )}
+              {isMobile
+                ? renderMobileChips()
+                : renderDesktopChips()}
             </div>
           )}
 
-          <div className='disclaimer'>
-            <p>Responses are generated using AI and may contain mistakes. Review the <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener">Redpanda privacy policy</a> to understand how your data is used.</p>
+          <div className="disclaimer">
+            <p>
+              Responses are generated using AI and may contain mistakes. Review the{' '}
+              <a
+                href="https://www.redpanda.com/legal/privacy-policy"
+                target="_blank"
+                rel="noopener"
+              >
+                Redpanda privacy policy
+              </a>{' '}
+              to understand how your data is used.
+            </p>
           </div>
         </div>
       </div>
