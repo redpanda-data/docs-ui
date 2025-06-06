@@ -10,6 +10,7 @@
 
 .beta-label {
   margin: 0;
+  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .beta-label > p:hover {
@@ -26,8 +27,9 @@
 .beta-label > p {
   flex: 0 1 auto;
   border-radius: 10px;
+  font-weight: bold;
   text-align: center;
-  border: 1px solid var(--highlight-border);
+  border: 2px solid var(--beta-label-border);
   background-color: inherit;
   color: rgb(102 112 133/1);
 }
@@ -38,6 +40,39 @@
 }
 
 .beta-label > p {
-  color: var(--link-highlight-color);
+  color: var(--beta-label-color);
   padding: 3px;
+  min-width: 100px;
+  margin-top: 5px;
+  background-color: var(--beta-label-background);
+}
+
+.nav-beta-label {
+  display: none;
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-weight: bold;
+  min-width: 100px;
+  padding: 3px;
+  border: 2px solid var(--beta-label-border);
+  border-radius: 10px;
+  color: var(--beta-label-color);
+  background-color: var(--beta-label-background);
+  cursor: pointer;
+}
+
+.nav-beta-label.visible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.nav-beta-container {
+  position: sticky;
+  top: 0;
+  padding: 0.5rem;
+  padding-bottom: 0;
+  padding-left: 0;
+  background-color: var(--body-background);
+  z-index: 10;
 }

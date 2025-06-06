@@ -118,6 +118,9 @@ html[data-theme=dark] {
   --admonition-border-radius: 10px;
   --admonition-box-shadow: 0 1px 2px 0 #0000001a;
   --admonition-padding: 1rem;
+  --beta-label-color: var(--link-highlight-color);
+  --beta-label-background: var(--body-background);
+  --beta-label-border: var(--link-highlight-color);
   /* doc */
   --doc-font-size: inherit;
   --doc-font-size--desktop: var(--body-font-size);

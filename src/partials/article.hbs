@@ -31,15 +31,45 @@
     <p>beta</p>
   </div>
   <script>
-  const betaButton = document.querySelector('.beta-label p');
-  // Create a Tippy instance on the button
-  const tippyInstance = tippy(betaButton, {
-    content: 'This feature is in beta. Features in beta are available for testing and feedback. They are not supported by Redpanda and should not be used in production environments.',
-    animation: 'scale',
-    theme: 'redpanda-term',
-    touch: 'hold',
-    interactive: true,
-    allowHTML: true,
+  document.addEventListener("DOMContentLoaded", () => {
+    const topBadge = document.querySelector(".beta-label p");
+    const navBadge = document.querySelector(".nav-beta-label");
+
+    if (!topBadge || !navBadge) {
+      return;
+    }
+    tippy(navBadge, {
+      content:
+        "This feature is in beta. Features in beta are available for testing and feedback. They are not supported by Redpanda and should not be used in production environments.",
+      animation: "scale",
+      theme: "redpanda-term",
+      touch: "hold",
+      interactive: true,
+      allowHTML: true,
+    });
+    tippy(topBadge, {
+      content:
+        "This feature is in beta. Features in beta are available for testing and feedback. They are not supported by Redpanda and should not be used in production environments.",
+      animation: "scale",
+      theme: "redpanda-term",
+      touch: "hold",
+      interactive: true,
+      allowHTML: true,
+    });
+    const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        navBadge.classList.remove("visible");
+      } else {
+        navBadge.classList.add("visible");
+      }
+    });
+  }, {
+    root: null,
+    threshold: 1.0
+  });
+
+  observer.observe(topBadge);
   });
   </script>
 {{/if}}
