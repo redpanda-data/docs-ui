@@ -1,5 +1,5 @@
 module.exports = (currentPage) => {
-  if (!currentPage.attributes) return
+  if (!currentPage || !currentPage.attributes) return false
   const currentVersion = currentPage.attributes.version
   if (!currentVersion) return false
   for (let i = 0; i < currentPage.component.versions.length; i++) {

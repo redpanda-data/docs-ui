@@ -1,0 +1,106 @@
+:root {
+  --body-font-family: "Inter", sans-serif;
+  --body-faint-font-color: #667085;
+  --body-font-color: #181818;
+  --secondary-font-size: calc(15.5 / 18 * 1rem);
+  --nav-border-color: #f2f4f7;
+  --doc-max-width: 1000px;
+  --toc-width: calc(250 / 18 * 1rem);
+  --toc-width--widescreen: 25%;
+}
+
+html[data-theme=dark] {
+  --body-font-color: white;
+}
+
+footer.footer {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--body-font-family);
+  padding-top: 48px;
+  color: var(--body-faint-font-color);
+  font-size: var(--secondary-font-size);
+  border-top: 1px solid var(--nav-border-color);
+}
+
+footer nav.footer-nav {
+  display: flex;
+  font-size: var(--secondary-font-size);
+  width: 100%;
+  padding-bottom: 30px;
+  flex: 1 1 0%;
+  flex-direction: row;
+  justify-content: space-between;
+  font-family: "Calibre Regular", sans-serif;
+  max-width: var(--doc-max-width);
+  margin: 0 auto;
+}
+
+footer .footer-links {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5rem;
+  font-size: var(--secondary-font-size);
+  margin: 0;
+}
+
+.footer-links-heading {
+  display: inline;
+  line-height: 1rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 20px;
+  font-weight: 300;
+  color: var(--body-font-color);
+  font-size: var(--secondary-font-size);
+}
+
+.footer-links-list {
+  line-height: 1.5rem;
+  color: var(--body-faint-font-color);
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  gap: 5px;
+  margin: 0;
+  font-size: var(--secondary-font-size);
+}
+
+.footer-links-list-item {
+  list-style: none;
+}
+
+.footer-links-list-item-detail {
+  max-height: 19px;
+  color: var(--body-faint-font-color) !important;
+  text-decoration: none;
+}
+
+@media (min-width: 1024px) {
+  body.home footer nav.footer-nav {
+    max-width: var(--doc-max-width);
+  }
+
+  footer .footer-links {
+    margin-right: 1rem;
+  }
+
+  main:not(.labs):not(.home) footer.footer {
+    width: calc(100% - var(--toc-width));
+    margin-left: 48px;
+  }
+}
+
+@media screen and (min-width: 1350px) {
+  main:not(.labs):not(.home) footer.footer {
+    width: calc(100% - var(--toc-width--widescreen));
+  }
+}
+
+@media (max-width: 1024px) {
+  footer.footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

@@ -8,7 +8,7 @@
     "url": "https://github.com/redpanda-data/docs-ui.git"
   },
   "engines": {
-    "node": ">= 14.0.0"
+    "node": ">= 16.0.0"
   },
   "browserslist": [
     "last 2 versions"

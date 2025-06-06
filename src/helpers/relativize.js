@@ -4,21 +4,36 @@ const { posix: path } = require('path')
 
 module.exports = (to, from, ctx) => {
   if (!to) return '#'
-  // NOTE only legacy invocation provides both to and from
-  if (!ctx) from = (ctx = from).data.root.page.url
-  if (to.charAt() !== '/') return to
-  if (!from) return (ctx.data.root.site.path || '') + to
+
+  // If ctx is missing or malformed (e.g., during CLI rendering)
+  let sitePath = ''
+  let fromPath = from
+
+  if (!ctx && from?.data?.root) {
+    // Classic Handlebars 2-arg call with context
+    ctx = from
+    fromPath = ctx?.data?.root?.page?.url
+    sitePath = ctx?.data?.root?.site?.path || ''
+  } else if (ctx?.data?.root) {
+    fromPath = ctx?.data?.root?.page?.url
+    sitePath = ctx?.data?.root?.site?.path || ''
+  }
+
+  if (to.charAt(0) !== '/') return to
+  if (!fromPath) return sitePath + to
+
   let hash = ''
   const hashIdx = to.indexOf('#')
   if (~hashIdx) {
-    hash = to.substr(hashIdx)
-    to = to.substr(0, hashIdx)
+    hash = to.slice(hashIdx)
+    to = to.slice(0, hashIdx)
   }
-  return to === from
+
+  return to === fromPath
     ? hash || (isDir(to) ? './' : path.basename(to))
-    : (path.relative(path.dirname(from + '.'), to) || '.') + (isDir(to) ? '/' + hash : hash)
+    : (path.relative(path.dirname(fromPath + '.'), to) || '.') + (isDir(to) ? '/' + hash : hash)
 }
 
 function isDir (str) {
-  return str.charAt(str.length - 1) === '/'
+  return str.endsWith('/')
 }
