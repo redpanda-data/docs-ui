@@ -5,6 +5,9 @@
 */
 
 module.exports = (collection) => {
+  if (!collection) {
+    return []
+  }
   const sourceCollection = Object.values(collection).reduce((accum, it) => {
     const headerAttributes =
       it.latest &&

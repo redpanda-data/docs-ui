@@ -1,0 +1,10 @@
+{
+  "site": {
+    "keys": {
+      "googleAnalytics": "GTM-WB2CSV5"
+    }
+  },
+  "isStandaloneWidget": "true",
+  "includeAlgoliaScript": "true",
+  "uiRootPath": "/_"
+}
