@@ -1,3 +1,133 @@
+<style>
+  .announcement-bar {
+    display: none;
+    height: 0;
+  }
+  .bloblang-playground .banner-container {
+    display: none;
+  }
+</style>
+<script>
+  (function() {
+    'use strict';
+    function handleBanner(bannerId, sessionKey, announcementType) {
+      const banner = document.getElementById(bannerId);
+      if (!banner) return;
+
+      const storageKey = `${sessionKey}-${announcementType}`; // Use the announcement type to differentiate between different banners
+      const hasSeenBanner = window.sessionStorage.getItem(storageKey) || false;
+      if (hasSeenBanner) {
+        if (announcementType !== 'bloblang') {
+          document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+          document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
+        }
+        banner.remove();
+      } else {
+          if (announcementType !== 'bloblang') {
+            document.documentElement.style.setProperty('--announcement-bar-height', '50px');
+            document.documentElement.style.setProperty('--announcement-bar-height--desktop', '30px');
+          }
+        banner.style.display = 'flex';
+        const closeButton = banner.querySelector('.close');
+        if (closeButton) {
+          closeButton.addEventListener('click', function () {
+            document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+            document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
+            banner.remove();
+            window.sessionStorage.setItem(storageKey, 'true');
+          });
+        }
+      }
+    }
+
+    // Initialize theme based on local storage or system preference
+    const initialTheme = localStorage.getItem('theme') ||
+      (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
+    window.addEventListener('DOMContentLoaded', function() {
+      const switchButton = document.getElementById('switch-theme');
+      const announcementBar = document.getElementById('announcement');
+      let announcementLevel = '';
+      if (switchButton) {
+        setTheme(initialTheme);  // Apply initial theme on load
+        switchButton.addEventListener('click', function() {
+          // Toggle theme on button click
+          const currentTheme = document.body.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', newTheme);
+          setTheme(newTheme);
+        });
+      }
+      if (!localStorage.getItem('theme')) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+          const newTheme = e.matches ? 'dark' : 'light';
+          setTheme(newTheme);
+        });
+      }
+      if (announcementBar) {
+        announcementLevel = announcementBar.getAttribute('data-announcement-key');
+        handleBanner('announcement', 'announcementClosed', announcementLevel);
+      }
+      handleBanner('bloblang-banner', 'bloblangBannerDismissed', 'bloblang');
+    });
+  function setTheme(theme) {
+    const rapidocEl = document.querySelector('rapi-doc#api');
+    const switchButton = document.getElementById('switch-theme');
+    const img = switchButton.querySelector('img:first-child');
+
+    if (theme === 'dark') {
+      img.src = img.src.replace('view-sun', 'view-moon');
+      img.classList.add('moon');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.classList.add('dark-theme');
+      document.body.setAttribute('data-theme', 'dark');
+      if (rapidocEl) {
+        rapidocEl.setAttribute('theme', 'dark');
+        rapidocEl.setAttribute('nav-bg-color', '#101828');
+        rapidocEl.setAttribute('bg-color', '#101828');
+      }
+    } else {
+      img.src = img.src.replace('view-moon', 'view-sun');
+      img.classList.remove('moon');
+      document.documentElement.removeAttribute('data-theme');
+      document.documentElement.classList.remove('dark-theme');
+      document.body.removeAttribute('data-theme');
+      if (rapidocEl) {
+        rapidocEl.setAttribute('theme', 'light');
+        rapidocEl.setAttribute('nav-bg-color', '#fff');
+        rapidocEl.setAttribute('bg-color', '#fff');
+      }
+    }
+  }
+})();
+</script>
+<!-- Load these styles before those in site.css to avoid flashing -->
+{{#if isStandaloneWidget}}
+{{else}}
+<style>
+  :root {
+    --background-color: #101828; /* Default to dark background color */
+    --text-color: #ffffff; /* Default to light text color */
+  }
+
+  html[data-theme="dark"] {
+    --background-color: #101828;
+    --text-color: #ffffff;
+  }
+
+  html[data-theme="light"] {
+    --background-color: #ffffff;
+    --text-color: #333;
+  }
+
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+</style>
+{{/if}}
 {{#with site.keys.googleAnalytics}}
 <script async src="https://www.googletagmanager.com/gtag/js?id={{this}}">
 </script>
@@ -14,7 +144,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <script defer src="https://plausible.io/js/plausible.js" data-domain="redpanda.com"></script>
 
-{{#if env.ALGOLIA_API_KEY}}
+{{#if (or env.ALGOLIA_API_KEY includeAlgoliaScript)}}
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-js.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
 <link
@@ -55,7 +185,7 @@ data-user-analytics-store-ip="true"
 data-modal-disclaimer="This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions. Review the [Redpanda privacy policy](https://www.redpanda.com/legal/privacy-policy) to understand how your data is used."
 ></script>
 {{/if}}
-{{#if (ne page.attributes.role 'bloblang-playground')}}
+{{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true'))}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
 <!-- Prism scripts for code blocks -->
 <script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-core.js"></script>

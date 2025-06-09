@@ -3,3 +3,4 @@ static_files:
 - console-config-migrator.wasm
 - ask-ai.html
 - rapidoc-min.js
+- assets/**

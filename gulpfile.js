@@ -4,7 +4,7 @@ const { parallel, series, watch } = require('gulp')
 const createTask = require('./gulp.d/lib/create-task')
 const exportTasks = require('./gulp.d/lib/export-tasks')
 const log = require('fancy-log')
-const { exec } = require('child_process')
+const { exec, execSync } = require('child_process')
 const path = require('path')
 const gulp = require('gulp')
 
@@ -28,6 +28,38 @@ const glob = {
 const rapidocSrc = 'node_modules/rapidoc/dist/rapidoc-min.js'
 const rapidocDest = path.join(srcDir, 'static')
 
+/**
+ * Compiles Handlebars partial templates by executing a Node.js script for each specified partial.
+ *
+ * @param {Function} cb - Callback to signal task completion or failure.
+ *
+ * @throws {Error} If any partial compilation fails, the callback is invoked with an error.
+ */
+function compileWidgets (cb) {
+  const partialsToCompile = [
+    { name: 'header', context: 'context/header.json' },
+    { name: 'footer', context: 'context/footer.json', scripts: ['05-mobile-navbar.js'] },
+    { name: 'head-scripts', context: 'context/head.json' },
+  ]
+
+  try {
+    for (const { name, context, scripts } of partialsToCompile) {
+      const jsArg = scripts ? ` --jsScripts='${JSON.stringify(scripts)}'` : ''
+      const ctxArg = context ? `${context}` : ''
+      const cmd = `node compile-partial.js ${name} ${ctxArg}${jsArg}`.trim()
+      execSync(cmd, { stdio: 'inherit' })
+    }
+    cb()
+  } catch (err) {
+    cb(new Error(`Failed to compile Handlebars partials: ${err.message}`))
+  }
+}
+
+/**
+ * Copies the Rapidoc JavaScript file from the source location to the static assets directory.
+ *
+ * @returns {Stream} A Gulp stream representing the copy operation.
+ */
 function copyRapidoc () {
   return gulp.src(rapidocSrc)
     .pipe(gulp.dest(rapidocDest))
@@ -96,7 +128,7 @@ const buildWasmTask = createTask({
       GOARCH: 'wasm',
     }
 
-    const command = `go build -o "${wasmOutputPath}" main.go`
+    const command = `go build -o "${wasmOutputPath}" .`
 
     exec(command, { cwd: wasmDir, env: envVars }, (err, stdout, stderr) => {
       if (err) {
@@ -112,7 +144,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildWasmTask, bundleReactTask, copyRapidoc, buildTask),
+  call: series(cleanTask, lintTask, buildWasmTask, bundleReactTask, compileWidgets, copyRapidoc, buildTask),
 })
 
 const bundlePackTask = createTask({

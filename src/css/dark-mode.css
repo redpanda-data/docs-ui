@@ -51,6 +51,7 @@ html[data-theme=dark] {
   --toolbar-background: var(--body-background);
   --toolbar-border-color: var(--panel-border-color);
   --toolbar-font-color: var(--body-font-color);
+  --default-header-color: var(--redpanda-800);
   --toolbar-muted-color: var(--color-gray-40);
   --page-version-menu-background: #545454;
   --page-version-font-color: var(--body-font-color);

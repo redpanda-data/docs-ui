@@ -1,27 +1,41 @@
 ---
-name: publish-release
-on:
-  push:
-    tags: ['v*']
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - run: npm install
-      - run: gulp bundle
-      - run: |
-          gh release create \
-            "${{ github.ref_name }}" ./build/ui-bundle.zip --generate-notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Trigger Netlify Build Hook
-        run: curl -X POST -d {} https://api.netlify.com/build_hooks/64e4682992f9ec30865c7c0b
+  name: publish-release
+
+  on:
+    push:
+      tags: ['v*']
+
+  jobs:
+    build:
+      runs-on: ubuntu-22.04
+      permissions:
+        contents: write
+
+      steps:
+        - uses: actions/checkout@v4
+
+        - uses: actions/cache@v4
+          with:
+            path: ~/.npm
+            key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+            restore-keys: |
+              ${{ runner.os }}-node-
+
+        - run: npm install
+
+        - run: gulp bundle
+
+        - name: Create GitHub Release (prerelease aware)
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            TAG="${{ github.ref_name }}"
+            ASSET=./build/ui-bundle.zip
+            FLAGS="--generate-notes"
+            if [[ "$TAG" =~ - ]]; then
+              FLAGS+=" --prerelease"
+            fi
+            gh release create "$TAG" $ASSET $FLAGS
+
+        - name: Trigger Netlify Build Hook
+          run: curl -X POST -d '{}' https://api.netlify.com/build_hooks/64e4682992f9ec30865c7c0b

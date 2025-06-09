@@ -118,6 +118,9 @@ html[data-theme=dark] {
   --admonition-border-radius: 10px;
   --admonition-box-shadow: 0 1px 2px 0 #0000001a;
   --admonition-padding: 1rem;
+  --beta-label-color: #fff;
+  --beta-label-background: var(--link-highlight-color);
+  --beta-label-border: var(--slate-800);
   /* doc */
   --doc-font-size: inherit;
   --doc-font-size--desktop: var(--body-font-size);
@@ -142,6 +145,7 @@ html[data-theme=dark] {
   --body-min-height: calc(100vh - var(--body-top));
   --nav-height: calc(var(--body-min-height) - var(--toolbar-height));
   --nav-collapse-height: 40px;
+  --default-header-color: var(--redpanda-800);
   --announcement-bar-height: 0px; /* stylelint-disable-line */
   --announcement-bar-height--desktop: 0px; /* stylelint-disable-line */
   --nav-height--desktop: var(--body-min-height);

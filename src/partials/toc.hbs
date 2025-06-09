@@ -3,6 +3,11 @@
   {{#if (eq page.component.name 'redpanda-labs')}}
     <img src="{{{@root.uiRootPath}}}/img/redpanda-lab-sitting.png" width="150px" height= "150px" alt="Redpanda sitting at a desk mixing chemicals"/>
   {{/if}}
+  {{#if page.attributes.beta}}
+  <div class="nav-beta-container">
+    <p class="nav-beta-label" aria-hidden="true">beta</p>
+  </div>
+  {{/if}}
   <div class="toc-menu"></div>
   <div class="thumbs">
     <ul style="list-style:none">
@@ -12,5 +17,6 @@
     </ul>
   </div>
     {{> thumbs id='thumbs-toc'}}
+    {{> feedback-success id='thumbs-toc'}}
 </aside>
 {{/if}}

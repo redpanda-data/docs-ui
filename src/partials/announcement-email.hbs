@@ -1,6 +1,6 @@
 <div class="announcement-email" role="banner" id="announcement-email">
   <div class="row">
-    <form data-netlify="true" data-netlify-recaptcha="true" name="announcementEmail" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmitEmail(event)">
+    <form data-netlify="true" name="announcementEmail" method="POST" netlify-honeypot="bot-field" onSubmit="handleSubmitEmail(event)">
       <input type="hidden" name="form-name" value="announcementEmail">
       <p class="hidden">
         <label class="hidden">Beep-Boop. Bot-field <input name="bot-field"></label>
@@ -10,7 +10,6 @@
         <div>
           <input type="email" name="email" id="email" placeholder="Email" class="email-input" required><input type="submit" class="submit-announcement-button-email"></input>
         </div>
-        <div data-netlify-recaptcha="true"></div>
         <button id="close-announcement-email-footer" type="button" aria-label="close" class="close-announcement-email-footer">
           <svg viewBox="0 0 15 15" width="14" height="14">
             <g stroke="currentColor" stroke-width="2.4">
