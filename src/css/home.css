@@ -341,7 +341,6 @@ body.article.home {
   padding: 10px;
   font-size: 14px;
   cursor: pointer;
-  white-space: nowrap;
   flex: 1;
   white-space: normal;
   flex: 1 1 auto;
