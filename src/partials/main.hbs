@@ -12,5 +12,7 @@
     {{> article}}
     {{/if}}
   </div>
+  {{#if (ne page.attributes.role 'home')}}
   {{> footer}}
+  {{/if}}
 </main>

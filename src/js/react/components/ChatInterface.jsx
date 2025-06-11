@@ -317,7 +317,7 @@ export default function ChatInterface() {
     const theRest   = suggestions.slice(2)
 
     return (
-      <div className="chip-group-desktop" style={{ display: 'flex', position: 'relative', flexWrap: 'wrap', gap: '8px' }}>
+      <div className="chip-group-desktop" style={{ display: 'flex', position: 'relative', width: '100%', gap: '3px' }}>
         {firstTwo.map((s, i) => (
           <div key={i} className="chip" onClick={() => doQuery(s)}>
             {s}
@@ -400,7 +400,7 @@ export default function ChatInterface() {
       <div className="chat-container">
         <div
           className="conversation-area"
-          style={hasInteracted ? { paddingBottom: '300px' } : { paddingBottom: '0px' }}
+          style={hasInteracted ? { paddingBottom: '180px' } : { paddingBottom: '0px' }}
         >
           <div className="conversation">
             {conversation.map((qa, idx) => {

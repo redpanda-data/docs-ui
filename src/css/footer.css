@@ -33,12 +33,12 @@ footer .footer-links {
 
 .footer-links-heading {
   display: inline;
-  line-height: 1rem;
+  line-height: 1rem !important;
   letter-spacing: 0.2em;
-  margin-bottom: 20px;
-  font-weight: 300;
-  color: var(--body-font-color);
-  font-size: var(--secondary-font-size);
+  margin-bottom: 20px !important;
+  font-weight: 300 !important;
+  color: var(--body-font-color) !important;
+  font-size: var(--secondary-font-size) !important;
 }
 
 .footer-links-list {
@@ -46,9 +46,9 @@ footer .footer-links {
   color: var(--body-faint-font-color);
   display: flex;
   flex-direction: column;
-  padding-left: 0;
+  padding-left: 0 !important;
   gap: 5px;
-  margin: 0;
+  margin: 0 !important;
   font-size: var(--secondary-font-size);
 }
 
@@ -59,7 +59,11 @@ footer .footer-links {
 .footer-links-list-item-detail {
   max-height: 19px;
   color: var(--body-faint-font-color) !important;
-  text-decoration: none;
+  text-decoration: none !important;
+}
+
+.doc .footer a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+  content: '';
 }
 
 @media (min-width: 1024px) {

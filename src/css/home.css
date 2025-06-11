@@ -10,9 +10,26 @@ body.article.home {
   margin-bottom: 48px;
 }
 
+.article.home footer.footer {
+  padding-top: 30px;
+  border-top: 1px solid #c6cedc;
+}
+
+.article.home footer nav.footer-nav {
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+@media (min-width: 400px) {
+  .article.home footer nav.footer-nav {
+    gap: 50px;
+    flex-direction: row;
+  }
+}
+
 .chat-footer-wrapper {
   width: 100%;
-  padding-bottom: 50px;
+  padding-bottom: 100px;
 }
 
 .chat-footer-wrapper.fixed-bottom {
@@ -40,15 +57,20 @@ body.article.home {
   gap: var(--spacings-spacing-lg);
   font-size: 14px;
   line-height: 1.8;
-  padding: 1rem;
+  padding: 0.5rem;
 }
 
 .home .disclaimer {
-  margin-top: 1rem;
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   color: #6b7280;
   line-height: 1.4;
   padding: 1em;
+  margin-top: 10px;
+}
+
+.home .intro {
+  color: #6b7280;
+  font-size: 14px;
 }
 
 .home .disclaimer p {
@@ -74,8 +96,7 @@ body.article.home {
 }
 
 .home .conversation-area a {
-  color: #ff6b35 !important;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 .home .conversation-area a:hover {
@@ -110,12 +131,12 @@ body.article.home {
   color: var(--body-font-color);
   display: inline-flex;
   background: var(--kapa-question-color);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 25px;
+  padding: 16px 20px;
 }
 
 .home .answer {
-  margin-top: var(--spacings-spacing-xs);
+  margin-top: 2rem;
   color: var(--body-font-color);
 }
 
@@ -297,7 +318,7 @@ body.article.home {
   border: none;
   align-items: center;
   gap: 5px;
-  border-radius: 0.25rem;
+  border-radius: 1rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
@@ -339,7 +360,7 @@ body.article.home {
   color: var(--chip-text-color);
   transition: background 0.2s;
   padding: 10px;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   white-space: normal;
   flex: 1 1 auto;
@@ -347,6 +368,7 @@ body.article.home {
 
 .home .chip:hover {
   background: #e5e7eb;
+  color: black;
 }
 
 .home .doc .more-chip {
@@ -356,13 +378,13 @@ body.article.home {
   color: var(--chip-text-color);
   transition: background 0.2s;
   padding: 10px;
-  font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .home .doc .more-chip:hover {
   background: #e5e7eb;
+  color: black;
 }
 
 .home .doc .pulldown-menu-desktop,
@@ -375,13 +397,13 @@ body.article.home {
   border-radius: 12px;
   z-index: 10;
   min-width: 160px;
+  font-size: 12px;
   width: 100%;
   margin-top: 4px;
 }
 
 .home .doc .pulldown-item {
   padding: 8px 12px;
-  font-size: 14px;
   color: var(--chip-text-color);
   white-space: normal;
   cursor: pointer;
@@ -404,6 +426,10 @@ body.article.home {
   overflow: visible; /* Ensure no overflow restrictions */
 }
 
+.home .home-header-container .answer p {
+  margin-bottom: 10px;
+}
+
 .home .home-header {
   max-width: 900px;
   display: flex;
@@ -416,11 +442,11 @@ body.article.home {
 }
 
 .home .home-header h1 {
-  font-size: calc(36 / var(--rem-base) * 1rem);
+  font-size: calc(24 / var(--rem-base) * 1rem);
   font-weight: 500;
   letter-spacing: -0.2px;
   line-height: 28px;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .home .search-card {
@@ -470,6 +496,19 @@ body.article.home {
   margin-right: 100px;
 }
 
+.home .features .container > h2 {
+  margin-top: 0;
+  font-size: calc(21 / var(--rem-base) * 1rem);
+  padding-top: 0;
+  margin-bottom: 12px;
+}
+
+.home .features .feature-image > h3 {
+  margin-top: 0;
+  font-size: calc(17 / var(--rem-base) * 1rem);
+  color: inherit;
+}
+
 .home .feature-row {
   display: flex;
   flex-direction: column;
@@ -481,7 +520,6 @@ body.article.home {
   width: 100%;
   height: 100%;
   color: var(--chip-text-color);
-  border: 1px solid var(--card-border-color);
   box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   display: flex;
@@ -489,23 +527,30 @@ body.article.home {
   padding: 1rem;
   align-items: start;
   transition: 100ms ease all;
-  background-color: var(--feature-background-color);
+  background-color: var(--chip-color);
+}
+
+.home .feature-box:hover {
+  background: #e5e7eb;
+  color: black;
 }
 
 .home .feature-image {
-  width: 50px;
-  height: 50px;
+  display: flex;
+  align-items: center;
+  margin-left: -4px;
+  gap: 8px;
 }
 
 .home .feature-image img {
-  height: 75%;
-  width: 75%;
+  height: 40px;
+  width: 40px;
   object-fit: contain;
 }
 
 .home .feature-text h2 {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 20px;
   margin-top: 5px;
 }
@@ -514,6 +559,7 @@ body.article.home {
   font-size: 12px;
   line-height: 16px;
   font-weight: 400;
+  margin-top: 5px;
 }
 
 .home a.feature-link {

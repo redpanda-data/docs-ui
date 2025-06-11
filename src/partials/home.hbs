@@ -1,7 +1,7 @@
 <div class="home-header-container">
   <div class="home-header">
     <h1>Ask anything about Redpanda</h1>
-    <div className='paragraph'>
+    <div class='intro'>
       <p>For best results, include the name of the product you're interested in as well as the version.</p>
     </div>
     <script>
@@ -12,11 +12,12 @@
     <script>
       window.AI_SUGGESTIONS = {{{json-stringify page.attributes.ai-suggestions}}};
     </script>
+    {{> footer}}
   </div>
     <section class="features">
     <div class='container'>
       {{#each (json page.attributes.row)}}
-        <h2 style="margin-top: 0;font-size: calc(28 / var(--rem-base) * 1rem);padding-top: 0;margin-bottom: 24px;">{{this.title}}</h2>
+        <h2>{{this.title}}</h2>
         <div class="feature-row">
           {{#each this.items}}
             {{#if (eq (array-length this.urls) 1)}}
@@ -27,10 +28,10 @@
                   {{#if this.image}}
                   <div class="feature-image">
                     <img src='./_images/{{this.image}}' alt={{{this.title}}} loading="lazy"/>
+                    <h3 class="discrete feature-title">{{{this.title}}}</h3>
                   </div>
                   {{/if}}
                   <div class="feature-text">
-                    <h2 class="discrete feature-title">{{{this.title}}}</h2>
                     {{#if this.description}}
                       <p class="feature-description">{{{this.description}}}</p>
                     {{/if}}
@@ -45,10 +46,10 @@
                 {{#if this.image}}
                 <div class="feature-image">
                   <img src='./_images/{{this.image}}' alt={{{this.title}}} loading="lazy"/>
+                  <h3 class="discrete feature-title">{{{this.title}}}</h3>
                 </div>
                 {{/if}}
                 <div class="feature-text">
-                  <h2 class="discrete feature-title">{{{this.title}}}</h2>
                   {{#if this.description}}
                     <p class="feature-description">{{{this.description}}}</p>
                   {{/if}}
