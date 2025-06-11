@@ -1,3 +1,3 @@
 'use strict'
 
-module.exports = (a) => JSON.stringify(a, null, 2)
+module.exports = (string) => JSON.parse(string)

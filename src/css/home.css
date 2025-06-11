@@ -15,16 +15,14 @@ body.article.home {
   padding-bottom: 50px;
 }
 
-.chat-footer-wrapper > form {
-  margin-right: 20px;
-}
-
 .chat-footer-wrapper.fixed-bottom {
   position: fixed;
   bottom: 0;
   z-index: 9999999;
   max-width: 900px;
-  width: fit-content;
+  width: 100%;
+  padding: 0 20px;
+  padding-bottom: 20px;
   background-color: var(--home-background);
 }
 
@@ -333,7 +331,6 @@ body.article.home {
 .home .doc .suggestion-chips {
   position: relative;
   margin-top: 1rem;
-  margin-right: 20px;
 }
 
 .home .doc .chip {
@@ -346,6 +343,8 @@ body.article.home {
   cursor: pointer;
   white-space: nowrap;
   flex: 1;
+  white-space: normal;
+  flex: 1 1 auto;
 }
 
 .home .chip:hover {
@@ -353,7 +352,7 @@ body.article.home {
 }
 
 .home .doc .more-chip {
-  flex: none;
+  flex: 1;
   background: var(--chip-color);
   border-radius: 12px;
   color: var(--chip-text-color);
@@ -378,6 +377,7 @@ body.article.home {
   border-radius: 12px;
   z-index: 10;
   min-width: 160px;
+  width: 100%;
   margin-top: 4px;
 }
 
@@ -385,7 +385,7 @@ body.article.home {
   padding: 8px 12px;
   font-size: 14px;
   color: var(--chip-text-color);
-  white-space: nowrap;
+  white-space: normal;
   cursor: pointer;
 }
 
@@ -552,5 +552,12 @@ body.article.home {
 
   .home .doc .suggestion-chips {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 900px) {
+  .chat-footer-wrapper.fixed-bottom {
+    right: 5px;
+    left: 10px;
   }
 }

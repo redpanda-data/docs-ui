@@ -158,10 +158,21 @@ export default function ChatInterface() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => {
-    if (window.AI_SUGGESTIONS) {
-      setSuggestions(window.AI_SUGGESTIONS)
+    let s = window.AI_SUGGESTIONS;
+    // if it's a string, try parsing it
+    if (typeof s === 'string') {
+      try {
+        s = JSON.parse(s);
+      } catch (e) {
+        console.warn('Could not parse AI_SUGGESTIONS JSON', e);
+      }
     }
-  }, [])
+    if (Array.isArray(s)) {
+      setSuggestions(s);
+    } else {
+      console.error('window.AI_SUGGESTIONS must be an array', s);
+    }
+  }, []);
 
   // Update isMobile on resize. Close dropdown if switching breakpoints.
   useEffect(() => {
@@ -299,7 +310,7 @@ export default function ChatInterface() {
 
   // On desktop: show first two, then “⋯” with dropdown of the rest
   const renderDesktopChips = () => {
-    if (suggestions.length === 0) return null
+    if (!Array.isArray(suggestions) || suggestions.length === 0) return null;
 
     // Always show up to the first two suggestions as chips
     const firstTwo  = suggestions.slice(0, 2)
@@ -488,7 +499,10 @@ export default function ChatInterface() {
 
           <div className="disclaimer">
             <p>
-              Responses are generated using AI and may contain mistakes. Review the{' '}
+              Responses are generated using AI and may contain mistakes.
+            </p>
+            <p>
+              Review the{' '}
               <a
                 href="https://www.redpanda.com/legal/privacy-policy"
                 target="_blank"

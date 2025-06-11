@@ -10,12 +10,12 @@
     <div id="kapa-chat-root"></div>
     <script src="{{{uiRootPath}}}/js/AskAI.bundle.js"></script>
     <script>
-      window.AI_SUGGESTIONS = {{{json page.attributes.ai-suggestions}}};
+      window.AI_SUGGESTIONS = {{{json-stringify page.attributes.ai-suggestions}}};
     </script>
   </div>
     <section class="features">
     <div class='container'>
-      {{#each page.attributes.row}}
+      {{#each (json page.attributes.row)}}
         <h2 style="margin-top: 0;font-size: calc(28 / var(--rem-base) * 1rem);padding-top: 0;margin-bottom: 24px;">{{this.title}}</h2>
         <div class="feature-row">
           {{#each this.items}}

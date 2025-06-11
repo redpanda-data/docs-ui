@@ -178,12 +178,12 @@ const buildPreviewPagesTask = createTask({
 const previewBuildTask = createTask({
   name: 'preview:build',
   desc: 'Process and stage the UI assets and generate pages for the preview',
-  call: series(buildWasmTask, copyRapidoc, buildTask, buildPreviewPagesTask),
+  call: series(buildWasmTask, copyRapidoc, bundleReactTask, buildTask, buildPreviewPagesTask),
 })
 
 const previewServeTask = createTask({
   name: 'preview:serve',
-  call: task.serve(previewDestDir, serverConfig, () => watch(glob.all, previewBuildTask)),
+  call: task.serve(previewDestDir, serverConfig, () => watch([`${srcDir}/**/*`, `${previewSrcDir}/**/*`, `!${srcDir}/static/**`], previewBuildTask)),
 })
 
 const previewTask = createTask({
