@@ -1,6 +1,5 @@
 {
   "isStandaloneWidget": "true",
-  "includeAlgoliaScript": "true",
   "site": {
     "keys": {
       "googleAnalytics": "GTM-WB2CSV5"
