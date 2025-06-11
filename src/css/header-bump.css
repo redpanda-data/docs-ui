@@ -197,7 +197,6 @@ html[data-theme=dark] .header {
   display: block;
   line-height: var(--doc-line-height);
   padding: 6px 8px;
-  font-weight: 600;
 }
 
 .home .navbar-item,
