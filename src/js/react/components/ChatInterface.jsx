@@ -258,11 +258,14 @@ export default function ChatInterface() {
     if (hasInteracted) {
       footerEl.style.display      = 'none'
       homeHeaderEl.style.height   = 'unset'
-      features.style.display = 'none'
+      if (window.innerWidth < 1150) {
+        features.style.display = 'none'
+      }
     } else {
       footerEl.style.display      = ''
-      homeHeaderEl.style.height   = '100vh'
-      features.style.display = 'flex'
+      if (window.innerWidth < 1150) {
+        features.style.display = 'flex'
+      }
     }
   }, [hasInteracted])
 
