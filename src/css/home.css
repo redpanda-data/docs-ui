@@ -601,7 +601,6 @@ body.article.home {
 
 /* Responsive adjustments */
 @media (max-width: 1150px) {
-
   .home .features {
     margin-left: 0;
   }
