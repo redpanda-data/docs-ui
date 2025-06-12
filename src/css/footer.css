@@ -26,7 +26,7 @@ footer nav.footer-nav {
 footer .footer-links {
   display: flex;
   flex-direction: column;
-  line-height: 1.5rem;
+  line-height: 1.3rem;
   font-size: var(--secondary-font-size);
   margin: 0;
 }

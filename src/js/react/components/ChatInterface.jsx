@@ -154,7 +154,7 @@ export default function ChatInterface() {
 
   // Detect mobile vs. desktop breakpoint
   const [isMobile, setIsMobile]         = useState(window.innerWidth < 1150)
-  // Track whether “⋯” dropdown is open (both mobile & desktop share this)
+  // Track whether dropdown is open (both mobile & desktop share this)
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => {
@@ -252,24 +252,26 @@ export default function ChatInterface() {
   useEffect(() => {
     const footerEl      = document.querySelector('footer.footer')
     const homeHeaderEl  = document.querySelector('.home-header-container')
-    if (!footerEl || !homeHeaderEl) return
+    const features  = document.querySelector('.features')
+    if (!footerEl || !homeHeaderEl || !features) return
 
     if (hasInteracted) {
       footerEl.style.display      = 'none'
       homeHeaderEl.style.height   = 'unset'
+      features.style.display = 'none'
     } else {
       footerEl.style.display      = ''
       homeHeaderEl.style.height   = '100vh'
+      features.style.display = 'flex'
     }
   }, [hasInteracted])
 
-  // Common: run a query
   const doQuery = (q) => {
     if (!q.trim()) return
     if (!hasInteracted) setHasInteracted(true)
     submitQuery(q)
     setMessage('')
-    setDropdownOpen(false) // close dropdown once you tap anything
+    setDropdownOpen(false) // close dropdown when you tap anything
   }
 
   const handleSubmit = (e) => {
@@ -308,11 +310,9 @@ export default function ChatInterface() {
 
   // ——— RENDERING FUNCTIONS ————————————————————————————————————————————————
 
-  // On desktop: show first two, then “⋯” with dropdown of the rest
   const renderDesktopChips = () => {
     if (!Array.isArray(suggestions) || suggestions.length === 0) return null;
 
-    // Always show up to the first two suggestions as chips
     const firstTwo  = suggestions.slice(0, 2)
     const theRest   = suggestions.slice(2)
 
@@ -332,7 +332,7 @@ export default function ChatInterface() {
               aria-label="Show more suggestions"
               onClick={() => setDropdownOpen((open) => !open)}
             >
-              ...Show more
+              Show more
             </div>
 
             {dropdownOpen && (
@@ -354,7 +354,6 @@ export default function ChatInterface() {
     )
   }
 
-  // 2) On mobile: show first one, then “⋯” with dropdown of the rest
   const renderMobileChips = () => {
     if (suggestions.length === 0) return null
 
@@ -373,7 +372,7 @@ export default function ChatInterface() {
               className="chip more-chip"
               onClick={() => setDropdownOpen((open) => !open)}
             >
-              ...Show more
+              Show more
             </div>
 
             {dropdownOpen && (
@@ -400,7 +399,7 @@ export default function ChatInterface() {
       <div className="chat-container">
         <div
           className="conversation-area"
-          style={hasInteracted ? { paddingBottom: '180px' } : { paddingBottom: '0px' }}
+          style={hasInteracted ? { paddingBottom: '230px' } : { paddingBottom: '0px' }}
         >
           <div className="conversation">
             {conversation.map((qa, idx) => {

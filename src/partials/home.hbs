@@ -12,6 +12,28 @@
     <script>
       window.AI_SUGGESTIONS = {{{json-stringify page.attributes.ai-suggestions}}};
     </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const featuresSection = document.querySelector('.features');
+        const footer = document.querySelector('footer.footer');
+
+        const moveFeatures = () => {
+          if (window.innerWidth <= 1150) {
+            if (featuresSection && footer) {
+              footer.parentNode.insertBefore(featuresSection, footer);
+            }
+          } else {
+            const homeHeaderContainer = document.querySelector('.home-header-container');
+            if (featuresSection && homeHeaderContainer) {
+              homeHeaderContainer.appendChild(featuresSection);
+            }
+          }
+        };
+
+        window.addEventListener('resize', moveFeatures);
+        moveFeatures();
+      });
+    </script>
     {{> footer}}
   </div>
     <section class="features">

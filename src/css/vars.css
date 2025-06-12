@@ -180,7 +180,7 @@ html:not([data-theme=dark]) {
   --card-color: #e4e9f0;
   --input-color: white;
   --chip-color: #e8e9eb;
-  --chip-text-color: var(--body-font-color);
+  --chip-text-color: rgb(102, 112, 133);
   --card-border-color: #c6cddb;
   --button-font-color: white;
   --panel-background: #f9fafb;
