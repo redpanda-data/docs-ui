@@ -176,17 +176,23 @@ html:not([data-theme=dark]) {
   /* base */
   --body-background: var(--color-white);
   --banner-background: #f0f1fd;
-  --home-background: rgba(245, 245, 245, 1);
+  --home-background: #f5f5f5;
+  --card-color: #e4e9f0;
+  --input-color: white;
+  --chip-color: #e8e9eb;
+  --chip-text-color: rgb(102, 112, 133);
+  --card-border-color: #c6cddb;
   --button-font-color: white;
   --panel-background: #f9fafb;
-  --panel-border-color: #e5e9f0;
+  --panel-border-color: #e0e0e0;
+  --kapa-question-color: #e0e0e0;
   --scrollbar-track-color: var(--color-smoke-30);
   --scrollbar-thumb-color: var(--color-gray-10);
   --scrollbar_hover-thumb-color: var(--color-gray-30);
   --sticky-table-header-background: #f6f6f6;
   --tooltip-background: var(--slate-900);
   --tooltip-font-color: white;
-  --feature-background-color: white;
+  --feature-background-color: var(--card-color);
   /* search */
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;

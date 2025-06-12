@@ -1,57 +1,94 @@
-<section class="features">
-  <div class='container'>
-    {{#each page.attributes.rows}}
-      {{#with this.title}}
-        <h2>{{this}}</h2>
-      {{/with}}
-      <div class="feature-row">
-        {{#each this.items}}
-          {{#if (eq (array-length this.urls) 1)}}
-            {{#each this.urls}}
-              <a href="{{{relativize (resolvePageURL this.url)}}}" class="feature-link">
-            {{/each}}
+<div class="home-header-container">
+  <div class="home-header">
+    <h1>Ask anything about Redpanda</h1>
+    <div class='intro'>
+      <p>For best results, include the name of the product you're interested in as well as the version.</p>
+    </div>
+    <script>
+      window.UI_INTEGRATION_ID = 'bc719cfb-2fd5-4c76-acde-de9a905f13b3';
+    </script>
+    <div id="kapa-chat-root"></div>
+    <script src="{{{uiRootPath}}}/js/AskAI.bundle.js"></script>
+    <script>
+      window.AI_SUGGESTIONS = {{{json-stringify page.attributes.ai-suggestions}}};
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const featuresSection = document.querySelector('.features');
+        const footer = document.querySelector('footer.footer');
+
+        const moveFeatures = () => {
+          if (window.innerWidth <= 1150) {
+            if (featuresSection && footer) {
+              footer.parentNode.insertBefore(featuresSection, footer);
+            }
+          } else {
+            const homeHeaderContainer = document.querySelector('.home-header-container');
+            if (featuresSection && homeHeaderContainer) {
+              homeHeaderContainer.appendChild(featuresSection);
+            }
+          }
+        };
+
+        window.addEventListener('resize', moveFeatures);
+        moveFeatures();
+      });
+    </script>
+    {{> footer}}
+  </div>
+    <section class="features">
+    <div class='container'>
+      {{#each (json page.attributes.row)}}
+        <h2>{{this.title}}</h2>
+        <div class="feature-row">
+          {{#each this.items}}
+            {{#if (eq (array-length this.urls) 1)}}
+              {{#each this.urls}}
+                <a href="{{{relativize (resolvePageURL this.url)}}}" class="feature-link">
+              {{/each}}
+                <div class="feature-box">
+                  {{#if this.image}}
+                  <div class="feature-image">
+                    <img src='./_images/{{this.image}}' alt={{{this.title}}} loading="lazy"/>
+                    <h3 class="discrete feature-title">{{{this.title}}}</h3>
+                  </div>
+                  {{/if}}
+                  <div class="feature-text">
+                    {{#if this.description}}
+                      <p class="feature-description">{{{this.description}}}</p>
+                    {{/if}}
+                    {{#if this.learn-text}}
+                      <p class="feature-learn-text">Learn more &rarr;</p>
+                    {{/if}}
+                  </div>
+                </div>
+                </a>
+            {{else}}
               <div class="feature-box">
                 {{#if this.image}}
                 <div class="feature-image">
                   <img src='./_images/{{this.image}}' alt={{{this.title}}} loading="lazy"/>
+                  <h3 class="discrete feature-title">{{{this.title}}}</h3>
                 </div>
                 {{/if}}
                 <div class="feature-text">
-                  <h2 class="discrete feature-title">{{{this.title}}}</h2>
                   {{#if this.description}}
                     <p class="feature-description">{{{this.description}}}</p>
                   {{/if}}
                   {{#if this.learn-text}}
                     <p class="feature-learn-text">Learn more &rarr;</p>
                   {{/if}}
+                  <ul>
+                    {{#each this.urls}}
+                      <li><a href="{{{relativize (resolvePageURL this.url)}}}">{{this.text}}</a></li>
+                    {{/each}}
+                  </ul>
                 </div>
               </div>
-              </a>
-          {{else}}
-            <div class="feature-box">
-              {{#if this.image}}
-              <div class="feature-image">
-                <img src='./_images/{{this.image}}' alt={{{this.title}}} loading="lazy"/>
-              </div>
-              {{/if}}
-              <div class="feature-text">
-                <h2 class="discrete feature-title">{{{this.title}}}</h2>
-                {{#if this.description}}
-                  <p class="feature-description">{{{this.description}}}</p>
-                {{/if}}
-                {{#if this.learn-text}}
-                  <p class="feature-learn-text">Learn more &rarr;</p>
-                {{/if}}
-                <ul>
-                  {{#each this.urls}}
-                    <li><a href="{{{relativize (resolvePageURL this.url)}}}">{{this.text}}</a></li>
-                  {{/each}}
-                </ul>
-              </div>
-            </div>
-          {{/if}}
-        {{/each}}
-      </div>
-    {{/each}}
-  </div>
-</section>
+            {{/if}}
+          {{/each}}
+        </div>
+      {{/each}}
+    </div>
+  </section>
+</div>

@@ -71,6 +71,15 @@ const cleanTask = createTask({
   call: task.remove(['build', 'public']),
 })
 
+const bundleReactTask = createTask({
+  name: 'bundle:react',
+  desc: 'Compile every React module under src/js/react',
+  call: task.bundleReact({
+    srcDir: path.join(__dirname, srcDir, 'js', 'react'),
+    destDir: path.join(__dirname, srcDir, 'static', 'js'),
+  }),
+})
+
 const lintCssTask = createTask({
   name: 'lint:css',
   desc: 'Lint the CSS source files using stylelint (standard config)',
@@ -135,7 +144,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildWasmTask, copyRapidoc, compileWidgets, buildTask),
+  call: series(cleanTask, lintTask, buildWasmTask, bundleReactTask, compileWidgets, copyRapidoc, buildTask),
 })
 
 const bundlePackTask = createTask({
@@ -169,12 +178,12 @@ const buildPreviewPagesTask = createTask({
 const previewBuildTask = createTask({
   name: 'preview:build',
   desc: 'Process and stage the UI assets and generate pages for the preview',
-  call: series(buildWasmTask, copyRapidoc, buildTask, buildPreviewPagesTask),
+  call: series(buildWasmTask, copyRapidoc, bundleReactTask, buildTask, buildPreviewPagesTask),
 })
 
 const previewServeTask = createTask({
   name: 'preview:serve',
-  call: task.serve(previewDestDir, serverConfig, () => watch(glob.all, previewBuildTask)),
+  call: task.serve(previewDestDir, serverConfig, () => watch([`${srcDir}/**/*`, `${previewSrcDir}/**/*`, `!${srcDir}/static/**`], previewBuildTask)),
 })
 
 const previewTask = createTask({
@@ -189,6 +198,7 @@ module.exports = exportTasks(
   lintTask,
   formatTask,
   buildWasmTask,
+  bundleReactTask,
   buildTask,
   bundleTask,
   bundlePackTask,
