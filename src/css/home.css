@@ -36,10 +36,9 @@ body.article.home {
   position: fixed;
   bottom: 0;
   z-index: 9999999;
-  max-width: 900px;
+  max-width: 860px;
   width: 100%;
-  padding: 0 20px;
-  padding-bottom: 20px;
+  padding: 0 20px 20px 0;
   background-color: var(--home-background);
 }
 
