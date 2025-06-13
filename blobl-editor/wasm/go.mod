@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	github.com/redpanda-data/benthos/v4 v4.53.0
-	github.com/redpanda-data/connect/v4 v4.57.0
+	github.com/redpanda-data/connect/v4 v4.58.0
 )
 
 require (
@@ -34,7 +34,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/generikvault/gvalstrings v0.0.0-20180926130504-471f38f0112a // indirect
 	github.com/go-faker/faker/v4 v4.6.1 // indirect
-	github.com/go-logr/logr v1.4.2 // indirect
+	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gofrs/uuid/v5 v5.3.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
