@@ -11,6 +11,11 @@
       permissions:
         contents: write
 
+      env:
+        ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+        ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+        ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
+
       steps:
         - uses: actions/checkout@v4
 
