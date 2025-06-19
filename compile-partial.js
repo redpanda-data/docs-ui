@@ -152,7 +152,7 @@ async function ensureRootVersion(context) {
   let html = template(context);
 
   // 🔽 Inject CSS if exists
-  const sharedCssFiles = ['typeface-inter-bump.css', 'typeface-ibmplexmono-bump.css', 'header-bump.css', 'footer-bump.css', 'search-bump.css', 'doc-bump.css'];
+  const sharedCssFiles = ['typeface-inter-bump.css', 'typeface-ibmplexmono-bump.css', 'header-bump.css', 'footer-bump.css', 'search-bump.css', 'doc-bump.css',  'breadcrumbs-bump.css'];
   const allCssFiles = [...sharedCssFiles, `${partialName}-bump.css`];
   const cssTags = [];
 

@@ -9,6 +9,8 @@
   --abstract-background: #f0f0f0;
   --alt-heading-font-weight: bold;
   --color-aliases-static-palette-text-tertiary: #6b7280;
+  --aa-detached-modal-max-width: 800px;
+  --link-highlight-color: #444ce7;
 }
 
 html[data-theme=dark] {
@@ -22,6 +24,7 @@ html[data-theme=dark] {
   --abstract-background: #292929;
   --alt-heading-font-weight: bold;
   --color-aliases-static-palette-text-tertiary: #98a2b3;
+  --link-highlight-color: #9184f1;
 }
 
 .aa-DetachedOverlay .doc {
