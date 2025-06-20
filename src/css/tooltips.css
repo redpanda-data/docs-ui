@@ -8,3 +8,12 @@ a.glossary-term {
   border-bottom: 2px dotted var(--link-highlight-color);
   text-decoration: none !important;
 }
+
+h1 [data-tippy-root],
+h2 [data-tippy-root],
+h3 [data-tippy-root],
+h4 [data-tippy-root],
+h5 [data-tippy-root],
+h6 [data-tippy-root] {
+  font-size: var(--body-font-size) !important;
+}
