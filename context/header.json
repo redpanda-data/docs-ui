@@ -67,6 +67,7 @@
   },
   "page": {
     "component": {
+      "name": "api",
       "title": "API",
       "latest": {
         "asciidoc": {

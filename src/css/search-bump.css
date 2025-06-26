@@ -294,12 +294,12 @@ article.search .ais-Pagination-list {
 
 .aa-Item[aria-selected=true] .aa-ItemContent mark {
   text-decoration: underline !important;
-  font-weight: unset !important;
+  font-weight: bold !important;
 }
 
-mark {
-  color: var(--link-highlight-color) !important;
-  background: var(--doc-base-dark-color);
+mark,
+.aa-ItemContent mark {
+  background-color: var(--link-highlight-color) !important;
 }
 
 .aa-Item[aria-selected=true] a {
