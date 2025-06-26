@@ -9,7 +9,7 @@
   --abstract-background: #f0f0f0;
   --alt-heading-font-weight: bold;
   --color-aliases-static-palette-text-tertiary: #6b7280;
-  --aa-detached-modal-max-width: 800px;
+  --aa-detached-modal-max-width: 1200px;
   --link-highlight-color: #444ce7;
 }
 
@@ -163,7 +163,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc p,
 .aa-DetachedOverlay .doc dl {
-  margin: 0;
+  margin-top: 10px;
   hyphens: none;
 }
 
@@ -519,7 +519,6 @@ html[data-theme=dark] {
 .aa-DetachedOverlay .doc ol,
 .aa-DetachedOverlay .doc ul {
   margin: 0;
-  padding: 0 0 0 2rem;
 }
 
 .aa-DetachedOverlay .doc ul.checklist,
