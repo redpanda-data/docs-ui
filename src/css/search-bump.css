@@ -299,7 +299,9 @@ article.search .ais-Pagination-list {
 
 mark,
 .aa-ItemContent mark {
-  background-color: var(--link-highlight-color) !important;
+  color: var(--link-highlight-color) !important;
+  -webkit-text-fill-color: var(--link-highlight-color) !important;
+  background-clip: initial !important;
 }
 
 .aa-Item[aria-selected=true] a {
