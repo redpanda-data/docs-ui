@@ -302,6 +302,7 @@ mark,
   color: var(--link-highlight-color) !important;
   -webkit-text-fill-color: var(--link-highlight-color) !important;
   background-clip: initial !important;
+  background: none !important;
 }
 
 .aa-Item[aria-selected=true] a {
