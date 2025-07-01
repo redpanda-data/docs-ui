@@ -14,7 +14,7 @@
 }
 
 .beta-label > p:hover {
-  cursor: pointer;
+  cursor: help;
 }
 
 .context-switcher button {
@@ -55,7 +55,7 @@
   border-radius: 10px;
   color: var(--beta-label-color);
   background-color: var(--beta-label-background);
-  cursor: pointer;
+  cursor: help;
 }
 
 .nav-beta-label.visible {
