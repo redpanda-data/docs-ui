@@ -141,7 +141,11 @@ function ActionButtons({ onReset, onCopy, setCopyToast }) {
   )
 }
 
-// ——— Main ChatInterface ————————————————————————————————————————————————————
+/**
+ * Renders the main chat interface, providing a conversational UI with markdown-rendered answers, feedback and copy/reset actions, animated loading states, and responsive suggestion chips.
+ *
+ * Manages user input, conversation state, and UI responsiveness for both desktop and mobile. Handles dynamic textarea resizing, scroll-to-bottom behavior, and conditional display of header/footer elements based on user interaction. Integrates with the chat backend via the `useChat` hook to submit queries, stop or reset conversations, and display AI-generated suggestions. Also manages inline toast notifications for copy and feedback actions.
+ */
 export default function ChatInterface() {
   const [message, setMessage]               = useState('')
   const [dots, setDots]                     = useState('')
