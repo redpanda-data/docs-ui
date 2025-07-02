@@ -151,6 +151,12 @@ export default function ChatInterface() {
   const [hasInteracted, setHasInteracted]   = useState(false)
   const [copyToast, setCopyToast]           = useState(null)
   const [feedbackToast, setFeedbackToast]   = useState(null)
+  const textareaRef = useRef(null)
+
+  const resetTextareaHeight = () => {
+    if (!textareaRef.current) return
+    textareaRef.current.style.height = 'unset'
+  }
 
   // Detect mobile vs. desktop breakpoint
   const [isMobile, setIsMobile]         = useState(window.innerWidth < 1150)
@@ -280,6 +286,7 @@ export default function ChatInterface() {
   const handleSubmit = (e) => {
     e.preventDefault()
     doQuery(message)
+    resetTextareaHeight()
   }
 
   const handleReset = () => {
@@ -290,6 +297,7 @@ export default function ChatInterface() {
     setShowScrollDown(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
     setDropdownOpen(false)
+    resetTextareaHeight()
   }
 
   const handleCopy = async () => {
@@ -458,14 +466,28 @@ export default function ChatInterface() {
           <form onSubmit={handleSubmit}>
             <div className="chat-card">
               <div className="chat-content">
-                <input
-                  className="chat-input"
-                  type="text"
-                  placeholder="How can we help you with Redpanda today?"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  disabled={isGeneratingAnswer || isPreparingAnswer}
-                />
+              <textarea
+                ref={textareaRef}
+                id="chat-message"
+                name="chat-message"
+                className="chat-input"
+                placeholder="How can we help you with Redpanda today?"
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value)
+
+                  const el = e.target
+                  el.style.height = 'auto'
+                  el.style.height = Math.min(el.scrollHeight, 200) + 'px'
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmit(e)
+                  }
+                }}
+                disabled={isGeneratingAnswer || isPreparingAnswer}
+              />
               </div>
               <div className="chat-footer">
                 {isPreparingAnswer || isGeneratingAnswer ? (
