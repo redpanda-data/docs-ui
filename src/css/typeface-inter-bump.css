@@ -4,7 +4,7 @@
   font-weight: 300;
   src:
     local("Inter"),
-    url(/_font/Inter-Light.ttf) format("truetype");
+    url(/_/font/Inter-Light.ttf) format("truetype");
   font-display: swap;
 }
 
@@ -24,7 +24,7 @@
   font-weight: 500;
   src:
     local("Inter"),
-    url(/_font/Inter-Medium.ttf) format("truetype");
+    url(/_/font/Inter-Medium.ttf) format("truetype");
   font-display: swap;
 }
 
@@ -34,6 +34,6 @@
   font-weight: 600;
   src:
     local("Inter"),
-    url(/_font/Inter-SemiBold.ttf) format("truetype");
+    url(/_/font/Inter-SemiBold.ttf) format("truetype");
   font-display: swap;
 }
