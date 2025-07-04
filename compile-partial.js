@@ -122,6 +122,7 @@ async function ensureRootVersion(context) {
     return;
   }
 
+<<<<<<< Updated upstream
   // Fallback: remote fetch
   try {
     const remoteVersion = await fetchRemoteAntoraVersion();
@@ -129,6 +130,12 @@ async function ensureRootVersion(context) {
     rootComponent.latest.version = remoteVersion;
   } catch (err) {
     console.warn(`⚠️ Could not fetch Antora version: ${err.message}`);
+=======
+if (partialName === 'head-bump') {
+  // Prepend styles
+  if (cssTags.length) {
+    html = `${html}\n${cssTags.join('\n')}`;
+>>>>>>> Stashed changes
   }
 }
 
