@@ -2,12 +2,20 @@
   --search-hits-boxshadow: 0 0 0 1px rgba(35, 38, 59, 0.05), 0 1px 3px 0 rgba(35, 38, 59, 0.15);
   --search-detached-mode-background: #f5f6f7;
   --search-icon-color: unset;
+  --body-font-color: #181818;
+  --panel-background: #f9fafb;
+  --link-highlight-color: #444ce7;
+  --link-highlight-background-color: rgba(68, 76, 231, 0.08);
 }
 
 html[data-theme=dark] {
   --search-hits-boxshadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 3px 0 rgba(255, 255, 255, 0.15);
   --search-detached-mode-background: #0a0908;
   --search-icon-color: unset;
+  --body-font-color: #f2f4f7;
+  --panel-background: #ffffff12;
+  --link-highlight-color: #9184f1;
+  --link-highlight-background-color: rgba(145, 132, 241, 0.16);
 }
 
 article.search {
