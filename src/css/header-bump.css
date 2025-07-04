@@ -27,6 +27,7 @@
   --z-index-navbar: 5;
   --rem-base: 18;
   --body-font-family: "Inter", sans-serif;
+  --text-color: rgb(24, 24, 24);
   --font-family: "Inter", sans-serif;
   --code-font-family: "IBM Plex Mono", "Courier Prime", courier, monospace;
   --body-line-height: 1.15;
