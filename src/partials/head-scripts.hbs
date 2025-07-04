@@ -129,9 +129,6 @@
 </style>
 {{/if}}
 {{#with site.keys.googleAnalytics}}
-<script async src="https://www.googletagmanager.com/gtag/js?id={{this}}">
-</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZPF6N5WXMW&amp;l=dataLayer&amp;cx=c"></script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -169,6 +166,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/worker-yaml.js"></script>
 <script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
 {{/if}}
+{{#if (ne page.attributes.role 'home')}}
 <script defer
 src="https://widget.kapa.ai/kapa-widget.bundle.js"
 data-website-id="fe00d579-9e9a-4f83-8f9f-0ca7672262a6"
@@ -183,6 +181,7 @@ data-user-analytics-fingerprint-enabled="true"
 data-user-analytics-store-ip="true"
 data-modal-disclaimer="This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions. Review the [Redpanda privacy policy](https://www.redpanda.com/legal/privacy-policy) to understand how your data is used."
 ></script>
+{{/if}}
 {{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true'))}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
 <!-- Prism scripts for code blocks -->
