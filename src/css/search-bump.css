@@ -302,7 +302,7 @@ mark,
   color: var(--link-highlight-color) !important;
   -webkit-text-fill-color: var(--link-highlight-color) !important;
   background-clip: initial !important;
-  background-color: none !important;
+  background-color: unset !important;
 }
 
 .aa-Item[aria-selected=true] a {
