@@ -7,12 +7,14 @@ const log = require('fancy-log')
 const fs = require('fs')
 
 /**
- * Bundles all React components using esbuild
+ * Bundles all React component files in the specified source directory using esbuild and outputs the bundled files to the destination directory.
  *
- * @param {Object} options - Configuration options
- * @param {string} options.srcDir - Directory containing React components
- * @param {string} options.destDir - Output directory for bundled files
- * @returns {Promise} A promise that resolves when bundling is complete
+ * Finds all `.js` and `.jsx` files recursively in the source directory, bundles each file individually with esbuild (including minification in production and source maps), and writes the output as IIFE bundles targeting modern browsers.
+ *
+ * @param {Object} options - Options for bundling.
+ * @param {string} options.srcDir - Path to the directory containing React component files.
+ * @param {string} options.destDir - Path to the directory where bundled files will be written.
+ * @returns {Promise<void>} Resolves when all bundles have been processed.
  */
 async function bundleAllReactTask ({ srcDir, destDir }) {
   // Find all JS and JSX files in the source directory
