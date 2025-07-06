@@ -56,6 +56,7 @@ async function bundleAllReactTask ({ srcDir, destDir }) {
       log.info(`Built ${outName}`)
     } catch (error) {
       log.error(`Error building ${base}:`, error.message)
+      throw error // Propagate error to fail the build
     }
   })
 
