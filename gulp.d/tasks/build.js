@@ -66,9 +66,13 @@ module.exports = (src, dest, preview) => () => {
       // NOTE concat already uses stat from newest combined file
       .pipe(concat('js/site.js')),
     vfs
-      .src('js/vendor/*([^.])?(.bundle).js', { ...opts, read: false })
+      .src(['js/vendor/*([^.])?(.bundle).js', '!js/vendor/sorttable.js'], { ...opts, read: false })
       .pipe(bundle(opts))
       .pipe(uglify({ output: { comments: /^! / } })),
+    // Handle sorttable.js separately without uglify
+    vfs
+      .src('js/vendor/sorttable.js', opts)
+      .pipe(through()),
     vfs
       .src('js/vendor/*.min.js', opts)
       .pipe(map((file, enc, next) => next(null, Object.assign(file, { extname: '' }, { extname: '.js' })))),
