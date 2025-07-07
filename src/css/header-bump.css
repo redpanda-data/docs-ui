@@ -35,7 +35,6 @@
 
 html {
   font-size: calc(17.5 / var(--rem-base) * 1rem);
-  --text-color: white;
 }
 
 html[data-theme=dark] .header {
