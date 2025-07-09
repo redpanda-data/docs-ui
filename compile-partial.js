@@ -152,8 +152,11 @@ async function ensureRootVersion(context) {
   let html = template(context);
 
   // 🔽 Inject CSS if exists
-  const sharedCssFiles = ['typeface-inter-bump.css', 'typeface-ibmplexmono-bump.css', 'header-bump.css', 'footer-bump.css', 'search-bump.css', 'doc-bump.css',  'breadcrumbs-bump.css'];
-  const allCssFiles = [...sharedCssFiles, `${partialName}-bump.css`];
+  const allCssFiles = fs.readdirSync(cssSrcDir)
+    .filter(f => f.endsWith('-bump.css') && f !== `${partialName}-bump.css`);
+
+  allCssFiles.push(`${partialName}-bump.css`);
+
   const cssTags = [];
 
   fs.mkdirSync(cssOutDir, { recursive: true });
@@ -188,7 +191,7 @@ async function ensureRootVersion(context) {
         fs.copyFileSync(jsSrcPath, jsOutPath);
         return `<script src="/assets/widgets/js/${jsFile}"></script>`;
       } else {
-        console.warn(`⚠️ JS script not found: ${jsSrcPath}`);
+        console.warn(`⚠️ JavaScript not found: ${jsSrcPath}`);
         return '';
       }
     }).filter(Boolean).join('\n  ');
