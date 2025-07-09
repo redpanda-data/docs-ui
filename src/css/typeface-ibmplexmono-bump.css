@@ -11,7 +11,7 @@
   font-weight: 300;
   src:
     local("IBM Plex Mono"),
-    url(../font/IBMPlexMono-Light.ttf) format("truetype");
+    url(/_/font/IBMPlexMono-Light.ttf) format("truetype");
   font-display: swap;
 }
 
@@ -21,7 +21,7 @@
   font-weight: 400;
   src:
     local("IBM Plex Mono"),
-    url(../font/IBMPlexMono-Regular.ttf) format("truetype");
+    url(/_/font/IBMPlexMono-Regular.ttf) format("truetype");
   font-display: swap;
 }
 
@@ -31,7 +31,7 @@
   font-weight: 500;
   src:
     local("IBM Plex Mono"),
-    url(../font/IBMPlexMono-Medium.ttf) format("truetype");
+    url(/_/font/IBMPlexMono-Medium.ttf) format("truetype");
   font-display: swap;
 }
 
@@ -41,6 +41,6 @@
   font-weight: 600;
   src:
     local("IBM Plex Mono"),
-    url(../font/IBMPlexMono-SemiBold.ttf) format("truetype");
+    url(/_/font/IBMPlexMono-SemiBold.ttf) format("truetype");
   font-display: swap;
 }

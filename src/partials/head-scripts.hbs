@@ -141,19 +141,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <script defer src="https://plausible.io/js/plausible.js" data-domain="redpanda.com"></script>
 
-{{#if (or env.ALGOLIA_API_KEY includeAlgoliaScript)}}
+{{#if env.ALGOLIA_API_KEY}}
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-js.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
 <link
   rel="stylesheet"
   href="{{{uiRootPath}}}/css/vendor/algolia/autocomplete-theme-classic.css"
 />
-{{/if}}
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-tags.js"></script>
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/autocomplete-tags-plugin.css">
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-recent-searches.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-query-suggestions.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-algolia-insights.js"></script>
+{{/if}}
 <script>
   var uiRootPath="{{{uiRootPath}}}"
 </script>

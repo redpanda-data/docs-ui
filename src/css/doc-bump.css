@@ -1,0 +1,1341 @@
+:root {
+  --body-font-color: #181818;
+  --doc-font-size: inherit;
+  --doc-line-height: 1.6;
+  --heading-font-color: #101828;
+  --heading-font-family: "Inter", sans-serif;
+  --heading-font-weight: 500;
+  --rem-base: 18;
+  --abstract-background: #f0f0f0;
+  --alt-heading-font-weight: bold;
+  --color-aliases-static-palette-text-tertiary: #6b7280;
+  --aa-detached-modal-max-width: 1200px;
+  --link-highlight-color: #444ce7;
+}
+
+html[data-theme=dark] {
+  --body-font-color: #f2f4f7;
+  --doc-font-size: inherit;
+  --doc-line-height: 1.6;
+  --heading-font-color: #eaecf0;
+  --heading-font-family: "Inter", sans-serif;
+  --heading-font-weight: 500;
+  --rem-base: 18;
+  --abstract-background: #292929;
+  --alt-heading-font-weight: bold;
+  --color-aliases-static-palette-text-tertiary: #98a2b3;
+  --link-highlight-color: #9184f1;
+}
+
+.aa-DetachedOverlay .doc {
+  color: var(--body-font-color);
+  font-size: var(--doc-font-size);
+  hyphens: auto;
+  line-height: var(--doc-line-height);
+  padding: 0 1rem 4rem;
+  margin-top: 3rem;
+}
+
+.aa-DetachedOverlay .doc ul.index {
+  padding-inline-start: 1rem;
+}
+
+.aa-DetachedOverlay .doc li.index,
+.aa-DetachedOverlay .doc p.index {
+  margin-top: 1rem;
+}
+
+.aa-DetachedOverlay .doc h1,
+.aa-DetachedOverlay .doc h2,
+.aa-DetachedOverlay .doc h3,
+.aa-DetachedOverlay .doc h4,
+.aa-DetachedOverlay .doc h5,
+.aa-DetachedOverlay .doc h6 {
+  color: var(--heading-font-color);
+  font-family: var(--heading-font-family);
+  hyphens: none;
+  line-height: 1.2;
+  margin: 2rem 0 0;
+  font-weight: var(--heading-font-weight);
+}
+
+.aa-DetachedOverlay .doc h1 {
+  font-size: calc(36 / var(--rem-base) * 1rem);
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+@media screen and (min-width: 600px) {
+  .aa-DetachedOverlay .doc .openblock.side-by-side > .content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .aa-DetachedOverlay .doc .openblock.side-by-side > .content > * {
+    flex: 1;
+    padding: 10px;
+    width: 0;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .aa-DetachedOverlay .doc h1 {
+    font-size: calc(44 / var(--rem-base) * 1rem);
+  }
+}
+
+.aa-DetachedOverlay .doc > h2#name + .sectionbody {
+  margin-top: 1rem;
+}
+
+.aa-DetachedOverlay .doc .sect1 + .sect1 {
+  margin-top: 2rem;
+}
+
+.aa-DetachedOverlay .doc h1.sect0 {
+  background: var(--abstract-background);
+  font-size: 1.8em;
+  margin: 1.5rem -1rem 0;
+  padding: 0.5rem 1rem;
+}
+
+.aa-DetachedOverlay .doc h2:not(.discrete) {
+  font-size: calc(32 / var(--rem-base) * 1rem);
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 0.4rem 1rem 0.1rem;
+}
+
+.aa-DetachedOverlay .doc h3:not(.discrete),
+.aa-PreviewTitle {
+  font-size: calc(24 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.aa-DetachedOverlay .doc h4:not(.discrete) {
+  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.aa-DetachedOverlay .doc h5:not(.discrete) {
+  font-size: calc(17.5 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.aa-DetachedOverlay .doc h6:not(.discrete) {
+  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+}
+
+.aa-DetachedOverlay .doc h1 .anchor,
+.aa-DetachedOverlay .doc h2 .anchor,
+.aa-DetachedOverlay .doc h3 .anchor,
+.aa-DetachedOverlay .doc h4 .anchor,
+.aa-DetachedOverlay .doc h5 .anchor,
+.aa-DetachedOverlay .doc h6 .anchor,
+.aa-DetachedOverlay .doc li .visible-anchor {
+  position: absolute;
+  text-decoration: none;
+  visibility: hidden;
+  font-weight: normal;
+  margin-left: 0.3rem;
+}
+
+.aa-DetachedOverlay .doc h1 .anchor::before,
+.aa-DetachedOverlay .doc h2 .anchor::before,
+.aa-DetachedOverlay .doc h3 .anchor::before,
+.aa-DetachedOverlay .doc h4 .anchor::before,
+.aa-DetachedOverlay .doc h5 .anchor::before,
+.aa-DetachedOverlay .doc h6 .anchor::before,
+.aa-DetachedOverlay .doc li .visible-anchor::before {
+  content: "#";
+}
+
+.aa-DetachedOverlay .doc h1:hover .anchor,
+.aa-DetachedOverlay .doc h2:hover .anchor,
+.aa-DetachedOverlay .doc h3:hover .anchor,
+.aa-DetachedOverlay .doc h4:hover .anchor,
+.aa-DetachedOverlay .doc h5:hover .anchor,
+.aa-DetachedOverlay .doc li:hover .visible-anchor {
+  visibility: visible;
+  cursor: pointer;
+}
+
+.aa-DetachedOverlay .doc p,
+.aa-DetachedOverlay .doc dl {
+  margin-top: 10px;
+  hyphens: none;
+}
+
+.aa-DetachedOverlay .doc a,
+.aa-DetachedOverlay .doc .glossary-term,
+.aa-DetachedOverlay .doc p a > code {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--color-aliases-static-palette-text-tertiary);
+  color: var(--body-font-color);
+}
+
+.aa-DetachedOverlay .doc a:hover,
+.aa-DetachedOverlay .doc .glossary-term:hover,
+.aa-DetachedOverlay .doc p a > code:hover {
+  color: var(--link-highlight-color);
+  text-decoration-color: var(--link-highlight-color);
+}
+
+.aa-DetachedOverlay .doc .metadata-block span.current-version,
+.aa-DetachedOverlay .doc .metadata-block span:not(.current-version):hover {
+  color: var(--link-highlight-color);
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.aa-DetachedOverlay .doc .glossary-term {
+  cursor: pointer;
+}
+
+.aa-DetachedOverlay .doc a.bare {
+  hyphens: none;
+}
+
+/*
+.aa-DetachedOverlay .doc a.unresolved {
+  color: var(--link_unresolved-font-color);
+}
+*/
+
+.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+  content: url('/_/img/external-link.svg');
+  position: relative;
+  margin-left: 2px;
+  filter: var(--external-link-filter);
+}
+
+.aa-DetachedOverlay .doc i.fa {
+  hyphens: none;
+  font-style: normal;
+}
+
+/* Override Prism.js styles */
+.aa-DetachedOverlay .doc code .token.operator,
+.aa-DetachedOverlay .doc code .token.url {
+  background-color: inherit;
+}
+
+.aa-DetachedOverlay .doc pre > code,
+.aa-DetachedOverlay .doc details .listingblock .content pre > code {
+  padding-bottom: 1rem;
+  border: none;
+  white-space: pre-wrap;
+  font-weight: lighter;
+  line-height: 1.7;
+}
+
+.aa-DetachedOverlay .doc blockquote {
+  margin: 0;
+}
+
+.aa-DetachedOverlay .doc .paragraph.lead > p {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.aa-DetachedOverlay .doc .right {
+  float: right;
+}
+
+.aa-DetachedOverlay .doc .left {
+  float: left;
+}
+
+.aa-DetachedOverlay .doc .float-gap.right {
+  margin: 0 1rem 1rem 0;
+}
+
+.aa-DetachedOverlay .doc .float-gap.left {
+  margin: 0 0 1rem 1rem;
+}
+
+.aa-DetachedOverlay .doc .float-group::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.aa-DetachedOverlay .doc .stretch {
+  width: 100%;
+}
+
+.aa-DetachedOverlay .doc .underline {
+  text-decoration: underline;
+}
+
+.aa-DetachedOverlay .doc .line-through {
+  text-decoration: line-through;
+}
+
+.aa-DetachedOverlay .doc .paragraph,
+.aa-DetachedOverlay .doc .dlist,
+.aa-DetachedOverlay .doc .hdlist,
+.aa-DetachedOverlay .doc .olist,
+.aa-DetachedOverlay .doc .ulist,
+.aa-DetachedOverlay .doc .exampleblock,
+.aa-DetachedOverlay .doc .imageblock,
+.aa-DetachedOverlay .doc .listingblock,
+.aa-DetachedOverlay .doc .literalblock,
+.aa-DetachedOverlay .doc .sidebarblock,
+.aa-DetachedOverlay .doc .verseblock,
+.aa-DetachedOverlay .doc .videoblock,
+.aa-DetachedOverlay .doc .quoteblock,
+.aa-DetachedOverlay .doc .partintro,
+.aa-DetachedOverlay .doc details,
+.aa-DetachedOverlay .doc hr {
+  margin: 0.6rem 0 0;
+}
+
+.aa-DetachedOverlay .doc li .paragraph > p,
+.aa-DetachedOverlay .doc td .paragraph > p {
+  margin-top: 0;
+}
+
+.aa-DetachedOverlay .doc .ulist.two-column {
+  column-count: 2;
+}
+
+.aa-DetachedOverlay .doc table.tableblock {
+  font-size: calc(17 / var(--rem-base) * 1rem);
+}
+
+.aa-DetachedOverlay .doc .clippedcontainer table.tableblock thead {
+  background: var(--sticky-table-header-background);
+  position: sticky;
+  top: -1px;
+  z-index: var(--z-index-nav);
+}
+
+.aa-DetachedOverlay .doc :not(.tablecontainer) > table.tableblock,
+.aa-DetachedOverlay .doc :not(.tablecontainer) > table.tableblock + * {
+  margin-top: 1.5rem;
+}
+
+.aa-DetachedOverlay .doc p.tableblock + p.tableblock {
+  margin-top: 0.5rem;
+}
+
+.aa-DetachedOverlay .doc td.tableblock > .content > :first-child {
+  margin-top: 0;
+}
+
+.aa-DetachedOverlay .doc table.tableblock th,
+.aa-DetachedOverlay .doc table.tableblock td {
+  padding: 0.5rem;
+}
+
+.aa-DetachedOverlay .doc table.tableblock,
+.aa-DetachedOverlay .doc table.tableblock > * > tr > * {
+  border: 0 solid var(--table-border-color);
+}
+
+.aa-DetachedOverlay .doc table.tableblock th {
+  text-align: center;
+}
+
+.aa-DetachedOverlay .doc table.grid-all > * > tr > * {
+  border-width: 1px;
+}
+
+.aa-DetachedOverlay .doc table.grid-cols > * > tr > * {
+  border-width: 0 1px;
+}
+
+.aa-DetachedOverlay .doc table.grid-rows > * > tr > * {
+  border-width: 1px 0;
+}
+
+.aa-DetachedOverlay .doc table.grid-all > thead th,
+.aa-DetachedOverlay .doc table.grid-rows > thead th {
+  border-bottom-width: 2.5px;
+}
+
+.aa-DetachedOverlay .doc table.frame-all {
+  border-width: 1px;
+}
+
+.aa-DetachedOverlay .doc table.frame-ends {
+  border-width: 1px 0;
+}
+
+.aa-DetachedOverlay .doc table.frame-sides {
+  border-width: 0 1px;
+}
+
+.aa-DetachedOverlay .doc table.frame-none > colgroup + * > :first-child > *,
+.aa-DetachedOverlay .doc table.frame-sides > colgroup + * > :first-child > * {
+  border-top-width: 0;
+}
+
+/* NOTE let the grid win in case of frame-none */
+.aa-DetachedOverlay .doc table.frame-sides > :last-child > :last-child > * {
+  border-bottom-width: 0;
+}
+
+.aa-DetachedOverlay .doc table.frame-none > * > tr > :first-child,
+.aa-DetachedOverlay .doc table.frame-ends > * > tr > :first-child {
+  border-left-width: 0;
+}
+
+.aa-DetachedOverlay .doc table.frame-none > * > tr > :last-child,
+.aa-DetachedOverlay .doc table.frame-ends > * > tr > :last-child {
+  border-right-width: 0;
+}
+
+.aa-DetachedOverlay .doc table.stripes-all > tbody > tr,
+.aa-DetachedOverlay .doc table.stripes-odd > tbody > tr:nth-of-type(odd),
+.aa-DetachedOverlay .doc table.stripes-even > tbody > tr:nth-of-type(even),
+.aa-DetachedOverlay .doc table.stripes-hover > tbody > tr:hover,
+.aa-DetachedOverlay .doc table.tableblock thead {
+  background: var(--table-stripe-background);
+}
+
+.aa-DetachedOverlay .doc table.tableblock > tfoot {
+  background: var(--table-footer-background);
+}
+
+.aa-DetachedOverlay .doc .halign-left {
+  text-align: left;
+}
+
+.aa-DetachedOverlay .doc .halign-right {
+  text-align: right;
+}
+
+.aa-DetachedOverlay .doc .halign-center {
+  text-align: center;
+}
+
+.aa-DetachedOverlay .doc .valign-top {
+  vertical-align: top;
+}
+
+.aa-DetachedOverlay .doc .valign-bottom {
+  vertical-align: bottom;
+}
+
+.aa-DetachedOverlay .doc .valign-middle {
+  vertical-align: middle;
+}
+
+.aa-DetachedOverlay .doc .imageblock,
+.aa-DetachedOverlay .doc .videoblock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.aa-DetachedOverlay .doc .videoblock {
+  align-items: flex-start;
+}
+
+.aa-DetachedOverlay .doc .imageblock.text-left,
+.aa-DetachedOverlay .doc .videoblock.text-left {
+  align-items: flex-start;
+}
+
+.aa-DetachedOverlay .doc .imageblock.text-right,
+.aa-DetachedOverlay .doc .videoblock.text-right {
+  align-items: flex-end;
+}
+
+.aa-DetachedOverlay .doc .imageblock img,
+.aa-DetachedOverlay .doc .imageblock object,
+.aa-DetachedOverlay .doc .imageblock svg,
+.aa-DetachedOverlay .doc .image > img,
+.aa-DetachedOverlay .doc .image > object,
+.aa-DetachedOverlay .doc .image > svg {
+  display: inline-block;
+  height: auto;
+  font-size: inherit !important;
+  max-width: 100%;
+  vertical-align: middle;
+  background: white;
+}
+
+.aa-DetachedOverlay .doc .image:not(.left):not(.right) > img {
+  margin-top: -0.2em;
+}
+
+.aa-DetachedOverlay .doc .videoblock iframe {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+#preamble .abstract blockquote {
+  background: var(--abstract-background);
+  border-left: 5px solid var(--abstract-border-color);
+  color: var(--abstract-font-color);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  padding: 0.75em 1em;
+}
+
+.aa-DetachedOverlay .doc .quoteblock,
+.aa-DetachedOverlay .doc .verseblock {
+  background: var(--quote-background);
+  border-left: 5px solid var(--quote-border-color);
+  color: var(--quote-font-color);
+}
+
+.aa-DetachedOverlay .doc .quoteblock {
+  padding: 0.25rem 2rem 1.25rem;
+}
+
+.aa-DetachedOverlay .doc .quoteblock .attribution {
+  color: var(--quote-attribution-font-color);
+  font-size: calc(17 / var(--rem-base) * 1rem);
+  margin-top: 0.75rem;
+}
+
+.aa-DetachedOverlay .doc .quoteblock blockquote {
+  margin-top: 1rem;
+}
+
+.aa-DetachedOverlay .doc .quoteblock .paragraph {
+  font-style: italic;
+}
+
+.aa-DetachedOverlay .doc .quoteblock cite {
+  padding-left: 1em;
+}
+
+.aa-DetachedOverlay .doc .verseblock {
+  font-size: 1.15em;
+  padding: 1rem 2rem;
+}
+
+.aa-DetachedOverlay .doc .verseblock pre {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.aa-DetachedOverlay .doc ol,
+.aa-DetachedOverlay .doc ul {
+  margin: 0;
+}
+
+.aa-DetachedOverlay .doc ul.checklist,
+.aa-DetachedOverlay .doc ul.none,
+.aa-DetachedOverlay .doc ol.none,
+.aa-DetachedOverlay .doc ul.no-bullet,
+.aa-DetachedOverlay .doc ol.unnumbered,
+.aa-DetachedOverlay .doc ul.unstyled,
+.aa-DetachedOverlay .doc ol.unstyled {
+  list-style-type: none;
+}
+
+.aa-DetachedOverlay .doc ul.no-bullet,
+.aa-DetachedOverlay .doc ol.unnumbered {
+  padding-left: 1.25rem;
+}
+
+.aa-DetachedOverlay .doc ul.unstyled,
+.aa-DetachedOverlay .doc ol.unstyled {
+  padding-left: 0;
+}
+
+.aa-DetachedOverlay .doc ul.circle {
+  list-style-type: circle;
+}
+
+.aa-DetachedOverlay .doc ul.disc {
+  list-style-type: disc;
+}
+
+.aa-DetachedOverlay .doc ul.square {
+  list-style-type: square;
+}
+
+.aa-DetachedOverlay .doc ul.circle ul:not([class]),
+.aa-DetachedOverlay .doc ul.disc ul:not([class]),
+.aa-DetachedOverlay .doc ul.square ul:not([class]) {
+  list-style: inherit;
+}
+
+.aa-DetachedOverlay .doc ol.arabic {
+  list-style-type: decimal;
+}
+
+.aa-DetachedOverlay .doc ol.decimal {
+  list-style-type: decimal-leading-zero;
+}
+
+.aa-DetachedOverlay .doc ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+
+.aa-DetachedOverlay .doc ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+
+.aa-DetachedOverlay .doc ol.lowerroman {
+  list-style-type: lower-roman;
+}
+
+.aa-DetachedOverlay .doc ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+.aa-DetachedOverlay .doc ol.lowergreek {
+  list-style-type: lower-greek;
+}
+
+.aa-DetachedOverlay .doc ul.checklist {
+  padding-left: 1.75rem;
+}
+
+.aa-DetachedOverlay .doc ul.checklist p > i.fa-check-square-o:first-child,
+.aa-DetachedOverlay .doc ul.checklist p > i.fa-square-o:first-child {
+  display: inline-flex;
+  justify-content: center;
+  width: 1.25rem;
+  margin-left: -1.25rem;
+}
+
+.aa-DetachedOverlay .doc ul.checklist i.fa-check-square-o::before {
+  content: "\2713";
+}
+
+.aa-DetachedOverlay .doc ul.checklist i.fa-square-o::before {
+  content: "\274f";
+}
+
+.aa-DetachedOverlay .doc .dlist .dlist,
+.aa-DetachedOverlay .doc .dlist .olist,
+.aa-DetachedOverlay .doc .dlist .ulist,
+.aa-DetachedOverlay .doc .olist .dlist,
+.aa-DetachedOverlay .doc .olist .olist,
+.aa-DetachedOverlay .doc .olist .ulist,
+.aa-DetachedOverlay .doc .ulist .dlist,
+.aa-DetachedOverlay .doc .ulist .olist,
+.aa-DetachedOverlay .doc .ulist .ulist {
+  margin-top: 0.5rem;
+}
+
+.aa-DetachedOverlay .doc .olist li + li,
+.aa-DetachedOverlay .doc .ulist li + li {
+  margin-top: 0.5rem;
+}
+
+.aa-DetachedOverlay .doc .ulist .listingblock,
+.aa-DetachedOverlay .doc .olist .listingblock,
+.admonitionblock .listingblock {
+  padding: 0;
+}
+
+.aa-DetachedOverlay .doc summary .title {
+  border-bottom: 0;
+  background-color: none;
+}
+
+.aa-DetachedOverlay .doc .videoblock .title,
+.aa-DetachedOverlay .doc .tableblock caption {
+  color: var(--caption-font-color);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-style: var(--caption-font-style);
+  font-weight: var(--caption-font-weight);
+  hyphens: none;
+  letter-spacing: 0.01em;
+  border-bottom: 7px solid #dadde1;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  margin-bottom: -0.75rem;
+  padding: 1rem;
+  background-color: var(--caption-background-color);
+}
+
+.aa-DetachedOverlay .doc .tableblock caption {
+  text-align: left;
+  margin-bottom: 0;
+  border-bottom: 1px solid #dadde1;
+}
+
+.aa-DetachedOverlay .doc .imageblock .title {
+  margin-top: 0.5rem;
+  padding-bottom: 0;
+}
+
+.aa-DetachedOverlay .doc details > summary.title {
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: 10px;
+  line-height: var(--doc-line-height);
+  background: none;
+  color: var(--body-font-color);
+  font-weight: 500;
+  padding-left: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.aa-DetachedOverlay .doc details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details[open] > summary {
+  padding-bottom: 16px;
+}
+
+.aa-DetachedOverlay .doc details > summary::after {
+  content: "";
+  background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
+  width: 1em;
+  height: 1.2em;
+  position: absolute;
+  right: 0;
+}
+
+.aa-DetachedOverlay .doc details[open] > summary::after {
+  border-color: currentColor transparent transparent;
+  border-width: 0.5rem 0.3rem 0;
+  transform: rotate(90deg);
+}
+
+.aa-DetachedOverlay .doc details {
+  margin: 0.5rem 0;
+  background-color: var(--accordian-background);
+  box-shadow: 0 1px 2px 0 #0000001a;
+  padding: 16px 24px;
+  border-radius: 8px 8px 0 0;
+}
+
+.aa-DetachedOverlay .doc details.result {
+  margin-top: 0.25rem;
+}
+
+.aa-DetachedOverlay .doc details.result > summary {
+  color: var(--caption-font-color);
+  font-style: italic;
+  margin-bottom: 0;
+}
+
+.aa-DetachedOverlay .doc details.result > .content {
+  margin-left: -1rem;
+}
+
+.aa-DetachedOverlay .doc .exampleblock > .content,
+.aa-DetachedOverlay .doc details.result > .content {
+  background: var(--example-background);
+  border: 0.25rem solid var(--example-border-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.aa-DetachedOverlay .doc .exampleblock > .content::after,
+.aa-DetachedOverlay .doc details.result > .content::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.aa-DetachedOverlay .doc .exampleblock > .content > :first-child,
+.aa-DetachedOverlay .doc details > .content > :first-child {
+  margin-top: 0;
+}
+
+.aa-DetachedOverlay .doc .sidebarblock {
+  background: var(--sidebar-background);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.aa-DetachedOverlay .doc .sidebarblock > .content > .title {
+  font-size: calc(22.5 / var(--rem-base) * 1rem);
+  font-weight: var(--alt-heading-font-weight);
+  line-height: 1.3;
+  margin-bottom: -0.3em;
+  text-align: center;
+}
+
+.aa-DetachedOverlay .doc .sidebarblock > .content > :not(.title):first-child {
+  margin-top: 0;
+}
+
+.aa-DetachedOverlay .doc .tableblock pre,
+.aa-DetachedOverlay .doc .listingblock.wrap pre {
+  white-space: pre-wrap;
+}
+
+.aa-DetachedOverlay .doc div.no-wrap pre code {
+  white-space: pre !important;
+  overflow-x: auto !important;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.aa-DetachedOverlay .doc .literalblock pre {
+  padding-left: 1em;
+}
+
+.aa-DetachedOverlay .doc .two-column-grid {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr;
+}
+
+.aa-DetachedOverlay .doc .component-card {
+  background-color: var(--panel-background);
+  border: 1px solid var(--page-version-menu-background);
+  border-radius: 0.4rem;
+  display: inline-block;
+  margin: 3px;
+  padding: 0.3em 0.3em;
+  color: var(--body-font-color);
+  text-decoration: none;
+}
+
+.aa-DetachedOverlay .doc .component-card:hover {
+  color: var(--link-highlight-color);
+  text-decoration: none;
+}
+
+.aa-DetachedOverlay .doc .choices {
+  overflow: visible;
+  border-radius: 10px;
+  margin-bottom: 0;
+  flex: 0.5;
+}
+
+.aa-DetachedOverlay .doc .choices:first-of-type {
+  flex: 100%;
+}
+
+.aa-DetachedOverlay .doc .metadata-block {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.3rem;
+  gap: 6px;
+  border-radius: 6px;
+  background-color: var(--note-background);
+  color: var(--note-on-color);
+}
+
+.aa-DetachedOverlay .doc .metadata-block .choices {
+  flex: 0.3;
+}
+
+.aa-DetachedOverlay .doc .tableblock td .enterprise-label-container {
+  display: flex;
+}
+
+.aa-DetachedOverlay .doc .tableblock td .enterprise-label {
+  background-color: var(--redpanda-1000);
+  color: #fff;
+  padding: 0.2em 0.2em;
+  line-height: normal;
+  border-radius: 3px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
+}
+
+.aa-DetachedOverlay .doc .inline-enterprise-label {
+  background-color: var(--redpanda-1000);
+  color: #fff;
+  padding: 0.2em 0.2em;
+  border-radius: 3px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
+}
+
+.aa-DetachedOverlay .doc .tableblock td .enterprise-label-container:hover,
+.aa-DetachedOverlay .doc .tableblock td .enterprise-label {
+  cursor: pointer;
+}
+
+.aa-DetachedOverlay .doc .choices__inner {
+  background-color: var(--body-background);
+  min-height: unset;
+  border-radius: 4px;
+}
+
+.aa-DetachedOverlay .doc .metadata-block .choices__inner {
+  height: 30px;
+  padding: unset;
+}
+
+.aa-DetachedOverlay .doc .choices__input {
+  background-color: var(--body-background);
+}
+
+.aa-DetachedOverlay .doc .tableblock .choices__list--single {
+  padding: 0;
+}
+
+.aa-DetachedOverlay .doc .tableblock .choices__list--dropdown,
+.aa-DetachedOverlay .doc .tableblock .choices__list[aria-expanded],
+.aa-DetachedOverlay .doc .choices__list--dropdown,
+.aa-DetachedOverlay .doc .choices__list[aria-expanded],
+.aa-DetachedOverlay .doc .table-filters .choices__list--dropdown,
+.aa-DetachedOverlay .doc .table-filters .choices__list[aria-expanded] {
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.aa-DetachedOverlay .doc .page-type-dropdown .choices[data-type*=select-one] .choices__inner {
+  padding: 0;
+}
+
+.aa-DetachedOverlay .doc .page-type-dropdown {
+  display: flex;
+  margin-top: 10px;
+  gap: 5px;
+  align-items: center;
+}
+
+.aa-DetachedOverlay .doc .page-type-dropdown .choices {
+  flex: 0.3;
+}
+
+.aa-DetachedOverlay .doc .button-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.aa-DetachedOverlay .doc .aa-DetachedOverlay .doc-button {
+  border: 1px solid rgba(128, 152, 249, 1);
+  padding: 6px 8px;
+  background: rgba(68, 76, 231, 0);
+  border-radius: 6px;
+  color: var(--body-font-color);
+  margin-top: 0;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 'background 0.3s';
+}
+
+.aa-DetachedOverlay .doc .aa-DetachedOverlay .doc-button:hover {
+  background: rgba(68, 76, 231, 0.06);
+  color: var(--body-font-color);
+}
+
+.aa-DetachedOverlay .doc .choices__list--dropdown .choices__item--selectable.is-highlighted,
+.aa-DetachedOverlay .doc .choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+  background-color: var(--panel-background);
+}
+
+.aa-DetachedOverlay .doc .choices__placeholder {
+  opacity: 9;
+  font-size: 14px;
+}
+
+.aa-DetachedOverlay .doc .type-dropdown {
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.aa-DetachedOverlay .doc .table-filters {
+  display: flex;
+  flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
+  gap: 10px; /* Add space between filter elements */
+  align-items: center; /* Align vertically */
+  margin-bottom: 15px; /* Add space between the filters and the table */
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .aa-DetachedOverlay .doc .table-filters {
+    flex-direction: column; /* Stack filters on smaller screens */
+    align-items: stretch; /* Make filters fill the container on smaller screens */
+    gap: 0;
+  }
+
+  .aa-DetachedOverlay .doc .choices,
+  .aa-DetachedOverlay .doc .table-filters input[type="text"] {
+    width: 100%; /* Ensure inputs take full width on small screens */
+  }
+}
+
+.aa-DetachedOverlay .doc .table-filters .table-search {
+  flex-basis: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  background-color: var(--body-background);
+  color: var(--body-font-color);
+}
+
+.aa-DetachedOverlay .doc .table-filters .table-search::placeholder,
+.aa-DetachedOverlay .doc .table-filters .table-search::-moz-placeholder,
+.aa-DetachedOverlay .doc .table-filters .table-search::-webkit-input-placeholder {
+  opacity: 0.9;
+  color: var(--body-font-color);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.aa-DetachedOverlay .doc .tableblock.component-table {
+  margin-top: 1rem;
+}
+
+.aa-DetachedOverlay .doc .nav-image::after,
+.nav .nav-image::after {
+  content: none !important;
+}
+
+.aa-DetachedOverlay .doc .dropdown {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  font-size: medium;
+}
+
+.aa-DetachedOverlay .doc .terminal-icon {
+  width: 20px;
+  height: 18px;
+  border: 1px solid black;
+  position: relative;
+  border-radius: 3px;
+  background-color: #333;
+}
+
+.aa-DetachedOverlay .doc .terminal-icon::after {
+  content: '>_';
+  color: white;
+  font-size: 10px;
+  position: absolute;
+  left: 3px;
+  bottom: 2px;
+}
+
+.aa-DetachedOverlay .doc .dropdown ul {
+  display: none;
+  position: absolute;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #f9f9f9;
+  width: max-content;
+  max-height: 200px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  z-index: var(--z-index-page-version-menu);
+  overflow-y: auto;
+  animation: slideDown 0.3s ease-out;
+}
+
+.aa-DetachedOverlay .doc .dropdown ul::-webkit-scrollbar {
+  width: 5px;
+}
+
+.aa-DetachedOverlay .doc .dropdown ul::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.aa-DetachedOverlay .doc .dropdown ul::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+.aa-DetachedOverlay .doc .dropdown ul::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.aa-DetachedOverlay .doc .dropdown ul li a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.aa-DetachedOverlay .doc .dropdown ul li a:hover {
+  background-color: #f1f1f1;
+}
+
+.aa-DetachedOverlay .doc .dropdown:hover ul {
+  display: block;
+}
+
+.aa-DetachedOverlay .doc .dropdown ul li {
+  border-bottom: 1px solid #f1f1f1;
+  cursor: pointer;
+}
+
+.aa-DetachedOverlay .doc .listingblock > .content {
+  position: relative;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox {
+  display: flex;
+  visibility: hidden;
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  color: var(--pre-annotation-font-color);
+  font-family: var(--body-font-family);
+  font-size: calc(15 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.aa-DetachedOverlay .doc .listingblock:hover .source-toolbox {
+  visibility: visible;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox .source-lang {
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox > :not(:last-child)::after {
+  content: "|";
+  letter-spacing: 0;
+  padding: 0 1ch;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox .run-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  outline: none;
+  font-size: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  padding: 0;
+  line-height: inherit;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox .copy-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  outline: none;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+  width: 1em;
+  height: 1em;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox .copy-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox img.copy-icon {
+  filter: invert(50.2%);
+}
+
+.aa-DetachedOverlay .doc .source-toolbox svg.copy-icon {
+  fill: currentColor;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox .copy-toast {
+  flex: none;
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  margin-top: 1em;
+  background-color: var(--body-font-color);
+  border-radius: 0.25em;
+  padding: 0.5em;
+  color: var(--body-background);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.5s;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox .copy-toast::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 1em;
+  height: 1em;
+  border: 0.55em solid transparent;
+  border-left-color: var(--body-font-color);
+  transform: rotate(-90deg) translateX(50%) translateY(50%);
+  transform-origin: left;
+}
+
+.aa-DetachedOverlay .doc .source-toolbox .copy-button.clicked .copy-toast {
+  opacity: 1;
+  transition: none;
+}
+
+.aa-DetachedOverlay .doc .language-console .hljs-meta {
+  user-select: none;
+}
+
+.aa-DetachedOverlay .doc .dlist dt {
+  font-style: italic;
+}
+
+.aa-DetachedOverlay .doc .dlist dd {
+  margin: 0 0 0.25rem 1.5rem;
+}
+
+.aa-DetachedOverlay .doc .dlist dd:last-of-type {
+  margin-bottom: 0;
+}
+
+.aa-DetachedOverlay .doc td.hdlist1,
+.aa-DetachedOverlay .doc td.hdlist2 {
+  padding: 0.5rem 0 0;
+  vertical-align: top;
+}
+
+.aa-DetachedOverlay .doc tr:first-child > .hdlist1,
+.aa-DetachedOverlay .doc tr:first-child > .hdlist2 {
+  padding-top: 0;
+}
+
+.aa-DetachedOverlay .doc td.hdlist1 {
+  font-family: var(--body-font-family-bold);
+  padding-right: 0.25rem;
+}
+
+.aa-DetachedOverlay .doc td.hdlist2 {
+  padding-left: 0.25rem;
+}
+
+.aa-DetachedOverlay .doc .colist {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  margin: 0.25rem 0 -0.25rem;
+}
+
+.aa-DetachedOverlay .doc .colist > table > tr > :first-child,
+.aa-DetachedOverlay .doc .colist > table > tbody > tr > :first-child {
+  padding: 0.25em 0.5rem 0;
+  vertical-align: top;
+}
+
+.aa-DetachedOverlay .doc .colist > table > tr > :last-child,
+.aa-DetachedOverlay .doc .colist > table > tbody > tr > :last-child {
+  padding: 0.25rem 0;
+}
+
+.aa-DetachedOverlay .doc .conum[data-value] {
+  border: 1px solid currentColor;
+  border-radius: 100%;
+  display: inline-block;
+  font-family: var(--body-font-family);
+  font-weight: 500;
+  font-size: calc(13.5 / var(--rem-base) * 1rem);
+  font-style: normal;
+  line-height: 1.1;
+  text-align: center;
+  width: 1.25em;
+  height: 1.25em;
+  letter-spacing: -0.25ex;
+  text-indent: -0.25ex;
+  color: var(--body-font-color);
+  margin-left: 4px;
+}
+
+.aa-DetachedOverlay .doc .conum[data-value]::after {
+  content: attr(data-value);
+}
+
+.aa-DetachedOverlay .doc .conum[data-value] + b {
+  display: none;
+}
+
+.aa-DetachedOverlay .doc hr {
+  border: solid var(--section-divider-color);
+  border-width: 2px 0 0;
+  height: 0;
+}
+
+.aa-DetachedOverlay .doc b.button {
+  white-space: nowrap; /* effectively ignores hyphens setting */
+}
+
+.aa-DetachedOverlay .doc b.button::before {
+  content: "[";
+  padding-right: 0.25em;
+}
+
+.aa-DetachedOverlay .doc b.button::after {
+  content: "]";
+  padding-left: 0.25em;
+}
+
+.aa-DetachedOverlay .doc kbd {
+  display: inline-block;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  background: var(--kbd-background);
+  border: 1px solid var(--kbd-border-color);
+  border-radius: 0.25em;
+  box-shadow: 0 1px 0 var(--kbd-border-color), 0 0 0 0.1em var(--body-background) inset;
+  padding: 0.25em 0.5em;
+  vertical-align: text-bottom;
+  white-space: nowrap; /* effectively ignores hyphens setting */
+}
+
+.aa-DetachedOverlay .doc kbd,
+.aa-DetachedOverlay .doc .keyseq {
+  line-height: 1;
+}
+
+.aa-DetachedOverlay .doc .keyseq {
+  font-size: var(--body-font-size);
+}
+
+.aa-DetachedOverlay .doc .keyseq kbd {
+  margin: 0 0.125em;
+}
+
+.aa-DetachedOverlay .doc .keyseq kbd:first-child {
+  margin-left: 0;
+}
+
+.aa-DetachedOverlay .doc .keyseq kbd:last-child {
+  margin-right: 0;
+}
+
+.aa-DetachedOverlay .doc .menuseq,
+.aa-DetachedOverlay .doc .path {
+  hyphens: none;
+}
+
+.aa-DetachedOverlay .doc .menuseq i.caret::before {
+  content: "\203a";
+  font-size: 1.1em;
+  font-family: var(--body-font-family-bold);
+  line-height: calc(1 / 1.1);
+}
+
+.aa-DetachedOverlay .doc :not(pre).nowrap {
+  white-space: nowrap;
+}
+
+.aa-DetachedOverlay .doc .nobreak {
+  hyphens: none;
+  word-wrap: normal;
+}
+
+.aa-DetachedOverlay .doc td.tableblock > .content #footnotes {
+  margin: 2rem 0 0;
+}

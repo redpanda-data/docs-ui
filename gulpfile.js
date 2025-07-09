@@ -39,7 +39,7 @@ function compileWidgets (cb) {
   const partialsToCompile = [
     { name: 'header', context: 'context/header.json' },
     { name: 'footer', context: 'context/footer.json', scripts: ['05-mobile-navbar.js'] },
-    { name: 'head-scripts', context: 'context/head.json' },
+    { name: 'head-bump', context: 'context/head.json' },
   ]
 
   try {

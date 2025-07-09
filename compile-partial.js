@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const Handlebars = require('handlebars');
+const https = require('https');
+const yaml = require('js-yaml');
 
 const helpersDir = path.join(__dirname, 'src', 'helpers');
 if (fs.existsSync(helpersDir)) {
@@ -15,6 +17,31 @@ if (fs.existsSync(helpersDir)) {
       Handlebars.registerHelper(name, helperFn);
     }
   });
+}
+
+function fetchRemoteAntoraVersion() {
+  const url = 'https://raw.githubusercontent.com/redpanda-data/docs/main/antora.yml'
+  return new Promise((resolve, reject) => {
+    https.get(url, res => {
+      if (res.statusCode !== 200) {
+        return reject(new Error(`Failed to fetch antora.yml: ${res.statusCode}`))
+      }
+      let body = ''
+      res.on('data', chunk => (body += chunk))
+      res.on('end', () => {
+        try {
+          const cfg = yaml.load(body)
+          if (cfg.version == null) {
+            throw new Error('version field missing')
+          }
+          const version = String(cfg.version).trim()
+          resolve(version)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    }).on('error', reject)
+  })
 }
 
 function readJson(filepath) {
@@ -76,60 +103,106 @@ fs.readdirSync(partialsDir).forEach((file) => {
   }
 });
 
-const templateSrc = fs.readFileSync(templatePath, 'utf8');
-const template = Handlebars.compile(templateSrc);
-const context = jsonPath ? readJson(path.resolve(jsonPath)) : {};
+async function ensureRootVersion(context) {
+  // Ensure the nested structure exists
+  context.site = context.site || {};
+  context.site.components = context.site.components || {};
+  context.site.components.ROOT = context.site.components.ROOT || {};
 
-let html = template(context);
+  const rootComponent = context.site.components.ROOT;
 
-// 🔽 Inject CSS if exists
-const sharedCssFiles = ['typeface-inter-bump.css', 'header-bump.css', 'footer-bump.css'];
-const allCssFiles = [...sharedCssFiles, `${partialName}-bump.css`];
-const cssTags = [];
+  // Always hard-code the title
+  rootComponent.title = 'Self-Managed';
 
-fs.mkdirSync(cssOutDir, { recursive: true });
-
-allCssFiles.forEach(cssFile => {
-  const srcPath = path.join(cssSrcDir, cssFile);
-  const outPath = path.join(cssOutDir, cssFile);
-  if (fs.existsSync(srcPath)) {
-    fs.copyFileSync(srcPath, outPath);
-    cssTags.push(`<link rel="stylesheet" href="/assets/widgets/css/${cssFile}">`);
-  } else if (cssFile !== `${partialName}-bump.css`) {
-    console.warn(`⚠️ Shared CSS not found: ${cssFile}`);
+  // Use env var if available
+  const envVersion = process.env.LATEST_ENTERPRISE;
+  if (envVersion) {
+    rootComponent.latest = rootComponent.latest || {};
+    rootComponent.latest.version = envVersion.trim();
+    return;
   }
-});
 
-if (partialName === 'head-scripts') {
-  // Prepend styles
-  if (cssTags.length) {
-    html = `${html}\n${cssTags.join('\n')}`;
+  // Fallback: remote fetch
+  try {
+    const remoteVersion = await fetchRemoteAntoraVersion();
+    rootComponent.latest = rootComponent.latest || {};
+    rootComponent.latest.version = remoteVersion;
+  } catch (err) {
+    console.warn(`⚠️ Could not fetch Antora version: ${err.message}`);
   }
 }
 
-// 🔽 Inject JS scripts
-if (Array.isArray(jsScripts)) {
-  fs.mkdirSync(jsOutDir, { recursive: true });
 
-  const scriptTags = jsScripts.map((jsFile) => {
-    const jsSrcPath = path.join(jsSrcDir, jsFile);
-    const jsOutPath = path.join(jsOutDir, jsFile);
+(async () => {
 
-    if (fs.existsSync(jsSrcPath)) {
-      fs.copyFileSync(jsSrcPath, jsOutPath);
-      return `<script src="/assets/widgets/js/${jsFile}"></script>`;
-    } else {
-      console.warn(`⚠️ JS script not found: ${jsSrcPath}`);
-      return '';
+  const templateSrc = fs.readFileSync(templatePath, 'utf8');
+  const template = Handlebars.compile(templateSrc);
+  const contextFromFile = jsonPath ? readJson(path.resolve(jsonPath)) : {};
+  const context = {
+    ...contextFromFile,
+    env: {
+      ALGOLIA_API_KEY: process.env.ALGOLIA_API_KEY,
+      ALGOLIA_APP_ID: process.env.ALGOLIA_APP_ID,
+      ALGOLIA_INDEX_NAME: process.env.ALGOLIA_INDEX_NAME,
+    },
+  };
+
+  await ensureRootVersion(context);
+
+  let html = template(context);
+
+  // 🔽 Inject CSS if exists
+  const allCssFiles = fs.readdirSync(cssSrcDir)
+    .filter(f => f.endsWith('-bump.css') && f !== `${partialName}-bump.css`);
+
+  allCssFiles.push(`${partialName}-bump.css`);
+
+  const cssTags = [];
+
+  fs.mkdirSync(cssOutDir, { recursive: true });
+
+  allCssFiles.forEach(cssFile => {
+    const srcPath = path.join(cssSrcDir, cssFile);
+    const outPath = path.join(cssOutDir, cssFile);
+    if (fs.existsSync(srcPath)) {
+      fs.copyFileSync(srcPath, outPath);
+      cssTags.push(`<link rel="stylesheet" href="/assets/widgets/css/${cssFile}">`);
+    } else if (cssFile !== `${partialName}-bump.css`) {
+      console.warn(`⚠️ Shared CSS not found: ${cssFile}`);
     }
-  }).filter(Boolean).join('\n  ');
+  });
 
-  if (scriptTags) {
-    html = `${html}\n${scriptTags}`;
+  if (partialName === 'head-bump') {
+    // Prepend styles
+    if (cssTags.length) {
+      html = `${html}\n${cssTags.join('\n')}`;
+    }
   }
-}
 
-// Output HTML
-fs.mkdirSync(outDir, { recursive: true });
-const outFile = path.join(outDir, `${partialName}.html`);
-fs.writeFileSync(outFile, html);
+  // 🔽 Inject JS scripts
+  if (Array.isArray(jsScripts)) {
+    fs.mkdirSync(jsOutDir, { recursive: true });
+
+    const scriptTags = jsScripts.map((jsFile) => {
+      const jsSrcPath = path.join(jsSrcDir, jsFile);
+      const jsOutPath = path.join(jsOutDir, jsFile);
+
+      if (fs.existsSync(jsSrcPath)) {
+        fs.copyFileSync(jsSrcPath, jsOutPath);
+        return `<script src="/assets/widgets/js/${jsFile}"></script>`;
+      } else {
+        console.warn(`⚠️ JavaScript not found: ${jsSrcPath}`);
+        return '';
+      }
+    }).filter(Boolean).join('\n  ');
+
+    if (scriptTags) {
+      html = `${html}\n${scriptTags}`;
+    }
+  }
+
+  // Output HTML
+  fs.mkdirSync(outDir, { recursive: true });
+  const outFile = path.join(outDir, `${partialName}.html`);
+  fs.writeFileSync(outFile, html);
+})();
