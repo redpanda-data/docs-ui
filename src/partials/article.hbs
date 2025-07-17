@@ -28,6 +28,10 @@
     if (!topBadge || !navBadge) {
       return;
     }
+    // DEBUG: If you need to debug Tippy.js tooltips in Chrome DevTools, note that the "force element state"
+    // feature doesn't work with JavaScript-based hover effects. Instead, use the Console to manually trigger events:
+    // document.querySelector('.beta-label p').dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    // This will show the tooltip without needing to hover, making it easier to inspect the generated DOM.
     tippy(navBadge, {
       content:
         "{{page.attributes.beta-text}}",
