@@ -5,7 +5,7 @@
 @import "base.css";
 @import "bloblang-playground.css";
 @import "body.css";
-@import "badges.css";
+@import "metadata.css";
 @import "ace-editor.css";
 @import "modal.css";
 @import "home.css";
@@ -30,7 +30,6 @@
 @import "banners.css";
 @import "editable-placeholders.css";
 @import "expandable-images.css";
-@import "context-switcher.css";
 @import "swagger.css";
 @import "cloud-api-feedback.css";
 @import "two-column.css";

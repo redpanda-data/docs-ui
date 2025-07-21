@@ -1,7 +1,7 @@
 <div id="preamble">
   <div class="sectionbody">
     <div class="paragraph home-intro">
-      <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{{relativize (resolvePageURL this)}}}">Learn more</a>{{/with}}
+      <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{{relativize (resolve-resource this)}}}">Learn more</a>{{/with}}
       </p>
       <img style="max-height: 150px;min-height: 120px;" src="../_images/{{page.attributes.home-image}}" alt="{{{page.title}}}" loading="lazy"/>
     </div>
@@ -14,7 +14,7 @@
   <div class='sectionbody container'>
     <div class="grid-primary boxes">
       {{#each page.attributes.home-primary-row}}
-      <a href="{{{relativize (resolvePageURL url)}}}" class="feature-link">
+      <a href="{{{relativize (resolve-resource  url)}}}" class="feature-link">
         <div class="feature-box">
           <div class="feature-text">
             <h3 id="{{{title}}}" class="feature-title">{{{title}}}</h2>
@@ -38,7 +38,7 @@
   <div class='sectionbody container'>
     <div class="grid-secondary boxes">
       {{#each page.attributes.home-secondary-row}}
-      <a href="{{{relativize (resolvePageURL url)}}}" class="feature-link">
+      <a href="{{{relativize (resolve-resource  url)}}}" class="feature-link">
         <div class="feature-box">
           <div class="feature-text">
             <h3 id="{{{title}}}" class="feature-title">{{{title}}}</h2>
@@ -64,7 +64,7 @@
       <ul class="grid-tertiary">
       {{#each page.attributes.home-tertiary-row}}
       <li>
-      <a href="{{{relativize (resolvePageURL url)}}}">{{{title}}}</a>
+      <a href="{{{relativize (resolve-resource  url)}}}">{{{title}}}</a>
       </li>
       {{/each}}
       </ul>

@@ -1,13 +1,11 @@
-{{#if page.attributes.context-links}}
 <div class="context-switcher">
-  {{#each (obj page.attributes.context-links)}}
+  {{#each (obj page.attributes.context-switcher)}}
     <a
       id="{{{this.name}}}"
-      href="{{{relativize (resolvePageURL this.to)}}}"
-      class="context-link {{#if (eq @root.page.url (resolvePageURL this.to))}}active{{/if}}"
+      href="{{{relativize (resolve-resource  this.to)}}}"
+      class="context-link {{#if (eq @root.page.url (resolve-resource  this.to))}}active{{/if}}"
     >
       <button type="button">{{{this.name}}}</button>
     </a>
     {{/each}}
 </div>
-{{/if}}
