@@ -5,13 +5,13 @@ module.exports = (resource, { data, hash: context }) => {
     return resource
   }
   const { contentCatalog, page } = data.root
-  
+
   // For preview builds where contentCatalog.resolveResource might not exist
   if (!contentCatalog || !contentCatalog.resolveResource) {
     // Return the resource as-is for preview builds
     return resource
   }
-  
+
   if (page.component) {
     context = Object.assign({ component: page.component.name, version: page.version, module: page.module }, context)
   }
