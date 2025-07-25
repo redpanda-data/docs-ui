@@ -44,7 +44,7 @@
           {{#each this.items}}
             {{#if (eq (array-length this.urls) 1)}}
               {{#each this.urls}}
-                <a href="{{{relativize (resolvePageURL this.url)}}}" class="feature-link">
+                <a href="{{{relativize (resolve-resource  this.url)}}}" class="feature-link">
               {{/each}}
                 <div class="feature-box">
                   {{#if this.image}}
@@ -80,7 +80,7 @@
                   {{/if}}
                   <ul>
                     {{#each this.urls}}
-                      <li><a href="{{{relativize (resolvePageURL this.url)}}}">{{this.text}}</a></li>
+                      <li><a href="{{{relativize (resolve-resource  this.url)}}}">{{this.text}}</a></li>
                     {{/each}}
                   </ul>
                 </div>

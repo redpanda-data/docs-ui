@@ -11,7 +11,6 @@
   }
 
   function jumpToAnchor (e) {
-    console.log('Do not hijack scroll behavior')
     // if (e) {
     //   if (e.altKey || e.ctrlKey) return
     //   window.location.hash = '#' + this.id

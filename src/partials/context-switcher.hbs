@@ -1,13 +1,151 @@
-{{#if page.attributes.context-links}}
 <div class="context-switcher">
-  {{#each (obj page.attributes.context-links)}}
-    <a
-      id="{{{this.name}}}"
-      href="{{{relativize (resolvePageURL this.to)}}}"
-      class="context-link {{#if (eq @root.page.url (resolvePageURL this.to))}}active{{/if}}"
-    >
-      <button type="button">{{{this.name}}}</button>
-    </a>
-    {{/each}}
+  <div class="context-dropdown">
+    <button type="button" class="context-dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+      {{#each (obj page.attributes.context-switcher)}}
+        {{#if (eq @root.page.url (resolve-resource this.to))}}
+          {{{this.name}}}
+          <svg class="context-dropdown-arrow" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+          </svg>
+        {{/if}}
+      {{/each}}
+    </button>
+    <div class="context-dropdown-menu" role="menu">
+      {{#each (obj page.attributes.context-switcher)}}
+        <a
+          href="{{{relativize (resolve-resource this.to)}}}"
+          class="context-dropdown-item {{#if (eq @root.page.url (resolve-resource this.to))}}active{{/if}}"
+          role="menuitem"
+        >
+          {{{this.name}}}
+        </a>
+      {{/each}}
+    </div>
+  </div>
 </div>
-{{/if}}
+
+<script>
+(function() {
+  'use strict';
+  
+  function initContextDropdown() {
+    const dropdowns = document.querySelectorAll('.context-dropdown');
+    if (!dropdowns.length) {
+      return;
+    }
+    
+    dropdowns.forEach(function(dropdown, index) {
+      const toggle = dropdown.querySelector('.context-dropdown-toggle');
+      const menu = dropdown.querySelector('.context-dropdown-menu');
+      
+      if (!toggle || !menu) {
+        return;
+      }
+      
+      // Toggle dropdown
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+        
+        // Close all other dropdowns first
+        dropdowns.forEach(function(otherDropdown) {
+          if (otherDropdown !== dropdown) {
+            const otherToggle = otherDropdown.querySelector('.context-dropdown-toggle');
+            const otherMenu = otherDropdown.querySelector('.context-dropdown-menu');
+            if (otherToggle && otherMenu) {
+              otherToggle.setAttribute('aria-expanded', 'false');
+              otherMenu.classList.remove('show');
+            }
+          }
+        });
+        
+        if (isOpen) {
+          // Close dropdown
+          toggle.setAttribute('aria-expanded', 'false');
+          menu.classList.remove('show');
+        } else {
+          // Open dropdown
+          toggle.setAttribute('aria-expanded', 'true');
+          menu.classList.add('show');
+          
+          // Focus first item when opening
+          setTimeout(function() {
+            const firstItem = menu.querySelector('.context-dropdown-item');
+            if (firstItem) firstItem.focus();
+          }, 100);
+        }
+      });
+      
+      // Handle keyboard navigation for this dropdown
+      dropdown.addEventListener('keydown', function(e) {
+        const items = Array.from(menu.querySelectorAll('.context-dropdown-item'));
+        const currentIndex = items.indexOf(document.activeElement);
+        
+        switch(e.key) {
+          case 'Escape':
+            toggle.setAttribute('aria-expanded', 'false');
+            menu.classList.remove('show');
+            toggle.focus();
+            break;
+          case 'ArrowDown':
+            e.preventDefault();
+            if (toggle.getAttribute('aria-expanded') === 'false') {
+              toggle.click();
+            } else {
+              const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+              items[nextIndex].focus();
+            }
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            if (toggle.getAttribute('aria-expanded') === 'true') {
+              const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+              items[prevIndex].focus();
+            }
+            break;
+          case 'Enter':
+          case ' ':
+            if (document.activeElement === toggle) {
+              e.preventDefault();
+              toggle.click();
+            }
+            break;
+        }
+      });
+    });
+    
+    // Close all dropdowns when clicking outside - use setTimeout to avoid immediate firing
+    document.addEventListener('click', function(e) {
+      setTimeout(function() {
+        let clickedInsideAny = false;
+        dropdowns.forEach(function(dropdown) {
+          if (dropdown.contains(e.target)) {
+            clickedInsideAny = true;
+          }
+        });
+        
+        if (!clickedInsideAny) {
+          dropdowns.forEach(function(dropdown) {
+            const toggle = dropdown.querySelector('.context-dropdown-toggle');
+            const menu = dropdown.querySelector('.context-dropdown-menu');
+            if (toggle && menu) {
+              toggle.setAttribute('aria-expanded', 'false');
+              menu.classList.remove('show');
+            }
+          });
+        }
+      }, 10);
+    });
+  }
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initContextDropdown);
+  } else {
+    initContextDropdown();
+  }
+})();
+</script>

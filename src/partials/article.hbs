@@ -16,54 +16,67 @@
     <h1 class="page">{{{this}}}</h1>
   {{/with}}
 {{/if}}
-{{#if page.attributes.beta}}
-  <div class="beta-label">
-    <p>beta</p>
-  </div>
+<div class="metadata metadata--main">
+  {{#if page.attributes.beta}}
+    <div class="beta-label">
+      <p>beta</p>
+    </div>
+  {{/if}}
+  {{#if page.attributes.context-switcher}}
+    {{> context-switcher}}
+  {{/if}}
+</div>
+{{#if (or page.attributes.beta page.attributes.context-switcher)}}
   <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const topBadge = document.querySelector(".beta-label p");
-    const navBadge = document.querySelector(".nav-beta-label");
+    const metadataContainer = document.querySelector(".metadata--main");
+    const navMetadataContainer = document.querySelector(".metadata--nav");
 
-    if (!topBadge || !navBadge) {
+    if (!metadataContainer || !navMetadataContainer) {
       return;
     }
+
+    // Initialize tooltips for beta badges if present
+    const topBadge = metadataContainer.querySelector(".beta-label p");
+    const navBadge = navMetadataContainer.querySelector(".nav-beta-label");
     // DEBUG: If you need to debug Tippy.js tooltips in Chrome DevTools, note that the "force element state"
     // feature doesn't work with JavaScript-based hover effects. Instead, use the Console to manually trigger events:
     // document.querySelector('.beta-label p').dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     // This will show the tooltip without needing to hover, making it easier to inspect the generated DOM.
-    tippy(navBadge, {
-      content:
-        "{{page.attributes.beta-text}}",
-      animation: "scale",
-      theme: "redpanda-term",
-      touch: "hold",
-      interactive: true,
-      allowHTML: true,
-    });
-    tippy(topBadge, {
-      content:
-        "{{page.attributes.beta-text}}",
-      animation: "scale",
-      theme: "redpanda-term",
-      touch: "hold",
-      interactive: true,
-      allowHTML: true,
-    });
-    const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        navBadge.classList.remove("visible");
-      } else {
-        navBadge.classList.add("visible");
-      }
-    });
-  }, {
-    root: null,
-    threshold: 1.0
-  });
+    if (topBadge && navBadge) {
+      tippy(topBadge, {
+        content: "{{page.attributes.beta-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+      });
+      tippy(navBadge, {
+        content: "{{page.attributes.beta-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+      });
+    }
 
-  observer.observe(topBadge);
+    // Show nav metadata when main metadata is not visible
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navMetadataContainer.classList.add("hidden");
+        } else {
+          navMetadataContainer.classList.remove("hidden");
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.1 // Trigger when 10% of the container is visible
+    });
+
+    observer.observe(metadataContainer);
   });
   </script>
 {{/if}}
@@ -85,11 +98,6 @@
     {{{listLabs}}}
   {{/with}}
 {{else}}
-  <!--
-  Removing context switchers for now
-  while we evaluate their usefulness
-  {{> context-switcher}}
-  -->
   {{#with (add-suggested-labs page.attributes page.contents)  as |suggestedLabs|}}
     {{{suggestedLabs}}}
   {{/with}}

@@ -1,16 +1,23 @@
-{{#if (and (ne page.component.name 'api') (or page.attributes.announcement page.component.latest.asciidoc.attributes.announcement site.keys.announcement))}}
+{{#if (and (ne page.component.name 'api') (or page.attributes.announcement page.componentVersion.asciidoc.attributes.announcement (get-module-announcement) site.keys.announcement))}}
 <div class="announcement-bar" role="banner" id="announcement"
-     data-announcement-key="{{#if page.attributes.announcement}}page-{{page.component.name}}-{{page.relativeSrcPath}}{{else if page.component.latest.asciidoc.attributes.announcement}}component-{{page.component.name}}{{else if site.keys.announcement}}site-global{{/if}}">
+     data-announcement-key="{{#if page.attributes.announcement}}page-{{page.component.name}}-{{page.relativeSrcPath}}{{else if page.componentVersion.asciidoc.attributes.announcement}}component-{{page.component.name}}-{{page.version}}{{else if (get-module-announcement)}}module-{{page.component.name}}-{{page.module}}-{{page.version}}{{else if site.keys.announcement}}site-global{{/if}}">
   <div class="announcement-content">
     {{#if page.attributes.announcement}}
       {{page.attributes.announcement-text}}
-      <a href="{{{page.attributes.announcement-link}}}">{{page.attributes.announcement-link-text}}</a>
-    {{else if page.component.latest.asciidoc.attributes.announcement}}
-      {{page.component.latest.asciidoc.attributes.announcement-text}}
-      <a href="{{{page.component.latest.asciidoc.attributes.announcement-link}}}">{{page.component.latest.asciidoc.attributes.announcement-link-text}}</a>
-    {{else if site.keys.announcement}}
-      {{site.keys.announcementText}}
-      <a href="{{{site.keys.announcementLink}}}">{{site.keys.announcementLinkText}}</a>
+      <a href="{{{relativize (resolve-resource page.attributes.announcement-link)}}}">{{page.attributes.announcement-link-text}}</a>
+    {{else if page.componentVersion.asciidoc.attributes.announcement}}
+      {{page.componentVersion.asciidoc.attributes.announcement-text}}
+      <a href="{{{relativize (resolve-resource page.componentVersion.asciidoc.attributes.announcement-link)}}}">{{page.componentVersion.asciidoc.attributes.announcement-link-text}}</a>
+    {{else}}
+      {{#with (get-module-announcement) as |moduleAnnouncement|}}
+        {{#if moduleAnnouncement}}
+          {{moduleAnnouncement.text}}
+          <a href="{{{relativize (resolve-resource moduleAnnouncement.link)}}}">{{moduleAnnouncement.linkText}}</a>
+        {{else if site.keys.announcement}}
+          {{site.keys.announcementText}}
+          <a href="{{{relativize (resolve-resource site.keys.announcementLink)}}}">{{site.keys.announcementLinkText}}</a>
+        {{/if}}
+      {{/with}}
     {{/if}}
   </div>
   <button id="close-announcement" type="button" aria-label="close" class="close">

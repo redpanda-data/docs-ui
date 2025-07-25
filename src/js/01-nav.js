@@ -160,7 +160,6 @@
       if (!a) {
         a = event.target.querySelector('a')
       }
-      console.log(a)
       if (a && a.href !== window.location.href) {
         window.location.href = a.href
       }
