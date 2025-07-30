@@ -14,9 +14,6 @@
   // Check if current browser supports copy operations
   var supportsCopy = window.navigator.clipboard
 
-  // Skip if we're within swagger/rapidoc blocks to avoid double copy buttons
-  if (document.querySelectorAll('.body.swagger').length > 0) return
-
   // Ensure each <pre> with a <code> child is styled appropriately
   document.querySelectorAll('pre').forEach(function (pre) {
     if (pre.firstElementChild && pre.firstElementChild.tagName.toLowerCase() === 'code') {

@@ -6,7 +6,6 @@ const exportTasks = require('./gulp.d/lib/export-tasks')
 const log = require('fancy-log')
 const { exec, execSync } = require('child_process')
 const path = require('path')
-const gulp = require('gulp')
 
 const bundleName = 'ui'
 const buildDir = 'build'
@@ -24,9 +23,6 @@ const glob = {
   css: `${srcDir}/css/**/*.css`,
   js: ['gulpfile.js', 'gulp.d/**/*.js', `${srcDir}/{helpers,js}/**/*.js`],
 }
-
-const rapidocSrc = 'node_modules/rapidoc/dist/rapidoc-min.js'
-const rapidocDest = path.join(srcDir, 'static')
 
 /**
  * Compiles Handlebars partial templates by executing a Node.js script for each specified partial.
@@ -53,16 +49,6 @@ function compileWidgets (cb) {
   } catch (err) {
     cb(new Error(`Failed to compile Handlebars partials: ${err.message}`))
   }
-}
-
-/**
- * Copies the Rapidoc JavaScript file from the source location to the static assets directory.
- *
- * @returns {Stream} A Gulp stream representing the copy operation.
- */
-function copyRapidoc () {
-  return gulp.src(rapidocSrc)
-    .pipe(gulp.dest(rapidocDest))
 }
 
 const cleanTask = createTask({
@@ -144,7 +130,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildWasmTask, bundleReactTask, compileWidgets, copyRapidoc, buildTask),
+  call: series(cleanTask, lintTask, buildWasmTask, bundleReactTask, compileWidgets, buildTask),
 })
 
 const bundlePackTask = createTask({
@@ -178,7 +164,7 @@ const buildPreviewPagesTask = createTask({
 const previewBuildTask = createTask({
   name: 'preview:build',
   desc: 'Process and stage the UI assets and generate pages for the preview',
-  call: series(buildWasmTask, copyRapidoc, bundleReactTask, buildTask, buildPreviewPagesTask),
+  call: series(buildWasmTask, bundleReactTask, buildTask, buildPreviewPagesTask),
 })
 
 const previewServeTask = createTask({
