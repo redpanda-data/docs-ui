@@ -73,7 +73,6 @@
       handleBanner('bloblang-banner', 'bloblangBannerDismissed', 'bloblang');
     });
   function setTheme(theme) {
-    const rapidocEl = document.querySelector('rapi-doc#api');
     const switchButton = document.getElementById('switch-theme');
     const img = switchButton.querySelector('img:first-child');
 
@@ -83,22 +82,12 @@
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark-theme');
       document.body.setAttribute('data-theme', 'dark');
-      if (rapidocEl) {
-        rapidocEl.setAttribute('theme', 'dark');
-        rapidocEl.setAttribute('nav-bg-color', '#101828');
-        rapidocEl.setAttribute('bg-color', '#101828');
-      }
     } else {
       img.src = img.src.replace('view-moon', 'view-sun');
       img.classList.remove('moon');
       document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('dark-theme');
       document.body.removeAttribute('data-theme');
-      if (rapidocEl) {
-        rapidocEl.setAttribute('theme', 'light');
-        rapidocEl.setAttribute('nav-bg-color', '#fff');
-        rapidocEl.setAttribute('bg-color', '#fff');
-      }
     }
   }
 })();
