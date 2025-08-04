@@ -500,13 +500,6 @@ func parseInt(s string) (int, error) {
 	return result, nil
 }
 
-// daysInMonth returns the number of days in the given month and year
-func daysInMonth(year, month int) int {
-	// Use Go's time package to get the last day of the month
-	t := time.Date(year, time.Month(month+1), 0, 0, 0, 0, 0, time.UTC)
-	return t.Day()
-}
-
 // formatStrftime is a simplified placeholder for strftime formatting.
 // A full implementation would require parsing strftime format specifiers
 // and converting them to Go's time format syntax.
