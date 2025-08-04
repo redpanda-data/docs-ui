@@ -242,6 +242,20 @@ func createMockEnvironment() *bloblang.Environment {
 			return nil, fmt.Errorf("timezone argument must be a string")
 		}
 
+		// For IANA timezone names, verify JavaScript timezone functions are available
+		// during method registration, not at runtime
+		if timezone != "UTC" && timezone != "Local" {
+			timezoneFuncs := js.Global().Get("timezoneFuncs")
+			if timezoneFuncs.IsUndefined() {
+				return nil, fmt.Errorf("IANA timezone '%s' requires JavaScript timezone functions (timezoneFuncs) to be available", timezone)
+			}
+			
+			convertFunc := timezoneFuncs.Get("convertToTimezone")
+			if convertFunc.IsUndefined() {
+				return nil, fmt.Errorf("IANA timezone '%s' requires convertToTimezone function to be available", timezone)
+			}
+		}
+
 		// For simple cases like "UTC" and "Local", use the original implementation
 		if timezone == "UTC" || timezone == "Local" {
 			return func(v any) (any, error) {
@@ -282,17 +296,12 @@ func createMockEnvironment() *bloblang.Environment {
 				return nil, fmt.Errorf("input must be a Unix timestamp (number)")
 			}
 
-			// Call JavaScript timezone conversion function from global scope
+			// For timezone conversion in WASM, we need to handle this specially
+			// since Go's time package doesn't have timezone data available
+			
+			// Use JavaScript to convert the timestamp to the target timezone
 			timezoneFuncs := js.Global().Get("timezoneFuncs")
-			if timezoneFuncs.IsUndefined() {
-				return nil, fmt.Errorf("timezone functions not available in JavaScript environment")
-			}
-			
 			convertFunc := timezoneFuncs.Get("convertToTimezone")
-			if convertFunc.IsUndefined() {
-				return nil, fmt.Errorf("convertToTimezone function not available")
-			}
-			
 			result := convertFunc.Invoke(timestamp, timezone)
 
 			// Check for errors
@@ -303,20 +312,41 @@ func createMockEnvironment() *bloblang.Environment {
 			// Get the timezone-converted parts
 			parts := result.Get("parts")
 			
-			// Create a time object representing the local time in the target timezone
-			year := parseInt(parts.Get("year").String())
-			month := parseInt(parts.Get("month").String())
-			day := parseInt(parts.Get("day").String())
-			hour := parseInt(parts.Get("hour").String())
-			minute := parseInt(parts.Get("minute").String())
-			second := parseInt(parts.Get("second").String())
+			// Parse the local time components in the target timezone
+			year, err := parseInt(parts.Get("year").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid year value: %w", err)
+			}
+			month, err := parseInt(parts.Get("month").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid month value: %w", err)
+			}
+			day, err := parseInt(parts.Get("day").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid day value: %w", err)
+			}
+			hour, err := parseInt(parts.Get("hour").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid hour value: %w", err)
+			}
+			minute, err := parseInt(parts.Get("minute").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid minute value: %w", err)
+			}
+			second, err := parseInt(parts.Get("second").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid second value: %w", err)
+			}
 			
-			// Create a time object in UTC with the converted local time values
-			// This allows Bloblang's other time methods to work correctly
-			localTime := time.Date(year, time.Month(month), day, hour, minute, second, 0, time.UTC)
+			// In WASM, since we can't use proper timezone databases, we create
+			// a timestamp from the local time components as UTC. This works
+			// because subsequent formatting operations treat it as UTC and
+			// display the correct local time values.
+			localAsUTC := time.Date(year, time.Month(month), day, hour, minute, second, 0, time.UTC)
 
-			// Return the Unix timestamp of the local time
-			return localTime.Unix(), nil
+			// Return the timestamp - this approach works for formatting operations
+			// even though it's not a "true" timezone conversion
+			return localAsUTC.Unix(), nil
 		}, nil
 	}); err != nil {
 		panic(err)
@@ -326,11 +356,10 @@ func createMockEnvironment() *bloblang.Environment {
 }
 
 // Helper functions for timezone conversion
-func parseInt(s string) int {
+func parseInt(s string) (int, error) {
 	var result int
 	if _, err := fmt.Sscanf(s, "%d", &result); err != nil {
-		// If parsing fails, return 0 as a safe default
-		return 0
+		return 0, fmt.Errorf("failed to parse integer from string '%s': %w", s, err)
 	}
-	return result
+	return result, nil
 }

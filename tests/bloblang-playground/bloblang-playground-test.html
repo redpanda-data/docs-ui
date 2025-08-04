@@ -171,7 +171,11 @@ root.StartHour = $time.ts_strftime("%-H")
 root.tz = $tz`,
                         input: `{"StartTime": 1754229000000}`,
                         metadata: `{}`,
-                        expectedKeys: ["StartHour", "tz"]
+                        expectedKeys: ["StartHour", "tz"],
+                        expected: {
+                            "StartHour": "17",
+                            "tz": "Europe/Vilnius"
+                        }
                     },
                     {
                         name: "UTC timezone (baseline)",
@@ -315,6 +319,21 @@ root.source = "processed-on-" + hostname()`,
                                 if (missingKeys.length > 0) {
                                     success = false;
                                     details = `Missing expected keys: ${missingKeys.join(', ')}`;
+                                }
+                            }
+                            
+                            // Check if expected values match
+                            if (success && test.expected) {
+                                const mismatchedValues = [];
+                                for (const [key, expectedValue] of Object.entries(test.expected)) {
+                                    const actualValue = message[key];
+                                    if (actualValue !== expectedValue) {
+                                        mismatchedValues.push(`${key}: expected "${expectedValue}", got "${actualValue}"`);
+                                    }
+                                }
+                                if (mismatchedValues.length > 0) {
+                                    success = false;
+                                    details = `Value mismatches: ${mismatchedValues.join(', ')}`;
                                 }
                             }
                             if (success) {

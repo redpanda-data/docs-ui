@@ -40,6 +40,7 @@ async function runTests() {
                 '--disable-extensions',
                 '--disable-plugins',
                 '--disable-images',
+                '--js-flags="--max-old-space-size=4096"',
                 '--disable-javascript-harmony-shipping',
                 '--disable-background-timer-throttling',
                 '--disable-backgrounding-occluded-windows',
