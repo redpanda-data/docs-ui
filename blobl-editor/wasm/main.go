@@ -242,9 +242,9 @@ func createMockEnvironment() *bloblang.Environment {
 			return nil, fmt.Errorf("timezone argument must be a string")
 		}
 
-		// For IANA timezone names, verify JavaScript timezone functions are available
+		// For IANA timezone names (including UTC), verify JavaScript timezone functions are available
 		// during method registration, not at runtime
-		if timezone != "UTC" && timezone != "Local" {
+		if timezone != "Local" {
 			timezoneFuncs := js.Global().Get("timezoneFuncs")
 			if timezoneFuncs.IsUndefined() {
 				return nil, fmt.Errorf("IANA timezone '%s' requires JavaScript timezone functions (timezoneFuncs) to be available", timezone)
@@ -256,8 +256,8 @@ func createMockEnvironment() *bloblang.Environment {
 			}
 		}
 
-		// For simple cases like "UTC" and "Local", use the original implementation
-		if timezone == "UTC" || timezone == "Local" {
+		// For "Local" timezone only, use the original Go implementation
+		if timezone == "Local" {
 			return func(v any) (any, error) {
 				var timestamp int64
 				switch val := v.(type) {
@@ -271,17 +271,12 @@ func createMockEnvironment() *bloblang.Environment {
 					return nil, fmt.Errorf("input must be a Unix timestamp (number)")
 				}
 
-				var t time.Time
-				if timezone == "UTC" {
-					t = time.Unix(timestamp, 0).UTC()
-				} else {
-					t = time.Unix(timestamp, 0) // Local time
-				}
+				t := time.Unix(timestamp, 0) // Local time
 				return t.Unix(), nil
 			}, nil
 		}
 
-		// For IANA timezone names, use JavaScript conversion
+		// For all IANA timezone names (including UTC), use JavaScript conversion
 		return func(v any) (any, error) {
 			// Convert input to Unix timestamp
 			var timestamp float64
@@ -329,6 +324,13 @@ func createMockEnvironment() *bloblang.Environment {
 			if err != nil {
 				return nil, fmt.Errorf("invalid hour value: %w", err)
 			}
+			// Fix JavaScript Intl.DateTimeFormat bug where it sometimes returns hour 24 instead of 0
+			// This happens at midnight and causes incorrect time calculations
+			// When hour is 24, it represents hour 0 of the current day (not the next day)
+			// so we just need to normalize it to 0 without changing the date
+			if hour == 24 {
+				hour = 0
+			}
 			minute, err := parseInt(parts.Get("minute").String())
 			if err != nil {
 				return nil, fmt.Errorf("invalid minute value: %w", err)
@@ -352,6 +354,139 @@ func createMockEnvironment() *bloblang.Environment {
 		panic(err)
 	}
 
+	// Override the standard ts_strftime method to use JavaScript timezone support
+	if err := env.RegisterMethod("ts_strftime", func(args ...any) (bloblang.Method, error) {
+		if len(args) < 1 || len(args) > 2 {
+			return nil, fmt.Errorf("ts_strftime expects 1 or 2 arguments (format, optional timezone)")
+		}
+
+		format, ok := args[0].(string)
+		if !ok {
+			return nil, fmt.Errorf("format argument must be a string")
+		}
+
+		timezone := ""
+		if len(args) == 2 {
+			timezone, ok = args[1].(string)
+			if !ok {
+				return nil, fmt.Errorf("timezone argument must be a string")
+			}
+		}
+
+		// For IANA timezone names (excluding Local), verify JavaScript timezone functions are available
+		if timezone != "" && timezone != "Local" && timezone != "UTC" {
+			timezoneFuncs := js.Global().Get("timezoneFuncs")
+			if timezoneFuncs.IsUndefined() {
+				return nil, fmt.Errorf("IANA timezone '%s' requires JavaScript timezone functions (timezoneFuncs) to be available", timezone)
+			}
+			
+			convertFunc := timezoneFuncs.Get("convertToTimezone")
+			if convertFunc.IsUndefined() {
+				return nil, fmt.Errorf("IANA timezone '%s' requires convertToTimezone function to be available", timezone)
+			}
+		}
+
+		return func(v any) (any, error) {
+			// Convert input to Unix timestamp
+			var timestamp float64
+			switch val := v.(type) {
+			case int64:
+				timestamp = float64(val)
+			case float64:
+				timestamp = val
+			case int:
+				timestamp = float64(val)
+			case string:
+				// Handle RFC 3339 format strings
+				t, err := time.Parse(time.RFC3339, val)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse RFC 3339 timestamp: %w", err)
+				}
+				timestamp = float64(t.Unix())
+			default:
+				return nil, fmt.Errorf("input must be a Unix timestamp (number) or RFC 3339 string")
+			}
+
+			// If no timezone specified, use local time
+			if timezone == "" {
+				t := time.Unix(int64(timestamp), 0)
+				return formatStrftime(t, format), nil
+			}
+
+			// If timezone is Local or UTC, use Go's built-in time handling
+			if timezone == "Local" {
+				t := time.Unix(int64(timestamp), 0)
+				return formatStrftime(t, format), nil
+			} else if timezone == "UTC" {
+				t := time.Unix(int64(timestamp), 0).UTC()
+				return formatStrftime(t, format), nil
+			}
+
+			// For IANA timezone names, use JavaScript conversion first to get the correct local time
+			timezoneFuncs := js.Global().Get("timezoneFuncs")
+			convertFunc := timezoneFuncs.Get("convertToTimezone")
+			result := convertFunc.Invoke(timestamp, timezone)
+
+			// Check for errors
+			if result.Get("error").Truthy() {
+				return nil, fmt.Errorf("timezone conversion error: %s", result.Get("error").String())
+			}
+			
+			// Get the timezone-converted parts
+			parts := result.Get("parts")
+			
+			// Parse the local time components in the target timezone
+			year, err := parseInt(parts.Get("year").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid year value: %w", err)
+			}
+			month, err := parseInt(parts.Get("month").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid month value: %w", err)
+			}
+			day, err := parseInt(parts.Get("day").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid day value: %w", err)
+			}
+			hour, err := parseInt(parts.Get("hour").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid hour value: %w", err)
+			}
+			// Fix JavaScript Intl.DateTimeFormat bug where it sometimes returns hour 24 instead of 0
+			if hour == 24 {
+				hour = 0
+			}
+			minute, err := parseInt(parts.Get("minute").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid minute value: %w", err)
+			}
+			second, err := parseInt(parts.Get("second").String())
+			if err != nil {
+				return nil, fmt.Errorf("invalid second value: %w", err)
+			}
+			
+			// Create a time in UTC representing the local time in the target timezone
+			localAsUTC := time.Date(year, time.Month(month), day, hour, minute, second, 0, time.UTC)
+
+			// Now format using the provided strftime format
+			// For now, use a simplified implementation that handles basic cases
+			switch format {
+			case "%-H":
+				return fmt.Sprintf("%d", hour), nil
+			case "%H":
+				return fmt.Sprintf("%02d", hour), nil
+			case "%Y-%m-%d %H:%M:%S":
+				return fmt.Sprintf("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second), nil
+			default:
+				// For other formats, use the helper function
+				formatted := formatStrftime(localAsUTC, format)
+				return formatted, nil
+			}
+		}, nil
+	}); err != nil {
+		panic(err)
+	}
+
 	return env
 }
 
@@ -362,4 +497,92 @@ func parseInt(s string) (int, error) {
 		return 0, fmt.Errorf("failed to parse integer from string '%s': %w", s, err)
 	}
 	return result, nil
+}
+
+// formatStrftime is a simplified placeholder for strftime formatting.
+// A full implementation would require parsing strftime format specifiers
+// and converting them to Go's time format syntax.
+func formatStrftime(t time.Time, format string) string {
+	// This is a basic implementation that handles common strftime specifiers
+	// A full implementation would need to handle all strftime format codes
+	
+	// For now, let's handle the most common cases used in the tests
+	result := format
+	result = replaceStrftimeSpecifiers(result, t)
+	return result
+}
+
+// replaceStrftimeSpecifiers replaces common strftime specifiers with Go's time format equivalents.
+func replaceStrftimeSpecifiers(format string, t time.Time) string {
+	// Handle common strftime specifiers
+	result := format
+	
+	// Year
+	result = replaceAll(result, "%Y", t.Format("2006"))     // 4-digit year
+	result = replaceAll(result, "%y", t.Format("06"))       // 2-digit year
+	
+	// Month
+	result = replaceAll(result, "%m", t.Format("01"))       // Month as number (01-12)
+	result = replaceAll(result, "%b", t.Format("Jan"))      // Abbreviated month name
+	result = replaceAll(result, "%B", t.Format("January"))  // Full month name
+	
+	// Day
+	result = replaceAll(result, "%d", t.Format("02"))       // Day of month (01-31)
+	result = replaceAll(result, "%e", t.Format("_2"))       // Day of month, space-padded
+	
+	// Hour
+	result = replaceAll(result, "%H", t.Format("15"))       // Hour 24-hour format (00-23)
+	result = replaceAll(result, "%I", t.Format("03"))       // Hour 12-hour format (01-12)
+	result = replaceAll(result, "%-H", fmt.Sprintf("%d", t.Hour()))  // Hour 24-hour, no padding
+	result = replaceAll(result, "%-I", func() string {
+		h := t.Hour()
+		if h == 0 {
+			return "12"
+		} else if h > 12 {
+			return fmt.Sprintf("%d", h-12)
+		} else {
+			return fmt.Sprintf("%d", h)
+		}
+	}())  // Hour 12-hour, no padding
+	
+	// Minute
+	result = replaceAll(result, "%M", t.Format("04"))       // Minute (00-59)
+	result = replaceAll(result, "%-M", fmt.Sprintf("%d", t.Minute()))  // Minute, no padding
+	
+	// Second
+	result = replaceAll(result, "%S", t.Format("05"))       // Second (00-59)
+	result = replaceAll(result, "%-S", fmt.Sprintf("%d", t.Second()))  // Second, no padding
+	
+	// Microseconds (Python extension)
+	result = replaceAll(result, "%f", fmt.Sprintf("%06d", t.Nanosecond()/1000))  // Microseconds
+	
+	// AM/PM
+	result = replaceAll(result, "%p", t.Format("PM"))       // AM or PM
+	
+	return result
+}
+
+// replaceAll replaces all occurrences of old with new in the string s.
+func replaceAll(s, old, new string) string {
+	// Simple string replacement - Go's strings.ReplaceAll would be better but keeping it simple
+	for {
+		newS := ""
+		found := false
+		i := 0
+		for i < len(s) {
+			if i <= len(s)-len(old) && s[i:i+len(old)] == old {
+				newS += new
+				i += len(old)
+				found = true
+			} else {
+				newS += string(s[i])
+				i++
+			}
+		}
+		s = newS
+		if !found {
+			break
+		}
+	}
+	return s
 }

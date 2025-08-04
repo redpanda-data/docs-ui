@@ -183,6 +183,19 @@ root.timestamp = this.StartTime / 1000`,
                         expectedKeys: ["hour", "timestamp"]
                     },
                     {
+                        name: "Epoch time UTC test",
+                        description: "Test epoch time (0) conversion to ensure correct midnight handling",
+                        mapping: `root.epoch_datetime = (0).ts_tz("UTC").ts_strftime("%Y-%m-%d %H:%M:%S", "UTC")
+root.epoch_hour = (0).ts_tz("UTC").ts_strftime("%H", "UTC")`,
+                        input: `{"test": true}`,
+                        metadata: `{}`,
+                        expectedKeys: ["epoch_datetime", "epoch_hour"],
+                        expected: {
+                            "epoch_datetime": "1970-01-01 00:00:00",
+                            "epoch_hour": "00"
+                        }
+                    },
+                    {
                         name: "America/New_York timezone",
                         description: "Test US Eastern timezone conversion",
                         mapping: `root.hour_ny = (this.StartTime / 1000).ts_tz("America/New_York").ts_strftime("%-H")
@@ -198,6 +211,15 @@ root.formatted = (this.StartTime / 1000).ts_tz("America/New_York").ts_strftime("
                         input: `{"StartTime": 1754229000000}`,
                         metadata: `{}`,
                         expectedKeys: ["hour_tokyo"]
+                    },
+                    {
+                        name: "Direct IANA timezone in ts_strftime",
+                        description: "Test direct IANA timezone usage in ts_strftime without ts_tz",
+                        mapping: `root.hour_tokyo_direct = (this.StartTime / 1000).ts_strftime("%-H", "Asia/Tokyo")
+root.formatted_tokyo_direct = (this.StartTime / 1000).ts_strftime("%Y-%m-%d %H:%M:%S", "Asia/Tokyo")`,
+                        input: `{"StartTime": 1754229000000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hour_tokyo_direct", "formatted_tokyo_direct"]
                     }
                 ]
             },
@@ -297,10 +319,26 @@ root.source = "processed-on-" + hostname()`,
                     testDiv.className = 'test-case';
                     try {
                         const result = blobl(test.mapping, test.input, test.metadata);
+                        
+                        // Check if result is an error string
+                        const isError = result.startsWith('Error:');
+                        
                         if (test.expectError) {
-                            // This test should have failed but didn't
+                            if (isError) {
+                                // This test was expected to fail and did fail
+                                testDiv.className += ' test-success';
+                                testDiv.innerHTML = createTestHTML(test, 'PASS', 'Test failed as expected', result);
+                                testResults.passed++;
+                            } else {
+                                // This test should have failed but didn't
+                                testDiv.className += ' test-error';
+                                testDiv.innerHTML = createTestHTML(test, 'UNEXPECTED SUCCESS', 'This test was expected to fail but succeeded', result);
+                                testResults.failed++;
+                            }
+                        } else if (isError) {
+                            // Unexpected error
                             testDiv.className += ' test-error';
-                            testDiv.innerHTML = createTestHTML(test, 'UNEXPECTED SUCCESS', 'This test was expected to fail but succeeded', result);
+                            testDiv.innerHTML = createTestHTML(test, 'ERROR', 'Unexpected error occurred', result);
                             testResults.failed++;
                         } else {
                             // Parse the result to check if it's valid

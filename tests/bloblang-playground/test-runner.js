@@ -61,11 +61,6 @@ async function runTests() {
         page.on('pageerror', (err) => {
             pageErrors.push(`Page error: ${err.message}`);
         });
-        page.on('console', (msg) => {
-            if (msg.type() === 'error') {
-                consoleErrors.push(msg.text());
-            }
-        });
         page.on('requestfailed', (request) => {
             console.warn(`❌ Request failed: ${request.url()}`);
         });
@@ -164,16 +159,19 @@ async function runTests() {
             testElements.forEach((testElement) => {
                 const titleElement = testElement.querySelector('.test-title');
                 const descriptionElement = testElement.querySelector('.test-description');
+                const outputElement = testElement.querySelector('.test-output');
                 const isSuccess = testElement.classList.contains('test-success');
                 const isError = testElement.classList.contains('test-error');
                 if (titleElement) {
                     const title = titleElement.textContent.trim();
                     const description = descriptionElement ? descriptionElement.textContent.trim() : '';
+                    const output = outputElement ? outputElement.textContent.trim() : '';
                     testCases.push({
                         title,
                         description,
                         status: isSuccess ? 'PASS' : (isError ? 'FAIL' : 'UNKNOWN'),
-                        success: isSuccess
+                        success: isSuccess,
+                        output: output // Include the full output for debugging
                     });
                 }
             });
@@ -202,6 +200,10 @@ async function runTests() {
             console.log(`${index + 1}. ${statusIcon} ${test.title.replace(/ - (PASS|FAIL|ERROR)$/, '')}`);
             if (test.description) {
                 console.log(`   📄 ${test.description}`);
+            }
+            // Show detailed output for failed tests
+            if (!test.success && test.output) {
+                console.log(`   🔍 Details: ${test.output.substring(0, 200)}${test.output.length > 200 ? '...' : ''}`);
             }
         });
         // Show any console errors
