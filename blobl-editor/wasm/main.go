@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"syscall/js"
+	"time"
 
 	"github.com/redpanda-data/benthos/v4/public/bloblang"
 	"github.com/redpanda-data/benthos/v4/public/service"
@@ -115,7 +116,7 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 func createMockEnvironment() *bloblang.Environment {
 	env := bloblang.NewEnvironment()
 
-	// Mock `env` function
+	// Mock env function
 	if err := env.RegisterFunction("env", func(args ...any) (bloblang.Function, error) {
 		return func() (any, error) {
 			var name string
@@ -132,10 +133,10 @@ func createMockEnvironment() *bloblang.Environment {
 					name, _ = v["name"].(string)
 					noCache, _ = v["no_cache"].(bool)
 				default:
-					return nil, fmt.Errorf("invalid argument format for `env`")
+					return nil, fmt.Errorf("invalid argument format for env")
 				}
 			} else {
-				return nil, fmt.Errorf("invalid number of arguments for `env`")
+				return nil, fmt.Errorf("invalid number of arguments for env")
 			}
 
 			mockValues := map[string]string{
@@ -153,7 +154,7 @@ func createMockEnvironment() *bloblang.Environment {
 		panic(err)
 	}
 
-	// Mock `file` function
+	// Mock file function
 	if err := env.RegisterFunction("file", func(args ...any) (bloblang.Function, error) {
 		return func() (any, error) {
 			var path string
@@ -164,16 +165,16 @@ func createMockEnvironment() *bloblang.Environment {
 			} else if len(args) == 2 {
 				params, ok := args[0].(map[string]any)
 				if !ok {
-					return nil, fmt.Errorf("invalid argument format for `file`")
+					return nil, fmt.Errorf("invalid argument format for file")
 				}
 				path, _ = params["path"].(string)
 				noCache, _ = params["no_cache"].(bool)
 			} else {
-				return nil, fmt.Errorf("invalid number of arguments for `file`")
+				return nil, fmt.Errorf("invalid number of arguments for file")
 			}
 
 			mockFiles := map[string]string{
-				"/mock/path/file.json": `{"hello": "world"}`,
+				"/mock/path/file.json": "{\"hello\": \"world\"}",
 			}
 			if content, exists := mockFiles[path]; exists {
 				if noCache {
@@ -187,7 +188,7 @@ func createMockEnvironment() *bloblang.Environment {
 		panic(err)
 	}
 
-	// Mock `file_rel` function
+	// Mock file_rel function
 	if err := env.RegisterFunction("file_rel", func(args ...any) (bloblang.Function, error) {
 		return func() (any, error) {
 			var path string
@@ -198,16 +199,16 @@ func createMockEnvironment() *bloblang.Environment {
 			} else if len(args) == 2 {
 				params, ok := args[0].(map[string]any)
 				if !ok {
-					return nil, fmt.Errorf("invalid argument format for `file_rel`")
+					return nil, fmt.Errorf("invalid argument format for file_rel")
 				}
 				path, _ = params["path"].(string)
 				noCache, _ = params["no_cache"].(bool)
 			} else {
-				return nil, fmt.Errorf("invalid number of arguments for `file_rel`")
+				return nil, fmt.Errorf("invalid number of arguments for file_rel")
 			}
 
 			mockFiles := map[string]string{
-				"relative/path/file.json": `{"hello": "world"}`,
+				"relative/path/file.json": "{\"hello\": \"world\"}",
 			}
 			if content, exists := mockFiles[path]; exists {
 				if noCache {
@@ -221,7 +222,7 @@ func createMockEnvironment() *bloblang.Environment {
 		panic(err)
 	}
 
-	// Mock `hostname` function
+	// Mock hostname function
 	if err := env.RegisterFunction("hostname", func(args ...any) (bloblang.Function, error) {
 		return func() (any, error) {
 			return "mocked-hostname", nil
@@ -230,5 +231,103 @@ func createMockEnvironment() *bloblang.Environment {
 		panic(err)
 	}
 
+	// Override the standard ts_tz method to use JavaScript timezone support
+	if err := env.RegisterMethod("ts_tz", func(args ...any) (bloblang.Method, error) {
+		if len(args) != 1 {
+			return nil, fmt.Errorf("ts_tz expects exactly 1 argument (timezone)")
+		}
+
+		timezone, ok := args[0].(string)
+		if !ok {
+			return nil, fmt.Errorf("timezone argument must be a string")
+		}
+
+		// For simple cases like "UTC" and "Local", use the original implementation
+		if timezone == "UTC" || timezone == "Local" {
+			return func(v any) (any, error) {
+				var timestamp int64
+				switch val := v.(type) {
+				case int64:
+					timestamp = val
+				case float64:
+					timestamp = int64(val)
+				case int:
+					timestamp = int64(val)
+				default:
+					return nil, fmt.Errorf("input must be a Unix timestamp (number)")
+				}
+
+				var t time.Time
+				if timezone == "UTC" {
+					t = time.Unix(timestamp, 0).UTC()
+				} else {
+					t = time.Unix(timestamp, 0) // Local time
+				}
+				return t.Unix(), nil
+			}, nil
+		}
+
+		// For IANA timezone names, use JavaScript conversion
+		return func(v any) (any, error) {
+			// Convert input to Unix timestamp
+			var timestamp float64
+			switch val := v.(type) {
+			case int64:
+				timestamp = float64(val)
+			case float64:
+				timestamp = val
+			case int:
+				timestamp = float64(val)
+			default:
+				return nil, fmt.Errorf("input must be a Unix timestamp (number)")
+			}
+
+			// Call JavaScript timezone conversion function from global scope
+			timezoneFuncs := js.Global().Get("timezoneFuncs")
+			if timezoneFuncs.IsUndefined() {
+				return nil, fmt.Errorf("timezone functions not available in JavaScript environment")
+			}
+			
+			convertFunc := timezoneFuncs.Get("convertToTimezone")
+			if convertFunc.IsUndefined() {
+				return nil, fmt.Errorf("convertToTimezone function not available")
+			}
+			
+			result := convertFunc.Invoke(timestamp, timezone)
+
+			// Check for errors
+			if result.Get("error").Truthy() {
+				return nil, fmt.Errorf("timezone conversion error: %s", result.Get("error").String())
+			}
+			
+			// Get the timezone-converted parts
+			parts := result.Get("parts")
+			
+			// Create a time object representing the local time in the target timezone
+			year := parseInt(parts.Get("year").String())
+			month := parseInt(parts.Get("month").String())
+			day := parseInt(parts.Get("day").String())
+			hour := parseInt(parts.Get("hour").String())
+			minute := parseInt(parts.Get("minute").String())
+			second := parseInt(parts.Get("second").String())
+			
+			// Create a time object in UTC with the converted local time values
+			// This allows Bloblang's other time methods to work correctly
+			localTime := time.Date(year, time.Month(month), day, hour, minute, second, 0, time.UTC)
+
+			// Return the Unix timestamp of the local time
+			return localTime.Unix(), nil
+		}, nil
+	}); err != nil {
+		panic(err)
+	}
+
 	return env
+}
+
+// Helper functions for timezone conversion
+func parseInt(s string) int {
+	var result int
+	fmt.Sscanf(s, "%d", &result)
+	return result
 }
