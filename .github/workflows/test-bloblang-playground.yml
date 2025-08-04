@@ -50,6 +50,9 @@ jobs:
       with:
         version: latest
         working-directory: blobl-editor/wasm
+      env:
+        GOOS: js
+        GOARCH: wasm
     - name: Build and Test
       run: npx gulp test:build
     - name: Upload test results
