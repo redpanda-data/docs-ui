@@ -328,6 +328,9 @@ func createMockEnvironment() *bloblang.Environment {
 // Helper functions for timezone conversion
 func parseInt(s string) int {
 	var result int
-	fmt.Sscanf(s, "%d", &result)
+	if _, err := fmt.Sscanf(s, "%d", &result); err != nil {
+		// If parsing fails, return 0 as a safe default
+		return 0
+	}
 	return result
 }
