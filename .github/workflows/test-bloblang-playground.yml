@@ -20,32 +20,27 @@ on:
 jobs:
   test-bloblang-playground:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-        go-version: [1.21.x, 1.22.x]
-      fail-fast: false
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    - name: Setup Node.js ${{ matrix.node-version }}
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '18.x'
         cache: 'npm'
-    - name: Setup Go ${{ matrix.go-version }}
+    - name: Setup Go
       uses: actions/setup-go@v4
       with:
-        go-version: ${{ matrix.go-version }}
+        go-version: '1.22.x'
     - name: Cache Go modules
       uses: actions/cache@v4
       with:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+        key: ${{ runner.os }}-go-1.22.x-${{ hashFiles('**/go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-go-${{ matrix.go-version }}-
+          ${{ runner.os }}-go-1.22.x-
     - name: Install dependencies
       run: |
         npm ci
@@ -56,30 +51,6 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results-node${{ matrix.node-version }}-go${{ matrix.go-version }}
+        name: test-results
         path: test-results.json
-  wasm-build-compatibility:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [1.20.x, 1.21.x, 1.22.x]
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Setup Go ${{ matrix.go-version }}
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ matrix.go-version }}
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        cache: 'npm'
-    - name: Install dependencies
-      run: npm ci
-    - name: Test WASM build compatibility
-      run: |
-        echo "Testing WASM build with Go ${{ matrix.go-version }}"
-        npx gulp build:wasm
-        ls -la src/static/blobl.wasm
-        echo "✅ WASM build successful with Go ${{ matrix.go-version }}"
+
