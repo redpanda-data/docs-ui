@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloblang Playground Test Suite</title>
+    <script src="../../src/js/vendor/wasm_exec.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-suite {
+            margin-bottom: 30px;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .test-error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .test-description {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .test-input {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            border: 1px solid #e9ecef;
+        }
+        .test-output {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+        }
+        .test-error .test-output {
+            background: #fff5f5;
+            color: #721c24;
+        }
+        .test-success .test-output {
+            background: #f8fff8;
+            color: #155724;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success {
+            background: #28a745;
+        }
+        .status-error {
+            background: #dc3545;
+        }
+        .status-pending {
+            background: #ffc107;
+        }
+        .summary {
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        h1 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .metadata-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Bloblang Playground Test Suite</h1>
+    <div id="loading" class="loading">
+        <h3>Loading WebAssembly module...</h3>
+        <p>Please wait while the Bloblang playground initializes.</p>
+    </div>
+    <div id="summary" class="summary" style="display: none;">
+        <h3>Test Summary</h3>
+        <p>
+            <span class="status-indicator status-success"></span><span id="passed-count">0</span> passed
+            <span class="status-indicator status-error"></span><span id="failed-count">0</span> failed
+            <span class="status-indicator status-pending"></span><span id="total-count">0</span> total
+        </p>
+    </div>
+    <div id="test-results" style="display: none;"></div>
+    <script>
+        // Define timezone conversion functions in global scope before loading WASM
+        window.timezoneFuncs = {
+            convertToTimezone: function(timestamp, timezone) {
+                try {
+                    const date = new Date(timestamp * 1000);
+                    const formatter = new Intl.DateTimeFormat('en-US', {
+                        timeZone: timezone,
+                        year: 'numeric',
+                        month: '2-digit', 
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false,
+                    });
+                    const parts = formatter.formatToParts(date);
+                    const partsMap = {};
+                    parts.forEach(part => {
+                        partsMap[part.type] = part.value;
+                    });
+                    return {
+                        formatted: formatter.format(date),
+                        parts: partsMap,
+                        timezone: timezone
+                    };
+                } catch (error) {
+                    return {
+                        error: error.message
+                    };
+                }
+            }
+        };
+        // Test cases for the Bloblang playground
+        const testCases = [
+            {
+                suite: "Timezone Support",
+                tests: [
+                    {
+                        name: "Europe/Vilnius timezone conversion",
+                        description: "Test IANA timezone support with Europe/Vilnius",
+                        mapping: `let tz = "Europe/Vilnius".or("UTC")
+let time = (this.StartTime / 1000).ts_tz("Europe/Vilnius")
+root.StartHour = $time.ts_strftime("%-H")
+root.tz = $tz`,
+                        input: `{"StartTime": 1754229000000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["StartHour", "tz"]
+                    },
+                    {
+                        name: "UTC timezone (baseline)",
+                        description: "Ensure UTC timezone still works correctly",
+                        mapping: `root.hour = (this.StartTime / 1000).ts_tz("UTC").ts_strftime("%-H")
+root.timestamp = this.StartTime / 1000`,
+                        input: `{"StartTime": 1754229000000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hour", "timestamp"]
+                    },
+                    {
+                        name: "Epoch time UTC test",
+                        description: "Test epoch time (0) conversion to ensure correct midnight handling",
+                        mapping: `root.epoch_datetime = (0).ts_tz("UTC").ts_strftime("%Y-%m-%d %H:%M:%S", "UTC")
+root.epoch_hour = (0).ts_tz("UTC").ts_strftime("%H", "UTC")`,
+                        input: `{"test": true}`,
+                        metadata: `{}`,
+                        expectedKeys: ["epoch_datetime", "epoch_hour"],
+                        expected: {
+                            "epoch_datetime": "1970-01-01 00:00:00",
+                            "epoch_hour": "00"
+                        }
+                    },
+                    {
+                        name: "America/New_York timezone",
+                        description: "Test US Eastern timezone conversion",
+                        mapping: `root.hour_ny = (this.StartTime / 1000).ts_tz("America/New_York").ts_strftime("%-H")
+root.formatted = (this.StartTime / 1000).ts_tz("America/New_York").ts_strftime("%Y-%m-%d %H:%M:%S")`,
+                        input: `{"StartTime": 1754229000000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hour_ny", "formatted"]
+                    },
+                    {
+                        name: "Asia/Tokyo timezone",
+                        description: "Test Japanese timezone conversion",
+                        mapping: `root.hour_tokyo = (this.StartTime / 1000).ts_tz("Asia/Tokyo").ts_strftime("%-H")`,
+                        input: `{"StartTime": 1754229000000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hour_tokyo"]
+                    },
+                    {
+                        name: "Direct IANA timezone in ts_strftime",
+                        description: "Test direct IANA timezone usage in ts_strftime without ts_tz",
+                        mapping: `root.hour_tokyo_direct = (this.StartTime / 1000).ts_strftime("%-H", "Asia/Tokyo")
+root.formatted_tokyo_direct = (this.StartTime / 1000).ts_strftime("%Y-%m-%d %H:%M:%S", "Asia/Tokyo")`,
+                        input: `{"StartTime": 1754229000000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hour_tokyo_direct", "formatted_tokyo_direct"]
+                    },
+                    {
+                        name: "Multiple timezone comparison",
+                        description: "Test timezone conversions with a specific timestamp to verify correct hour calculations",
+                        mapping: `let utc_time = (this.StartTime / 1000).ts_tz("UTC")
+let ny_time = (this.StartTime / 1000).ts_tz("America/New_York")
+let tokyo_time = (this.StartTime / 1000).ts_tz("Asia/Tokyo")
+root.utc_hour = $utc_time.ts_strftime("%-H")
+root.ny_hour = $ny_time.ts_strftime("%-H")
+root.tokyo_hour = $tokyo_time.ts_strftime("%-H")
+root.utc_formatted = $utc_time.ts_strftime("%Y-%m-%d %H:%M:%S")
+root.ny_formatted = $ny_time.ts_strftime("%Y-%m-%d %H:%M:%S")
+root.tokyo_formatted = $tokyo_time.ts_strftime("%Y-%m-%d %H:%M:%S")`,
+                        input: `{"StartTime": 1737291600000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["utc_hour", "ny_hour", "tokyo_hour", "utc_formatted", "ny_formatted", "tokyo_formatted"],
+                        expected: {
+                            "utc_hour": "13",
+                            "ny_hour": "8", 
+                            "tokyo_hour": "22"
+                        }
+                    },
+                    {
+                        name: "Epoch timestamp test (Critical Bug Reproduction)",
+                        description: "Test epoch timestamp 0 to reproduce the timezone conversion bug",
+                        mapping: `let utc_time = (this.StartTime / 1000).ts_tz("UTC")
+let ny_time = (this.StartTime / 1000).ts_tz("America/New_York")
+let tokyo_time = (this.StartTime / 1000).ts_tz("Asia/Tokyo")
+root.utc_hour = $utc_time.ts_strftime("%-H")
+root.ny_hour = $ny_time.ts_strftime("%-H")
+root.tokyo_hour = $tokyo_time.ts_strftime("%-H")
+root.utc_formatted = $utc_time.ts_strftime("%Y-%m-%d %H:%M:%S")
+root.ny_formatted = $ny_time.ts_strftime("%Y-%m-%d %H:%M:%S")
+root.tokyo_formatted = $tokyo_time.ts_strftime("%Y-%m-%d %H:%M:%S")`,
+                        input: `{"StartTime": 0}`,
+                        metadata: `{}`,
+                        expectedKeys: ["utc_hour", "ny_hour", "tokyo_hour", "utc_formatted", "ny_formatted", "tokyo_formatted"],
+                        expected: {
+                            "utc_hour": "0",
+                            "ny_hour": "19", 
+                            "tokyo_hour": "9"
+                        }
+                    },
+                    {
+                        name: "DST Transition Test (March 10, 2024)",
+                        description: "Test US DST transition - challenging timezone edge case",
+                        mapping: `let time = (this.StartTime / 1000).ts_tz("America/New_York")
+root.hour = $time.ts_strftime("%-H")
+root.date = $time.ts_strftime("%Y-%m-%d")
+root.full_datetime = $time.ts_strftime("%Y-%m-%d %H:%M:%S")`,
+                        input: `{"StartTime": 1710050400000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hour", "date", "full_datetime"]
+                    },
+                    {
+                        name: "Year Boundary Test (Pacific/Kiritimati)",
+                        description: "Test year boundary with extreme timezone offset",
+                        mapping: `let time = (this.StartTime / 1000).ts_tz("Pacific/Kiritimati")
+root.hour = $time.ts_strftime("%-H")
+root.date = $time.ts_strftime("%Y-%m-%d")
+root.full_datetime = $time.ts_strftime("%Y-%m-%d %H:%M:%S")`,
+                        input: `{"StartTime": 1735689600000}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hour", "date", "full_datetime"]
+                    },
+                    {
+                        name: "Direct ts_strftime Test (Bypass ts_tz)",
+                        description: "Test direct ts_strftime to isolate the bug - bypassing ts_tz completely",
+                        mapping: `root.utc_hour_direct = (this.StartTime / 1000).ts_strftime("%-H", "UTC")
+root.ny_hour_direct = (this.StartTime / 1000).ts_strftime("%-H", "America/New_York")
+root.tokyo_hour_direct = (this.StartTime / 1000).ts_strftime("%-H", "Asia/Tokyo")`,
+                        input: `{"StartTime": 0}`,
+                        metadata: `{}`,
+                        expectedKeys: ["utc_hour_direct", "ny_hour_direct", "tokyo_hour_direct"],
+                        expected: {
+                            "utc_hour_direct": "0",
+                            "ny_hour_direct": "19", 
+                            "tokyo_hour_direct": "9"
+                        }
+                    }
+                ]
+            },
+            {
+                suite: "Basic Data Transformations",
+                tests: [
+                    {
+                        name: "Array filtering",
+                        description: "Filter even numbers from an array",
+                        mapping: `root.even_numbers = this.numbers.filter(n -> n % 2 == 0)
+root.sum = this.numbers.sum()
+root.count = this.numbers.length()`,
+                        input: `{"numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}`,
+                        metadata: `{}`,
+                        expectedKeys: ["even_numbers", "sum", "count"]
+                    },
+                    {
+                        name: "String manipulation",
+                        description: "Various string operations",
+                        mapping: `root.upper = this.name.uppercase()
+root.lower = this.name.lowercase()
+root.length = this.name.length()
+root.contains_john = this.name.contains("John")`,
+                        input: `{"name": "John Doe"}`,
+                        metadata: `{}`,
+                        expectedKeys: ["upper", "lower", "length", "contains_john"]
+                    },
+                    {
+                        name: "Conditional logic",
+                        description: "Test conditional operations and default values",
+                        mapping: `root.status = if this.age >= 18 { "adult" } else { "minor" }
+root.category = this.type.or("unknown")
+root.processed = true`,
+                        input: `{"age": 25}`,
+                        metadata: `{}`,
+                        expectedKeys: ["status", "category", "processed"]
+                    }
+                ]
+            },
+            {
+                suite: "Metadata Handling",
+                tests: [
+                    {
+                        name: "Metadata access and manipulation",
+                        description: "Test reading and setting metadata",
+                        mapping: `root.message = this
+root.source = meta("source").or("unknown")`,
+                        input: `{"data": "test message"}`,
+                        metadata: `{"source": "test-system", "version": "1.0"}`,
+                        expectedKeys: ["message", "source"]
+                    }
+                ]
+            },
+            {
+                suite: "Mock Functions",
+                tests: [
+                    {
+                        name: "Environment variable mock",
+                        description: "Test the mocked env() function",
+                        mapping: `root.env_value = env("key")
+root.missing_env = env("missing").or("default")`,
+                        input: `{"test": true}`,
+                        metadata: `{}`,
+                        expectedKeys: ["env_value", "missing_env"]
+                    },
+                    {
+                        name: "Hostname mock",
+                        description: "Test the mocked hostname() function",
+                        mapping: `root.hostname = hostname()
+root.source = "processed-on-" + hostname()`,
+                        input: `{"data": "test"}`,
+                        metadata: `{}`,
+                        expectedKeys: ["hostname", "source"]
+                    }
+                ]
+            }
+        ];
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            total: 0
+        };
+        function runTestSuite() {
+            const resultsContainer = document.getElementById('test-results');
+            const loadingDiv = document.getElementById('loading');
+            const summaryDiv = document.getElementById('summary');
+            loadingDiv.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            summaryDiv.style.display = 'block';
+            testCases.forEach(suite => {
+                const suiteDiv = document.createElement('div');
+                suiteDiv.className = 'test-suite';
+                suiteDiv.innerHTML = `<h2>${suite.suite}</h2>`;
+                suite.tests.forEach(test => {
+                    testResults.total++;
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'test-case';
+                    try {
+                        const result = blobl(test.mapping, test.input, test.metadata);
+                        
+                        // Check if result is an error string
+                        const isError = result.startsWith('Error:');
+                        
+                        if (test.expectError) {
+                            if (isError) {
+                                // This test was expected to fail and did fail
+                                testDiv.className += ' test-success';
+                                testDiv.innerHTML = createTestHTML(test, 'PASS', 'Test failed as expected', result);
+                                testResults.passed++;
+                            } else {
+                                // This test should have failed but didn't
+                                testDiv.className += ' test-error';
+                                testDiv.innerHTML = createTestHTML(test, 'UNEXPECTED SUCCESS', 'This test was expected to fail but succeeded', result);
+                                testResults.failed++;
+                            }
+                        } else if (isError) {
+                            // Unexpected error
+                            testDiv.className += ' test-error';
+                            testDiv.innerHTML = createTestHTML(test, 'ERROR', 'Unexpected error occurred', result);
+                            testResults.failed++;
+                        } else {
+                            // Parse the result to check if it's valid
+                            const parsedResult = JSON.parse(result);
+                            const message = parsedResult.msg;
+                            const metadata = parsedResult.meta || {};
+                            let success = true;
+                            let details = '';
+                            // Check if expected keys are present
+                            if (test.expectedKeys) {
+                                const missingKeys = test.expectedKeys.filter(key => !(key in message));
+                                if (missingKeys.length > 0) {
+                                    success = false;
+                                    details = `Missing expected keys: ${missingKeys.join(', ')}`
+                                }
+                            }
+                            
+                            // Check if expected values match
+                            if (success && test.expected) {
+                                const mismatchedValues = [];
+                                for (const [key, expectedValue] of Object.entries(test.expected)) {
+                                    const actualValue = message[key];
+                                    if (actualValue !== expectedValue) {
+                                        mismatchedValues.push(`${key}: expected "${expectedValue}", got "${actualValue}"`);
+                                    }
+                                }
+                                if (mismatchedValues.length > 0) {
+                                    success = false;
+                                    details = `Value mismatches: ${mismatchedValues.join(', ')}`;
+                                }
+                            }
+                            if (success) {
+                                testDiv.className += ' test-success';
+                                testDiv.innerHTML = createTestHTML(test, 'PASS', 'Test executed successfully', result);
+                                testResults.passed++;
+                            } else {
+                                testDiv.className += ' test-error';
+                                testDiv.innerHTML = createTestHTML(test, 'FAIL', details, result);
+                                testResults.failed++;
+                            }
+                        }
+                    } catch (error) {
+                        if (test.expectError) {
+                            // This test was expected to fail
+                            testDiv.className += ' test-success';
+                            testDiv.innerHTML = createTestHTML(test, 'PASS', 'Test failed as expected', error.toString());
+                            testResults.passed++;
+                        } else {
+                            // Unexpected error
+                            testDiv.className += ' test-error';
+                            testDiv.innerHTML = createTestHTML(test, 'ERROR', 'Unexpected error occurred', error.toString());
+                            testResults.failed++;
+                        }
+                    }
+                    suiteDiv.appendChild(testDiv);
+                });
+                resultsContainer.appendChild(suiteDiv);
+            });
+            updateSummary();
+        }
+        function createTestHTML(test, status, message, output) {
+            const statusClass = status === 'PASS' ? 'status-success' : 'status-error';
+            return `
+                <div class="test-title">
+                    <span class="status-indicator ${statusClass}"></span>
+                    ${test.name} - ${status}
+                </div>
+                <div class="test-description">${test.description}</div>
+                <div class="test-input">
+                    <strong>Mapping:</strong><br>${test.mapping}
+                </div>
+                <div class="test-input">
+                    <strong>Input:</strong><br>${test.input}
+                </div>
+                ${test.metadata !== '{}' ? `<div class="test-input"><strong>Metadata:</strong><br>${test.metadata}</div>` : ''}
+                <div class="test-output">
+                    <strong>Result:</strong><br>${message}<br><br><strong>Output:</strong><br>${output}
+                </div>
+            `;
+        }
+        function updateSummary() {
+            document.getElementById('passed-count').textContent = testResults.passed;
+            document.getElementById('failed-count').textContent = testResults.failed;
+            document.getElementById('total-count').textContent = testResults.total;
+        }
+        // Initialize the test suite when WASM is loaded
+        window.wasmInitialized = false;
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("../../src/static/blobl.wasm"), go.importObject)
+            .then((result) => {
+                go.run(result.instance);
+                // Wait a moment for the WASM module to fully initialize
+                setTimeout(() => {
+                    window.wasmInitialized = true;
+                    runTestSuite();
+                }, 100);
+            })
+            .catch(error => {
+                document.getElementById('loading').innerHTML = `
+                    <h3>❌ Failed to load WebAssembly module</h3>
+                    <pre style="color: red; background: #ffe6e6; padding: 10px; border-radius: 5px;">${error}</pre>
+                `;
+            });
+    </script>
+</body>
+</html>

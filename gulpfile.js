@@ -192,6 +192,35 @@ const previewTask = createTask({
   call: series(previewBuildTask, previewServeTask),
 })
 
+const testTask = createTask({
+  name: 'test',
+  desc: 'Run Bloblang playground tests (build WASM + run tests)',
+  call: (done) => {
+    const { spawn } = require('child_process')
+    const testProcess = spawn('node', ['tests/bloblang-playground/test-runner.js'], { stdio: 'inherit' })
+    testProcess.on('close', (code) => {
+      if (code === 0) {
+        log.info('✅ All tests passed!')
+        done()
+      } else {
+        done(new Error(`Tests failed with exit code ${code}`))
+      }
+    })
+  },
+})
+
+const testBuildTask = createTask({
+  name: 'test:build',
+  desc: 'Build WASM and run playground tests',
+  call: series(buildWasmTask, testTask),
+})
+
+const testQuickTask = createTask({
+  name: 'test:quick',
+  desc: 'Run playground tests with existing WASM (development)',
+  call: testTask,
+})
+
 module.exports = exportTasks(
   bundleTask,
   cleanTask,
@@ -200,9 +229,11 @@ module.exports = exportTasks(
   buildWasmTask,
   bundleReactTask,
   buildTask,
-  bundleTask,
   bundlePackTask,
   previewTask,
   previewBuildTask,
-  packTask
+  packTask,
+  testTask,
+  testBuildTask,
+  testQuickTask
 )
