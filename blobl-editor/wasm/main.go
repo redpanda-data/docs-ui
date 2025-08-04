@@ -324,10 +324,9 @@ func createMockEnvironment() *bloblang.Environment {
 			if err != nil {
 				return nil, fmt.Errorf("invalid hour value: %w", err)
 			}
-			// Fix JavaScript Intl.DateTimeFormat bug where it sometimes returns hour 24 instead of 0
-			// This happens at midnight and causes incorrect time calculations
-			// When hour is 24, it represents hour 0 of the current day (not the next day)
-			// so we just need to normalize it to 0 without changing the date
+			// Fix JavaScript Intl.DateTimeFormat bug where it returns hour 24 instead of 0 for midnight
+			// This is a known issue where midnight (00:00) is sometimes represented as hour 24
+			// Hour 24 should be normalized to hour 0 without changing the date
 			if hour == 24 {
 				hour = 0
 			}
@@ -410,11 +409,12 @@ func createMockEnvironment() *bloblang.Environment {
 			// Handle timezone using tagged switch
 			switch timezone {
 			case "":
-				// No timezone specified, use local time
-				t := time.Unix(int64(timestamp), 0)
+				// No timezone specified - in WASM context, default to UTC for consistency
+				// since local time is not well-defined in a browser environment
+				t := time.Unix(int64(timestamp), 0).UTC()
 				return formatStrftime(t, format), nil
 			case "Local":
-				// Use Go's built-in local time handling
+				// Use Go's built-in local time handling (which defaults to UTC in WASM)
 				t := time.Unix(int64(timestamp), 0)
 				return formatStrftime(t, format), nil
 			case "UTC":
@@ -453,7 +453,7 @@ func createMockEnvironment() *bloblang.Environment {
 			if err != nil {
 				return nil, fmt.Errorf("invalid hour value: %w", err)
 			}
-			// Fix JavaScript Intl.DateTimeFormat bug where it sometimes returns hour 24 instead of 0
+			// Fix JavaScript Intl.DateTimeFormat bug where it returns hour 24 instead of 0 for midnight
 			if hour == 24 {
 				hour = 0
 			}
@@ -498,6 +498,13 @@ func parseInt(s string) (int, error) {
 		return 0, fmt.Errorf("failed to parse integer from string '%s': %w", s, err)
 	}
 	return result, nil
+}
+
+// daysInMonth returns the number of days in the given month and year
+func daysInMonth(year, month int) int {
+	// Use Go's time package to get the last day of the month
+	t := time.Date(year, time.Month(month+1), 0, 0, 0, 0, 0, time.UTC)
+	return t.Day()
 }
 
 // formatStrftime is a simplified placeholder for strftime formatting.
