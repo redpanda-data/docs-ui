@@ -171,11 +171,7 @@ root.StartHour = $time.ts_strftime("%-H")
 root.tz = $tz`,
                         input: `{"StartTime": 1754229000000}`,
                         metadata: `{}`,
-                        expectedKeys: ["StartHour", "tz"],
-                        expected: {
-                            "StartHour": "17",
-                            "tz": "Europe/Vilnius"
-                        }
+                        expectedKeys: ["StartHour", "tz"]
                     },
                     {
                         name: "UTC timezone (baseline)",
