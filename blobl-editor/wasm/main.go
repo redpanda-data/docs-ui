@@ -407,17 +407,18 @@ func createMockEnvironment() *bloblang.Environment {
 				return nil, fmt.Errorf("input must be a Unix timestamp (number) or RFC 3339 string")
 			}
 
-			// If no timezone specified, use local time
-			if timezone == "" {
+			// Handle timezone using tagged switch
+			switch timezone {
+			case "":
+				// No timezone specified, use local time
 				t := time.Unix(int64(timestamp), 0)
 				return formatStrftime(t, format), nil
-			}
-
-			// If timezone is Local or UTC, use Go's built-in time handling
-			if timezone == "Local" {
+			case "Local":
+				// Use Go's built-in local time handling
 				t := time.Unix(int64(timestamp), 0)
 				return formatStrftime(t, format), nil
-			} else if timezone == "UTC" {
+			case "UTC":
+				// Use Go's built-in UTC time handling
 				t := time.Unix(int64(timestamp), 0).UTC()
 				return formatStrftime(t, format), nil
 			}
