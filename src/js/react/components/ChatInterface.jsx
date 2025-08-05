@@ -540,6 +540,9 @@ export default function ChatInterface() {
               </a>{' '}
               to understand how your data is used.
             </p>
+            <p>
+              Powered by <a href="https://kapa.ai" target="_blank" rel="noopener noreferrer">kapa.ai</a>
+            </p>
           </div>
         </div>
       </div>
