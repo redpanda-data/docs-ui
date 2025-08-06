@@ -5,8 +5,8 @@ go 1.24.1
 toolchain go1.24.2
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.53.1
-	github.com/redpanda-data/connect/v4 v4.60.2
+	github.com/redpanda-data/benthos/v4 v4.55.0
+	github.com/redpanda-data/connect/v4 v4.61.0
 )
 
 require (
