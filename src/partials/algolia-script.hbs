@@ -203,7 +203,7 @@ window.addEventListener('DOMContentLoaded', function() {
               ${
                 preview.image
                 ? html`<div class="aa-ItemIcon">
-                      ${preview.type == 'Doc' ?
+                      ${preview.type == 'Doc' || preview.type == 'API Endpoint' ?
                         html`<a
                           onclick="${(event) => {
                           event.stopPropagation();
@@ -242,7 +242,7 @@ window.addEventListener('DOMContentLoaded', function() {
                   <ul>
                   ${preview.titles && preview.titles.length > 0 && preview.titles.map(title =>
                     html`<li>
-                      ${state.context.preview.type == 'Doc' ?
+                      ${state.context.preview.type == 'Doc' || state.context.preview.type == 'API Endpoint' ?
                         html`<a onclick="${(event) => {
                           event.stopPropagation();
                           aa('clickedObjectIDsAfterSearch',{
@@ -449,7 +449,7 @@ window.addEventListener('DOMContentLoaded', function() {
             },
             item({ item, components, html }) {
               const matchingHeading = item.matchingHeading || ''
-              const aTag = item.type == 'Doc' ? html`<a class="aa-ItemLink" href="${item.objectID}${matchingHeading}">
+              const aTag = item.type == 'Doc' || item.type == 'API Endpoint' ? html`<a class="aa-ItemLink" href="${item.objectID}${matchingHeading}">
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
                     <div class="aa-ItemContentRow">
