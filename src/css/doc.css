@@ -1122,9 +1122,7 @@ details[open] > summary {
 .doc .tableblock .choices__list--dropdown,
 .doc .tableblock .choices__list[aria-expanded],
 .doc .choices__list--dropdown,
-.doc .choices__list[aria-expanded],
-.doc .table-filters .choices__list--dropdown,
-.doc .table-filters .choices__list[aria-expanded] {
+.doc .choices__list[aria-expanded][aria-expanded] {
   background-color: var(--body-background);
   color: var(--body-font-color);
 }
@@ -1238,46 +1236,10 @@ a.button-arrow {
   color: var(--body-font-color);
 }
 
-.doc .table-filters {
-  display: flex;
-  flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
-  gap: 10px; /* Add space between filter elements */
-  align-items: center; /* Align vertically */
-  margin-bottom: 15px; /* Add space between the filters and the table */
-  margin-top: 15px;
-  font-size: 14px;
-}
-
 @media (max-width: 768px) {
-  .doc .table-filters {
-    flex-direction: column; /* Stack filters on smaller screens */
-    align-items: stretch; /* Make filters fill the container on smaller screens */
-    gap: 0;
-  }
-
-  .doc .choices,
-  .doc .table-filters input[type="text"] {
+  .doc .choices {
     width: 100%; /* Ensure inputs take full width on small screens */
   }
-}
-
-.doc .table-filters .table-search {
-  flex-basis: 100%;
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ccc;
-  background-color: var(--body-background);
-  color: var(--body-font-color);
-}
-
-.doc .table-filters .table-search::placeholder,
-.doc .table-filters .table-search::-moz-placeholder,
-.doc .table-filters .table-search::-webkit-input-placeholder {
-  opacity: 0.9;
-  color: var(--body-font-color);
-  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .doc .tableblock.component-table {
