@@ -1122,7 +1122,7 @@ details[open] > summary {
 .doc .tableblock .choices__list--dropdown,
 .doc .tableblock .choices__list[aria-expanded],
 .doc .choices__list--dropdown,
-.doc .choices__list[aria-expanded][aria-expanded] {
+.doc .choices__list[aria-expanded="true"] {
   background-color: var(--body-background);
   color: var(--body-font-color);
 }

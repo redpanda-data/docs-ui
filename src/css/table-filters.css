@@ -47,8 +47,9 @@
 }
 
 .doc .metadata-block .dropdown-menu {
-  left: 50px;
+  left: 0;
   max-width: 180px;
+  transform: translateX(50px);
 }
 
 /* ===== TABLE FILTERS CONTAINER ===== */
@@ -218,6 +219,12 @@
   color: white;
   font-size: 12px;
   font-weight: bold;
+}
+
+.doc .dropdown-checkbox-option input[type="checkbox"]:focus-visible {
+  outline: 2px solid #54478c;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(84, 71, 140, 0.15);
 }
 
 .doc .dropdown-checkbox-option span {
@@ -433,6 +440,12 @@
     background: var(--link-highlight-color);
   }
 
+  .doc .dropdown-checkbox-option input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--link-highlight-color);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--link-highlight-background-color);
+  }
+
   .doc .dropdown-checkbox-option span {
     color: var(--body-font-color);
   }
@@ -599,6 +612,14 @@ html[data-theme="dark"] .doc .dropdown-checkbox-option input[type="checkbox"] {
 .doc.dark .dropdown-checkbox-option input[type="checkbox"]:checked,
 html[data-theme="dark"] .doc .dropdown-checkbox-option input[type="checkbox"]:checked {
   background: var(--link-highlight-color);
+}
+
+.doc[data-theme="dark"] .dropdown-checkbox-option input[type="checkbox"]:focus-visible,
+.doc.dark .dropdown-checkbox-option input[type="checkbox"]:focus-visible,
+html[data-theme="dark"] .doc .dropdown-checkbox-option input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--link-highlight-color);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--link-highlight-background-color);
 }
 
 .doc[data-theme="dark"] .dropdown-checkbox-option span,
