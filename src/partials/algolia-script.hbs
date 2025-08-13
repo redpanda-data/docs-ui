@@ -1,4 +1,6 @@
+
 <script>
+const SUPPORTED_PREVIEW_TYPES = ['doc', 'api endpoint'];
 
 const INITIAL_TAG = `
 {{#if (eq page.component.name 'api')}}
@@ -203,7 +205,7 @@ window.addEventListener('DOMContentLoaded', function() {
               ${
                 preview.image
                 ? html`<div class="aa-ItemIcon">
-                      ${['Doc', 'API Endpoint'].includes(preview.type) ?
+                      ${SUPPORTED_PREVIEW_TYPES.includes((preview.type || '').toLowerCase()) ?
                         html`<a
                           onclick="${(event) => {
                           event.stopPropagation();
@@ -242,7 +244,7 @@ window.addEventListener('DOMContentLoaded', function() {
                   <ul>
                   ${preview.titles && preview.titles.length > 0 && preview.titles.map(title =>
                     html`<li>
-                      ${['Doc', 'API Endpoint'].includes(state.context.preview.type) ?
+                      ${SUPPORTED_PREVIEW_TYPES.includes((state.context.preview.type || '').toLowerCase()) ?
                         html`<a onclick="${(event) => {
                           event.stopPropagation();
                           aa('clickedObjectIDsAfterSearch',{
@@ -449,7 +451,7 @@ window.addEventListener('DOMContentLoaded', function() {
             },
             item({ item, components, html }) {
               const matchingHeading = item.matchingHeading || ''
-              const aTag = ['Doc', 'API Endpoint'].includes(item.type) ? html`<a class="aa-ItemLink" href="${item.objectID}${matchingHeading}">
+              const aTag = SUPPORTED_PREVIEW_TYPES.includes((item.type || '').toLowerCase()) ? html`<a class="aa-ItemLink" href="${item.objectID}${matchingHeading}">
                 <div class="aa-ItemContent">
                   <div class="aa-ItemContentBody">
                     <div class="aa-ItemContentRow">
