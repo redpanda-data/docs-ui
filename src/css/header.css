@@ -262,7 +262,7 @@ html.is-clipped--navbar {
   .platform-indicator-mobile {
     display: inline-block;
     margin-left: 12px;
-    margin-right: 12px;
+    margin-right: 16px;
     color: #fff;
     vertical-align: middle;
     order: 1;
@@ -272,6 +272,10 @@ html.is-clipped--navbar {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .theme-switcher {
+    margin-right: 8px;
   }
 
   .header {
@@ -298,7 +302,7 @@ html.is-clipped--navbar {
 
   .navbar-burger {
     order: 2;
-    margin-left: 0;
+    margin-left: 4px;
   }
 }
 
