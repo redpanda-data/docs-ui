@@ -263,11 +263,12 @@ html.is-clipped--navbar {
     display: inline-block;
     margin-left: 12px;
     margin-right: 12px;
-    color: var(--navbar-font-color);
+    color: #fff;
     vertical-align: middle;
     order: 1;
     flex: 1 1 auto;
     min-width: 0;
+    text-align: right;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
