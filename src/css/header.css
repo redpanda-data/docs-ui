@@ -257,6 +257,7 @@ html.is-clipped--navbar {
   .navbar-brand {
     height: inherit;
     align-items: center;
+    margin-right: 8px;
   }
 
   .platform-indicator-mobile {
@@ -275,7 +276,7 @@ html.is-clipped--navbar {
   }
 
   .theme-switcher {
-    margin-right: 8px;
+    margin-right: 16px;
   }
 
   .header {
