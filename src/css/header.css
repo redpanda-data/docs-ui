@@ -260,6 +260,11 @@ html.is-clipped--navbar {
     margin-right: 8px;
   }
 
+  #switch-theme {
+    margin: 0;
+    margin-top: -2px;
+  }
+
   .platform-indicator-mobile {
     display: inline-block;
     margin-left: 12px;
@@ -307,7 +312,7 @@ html.is-clipped--navbar {
   }
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1025px) {
   .body {
     padding-top: var(--body-top--desktop);
   }
@@ -479,11 +484,4 @@ html.is-clipped--navbar {
   cursor: pointer;
   transform: rotate(110deg);
   filter: invert(100%) sepia(5%) saturate(1016%) hue-rotate(181deg) brightness(100%) contrast(106%);
-}
-
-@media screen and (max-width: 1023.5px) {
-  #switch-theme {
-    margin: 0;
-    margin-top: -2px;
-  }
 }
