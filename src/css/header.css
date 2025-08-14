@@ -263,7 +263,7 @@ html.is-clipped--navbar {
     display: inline-block;
     margin-left: 12px;
     margin-right: 12px;
-    color: #fff;
+    color: var(--navbar-font-color);
     vertical-align: middle;
     order: 1;
     flex: 1 1 auto;
