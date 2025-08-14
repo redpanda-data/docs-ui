@@ -265,6 +265,12 @@ html.is-clipped--navbar {
     margin-right: 12px;
     color: #fff;
     vertical-align: middle;
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .header {
