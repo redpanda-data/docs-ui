@@ -294,6 +294,11 @@ html.is-clipped--navbar {
   .navbar-menu:not(.is-active) {
     display: none;
   }
+
+  .navbar-burger {
+    order: 2;
+    margin-left: 0;
+  }
 }
 
 @media screen and (min-width: 1024px) {
