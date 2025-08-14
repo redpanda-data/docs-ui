@@ -1,3 +1,8 @@
+/* Platform indicator for mobile header */
+.platform-indicator-mobile {
+  display: none;
+}
+
 html.is-clipped--navbar {
   overflow-y: hidden;
 }
@@ -251,6 +256,15 @@ html.is-clipped--navbar {
 @media screen and (max-width: 1024px) {
   .navbar-brand {
     height: inherit;
+    align-items: center;
+  }
+
+  .platform-indicator-mobile {
+    display: inline-block;
+    margin-left: 12px;
+    margin-right: 12px;
+    color: #fff;
+    vertical-align: middle;
   }
 
   .header {

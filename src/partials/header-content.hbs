@@ -11,6 +11,7 @@
         <span></span>
         <span></span>
       </button>
+      <span class="platform-indicator-mobile">{{page.component.title}}</span>
     </div>
     <div id="topbar-nav" class="navbar-menu" {{#if isStandaloneWidget}}style="background-color: inherit;"{{else if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: var(--default-header-color)"{{/if}}>
       {{#each (sort-components site.components)}}
