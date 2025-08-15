@@ -1,10 +1,12 @@
 = Hardware and Software Requirements
-Author Name
+:description: This page provides a preview of the Redpanda documentation UI, including API references, Bloblang playground, and site search.
 :idprefix:
 :idseparator: -
 :!example-caption:
 :!table-caption:
 :page-pagination:
+
+{description}
 
 ```bash
 alias internal-rpk="kubectl --namespace <namespace> exec -i -t redpanda-0 -c redpanda -- rpk"
