@@ -1,6 +1,5 @@
 = Hardware and Software Requirements
 :description: This page provides a preview of the Redpanda documentation UI, including API references, Bloblang playground, and site search.
-Author Name
 :idprefix:
 :idseparator: -
 :!example-caption:

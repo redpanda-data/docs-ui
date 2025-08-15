@@ -13,11 +13,18 @@
     <meta property="og:title" content="{{{this}}} | Redpanda {{{@root.page.component.title}}}">
     <meta name="twitter:title" content="{{{this}}} | Redpanda {{{@root.page.component.title}}}">
     {{/with}}
-    {{#with page.description}}
-    <meta name="description" content="{{{detag this}}}">
-    <meta property="og:description" content="{{{detag this}}}">
-    <meta name="twitter:description" content="{{{detag this}}}">
+    {{#with page.canonicalUrl}}
+    <meta property="og:url" content="{{{this}}}">
     {{/with}}
+    {{#if page.description}}
+    <meta name="description" content="{{{detag page.description}}}">
+    <meta property="og:description" content="{{{detag page.description}}}">
+    <meta name="twitter:description" content="{{{detag page.description}}}">
+    {{else}}
+    <meta name="description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
+    <meta property="og:description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
+    <meta name="twitter:description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
+    {{/if}}
     {{#with page.keywords}}
     <meta name="keywords" content="{{{this}}}">
     {{/with}}
