@@ -1,6 +1,6 @@
 antoraVersion: '1.0.0'
 site:
-  url: http://localhost:5252
+  url: https://deploy-preview-327--docs-ui.netlify.app
   title: UI Preview
   homeUrl: &home_url /xyz/24.3/index.html
   components:
