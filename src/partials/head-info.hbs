@@ -11,14 +11,37 @@
     {{/unless}}
     {{#with page.title}}
     <meta property="og:title" content="{{{this}}} | Redpanda {{{@root.page.component.title}}}">
+    <meta name="twitter:title" content="{{{this}}} | Redpanda {{{@root.page.component.title}}}">
     {{/with}}
-    {{#with page.description}}
-    <meta name="description" content="{{{detag this}}}">
-    <meta property="og:description" content="{{{detag this}}}">
+    {{#with page.canonicalUrl}}
+    <meta property="og:url" content="{{{this}}}">
     {{/with}}
+    {{#if page.description}}
+    <meta name="description" content="{{{detag page.description}}}">
+    <meta property="og:description" content="{{{detag page.description}}}">
+    <meta name="twitter:description" content="{{{detag page.description}}}">
+    {{else}}
+    <meta name="description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
+    <meta property="og:description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
+    <meta name="twitter:description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
+    {{/if}}
     {{#with page.keywords}}
     <meta name="keywords" content="{{{this}}}">
     {{/with}}
     {{#with (or antoraVersion site.antoraVersion)}}
     <meta name="generator" content="Antora {{{this}}}">
     {{/with}}
+    {{#if (and (ne page.component.title 'home') (ne page.layout 'labs-search') (ne page.attributes.role 'home'))}}
+    <meta property="og:type" content="article">
+    {{else}}
+    <meta property="og:type" content="website">
+    {{/if}}
+    <meta property="og:site_name" content="Redpanda Documentation">
+    <meta property="og:image" content="{{#with @root.site.url}}{{{this}}}{{/with}}/_/img/redpanda_social-card.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="Redpanda Documentation Social Card">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{#with @root.site.url}}{{{this}}}{{/with}}/_/img/redpanda_social-card.png">
+    <meta name="twitter:image:alt" content="Redpanda Documentation Social Card">
