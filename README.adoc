@@ -196,14 +196,13 @@ The HTML is controlled by layouts, which are Handlebars templates located in [.p
 A layout typically includes partials, located in [.path]_src/partials_, which are reusable template fragments.
 Partials may, in turn, include other partials.
 
-This project currently has six layouts:
+This project currently has five layouts:
 
 * default.hbs
 * 404.hbs
 * home.hbs
 * index.hbs
 * search.hbs
-* swagger.hbs
 
 If a page doesn't specify a layout, the `default.hbs` layout is used.
 

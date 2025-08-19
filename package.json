@@ -55,6 +55,7 @@
     "js-yaml": "~3.13",
     "lucide-react": "^0.508.0",
     "marked": "^15.0.11",
+    "marked-highlight": "^2.2.1",
     "merge-stream": "~2.0",
     "postcss-calc": "~7.0",
     "postcss-custom-properties": "~9.1",
@@ -71,14 +72,6 @@
     "stylelint-config-standard": "~20.0",
     "vinyl-buffer": "^1.0.1",
     "vinyl-fs": "~3.0",
-    "vinyl-source-stream": "^2.0.0",
-    "marked-highlight": "^2.2.1",
-    "rapidoc": "^9.3.8"
-  },
-  "scripts": {
-    "test:headless": "node tests/bloblang-playground/test-runner.js",
-    "test:playground": "npm run build:wasm && npm run test:headless",
-    "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
-    "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/"
+    "vinyl-source-stream": "^2.0.0"
   }
 }
