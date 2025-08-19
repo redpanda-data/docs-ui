@@ -205,19 +205,11 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 	   }
 
 	   // --- SCHEMA INFERENCE EXTRA CHECK ---
-	   // If mapping contains infer_schema, ensure the message is structured
+	   // If mapping contains infer_schema, ensure the message is structured and sanitized
 	   if containsInferSchema(args[0].String()) {
-	           val, _ := msg.AsStructured()
-	           // Sanitize and re-wrap into the message so the mapping operates on the sanitized structure.
-	           val = fixNumbers(val)
-	           val = canonicalize(val)
-	           val = fixNumbers(val)
-	           b, err := json.Marshal(val)
-	           if err != nil {
-	                   return fmt.Errorf("failed to marshal sanitized input: %s", err)
-	           }
-	           // Preserve the sanitized payload for schema inference
-	           msg = service.NewMessage(b)
+			   val, _ := msg.AsStructured()
+			   // Only sanitize for side effects; do not re-wrap or marshal
+			   _ = fixNumbers(canonicalize(fixNumbers(val)))
 	   }
 
 	   // --- METADATA HANDLING ---
