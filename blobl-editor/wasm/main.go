@@ -1,15 +1,112 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"syscall/js"
-	"time"
+	   "encoding/json"
+	   "fmt"
+	   "syscall/js"
+	   "time"
 
-	"github.com/redpanda-data/benthos/v4/public/bloblang"
-	"github.com/redpanda-data/benthos/v4/public/service"
-	_ "github.com/redpanda-data/connect/v4/public/components/pure/extended"
+	   "github.com/redpanda-data/benthos/v4/public/bloblang"
+	   "github.com/redpanda-data/benthos/v4/public/service"
+	   _ "github.com/redpanda-data/connect/v4/public/components/pure/extended"
 )
+
+// containsJsonNumber recursively checks for json.Number in a structure.
+// Returns true and the path if found. Used as a failsafe to ensure no json.Number leaks into Redpanda Connect.
+func containsJsonNumber(v any, path string) (bool, string) {
+	   switch val := v.(type) {
+	   case map[string]interface{}:
+			   // Recursively check all map values
+			   for k, v2 := range val {
+					   if found, p := containsJsonNumber(v2, path+"."+k); found {
+							   return true, p
+					   }
+			   }
+	   case []interface{}:
+			   // Recursively check all array elements
+			   for i, v2 := range val {
+					   if found, p := containsJsonNumber(v2, fmt.Sprintf("%s[%d]", path, i)); found {
+							   return true, p
+					   }
+			   }
+	   case json.Number:
+			   // Found a json.Number at this path
+			   return true, path
+	   }
+	   // No json.Number found in this branch
+	   return false, ""
+}
+
+// canonicalize re-encodes and decodes a value to strip json.Number wrappers.
+// This step: marshals to JSON and unmarshals back to Go native types.
+// Any json.Number values are converted to float64 or int64 by encoding/json.
+func canonicalize(v any) any {
+	   b, _ := json.Marshal(v)
+	   var out any
+	   _ = json.Unmarshal(b, &out)
+	   return out
+}
+
+
+// jsValueToGo converts a js.Value to a Go value recursively
+// jsValueToGo recursively converts a JavaScript value (js.Value) to a Go value.
+// Handles all JS types: null, undefined, boolean, number, string, array, and object.
+func jsValueToGo(v js.Value) any {
+	   switch v.Type() {
+	   case js.TypeNull, js.TypeUndefined:
+			   // JS null/undefined → Go nil
+			   return nil
+	   case js.TypeBoolean:
+			   // JS boolean → Go bool
+			   return v.Bool()
+	   case js.TypeNumber:
+			   // JS number → Go float64
+			   return v.Float()
+	   case js.TypeString:
+			   // JS string → Go string
+			   return v.String()
+	   case js.TypeObject:
+			   // Array or Object
+			   if v.InstanceOf(js.Global().Get("Array")) {
+					   // JS Array → Go []interface{}
+					   arr := make([]interface{}, v.Length())
+					   for i := 0; i < v.Length(); i++ {
+							   arr[i] = jsValueToGo(v.Index(i))
+					   }
+					   return arr
+			   }
+			   // JS Object → Go map[string]interface{}
+			   obj := map[string]interface{}{}
+			   keys := js.Global().Get("Object").Call("keys", v)
+			   for i := 0; i < keys.Length(); i++ {
+					   k := keys.Index(i).String()
+					   obj[k] = jsValueToGo(v.Get(k))
+			   }
+			   return obj
+	   default:
+			   // Any other JS type → Go nil
+			   return nil
+	   }
+}
+
+// containsInferSchema checks if the mapping string uses infer_schema (simple substring match)
+// containsInferSchema returns true if the mapping string uses infer_schema (simple substring match).
+// Used to optionally trigger extra sanitization for schema inference.
+func containsInferSchema(mapping string) bool {
+	   return (len(mapping) > 0 && (contains(mapping, ".infer_schema()") || contains(mapping, "infer_schema()")))
+}
+
+// contains is a helper for substring search (no import for strings).
+func contains(s, substr string) bool {
+	   return len(substr) > 0 && (func() bool {
+			   for i := 0; i+len(substr) <= len(s); i++ {
+					   if s[i:i+len(substr)] == substr {
+							   return true
+					   }
+			   }
+			   return false
+	   })()
+}
 
 var globalEnv *bloblang.Environment
 
@@ -23,93 +120,199 @@ func main() {
 	select {}
 }
 
+// blobl is the main entrypoint for the WASM module, called from JavaScript.
+// It takes a mapping string, a payload (string or JS object), and optional metadata.
 func blobl(_ js.Value, args []js.Value) (output any) {
-	defer func() {
-		// Make sure we return a string instead of an error
-		if o, ok := output.(error); ok {
-			output = "Error: " + o.Error()
-		}
-	}()
+	   defer func() {
+			   // Always return a string, even for errors
+			   if o, ok := output.(error); ok {
+					   output = "Error: " + o.Error()
+			   }
+	   }()
 
-	if len(args) < 2 || len(args) > 3 {
-		return fmt.Errorf("expected 2 or 3 arguments, received %d instead", len(args))
-	}
+	   // Validate argument count
+	   if len(args) < 2 || len(args) > 3 {
+			   return fmt.Errorf("expected 2 or 3 arguments, received %d instead", len(args))
+	   }
 
-	// Parse the mapping
-	mapping, err := globalEnv.Parse(args[0].String())
-	if err != nil {
-		return fmt.Errorf("failed to parse mapping: %s", err)
-	}
+	   // Parse the Bloblang mapping
+	   mapping, err := globalEnv.Parse(args[0].String())
+	   if err != nil {
+			   return fmt.Errorf("failed to parse mapping: %s", err)
+	   }
 
-	// Take the raw data without unmarshaling
-	payloadBytes := []byte(args[1].String())
+	   // --- PAYLOAD HANDLING ---
+	   // Always decode to interface{}, fix numbers, canonicalize, then marshal for service.NewMessage
+	   // This ensures all numbers are native Go types (float64/int64), never json.Number.
+	   var msg *service.Message
+	   var data any
+	   if args[1].Type() == js.TypeString {
+			   payloadBytes := []byte(args[1].String())
+			   // Try to unmarshal as JSON (map or array)
+			   var temp interface{}
+			   if err := json.Unmarshal(payloadBytes, &temp); err == nil {
+					   // Re-marshal and unmarshal to force all numbers to native types
+					   b, _ := json.Marshal(temp)
+					   var canonical interface{}
+					   _ = json.Unmarshal(b, &canonical)
+					   data = canonical
+					   // This sequence ensures all json.Number are converted, even from edge cases
+					   data = fixNumbers(data)
+					   data = canonicalize(data)
+					   data = fixNumbers(data)
+					   // Failsafe: check for json.Number before passing to Redpanda Connect
+					   if found, path := containsJsonNumber(data, ""); found {
+							   return fmt.Errorf("[FAILSAFE] json.Number found at %s before service.NewMessage", path)
+					   }
+					   b, err := json.Marshal(data)
+					   if err != nil {
+							   return fmt.Errorf("failed to marshal input: %s", err)
+					   }
+					   // Final failsafe: check for json.Number in marshaled bytes
+					   var check any
+					   if err := json.Unmarshal(b, &check); err == nil {
+							   if found, path := containsJsonNumber(check, "marshal-check"); found {
+									   return fmt.Errorf("[FAILSAFE] json.Number found after marshal at %s", path)
+							   }
+					   }
+					   msg = service.NewMessage(b)
+			   } else {
+					   // Not JSON, treat as string
+					   msg = service.NewMessage([]byte(args[1].String()))
+			   }
+	   } else {
+			   // For non-string input, convert JS value to Go value, fix numbers, canonicalize
+			   data = jsValueToGo(args[1])
+			   data = fixNumbers(data)
+			   data = canonicalize(data)
+			   data = fixNumbers(data)
+			   // Failsafe: check for json.Number before passing to Redpanda Connect
+			   if found, path := containsJsonNumber(data, ""); found {
+					   return fmt.Errorf("[FAILSAFE] json.Number found at %s before service.NewMessage", path)
+			   }
+			   b, err := json.Marshal(data)
+			   if err != nil {
+					   return fmt.Errorf("failed to marshal input: %s", err)
+			   }
+			   // Final failsafe: check for json.Number in marshaled bytes
+			   var check any
+			   if err := json.Unmarshal(b, &check); err == nil {
+					   if found, path := containsJsonNumber(check, "marshal-check"); found {
+							   return fmt.Errorf("[FAILSAFE] json.Number found after marshal at %s", path)
+					   }
+			   }
+			   msg = service.NewMessage(b)
+	   }
 
-	// Create the message from the raw bytes
-	msg := service.NewMessage(payloadBytes)
+	   // --- SCHEMA INFERENCE EXTRA CHECK ---
+	   // If mapping contains infer_schema, ensure the message is structured
+	   if containsInferSchema(args[0].String()) {
+			   val, _ := msg.AsStructured()
+			   // Sanitize: fixNumbers and canonicalize to remove any json.Number
+			   val = fixNumbers(val)
+			   val = canonicalize(val)
+			   val = fixNumbers(val)
+	   }
 
-	// Parse the optional metadata (this can still be JSON)
-	metadata := map[string]any{}
-	if len(args) == 3 {
-		if err := json.Unmarshal([]byte(args[2].String()), &metadata); err != nil {
-			return fmt.Errorf("failed to parse metadata: %s", err)
-		}
-	}
+	   // --- METADATA HANDLING ---
+	   // Parse the optional metadata (this can still be JSON)
+	   metadata := map[string]any{}
+	   if len(args) == 3 {
+			   if err := json.Unmarshal([]byte(args[2].String()), &metadata); err != nil {
+					   return fmt.Errorf("failed to parse metadata: %s", err)
+			   }
+			   // Fix numbers and canonicalize in metadata as well
+			   metadata = canonicalize(fixNumbers(metadata)).(map[string]any)
+			   if found, path := containsJsonNumber(metadata, ""); found {
+					   return fmt.Errorf("[FAILSAFE] json.Number found in metadata at %s", path)
+			   }
+	   }
 
-	// Apply metadata to the message
-	for key, value := range metadata {
-		strValue, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("metadata value for key '%s' must be a string, got %T", key, value)
-		}
-		msg.MetaSetMut(key, strValue)
-	}
+	   // Apply metadata to the message (all values must be strings)
+	   for key, value := range metadata {
+			   strValue, ok := value.(string)
+			   if !ok {
+					   return fmt.Errorf("metadata value for key '%s' must be a string, got %T", key, value)
+			   }
+			   msg.MetaSetMut(key, strValue)
+	   }
 
-	// Execute the mapping
-	result, err := msg.BloblangQuery(mapping)
-	if err != nil {
-		return fmt.Errorf("failed to execute mapping: %s", err)
-	}
+	   // --- EXECUTE BLOBLANG MAPPING ---
+	   result, err := msg.BloblangQuery(mapping)
+	   if err != nil {
+			   return fmt.Errorf("failed to execute mapping: %s", err)
+	   }
 
-	var message any
-	if result == nil {
-		message = nil
-	} else {
-		message, err = result.AsStructured()
-		if err != nil {
-			res, err := result.AsBytes()
-			if err != nil {
-				return fmt.Errorf("failed to extract message: %s", err)
-			}
-			message = string(res)
-		}
-	}
+	   // --- EXTRACT OUTPUT ---
+	   var message any
+	   if result == nil {
+			   message = nil
+	   } else {
+			   message, err = result.AsStructured()
+			   if err != nil {
+					   // If AsStructured fails, fallback to extracting as bytes/string
+					   res, err := result.AsBytes()
+					   if err != nil {
+							   return fmt.Errorf("failed to extract message: %s", err)
+					   }
+					   message = string(res)
+			   }
+	   }
 
-  // Extract metadata (only if we got a non‐nil result)
-  var extractedMetadata map[string]any
-  if result != nil {
-     if err = result.MetaWalkMut(func(key string, value any) error {
-         if extractedMetadata == nil {
-             extractedMetadata = make(map[string]any)
-         }
-         extractedMetadata[key] = value
-         return nil
-     }); err != nil {
-         return fmt.Errorf("failed to extract metadata: %s", err)
-     }
-  }
+	   // Extract metadata (only if we got a non‐nil result)
+	   var extractedMetadata map[string]any
+	   if result != nil {
+			   if err = result.MetaWalkMut(func(key string, value any) error {
+					   if extractedMetadata == nil {
+							   extractedMetadata = make(map[string]any)
+					   }
+					   extractedMetadata[key] = value
+					   return nil
+			   }); err != nil {
+					   return fmt.Errorf("failed to extract metadata: %s", err)
+			   }
+	   }
 
-	payload, err := json.MarshalIndent(struct {
-		Msg  any            `json:"msg"`
-		Meta map[string]any `json:"meta,omitempty"`
-	}{
-		Msg:  message,
-		Meta: extractedMetadata,
-	}, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal output: %s", err)
-	}
+	   // Marshal the output as pretty JSON
+	   payload, err := json.MarshalIndent(struct {
+			   Msg  any            `json:"msg"`
+			   Meta map[string]any `json:"meta,omitempty"`
+	   }{
+			   Msg:  message,
+			   Meta: extractedMetadata,
+	   }, "", "  ")
+	   if err != nil {
+			   return fmt.Errorf("failed to marshal output: %s", err)
+	   }
 
-	return string(payload)
+	   return string(payload)
+}
+
+// fixNumbers recursively converts json.Number to float64 or int64.
+func fixNumbers(i interface{}) interface{} {
+	   switch v := i.(type) {
+	   case map[string]interface{}:
+			   for k, val := range v {
+					   v[k] = fixNumbers(val)
+			   }
+			   return v
+	   case []interface{}:
+			   for i, val := range v {
+					   v[i] = fixNumbers(val)
+			   }
+			   return v
+	   case json.Number:
+			   // Try int first, fallback to float
+			   if intVal, err := v.Int64(); err == nil {
+					   return intVal
+			   }
+			   if floatVal, err := v.Float64(); err == nil {
+					   return floatVal
+			   }
+			   return v.String()
+	   default:
+			   return v
+	   }
 }
 
 // createMockEnvironment creates a shared Bloblang environment with mocked I/O functions.
