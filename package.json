@@ -72,7 +72,7 @@
     "stylelint-config-standard": "~20.0",
     "vinyl-buffer": "^1.0.1",
     "vinyl-fs": "~3.0",
-    "vinyl-source-stream": "^2.0.0",
+    "vinyl-source-stream": "^2.0.0"
   },
   "scripts": {
     "test:headless": "node tests/bloblang-playground/test-runner.js",

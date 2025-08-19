@@ -3,6 +3,7 @@ package main
 import (
 	   "encoding/json"
 	   "fmt"
+	   "strings"
 	   "syscall/js"
 	   "time"
 
@@ -14,26 +15,33 @@ import (
 // containsJsonNumber recursively checks for json.Number in a structure.
 // Returns true and the path if found. Used as a failsafe to ensure no json.Number leaks into Redpanda Connect.
 func containsJsonNumber(v any, path string) (bool, string) {
+	   // Normalize root path for clearer diagnostics
+	   if path == "" {
+			   path = "$"
+	   }
 	   switch val := v.(type) {
 	   case map[string]interface{}:
-			   // Recursively check all map values
 			   for k, v2 := range val {
-					   if found, p := containsJsonNumber(v2, path+"."+k); found {
+					   nextPath := path
+					   if path == "$" {
+							   nextPath += "." + k
+					   } else {
+							   nextPath = path + "." + k
+					   }
+					   if found, p := containsJsonNumber(v2, nextPath); found {
 							   return true, p
 					   }
 			   }
 	   case []interface{}:
-			   // Recursively check all array elements
 			   for i, v2 := range val {
-					   if found, p := containsJsonNumber(v2, fmt.Sprintf("%s[%d]", path, i)); found {
+					   nextPath := fmt.Sprintf("%s[%d]", path, i)
+					   if found, p := containsJsonNumber(v2, nextPath); found {
 							   return true, p
 					   }
 			   }
 	   case json.Number:
-			   // Found a json.Number at this path
 			   return true, path
 	   }
-	   // No json.Number found in this branch
 	   return false, ""
 }
 
@@ -41,9 +49,14 @@ func containsJsonNumber(v any, path string) (bool, string) {
 // This step: marshals to JSON and unmarshals back to Go native types.
 // Any json.Number values are converted to float64 or int64 by encoding/json.
 func canonicalize(v any) any {
-	   b, _ := json.Marshal(v)
+	   b, err := json.Marshal(v)
+	   if err != nil {
+			   return v
+	   }
 	   var out any
-	   _ = json.Unmarshal(b, &out)
+	   if err := json.Unmarshal(b, &out); err != nil {
+			   return v
+	   }
 	   return out
 }
 
@@ -54,28 +67,23 @@ func canonicalize(v any) any {
 func jsValueToGo(v js.Value) any {
 	   switch v.Type() {
 	   case js.TypeNull, js.TypeUndefined:
-			   // JS null/undefined → Go nil
 			   return nil
 	   case js.TypeBoolean:
-			   // JS boolean → Go bool
 			   return v.Bool()
 	   case js.TypeNumber:
-			   // JS number → Go float64
 			   return v.Float()
 	   case js.TypeString:
-			   // JS string → Go string
 			   return v.String()
 	   case js.TypeObject:
-			   // Array or Object
+			   // Handle TypedArrays (optional, not required for most use cases)
+			   // If you want to support Uint8Array, Float32Array, etc., add logic here
 			   if v.InstanceOf(js.Global().Get("Array")) {
-					   // JS Array → Go []interface{}
 					   arr := make([]interface{}, v.Length())
 					   for i := 0; i < v.Length(); i++ {
 							   arr[i] = jsValueToGo(v.Index(i))
 					   }
 					   return arr
 			   }
-			   // JS Object → Go map[string]interface{}
 			   obj := map[string]interface{}{}
 			   keys := js.Global().Get("Object").Call("keys", v)
 			   for i := 0; i < keys.Length(); i++ {
@@ -84,7 +92,6 @@ func jsValueToGo(v js.Value) any {
 			   }
 			   return obj
 	   default:
-			   // Any other JS type → Go nil
 			   return nil
 	   }
 }
@@ -93,20 +100,10 @@ func jsValueToGo(v js.Value) any {
 // containsInferSchema returns true if the mapping string uses infer_schema (simple substring match).
 // Used to optionally trigger extra sanitization for schema inference.
 func containsInferSchema(mapping string) bool {
-	   return (len(mapping) > 0 && (contains(mapping, ".infer_schema()") || contains(mapping, "infer_schema()")))
+	   return len(mapping) > 0 && (strings.Contains(mapping, ".infer_schema()") || strings.Contains(mapping, "infer_schema()"))
 }
 
-// contains is a helper for substring search (no import for strings).
-func contains(s, substr string) bool {
-	   return len(substr) > 0 && (func() bool {
-			   for i := 0; i+len(substr) <= len(s); i++ {
-					   if s[i:i+len(substr)] == substr {
-							   return true
-					   }
-			   }
-			   return false
-	   })()
-}
+
 
 var globalEnv *bloblang.Environment
 
@@ -152,23 +149,23 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 			   var temp interface{}
 			   if err := json.Unmarshal(payloadBytes, &temp); err == nil {
 					   // Re-marshal and unmarshal to force all numbers to native types
-					   b, _ := json.Marshal(temp)
+					   b, err := json.Marshal(temp)
+					   if err != nil {
+							   return fmt.Errorf("failed to marshal intermediate input: %s", err)
+					   }
 					   var canonical interface{}
 					   _ = json.Unmarshal(b, &canonical)
 					   data = canonical
-					   // This sequence ensures all json.Number are converted, even from edge cases
 					   data = fixNumbers(data)
 					   data = canonicalize(data)
 					   data = fixNumbers(data)
-					   // Failsafe: check for json.Number before passing to Redpanda Connect
 					   if found, path := containsJsonNumber(data, ""); found {
 							   return fmt.Errorf("[FAILSAFE] json.Number found at %s before service.NewMessage", path)
 					   }
-					   b, err := json.Marshal(data)
+					   b, err = json.Marshal(data)
 					   if err != nil {
 							   return fmt.Errorf("failed to marshal input: %s", err)
 					   }
-					   // Final failsafe: check for json.Number in marshaled bytes
 					   var check any
 					   if err := json.Unmarshal(b, &check); err == nil {
 							   if found, path := containsJsonNumber(check, "marshal-check"); found {
@@ -220,7 +217,11 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 					   return fmt.Errorf("failed to parse metadata: %s", err)
 			   }
 			   // Fix numbers and canonicalize in metadata as well
-			   metadata = canonicalize(fixNumbers(metadata)).(map[string]any)
+			   if m, ok := canonicalize(fixNumbers(metadata)).(map[string]any); ok {
+					   metadata = m
+			   } else {
+					   return fmt.Errorf("metadata must be a JSON object")
+			   }
 			   if found, path := containsJsonNumber(metadata, ""); found {
 					   return fmt.Errorf("[FAILSAFE] json.Number found in metadata at %s", path)
 			   }
