@@ -51,6 +51,10 @@ html[data-theme=dark] {
   font-family: var(--body-font-family);
 }
 
+.platform-indicator-mobile {
+  display: none;
+}
+
 .navbar {
   background: var(--navbar-background);
   max-height: var(--navbar-height);
