@@ -160,6 +160,35 @@
         // Test cases for the Bloblang playground
         const testCases = [
             {
+                suite: "Schema Inference",
+                tests: [
+                    {
+                        name: "infer_schema with numbers",
+                        description: "Should infer schema for JSON with integer and float values (regression test for WASM json.Number issue)",
+                        mapping: `root = this.infer_schema()`,
+                        input: `{"id": 123, "score": 45.67, "name": "Alice"}`,
+                        metadata: `{}`,
+                        expected: {
+                            "id": "INT64",
+                            "score": "FLOAT64",
+                            "name": "STRING"
+                        }
+                    },
+                    {
+                        name: "infer_schema with all strings",
+                        description: "Should infer schema for JSON with only string values (control test)",
+                        mapping: `root = this.infer_schema()`,
+                        input: `{"id": "123", "score": "45.67", "name": "Alice"}`,
+                        metadata: `{}`,
+                        expected: {
+                            "id": "string",
+                            "score": "string",
+                            "name": "string"
+                        }
+                    }
+                ]
+            },
+            {
                 suite: "Timezone Support",
                 tests: [
                     {
@@ -398,49 +427,60 @@ root.source = "processed-on-" + hostname()`,
                     testDiv.className = 'test-case';
                     try {
                         const result = blobl(test.mapping, test.input, test.metadata);
-                        
-                        // Check if result is an error string
                         const isError = result.startsWith('Error:');
-                        
                         if (test.expectError) {
                             if (isError) {
-                                // This test was expected to fail and did fail
                                 testDiv.className += ' test-success';
                                 testDiv.innerHTML = createTestHTML(test, 'PASS', 'Test failed as expected', result);
                                 testResults.passed++;
                             } else {
-                                // This test should have failed but didn't
                                 testDiv.className += ' test-error';
                                 testDiv.innerHTML = createTestHTML(test, 'UNEXPECTED SUCCESS', 'This test was expected to fail but succeeded', result);
                                 testResults.failed++;
                             }
                         } else if (isError) {
-                            // Unexpected error
                             testDiv.className += ' test-error';
                             testDiv.innerHTML = createTestHTML(test, 'ERROR', 'Unexpected error occurred', result);
                             testResults.failed++;
                         } else {
-                            // Parse the result to check if it's valid
                             const parsedResult = JSON.parse(result);
                             const message = parsedResult.msg;
                             const metadata = parsedResult.meta || {};
                             let success = true;
                             let details = '';
-                            // Check if expected keys are present
-                            if (test.expectedKeys) {
-                                const missingKeys = test.expectedKeys.filter(key => !(key in message));
-                                if (missingKeys.length > 0) {
-                                    success = false;
-                                    details = `Missing expected keys: ${missingKeys.join(', ')}`
+                            // Special handling for infer_schema output (Benthos >= 4.21)
+                            const isInferSchema = typeof test.mapping === 'string' && test.mapping.includes('infer_schema()');
+                            let flatSchema = null;
+                            if (isInferSchema && message && message.type === 'OBJECT' && Array.isArray(message.children)) {
+                                // Convert children array to flat key:type map (lowercase type)
+                                flatSchema = {};
+                                for (const child of message.children) {
+                                    if (child && child.name && child.type) {
+                                        flatSchema[child.name] = String(child.type).toLowerCase();
+                                    }
                                 }
                             }
-                            
+                            // Check if expected keys are present
+                            if (test.expectedKeys) {
+                                const keysToCheck = flatSchema || message;
+                                const missingKeys = test.expectedKeys.filter(key => !(key in keysToCheck));
+                                if (missingKeys.length > 0) {
+                                    success = false;
+                                    details = `Missing expected keys: ${missingKeys.join(', ')}`;
+                                }
+                            }
                             // Check if expected values match
                             if (success && test.expected) {
                                 const mismatchedValues = [];
+                                const keysToCheck = flatSchema || message;
                                 for (const [key, expectedValue] of Object.entries(test.expected)) {
-                                    const actualValue = message[key];
-                                    if (actualValue !== expectedValue) {
+                                    let actualValue = keysToCheck[key];
+                                    // Accept both string and uppercase STRING for type
+                                    if (typeof actualValue === 'string' && typeof expectedValue === 'string') {
+                                        if (actualValue.toLowerCase() !== expectedValue.toLowerCase()) {
+                                            mismatchedValues.push(`${key}: expected "${expectedValue}", got "${actualValue}"`);
+                                        }
+                                    } else if (actualValue !== expectedValue) {
                                         mismatchedValues.push(`${key}: expected "${expectedValue}", got "${actualValue}"`);
                                     }
                                 }
@@ -461,12 +501,10 @@ root.source = "processed-on-" + hostname()`,
                         }
                     } catch (error) {
                         if (test.expectError) {
-                            // This test was expected to fail
                             testDiv.className += ' test-success';
                             testDiv.innerHTML = createTestHTML(test, 'PASS', 'Test failed as expected', error.toString());
                             testResults.passed++;
                         } else {
-                            // Unexpected error
                             testDiv.className += ' test-error';
                             testDiv.innerHTML = createTestHTML(test, 'ERROR', 'Unexpected error occurred', error.toString());
                             testResults.failed++;

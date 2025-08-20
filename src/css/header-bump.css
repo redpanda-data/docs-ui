@@ -302,6 +302,32 @@ html[data-theme=dark] {
 @media screen and (max-width: 1024px) {
   .navbar-brand {
     height: var(--navbar-height);
+    align-items: center;
+    margin-right: 8px;
+  }
+
+  #switch-theme {
+    margin: 0;
+    margin-top: -2px;
+  }
+
+  .platform-indicator-mobile {
+    display: inline-block;
+    margin-left: 12px;
+    margin-right: 16px;
+    color: #fff;
+    vertical-align: middle;
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .theme-switcher {
+    margin-right: 16px;
   }
 
   .header {
@@ -324,9 +350,14 @@ html[data-theme=dark] {
   .navbar-menu:not(.is-active) {
     display: none;
   }
+
+  .navbar-burger {
+    order: 2;
+    margin-left: 4px;
+  }
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1025px) {
   .navbar-burger {
     display: none;
   }

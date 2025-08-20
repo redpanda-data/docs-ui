@@ -73,5 +73,12 @@
     "vinyl-buffer": "^1.0.1",
     "vinyl-fs": "~3.0",
     "vinyl-source-stream": "^2.0.0"
+  },
+  "scripts": {
+    "test:headless": "node tests/bloblang-playground/test-runner.js",
+    "test:playground": "npm run build:wasm && npm run test:headless",
+    "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
+    "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
+    "serve:playground": "npx serve ."
   }
 }
