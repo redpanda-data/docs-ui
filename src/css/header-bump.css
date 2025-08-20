@@ -358,7 +358,7 @@ html[data-theme=dark] {
 }
 
 @media screen and (min-width: 1025px) {
-    .navbar-burger {
+  .navbar-burger {
     display: none;
   }
 
