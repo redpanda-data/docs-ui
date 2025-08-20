@@ -156,9 +156,7 @@ func blobl(_ js.Value, args []js.Value) (output any) {
 					   var canonical interface{}
 					   _ = json.Unmarshal(b, &canonical)
 					   data = canonical
-					   data = fixNumbers(data)
-					   data = canonicalize(data)
-					   data = fixNumbers(data)
+					   data = fixNumbers(canonicalize(data))
 					   if found, path := containsJsonNumber(data, ""); found {
 							   return fmt.Errorf("[FAILSAFE] json.Number found at %s before service.NewMessage", path)
 					   }
