@@ -1,6 +1,6 @@
 <script>
 // Supported previewable types
-const SUPPORTED_PREVIEW_TYPES = ['doc', 'api endpoint'];
+const SUPPORTED_PREVIEW_TYPES = ['doc', 'api endpoint' 'api group'];
 
 // Handlebars-context strings
 const INITIAL_TAG = `
@@ -243,6 +243,7 @@ window.addEventListener('DOMContentLoaded', function () {
                         })}
                       </h3>
                       <p>${ preview.intro ? components.Highlight({ hit: preview, attribute: 'intro' }) : preview.description ? components.Highlight({ hit: preview, attribute: 'description' }) : '' }</p>
+                      ${ preview.api ? html`<div class="aa-ItemContentRow"><div class="aa-ItemContentTitle result-type">${preview.api}</div></div>` : '' }
                       ${ hasEndpoint ? html`<div class="endpoint-example">
                           <h4>Endpoint</h4>
                           <pre><code>${endpointLine}</code></pre>
@@ -527,6 +528,7 @@ window.addEventListener('DOMContentLoaded', function () {
                         <div class="aa-ItemContentRow">
                           <div class="aa-ItemContentTitle result-type">${item.type}</div>
                           ${item.product ? html`<div class="aa-ItemContentTitle result-type">${item.product}</div>` : ''}
+                          ${item.api ? html`<div class="aa-ItemContentTitle result-type">${item.api}</div>` : ''}
                           ${item.version ? html`<div class="aa-ItemContentTitle result-type">${item.version}</div>` : ''}
                         </div>
                       </div>
