@@ -280,7 +280,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                           positions: [state.activeItemId + 1],
                                         });
                                       }}
-                                      target="_blank"
+                                      target="_blank" rel="noopener noreferrer"
                                       href="${preview.url || preview.objectID}"
                                     >
                                       <img src="${preview.image}" alt="${preview.title || ''}" />
@@ -324,7 +324,7 @@ window.addEventListener('DOMContentLoaded', function () {
                                               positions: [state.activeItemId + 1],
                                             });
                                           }}
-                                          target="_blank"
+                                          target="_blank" rel="noopener noreferrer"
                                           href="${(preview.url || preview.objectID)}#${title.h}"
                                         >
                                           ${components.Highlight({ hit: title, attribute: 't' })}
@@ -497,7 +497,7 @@ window.addEventListener('DOMContentLoaded', function () {
                 <div>No results for ${state.query}</div>
                 <p>
                   Believe this query should return results?
-                  <a target="_blank" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}">
+                  <a target="_blank" rel="noopener noreferrer" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}">
                     Let us know
                   </a>.
                 </p>`;
@@ -544,7 +544,7 @@ window.addEventListener('DOMContentLoaded', function () {
                       </div>
                     </div>
                   </a>`
-                : html`<a target="_blank" class="aa-ItemLink" href="${item.url || item.objectID}">
+                : html`<a target="_blank" rel="noopener noreferrer" class="aa-ItemLink" href="${item.url || item.objectID}">
                     <div class="aa-ItemContent">
                       <div class="aa-ItemContentBody">
                         <div class="aa-ItemContentRow">
