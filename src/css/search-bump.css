@@ -78,7 +78,12 @@
   border-bottom: none;
 }
 
-.aa-Panel .context-dropdown-menu .context-dropdown-item:hover,
+.aa-Panel .context-dropdown-menu .context-dropdown-item:hover {
+  background: var(--link-highlight-color);
+  color: white;
+  cursor: pointer;
+}
+
 .aa-Panel .context-dropdown-menu .context-dropdown-item:focus {
   background: var(--link-highlight-color);
   outline: none;
@@ -93,25 +98,25 @@
 }
 
 :root {
-  --search-hits-boxshadow: var(--search-hits-boxshadow);
-  --search-detached-mode-background: var(--search-detached-mode-background);
-  --search-icon-color: var(--search-icon-color);
-  --body-font-color: var(--body-font-color);
-  --panel-background: var(--panel-background);
-  --link-highlight-color: var(--link-highlight-color);
-  --link-highlight-background-color: var(--link-highlight-background-color);
+  --search-hits-boxshadow: 0 0 0 1px rgba(16, 24, 40, 0.05), 0 1px 3px 0 rgba(16, 24, 40, 0.15);
+  --search-detached-mode-background: #fcfcfd;
+  --search-icon-color: #667085;
+  --body-font-color: #101828;
+  --panel-background: #fff;
+  --link-highlight-color: #444ce7;
+  --link-highlight-background-color: rgba(68, 76, 231, 0.08);
   --color-white: #fff;
-  --panel-border-color: #e0e0e0;
+  --panel-border-color: #eaecf0;
 }
 
 html[data-theme=dark] {
-  --search-hits-boxshadow: var(--search-hits-boxshadow);
-  --search-detached-mode-background: var(--search-detached-mode-background);
-  --search-icon-color: var(--search-icon-color);
-  --body-font-color: var(--body-font-color);
-  --panel-background: var(--panel-background);
-  --link-highlight-color: var(--link-highlight-color);
-  --link-highlight-background-color: var(--link-highlight-background-color);
+  --search-hits-boxshadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 3px 0 rgba(255, 255, 255, 0.15);
+  --search-detached-mode-background: #101828;
+  --search-icon-color: #d0d5dd;
+  --body-font-color: #fff;
+  --panel-background: #ffffff12;
+  --link-highlight-color: #9184f1;
+  --link-highlight-background-color: rgba(145, 132, 241, 0.16);
 }
 
 article.search {
