@@ -192,7 +192,7 @@ article.search .ais-Heading > a {
 /* Reserve space for Algolia preview panel to prevent CLS */
 .aa-Preview.aa-Column.doc {
   min-width: 350px;
-  max-width: 400px;
+  max-width: 600px;
   min-height: 400px;
   margin-top: 0;
 }
