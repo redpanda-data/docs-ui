@@ -1,3 +1,7 @@
+main > .content {
+  min-height: 0;
+}
+
 main.article {
   min-height: calc(100vh - var(--body-top) - 60px);
   display: flex;

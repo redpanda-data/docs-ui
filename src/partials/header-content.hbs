@@ -4,7 +4,7 @@
 >
     <div class="navbar-brand" id="brand">
       {{#with site.homeUrl}}
-      <a class="navbar-item" href="{{{relativize this}}}" aria-label="Go to home page"><img src="{{{@root.uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="150" height="22" style="aspect-ratio:150/22;" alt="Redpanda logo"/></a>
+      <a class="navbar-item" href="{{{relativize this}}}" aria-label="Go to home page"><img src="{{{@root.uiRootPath}}}/img/redpanda-docs-logo-white.svg" width="150" height="22" style="aspect-ratio:150/22;" decoding="async" alt="Redpanda logo"/></a>
       {{/with}}
       <button class="navbar-burger" data-target="topbar-nav" aria-label="Header navigation menu">
         <span></span>
