@@ -297,6 +297,7 @@ article.search .ais-Heading > a {
   max-width: 600px;
   min-height: 400px;
   margin-top: 0;
+}
 
 section.aa-Source[data-autocomplete-source-id=tagsPlugin] {
   display: none;
