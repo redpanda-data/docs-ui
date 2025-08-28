@@ -143,6 +143,19 @@
                     </p>
                     <div class="aa-ItemContentRow">
                       <div class="aa-ItemContentTitle result-type">${hit.type}</div>
+                      ${hit.product && Array.isArray(hit.product)
+                        ? (() => {
+                            const seen = new Set();
+                            return hit.product.filter(p => {
+                              const norm = (p || '').toLowerCase();
+                              if (seen.has(norm)) return false;
+                              seen.add(norm);
+                              return true;
+                            }).map(p => html`<div class="aa-ItemContentTitle result-type">${p}</div>`);
+                          })()
+                        : hit.product
+                        ? html`<div class="aa-ItemContentTitle result-type">${hit.product}</div>`
+                        : ''}
                       ${hit.version ? html`
                         <div class="aa-ItemContentTitle result-type">${hit.version}</div>
                       ` : ''}

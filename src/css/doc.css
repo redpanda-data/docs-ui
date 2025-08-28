@@ -230,7 +230,7 @@ html {
 .doc thead code,
 .doc .colist > table code {
   color: var(--code-font-color);
-  background: var(--code-background);
+  background: var(--pre-background);
   border: 0.1rem solid #0000001a;
   font-weight: lighter;
   border-radius: 0.25em;
@@ -979,7 +979,7 @@ details[open] > summary {
 .doc pre.highlight code,
 .doc .listingblock pre:not(.highlight),
 .doc .literalblock pre {
-  background: var(--pre-background);
+  background: var(--code-background);
   display: block;
   overflow-x: auto;
   font-weight: 300;
