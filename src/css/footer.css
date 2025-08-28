@@ -8,6 +8,7 @@ footer.footer {
   color: var(--body-faint-font-color);
   font-size: var(--secondary-font-size);
   border-top: 1px solid var(--nav-border-color);
+  min-height: 60px;
 }
 
 footer nav.footer-nav {

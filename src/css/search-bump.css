@@ -291,6 +291,14 @@ article.search .ais-Heading > a {
   padding: 12px;
 }
 
+/* Reserve space for Algolia preview panel to prevent CLS */
+.aa-Preview.aa-Column.doc {
+  min-width: 350px;
+  max-width: 600px;
+  min-height: 400px;
+  margin-top: 0;
+}
+
 section.aa-Source[data-autocomplete-source-id=tagsPlugin] {
   display: none;
 }
@@ -513,10 +521,6 @@ kbd.algolia-command {
 
 .aa-ItemLink:hover {
   text-decoration: none;
-}
-
-.aa-Preview.aa-Column.doc {
-  margin-top: 0;
 }
 
 .aa-ItemContentTitle.result-type {
