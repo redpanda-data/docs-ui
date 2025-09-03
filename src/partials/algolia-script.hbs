@@ -41,11 +41,14 @@ const COMPONENT_NAME = `{{{page.component.title}}}`.trim();
 /**
  * The “catalog” of product/API tags we want available by default.
  * For Cloud, we intentionally exclude "Admin API" from defaults.
+ * For Self-Managed, we intentionally exclude Cloud Control Plane/Data Plane APIs from defaults.
  */
-const INITIAL_TAGS =
-  COMPONENT_NAME === 'Cloud'
-    ? ['Labs', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API']
-    : ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
+const TAGS_BY_COMPONENT = {
+  Cloud: ['Labs', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
+  'Self-Managed': ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
+};
+const DEFAULT_TAGS = ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
+const INITIAL_TAGS = TAGS_BY_COMPONENT[COMPONENT_NAME] || DEFAULT_TAGS;
 
 /** Version added to the “View all” link to scope whole-site search. */
 const VERSION = PRERELEASE === 'true'
