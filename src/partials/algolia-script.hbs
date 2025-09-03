@@ -45,6 +45,8 @@ const COMPONENT_NAME = `{{{page.component.title}}}`.trim();
 const INITIAL_TAGS =
   COMPONENT_NAME === 'Cloud'
     ? ['Labs', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API']
+    : COMPONENT_NAME === 'Self-Managed'
+    ? ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API']
     : ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
 
 /** Version added to the “View all” link to scope whole-site search. */
