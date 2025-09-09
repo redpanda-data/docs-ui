@@ -2,9 +2,63 @@
   display: none !important;
 }
 
-.aa-Panel .context-dropdown {
-  position: relative;
-  display: inline-block;
+.aa-Panel .context-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  padding: 0;
+  font-size: small;
+  left: 0;
+  right: 0;
+  background: var(--body-background);
+  border: 1px solid var(--color-smoke-90);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.aa-Panel .context-dropdown-menu[style*="display: none"] {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+}
+
+.aa-Panel .context-dropdown-menu .context-dropdown-item {
+  display: block;
+  padding: 10px 16px;
+  text-decoration: none;
+  font-weight: 500;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  color: var(--body-font-color);
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--color-smoke-70);
+}
+
+.aa-Panel .context-dropdown-menu .context-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.aa-Panel .context-dropdown-menu .context-dropdown-item:hover,
+.aa-Panel .context-dropdown-menu .context-dropdown-item:focus {
+  background: var(--link-highlight-color);
+  outline: none;
+  color: white;
+  cursor: pointer;
+}
+
+.aa-Panel .context-dropdown-menu .context-dropdown-item.active {
+  background: var(--link-highlight-color);
+  color: white;
+  font-weight: 600;
 }
 
 .aa-Panel .context-dropdown-toggle {
@@ -285,9 +339,9 @@ article.search .ais-Heading > a {
 
 .aa-Header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;          /* Space between the button and link */
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
   padding: 12px;
 }
 
@@ -449,7 +503,6 @@ kbd.algolia-command {
 .aa-DetachedContainer.aa-DetachedContainer--modal {
   padding: 20px;
   background: var(--search-detached-mode-background);
-  min-height: 500px;
 }
 
 .aa-DetachedFormContainer {

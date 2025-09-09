@@ -424,7 +424,6 @@ kbd.algolia-command {
 .aa-DetachedContainer.aa-DetachedContainer--modal {
   padding: 20px;
   background: var(--search-detached-mode-background);
-  min-height: 500px;
 }
 
 .aa-DetachedFormContainer {
