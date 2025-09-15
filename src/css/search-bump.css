@@ -88,6 +88,7 @@
 }
 
 :root {
+  --body-background: var(--color-white);
   --search-hits-boxshadow: 0 0 0 1px rgba(16, 24, 40, 0.05), 0 1px 3px 0 rgba(16, 24, 40, 0.15);
   --search-detached-mode-background: #fcfcfd;
   --search-icon-color: #667085;
@@ -100,6 +101,7 @@
 }
 
 html[data-theme=dark] {
+  --body-background: #101828;
   --search-hits-boxshadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 1px 3px 0 rgba(255, 255, 255, 0.15);
   --search-detached-mode-background: #101828;
   --search-icon-color: #d0d5dd;
