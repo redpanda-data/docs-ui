@@ -1,3 +1,34 @@
+:root {
+  --body-font-color: #181818;
+  --body-background: var(--color-white);
+  --doc-font-size: inherit;
+  --doc-line-height: 1.6;
+  --heading-font-color: #101828;
+  --heading-font-family: "Inter", sans-serif;
+  --heading-font-weight: 500;
+  --rem-base: 18;
+  --abstract-background: #f0f0f0;
+  --alt-heading-font-weight: bold;
+  --color-aliases-static-palette-text-tertiary: #6b7280;
+  --aa-detached-modal-max-width: 1200px;
+  --link-highlight-color: #444ce7;
+}
+
+html[data-theme=dark] {
+  --body-font-color: #f2f4f7;
+  --body-background: #101828;
+  --doc-font-size: inherit;
+  --doc-line-height: 1.6;
+  --heading-font-color: #eaecf0;
+  --heading-font-family: "Inter", sans-serif;
+  --heading-font-weight: 500;
+  --rem-base: 18;
+  --abstract-background: #292929;
+  --alt-heading-font-weight: bold;
+  --color-aliases-static-palette-text-tertiary: #98a2b3;
+  --link-highlight-color: #9184f1;
+}
+
 .aa-Source[data-autocomplete-source-id="filters"] .aa-List .aa-Item:empty {
   display: none !important;
 }
