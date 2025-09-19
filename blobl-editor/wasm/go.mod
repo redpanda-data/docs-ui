@@ -5,11 +5,14 @@ go 1.24.1
 toolchain go1.24.2
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.55.0
-	github.com/redpanda-data/connect/v4 v4.62.0
+	github.com/redpanda-data/benthos/v4 v4.56.0
+	github.com/redpanda-data/connect/v4 v4.63.0
 )
 
 require (
+	buf.build/gen/go/bufbuild/reflect/connectrpc/go v1.18.1-20240117202343-bf8f65e8876c.1 // indirect
+	buf.build/gen/go/bufbuild/reflect/protocolbuffers/go v1.36.2-20240117202343-bf8f65e8876c.1 // indirect
+	connectrpc.com/connect v1.18.1 // indirect
 	cuelang.org/go v0.13.2 // indirect
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
 	github.com/Jeffail/grok v1.1.0 // indirect
@@ -23,6 +26,7 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/benhoyt/goawk v1.29.1 // indirect
 	github.com/bufbuild/protocompile v0.14.1 // indirect
+	github.com/bufbuild/prototransform v0.4.0 // indirect
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
@@ -66,6 +70,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/parquet-go/parquet-go v0.25.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/quipo/dependencysolver v0.0.0-20170801134659-2b009cb4ddcc // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
 	github.com/rickb777/period v1.0.15 // indirect
