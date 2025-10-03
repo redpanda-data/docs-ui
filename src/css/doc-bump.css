@@ -1,6 +1,5 @@
 :root {
   --body-font-color: #181818;
-  --doc-font-size: inherit;
   --doc-line-height: 1.6;
   --heading-font-color: #101828;
   --heading-font-family: "Inter", sans-serif;
@@ -15,7 +14,6 @@
 
 html[data-theme=dark] {
   --body-font-color: #f2f4f7;
-  --doc-font-size: inherit;
   --doc-line-height: 1.6;
   --heading-font-color: #eaecf0;
   --heading-font-family: "Inter", sans-serif;
@@ -680,10 +678,6 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc details > summary::-webkit-details-marker {
   display: none;
-}
-
-details[open] > summary {
-  padding-bottom: 16px;
 }
 
 .aa-DetachedOverlay .doc details > summary::after {
