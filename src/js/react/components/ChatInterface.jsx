@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Component } from 'react'
-import { useChat } from '@kapaai/react-sdk'
+import { useChat, useDeepThinking } from '@kapaai/react-sdk'
 import {
   ArrowUp,
   ArrowDown,
@@ -8,6 +8,7 @@ import {
   RefreshCcw,
   ClipboardCopy,
   CircleStop,
+  FileSearch,
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { Marked } from 'marked'
@@ -207,6 +208,8 @@ export default function ChatInterface() {
     resetConversation,
     isPreparingAnswer,
   } = useChat()
+
+  const deepThinking = useDeepThinking()
 
   const latestQA = conversation.getLatest()
 
@@ -450,7 +453,12 @@ export default function ChatInterface() {
               )
             })}
             {isPreparingAnswer && (
-              <div className="loading">Preparing answer{dots}</div>
+              <div className="loading">
+                {deepThinking.active
+                  ? `Running deep thinking mode up to a minute. ${deepThinking.seconds}s…`
+                  : `Preparing answer${dots}`
+                }
+              </div>
             )}
           </div>
         </div>
@@ -504,10 +512,24 @@ export default function ChatInterface() {
                     <span className="button-text">Stop</span>
                   </button>
                 ) : (
-                  <button type="submit" className="main-button">
-                    <ArrowUp className="button-icon" />
-                    <span className="button-text">Submit</span>
-                  </button>
+                  <div className="chat-footer-buttons">
+                    <button
+                      type="button"
+                      onClick={deepThinking.toggle}
+                      className={`deep-thinking-button outlined ${deepThinking.active ? 'active' : ''}`}
+                      title="For harder questions. Search longer across all sources. Takes up to 1 minute."
+                    >
+                      <span className="button-icon-left">
+                        {/* Tabler FileSearch icon from lucide-react */}
+                        <FileSearch className="button-icon" />
+                      </span>
+                      <span className="button-text">Deep thinking</span>
+                    </button>
+                    <button type="submit" className="main-button">
+                      <ArrowUp className="button-icon" />
+                      <span className="button-text">Submit</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
