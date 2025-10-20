@@ -296,7 +296,7 @@ body.article.home {
 }
 
 .home .deep-thinking-button.active {
-  background: rgba(218, 93, 8, 0.10);
+  background: rgba(218, 93, 8, 0.1);
   border-color: var(--color-primitives-global-orange-orange-800);
   color: var(--color-primitives-global-orange-orange-800);
 }
