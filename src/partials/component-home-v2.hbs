@@ -3,7 +3,9 @@
     <div class="paragraph home-intro">
       <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{{relativize (resolve-resource this)}}}">Learn more</a>{{/with}}
       </p>
+      {{#if page.attributes.home-image}}
       <img style="max-height: 150px;min-height: 120px;" src="../_images/{{page.attributes.home-image}}" alt="{{{page.title}}}" loading="lazy"/>
+      {{/if}}
     </div>
   </div>
 </div>
