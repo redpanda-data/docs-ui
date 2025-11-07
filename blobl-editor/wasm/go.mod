@@ -3,8 +3,8 @@ module blobl
 go 1.25.2
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.57.1
-	github.com/redpanda-data/connect/v4 v4.67.5
+	github.com/redpanda-data/benthos/v4 v4.60.0
+	github.com/redpanda-data/connect/v4 v4.68.0
 )
 
 require (
@@ -92,7 +92,7 @@ require (
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/crypto v0.43.1-0.20251009181029-0b7aa0cfb07b // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
