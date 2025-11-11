@@ -30,6 +30,11 @@ module.exports = (url, { data: { root } }) => {
     return memoizedPageInfo.get(cacheKey)
   }
 
+  // Clear cache after short delay for next render cycle (on first access)
+  if (memoizedPageInfo.size === 0) {
+    setTimeout(() => memoizedPageInfo.clear(), 100)
+  }
+
   let pageInfo
 
   let isCurrentComponent = false
