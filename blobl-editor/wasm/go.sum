@@ -616,10 +616,10 @@ github.com/quipo/dependencysolver v0.0.0-20170801134659-2b009cb4ddcc h1:hK577yxE
 github.com/quipo/dependencysolver v0.0.0-20170801134659-2b009cb4ddcc/go.mod h1:OQt6Zo5B3Zs+C49xul8kcHo+fZ1mCLPvd0LFxiZ2DHc=
 github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 h1:bsUq1dX0N8AOIL7EB/X911+m4EHsnWEHeJ0c+3TTBrg=
 github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
-github.com/redpanda-data/benthos/v4 v4.57.1 h1:XEHeqON8UIpqUeDBwaMmYFtjhiIphJgCRLy91IqNW8w=
-github.com/redpanda-data/benthos/v4 v4.57.1/go.mod h1:i6bHXMyFLykvGzyVC0ekoRMDM3zfVOSeh+GWwqfp0mU=
-github.com/redpanda-data/connect/v4 v4.67.5 h1:xC3rV+z0e7ASMg/bSy0Tim4h+5SoL8SEl+0AoTexGiE=
-github.com/redpanda-data/connect/v4 v4.67.5/go.mod h1:pefPMteOjS78oCnsYrH8yn5nTMFb64yPlNDaKQHxUlg=
+github.com/redpanda-data/benthos/v4 v4.60.0 h1:TCX2cFUOL3trbiYcVSIGbwnHRXtHBoM3qe+mK21a44A=
+github.com/redpanda-data/benthos/v4 v4.60.0/go.mod h1:OEs66BtOML3fsro4MFgrUuYXChObrWzG8fPJ7RJ37E4=
+github.com/redpanda-data/connect/v4 v4.68.0 h1:TJWJQeLttrToeSQSkwBWk1PaoqUGNG+7ebokjmZ/4e4=
+github.com/redpanda-data/connect/v4 v4.68.0/go.mod h1:nnZ+3whTxrgU6Jrwu0b2uqhH/VJM0oePLPXdxQn5w8g=
 github.com/rickb777/expect v0.24.0 h1:IzFxn4jINkVuCmx4jdQP7LxaIBhG60bDVbeGWk3xnzo=
 github.com/rickb777/expect v0.24.0/go.mod h1:jwwS3gmukQ7wPxzEtOhMJEv43UxSwOBE7MUgTt8CX0k=
 github.com/rickb777/period v1.0.16 h1:Gyh2Ubl4n1Jkk6N8ZheMDraU7tRZFWiIwNg0jjYd61Y=
@@ -767,8 +767,8 @@ golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88/go.mod h1:IxCIyHEi3zRg3s0
 golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.7.0/go.mod h1:pYwdfH91IfpZVANVyUOhSIPZaFoJGxTFbZhFTx+dXZU=
 golang.org/x/crypto v0.9.0/go.mod h1:yrmDGqONDYtNj3tH8X9dzUun2m2lzPa9ngI6/RUPGR0=
-golang.org/x/crypto v0.43.0 h1:dduJYIi3A3KOfdGOHX8AVZ/jGiyPa3IbBozJ5kNuE04=
-golang.org/x/crypto v0.43.0/go.mod h1:BFbav4mRNlXJL4wNeejLpWxB7wMbc79PdRGhWKncxR0=
+golang.org/x/crypto v0.43.1-0.20251009181029-0b7aa0cfb07b h1:+jluv6UmpfuFSPbT18POG0j+WJxESgK5WjWaAnbDDXs=
+golang.org/x/crypto v0.43.1-0.20251009181029-0b7aa0cfb07b/go.mod h1:BFbav4mRNlXJL4wNeejLpWxB7wMbc79PdRGhWKncxR0=
 golang.org/x/exp v0.0.0-20180321215751-8460e604b9de/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20180807140117-3d87b88a115f/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
