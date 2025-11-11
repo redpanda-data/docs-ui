@@ -17,7 +17,7 @@ module.exports = ({ data: { root } }) => {
   if (!allowedLayouts.includes(page.layout)) return false
 
   // Exclude specific page roles
-  const excludedRoles = ['bloblang-playground', 'component-home-v2']
+  const excludedRoles = ['bloblang-playground', 'component-home-v2', 'home']
   if (page.attributes?.role && excludedRoles.includes(page.attributes.role)) return false
 
   // Query contentCatalog for full page object
