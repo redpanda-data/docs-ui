@@ -65,6 +65,7 @@
 /* Dropdown Menu */
 .markdown-dropdown-menu {
   top: calc(100% + 0.25rem);
+  position: absolute;
   right: 0;
   z-index: 1000;
   min-width: 200px;
@@ -153,6 +154,11 @@
 @media (max-width: 768px) {
   .article .metadata .markdown-dropdown {
     margin-left: 0; /* Reset margin on mobile */
+  }
+
+  .markdown-dropdown-menu {
+    right: auto;
+    left: 0;
   }
 
   .markdown-text {
