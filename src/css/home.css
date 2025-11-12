@@ -11,8 +11,102 @@ body.article.home {
 }
 
 .article.home footer.footer {
-  padding-top: 30px;
-  border-top: 1px solid #c6cedc;
+  padding-top: 48px;
+  padding-bottom: 48px;
+  background-color: var(--home-background);
+  border-top: 1px solid var(--nav-border-color);
+}
+
+/* Center footer content to match home page width */
+.article.home footer.footer .container-large {
+  max-width: 860px;
+}
+
+/* Simplify footer on home - hide logo and columns, keep only socials and legal */
+.article.home footer.footer .footer__logo-link,
+.article.home footer.footer .footer__columns {
+  display: none;
+}
+
+.article.home footer.footer .footer__top {
+  margin-bottom: 1.5rem;
+}
+
+/* Adjust footer layout on home */
+.article.home footer.footer .footer__bottom {
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Reduce visual weight - smaller, lighter text */
+.article.home footer.footer .footer__link,
+.article.home footer.footer .footer__header,
+.article.home footer.footer .text-style-footer-legal {
+  font-size: 0.8125rem;
+  color: var(--color-aliases-static-palette-text-subtle);
+}
+
+/* Subtler social icon colors on home */
+.article.home footer.footer .footer__social-link {
+  color: var(--color-aliases-static-palette-text-subtle);
+  opacity: 0.7;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.article.home footer.footer .footer__social-link:hover {
+  opacity: 1;
+  color: var(--body-font-color);
+}
+
+/* Labs Home Page Footer Styling - Same simplified approach as home */
+main.article.labs footer.footer {
+  padding-top: 48px;
+  padding-bottom: 48px;
+  background-color: var(--body-background);
+  border-top: 1px solid var(--nav-border-color);
+}
+
+/* Center footer content to match labs page width */
+main.article.labs footer.footer .container-large {
+  max-width: 860px;
+}
+
+/* Simplify footer on labs home - hide logo and columns, keep only socials and legal */
+main.article.labs footer.footer .footer__logo-link,
+main.article.labs footer.footer .footer__columns {
+  display: none;
+}
+
+main.article.labs footer.footer .footer__top {
+  margin-bottom: 1.5rem;
+}
+
+/* Adjust footer layout on labs home */
+main.article.labs footer.footer .footer__bottom {
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Reduce visual weight - smaller, lighter text */
+main.article.labs footer.footer .footer__link,
+main.article.labs footer.footer .footer__header,
+main.article.labs footer.footer .text-style-footer-legal {
+  font-size: 0.8125rem;
+  color: var(--color-aliases-static-palette-text-subtle);
+}
+
+/* Subtler social icon colors on labs home */
+main.article.labs footer.footer .footer__social-link {
+  color: var(--color-aliases-static-palette-text-subtle);
+  opacity: 0.7;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+main.article.labs footer.footer .footer__social-link:hover {
+  opacity: 1;
+  color: var(--body-font-color);
 }
 
 .article.home footer nav.footer-nav {
