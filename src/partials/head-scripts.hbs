@@ -172,7 +172,10 @@ data-modal-disclaimer="This is a custom LLM for Redpanda with access to all deve
 ></script>
 {{/if}}
 {{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true'))}}
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css" media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">
+</noscript>
 <!-- Prism scripts for code blocks -->
 <script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-core.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-numbers-plugin.js"></script>

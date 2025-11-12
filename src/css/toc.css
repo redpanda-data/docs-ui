@@ -177,6 +177,15 @@
   flex: 0 0 var(--toc-width);
   word-wrap: break-word;
   top: calc(var(--navbar-height) + var(--announcement-bar-height));
+  /* Reserve space for TOC to prevent CLS when JavaScript populates it */
+  min-width: var(--toc-width);
+  /* Isolate rendering */
+  contain: layout style;
+}
+
+/* Reserve space for TOC menu before JavaScript populates it */
+.toc.sidebar .toc-menu {
+  min-height: 300px;
 }
 
 @media screen and (min-width: 1350px) {

@@ -55,6 +55,8 @@ body.status-404 main > .content {
     /* grid-template-columns: 3fr 1fr; */
     gap: 50px;
     justify-content: center;
+    /* Prevent CLS by isolating content layout */
+    contain: layout;
   }
 
   aside.toc.embedded {

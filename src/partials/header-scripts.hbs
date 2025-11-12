@@ -1,9 +1,12 @@
 {{#if isStandaloneWidget}}
 {{else}}
-<script src="https://unpkg.com/@popperjs/core@2"></script>
-<script src="https://unpkg.com/tippy.js@6"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2" defer></script>
+<script src="https://unpkg.com/tippy.js@6" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" media="print" onload="this.media='all'" />
+<noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js" defer></script>
 {{/if}}
 {{#with site.keys.googleAnalytics}}
 <!-- Google Tag Manager (noscript) -->
@@ -13,4 +16,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 {{/with}}
 <!-- Injected by the '@sntke/antora-mermaid-extension' extension -->
 <!--  https://github.com/snt/antora-mermaid-extension -->
+<!-- Only load Mermaid on pages that aren't home/labs to avoid request chain on landing pages -->
+{{#unless (or (eq page.attributes.role 'home') (eq page.layout 'labs-search'))}}
 {{> mermaid-scripts}}
+{{/unless}}

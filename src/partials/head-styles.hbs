@@ -1,18 +1,59 @@
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/tabs.css">
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/sortable-tables.css">
+<!-- Preconnect to external domains for faster resource loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<!-- Critical CSS - loaded synchronously -->
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
+
+<!-- Non-critical vendor CSS - loaded asynchronously -->
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/tabs.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/sortable-tables.css" media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/tabs.css">
+  <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/sortable-tables.css">
+</noscript>
+
+<!-- Preload Material Symbols font for critical icons in navigation -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" as="style">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block">
+
+<!-- Non-critical CSS - loaded asynchronously to prevent render blocking -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=optional"
+      rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" media="print" onload="this.media='all'">
+<!-- Fallback for browsers without JavaScript -->
+<noscript>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=optional" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</noscript>
 <style>
 .material-symbols-outlined {
   color: var(--link-highlight-color);
+  font-family: 'Material Symbols Outlined', sans-serif;
   font-variation-settings:
   'FILL' 0,
   'wght' 400,
   'GRAD' 0,
-  'opsz' 24
+  'opsz' 24;
+  /* Ensure icon font loads and displays properly */
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  /* Optimize rendering for icon fonts */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  /* Reserve space to prevent layout shift */
+  min-width: 1em;
 }
 </style>

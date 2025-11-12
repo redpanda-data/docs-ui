@@ -9,6 +9,10 @@ html {
   line-height: var(--doc-line-height);
   padding: 0 1rem 4rem;
   margin-top: 3rem;
+  /* Reserve minimum space to prevent CLS */
+  min-height: 400px;
+  /* Isolate rendering to improve performance */
+  contain: layout style paint;
 }
 
 .doc ul.index {
@@ -91,6 +95,11 @@ html {
 #preamble + .sect1,
 .doc .sect1 + .sect1 {
   margin-top: 2rem;
+}
+
+.doc .sect1 {
+  /* Isolate rendering to improve performance */
+  contain: layout style;
 }
 
 .doc h1.sect0 {
@@ -657,6 +666,18 @@ table code {
   max-width: 100%;
   vertical-align: middle;
   background: white;
+  /* Optimize image rendering - use high quality for downscaled images */
+  image-rendering: auto;
+  /* Isolate image rendering to improve performance */
+  contain: layout style;
+  /* Prevent CLS from unsized images - use default aspect ratio */
+  aspect-ratio: 16 / 9;
+}
+
+/* Once image loads, use its natural aspect ratio */
+.doc .imageblock img[width][height],
+.doc .image > img[width][height] {
+  aspect-ratio: auto;
 }
 
 .doc .image:not(.left):not(.right) > img {

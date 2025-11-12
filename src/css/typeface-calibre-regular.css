@@ -2,6 +2,9 @@
   font-family: "Calibre Regular";
   font-weight: 400;
   font-style: normal;
+  /* Use optional to prevent CLS from font loading - only use font if already cached */
+  font-display: optional;
+  /* size-adjust: 107%; - Match fallback font metrics to reduce CLS - disabled due to stylelint */
   src:
     local("Calibre Regular"),
     url(../font/calibre-Regular.woff2) format("woff2");
