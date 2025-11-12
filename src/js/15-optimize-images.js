@@ -17,10 +17,17 @@
   function optimizeImages () {
     const images = document.querySelectorAll('.doc img:not([loading])')
 
-    images.forEach((img) => {
-      // Add lazy loading for off-screen images
-      // This significantly reduces initial page load for image-heavy pages
-      img.setAttribute('loading', 'lazy')
+    images.forEach((img, index) => {
+      // First image is likely LCP - prioritize it and don't lazy load
+      if (index === 0) {
+        // Optimize LCP by making it eagerly loaded with high priority
+        img.setAttribute('loading', 'eager')
+        img.setAttribute('fetchpriority', 'high')
+      } else {
+        // Add lazy loading for off-screen images
+        // This significantly reduces initial page load for image-heavy pages
+        img.setAttribute('loading', 'lazy')
+      }
 
       // Add async decoding for better render performance
       img.setAttribute('decoding', 'async')
@@ -42,22 +49,38 @@
   }
 
   function setImageDimensions (img) {
-    // Get the natural dimensions
+    // Don't overwrite existing width/height attributes
+    if (img.hasAttribute('width') && img.hasAttribute('height')) {
+      return
+    }
+
+    // Get the natural (intrinsic) dimensions
     const naturalWidth = img.naturalWidth
     const naturalHeight = img.naturalHeight
 
-    // Get the displayed dimensions
+    // Get the displayed dimensions (fallback)
     const displayedWidth = img.offsetWidth
     const displayedHeight = img.offsetHeight
 
-    // Only set dimensions if the image is actually being resized by CSS
-    // This preserves the aspect ratio and helps with CLS
-    if (displayedWidth > 0 && displayedHeight > 0) {
-      img.setAttribute('width', displayedWidth)
-      img.setAttribute('height', displayedHeight)
+    // Prefer intrinsic dimensions to keep images responsive
+    // Only use displayed dimensions if intrinsic dimensions unavailable
+    let width = naturalWidth
+    let height = naturalHeight
+
+    // Fallback to displayed dimensions if intrinsic dimensions are zero/unavailable
+    if (width === 0 || height === 0) {
+      width = displayedWidth
+      height = displayedHeight
+    }
+
+    // Only set dimensions if we have valid values
+    if (width > 0 && height > 0) {
+      img.setAttribute('width', width)
+      img.setAttribute('height', height)
 
       // Log warning if image is significantly oversized (developer tool)
-      if (naturalWidth > displayedWidth * 2 || naturalHeight > displayedHeight * 2) {
+      if (naturalWidth > 0 && displayedWidth > 0 &&
+          (naturalWidth > displayedWidth * 2 || naturalHeight > displayedHeight * 2)) {
         const savings = Math.round(((naturalWidth * naturalHeight) - (displayedWidth * displayedHeight)) /
           (naturalWidth * naturalHeight) * 100)
         console.info(
