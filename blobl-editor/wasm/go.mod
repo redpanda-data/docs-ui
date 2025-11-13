@@ -4,12 +4,13 @@ go 1.25.2
 
 require (
 	github.com/redpanda-data/benthos/v4 v4.60.0
-	github.com/redpanda-data/connect/v4 v4.68.0
+	github.com/redpanda-data/connect/v4 v4.70.0
 )
 
 require (
 	buf.build/gen/go/bufbuild/reflect/connectrpc/go v1.19.1-20240117202343-bf8f65e8876c.2 // indirect
 	buf.build/gen/go/bufbuild/reflect/protocolbuffers/go v1.36.10-20240117202343-bf8f65e8876c.1 // indirect
+	buf.build/go/hyperpb v0.1.3 // indirect
 	connectrpc.com/connect v1.19.1 // indirect
 	cuelang.org/go v0.14.1 // indirect
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
@@ -30,6 +31,7 @@ require (
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -67,6 +69,7 @@ require (
 	github.com/parquet-go/parquet-go v0.25.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quipo/dependencysolver v0.0.0-20170801134659-2b009cb4ddcc // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
 	github.com/rickb777/period v1.0.16 // indirect
@@ -77,7 +80,9 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/tilinna/z85 v1.0.0 // indirect
+	github.com/timandy/routine v1.1.5 // indirect
 	github.com/urfave/cli/v2 v2.27.7 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
