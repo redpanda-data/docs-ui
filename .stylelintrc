@@ -5,6 +5,15 @@
     "no-descending-specificity": null,
     "selector-type-no-unknown": null,
     "color-hex-length": null,
-    "length-zero-no-unit": null
+    "length-zero-no-unit": null,
+    "property-no-unknown": [
+      true,
+      {
+        "ignoreProperties": [
+          "contain",
+          "aspect-ratio"
+        ]
+      }
+    ]
   }
 }

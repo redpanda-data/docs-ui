@@ -66,13 +66,14 @@ module.exports = (src, dest, preview) => () => {
       // NOTE concat already uses stat from newest combined file
       .pipe(concat('js/site.js')),
     vfs
-      .src(['js/vendor/*([^.])?(.bundle).js', '!js/vendor/sorttable.js'], { ...opts, read: false })
+      .src('js/vendor/*.bundle.js', { ...opts, read: false })
       .pipe(bundle(opts))
       .pipe(uglify({ output: { comments: /^! / } })),
-    // Handle sorttable.js separately without uglify
+    // Minify Prism plugins for 8.1 KiB savings
     vfs
-      .src('js/vendor/sorttable.js', opts)
-      .pipe(through()),
+      .src(['js/vendor/prism/prism-line-highlight-plugin.js', 'js/vendor/prism/prism-line-numbers-plugin.js'], opts)
+      .pipe(uglify({ output: { comments: /^! / } })),
+    // sorttable.js will be copied unminified by the catch-all below (legacy code with non-strict-mode syntax)
     vfs
       .src('js/vendor/*.min.js', opts)
       .pipe(map((file, enc, next) => next(null, Object.assign(file, { extname: '' }, { extname: '.js' })))),
@@ -101,7 +102,14 @@ module.exports = (src, dest, preview) => () => {
         )
     ),
     vfs.src('css/vendor/**/*.css', opts),
-    vfs.src('js/vendor/**/*.js', opts),
+    // Copy remaining vendor JS files (excluding already minified/processed ones)
+    vfs.src([
+      'js/vendor/**/*.js',
+      '!js/vendor/prism/prism-line-highlight-plugin.js',
+      '!js/vendor/prism/prism-line-numbers-plugin.js',
+      '!js/vendor/*.bundle.js',
+      '!js/vendor/*.min.js',
+    ], opts),
     vfs.src('helpers/*.js', opts),
     vfs.src('layouts/*.hbs', opts),
     vfs.src('partials/*.hbs', opts),

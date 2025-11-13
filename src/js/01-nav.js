@@ -63,6 +63,18 @@
         })
       }
     }
+    // Add keyboard handlers for nav-item-toggle buttons (WCAG 2.1 Level A requirement)
+    var navToggleButton = div.querySelector('.nav-item-toggle')
+    if (navToggleButton) {
+      navToggleButton.addEventListener('keydown', function (event) {
+        // Handle Space (32) and Enter (13) keys
+        if (event.keyCode === 32 || event.keyCode === 13) {
+          event.preventDefault()
+          // Trigger the same toggle behavior as clicking
+          element.classList.toggle('is-active')
+        }
+      })
+    }
   })
 
   if (explorePanel) {

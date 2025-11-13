@@ -177,6 +177,16 @@
   flex: 0 0 var(--toc-width);
   word-wrap: break-word;
   top: calc(var(--navbar-height) + var(--announcement-bar-height));
+  /* Reserve space for TOC to prevent CLS when JavaScript populates it */
+  min-width: var(--toc-width);
+}
+
+/* Reserve space for TOC menu before JavaScript populates it */
+/* Apply containment to inner wrapper to preserve position: sticky on parent */
+.toc.sidebar .toc-menu {
+  min-height: 300px;
+  /* Isolate rendering without breaking parent sticky positioning */
+  contain: layout style;
 }
 
 @media screen and (min-width: 1350px) {

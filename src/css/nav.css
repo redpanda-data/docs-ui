@@ -186,6 +186,8 @@ html.is-clipped--nav {
   position: relative;
   line-height: var(--nav-line-height);
   padding: calc(var(--toolbar-top-padding) - 8px) var(--nav-side-padding) 32px;
+  /* Isolate rendering for performance */
+  contain: layout style;
 }
 
 .nav-menu h3.title {
