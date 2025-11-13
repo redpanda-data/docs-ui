@@ -18,8 +18,6 @@ footer.footer {
 
 .container-large {
   max-width: 80rem;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .footer__wrap {
@@ -182,15 +180,43 @@ footer.footer {
   }
 }
 
-/* Ensure footer doesn't interfere with TOC on doc pages */
+/* Align footer with .doc content on non-home pages */
 @media (min-width: 1024px) {
   main:not(.labs):not(.home) footer.footer {
-    width: calc(100% - var(--toc-width));
+    display: flex;
+    justify-content: center;
+  }
+
+  main:not(.labs):not(.home) footer.footer .padding-global {
+    padding-left: 0;
+    padding-right: 0;
+    display: flex;
+    gap: 50px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  main:not(.labs):not(.home) footer.footer .container-large {
+    flex: auto;
+    max-width: var(--doc-max-width);
+    margin-left: 48px;
+    margin-right: 0;
+  }
+
+  /* Add spacer to match TOC width */
+  main:not(.labs):not(.home) footer.footer .padding-global::after {
+    content: '';
+    flex: 0 0 var(--toc-width);
   }
 }
 
-@media screen and (min-width: 1350px) {
-  main:not(.labs):not(.home) footer.footer {
-    width: calc(100% - var(--toc-width--widescreen));
+@media screen and (min-width: 1400px) {
+  main:not(.labs):not(.home) footer.footer .padding-global {
+    gap: 150px;
+  }
+
+  main:not(.labs):not(.home) footer.footer .padding-global::after {
+    flex-basis: var(--toc-width--widescreen);
+    max-width: 400px;
   }
 }

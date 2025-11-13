@@ -155,7 +155,7 @@ html[data-theme=dark] {
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);
   --toc-width: calc(250 / var(--rem-base) * 1rem);
-  --toc-width--widescreen: 25%;
+  --toc-width--widescreen: calc(350 / var(--rem-base) * 1rem);
   --doc-max-width: 1000px;
   /* stacking */
   --z-index-page-version-menu: 2;
