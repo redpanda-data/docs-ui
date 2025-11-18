@@ -1487,8 +1487,7 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .source-toolbox .copy-button {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
   background: none;
   border: none;
@@ -1497,54 +1496,96 @@ html[data-theme=dark] code[class*=language-] .token.function {
   padding: 0;
   font-size: inherit;
   line-height: inherit;
-  width: 1em;
-  height: 1em;
+  cursor: pointer;
+  position: relative;
 }
 
 .doc .source-toolbox .copy-icon {
   flex: none;
   width: 20px;
   height: 20px;
+  transition: fill 0.2s ease;
 }
 
 .doc .source-toolbox img.copy-icon {
   filter: invert(50.2%);
+  transition: filter 0.2s ease;
 }
 
 .doc .source-toolbox svg.copy-icon {
   fill: currentColor;
 }
 
+.doc .source-toolbox .copy-button:hover svg.copy-icon {
+  fill: rgb(225, 66, 37);
+}
+
+.doc .source-toolbox .copy-button:hover img.copy-icon {
+  filter: invert(50.2%) sepia(1) saturate(5) hue-rotate(340deg);
+}
+
 .doc .source-toolbox .copy-toast {
-  flex: none;
-  position: relative;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0.5rem;
   display: inline-flex;
   justify-content: center;
-  margin-top: 1em;
   background-color: var(--body-font-color);
   border-radius: 0.25em;
   padding: 0.5em;
   color: var(--body-background);
-  cursor: pointer;
+  white-space: nowrap;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s ease 0.5s;
+  z-index: 10;
 }
 
 .doc .source-toolbox .copy-toast::after {
   content: "";
   position: absolute;
-  top: 0;
-  width: 1em;
-  height: 1em;
-  border: 0.55em solid transparent;
-  border-left-color: var(--body-font-color);
-  transform: rotate(-90deg) translateX(50%) translateY(50%);
-  transform-origin: left;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 0.4em solid transparent;
+  border-bottom-color: var(--body-font-color);
 }
 
 .doc .source-toolbox .copy-button.clicked .copy-toast {
   opacity: 1;
   transition: none;
+}
+
+.doc .source-toolbox .ask-ai-button {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  outline: none;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+
+.doc .source-toolbox .ask-ai-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.doc .source-toolbox .ask-ai-icon path {
+  fill: currentColor;
+  transition: fill 0.2s ease;
+}
+
+.doc .source-toolbox .ask-ai-button:hover .ask-ai-icon path {
+  fill: rgb(225, 66, 37);
 }
 
 .doc .language-console .hljs-meta {
