@@ -92,11 +92,6 @@ html {
   margin-top: 1rem;
 }
 
-#preamble + .sect1,
-.doc .sect1 + .sect1 {
-  margin-top: 2rem;
-}
-
 .doc .sect1 {
   /* Isolate rendering to improve performance */
   contain: layout style;
@@ -1504,24 +1499,15 @@ html[data-theme=dark] code[class*=language-] .token.function {
   flex: none;
   width: 20px;
   height: 20px;
-  transition: fill 0.2s ease;
 }
 
-.doc .source-toolbox img.copy-icon {
-  filter: invert(50.2%);
-  transition: filter 0.2s ease;
+.doc .source-toolbox .copy-icon rect {
+  stroke: currentColor;
+  transition: stroke 0.2s ease;
 }
 
-.doc .source-toolbox svg.copy-icon {
-  fill: currentColor;
-}
-
-.doc .source-toolbox .copy-button:hover svg.copy-icon {
-  fill: rgb(225, 66, 37);
-}
-
-.doc .source-toolbox .copy-button:hover img.copy-icon {
-  filter: invert(50.2%) sepia(1) saturate(5) hue-rotate(340deg);
+.doc .source-toolbox .copy-button:hover .copy-icon rect {
+  stroke: rgb(225, 66, 37);
 }
 
 .doc .source-toolbox .copy-toast {

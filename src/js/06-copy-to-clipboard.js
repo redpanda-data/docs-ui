@@ -56,20 +56,39 @@
       ;(copy = document.createElement('button')).className = 'copy-button'
       copy.setAttribute('title', 'Copy to clipboard')
 
-      if (svgAs === 'svg') {
-        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-        svg.setAttribute('class', 'copy-icon')
-        var use = document.createElementNS('http://www.w3.org/2000/svg', 'use')
-        use.setAttribute('href', uiRootPath + '/img/octicons-16.svg#icon-clippy')
-        svg.appendChild(use)
-        copy.appendChild(svg)
-      } else {
-        var img = document.createElement('img')
-        img.src = uiRootPath + '/img/octicons-16.svg#view-clippy'
-        img.alt = 'copy icon'
-        img.className = 'copy-icon'
-        copy.appendChild(img)
-      }
+      // Create custom duplicate pages icon (two overlapping rectangles)
+      var copySvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      copySvg.setAttribute('width', '16')
+      copySvg.setAttribute('height', '16')
+      copySvg.setAttribute('viewBox', '0 0 16 16')
+      copySvg.setAttribute('fill', 'none')
+      copySvg.setAttribute('class', 'copy-icon')
+
+      // Back page
+      var backRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      backRect.setAttribute('x', '1')
+      backRect.setAttribute('y', '4')
+      backRect.setAttribute('width', '10')
+      backRect.setAttribute('height', '10')
+      backRect.setAttribute('rx', '1')
+      backRect.setAttribute('stroke', 'currentColor')
+      backRect.setAttribute('stroke-width', '1.5')
+      backRect.setAttribute('fill', 'none')
+
+      // Front page (higher and more offset)
+      var frontRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      frontRect.setAttribute('x', '5')
+      frontRect.setAttribute('y', '2')
+      frontRect.setAttribute('width', '10')
+      frontRect.setAttribute('height', '10')
+      frontRect.setAttribute('rx', '1')
+      frontRect.setAttribute('stroke', 'currentColor')
+      frontRect.setAttribute('stroke-width', '1.5')
+      frontRect.setAttribute('fill', 'var(--body-background)')
+
+      copySvg.appendChild(backRect)
+      copySvg.appendChild(frontRect)
+      copy.appendChild(copySvg)
 
       toast = document.createElement('span')
       toast.className = 'copy-toast'
