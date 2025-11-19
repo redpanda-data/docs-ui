@@ -6,11 +6,6 @@
   var LINE_CONTINUATION_RX = /( ) *\\\n *|\\\n( ?) */g
   var TRAILING_SPACE_RX = / +$/gm
 
-  // Pull UI configuration from Antora's <script> tag if needed
-  var config = (document.getElementById('site-script') || { dataset: {} }).dataset
-  var uiRootPath = config.uiRootPath == null ? '.' : config.uiRootPath
-  var svgAs = config.svgAs
-
   // Check if current browser supports copy operations
   var supportsCopy = window.navigator.clipboard
 
