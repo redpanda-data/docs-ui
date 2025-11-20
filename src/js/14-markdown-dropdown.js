@@ -58,6 +58,9 @@
         } else if (action === 'ask-ai') {
           handleAskAI()
           setOpen(false)
+        } else if (action === 'add-mcp') {
+          handleAddMCP()
+          setOpen(false)
         }
       })
     })
@@ -169,5 +172,24 @@
     } else {
       console.warn('Kapa AI is not available.')
     }
+  }
+
+  /**
+   * Handle Add MCP Server to VS Code
+   */
+  function handleAddMCP () {
+    // MCP server configuration
+    var mcpConfig = {
+      name: 'Redpanda Documentation',
+      url: 'https://docs.redpanda.com/mcp',
+    }
+
+    // Create VS Code MCP install URI
+    var configJson = JSON.stringify(mcpConfig)
+    var encodedConfig = encodeURIComponent(configJson)
+    var vscodeUri = 'vscode:mcp/install?' + encodedConfig
+
+    // Open VS Code with the MCP install URI
+    window.location.href = vscodeUri
   }
 })()

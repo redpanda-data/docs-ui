@@ -1493,6 +1493,8 @@ html[data-theme=dark] code[class*=language-] .token.function {
   line-height: inherit;
   cursor: pointer;
   position: relative;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .doc .source-toolbox .copy-icon {
@@ -1557,6 +1559,8 @@ html[data-theme=dark] code[class*=language-] .token.function {
   font-size: inherit;
   line-height: inherit;
   cursor: pointer;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .doc .source-toolbox .ask-ai-icon {
