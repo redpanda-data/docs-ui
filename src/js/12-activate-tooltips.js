@@ -12,7 +12,7 @@
       touch: 'hold',
       interactive: true,
       allowHTML: true,
-      delay: [0, 0], // Instant show/hide for faster tooltips
+      delay: [200, 0], // Instant show/hide for faster tooltips
     }
 
     // Initialize tippy for elements with built-in data-tippy-content
