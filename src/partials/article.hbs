@@ -52,6 +52,7 @@
         touch: "hold",
         interactive: true,
         allowHTML: true,
+        appendTo: () => document.body,
       });
       tippy(navBadge, {
         content: "{{page.attributes.beta-text}}",
@@ -60,6 +61,7 @@
         touch: "hold",
         interactive: true,
         allowHTML: true,
+        appendTo: () => document.body,
       });
     }
 
