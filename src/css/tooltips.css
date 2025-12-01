@@ -2,6 +2,7 @@
   font-size: 0.9em;
   background-color: var(--tooltip-background);
   color: var(--tooltip-font-color);
+  z-index: 9999;
 }
 
 a.glossary-term {
