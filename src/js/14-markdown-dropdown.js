@@ -181,7 +181,7 @@
     // MCP server configuration
     var mcpConfig = {
       name: 'Redpanda Documentation',
-      url: 'https://redpanda.mcp.kapa.ai',
+      url: 'https://docs.redpanda.com/mcp',
     }
 
     // Create VS Code MCP install URI
