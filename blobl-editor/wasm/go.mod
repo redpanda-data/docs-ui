@@ -1,10 +1,10 @@
 module blobl
 
-go 1.25.4
+go 1.25.5
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.61.0
-	github.com/redpanda-data/connect/v4 v4.71.0
+	github.com/redpanda-data/benthos/v4 v4.63.0
+	github.com/redpanda-data/connect/v4 v4.77.0
 )
 
 require (
@@ -12,7 +12,7 @@ require (
 	buf.build/gen/go/bufbuild/reflect/protocolbuffers/go v1.36.10-20240117202343-bf8f65e8876c.1 // indirect
 	buf.build/go/hyperpb v0.1.3 // indirect
 	connectrpc.com/connect v1.19.1 // indirect
-	cuelang.org/go v0.14.1 // indirect
+	cuelang.org/go v0.15.1 // indirect
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
 	github.com/Jeffail/grok v1.1.0 // indirect
 	github.com/Jeffail/shutdown v1.1.0 // indirect
@@ -28,6 +28,7 @@ require (
 	github.com/bufbuild/prototransform v0.4.0 // indirect
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
@@ -40,7 +41,7 @@ require (
 	github.com/go-faker/faker/v4 v4.7.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/gofrs/uuid/v5 v5.3.2 // indirect
+	github.com/gofrs/uuid/v5 v5.4.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
@@ -54,11 +55,11 @@ require (
 	github.com/hashicorp/golang-lru/arc/v2 v2.0.7 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/influxdata/go-syslog/v3 v3.0.0 // indirect
-	github.com/itchyny/gojq v0.12.17 // indirect
+	github.com/itchyny/gojq v0.12.18 // indirect
 	github.com/itchyny/timefmt-go v0.1.7 // indirect
 	github.com/jhump/protoreflect v1.17.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/klauspost/compress v1.18.1 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/matoous/go-nanoid/v2 v2.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
@@ -72,8 +73,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/quipo/dependencysolver v0.0.0-20170801134659-2b009cb4ddcc // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
-	github.com/rickb777/period v1.0.16 // indirect
-	github.com/rickb777/plural v1.4.4 // indirect
+	github.com/rickb777/period v1.0.21 // indirect
+	github.com/rickb777/plural v1.4.7 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -94,14 +95,14 @@ require (
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/otel v1.38.0 // indirect
-	go.opentelemetry.io/otel/metric v1.38.0 // indirect
-	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
+	go.opentelemetry.io/otel v1.39.0 // indirect
+	go.opentelemetry.io/otel/metric v1.39.0 // indirect
+	go.opentelemetry.io/otel/trace v1.39.0 // indirect
+	golang.org/x/crypto v0.46.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
