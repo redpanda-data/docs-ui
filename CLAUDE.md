@@ -92,7 +92,7 @@ Layouts select partials to compose pages. Helpers in `src/helpers/` provide temp
 ## Prerequisites
 - Node.js 18+
 - Gulp CLI (install globally: `npm install -g gulp-cli`)
-- Go 1.23.4+ (for building WASM modules)
+- Go 1.22.3+ (for building WASM modules)
 
 ## Making Changes
 1. **CSS changes**: Edit files in `src/css/`, changes auto-reload in preview
