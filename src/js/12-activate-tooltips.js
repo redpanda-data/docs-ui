@@ -13,6 +13,25 @@
       interactive: true,
       allowHTML: true,
       delay: [200, 0], // Instant show/hide for faster tooltips
+      // Append to body to prevent overflow/clipping issues
+      appendTo: () => document.body,
+      // Configure popper to handle boundary detection
+      popperOptions: {
+        modifiers: [
+          {
+            name: 'preventOverflow',
+            options: {
+              boundary: 'viewport',
+            },
+          },
+          {
+            name: 'flip',
+            options: {
+              fallbackPlacements: ['bottom', 'top', 'left', 'right'],
+            },
+          },
+        ],
+      },
     }
 
     // Initialize tippy for elements with built-in data-tippy-content
@@ -36,25 +55,6 @@
         tippy(el, {
           ...tooltipConfig,
           content: titleContent,
-          // Append to body to prevent overflow/clipping issues
-          appendTo: () => document.body,
-          // Configure popper to handle boundary detection
-          popperOptions: {
-            modifiers: [
-              {
-                name: 'preventOverflow',
-                options: {
-                  boundary: 'viewport',
-                },
-              },
-              {
-                name: 'flip',
-                options: {
-                  fallbackPlacements: ['bottom', 'top', 'left', 'right'],
-                },
-              },
-            ],
-          },
         })
       }
     })
