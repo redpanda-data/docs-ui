@@ -4,6 +4,25 @@
   document.addEventListener('DOMContentLoaded', function () {
     const backToTopButton = document.querySelector('#back-to-top')
     if (!backToTopButton) return
+
+    // Initially hide the button
+    backToTopButton.style.display = 'none'
+
+    // Show/hide button based on scroll position
+    function toggleBackToTop() {
+      if (window.scrollY > 300) {
+        backToTopButton.style.display = 'flex'
+      } else {
+        backToTopButton.style.display = 'none'
+      }
+    }
+
+    // Check on scroll
+    window.addEventListener('scroll', toggleBackToTop)
+
+    // Check initial state
+    toggleBackToTop()
+
     backToTopButton.addEventListener('click', function (event) {
       event.preventDefault()
       window.scrollTo({ top: 0, behavior: 'smooth' })
