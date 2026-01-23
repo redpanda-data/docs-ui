@@ -501,15 +501,15 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     gap: 10px;
   }
 
-  .output-section {
+  .bloblang-playground .output-section {
     flex: 1 1 100%;
   }
 
-  .button-bar {
+  .bloblang-playground .button-bar {
     align-items: flex-start;
   }
 
-  .button-bar .choices {
+  .bloblang-playground .button-bar .choices {
     width: 100%;
   }
 
@@ -546,7 +546,7 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 }
 
 /* Playground tip */
-.playground-tip {
+.bloblang-playground .playground-tip {
   background: linear-gradient(135deg, rgba(68, 116, 231, 0.08) 0%, rgba(68, 116, 231, 0.04) 100%);
   border: 1px solid rgba(68, 116, 231, 0.2);
   border-radius: 8px;
@@ -557,25 +557,25 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   line-height: 1.5;
 }
 
-.playground-tip-content {
+.bloblang-playground .playground-tip-content {
   color: var(--body-font-color);
 }
 
-.playground-tip-content strong {
+.bloblang-playground .playground-tip-content strong {
   color: var(--link-highlight-color);
 }
 
-.playground-tip-content a {
+.bloblang-playground .playground-tip-content a {
   color: var(--link-highlight-color);
   text-decoration: underline;
   font-weight: 500;
 }
 
-.playground-tip-content a:hover {
+.bloblang-playground .playground-tip-content a:hover {
   color: var(--link_hover-font-color);
 }
 
-.try-example-button {
+.bloblang-playground .try-example-button {
   background: #4474e7;
   color: white;
   border: 1.5px solid #4474e7;
@@ -589,14 +589,14 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   box-shadow: 0 2px 4px rgba(68, 116, 231, 0.2);
 }
 
-.try-example-button:hover {
+.bloblang-playground .try-example-button:hover {
   background: #365bd6;
   border-color: #365bd6;
   box-shadow: 0 3px 6px rgba(68, 116, 231, 0.3);
   transform: translateY(-1px);
 }
 
-.dismiss-tip {
+.bloblang-playground .dismiss-tip {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -613,12 +613,12 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   transition: opacity 0.2s ease;
 }
 
-.dismiss-tip:hover {
+.bloblang-playground .dismiss-tip:hover {
   opacity: 1;
 }
 
 /* Editor help icons */
-.editor-help-icon {
+.bloblang-playground .editor-help-icon {
   font-size: 12px;
   opacity: 0.5;
   cursor: help;
@@ -626,7 +626,7 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   transition: opacity 0.2s ease;
 }
 
-.editor-help-icon:hover {
+.bloblang-playground .editor-help-icon:hover {
   opacity: 1;
 }
 
@@ -659,15 +659,15 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     min-width: 38px;
   }
 
-  .shortcuts-content {
+  .bloblang-playground .shortcuts-content {
     padding: 20px;
   }
 
-  .share-modal-content {
+  .bloblang-playground .share-modal-content {
     padding: 20px;
   }
 
-  .notification {
+  .bloblang-playground .notification {
     top: 160px;
     right: 10px;
     left: 10px;
@@ -853,18 +853,6 @@ html[data-theme=dark] .validation-info {
 
 .bloblang-playground .tippy-box[data-theme~='redpanda-term'] .tippy-content {
   padding: 0;
-}
-
-/* Smaller help icons */
-.bloblang-playground .editor-help-icon {
-  font-size: 12px;
-  opacity: 0.6;
-  cursor: help;
-  transition: opacity 0.2s ease;
-}
-
-.bloblang-playground .editor-help-icon:hover {
-  opacity: 1;
 }
 
 /* Editor error/success states */
