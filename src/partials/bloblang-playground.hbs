@@ -487,7 +487,11 @@ async function fetchConnectCompletions() {
     if (releasesResp.ok) {
       const release = await releasesResp.json();
       const version = release.tag_name.replace(/^v/, ''); // Remove 'v' prefix if present
-      return await tryFetchConnectJSON(version);
+      const result = await tryFetchConnectJSON(version);
+      if (result.length > 0) {
+        return result;
+      }
+      console.log(`Latest version ${version} returned no completions, trying fallbacks`);
     }
   } catch (e) {
     console.log('Could not fetch latest Connect version, trying fallbacks', e);
@@ -655,7 +659,7 @@ function getContextCompletions(editor, session, pos) {
     const quotesBefore = (beforeCursor.match(/["']/g) || []).length;
     if (quotesBefore % 2 === 1) {
       // Odd number of quotes means we're inside a string
-      return { suppressAll: true };
+      return { type: 'none' };
     }
   }
 

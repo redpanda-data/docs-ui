@@ -239,6 +239,7 @@
   }
 
   function trapEvent (e) {
+    if (!e) return
     e.stopPropagation()
   }
 
