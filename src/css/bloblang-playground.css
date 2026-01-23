@@ -320,7 +320,7 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   align-items: flex-start;
   padding: 10px 12px;
   background: var(--body-background);
-  border-bottom: 1px solid rgba(204, 204, 204, 0.3);
+  border-bottom: 1px solid rgba(204, 204, 204, 0.15);
 }
 
 .bloblang-playground .editor-header-content {
@@ -348,10 +348,9 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 4px;
-  background: linear-gradient(180deg, #6c757d 0%, #8a939e 100%);
-  border-radius: 2px;
-  box-shadow: 0 0 8px rgba(108, 117, 125, 0.25);
+  width: 1px;
+  background: rgba(204, 204, 204, 0.15);
+  border-radius: 0;
 }
 
 .bloblang-playground .editor-section-collapsible {
@@ -372,6 +371,8 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .bloblang-playground .editor-section-collapsible summary::after {
@@ -383,10 +384,33 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   display: flex;
   gap: 8px;
   margin-left: auto;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .bloblang-playground .editor-section-collapsible summary button {
   pointer-events: all;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  padding: 5px 12px !important;
+  cursor: pointer !important;
+  flex-shrink: 0;
+  height: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .bloblang-playground .editor-section-collapsible summary {
+    flex-wrap: wrap;
+  }
+
+  .bloblang-playground .editor-section-collapsible summary > div {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+    margin-top: 8px;
+  }
 }
 
 .bloblang-playground .optional-badge {
@@ -1056,4 +1080,162 @@ html[data-theme=dark] .editor-success {
   font-size: 18px;
   font-weight: 700;
   border-radius: 6px;
+}
+
+/* ACE Editor Autocomplete Styles */
+.ace_editor.ace_autocomplete {
+  background: var(--body-background) !important;
+  border: 1px solid rgba(128, 152, 249, 0.3) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(68, 116, 231, 0.1) !important;
+  padding: 4px 0 !important;
+  font-family: var(--body-font-family) !important;
+  font-size: 13px !important;
+  width: 360px !important;
+  max-width: 360px !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(68, 116, 231, 0.2) !important;
+}
+
+/* Autocomplete rows */
+.ace_editor.ace_autocomplete .ace_line {
+  padding: 8px 12px !important;
+  color: var(--body-font-color) !important;
+  line-height: 1.4 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(128, 152, 249, 0.08) !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.ace_editor.ace_autocomplete .ace_line:last-child {
+  border-bottom: none !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line {
+  border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.ace_editor.ace_autocomplete .ace_line:hover {
+  background: rgba(68, 116, 231, 0.08) !important;
+}
+
+/* Selected/highlighted row */
+.ace_editor.ace_autocomplete .ace_line.ace_selected {
+  background: linear-gradient(135deg, rgba(68, 116, 231, 0.12) 0%, rgba(102, 126, 234, 0.12) 100%) !important;
+  border-left: 3px solid #4474e7 !important;
+  padding-left: 9px !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line.ace_selected {
+  background: linear-gradient(135deg, rgba(68, 116, 231, 0.2) 0%, rgba(102, 126, 234, 0.2) 100%) !important;
+  border-left-color: #667eea !important;
+}
+
+/* Completion text */
+.ace_editor.ace_autocomplete .ace_completion-highlight {
+  color: #4474e7 !important;
+  font-weight: 600 !important;
+  text-shadow: none !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_completion-highlight {
+  color: #8098ff !important;
+}
+
+/* Meta labels (function, method, keyword, field) */
+.ace_editor.ace_autocomplete .ace_completion-meta {
+  float: right !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  margin-left: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+}
+
+/* Meta type colors */
+.ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
+  background: rgba(156, 163, 175, 0.15) !important;
+  color: #6b7280 !important;
+}
+
+.ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
+  background: rgba(68, 116, 231, 0.15) !important;
+  color: #4474e7 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
+  background: rgba(156, 163, 175, 0.25) !important;
+  color: #9ca3af !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
+  background: rgba(128, 152, 255, 0.25) !important;
+  color: #8098ff !important;
+}
+
+/* Documentation popup */
+.ace_editor.ace_autocomplete .ace_doc-tooltip {
+  background: var(--body-background) !important;
+  border: 1px solid rgba(128, 152, 249, 0.3) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  padding: 12px !important;
+  font-family: var(--body-font-family) !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: var(--body-font-color) !important;
+  max-width: 400px !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_doc-tooltip {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+.ace_editor.ace_autocomplete .ace_doc-tooltip b {
+  color: #4474e7 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_doc-tooltip b {
+  color: #8098ff !important;
+}
+
+.ace_editor.ace_autocomplete .ace_doc-tooltip em {
+  color: #6b7280 !important;
+  font-style: normal !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .ace_editor.ace_autocomplete .ace_doc-tooltip em {
+  color: #9ca3af !important;
+}
+
+/* Scrollbar for autocomplete */
+.ace_editor.ace_autocomplete .ace_scroller {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(156, 163, 175, 0.3) transparent !important;
+}
+
+.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3) !important;
+  border-radius: 4px !important;
+}
+
+.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5) !important;
 }

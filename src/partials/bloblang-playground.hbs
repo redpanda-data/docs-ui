@@ -234,6 +234,7 @@ const TAB_SIZE = 2;
 let executionTimeoutId = null;
 let lastExecutionTime = 0;
 let autoRunEnabled = true;
+let dynamicCompletions = [];
 
 // Keys for sessionStorage
 const sessionStorageKeys = {
@@ -374,6 +375,436 @@ function prettifyJSON(json) {
   }
 }
 
+// Static Bloblang completions (always available)
+const staticBloblangCompletions = [
+  // Keywords
+  { caption: 'root', value: 'root', meta: 'keyword', score: 1000, docHTML: '<b>root</b> - The root of the output document' },
+  { caption: 'this', value: 'this', meta: 'keyword', score: 1000, docHTML: '<b>this</b> - Reference to the current context value' },
+  { caption: 'deleted()', value: 'deleted()', meta: 'function', score: 950, docHTML: '<b>deleted()</b> - Delete a field from output' },
+
+  // Core functions
+  { caption: 'content()', value: 'content()', meta: 'function', score: 900, docHTML: '<b>content()</b> - Get raw message content as string' },
+  { caption: 'json()', value: 'json()', meta: 'function', score: 900, docHTML: '<b>json()</b> - Parse content as JSON' },
+  { caption: 'meta()', snippet: 'meta("${1:key}")', meta: 'function', score: 900, docHTML: '<b>meta(key)</b> - Get metadata value' },
+  { caption: 'timestamp_unix()', value: 'timestamp_unix()', meta: 'function', score: 880, docHTML: '<b>timestamp_unix()</b> - Current Unix timestamp' },
+  { caption: 'uuid_v4()', value: 'uuid_v4()', meta: 'function', score: 880, docHTML: '<b>uuid_v4()</b> - Generate UUID v4' },
+  { caption: 'range()', snippet: 'range(${1:start}, ${2:stop})', meta: 'function', score: 850, docHTML: '<b>range(start, stop)</b> - Generate array of integers' },
+  { caption: 'error()', snippet: 'error("${1:message}")', meta: 'function', score: 850, docHTML: '<b>error(msg)</b> - Throw an error' },
+
+  // Common string methods
+  { caption: 'uppercase()', value: 'uppercase()', meta: 'method', score: 800, docHTML: '<b>uppercase()</b> - Convert to uppercase' },
+  { caption: 'lowercase()', value: 'lowercase()', meta: 'method', score: 800, docHTML: '<b>lowercase()</b> - Convert to lowercase' },
+  { caption: 'trim()', value: 'trim()', meta: 'method', score: 800, docHTML: '<b>trim()</b> - Remove whitespace' },
+  { caption: 'contains()', snippet: 'contains("${1:substr}")', meta: 'method', score: 800, docHTML: '<b>contains(substr)</b> - Check if string contains substring' },
+  { caption: 'replace()', snippet: 'replace("${1:old}", "${2:new}")', meta: 'method', score: 800, docHTML: '<b>replace(old, new)</b> - Replace substring' },
+  { caption: 'split()', snippet: 'split("${1:sep}")', meta: 'method', score: 800, docHTML: '<b>split(sep)</b> - Split string into array' },
+
+  // Array methods
+  { caption: 'length()', value: 'length()', meta: 'method', score: 800, docHTML: '<b>length()</b> - Get length of array or string' },
+  { caption: 'map()', snippet: 'map(item -> ${1:item})', meta: 'method', score: 850, docHTML: '<b>map(fn)</b> - Transform each array element' },
+  { caption: 'filter()', snippet: 'filter(item -> ${1:condition})', meta: 'method', score: 850, docHTML: '<b>filter(fn)</b> - Filter array elements' },
+  { caption: 'flatten()', value: 'flatten()', meta: 'method', score: 800, docHTML: '<b>flatten()</b> - Flatten nested arrays' },
+  { caption: 'join()', snippet: 'join("${1:sep}")', meta: 'method', score: 800, docHTML: '<b>join(sep)</b> - Join array into string' },
+
+  // Type checks
+  { caption: 'type()', value: 'type()', meta: 'method', score: 780, docHTML: '<b>type()</b> - Get value type' },
+  { caption: 'exists()', snippet: 'exists("${1:path}")', meta: 'method', score: 780, docHTML: '<b>exists(path)</b> - Check if field exists' },
+];
+
+// Mock Connect data for local testing (to avoid CORS issues)
+const mockConnectData = {
+  'bloblang-functions': [
+    { name: 'parse_json', description: 'Parse a JSON string into a structured value', category: 'Parsing', params: { named: [] } },
+    { name: 'parse_csv', description: 'Parse CSV string into array of objects', category: 'Parsing', params: { named: [] } },
+    { name: 'parse_xml', description: 'Parse XML string into structured value', category: 'Parsing', params: { named: [{ name: 'cast' }] } },
+    { name: 'format_json', description: 'Format a value as JSON string', category: 'Encoding', params: { named: [{ name: 'indent' }] } },
+    { name: 'format_timestamp', description: 'Format a timestamp with specified layout', category: 'Time', params: { named: [{ name: 'layout' }] } },
+    { name: 'now', description: 'Returns current timestamp', category: 'Time', params: { named: [] } },
+    { name: 'env', description: 'Get environment variable value', category: 'Environment', params: { named: [{ name: 'name' }] } },
+    { name: 'file', description: 'Read file contents as string', category: 'General', params: { named: [{ name: 'path' }] } },
+    { name: 'hostname', description: 'Get system hostname', category: 'Environment', params: { named: [] } },
+    { name: 'random_int', description: 'Generate random integer', category: 'General', params: { named: [{ name: 'min' }, { name: 'max' }] } },
+    { name: 'throw', description: 'Throw an error with message', category: 'General', params: { named: [{ name: 'message' }] } },
+    { name: 'uuid_v4', description: 'Generate a new RFC-4122 UUID', category: 'General', params: { named: [] } },
+    { name: 'timestamp_unix', description: 'Returns current Unix timestamp', category: 'Time', params: { named: [] } },
+    { name: 'content', description: 'Returns the full raw contents of the message', category: 'Message Info', params: { named: [] } },
+    { name: 'json', description: 'Returns the message contents as a structured JSON value', category: 'Message Info', params: { named: [] } },
+    { name: 'batch_size', description: 'Returns the size of the message batch', category: 'Message Info', params: { named: [] } },
+    { name: 'batch_index', description: 'Returns the index of the message within the batch', category: 'Message Info', params: { named: [] } },
+    { name: 'error', description: 'Returns the last error message', category: 'Error Handling', params: { named: [] } },
+    { name: 'errored', description: 'Returns whether processing resulted in an error', category: 'Error Handling', params: { named: [] } },
+  ],
+  'bloblang-methods': [
+    { name: 'abs', description: 'Get absolute value of number', params: { named: [] } },
+    { name: 'append', description: 'Append element to array', params: { named: [{ name: 'value' }] } },
+    { name: 'apply', description: 'Apply mapping to value', params: { named: [{ name: 'mapping' }] } },
+    { name: 'capitalize', description: 'Capitalize first letter', params: { named: [] } },
+    { name: 'ceil', description: 'Round up to nearest integer', params: { named: [] } },
+    { name: 'collapse', description: 'Collapse whitespace in string', params: { named: [] } },
+    { name: 'encode', description: 'Encode string (base64, hex, etc)', params: { named: [{ name: 'scheme' }] } },
+    { name: 'decode', description: 'Decode string (base64, hex, etc)', params: { named: [{ name: 'scheme' }] } },
+    { name: 'floor', description: 'Round down to nearest integer', params: { named: [] } },
+    { name: 'format', description: 'Format string with arguments', params: { named: [{ name: 'args' }] } },
+    { name: 'has_prefix', description: 'Check if string has prefix', params: { named: [{ name: 'prefix' }] } },
+    { name: 'has_suffix', description: 'Check if string has suffix', params: { named: [{ name: 'suffix' }] } },
+    { name: 'index', description: 'Get index of substring or element', params: { named: [{ name: 'value' }] } },
+    { name: 'keys', description: 'Get object keys as array', params: { named: [] } },
+    { name: 'length', description: 'Get length of string or array', params: { named: [] } },
+    { name: 'lowercase', description: 'Convert string to lowercase', params: { named: [] } },
+    { name: 'uppercase', description: 'Convert string to uppercase', params: { named: [] } },
+    { name: 'merge', description: 'Merge objects or arrays', params: { named: [{ name: 'value' }] } },
+    { name: 'not', description: 'Logical NOT operation', params: { named: [] } },
+    { name: 're_find_all', description: 'Find all regex matches', params: { named: [{ name: 'pattern' }] } },
+    { name: 're_match', description: 'Test if string matches regex', params: { named: [{ name: 'pattern' }] } },
+    { name: 're_replace', description: 'Replace regex matches', params: { named: [{ name: 'pattern' }, { name: 'replacement' }] } },
+    { name: 'replace', description: 'Replace all occurrences of substring', params: { named: [{ name: 'old' }, { name: 'new' }] } },
+    { name: 'reverse', description: 'Reverse array or string', params: { named: [] } },
+    { name: 'round', description: 'Round to nearest integer', params: { named: [] } },
+    { name: 'slice', description: 'Get slice of array or string', params: { named: [{ name: 'start' }, { name: 'end' }] } },
+    { name: 'sort', description: 'Sort array', params: { named: [] } },
+    { name: 'split', description: 'Split string into array', params: { named: [{ name: 'separator' }] } },
+    { name: 'sqrt', description: 'Calculate square root', params: { named: [] } },
+    { name: 'string', description: 'Convert to string', params: { named: [] } },
+    { name: 'sum', description: 'Sum array of numbers', params: { named: [] } },
+    { name: 'trim', description: 'Trim whitespace from string', params: { named: [] } },
+    { name: 'type', description: 'Get type of value', params: { named: [] } },
+    { name: 'unique', description: 'Get unique elements from array', params: { named: [] } },
+    { name: 'values', description: 'Get object values as array', params: { named: [] } },
+  ]
+};
+
+// Fetch Redpanda Connect component data for dynamic completions
+async function fetchConnectCompletions() {
+  // If running on localhost, use mock data to avoid CORS issues
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    console.log('Using mock Connect data for local development');
+    return extractCompletionsFromConnectData(mockConnectData);
+  }
+
+  // Try to get latest version from GitHub releases
+  try {
+    const releasesResp = await fetch('https://api.github.com/repos/redpanda-data/connect/releases/latest');
+    if (releasesResp.ok) {
+      const release = await releasesResp.json();
+      const version = release.tag_name.replace(/^v/, ''); // Remove 'v' prefix if present
+      return await tryFetchConnectJSON(version);
+    }
+  } catch (e) {
+    console.log('Could not fetch latest Connect version, trying fallbacks', e);
+  }
+
+  // Fallback: try known recent versions
+  const fallbackVersions = ['4.78.0', '4.77.0', '4.76.0', '4.75.0'];
+  for (const version of fallbackVersions) {
+    const result = await tryFetchConnectJSON(version);
+    if (result.length > 0) return result;
+  }
+
+  console.log('Using static completions only');
+  return [];
+}
+
+async function tryFetchConnectJSON(version) {
+  try {
+    const url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
+    console.log(`Trying to fetch Connect completions from: ${url}`);
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.log(`Version ${version} not found`);
+      return [];
+    }
+
+    const data = await response.json();
+    console.log(`Successfully loaded Connect ${version} data`);
+    return extractCompletionsFromConnectData(data);
+  } catch (e) {
+    console.log(`Failed to fetch Connect ${version}:`, e);
+    return [];
+  }
+}
+
+function extractCompletionsFromConnectData(data) {
+  const completions = [];
+
+  try {
+    // Extract Bloblang functions (array of function objects)
+    if (Array.isArray(data['bloblang-functions'])) {
+      data['bloblang-functions'].forEach(fn => {
+        const name = fn.name;
+
+        // Build parameter snippet from actual parameter names
+        let completion = {
+          caption: name + '()',
+          meta: 'function',
+          score: 850
+        };
+
+        if (fn.params && fn.params.named && fn.params.named.length > 0) {
+          // Create snippet with named parameters
+          const paramSnippets = fn.params.named.map((param, index) => {
+            const paramName = param.name || `arg${index + 1}`;
+            return `\${${index + 1}:${paramName}}`;
+          });
+          completion.snippet = `${name}(${paramSnippets.join(', ')})`;
+
+          // Create readable signature for display
+          const paramNames = fn.params.named.map(p => p.name || 'arg').join(', ');
+          completion.docHTML = `<b>${name}(${paramNames})</b> - ${fn.description || 'Bloblang function'}${fn.category ? ` <em>(${fn.category})</em>` : ''}`;
+        } else {
+          completion.value = name + '()';
+          completion.docHTML = `<b>${name}()</b> - ${fn.description || 'Bloblang function'}${fn.category ? ` <em>(${fn.category})</em>` : ''}`;
+        }
+
+        completions.push(completion);
+      });
+    }
+
+    // Extract Bloblang methods (array of method objects)
+    if (Array.isArray(data['bloblang-methods'])) {
+      data['bloblang-methods'].forEach(method => {
+        const name = method.name;
+
+        // Build parameter snippet from actual parameter names
+        let completion = {
+          caption: name + '()',
+          meta: 'method',
+          score: 820
+        };
+
+        if (method.params && method.params.named && method.params.named.length > 0) {
+          // Create snippet with named parameters
+          const paramSnippets = method.params.named.map((param, index) => {
+            const paramName = param.name || `arg${index + 1}`;
+            return `\${${index + 1}:${paramName}}`;
+          });
+          completion.snippet = `${name}(${paramSnippets.join(', ')})`;
+
+          // Create readable signature for display
+          const paramNames = method.params.named.map(p => p.name || 'arg').join(', ');
+          completion.docHTML = `<b>${name}(${paramNames})</b> - ${method.description || 'Bloblang method'}`;
+        } else {
+          completion.value = name + '()';
+          completion.docHTML = `<b>${name}()</b> - ${method.description || 'Bloblang method'}`;
+        }
+
+        completions.push(completion);
+      });
+    }
+
+    console.log(`Extracted ${completions.length} dynamic completions from Connect data`);
+  } catch (e) {
+    console.error('Error parsing Connect data:', e);
+  }
+
+  return completions;
+}
+
+// Extract field names from JSON object (recursively)
+function extractFieldsFromJSON(jsonString, maxDepth = 3) {
+  try {
+    const obj = JSON.parse(jsonString);
+    return extractFieldPaths(obj, '', maxDepth);
+  } catch (e) {
+    return [];
+  }
+}
+
+function extractFieldPaths(obj, prefix, maxDepth, currentDepth = 0) {
+  if (currentDepth >= maxDepth || obj === null || typeof obj !== 'object') {
+    return [];
+  }
+
+  const fields = [];
+
+  if (Array.isArray(obj)) {
+    // For arrays, show common array methods and suggest index access
+    if (obj.length > 0) {
+      fields.push(...extractFieldPaths(obj[0], prefix + '[0].', maxDepth, currentDepth + 1));
+    }
+  } else {
+    // For objects, extract all keys
+    Object.keys(obj).forEach(key => {
+      const path = prefix ? `${prefix}${key}` : key;
+      fields.push(path);
+
+      // Recursively extract nested fields
+      const value = obj[key];
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        fields.push(...extractFieldPaths(value, path + '.', maxDepth, currentDepth + 1));
+      }
+    });
+  }
+
+  return fields;
+}
+
+// Cache for field extraction to avoid re-parsing on every keystroke
+let cachedInputJSON = '';
+let cachedFields = [];
+
+// Get context-aware completions based on cursor position
+function getContextCompletions(editor, session, pos) {
+  const line = session.getLine(pos.row);
+  const beforeCursor = line.substring(0, pos.column);
+
+  // Check if cursor is inside a string literal - don't suggest completions
+  const stringMatch = beforeCursor.match(/["']([^"']*)$/);
+  if (stringMatch) {
+    // Count quotes before cursor to see if we're inside a string
+    const quotesBefore = (beforeCursor.match(/["']/g) || []).length;
+    if (quotesBefore % 2 === 1) {
+      // Odd number of quotes means we're inside a string
+      return { suppressAll: true };
+    }
+  }
+
+  // Check if we're after "this."
+  const thisMatch = beforeCursor.match(/this\.(\w*)$/);
+  if (thisMatch) {
+    // Extract fields from input JSON with caching
+    const inputValue = aceInputEditor ? aceInputEditor.getValue() : '';
+
+    // Only re-extract if input has changed
+    if (inputValue !== cachedInputJSON) {
+      cachedInputJSON = inputValue;
+      cachedFields = extractFieldsFromJSON(inputValue);
+    }
+
+    return {
+      type: 'fields',
+      completions: cachedFields.map(field => ({
+        caption: field,
+        value: field,
+        meta: 'field',
+        score: 2000,
+        docHTML: `<b>${field}</b> - Field from input`
+      }))
+    };
+  }
+
+  // Check if we're after "this" followed by a path like "this.user."
+  const thisPathMatch = beforeCursor.match(/this\.([\w.]+)\.(\w*)$/);
+  if (thisPathMatch) {
+    const path = thisPathMatch[1];
+    const inputValue = aceInputEditor ? aceInputEditor.getValue() : '';
+
+    try {
+      const obj = JSON.parse(inputValue);
+      // Navigate to the path
+      const parts = path.split('.');
+      let current = obj;
+      for (const part of parts) {
+        if (current && typeof current === 'object') {
+          current = current[part];
+        } else {
+          return { type: 'none', completions: [] };
+        }
+      }
+
+      // Extract fields at this level
+      if (current && typeof current === 'object' && !Array.isArray(current)) {
+        const fields = Object.keys(current);
+        return {
+          type: 'fields',
+          completions: fields.map(field => ({
+            caption: field,
+            value: field,
+            meta: 'field',
+            score: 2000,
+            docHTML: `<b>${field}</b> - Field from this.${path}`
+          }))
+        };
+      }
+    } catch (e) {
+      // Invalid JSON or path, return empty
+      return { type: 'none', completions: [] };
+    }
+  }
+
+  // Check if we're after "meta("
+  const metaMatch = beforeCursor.match(/meta\(["']?(\w*)$/);
+  if (metaMatch) {
+    // Suggest common metadata keys
+    const commonMetaKeys = [
+      { key: 'kafka_key', desc: 'Kafka message key' },
+      { key: 'kafka_topic', desc: 'Kafka topic name' },
+      { key: 'kafka_partition', desc: 'Kafka partition' },
+      { key: 'kafka_offset', desc: 'Kafka offset' },
+      { key: 'kafka_timestamp', desc: 'Kafka timestamp' },
+      { key: 'content_type', desc: 'Content type' },
+    ];
+
+    return {
+      type: 'metadata',
+      completions: commonMetaKeys.map(({ key, desc }) => ({
+        caption: key,
+        value: key,
+        meta: 'metadata',
+        score: 1900,
+        docHTML: `<b>${key}</b> - ${desc}`
+      }))
+    };
+  }
+
+  // Check if we're in a method-chaining context (after any value followed by .)
+  // Match: word/closing-bracket/closing-paren, then dot, optional whitespace
+  // This handles: field. function(). array[0]. (expr).
+  const methodChainMatch = beforeCursor.match(/[\w\]\)]\.\s*\w*$/);
+  if (methodChainMatch) {
+    // Check if it's NOT root. or root.fieldname. (those are valid field assignments)
+    // Only suppress methods after bare "root." at start of assignment
+    const isRootFieldAssignment = beforeCursor.match(/^\s*root\.\w*$/) || beforeCursor.match(/=\s*root\.\w*$/);
+    if (!isRootFieldAssignment) {
+      return { type: 'methods-only' };
+    }
+  }
+
+  return { type: 'all' };
+}
+
+// Custom completer for Bloblang
+const bloblangCompleter = {
+  getCompletions: function(editor, session, pos, prefix, callback) {
+    // Get context-aware completions
+    const context = getContextCompletions(editor, session, pos);
+
+    let completionsToUse = [];
+
+    switch (context.type) {
+      case 'none':
+        // No completions (inside string literal or invalid context)
+        callback(null, []);
+        return;
+
+      case 'fields':
+      case 'metadata':
+        // Use specific context completions
+        completionsToUse = context.completions;
+        break;
+
+      case 'methods-only':
+        // Only show methods, filter out keywords and functions
+        const allCompletions = [...staticBloblangCompletions, ...dynamicCompletions];
+        completionsToUse = allCompletions.filter(c => c.meta === 'method');
+        break;
+
+      case 'all':
+      default:
+        // Show all completions
+        completionsToUse = [...staticBloblangCompletions, ...dynamicCompletions];
+        break;
+    }
+
+    // Filter by prefix
+    const filtered = completionsToUse.filter(c =>
+      c.caption.toLowerCase().startsWith(prefix.toLowerCase())
+    );
+
+    callback(null, filtered);
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
   inputAIButton = document.getElementById("input-ai-help");
@@ -395,6 +826,47 @@ document.addEventListener("DOMContentLoaded", () => {
   aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, initialInput);
   aceInputMetadataEditor = initializeAceEditor("ace-input-metadata", 'ace/mode/json', false, initialMeta);
   aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/coffee', false, initialMapping);
+
+  // Enable autocomplete for Bloblang mapping editor
+  try {
+    ace.require("ace/ext/language_tools");
+    aceMappingEditor.setOptions({
+      enableBasicAutocompletion: true,
+      enableLiveAutocompletion: true,
+      enableSnippets: true
+    });
+    aceMappingEditor.completers = [bloblangCompleter];
+    console.log('Bloblang autocomplete enabled');
+
+    // Trigger autocomplete on specific characters
+    aceMappingEditor.commands.on("afterExec", function(e) {
+      if (e.command.name === "insertstring") {
+        const char = e.args;
+        // Trigger autocomplete after typing "." (for this. or nested paths)
+        if (char === ".") {
+          aceMappingEditor.execCommand("startAutocomplete");
+        }
+        // Trigger autocomplete after typing "(" for function calls like meta(
+        if (char === "(") {
+          // Small delay to let the completer detect the context
+          setTimeout(() => {
+            aceMappingEditor.execCommand("startAutocomplete");
+          }, 50);
+        }
+      }
+    });
+
+    // Load dynamic completions from Connect JSON (async)
+    fetchConnectCompletions().then(completions => {
+      dynamicCompletions = completions;
+      const totalCount = completions.length + staticBloblangCompletions.length;
+      console.log(`✓ Loaded ${completions.length} dynamic Bloblang completions (${totalCount} total)`);
+    }).catch(err => {
+      console.warn('⚠ Could not load dynamic completions, using static only:', err);
+    });
+  } catch (e) {
+    console.warn('Could not enable autocomplete:', e);
+  }
 
   // Output editors always start with the defaults
   aceOutputEditor = initializeAceEditor("ace-output", 'ace/mode/text', true, defaultOutput);
@@ -506,63 +978,75 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearInputMetadataButton = document.getElementById("clear-input-metadata");
   const clearMappingButton = document.getElementById("clear-mapping");
 
-  clearInputButton.addEventListener("click", () => {
-    aceInputEditor.setValue("", 1);
-    saveTosessionStorage();
-  });
+  if (clearInputButton) {
+    clearInputButton.addEventListener("click", () => {
+      aceInputEditor.setValue("", 1);
+      saveTosessionStorage();
+    });
+  }
 
-  clearInputMetadataButton.addEventListener("click", (e) => {
-    e.stopPropagation(); // Prevent triggering details toggle
-    aceInputMetadataEditor.setValue("{}", 1);
-    saveTosessionStorage();
-  });
+  if (clearInputMetadataButton) {
+    clearInputMetadataButton.addEventListener("click", (e) => {
+      if (e) e.stopPropagation(); // Prevent triggering details toggle
+      aceInputMetadataEditor.setValue("{}", 1);
+      saveTosessionStorage();
+    });
+  }
 
-  clearMappingButton.addEventListener("click", () => {
-    aceMappingEditor.setValue("", 1);
-    saveTosessionStorage();
-  });
+  if (clearMappingButton) {
+    clearMappingButton.addEventListener("click", () => {
+      aceMappingEditor.setValue("", 1);
+      saveTosessionStorage();
+    });
+  }
 
   // Copy input metadata button
   const copyInputMetadataButton = document.getElementById("copy-input-metadata");
-  copyInputMetadataButton.addEventListener("click", async (e) => {
-    e.stopPropagation(); // Prevent triggering details toggle
-    const metadata = aceInputMetadataEditor.getValue();
-    try {
-      await navigator.clipboard.writeText(metadata);
-      const originalText = copyInputMetadataButton.textContent.trim();
-      copyInputMetadataButton.textContent = 'Copied!';
-      setTimeout(() => {
-        copyInputMetadataButton.textContent = originalText;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy input metadata', err);
-    }
-  });
+  if (copyInputMetadataButton) {
+    copyInputMetadataButton.addEventListener("click", async (e) => {
+      if (e) e.stopPropagation(); // Prevent triggering details toggle
+      const metadata = aceInputMetadataEditor.getValue();
+      try {
+        await navigator.clipboard.writeText(metadata);
+        const originalText = copyInputMetadataButton.textContent.trim();
+        copyInputMetadataButton.textContent = 'Copied!';
+        setTimeout(() => {
+          copyInputMetadataButton.textContent = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy input metadata', err);
+      }
+    });
+  }
 
   // Format JSON buttons
   const formatInputButton = document.getElementById("format-input");
   const formatInputMetadataButton = document.getElementById("format-input-metadata");
 
-  formatInputButton.addEventListener("click", () => {
-    try {
-      const formatted = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
-      aceInputEditor.setValue(formatted, 1);
-      saveTosessionStorage();
-    } catch (error) {
-      showNotification('Invalid JSON - cannot format', 'error');
-    }
-  });
+  if (formatInputButton) {
+    formatInputButton.addEventListener("click", () => {
+      try {
+        const formatted = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
+        aceInputEditor.setValue(formatted, 1);
+        saveTosessionStorage();
+      } catch (error) {
+        showNotification('Invalid JSON - cannot format', 'error');
+      }
+    });
+  }
 
-  formatInputMetadataButton.addEventListener("click", (e) => {
-    e.stopPropagation(); // Prevent triggering details toggle
-    try {
-      const formatted = JSON.stringify(JSON.parse(aceInputMetadataEditor.getValue()), null, 2);
-      aceInputMetadataEditor.setValue(formatted, 1);
-      saveTosessionStorage();
-    } catch (error) {
-      showNotification('Invalid JSON - cannot format', 'error');
-    }
-  });
+  if (formatInputMetadataButton) {
+    formatInputMetadataButton.addEventListener("click", (e) => {
+      if (e) e.stopPropagation(); // Prevent triggering details toggle
+      try {
+        const formatted = JSON.stringify(JSON.parse(aceInputMetadataEditor.getValue()), null, 2);
+        aceInputMetadataEditor.setValue(formatted, 1);
+        saveTosessionStorage();
+      } catch (error) {
+        showNotification('Invalid JSON - cannot format', 'error');
+      }
+    });
+  }
 
 
   // Export configuration
@@ -819,6 +1303,9 @@ document.addEventListener("DOMContentLoaded", () => {
     validateInputJSON();
     debouncedSave();
     debouncedExecute();
+    // Clear field cache when input changes so autocomplete suggestions update
+    cachedInputJSON = '';
+    cachedFields = [];
   });
 
   aceInputMetadataEditor.on("change", () => {
