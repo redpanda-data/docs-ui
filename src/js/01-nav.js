@@ -15,18 +15,22 @@
   var nav = navContainer.querySelector('.nav')
 
   if (navToggle) navToggle.addEventListener('click', showNav)
-  if (navCollapse) navCollapse.addEventListener('click', function (e) {
-    hideNav(e, true)
-    localStorage.setItem('navCollapsed', 'true')
-  })
-  if (navExpand) navExpand.addEventListener('click', function (e) {
-    showNav(e, true)
-    localStorage.setItem('navCollapsed', 'false')
-  })
+  if (navCollapse) {
+    navCollapse.addEventListener('click', function (e) {
+      hideNav(e, true)
+      window.localStorage.setItem('navCollapsed', 'true')
+    })
+  }
+  if (navExpand) {
+    navExpand.addEventListener('click', function (e) {
+      showNav(e, true)
+      window.localStorage.setItem('navCollapsed', 'false')
+    })
+  }
   navContainer.addEventListener('click', trapEvent)
 
   // Restore nav collapse state from localStorage
-  if (localStorage.getItem('navCollapsed') === 'true' && navCollapse) {
+  if (window.localStorage.getItem('navCollapsed') === 'true' && navCollapse) {
     hideNav(null, true)
   }
 

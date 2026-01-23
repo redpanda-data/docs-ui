@@ -9,7 +9,7 @@
     backToTopButton.style.display = 'none'
 
     // Show/hide button based on scroll position
-    function toggleBackToTop() {
+    function toggleBackToTop () {
       if (window.scrollY > 300) {
         backToTopButton.style.display = 'flex'
       } else {

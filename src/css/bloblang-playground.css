@@ -52,7 +52,6 @@
   height: 14px;
 }
 
-
 .bloblang-playground .banner span {
   margin: 0;
   flex-grow: 1;
@@ -260,7 +259,6 @@ html[data-theme=dark] .bloblang-playground .execution-time-error {
 .bloblang-playground #sample-dropdown option {
   padding: 8px;
 }
-
 
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
   background-color: #4474e7;
