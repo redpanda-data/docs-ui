@@ -706,7 +706,7 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 }
 
 /* Notifications */
-.notification {
+.bloblang-playground .notification {
   position: absolute;
   top: 180px;
   right: 20px;
@@ -727,61 +727,61 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   position: relative;
 }
 
-.notification-show {
+.bloblang-playground .notification-show {
   opacity: 1;
   transform: translateX(0);
 }
 
-.notification-success {
+.bloblang-playground .notification-success {
   border-left-color: var(--color-primitives-global-green-green-600);
   color: var(--color-primitives-global-green-green-800);
   background: var(--color-primitives-global-green-green-100);
 }
 
-html[data-theme=dark] .notification-success {
+html[data-theme=dark] .bloblang-playground .notification-success {
   border-left-color: var(--color-primitives-global-green-green-500);
   color: var(--color-primitives-global-green-green-200);
   background: rgba(56, 161, 105, 0.2);
 }
 
-.notification-error {
+.bloblang-playground .notification-error {
   border-left-color: var(--color-primitives-global-red-red-600);
   color: var(--color-primitives-global-red-red-800);
   background: var(--color-primitives-global-red-red-100);
 }
 
-html[data-theme=dark] .notification-error {
+html[data-theme=dark] .bloblang-playground .notification-error {
   border-left-color: var(--color-primitives-global-red-red-500);
   color: var(--color-primitives-global-red-red-200);
   background: rgba(255, 107, 96, 0.2);
 }
 
-.notification-warning {
+.bloblang-playground .notification-warning {
   border-left-color: var(--color-primitives-global-orange-orange-600);
   color: var(--color-primitives-global-orange-orange-800);
   background: var(--color-primitives-global-orange-orange-100);
 }
 
-html[data-theme=dark] .notification-warning {
+html[data-theme=dark] .bloblang-playground .notification-warning {
   border-left-color: var(--color-primitives-global-orange-orange-500);
   color: var(--color-primitives-global-orange-orange-200);
   background: rgba(249, 148, 79, 0.2);
 }
 
-.notification-info {
+.bloblang-playground .notification-info {
   border-left-color: var(--color-primitives-global-blue-blue-600);
   color: var(--color-primitives-global-blue-blue-800);
   background: var(--color-primitives-global-blue-blue-100);
 }
 
-html[data-theme=dark] .notification-info {
+html[data-theme=dark] .bloblang-playground .notification-info {
   border-left-color: var(--color-primitives-global-blue-blue-500);
   color: var(--color-primitives-global-blue-blue-200);
   background: rgba(69, 173, 232, 0.2);
 }
 
 /* Validation indicators */
-.validation-indicator {
+.bloblang-playground .validation-indicator {
   font-size: 11px;
   font-weight: 500;
   padding: 3px 8px;
@@ -791,40 +791,40 @@ html[data-theme=dark] .notification-info {
   min-width: 0;
 }
 
-.validation-success {
+.bloblang-playground .validation-success {
   color: var(--color-primitives-global-green-green-700);
   background: var(--color-primitives-global-green-green-50);
 }
 
-html[data-theme=dark] .validation-success {
+html[data-theme=dark] .bloblang-playground .validation-success {
   color: var(--color-primitives-global-green-green-400);
   background: rgba(56, 161, 105, 0.15);
 }
 
-.validation-error {
+.bloblang-playground .validation-error {
   color: var(--color-primitives-global-red-red-700);
   background: var(--color-primitives-global-red-red-50);
   max-width: 100%;
   word-break: break-word;
 }
 
-html[data-theme=dark] .validation-error {
+html[data-theme=dark] .bloblang-playground .validation-error {
   color: var(--color-primitives-global-red-red-400);
   background: rgba(255, 107, 96, 0.15);
 }
 
-.validation-info {
+.bloblang-playground .validation-info {
   color: var(--color-primitives-global-grey-grey-700);
   background: var(--color-primitives-global-grey-grey-50);
 }
 
-html[data-theme=dark] .validation-info {
+html[data-theme=dark] .bloblang-playground .validation-info {
   color: var(--color-primitives-global-grey-grey-300);
   background: rgba(170, 171, 174, 0.15);
 }
 
 /* Input format selector */
-.input-format-selector {
+.bloblang-playground .input-format-selector {
   font-size: 12px;
   padding: 4px 8px;
   border: 1px solid rgba(128, 152, 249, 0.3);
@@ -835,11 +835,11 @@ html[data-theme=dark] .validation-info {
   transition: border-color 0.2s ease;
 }
 
-.input-format-selector:hover {
+.bloblang-playground .input-format-selector:hover {
   border-color: rgba(128, 152, 249, 0.6);
 }
 
-.input-format-selector:focus {
+.bloblang-playground .input-format-selector:focus {
   outline: none;
   border-color: #4474e7;
   box-shadow: 0 0 0 2px rgba(68, 116, 231, 0.2);
@@ -856,26 +856,26 @@ html[data-theme=dark] .validation-info {
 }
 
 /* Editor error/success states */
-.editor-error {
+.bloblang-playground .editor-error {
   border: 2px solid var(--color-primitives-global-red-red-600) !important;
   background: var(--color-primitives-global-red-red-50) !important;
 }
 
-html[data-theme=dark] .editor-error {
+html[data-theme=dark] .bloblang-playground .editor-error {
   border: 2px solid var(--color-primitives-global-red-red-500) !important;
   background: rgba(255, 107, 96, 0.08) !important;
 }
 
-.editor-success {
+.bloblang-playground .editor-success {
   border: 2px solid var(--color-primitives-global-green-green-600) !important;
 }
 
-html[data-theme=dark] .editor-success {
+html[data-theme=dark] .bloblang-playground .editor-success {
   border: 2px solid var(--color-primitives-global-green-green-500) !important;
 }
 
 /* Copy output button */
-.copy-output-button {
+.bloblang-playground .copy-output-button {
   background: var(--body-background);
   border: 1.5px solid rgba(128, 152, 249, 0.4);
   color: var(--body-font-color);
@@ -891,7 +891,7 @@ html[data-theme=dark] .editor-success {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.copy-output-button:hover {
+.bloblang-playground .copy-output-button:hover {
   background: rgba(68, 76, 231, 0.06);
   border-color: #4474e7;
   color: var(--body-font-color);
@@ -900,7 +900,7 @@ html[data-theme=dark] .editor-success {
 }
 
 /* Shortcuts overlay */
-.shortcuts-overlay {
+.bloblang-playground .shortcuts-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -916,7 +916,7 @@ html[data-theme=dark] .editor-success {
   overflow: auto;
 }
 
-.shortcuts-content {
+.bloblang-playground .shortcuts-content {
   background: var(--body-background);
   padding: 30px;
   border-radius: 12px;
@@ -926,12 +926,12 @@ html[data-theme=dark] .editor-success {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
-.shortcuts-content h3 {
+.bloblang-playground .shortcuts-content h3 {
   margin-top: 0;
   color: var(--body-font-color);
 }
 
-.close-shortcuts {
+.bloblang-playground .close-shortcuts {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -946,17 +946,17 @@ html[data-theme=dark] .editor-success {
   height: 30px;
 }
 
-.close-shortcuts:hover {
+.bloblang-playground .close-shortcuts:hover {
   opacity: 0.7;
 }
 
-.shortcuts-list {
+.bloblang-playground .shortcuts-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.shortcuts-list li {
+.bloblang-playground .shortcuts-list li {
   padding: 10px 0;
   border-bottom: 1px solid rgba(204, 204, 204, 0.2);
   display: flex;
@@ -965,11 +965,11 @@ html[data-theme=dark] .editor-success {
   color: var(--body-font-color);
 }
 
-.shortcuts-list li:last-child {
+.bloblang-playground .shortcuts-list li:last-child {
   border-bottom: none;
 }
 
-.shortcuts-list kbd {
+.bloblang-playground .shortcuts-list kbd {
   background: rgba(68, 76, 231, 0.1);
   padding: 4px 8px;
   border-radius: 4px;
@@ -980,7 +980,7 @@ html[data-theme=dark] .editor-success {
 }
 
 /* Share modal */
-.share-modal {
+.bloblang-playground .share-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -996,7 +996,7 @@ html[data-theme=dark] .editor-success {
   overflow: auto;
 }
 
-.share-modal-content {
+.bloblang-playground .share-modal-content {
   background: var(--body-background);
   padding: 30px;
   border-radius: 12px;
@@ -1005,18 +1005,18 @@ html[data-theme=dark] .editor-success {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
-.share-modal-content h3 {
+.bloblang-playground .share-modal-content h3 {
   margin-top: 0;
   color: var(--body-font-color);
 }
 
-.share-url-container {
+.bloblang-playground .share-url-container {
   display: flex;
   gap: 10px;
   margin: 20px 0;
 }
 
-.share-url-container input {
+.bloblang-playground .share-url-container input {
   flex: 1;
   padding: 10px;
   border: 1px solid rgba(204, 204, 204, 0.5);
@@ -1069,7 +1069,7 @@ html[data-theme=dark] .editor-success {
 }
 
 /* ACE Editor Autocomplete Styles */
-.ace_editor.ace_autocomplete {
+.bloblang-playground .ace_editor.ace_autocomplete {
   background: var(--body-background) !important;
   border: 1px solid rgba(128, 152, 249, 0.3) !important;
   border-radius: 8px !important;
@@ -1081,12 +1081,12 @@ html[data-theme=dark] .editor-success {
   max-width: 360px !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(68, 116, 231, 0.2) !important;
 }
 
 /* Autocomplete rows */
-.ace_editor.ace_autocomplete .ace_line {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_line {
   padding: 8px 12px !important;
   color: var(--body-font-color) !important;
   line-height: 1.4 !important;
@@ -1096,43 +1096,43 @@ html[data-theme=dark] .editor-success {
   transition: background-color 0.15s ease !important;
 }
 
-.ace_editor.ace_autocomplete .ace_line:last-child {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_line:last-child {
   border-bottom: none !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line {
   border-bottom-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-.ace_editor.ace_autocomplete .ace_line:hover {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_line:hover {
   background: rgba(68, 116, 231, 0.08) !important;
 }
 
 /* Selected/highlighted row */
-.ace_editor.ace_autocomplete .ace_line.ace_selected {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected {
   background: linear-gradient(135deg, rgba(68, 116, 231, 0.12) 0%, rgba(102, 126, 234, 0.12) 100%) !important;
   border-left: 3px solid #4474e7 !important;
   padding-left: 9px !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line.ace_selected {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected {
   background: linear-gradient(135deg, rgba(68, 116, 231, 0.2) 0%, rgba(102, 126, 234, 0.2) 100%) !important;
   border-left-color: #667eea !important;
 }
 
 /* Completion text */
-.ace_editor.ace_autocomplete .ace_completion-highlight {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_completion-highlight {
   color: #4474e7 !important;
   font-weight: 600 !important;
   text-shadow: none !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_completion-highlight {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_completion-highlight {
   color: #8098ff !important;
 }
 
 /* Meta labels (function, method, keyword, field) */
-.ace_editor.ace_autocomplete .ace_completion-meta {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_completion-meta {
   float: right !important;
   font-size: 11px !important;
   font-weight: 600 !important;
@@ -1144,29 +1144,29 @@ html[data-theme=dark] .editor-success {
 }
 
 /* Meta type colors */
-.ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
   background: rgba(156, 163, 175, 0.15) !important;
   color: #6b7280 !important;
 }
 
-.ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
   background: rgba(68, 116, 231, 0.15) !important;
   color: #4474e7 !important;
   font-weight: 700 !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
   background: rgba(156, 163, 175, 0.25) !important;
   color: #9ca3af !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
   background: rgba(128, 152, 255, 0.25) !important;
   color: #8098ff !important;
 }
 
 /* Documentation popup */
-.ace_editor.ace_autocomplete .ace_doc-tooltip {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip {
   background: var(--body-background) !important;
   border: 1px solid rgba(128, 152, 249, 0.3) !important;
   border-radius: 8px !important;
@@ -1179,49 +1179,49 @@ html[data-theme=dark] .editor-success {
   max-width: 400px !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_doc-tooltip {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
-.ace_editor.ace_autocomplete .ace_doc-tooltip b {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip b {
   color: #4474e7 !important;
   font-weight: 600 !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_doc-tooltip b {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip b {
   color: #8098ff !important;
 }
 
-.ace_editor.ace_autocomplete .ace_doc-tooltip em {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip em {
   color: #6b7280 !important;
   font-style: normal !important;
   font-size: 11px !important;
   font-weight: 600 !important;
 }
 
-[data-theme="dark"] .ace_editor.ace_autocomplete .ace_doc-tooltip em {
+[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip em {
   color: #9ca3af !important;
 }
 
 /* Scrollbar for autocomplete */
-.ace_editor.ace_autocomplete .ace_scroller {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_scroller {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(156, 163, 175, 0.3) transparent !important;
 }
 
-.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar {
   width: 8px !important;
 }
 
-.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-track {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-track {
   background: transparent !important;
 }
 
-.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-thumb {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-thumb {
   background: rgba(156, 163, 175, 0.3) !important;
   border-radius: 4px !important;
 }
 
-.ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-thumb:hover {
+.bloblang-playground .ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.5) !important;
 }
