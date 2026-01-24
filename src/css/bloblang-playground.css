@@ -401,13 +401,20 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 @media (max-width: 768px) {
   .bloblang-playground .editor-section-collapsible summary {
     flex-wrap: wrap;
+    gap: 8px;
   }
 
   .bloblang-playground .editor-section-collapsible summary > div {
     flex-basis: 100%;
-    justify-content: flex-end;
+    justify-content: flex-start;
     margin-left: 0;
-    margin-top: 8px;
+    margin-top: 4px;
+    gap: 8px;
+  }
+
+  .bloblang-playground .editor-section-collapsible summary button {
+    flex: 1;
+    min-width: 0;
   }
 }
 
@@ -631,6 +638,64 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 }
 
 @media (max-width: 768px) {
+  /* Hide tooltips on mobile - they interfere with touch */
+  .bloblang-playground .editor-help-icon {
+    display: none;
+  }
+
+  /* Fix editor header to prevent squishing */
+  .bloblang-playground .editor-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .bloblang-playground .editor-header-content {
+    width: 100%;
+  }
+
+  /* Stack editor header action buttons on mobile */
+  .bloblang-playground .editor-header > div[style*="display: flex"] {
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+
+  .bloblang-playground .editor-header > div[style*="display: flex"] button {
+    flex: 1 1 calc(50% - 3px);
+    min-width: 0;
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  /* Give error messages and Ask AI button full width */
+  .bloblang-playground .editor-header h4 {
+    font-size: 13px;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  /* Stack validation indicators and buttons vertically on mobile */
+  .bloblang-playground .editor-header-content > div {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .bloblang-playground .validation-indicator {
+    display: block;
+    width: 100%;
+    text-align: left;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  /* Give Ask AI button more space on mobile */
+  .bloblang-playground .custom-ai-help-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Button bar improvements */
   .bloblang-playground .button-bar {
     gap: 8px;
   }
@@ -659,6 +724,21 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     min-width: 38px;
   }
 
+  /* Status bar improvements for mobile */
+  .bloblang-playground .status-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .bloblang-playground .auto-run-toggle {
+    flex: 1 1 100%;
+  }
+
+  .bloblang-playground .execution-time {
+    flex: 1 1 100%;
+    min-width: auto;
+  }
+
   .bloblang-playground .shortcuts-content {
     padding: 20px;
   }
@@ -673,6 +753,13 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     left: 10px;
     max-width: none;
   }
+
+  /* Make input format selector more touch-friendly */
+  .bloblang-playground .input-format-selector {
+    min-height: 36px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -683,6 +770,17 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 
   .bloblang-playground .button-group .button {
     width: 100%;
+  }
+}
+
+/* Hide all tooltips on touch devices - they flash/interfere with tap interactions */
+@media (hover: none) and (pointer: coarse) {
+  .bloblang-playground .tippy-box {
+    display: none !important;
+  }
+
+  .bloblang-playground .editor-help-icon {
+    display: none;
   }
 }
 
@@ -697,11 +795,6 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     font-size: 13px;
     padding: 10px 14px;
     min-height: 44px;
-  }
-
-  .bloblang-playground .status-bar {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
 
@@ -977,6 +1070,91 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   font-size: 12px;
   color: #4474e7;
   border: 1px solid rgba(68, 76, 231, 0.2);
+}
+
+.bloblang-playground .shortcuts-divider {
+  border-top: 2px solid rgba(102, 126, 234, 0.2);
+  margin: 24px 0 20px 0;
+}
+
+.bloblang-playground .shortcuts-claude-section {
+  margin-top: 0;
+}
+
+.bloblang-playground .shortcuts-claude-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--body-font-color);
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.bloblang-playground .shortcuts-claude-title svg {
+  color: #667eea;
+}
+
+.bloblang-playground .shortcuts-claude-description {
+  color: var(--body-font-color);
+  opacity: 0.8;
+  margin: 0 0 12px 0;
+  font-size: 13px;
+}
+
+.bloblang-playground .shortcuts-claude-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.bloblang-playground .shortcuts-claude-list li {
+  padding: 8px 0;
+  color: var(--body-font-color);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.bloblang-playground .shortcuts-claude-list strong {
+  font-family: var(--monospace-font-family);
+  color: #667eea;
+  font-weight: 600;
+  font-size: 12px;
+  background: rgba(102, 126, 234, 0.08);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 4px;
+}
+
+.bloblang-playground .shortcuts-claude-link {
+  display: inline-flex;
+  align-items: center;
+  color: #667eea;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.bloblang-playground .shortcuts-claude-link:hover {
+  color: #5a67d8;
+  text-decoration: underline;
+}
+
+[data-theme="dark"] .bloblang-playground .shortcuts-claude-title svg {
+  color: #8b9ef7;
+}
+
+[data-theme="dark"] .bloblang-playground .shortcuts-claude-list strong {
+  color: #8b9ef7;
+  background: rgba(139, 158, 247, 0.12);
+}
+
+[data-theme="dark"] .bloblang-playground .shortcuts-claude-link {
+  color: #8b9ef7;
+}
+
+[data-theme="dark"] .bloblang-playground .shortcuts-claude-link:hover {
+  color: #a5b4f9;
 }
 
 /* Share modal */
