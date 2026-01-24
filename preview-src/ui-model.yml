@@ -113,4 +113,220 @@ page:
       - content: Home page
         url: /xyz/24.3/home.html
         urlType: internal
+    - content: Get Started
+      url: '#'
+      urlType: internal
+      items:
+      - content: Installation Guide
+        url: '#'
+        urlType: internal
+      - content: Quick Setup
+        url: '#'
+        urlType: internal
+      - content: Configuration Basics
+        url: '#'
+        urlType: internal
+      - content: First Steps Tutorial
+        url: '#'
+        urlType: internal
+    - content: Concepts
+      url: '#'
+      urlType: internal
+      items:
+      - content: Architecture Overview
+        url: '#'
+        urlType: internal
+      - content: Data Streaming
+        url: '#'
+        urlType: internal
+      - content: Topics and Partitions
+        url: '#'
+        urlType: internal
+      - content: Consumer Groups
+        url: '#'
+        urlType: internal
+      - content: Producers and Consumers
+        url: '#'
+        urlType: internal
+      - content: Transactions
+        url: '#'
+        urlType: internal
+    - content: Deploy
+      url: '#'
+      urlType: internal
+      items:
+      - content: Kubernetes
+        url: '#'
+        urlType: internal
+        items:
+        - content: Helm Charts
+          url: '#'
+          urlType: internal
+        - content: Operators
+          url: '#'
+          urlType: internal
+        - content: StatefulSets
+          url: '#'
+          urlType: internal
+      - content: Docker
+        url: '#'
+        urlType: internal
+      - content: Bare Metal
+        url: '#'
+        urlType: internal
+      - content: Cloud Providers
+        url: '#'
+        urlType: internal
+        items:
+        - content: AWS
+          url: '#'
+          urlType: internal
+        - content: GCP
+          url: '#'
+          urlType: internal
+        - content: Azure
+          url: '#'
+          urlType: internal
+    - content: Configuration
+      url: '#'
+      urlType: internal
+      items:
+      - content: Cluster Properties
+        url: '#'
+        urlType: internal
+      - content: Topic Properties
+        url: '#'
+        urlType: internal
+      - content: Security Settings
+        url: '#'
+        urlType: internal
+      - content: Performance Tuning
+        url: '#'
+        urlType: internal
+      - content: Resource Limits
+        url: '#'
+        urlType: internal
+    - content: Develop
+      url: '#'
+      urlType: internal
+      items:
+      - content: Client Libraries
+        url: '#'
+        urlType: internal
+        items:
+        - content: Java Client
+          url: '#'
+          urlType: internal
+        - content: Python Client
+          url: '#'
+          urlType: internal
+        - content: Go Client
+          url: '#'
+          urlType: internal
+        - content: Node.js Client
+          url: '#'
+          urlType: internal
+      - content: Connect
+        url: '#'
+        urlType: internal
+        items:
+        - content: Connectors
+          url: '#'
+          urlType: internal
+        - content: Processors
+          url: '#'
+          urlType: internal
+        - content: Bloblang
+          url: '#'
+          urlType: internal
+      - content: Schema Registry
+        url: '#'
+        urlType: internal
+      - content: REST API
+        url: '#'
+        urlType: internal
+    - content: Manage
+      url: '#'
+      urlType: internal
+      items:
+      - content: Monitoring
+        url: '#'
+        urlType: internal
+        items:
+        - content: Metrics
+          url: '#'
+          urlType: internal
+        - content: Dashboards
+          url: '#'
+          urlType: internal
+        - content: Alerts
+          url: '#'
+          urlType: internal
+      - content: Operations
+        url: '#'
+        urlType: internal
+        items:
+        - content: Cluster Maintenance
+          url: '#'
+          urlType: internal
+        - content: Upgrades
+          url: '#'
+          urlType: internal
+        - content: Backups
+          url: '#'
+          urlType: internal
+        - content: Disaster Recovery
+          url: '#'
+          urlType: internal
+      - content: Security
+        url: '#'
+        urlType: internal
+        items:
+        - content: Authentication
+          url: '#'
+          urlType: internal
+        - content: Authorization
+          url: '#'
+          urlType: internal
+        - content: Encryption
+          url: '#'
+          urlType: internal
+        - content: Audit Logs
+          url: '#'
+          urlType: internal
+    - content: Reference
+      url: '#'
+      urlType: internal
+      items:
+      - content: CLI Commands
+        url: '#'
+        urlType: internal
+      - content: API Reference
+        url: '#'
+        urlType: internal
+      - content: Configuration Reference
+        url: '#'
+        urlType: internal
+      - content: Metrics Reference
+        url: '#'
+        urlType: internal
+      - content: Error Codes
+        url: '#'
+        urlType: internal
+    - content: Troubleshooting
+      url: '#'
+      urlType: internal
+      items:
+      - content: Common Issues
+        url: '#'
+        urlType: internal
+      - content: Performance Problems
+        url: '#'
+        urlType: internal
+      - content: Connection Issues
+        url: '#'
+        urlType: internal
+      - content: Data Loss Prevention
+        url: '#'
+        urlType: internal
 

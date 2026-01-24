@@ -15,9 +15,24 @@
   var nav = navContainer.querySelector('.nav')
 
   if (navToggle) navToggle.addEventListener('click', showNav)
-  if (navCollapse) navCollapse.addEventListener('click', function (e) { hideNav(e, true) })
-  if (navExpand) navExpand.addEventListener('click', function (e) { showNav(e, true) })
+  if (navCollapse) {
+    navCollapse.addEventListener('click', function (e) {
+      hideNav(e, true)
+      window.localStorage.setItem('navCollapsed', 'true')
+    })
+  }
+  if (navExpand) {
+    navExpand.addEventListener('click', function (e) {
+      showNav(e, true)
+      window.localStorage.setItem('navCollapsed', 'false')
+    })
+  }
   navContainer.addEventListener('click', trapEvent)
+
+  // Restore nav collapse state from localStorage
+  if (window.localStorage.getItem('navCollapsed') === 'true' && navCollapse) {
+    hideNav(null, true)
+  }
 
   var menuPanel = navContainer.querySelector('[data-panel=menu]')
   if (!menuPanel) return
@@ -224,6 +239,7 @@
   }
 
   function trapEvent (e) {
+    if (!e) return
     e.stopPropagation()
   }
 

@@ -4,59 +4,192 @@ For more details about this bundle and for the source code, see https://github.c
 -->
 
 {{{page.contents}}}
+
+<!-- Getting started tip -->
+<div class="playground-tip" id="playground-tip">
+  <div class="playground-tip-content">
+    Enter your data in <strong>Input</strong>, write a Bloblang mapping to transform it, and see the result in <strong>Output</strong>. Or,
+     <a href="https://docs.redpanda.com/redpanda-connect/guides/bloblang/about/" target="_blank" rel="noopener">learn Bloblang</a>.
+    <button id="dismiss-tip" class="dismiss-tip" aria-label="Dismiss tip">&times;</button>
+  </div>
+</div>
+
+<!-- Keyboard shortcuts help overlay -->
+<div id="shortcuts-overlay" class="shortcuts-overlay" style="display: none;" role="dialog" aria-labelledby="shortcuts-title" aria-modal="true">
+  <div class="shortcuts-content">
+    <h3 id="shortcuts-title">Keyboard Shortcuts</h3>
+    <button id="close-shortcuts" class="close-shortcuts" aria-label="Close shortcuts">&times;</button>
+    <ul class="shortcuts-list">
+      <li><kbd>Ctrl/Cmd + Enter</kbd> Execute mapping</li>
+      <li><kbd>Ctrl/Cmd + Shift + X</kbd> Clear all fields</li>
+      <li><kbd>Ctrl/Cmd + Shift + F</kbd> Format JSON input</li>
+      <li><kbd>Ctrl/Cmd + S</kbd> Copy share link</li>
+      <li><kbd>Ctrl/Cmd + E</kbd> Export configuration</li>
+      <li><kbd>Ctrl/Cmd + /</kbd> Toggle this help</li>
+    </ul>
+  </div>
+</div>
+
 <!-- Action buttons -->
 <div class="button-bar">
-  <button id="clear" class="button">Clear</button>
-  <button id="prettify" class="button">Format input</button>
-  <button id="share" class="button">Share link</button>
-  <select id="sample-dropdown" class="button">
-    {{#each (obj page.attributes.bloblang-samples) }}
-    <option value="{{this.title}}">{{this.title}}</option>
-    {{/each}}
-  </select>
+  <div class="button-group button-group-primary">
+    <select id="sample-dropdown" class="button" aria-label="Select example">
+      <option value="">Choose an example...</option>
+      {{#each (obj page.attributes.bloblang-samples) }}
+      <option value="{{this.title}}">{{this.title}}</option>
+      {{/each}}
+    </select>
+    <button id="share" class="button button-primary" data-tippy-content="Copy shareable link (Ctrl/Cmd + S)">
+      <span id="share-icon">Share</span>
+    </button>
+  </div>
+
+
+  <div class="button-group button-group-utility">
+    <button id="export-config" class="button button-secondary" data-tippy-content="Export configuration (Ctrl/Cmd + E)">
+      Export
+    </button>
+    <button id="import-config" class="button button-secondary" data-tippy-content="Import configuration">
+      Import
+    </button>
+    <input type="file" id="import-file-input" accept=".json" style="display: none;" aria-label="Import configuration file">
+  </div>
+
+  <button id="show-shortcuts" class="button button-secondary" data-tippy-content="Show keyboard shortcuts (Ctrl/Cmd + /)" aria-label="Show keyboard shortcuts">
+    ?
+  </button>
 </div>
-<button
-  id="custom-ai-help"
-  type="button"
-  class="custom-ai-help-button"
->
-  Get help from AI
-</button>
+
+<div class="status-bar">
+  <span id="execution-time" class="execution-time" role="status" aria-live="polite"></span>
+  <label class="auto-run-toggle">
+    <input type="checkbox" id="auto-run-toggle" checked>
+    <span>Auto-run <span class="editor-help-icon" data-tippy-content="Automatically execute mapping when you type">ⓘ</span></span>
+  </label>
+</div>
 
 <div class="playground-container">
   <!-- Editors -->
-  <section class="editors">
+  <section class="editors" aria-label="Input and mapping editors">
 
     <!-- Editor containers -->
-    <div class="editor-container">
+    <div class="editor-container editor-container-input">
       <!-- Input editor -->
-      <details open>
-        <summary>Input</summary>
-        <div class="editor" id="ace-input" contenteditable="true"></div>
-      </details>
-      <details open>
-        <summary>Input metadata</summary>
-        <div class="editor" id="ace-input-metadata" contenteditable="true"></div>
+      <div class="editor-section editor-section-always-open">
+        <div class="editor-header">
+          <div class="editor-header-content">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h4>Input <span class="editor-help-icon" data-tippy-content="Your source data in any format (JSON, text, CSV, XML, etc.)">ⓘ</span></h4>
+              <select id="input-format" class="input-format-selector" aria-label="Select input format" data-tippy-content="Choose your input format for validation and editor syntax highlighting">
+                <option value="auto">Auto-detect</option>
+                <option value="json">JSON</option>
+                <option value="text">Text</option>
+                <option value="csv">CSV</option>
+                <option value="xml">XML</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="validation-indicator" id="input-validation" role="status" aria-live="polite"></span>
+              <button
+                id="input-ai-help"
+                type="button"
+                class="custom-ai-help-button"
+                data-tippy-content="Get AI help with this error"
+                aria-label="Get help from AI for errors"
+                style="display: none;"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.01942 4.14696C0.821273 4.07417 0.615365 4.0169 0.403168 3.97662C0.387588 3.97367 0.371975 3.9708 0.356327 3.96802C0.214558 3.94289 0.214558 3.74081 0.356327 3.71568C0.371975 3.7129 0.387588 3.71003 0.403168 3.70709C0.615365 3.6668 0.821273 3.60953 1.01942 3.53675C1.138 3.49318 1.2538 3.44407 1.36651 3.38969C2.14702 3.01321 2.77911 2.38509 3.158 1.60949C3.2127 1.49749 3.26214 1.38242 3.30596 1.26458C3.37921 1.06768 3.43684 0.863067 3.47738 0.652204C3.48035 0.636723 3.48323 0.621208 3.48603 0.605658C3.51132 0.464781 3.71467 0.464781 3.73997 0.605658C3.74277 0.621208 3.74565 0.636723 3.74861 0.652204C3.78916 0.863067 3.84678 1.06768 3.92003 1.26458C3.96387 1.38242 4.01329 1.49749 4.06802 1.60949C4.44688 2.38509 5.07898 3.01321 5.8595 3.38969C5.9722 3.44407 6.088 3.49318 6.20657 3.53675C6.40473 3.60953 6.61063 3.6668 6.82284 3.70709C6.83842 3.71003 6.85402 3.7129 6.86967 3.71568C7.01144 3.74081 7.01144 3.94289 6.86967 3.96802C6.85402 3.9708 6.83842 3.97367 6.82284 3.97662C6.61063 4.0169 6.40473 4.07417 6.20657 4.14696C6.088 4.19052 5.9722 4.23963 5.8595 4.29401C5.07898 4.67049 4.44688 5.29861 4.06802 6.07422C4.01329 6.18622 3.96387 6.30129 3.92003 6.41912C3.84678 6.61602 3.78916 6.82063 3.74861 7.03151C3.74565 7.04697 3.74277 7.06249 3.73997 7.07804C3.71467 7.21893 3.51132 7.21893 3.48603 7.07804C3.48323 7.06249 3.48035 7.04697 3.47738 7.03151C3.43684 6.82063 3.37921 6.61602 3.30596 6.41912C3.26214 6.30129 3.2127 6.18622 3.158 6.07422C2.77911 5.29861 2.14702 4.67049 1.36651 4.29401C1.2538 4.23963 1.138 4.19052 1.01942 4.14696ZM5.75667 9.15294C5.61809 9.11583 5.47758 9.08326 5.3353 9.05541C5.31306 9.05107 5.29079 9.04684 5.26848 9.04271L5.26172 9.04146L5.25257 9.0398C5.23849 9.03725 5.22303 9.03451 5.19212 9.02901L5.18132 9.0271C4.9546 8.98447 4.9546 8.66184 5.18132 8.61921L5.19212 8.6173C5.22303 8.6118 5.23849 8.60906 5.25257 8.60651L5.26172 8.60485L5.26848 8.60361C5.29079 8.59947 5.31306 8.59524 5.33528 8.5909C5.47756 8.56305 5.61809 8.53048 5.75667 8.49337C5.87504 8.46168 5.992 8.42664 6.10746 8.38841C7.9755 7.76963 9.44545 6.30893 10.0681 4.45264C10.1066 4.33791 10.1419 4.22168 10.1738 4.10403C10.2111 3.96634 10.2439 3.8267 10.2719 3.68531C10.2763 3.66323 10.2805 3.6411 10.2847 3.61894L10.286 3.61221L10.2876 3.60312C10.2902 3.5893 10.2929 3.57413 10.2983 3.54409L10.2985 3.54306L10.3004 3.53232C10.3433 3.30702 10.668 3.30702 10.7109 3.53232L10.7128 3.54306C10.7183 3.57377 10.7211 3.58913 10.7237 3.60312L10.7253 3.61221L10.7266 3.61894C10.7307 3.6411 10.735 3.66323 10.7394 3.68531C10.7674 3.82672 10.8002 3.96634 10.8375 4.10403C10.8694 4.22168 10.9047 4.33791 10.9431 4.45264C11.5658 6.30893 13.0358 7.76963 14.9038 8.38841C15.0193 8.42664 15.1362 8.46168 15.2546 8.49337C15.3932 8.53048 15.5337 8.56305 15.676 8.5909C15.6982 8.59524 15.7205 8.59947 15.7428 8.60361L15.7496 8.60485L15.7587 8.60651C15.7728 8.60906 15.7882 8.6118 15.8192 8.6173L15.83 8.61921C16.0567 8.66184 16.0567 8.98447 15.83 9.0271L15.8192 9.02901L15.7864 9.03482L15.7587 9.0398L15.7496 9.04146L15.7428 9.04271C15.7205 9.04684 15.6982 9.05107 15.676 9.05541C15.5337 9.08326 15.3932 9.11583 15.2546 9.15294C15.1362 9.18463 15.0193 9.21967 14.9038 9.2579C13.0358 9.87668 11.5658 11.3374 10.9431 13.1937C10.9047 13.3084 10.8694 13.4246 10.8375 13.5423C10.8002 13.68 10.7674 13.8196 10.7394 13.961C10.735 13.9831 10.7307 14.0052 10.7266 14.0274L10.7253 14.0341L10.7237 14.0432L10.7199 14.0637L10.713 14.1021L10.7109 14.114C10.668 14.3393 10.3433 14.3393 10.3004 14.114L10.2985 14.1033C10.293 14.0726 10.2902 14.0572 10.2876 14.0432L10.286 14.0341L10.2847 14.0274C10.2805 14.0052 10.2763 13.9831 10.2719 13.961C10.2439 13.8196 10.2111 13.68 10.1738 13.5423C10.1419 13.4246 10.1066 13.3084 10.0681 13.1937C9.44545 11.3374 7.9755 9.87668 6.10746 9.2579C5.992 9.21967 5.87504 9.18463 5.75667 9.15294ZM2.63009 13.4745C2.86838 13.5197 3.09411 13.5989 3.30206 13.7067C3.39456 13.7547 3.48354 13.8084 3.56853 13.8673C3.80536 14.0313 4.01129 14.236 4.17642 14.4713C4.23567 14.5558 4.28969 14.6442 4.33796 14.7361C4.44653 14.9428 4.52617 15.1671 4.57168 15.4039C4.57356 15.4137 4.5754 15.4234 4.57715 15.4333C4.59313 15.5222 4.72156 15.5222 4.73754 15.4333C4.7393 15.4234 4.74111 15.4137 4.74299 15.4039C4.78853 15.1671 4.86817 14.9428 4.97672 14.7361C5.02501 14.6442 5.07902 14.5558 5.13828 14.4713C5.30339 14.236 5.50933 14.0313 5.74616 13.8673C5.83115 13.8084 5.92013 13.7547 6.01262 13.7067C6.22059 13.5989 6.44631 13.5197 6.68461 13.4745C6.69445 13.4726 6.7043 13.4708 6.71418 13.469C6.80373 13.4532 6.80373 13.3255 6.71418 13.3097C6.7043 13.3079 6.69445 13.3061 6.68461 13.3042C6.44631 13.259 6.22059 13.1798 6.01262 13.072C5.92013 13.024 5.83115 12.9703 5.74616 12.9114C5.50933 12.7474 5.30339 12.5427 5.13828 12.3074C5.07902 12.2229 5.02501 12.1345 4.97672 12.0426C4.86817 11.836 4.78853 11.6116 4.74299 11.3748C4.74111 11.3651 4.7393 11.3553 4.73754 11.3454C4.72156 11.2565 4.59313 11.2565 4.57715 11.3454C4.5754 11.3553 4.57356 11.3651 4.57168 11.3748C4.52617 11.6116 4.44653 11.836 4.33796 12.0426C4.28969 12.1345 4.23567 12.2229 4.17642 12.3074C4.01129 12.5427 3.80536 12.7474 3.56853 12.9114C3.48354 12.9703 3.39456 13.024 3.30206 13.072C3.09411 13.1798 2.86838 13.259 2.63009 13.3042C2.62025 13.3061 2.61039 13.3079 2.60049 13.3097C2.51097 13.3255 2.51097 13.4532 2.60049 13.469C2.61039 13.4708 2.62025 13.4726 2.63009 13.4745Z" fill="white"/></svg>
+                Ask AI
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="format-input" class="copy-output-button" data-tippy-content="Format JSON (Ctrl/Cmd + Shift + F)" aria-label="Format JSON" style="display: none;">
+              Format
+            </button>
+            <button id="copy-input" class="copy-output-button" data-tippy-content="Copy input to clipboard" aria-label="Copy input">
+              Copy
+            </button>
+            <button id="clear-input" class="copy-output-button" data-tippy-content="Clear input" aria-label="Clear input">
+              Clear
+            </button>
+          </div>
+        </div>
+        <div class="editor" id="ace-input" contenteditable="true" role="textbox" aria-label="Input data editor" aria-multiline="true"></div>
+      </div>
+
+      <!-- Input metadata - collapsible -->
+      <details class="editor-section-collapsible">
+        <summary>
+          <span>Input metadata <span class="optional-badge">Optional</span></span>
+          <div style="display: flex; gap: 8px; margin-left: auto;">
+            <button id="format-input-metadata" class="copy-output-button" data-tippy-content="Format JSON" aria-label="Format JSON">
+              Format
+            </button>
+            <button id="copy-input-metadata" class="copy-output-button" data-tippy-content="Copy input metadata to clipboard" aria-label="Copy input metadata">
+              Copy
+            </button>
+            <button id="clear-input-metadata" class="copy-output-button" data-tippy-content="Clear input metadata" aria-label="Clear input metadata">
+              Clear
+            </button>
+          </div>
+        </summary>
+        <div class="editor" id="ace-input-metadata" contenteditable="true" role="textbox" aria-label="Input metadata JSON editor" aria-multiline="true"></div>
       </details>
 
       <!-- Mapping editor -->
-      <details open>
-        <summary>Mapping</summary>
-        <div class="editor" id="ace-mapping" contenteditable="true"></div>
-      </details>
+      <div class="editor-section editor-section-always-open">
+        <div class="editor-header">
+          <div class="editor-header-content">
+            <h4>Mapping <span class="editor-help-icon" data-tippy-content="Bloblang code to transform your input. Use 'this' for JSON or 'content()' for text/CSV/XML">ⓘ</span></h4>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="validation-indicator" id="mapping-validation" role="status" aria-live="polite"></span>
+              <button
+                id="mapping-ai-help"
+                type="button"
+                class="custom-ai-help-button"
+                data-tippy-content="Get AI help with this error"
+                aria-label="Get help from AI for errors"
+                style="display: none;"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.01942 4.14696C0.821273 4.07417 0.615365 4.0169 0.403168 3.97662C0.387588 3.97367 0.371975 3.9708 0.356327 3.96802C0.214558 3.94289 0.214558 3.74081 0.356327 3.71568C0.371975 3.7129 0.387588 3.71003 0.403168 3.70709C0.615365 3.6668 0.821273 3.60953 1.01942 3.53675C1.138 3.49318 1.2538 3.44407 1.36651 3.38969C2.14702 3.01321 2.77911 2.38509 3.158 1.60949C3.2127 1.49749 3.26214 1.38242 3.30596 1.26458C3.37921 1.06768 3.43684 0.863067 3.47738 0.652204C3.48035 0.636723 3.48323 0.621208 3.48603 0.605658C3.51132 0.464781 3.71467 0.464781 3.73997 0.605658C3.74277 0.621208 3.74565 0.636723 3.74861 0.652204C3.78916 0.863067 3.84678 1.06768 3.92003 1.26458C3.96387 1.38242 4.01329 1.49749 4.06802 1.60949C4.44688 2.38509 5.07898 3.01321 5.8595 3.38969C5.9722 3.44407 6.088 3.49318 6.20657 3.53675C6.40473 3.60953 6.61063 3.6668 6.82284 3.70709C6.83842 3.71003 6.85402 3.7129 6.86967 3.71568C7.01144 3.74081 7.01144 3.94289 6.86967 3.96802C6.85402 3.9708 6.83842 3.97367 6.82284 3.97662C6.61063 4.0169 6.40473 4.07417 6.20657 4.14696C6.088 4.19052 5.9722 4.23963 5.8595 4.29401C5.07898 4.67049 4.44688 5.29861 4.06802 6.07422C4.01329 6.18622 3.96387 6.30129 3.92003 6.41912C3.84678 6.61602 3.78916 6.82063 3.74861 7.03151C3.74565 7.04697 3.74277 7.06249 3.73997 7.07804C3.71467 7.21893 3.51132 7.21893 3.48603 7.07804C3.48323 7.06249 3.48035 7.04697 3.47738 7.03151C3.43684 6.82063 3.37921 6.61602 3.30596 6.41912C3.26214 6.30129 3.2127 6.18622 3.158 6.07422C2.77911 5.29861 2.14702 4.67049 1.36651 4.29401C1.2538 4.23963 1.138 4.19052 1.01942 4.14696ZM5.75667 9.15294C5.61809 9.11583 5.47758 9.08326 5.3353 9.05541C5.31306 9.05107 5.29079 9.04684 5.26848 9.04271L5.26172 9.04146L5.25257 9.0398C5.23849 9.03725 5.22303 9.03451 5.19212 9.02901L5.18132 9.0271C4.9546 8.98447 4.9546 8.66184 5.18132 8.61921L5.19212 8.6173C5.22303 8.6118 5.23849 8.60906 5.25257 8.60651L5.26172 8.60485L5.26848 8.60361C5.29079 8.59947 5.31306 8.59524 5.33528 8.5909C5.47756 8.56305 5.61809 8.53048 5.75667 8.49337C5.87504 8.46168 5.992 8.42664 6.10746 8.38841C7.9755 7.76963 9.44545 6.30893 10.0681 4.45264C10.1066 4.33791 10.1419 4.22168 10.1738 4.10403C10.2111 3.96634 10.2439 3.8267 10.2719 3.68531C10.2763 3.66323 10.2805 3.6411 10.2847 3.61894L10.286 3.61221L10.2876 3.60312C10.2902 3.5893 10.2929 3.57413 10.2983 3.54409L10.2985 3.54306L10.3004 3.53232C10.3433 3.30702 10.668 3.30702 10.7109 3.53232L10.7128 3.54306C10.7183 3.57377 10.7211 3.58913 10.7237 3.60312L10.7253 3.61221L10.7266 3.61894C10.7307 3.6411 10.735 3.66323 10.7394 3.68531C10.7674 3.82672 10.8002 3.96634 10.8375 4.10403C10.8694 4.22168 10.9047 4.33791 10.9431 4.45264C11.5658 6.30893 13.0358 7.76963 14.9038 8.38841C15.0193 8.42664 15.1362 8.46168 15.2546 8.49337C15.3932 8.53048 15.5337 8.56305 15.676 8.5909C15.6982 8.59524 15.7205 8.59947 15.7428 8.60361L15.7496 8.60485L15.7587 8.60651C15.7728 8.60906 15.7882 8.6118 15.8192 8.6173L15.83 8.61921C16.0567 8.66184 16.0567 8.98447 15.83 9.0271L15.8192 9.02901L15.7864 9.03482L15.7587 9.0398L15.7496 9.04146L15.7428 9.04271C15.7205 9.04684 15.6982 9.05107 15.676 9.05541C15.5337 9.08326 15.3932 9.11583 15.2546 9.15294C15.1362 9.18463 15.0193 9.21967 14.9038 9.2579C13.0358 9.87668 11.5658 11.3374 10.9431 13.1937C10.9047 13.3084 10.8694 13.4246 10.8375 13.5423C10.8002 13.68 10.7674 13.8196 10.7394 13.961C10.735 13.9831 10.7307 14.0052 10.7266 14.0274L10.7253 14.0341L10.7237 14.0432L10.7199 14.0637L10.713 14.1021L10.7109 14.114C10.668 14.3393 10.3433 14.3393 10.3004 14.114L10.2985 14.1033C10.293 14.0726 10.2902 14.0572 10.2876 14.0432L10.286 14.0341L10.2847 14.0274C10.2805 14.0052 10.2763 13.9831 10.2719 13.961C10.2439 13.8196 10.2111 13.68 10.1738 13.5423C10.1419 13.4246 10.1066 13.3084 10.0681 13.1937C9.44545 11.3374 7.9755 9.87668 6.10746 9.2579C5.992 9.21967 5.87504 9.18463 5.75667 9.15294ZM2.63009 13.4745C2.86838 13.5197 3.09411 13.5989 3.30206 13.7067C3.39456 13.7547 3.48354 13.8084 3.56853 13.8673C3.80536 14.0313 4.01129 14.236 4.17642 14.4713C4.23567 14.5558 4.28969 14.6442 4.33796 14.7361C4.44653 14.9428 4.52617 15.1671 4.57168 15.4039C4.57356 15.4137 4.5754 15.4234 4.57715 15.4333C4.59313 15.5222 4.72156 15.5222 4.73754 15.4333C4.7393 15.4234 4.74111 15.4137 4.74299 15.4039C4.78853 15.1671 4.86817 14.9428 4.97672 14.7361C5.02501 14.6442 5.07902 14.5558 5.13828 14.4713C5.30339 14.236 5.50933 14.0313 5.74616 13.8673C5.83115 13.8084 5.92013 13.7547 6.01262 13.7067C6.22059 13.5989 6.44631 13.5197 6.68461 13.4745C6.69445 13.4726 6.7043 13.4708 6.71418 13.469C6.80373 13.4532 6.80373 13.3255 6.71418 13.3097C6.7043 13.3079 6.69445 13.3061 6.68461 13.3042C6.44631 13.259 6.22059 13.1798 6.01262 13.072C5.92013 13.024 5.83115 12.9703 5.74616 12.9114C5.50933 12.7474 5.30339 12.5427 5.13828 12.3074C5.07902 12.2229 5.02501 12.1345 4.97672 12.0426C4.86817 11.836 4.78853 11.6116 4.74299 11.3748C4.74111 11.3651 4.7393 11.3553 4.73754 11.3454C4.72156 11.2565 4.59313 11.2565 4.57715 11.3454C4.5754 11.3553 4.57356 11.3651 4.57168 11.3748C4.52617 11.6116 4.44653 11.836 4.33796 12.0426C4.28969 12.1345 4.23567 12.2229 4.17642 12.3074C4.01129 12.5427 3.80536 12.7474 3.56853 12.9114C3.48354 12.9703 3.39456 13.024 3.30206 13.072C3.09411 13.1798 2.86838 13.259 2.63009 13.3042C2.62025 13.3061 2.61039 13.3079 2.60049 13.3097C2.51097 13.3255 2.51097 13.4532 2.60049 13.469C2.61039 13.4708 2.62025 13.4726 2.63009 13.4745Z" fill="white"/></svg>
+                Ask AI
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="copy-mapping" class="copy-output-button" data-tippy-content="Copy mapping to clipboard" aria-label="Copy mapping">
+              Copy
+            </button>
+            <button id="clear-mapping" class="copy-output-button" data-tippy-content="Clear mapping" aria-label="Clear mapping">
+              Clear
+            </button>
+          </div>
+        </div>
+        <div class="editor" id="ace-mapping" contenteditable="true" role="textbox" aria-label="Bloblang mapping editor" aria-multiline="true"></div>
+      </div>
     </div>
   </section>
 
   <!-- Output -->
-  <section class="output-section">
-    <div class="editor-container">
-      <details open>
-        <summary>Output</summary>
-        <div class="editor" id="ace-output">"Output will appear here..."</div>
-      </details>
-      <details open>
-      <summary>Output metadata</summary>
-        <div class="editor" id="ace-metadata">"Metadata will appear here..."</div>
+  <section class="output-section" aria-label="Output results">
+    <div class="editor-container editor-container-output">
+      <div class="editor-section editor-section-always-open">
+        <div class="editor-header">
+          <div class="editor-header-content">
+            <h4>Output <span class="editor-help-icon" data-tippy-content="Transformed result">ⓘ</span></h4>
+          </div>
+          <button id="copy-output" class="copy-output-button" data-tippy-content="Copy output to clipboard" aria-label="Copy output">
+            Copy
+          </button>
+        </div>
+        <div class="editor editor-output" id="ace-output" role="log" aria-label="Output result" aria-live="polite">Output will appear here...</div>
+      </div>
+
+      <!-- Output metadata - collapsible -->
+      <details class="editor-section-collapsible" open>
+        <summary>Output metadata</summary>
+        <div class="editor editor-output-meta" id="ace-metadata" role="log" aria-label="Output metadata">Metadata will appear here...</div>
       </details>
     </div>
   </section>
@@ -96,8 +229,12 @@ window.timezoneFuncs = {
   }
 };
 
-let aceInputEditor, aceMappingEditor, aceOutputEditor, metadataDetails, choices, customAIButton;
+let aceInputEditor, aceMappingEditor, aceOutputEditor, aceInputMetadataEditor, aceOutputMetadataEditor, metadataDetails, choices, inputAIButton, mappingAIButton;
 const TAB_SIZE = 2;
+let executionTimeoutId = null;
+let lastExecutionTime = 0;
+let autoRunEnabled = true;
+let dynamicCompletions = [];
 
 // Keys for sessionStorage
 const sessionStorageKeys = {
@@ -128,6 +265,87 @@ const initialInput   = (hasUrlData || hasSavedState) ? loadingPlaceholder : defa
 const initialMeta    = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultMetaInput;
 const initialMapping = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultMapping;
 
+// Utility Functions
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+function validateJSON(jsonString) {
+  try {
+    JSON.parse(jsonString);
+    return { valid: true, error: null };
+  } catch (e) {
+    return { valid: false, error: e.message };
+  }
+}
+
+function validateXML(xmlString) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlString, 'application/xml');
+    const parserError = doc.querySelector('parsererror');
+    if (parserError) {
+      return { valid: false, error: parserError.textContent };
+    }
+    return { valid: true, error: null };
+  } catch (e) {
+    return { valid: false, error: e.message };
+  }
+}
+
+function validateCSV(csvString) {
+  // Basic CSV validation - check for consistent column counts
+  const lines = csvString.trim().split('\n');
+  if (lines.length === 0) return { valid: false, error: 'Empty CSV' };
+
+  const firstLineColumns = lines[0].split(',').length;
+  for (let i = 1; i < lines.length; i++) {
+    const columns = lines[i].split(',').length;
+    if (columns !== firstLineColumns) {
+      return { valid: false, error: `Inconsistent columns at line ${i + 1}` };
+    }
+  }
+  return { valid: true, error: null };
+}
+
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  notification.setAttribute('role', 'alert');
+
+  // Append to playground container instead of body for better positioning
+  const playgroundContainer = document.querySelector('.bloblang-playground');
+  if (playgroundContainer) {
+    playgroundContainer.appendChild(notification);
+  } else {
+    document.body.appendChild(notification);
+  }
+
+  setTimeout(() => {
+    notification.classList.add('notification-show');
+  }, 10);
+
+  setTimeout(() => {
+    notification.classList.remove('notification-show');
+    setTimeout(() => notification.remove(), 300);
+  }, 5000); // Increased from 3000ms to 5000ms
+}
+
+function formatExecutionTime(ms) {
+  if (ms < 1) return `${(ms * 1000).toFixed(0)}µs`;
+  if (ms < 1000) return `${ms.toFixed(2)}ms`;
+  return `${(ms / 1000).toFixed(2)}s`;
+}
+
 // Initialize ACE Editors
 function initializeAceEditor(editorId, mode, readOnly = false, initialValue = '') {
   const editor = ace.edit(editorId);
@@ -141,6 +359,11 @@ function initializeAceEditor(editorId, mode, readOnly = false, initialValue = ''
     minLines: 1, // Minimum height
     maxLines: 50, // Allow growth
   });
+
+  // Disable ACE's built-in validation to avoid conflicting error messages
+  // We handle validation ourselves with clearer error messages in the validation indicators
+  editor.session.setUseWorker(false);
+
   return editor;
 }
 
@@ -152,14 +375,502 @@ function prettifyJSON(json) {
   }
 }
 
+// Static Bloblang completions (always available)
+const staticBloblangCompletions = [
+  // Keywords
+  { caption: 'root', value: 'root', meta: 'keyword', score: 1000, docHTML: '<b>root</b> - The root of the output document' },
+  { caption: 'this', value: 'this', meta: 'keyword', score: 1000, docHTML: '<b>this</b> - Reference to the current context value' },
+  { caption: 'deleted()', value: 'deleted()', meta: 'function', score: 950, docHTML: '<b>deleted()</b> - Delete a field from output' },
+
+  // Core functions
+  { caption: 'content()', value: 'content()', meta: 'function', score: 900, docHTML: '<b>content()</b> - Get raw message content as string' },
+  { caption: 'json()', value: 'json()', meta: 'function', score: 900, docHTML: '<b>json()</b> - Parse content as JSON' },
+  { caption: 'meta()', snippet: 'meta("${1:key}")', meta: 'function', score: 900, docHTML: '<b>meta(key)</b> - Get metadata value' },
+  { caption: 'timestamp_unix()', value: 'timestamp_unix()', meta: 'function', score: 880, docHTML: '<b>timestamp_unix()</b> - Current Unix timestamp' },
+  { caption: 'uuid_v4()', value: 'uuid_v4()', meta: 'function', score: 880, docHTML: '<b>uuid_v4()</b> - Generate UUID v4' },
+  { caption: 'range()', snippet: 'range(${1:start}, ${2:stop})', meta: 'function', score: 850, docHTML: '<b>range(start, stop)</b> - Generate array of integers' },
+  { caption: 'error()', snippet: 'error("${1:message}")', meta: 'function', score: 850, docHTML: '<b>error(msg)</b> - Throw an error' },
+
+  // Common string methods
+  { caption: 'uppercase()', value: 'uppercase()', meta: 'method', score: 800, docHTML: '<b>uppercase()</b> - Convert to uppercase' },
+  { caption: 'lowercase()', value: 'lowercase()', meta: 'method', score: 800, docHTML: '<b>lowercase()</b> - Convert to lowercase' },
+  { caption: 'trim()', value: 'trim()', meta: 'method', score: 800, docHTML: '<b>trim()</b> - Remove whitespace' },
+  { caption: 'contains()', snippet: 'contains("${1:substr}")', meta: 'method', score: 800, docHTML: '<b>contains(substr)</b> - Check if string contains substring' },
+  { caption: 'replace()', snippet: 'replace("${1:old}", "${2:new}")', meta: 'method', score: 800, docHTML: '<b>replace(old, new)</b> - Replace substring' },
+  { caption: 'split()', snippet: 'split("${1:sep}")', meta: 'method', score: 800, docHTML: '<b>split(sep)</b> - Split string into array' },
+
+  // Array methods
+  { caption: 'length()', value: 'length()', meta: 'method', score: 800, docHTML: '<b>length()</b> - Get length of array or string' },
+  { caption: 'map()', snippet: 'map(item -> ${1:item})', meta: 'method', score: 850, docHTML: '<b>map(fn)</b> - Transform each array element' },
+  { caption: 'filter()', snippet: 'filter(item -> ${1:condition})', meta: 'method', score: 850, docHTML: '<b>filter(fn)</b> - Filter array elements' },
+  { caption: 'flatten()', value: 'flatten()', meta: 'method', score: 800, docHTML: '<b>flatten()</b> - Flatten nested arrays' },
+  { caption: 'join()', snippet: 'join("${1:sep}")', meta: 'method', score: 800, docHTML: '<b>join(sep)</b> - Join array into string' },
+
+  // Type checks
+  { caption: 'type()', value: 'type()', meta: 'method', score: 780, docHTML: '<b>type()</b> - Get value type' },
+  { caption: 'exists()', snippet: 'exists("${1:path}")', meta: 'method', score: 780, docHTML: '<b>exists(path)</b> - Check if field exists' },
+];
+
+// Mock Connect data for local testing (to avoid CORS issues)
+const mockConnectData = {
+  'bloblang-functions': [
+    { name: 'parse_json', description: 'Parse a JSON string into a structured value', category: 'Parsing', params: { named: [] } },
+    { name: 'parse_csv', description: 'Parse CSV string into array of objects', category: 'Parsing', params: { named: [] } },
+    { name: 'parse_xml', description: 'Parse XML string into structured value', category: 'Parsing', params: { named: [{ name: 'cast' }] } },
+    { name: 'format_json', description: 'Format a value as JSON string', category: 'Encoding', params: { named: [{ name: 'indent' }] } },
+    { name: 'format_timestamp', description: 'Format a timestamp with specified layout', category: 'Time', params: { named: [{ name: 'layout' }] } },
+    { name: 'now', description: 'Returns current timestamp', category: 'Time', params: { named: [] } },
+    { name: 'env', description: 'Get environment variable value', category: 'Environment', params: { named: [{ name: 'name' }] } },
+    { name: 'file', description: 'Read file contents as string', category: 'General', params: { named: [{ name: 'path' }] } },
+    { name: 'hostname', description: 'Get system hostname', category: 'Environment', params: { named: [] } },
+    { name: 'random_int', description: 'Generate random integer', category: 'General', params: { named: [{ name: 'min' }, { name: 'max' }] } },
+    { name: 'throw', description: 'Throw an error with message', category: 'General', params: { named: [{ name: 'message' }] } },
+    { name: 'uuid_v4', description: 'Generate a new RFC-4122 UUID', category: 'General', params: { named: [] } },
+    { name: 'timestamp_unix', description: 'Returns current Unix timestamp', category: 'Time', params: { named: [] } },
+    { name: 'content', description: 'Returns the full raw contents of the message', category: 'Message Info', params: { named: [] } },
+    { name: 'json', description: 'Returns the message contents as a structured JSON value', category: 'Message Info', params: { named: [] } },
+    { name: 'batch_size', description: 'Returns the size of the message batch', category: 'Message Info', params: { named: [] } },
+    { name: 'batch_index', description: 'Returns the index of the message within the batch', category: 'Message Info', params: { named: [] } },
+    { name: 'error', description: 'Returns the last error message', category: 'Error Handling', params: { named: [] } },
+    { name: 'errored', description: 'Returns whether processing resulted in an error', category: 'Error Handling', params: { named: [] } },
+  ],
+  'bloblang-methods': [
+    { name: 'abs', description: 'Get absolute value of number', params: { named: [] } },
+    { name: 'append', description: 'Append element to array', params: { named: [{ name: 'value' }] } },
+    { name: 'apply', description: 'Apply mapping to value', params: { named: [{ name: 'mapping' }] } },
+    { name: 'capitalize', description: 'Capitalize first letter', params: { named: [] } },
+    { name: 'ceil', description: 'Round up to nearest integer', params: { named: [] } },
+    { name: 'collapse', description: 'Collapse whitespace in string', params: { named: [] } },
+    { name: 'encode', description: 'Encode string (base64, hex, etc)', params: { named: [{ name: 'scheme' }] } },
+    { name: 'decode', description: 'Decode string (base64, hex, etc)', params: { named: [{ name: 'scheme' }] } },
+    { name: 'floor', description: 'Round down to nearest integer', params: { named: [] } },
+    { name: 'format', description: 'Format string with arguments', params: { named: [{ name: 'args' }] } },
+    { name: 'has_prefix', description: 'Check if string has prefix', params: { named: [{ name: 'prefix' }] } },
+    { name: 'has_suffix', description: 'Check if string has suffix', params: { named: [{ name: 'suffix' }] } },
+    { name: 'index', description: 'Get index of substring or element', params: { named: [{ name: 'value' }] } },
+    { name: 'keys', description: 'Get object keys as array', params: { named: [] } },
+    { name: 'length', description: 'Get length of string or array', params: { named: [] } },
+    { name: 'lowercase', description: 'Convert string to lowercase', params: { named: [] } },
+    { name: 'uppercase', description: 'Convert string to uppercase', params: { named: [] } },
+    { name: 'merge', description: 'Merge objects or arrays', params: { named: [{ name: 'value' }] } },
+    { name: 'not', description: 'Logical NOT operation', params: { named: [] } },
+    { name: 're_find_all', description: 'Find all regex matches', params: { named: [{ name: 'pattern' }] } },
+    { name: 're_match', description: 'Test if string matches regex', params: { named: [{ name: 'pattern' }] } },
+    { name: 're_replace', description: 'Replace regex matches', params: { named: [{ name: 'pattern' }, { name: 'replacement' }] } },
+    { name: 'replace', description: 'Replace all occurrences of substring', params: { named: [{ name: 'old' }, { name: 'new' }] } },
+    { name: 'reverse', description: 'Reverse array or string', params: { named: [] } },
+    { name: 'round', description: 'Round to nearest integer', params: { named: [] } },
+    { name: 'slice', description: 'Get slice of array or string', params: { named: [{ name: 'start' }, { name: 'end' }] } },
+    { name: 'sort', description: 'Sort array', params: { named: [] } },
+    { name: 'split', description: 'Split string into array', params: { named: [{ name: 'separator' }] } },
+    { name: 'sqrt', description: 'Calculate square root', params: { named: [] } },
+    { name: 'string', description: 'Convert to string', params: { named: [] } },
+    { name: 'sum', description: 'Sum array of numbers', params: { named: [] } },
+    { name: 'trim', description: 'Trim whitespace from string', params: { named: [] } },
+    { name: 'type', description: 'Get type of value', params: { named: [] } },
+    { name: 'unique', description: 'Get unique elements from array', params: { named: [] } },
+    { name: 'values', description: 'Get object values as array', params: { named: [] } },
+  ]
+};
+
+// Fetch Redpanda Connect component data for dynamic completions
+async function fetchConnectCompletions() {
+  // If running on localhost, use mock data to avoid CORS issues
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    console.log('Using mock Connect data for local development');
+    return extractCompletionsFromConnectData(mockConnectData);
+  }
+
+  // Try to get latest version from GitHub releases
+  try {
+    const releasesResp = await fetch('https://api.github.com/repos/redpanda-data/connect/releases/latest');
+    if (releasesResp.ok) {
+      const release = await releasesResp.json();
+      const version = release.tag_name.replace(/^v/, ''); // Remove 'v' prefix if present
+      const result = await tryFetchConnectJSON(version);
+      if (result.length > 0) {
+        return result;
+      }
+      console.log(`Latest version ${version} returned no completions, trying fallbacks`);
+    }
+  } catch (e) {
+    console.log('Could not fetch latest Connect version, trying fallbacks', e);
+  }
+
+  // Fallback: try known recent versions
+  const fallbackVersions = ['4.78.0', '4.77.0', '4.76.0', '4.75.0'];
+  for (const version of fallbackVersions) {
+    const result = await tryFetchConnectJSON(version);
+    if (result.length > 0) return result;
+  }
+
+  console.log('Using static completions only');
+  return [];
+}
+
+async function tryFetchConnectJSON(version) {
+  try {
+    const url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
+    console.log(`Trying to fetch Connect completions from: ${url}`);
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.log(`Version ${version} not found`);
+      return [];
+    }
+
+    const data = await response.json();
+    console.log(`Successfully loaded Connect ${version} data`);
+    return extractCompletionsFromConnectData(data);
+  } catch (e) {
+    console.log(`Failed to fetch Connect ${version}:`, e);
+    return [];
+  }
+}
+
+function extractCompletionsFromConnectData(data) {
+  const completions = [];
+
+  try {
+    // Extract Bloblang functions (array of function objects)
+    if (Array.isArray(data['bloblang-functions'])) {
+      data['bloblang-functions'].forEach(fn => {
+        const name = fn.name;
+
+        // Build parameter snippet from actual parameter names
+        let completion = {
+          caption: name + '()',
+          meta: 'function',
+          score: 850
+        };
+
+        if (fn.params && fn.params.named && fn.params.named.length > 0) {
+          // Create snippet with named parameters
+          const paramSnippets = fn.params.named.map((param, index) => {
+            const paramName = param.name || `arg${index + 1}`;
+            return `\${${index + 1}:${paramName}}`;
+          });
+          completion.snippet = `${name}(${paramSnippets.join(', ')})`;
+
+          // Create readable signature for display
+          const paramNames = fn.params.named.map(p => p.name || 'arg').join(', ');
+          completion.docHTML = `<b>${name}(${paramNames})</b> - ${fn.description || 'Bloblang function'}${fn.category ? ` <em>(${fn.category})</em>` : ''}`;
+        } else {
+          completion.value = name + '()';
+          completion.docHTML = `<b>${name}()</b> - ${fn.description || 'Bloblang function'}${fn.category ? ` <em>(${fn.category})</em>` : ''}`;
+        }
+
+        completions.push(completion);
+      });
+    }
+
+    // Extract Bloblang methods (array of method objects)
+    if (Array.isArray(data['bloblang-methods'])) {
+      data['bloblang-methods'].forEach(method => {
+        const name = method.name;
+
+        // Build parameter snippet from actual parameter names
+        let completion = {
+          caption: name + '()',
+          meta: 'method',
+          score: 820
+        };
+
+        if (method.params && method.params.named && method.params.named.length > 0) {
+          // Create snippet with named parameters
+          const paramSnippets = method.params.named.map((param, index) => {
+            const paramName = param.name || `arg${index + 1}`;
+            return `\${${index + 1}:${paramName}}`;
+          });
+          completion.snippet = `${name}(${paramSnippets.join(', ')})`;
+
+          // Create readable signature for display
+          const paramNames = method.params.named.map(p => p.name || 'arg').join(', ');
+          completion.docHTML = `<b>${name}(${paramNames})</b> - ${method.description || 'Bloblang method'}`;
+        } else {
+          completion.value = name + '()';
+          completion.docHTML = `<b>${name}()</b> - ${method.description || 'Bloblang method'}`;
+        }
+
+        completions.push(completion);
+      });
+    }
+
+    console.log(`Extracted ${completions.length} dynamic completions from Connect data`);
+  } catch (e) {
+    console.error('Error parsing Connect data:', e);
+  }
+
+  return completions;
+}
+
+// Extract field names from JSON object (recursively)
+function extractFieldsFromJSON(jsonString, maxDepth = 3) {
+  try {
+    const obj = JSON.parse(jsonString);
+    return extractFieldPaths(obj, '', maxDepth);
+  } catch (e) {
+    return [];
+  }
+}
+
+function extractFieldPaths(obj, prefix, maxDepth, currentDepth = 0) {
+  if (currentDepth >= maxDepth || obj === null || typeof obj !== 'object') {
+    return [];
+  }
+
+  const fields = [];
+
+  if (Array.isArray(obj)) {
+    // For arrays, show common array methods and suggest index access
+    if (obj.length > 0) {
+      fields.push(...extractFieldPaths(obj[0], prefix + '[0].', maxDepth, currentDepth + 1));
+    }
+  } else {
+    // For objects, extract all keys
+    Object.keys(obj).forEach(key => {
+      const path = prefix ? `${prefix}${key}` : key;
+      fields.push(path);
+
+      // Recursively extract nested fields
+      const value = obj[key];
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        fields.push(...extractFieldPaths(value, path + '.', maxDepth, currentDepth + 1));
+      }
+    });
+  }
+
+  return fields;
+}
+
+// Cache for field extraction to avoid re-parsing on every keystroke
+let cachedInputJSON = '';
+let cachedFields = [];
+
+// Get context-aware completions based on cursor position
+function getContextCompletions(editor, session, pos) {
+  const line = session.getLine(pos.row);
+  const beforeCursor = line.substring(0, pos.column);
+
+  // Check if cursor is inside a string literal - don't suggest completions
+  const stringMatch = beforeCursor.match(/["']([^"']*)$/);
+  if (stringMatch) {
+    // Count quotes before cursor to see if we're inside a string
+    const quotesBefore = (beforeCursor.match(/["']/g) || []).length;
+    if (quotesBefore % 2 === 1) {
+      // Odd number of quotes means we're inside a string
+      return { type: 'none' };
+    }
+  }
+
+  // Check if we're after "this."
+  const thisMatch = beforeCursor.match(/this\.(\w*)$/);
+  if (thisMatch) {
+    // Extract fields from input JSON with caching
+    const inputValue = aceInputEditor ? aceInputEditor.getValue() : '';
+
+    // Only re-extract if input has changed
+    if (inputValue !== cachedInputJSON) {
+      cachedInputJSON = inputValue;
+      cachedFields = extractFieldsFromJSON(inputValue);
+    }
+
+    return {
+      type: 'fields',
+      completions: cachedFields.map(field => ({
+        caption: field,
+        value: field,
+        meta: 'field',
+        score: 2000,
+        docHTML: `<b>${field}</b> - Field from input`
+      }))
+    };
+  }
+
+  // Check if we're after "this" followed by a path like "this.user."
+  const thisPathMatch = beforeCursor.match(/this\.([\w.]+)\.(\w*)$/);
+  if (thisPathMatch) {
+    const path = thisPathMatch[1];
+    const inputValue = aceInputEditor ? aceInputEditor.getValue() : '';
+
+    try {
+      const obj = JSON.parse(inputValue);
+      // Navigate to the path
+      const parts = path.split('.');
+      let current = obj;
+      for (const part of parts) {
+        if (current && typeof current === 'object') {
+          current = current[part];
+        } else {
+          return { type: 'none', completions: [] };
+        }
+      }
+
+      // Extract fields at this level
+      if (current && typeof current === 'object' && !Array.isArray(current)) {
+        const fields = Object.keys(current);
+        return {
+          type: 'fields',
+          completions: fields.map(field => ({
+            caption: field,
+            value: field,
+            meta: 'field',
+            score: 2000,
+            docHTML: `<b>${field}</b> - Field from this.${path}`
+          }))
+        };
+      }
+    } catch (e) {
+      // Invalid JSON or path, return empty
+      return { type: 'none', completions: [] };
+    }
+  }
+
+  // Check if we're after "meta("
+  const metaMatch = beforeCursor.match(/meta\(["']?(\w*)$/);
+  if (metaMatch) {
+    // Suggest common metadata keys
+    const commonMetaKeys = [
+      { key: 'kafka_key', desc: 'Kafka message key' },
+      { key: 'kafka_topic', desc: 'Kafka topic name' },
+      { key: 'kafka_partition', desc: 'Kafka partition' },
+      { key: 'kafka_offset', desc: 'Kafka offset' },
+      { key: 'kafka_timestamp', desc: 'Kafka timestamp' },
+      { key: 'content_type', desc: 'Content type' },
+    ];
+
+    return {
+      type: 'metadata',
+      completions: commonMetaKeys.map(({ key, desc }) => ({
+        caption: key,
+        value: key,
+        meta: 'metadata',
+        score: 1900,
+        docHTML: `<b>${key}</b> - ${desc}`
+      }))
+    };
+  }
+
+  // Check if we're in a method-chaining context (after any value followed by .)
+  // Match: word/closing-bracket/closing-paren, then dot, optional whitespace
+  // This handles: field. function(). array[0]. (expr).
+  const methodChainMatch = beforeCursor.match(/[\w\]\)]\.\s*\w*$/);
+  if (methodChainMatch) {
+    // Check if it's NOT root. or root.fieldname. (those are valid field assignments)
+    // Only suppress methods after bare "root." at start of assignment
+    const isRootFieldAssignment = beforeCursor.match(/^\s*root\.\w*$/) || beforeCursor.match(/=\s*root\.\w*$/);
+    if (!isRootFieldAssignment) {
+      return { type: 'methods-only' };
+    }
+  }
+
+  return { type: 'all' };
+}
+
+// Custom completer for Bloblang
+const bloblangCompleter = {
+  getCompletions: function(editor, session, pos, prefix, callback) {
+    // Get context-aware completions
+    const context = getContextCompletions(editor, session, pos);
+
+    let completionsToUse = [];
+
+    switch (context.type) {
+      case 'none':
+        // No completions (inside string literal or invalid context)
+        callback(null, []);
+        return;
+
+      case 'fields':
+      case 'metadata':
+        // Use specific context completions
+        completionsToUse = context.completions;
+        break;
+
+      case 'methods-only':
+        // Only show methods, filter out keywords and functions
+        const allCompletions = [...staticBloblangCompletions, ...dynamicCompletions];
+        completionsToUse = allCompletions.filter(c => c.meta === 'method');
+        break;
+
+      case 'all':
+      default:
+        // Show all completions
+        completionsToUse = [...staticBloblangCompletions, ...dynamicCompletions];
+        break;
+    }
+
+    // Filter by prefix
+    const filtered = completionsToUse.filter(c =>
+      c.caption.toLowerCase().startsWith(prefix.toLowerCase())
+    );
+
+    callback(null, filtered);
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   metadataDetails = document.getElementById("metadata-details");
-  customAIButton = document.getElementById("custom-ai-help");
+  inputAIButton = document.getElementById("input-ai-help");
+  mappingAIButton = document.getElementById("mapping-ai-help");
+
+  // Setup keyboard shortcuts
+  setupKeyboardShortcuts();
+
+  // Setup auto-run toggle
+  const autoRunToggle = document.getElementById("auto-run-toggle");
+  autoRunToggle.addEventListener("change", (e) => {
+    autoRunEnabled = e.target.checked;
+    if (autoRunEnabled) {
+      debouncedExecute();
+    }
+  });
 
   // Initialize editors using the initial placeholders if URL/saved state exists
   aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, initialInput);
   aceInputMetadataEditor = initializeAceEditor("ace-input-metadata", 'ace/mode/json', false, initialMeta);
   aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/coffee', false, initialMapping);
+
+  // Enable autocomplete for Bloblang mapping editor
+  try {
+    ace.require("ace/ext/language_tools");
+    aceMappingEditor.setOptions({
+      enableBasicAutocompletion: true,
+      enableLiveAutocompletion: true,
+      enableSnippets: true
+    });
+    aceMappingEditor.completers = [bloblangCompleter];
+    console.log('Bloblang autocomplete enabled');
+
+    // Trigger autocomplete on specific characters
+    aceMappingEditor.commands.on("afterExec", function(e) {
+      if (e.command.name === "insertstring") {
+        const char = e.args;
+        // Trigger autocomplete after typing "." (for this. or nested paths)
+        if (char === ".") {
+          aceMappingEditor.execCommand("startAutocomplete");
+        }
+        // Trigger autocomplete after typing "(" for function calls like meta(
+        if (char === "(") {
+          // Small delay to let the completer detect the context
+          setTimeout(() => {
+            aceMappingEditor.execCommand("startAutocomplete");
+          }, 50);
+        }
+      }
+    });
+
+    // Load dynamic completions from Connect JSON (async)
+    fetchConnectCompletions().then(completions => {
+      dynamicCompletions = completions;
+      const totalCount = completions.length + staticBloblangCompletions.length;
+      console.log(`✓ Loaded ${completions.length} dynamic Bloblang completions (${totalCount} total)`);
+    }).catch(err => {
+      console.warn('⚠ Could not load dynamic completions, using static only:', err);
+    });
+  } catch (e) {
+    console.warn('Could not enable autocomplete:', e);
+  }
 
   // Output editors always start with the defaults
   aceOutputEditor = initializeAceEditor("ace-output", 'ace/mode/text', true, defaultOutput);
@@ -199,91 +910,364 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const shareButton = document.getElementById("share");
 
-  // Create a Tippy instance on the button
-  const tippyInstance = tippy(shareButton, {
-    trigger: 'manual',
-    arrow: true,
-  });
-
-  // On click, copy to clipboard and show tooltip
+  // On click, copy to clipboard and show notification
   shareButton.addEventListener("click", async () => {
     const shareUrl = generateShareableUrl();
 
     try {
       await navigator.clipboard.writeText(shareUrl);
-      tippyInstance.setContent("Copied!");
-      tippyInstance.show();
+      const icon = shareButton.querySelector('#share-icon');
+      const originalText = icon.textContent;
+      icon.textContent = 'Copied!';
 
       setTimeout(() => {
-        tippyInstance.hide();
+        icon.textContent = originalText;
       }, 2000);
     } catch (err) {
       console.error("Failed to copy shareable URL:", err);
-      tippyInstance.setContent("Failed to copy URL.");
-      tippyInstance.show();
-
-      setTimeout(() => {
-        tippyInstance.hide();
-      }, 2000);
+      // Fallback: show modal with URL
+      showShareUrlModal(shareUrl);
     }
   });
 
-  // Handle clear button
-  document.getElementById("clear").addEventListener("click", () => {
-    aceInputEditor.setValue("");
-    aceMappingEditor.setValue("");
-    aceInputMetadataEditor.setValue("");
-    aceOutputEditor.setValue(defaultOutput, 1);
-    aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
-    saveTosessionStorage();
-  });
+  // Copy buttons
+  const copyOutputButton = document.getElementById("copy-output");
+  const copyInputButton = document.getElementById("copy-input");
+  const copyMappingButton = document.getElementById("copy-mapping");
 
-  customAIButton.addEventListener("click", () => {
-    const input = aceInputEditor.getValue();
-    const mapping = aceMappingEditor.getValue();
-    const meta = aceInputMetadataEditor.getValue();
+  copyOutputButton.addEventListener("click", async () => {
     const output = aceOutputEditor.getValue();
-    const kapa = window.Kapa;
-
-    // Simulate a click on the AI modal trigger
-    if (kapa) {
-      let aiPromptText = "I am using the Bloblang playground to test my Bloblang mappings for Redpanda Connect. I encountered an error with the following configuration:\n\n";
-      if (input && input !== "{}") {
-        aiPromptText += `Input:\n\n${input}\n\n`;
-      }
-      if (meta && meta !== "{}") {
-        aiPromptText += `Input Metadata:\n\n${meta}\n\n`;
-      }
-      if (mapping) {
-        aiPromptText += `Mapping:\n\n${mapping}\n\n`;
-      }
-      if (output) {
-        aiPromptText += `Output:\n\n${output}\n\n`;
-      }
-      aiPromptText += "Can you help debug this?";
-      kapa.open({
-        mode: 'ai',
-        query: aiPromptText,
-        submit: true
-      });
-    } else {
-      console.warn('Kapa AI is not available. Please check your configuration.');
-    }
-  });
-
-  // Handle prettify button
-  document.getElementById("prettify").addEventListener("click", () => {
     try {
-      const formattedInput = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
-      const formattedInputMetadata = JSON.stringify(JSON.parse(aceInputMetadataEditor.getValue()), null, 2);
-      aceInputEditor.setValue(formattedInput, 1);
-      saveTosessionStorage();
-      aceInputMetadataEditor.setValue(formattedInputMetadata, 1);
-      saveTosessionStorage();
-    } catch (error) {
-      aceOutputEditor.setValue("Error: Invalid JSON input", 1);
+      await navigator.clipboard.writeText(output);
+      const originalText = copyOutputButton.textContent.trim();
+      copyOutputButton.textContent = 'Copied!';
+      setTimeout(() => {
+        copyOutputButton.textContent = originalText;
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy output', err);
     }
   });
+
+  copyInputButton.addEventListener("click", async () => {
+    const input = aceInputEditor.getValue();
+    try {
+      await navigator.clipboard.writeText(input);
+      const originalText = copyInputButton.textContent.trim();
+      copyInputButton.textContent = 'Copied!';
+      setTimeout(() => {
+        copyInputButton.textContent = originalText;
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy input', err);
+    }
+  });
+
+  copyMappingButton.addEventListener("click", async () => {
+    const mapping = aceMappingEditor.getValue();
+    try {
+      await navigator.clipboard.writeText(mapping);
+      const originalText = copyMappingButton.textContent.trim();
+      copyMappingButton.textContent = 'Copied!';
+      setTimeout(() => {
+        copyMappingButton.textContent = originalText;
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy mapping', err);
+    }
+  });
+
+  // Clear buttons
+  const clearInputButton = document.getElementById("clear-input");
+  const clearInputMetadataButton = document.getElementById("clear-input-metadata");
+  const clearMappingButton = document.getElementById("clear-mapping");
+
+  if (clearInputButton) {
+    clearInputButton.addEventListener("click", () => {
+      aceInputEditor.setValue("", 1);
+      saveTosessionStorage();
+    });
+  }
+
+  if (clearInputMetadataButton) {
+    clearInputMetadataButton.addEventListener("click", (e) => {
+      if (e) e.stopPropagation(); // Prevent triggering details toggle
+      aceInputMetadataEditor.setValue("{}", 1);
+      saveTosessionStorage();
+    });
+  }
+
+  if (clearMappingButton) {
+    clearMappingButton.addEventListener("click", () => {
+      aceMappingEditor.setValue("", 1);
+      saveTosessionStorage();
+    });
+  }
+
+  // Copy input metadata button
+  const copyInputMetadataButton = document.getElementById("copy-input-metadata");
+  if (copyInputMetadataButton) {
+    copyInputMetadataButton.addEventListener("click", async (e) => {
+      if (e) e.stopPropagation(); // Prevent triggering details toggle
+      const metadata = aceInputMetadataEditor.getValue();
+      try {
+        await navigator.clipboard.writeText(metadata);
+        const originalText = copyInputMetadataButton.textContent.trim();
+        copyInputMetadataButton.textContent = 'Copied!';
+        setTimeout(() => {
+          copyInputMetadataButton.textContent = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy input metadata', err);
+      }
+    });
+  }
+
+  // Format JSON buttons
+  const formatInputButton = document.getElementById("format-input");
+  const formatInputMetadataButton = document.getElementById("format-input-metadata");
+
+  if (formatInputButton) {
+    formatInputButton.addEventListener("click", () => {
+      try {
+        const formatted = JSON.stringify(JSON.parse(aceInputEditor.getValue()), null, 2);
+        aceInputEditor.setValue(formatted, 1);
+        saveTosessionStorage();
+      } catch (error) {
+        showNotification('Invalid JSON - cannot format', 'error');
+      }
+    });
+  }
+
+  if (formatInputMetadataButton) {
+    formatInputMetadataButton.addEventListener("click", (e) => {
+      if (e) e.stopPropagation(); // Prevent triggering details toggle
+      try {
+        const formatted = JSON.stringify(JSON.parse(aceInputMetadataEditor.getValue()), null, 2);
+        aceInputMetadataEditor.setValue(formatted, 1);
+        saveTosessionStorage();
+      } catch (error) {
+        showNotification('Invalid JSON - cannot format', 'error');
+      }
+    });
+  }
+
+
+  // Export configuration
+  document.getElementById("export-config").addEventListener("click", async () => {
+    const config = {
+      input: aceInputEditor.getValue(),
+      inputMetadata: aceInputMetadataEditor.getValue(),
+      mapping: aceMappingEditor.getValue(),
+      version: "1.0",
+      exportedAt: new Date().toISOString()
+    };
+
+    const content = JSON.stringify(config, null, 2);
+    const suggestedName = `bloblang-config-${Date.now()}.json`;
+
+    // Try to use File System Access API for better UX
+    if ('showSaveFilePicker' in window) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: suggestedName,
+          types: [{
+            description: 'JSON Files',
+            accept: { 'application/json': ['.json'] }
+          }]
+        });
+
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+      } catch (err) {
+        // User cancelled or error occurred
+        if (err.name !== 'AbortError') {
+          console.error('Export error:', err);
+        }
+      }
+    } else {
+      // Fallback for browsers that don't support File System Access API
+      const blob = new Blob([content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = suggestedName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  // Import configuration
+  document.getElementById("import-config").addEventListener("click", () => {
+    document.getElementById("import-file-input").click();
+  });
+
+  document.getElementById("import-file-input").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const config = JSON.parse(event.target.result);
+          aceInputEditor.setValue(config.input || "", 1);
+          aceInputMetadataEditor.setValue(config.inputMetadata || "{}", 1);
+          aceMappingEditor.setValue(config.mapping || "", 1);
+          saveTosessionStorage();
+          execute();
+        } catch (err) {
+          console.error('Invalid configuration file', err);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = ''; // Reset input
+    }
+  });
+
+  // Move shortcuts modal to body to ensure it covers entire viewport
+  const shortcutsOverlay = document.getElementById("shortcuts-overlay");
+  document.body.appendChild(shortcutsOverlay);
+
+  // Shortcuts modal
+  document.getElementById("show-shortcuts").addEventListener("click", () => {
+    shortcutsOverlay.style.display = "flex";
+  });
+
+  document.getElementById("close-shortcuts").addEventListener("click", () => {
+    shortcutsOverlay.style.display = "none";
+  });
+
+  shortcutsOverlay.addEventListener("click", (e) => {
+    if (e.target.id === "shortcuts-overlay") {
+      shortcutsOverlay.style.display = "none";
+    }
+  });
+
+  // Handle AI help for input errors
+  if (inputAIButton) {
+    inputAIButton.addEventListener("click", () => {
+      const input = aceInputEditor.getValue();
+      const inputFormat = document.getElementById('input-format')?.value || 'auto';
+      const inputError = document.getElementById('input-validation')?.textContent || '';
+      const kapa = window.Kapa;
+
+      if (kapa) {
+        let aiPromptText = "I'm using the Bloblang playground and have an error with my input data:\n\n";
+        aiPromptText += `Input Format: ${inputFormat}\n\n`;
+        if (input) {
+          aiPromptText += `Input Data:\n\`\`\`\n${input}\n\`\`\`\n\n`;
+        }
+        if (inputError) {
+          aiPromptText += `Error: ${inputError}\n\n`;
+        }
+        aiPromptText += "Can you help me understand and fix this input error?";
+        kapa.open({
+          mode: 'ai',
+          query: aiPromptText,
+          submit: true
+        });
+      } else {
+        console.warn('Kapa AI is not available.');
+      }
+    });
+  }
+
+  // Handle AI help for mapping errors
+  if (mappingAIButton) {
+    mappingAIButton.addEventListener("click", () => {
+      const input = aceInputEditor.getValue();
+      const mapping = aceMappingEditor.getValue();
+      const meta = aceInputMetadataEditor.getValue();
+      const output = aceOutputEditor.getValue();
+      const inputFormat = document.getElementById('input-format')?.value || 'auto';
+      const kapa = window.Kapa;
+
+      if (kapa) {
+        let aiPromptText = "I'm using the Bloblang playground and my mapping is producing an error:\n\n";
+        aiPromptText += `Input Format: ${inputFormat}\n\n`;
+        if (input && input !== "{}") {
+          aiPromptText += `Input:\n\`\`\`\n${input}\n\`\`\`\n\n`;
+        }
+        if (meta && meta !== "{}") {
+          aiPromptText += `Input Metadata:\n\`\`\`json\n${meta}\n\`\`\`\n\n`;
+        }
+        if (mapping) {
+          aiPromptText += `Mapping:\n\`\`\`bloblang\n${mapping}\n\`\`\`\n\n`;
+        }
+        if (output) {
+          aiPromptText += `Error Output:\n\`\`\`\n${output}\n\`\`\`\n\n`;
+        }
+        aiPromptText += "Can you help debug this Bloblang mapping?";
+        kapa.open({
+          mode: 'ai',
+          query: aiPromptText,
+          submit: true
+        });
+      } else {
+        console.warn('Kapa AI is not available.');
+      }
+    });
+  }
+
+
+  // Handle input format selector
+  const inputFormatSelector = document.getElementById('input-format');
+
+  if (inputFormatSelector) {
+    inputFormatSelector.addEventListener('change', (e) => {
+      const format = e.target.value;
+
+      // Update ACE editor mode based on format
+      const modeMap = {
+        'json': 'ace/mode/json',
+        'text': 'ace/mode/text',
+        'csv': 'ace/mode/text',
+        'xml': 'ace/mode/xml',
+        'auto': 'ace/mode/text'
+      };
+
+      if (aceInputEditor && modeMap[format]) {
+        aceInputEditor.session.setMode(modeMap[format]);
+      }
+
+      // Show/hide Format JSON button based on format
+      if (formatInputButton) {
+        if (format === 'json') {
+          formatInputButton.style.display = '';
+        } else {
+          formatInputButton.style.display = 'none';
+        }
+      }
+
+      // Revalidate with new format
+      validateInputJSON();
+
+      // Save format preference
+      try {
+        sessionStorage.setItem('blobl-editor-input-format', format);
+      } catch (e) {
+        console.warn('Could not save format preference');
+      }
+    });
+
+    // Restore format preference and initialize button visibility
+    try {
+      const savedFormat = sessionStorage.getItem('blobl-editor-input-format');
+      if (savedFormat) {
+        inputFormatSelector.value = savedFormat;
+        // Trigger change event to update editor mode and button visibility
+        inputFormatSelector.dispatchEvent(new Event('change'));
+      } else {
+        // Initialize button visibility for default format
+        // Trigger validation which will set button visibility based on content
+        validateInputJSON();
+      }
+    } catch (e) {
+      console.warn('Could not restore format preference');
+    }
+  }
 
   const samples = {{{page.attributes.bloblang-samples}}};
 
@@ -301,10 +1285,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Debounced functions
+  const debouncedSave = debounce(saveTosessionStorage, 500);
+
+  function debouncedExecute() {
+    if (executionTimeoutId) {
+      clearTimeout(executionTimeoutId);
+    }
+    executionTimeoutId = setTimeout(() => {
+      if (autoRunEnabled) {
+        execute();
+      }
+    }, 300);
+  }
+
+  // Debounced validation for mapping (more expensive than JSON validation)
+  const debouncedValidateMapping = debounce(validateMapping, 500);
+
   // Save content to sessionStorage and execute on changes
-  [aceInputEditor, aceInputMetadataEditor, aceMappingEditor].forEach((editor) => {
-    editor.on("change", saveTosessionStorage);
-    editor.on("change", execute);
+  aceInputEditor.on("change", () => {
+    validateInputJSON();
+    debouncedSave();
+    debouncedExecute();
+    // Clear field cache when input changes so autocomplete suggestions update
+    cachedInputJSON = '';
+    cachedFields = [];
+  });
+
+  aceInputMetadataEditor.on("change", () => {
+    debouncedSave();
+    debouncedExecute();
+  });
+
+  aceMappingEditor.on("change", () => {
+    debouncedValidateMapping();
+    debouncedSave();
+    debouncedExecute();
+  });
+
+  // Note: Tippy tooltips are initialized globally by 12-activate-tooltips.js
+  // No need to initialize them here as it would create duplicate tooltips
+
+  // Initial validation
+  validateInputJSON();
+  validateMapping();
+
+  // Handle playground tip
+  const playgroundTip = document.getElementById('playground-tip');
+  const dismissTip = document.getElementById('dismiss-tip');
+
+  if (sessionStorage.getItem('playgroundTipDismissed') === 'true') {
+    playgroundTip.style.display = 'none';
+  }
+
+  dismissTip.addEventListener('click', () => {
+    playgroundTip.style.display = 'none';
+    sessionStorage.setItem('playgroundTipDismissed', 'true');
   });
 });
 
@@ -337,14 +1373,31 @@ function execute() {
   aceOutputEditor.setValue("");
   aceOutputMetadataEditor.setValue("");
 
+  const startTime = performance.now();
+  const executionTimeEl = document.getElementById("execution-time");
+
   try {
     if (typeof blobl !== 'function') {
       throw new Error("WebAssembly module not properly loaded. Please refresh the page.");
     }
     const result = blobl(getMapping(), getInput(), getInputMetadata());
+    const endTime = performance.now();
+    const executionTime = endTime - startTime;
+
+    executionTimeEl.textContent = `Executed in ${formatExecutionTime(executionTime)}`;
+    executionTimeEl.className = 'execution-time execution-time-success';
 
     if (isValidJSON(result)) {
-      customAIButton.style.display = "none";
+      if (inputAIButton) inputAIButton.style.display = "none";
+      if (mappingAIButton) mappingAIButton.style.display = "none";
+
+      // Clear mapping error indicator on success
+      const mappingIndicator = document.getElementById('mapping-validation');
+      if (mappingIndicator) {
+        mappingIndicator.textContent = '';
+        mappingIndicator.className = 'validation-indicator';
+      }
+
       const parsedResult = JSON.parse(result);
 
       // Separate message and metadata
@@ -354,6 +1407,8 @@ function execute() {
       // Display message output
       aceOutputEditor.session.setMode("ace/mode/json");
       aceOutputEditor.setValue(JSON.stringify(message, null, 2), 1);
+      aceOutputEditor.container.classList.remove('editor-error');
+      aceOutputEditor.container.classList.add('editor-success');
 
       // Display metadata
       if (Object.keys(metadata).length > 0) {
@@ -364,30 +1419,267 @@ function execute() {
         aceOutputMetadataEditor.setValue("{}", 1);
       }
     } else {
-      // If the result is not JSON, handle it as raw text
+      // If the result is not JSON, handle it as raw text (likely an error)
+      const endTime = performance.now();
+      const executionTime = endTime - startTime;
+
       aceOutputEditor.session.setMode("ace/mode/text");
       aceOutputEditor.setValue(result, 1);
-      customAIButton.style.display = "inline-block";
+      aceOutputEditor.container.classList.add('editor-error');
+      aceOutputEditor.container.classList.remove('editor-success');
+
+      // Show mapping AI help button
+      if (mappingAIButton) mappingAIButton.style.display = "inline-flex";
+
+      // Show mapping error in validation indicator
+      const mappingIndicator = document.getElementById('mapping-validation');
+      if (mappingIndicator) {
+        // Show full error message (it will wrap if needed)
+        mappingIndicator.textContent = result;
+        mappingIndicator.className = 'validation-indicator validation-error';
+      }
 
       aceOutputMetadataEditor.session.setMode("ace/mode/text");
       aceOutputMetadataEditor.setValue("No metadata available", 1);
+
+      executionTimeEl.textContent = `Error after ${formatExecutionTime(executionTime)}`;
+      executionTimeEl.className = 'execution-time execution-time-error';
     }
   } catch (error) {
+    const endTime = performance.now();
+    const executionTime = endTime - startTime;
+
     // Handle general errors
     aceOutputEditor.session.setMode("ace/mode/text");
     aceOutputEditor.setValue("Error: " + error.message, 1);
-    customAIButton.style.display = "inline-block";
+    aceOutputEditor.container.classList.add('editor-error');
+    aceOutputEditor.container.classList.remove('editor-success');
+
+    // Show mapping AI help button
+    if (mappingAIButton) mappingAIButton.style.display = "inline-flex";
+
+    // Show mapping error in validation indicator
+    const mappingIndicator = document.getElementById('mapping-validation');
+    if (mappingIndicator) {
+      mappingIndicator.textContent = error.message;
+      mappingIndicator.className = 'validation-indicator validation-error';
+    }
 
     aceOutputMetadataEditor.session.setMode("ace/mode/text");
     aceOutputMetadataEditor.setValue("Error: " + error.message, 1);
+
+    executionTimeEl.textContent = `Error after ${formatExecutionTime(executionTime)}`;
+    executionTimeEl.className = 'execution-time execution-time-error';
   }
 }
 
 // Save editor content to sessionStorage
 function saveTosessionStorage() {
-  sessionStorage.setItem(sessionStorageKeys.input, aceInputEditor.getValue());
-  sessionStorage.setItem(sessionStorageKeys.mapping, aceMappingEditor.getValue());
-  sessionStorage.setItem(sessionStorageKeys.metadata, aceInputMetadataEditor.getValue());
+  try {
+    sessionStorage.setItem(sessionStorageKeys.input, aceInputEditor.getValue());
+    sessionStorage.setItem(sessionStorageKeys.mapping, aceMappingEditor.getValue());
+    sessionStorage.setItem(sessionStorageKeys.metadata, aceInputMetadataEditor.getValue());
+  } catch (e) {
+    if (e.name === 'QuotaExceededError') {
+      console.warn('Session storage quota exceeded');
+    }
+  }
+}
+
+// Validate input based on selected format
+function validateInputJSON() {
+  const input = aceInputEditor.getValue();
+  const indicator = document.getElementById('input-validation');
+  const formatSelector = document.getElementById('input-format');
+  const selectedFormat = formatSelector ? formatSelector.value : 'auto';
+  const formatInputBtn = document.getElementById('format-input');
+
+  if (!input || input.trim() === '') {
+    indicator.textContent = '';
+    indicator.className = 'validation-indicator';
+    // Hide input AI button when empty
+    if (inputAIButton) inputAIButton.style.display = 'none';
+    // Hide format button when empty
+    if (formatInputBtn && selectedFormat === 'auto') formatInputBtn.style.display = 'none';
+    return;
+  }
+
+  // Validate based on selected format
+  let validation;
+  let formatLabel;
+
+  switch (selectedFormat) {
+    case 'json':
+      validation = validateJSON(input);
+      formatLabel = 'JSON';
+      break;
+
+    case 'xml':
+      validation = validateXML(input);
+      formatLabel = 'XML';
+      break;
+
+    case 'csv':
+      validation = validateCSV(input);
+      formatLabel = 'CSV';
+      break;
+
+    case 'text':
+      // Text doesn't need validation
+      indicator.textContent = 'Plain text format';
+      indicator.className = 'validation-indicator validation-info';
+      // Hide input AI button for text (no validation errors)
+      if (inputAIButton) inputAIButton.style.display = 'none';
+      return;
+
+    case 'auto':
+      // Try to detect format
+      const trimmed = input.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        validation = validateJSON(input);
+        formatLabel = 'JSON';
+        // Show format button for auto-detected JSON
+        if (formatInputBtn) formatInputBtn.style.display = '';
+      } else if (trimmed.startsWith('<')) {
+        validation = validateXML(input);
+        formatLabel = 'XML';
+        // Hide format button for non-JSON
+        if (formatInputBtn) formatInputBtn.style.display = 'none';
+      } else {
+        indicator.textContent = 'Text format (auto-detected)';
+        indicator.className = 'validation-indicator validation-info';
+        // Hide input AI button for text (no validation errors)
+        if (inputAIButton) inputAIButton.style.display = 'none';
+        // Hide format button for non-JSON
+        if (formatInputBtn) formatInputBtn.style.display = 'none';
+        return;
+      }
+      break;
+
+    default:
+      indicator.textContent = '';
+      indicator.className = 'validation-indicator';
+      return;
+  }
+
+  // Show validation result
+  if (validation.valid) {
+    indicator.textContent = `Valid ${formatLabel}`;
+    indicator.className = 'validation-indicator validation-success';
+    // Hide input AI button on success
+    if (inputAIButton) inputAIButton.style.display = 'none';
+  } else {
+    indicator.textContent = validation.error;
+    indicator.className = 'validation-indicator validation-error';
+    // Show input AI button on error
+    if (inputAIButton) inputAIButton.style.display = 'inline-flex';
+  }
+}
+
+// Validate mapping (basic syntax check only, doesn't replace full execution)
+function validateMapping() {
+  const mapping = aceMappingEditor.getValue();
+  const indicator = document.getElementById('mapping-validation');
+
+  if (!mapping || mapping.trim() === '') {
+    indicator.textContent = '';
+    indicator.className = 'validation-indicator';
+    return;
+  }
+
+  // Note: We don't validate mapping syntax here to avoid duplicate error messages
+  // The main execution will show errors in the indicator and output section
+  // Don't clear error indicators - they're set by the execute() function
+}
+
+// Keyboard shortcuts
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const modifier = isMac ? e.metaKey : e.ctrlKey;
+
+    if (!modifier) return;
+
+    switch (e.key.toLowerCase()) {
+      case 'enter':
+        e.preventDefault();
+        execute();
+        break;
+
+      case 'x':
+        if (e.shiftKey) {
+          e.preventDefault();
+          // Clear all editors
+          aceInputEditor.setValue("", 1);
+          aceMappingEditor.setValue("", 1);
+          aceInputMetadataEditor.setValue("{}", 1);
+          aceOutputEditor.setValue(defaultOutput, 1);
+          aceOutputMetadataEditor.setValue(defaultMetaOutput, 1);
+          saveTosessionStorage();
+        }
+        break;
+
+      case 'f':
+        if (e.shiftKey) {
+          e.preventDefault();
+          const formatBtn = document.getElementById('format-input');
+          if (formatBtn && formatBtn.style.display !== 'none') {
+            formatBtn.click();
+          }
+        }
+        break;
+
+      case 's':
+        e.preventDefault();
+        document.getElementById('share').click();
+        break;
+
+      case 'e':
+        e.preventDefault();
+        document.getElementById('export-config').click();
+        break;
+
+      case '/':
+        e.preventDefault();
+        const overlay = document.getElementById('shortcuts-overlay');
+        overlay.style.display = overlay.style.display === 'none' ? 'flex' : 'none';
+        break;
+    }
+  });
+}
+
+// Show share URL modal as fallback (always appends to body)
+function showShareUrlModal(url) {
+  const modal = document.createElement('div');
+  modal.className = 'share-modal';
+  modal.innerHTML = `
+    <div class="share-modal-content">
+      <h3>Share Link</h3>
+      <p>Copy this link to share your configuration:</p>
+      <div class="share-url-container">
+        <input type="text" value="${url}" readonly id="share-url-input">
+        <button id="manual-copy-btn" class="button button-primary">Copy</button>
+      </div>
+      <button id="close-share-modal" class="button button-secondary">Close</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById('manual-copy-btn').addEventListener('click', () => {
+    const input = document.getElementById('share-url-input');
+    input.select();
+    document.execCommand('copy');
+  });
+
+  document.getElementById('close-share-modal').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
 }
 
 // Restore editor content from sessionStorage
