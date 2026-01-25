@@ -56,7 +56,6 @@ For more details about this bundle and for the source code, see https://github.c
 <div class="button-bar">
   <div class="button-group button-group-primary">
     <select id="sample-dropdown" class="button" aria-label="Select example">
-      <option value="">Choose an example...</option>
       {{#each (obj page.attributes.bloblang-samples) }}
       <option value="{{this.title}}">{{this.title}}</option>
       {{/each}}
@@ -901,7 +900,7 @@ document.addEventListener("DOMContentLoaded", () => {
   choices = new Choices(document.getElementById("sample-dropdown"), {
     searchEnabled: true,
     searchPlaceholderValue: 'Search examples',
-    placeholderValue: 'Select an example',
+    placeholderValue: 'Choose an example...',
     allowHTML: true
   });
 
