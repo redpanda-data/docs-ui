@@ -137,6 +137,26 @@
   white-space: nowrap;
 }
 
+/* Dropdown list styling */
+.bloblang-playground .choices__list--dropdown {
+  padding: 8px 0 !important;
+}
+
+/* Search input in dropdown - ensure it has space and doesn't overlap items */
+.bloblang-playground .choices__list--dropdown .choices__input {
+  padding: 10px 12px !important;
+  margin: 8px 8px 16px 8px !important;
+  background: var(--body-background);
+  border: 1px solid var(--panel-border-color);
+  border-radius: 4px;
+}
+
+/* Dropdown items - ensure proper spacing from search input */
+.bloblang-playground .choices__list--dropdown .choices__item--choice {
+  padding: 10px 12px !important;
+  margin: 2px 4px !important;
+}
+
 .bloblang-playground .button-bar {
   display: flex;
   gap: 12px;
