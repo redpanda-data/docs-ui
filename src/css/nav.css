@@ -85,7 +85,7 @@
     display: block;
     position: sticky;
     visibility: visible;
-    height: calc(100vh - var(--navbar-height));
+    height: calc(100vh - var(--navbar-height) - var(--announcement-bar-height--desktop));
     top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
     width: var(--nav-width);
   }
