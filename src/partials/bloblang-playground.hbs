@@ -83,6 +83,9 @@ For more details about this bundle and for the source code, see https://github.c
 
 <div class="status-bar">
   <span id="execution-time" class="execution-time" role="status" aria-live="polite"></span>
+  <button id="manual-run-button" class="button button-primary" style="display: none;" data-tippy-content="Execute mapping (Ctrl/Cmd + Enter)" aria-label="Run mapping">
+    Run
+  </button>
   <label class="auto-run-toggle">
     <input type="checkbox" id="auto-run-toggle" checked>
     <span>Auto-run <span class="editor-help-icon" data-tippy-content="Automatically execute mapping when you type">ⓘ</span></span>
@@ -1305,13 +1308,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // Setup keyboard shortcuts
   setupKeyboardShortcuts();
 
-  // Setup auto-run toggle
+  // Setup auto-run toggle and manual run button
   const autoRunToggle = document.getElementById("auto-run-toggle");
+  const manualRunButton = document.getElementById("manual-run-button");
+
   autoRunToggle.addEventListener("change", (e) => {
     autoRunEnabled = e.target.checked;
+    // Show run button when auto-run is disabled, hide when enabled
+    manualRunButton.style.display = autoRunEnabled ? 'none' : 'inline-block';
     if (autoRunEnabled) {
       debouncedExecute();
     }
+  });
+
+  // Manual run button click handler
+  manualRunButton.addEventListener("click", () => {
+    execute();
   });
 
   // Initialize editors using the initial placeholders if URL/saved state exists
