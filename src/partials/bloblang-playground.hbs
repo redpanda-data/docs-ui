@@ -83,6 +83,9 @@ For more details about this bundle and for the source code, see https://github.c
 
 <div class="status-bar">
   <span id="execution-time" class="execution-time" role="status" aria-live="polite"></span>
+  <button id="manual-run-button" class="button button-primary" style="display: none;" data-tippy-content="Execute mapping (Ctrl/Cmd + Enter)" aria-label="Run mapping">
+    Run
+  </button>
   <label class="auto-run-toggle">
     <input type="checkbox" id="auto-run-toggle" checked>
     <span>Auto-run <span class="editor-help-icon" data-tippy-content="Automatically execute mapping when you type">ⓘ</span></span>
@@ -422,10 +425,12 @@ const staticBloblangCompletions = [
 
   // Array methods
   { caption: 'length()', value: 'length()', meta: 'method', score: 800, docHTML: '<b>length()</b> - Get length of array or string' },
+  { caption: 'map_each()', snippet: 'map_each(${1:item} -> ${2:item})', meta: 'method', score: 900, docHTML: '<b>map_each(fn)</b> - Transform each array element' },
   { caption: 'map()', snippet: 'map(item -> ${1:item})', meta: 'method', score: 850, docHTML: '<b>map(fn)</b> - Transform each array element' },
   { caption: 'filter()', snippet: 'filter(item -> ${1:condition})', meta: 'method', score: 850, docHTML: '<b>filter(fn)</b> - Filter array elements' },
   { caption: 'flatten()', value: 'flatten()', meta: 'method', score: 800, docHTML: '<b>flatten()</b> - Flatten nested arrays' },
   { caption: 'join()', snippet: 'join("${1:sep}")', meta: 'method', score: 800, docHTML: '<b>join(sep)</b> - Join array into string' },
+  { caption: 'index()', snippet: 'index(${1:0})', meta: 'method', score: 850, docHTML: '<b>index(i)</b> - Get element at index' },
 
   // Type checks
   { caption: 'type()', value: 'type()', meta: 'method', score: 780, docHTML: '<b>type()</b> - Get value type' },
@@ -457,18 +462,26 @@ const mockConnectData = {
   ],
   'bloblang-methods': [
     { name: 'abs', description: 'Get absolute value of number', params: { named: [] } },
+    { name: 'all', description: 'Returns true if all array elements match condition', params: { named: [{ name: 'predicate' }] } },
+    { name: 'any', description: 'Returns true if any array element matches condition', params: { named: [{ name: 'predicate' }] } },
     { name: 'append', description: 'Append element to array', params: { named: [{ name: 'value' }] } },
     { name: 'apply', description: 'Apply mapping to value', params: { named: [{ name: 'mapping' }] } },
     { name: 'capitalize', description: 'Capitalize first letter', params: { named: [] } },
+    { name: 'catch', description: 'Provide fallback value on error', params: { named: [{ name: 'value' }] } },
     { name: 'ceil', description: 'Round up to nearest integer', params: { named: [] } },
     { name: 'collapse', description: 'Collapse whitespace in string', params: { named: [] } },
+    { name: 'contains', description: 'Check if array/string contains value', params: { named: [{ name: 'value' }] } },
     { name: 'encode', description: 'Encode string (base64, hex, etc)', params: { named: [{ name: 'scheme' }] } },
     { name: 'decode', description: 'Decode string (base64, hex, etc)', params: { named: [{ name: 'scheme' }] } },
+    { name: 'filter', description: 'Filter array elements by condition', params: { named: [{ name: 'predicate' }] } },
+    { name: 'flatten', description: 'Flatten nested arrays', params: { named: [] } },
     { name: 'floor', description: 'Round down to nearest integer', params: { named: [] } },
+    { name: 'fold', description: 'Reduce array to single value', params: { named: [{ name: 'initial' }, { name: 'fn' }] } },
     { name: 'format', description: 'Format string with arguments', params: { named: [{ name: 'args' }] } },
     { name: 'has_prefix', description: 'Check if string has prefix', params: { named: [{ name: 'prefix' }] } },
     { name: 'has_suffix', description: 'Check if string has suffix', params: { named: [{ name: 'suffix' }] } },
-    { name: 'index', description: 'Get index of substring or element', params: { named: [{ name: 'value' }] } },
+    { name: 'index', description: 'Get element at array index', params: { named: [{ name: 'index' }] } },
+    { name: 'map_each', description: 'Transform each array element', params: { named: [{ name: 'mapping' }] } },
     { name: 'keys', description: 'Get object keys as array', params: { named: [] } },
     { name: 'length', description: 'Get length of string or array', params: { named: [] } },
     { name: 'lowercase', description: 'Convert string to lowercase', params: { named: [] } },
@@ -643,9 +656,19 @@ function extractFieldPaths(obj, prefix, maxDepth, currentDepth = 0) {
   const fields = [];
 
   if (Array.isArray(obj)) {
-    // For arrays, show common array methods and suggest index access
+    // For arrays, extract from first element using Bloblang .index(0) syntax
     if (obj.length > 0) {
-      fields.push(...extractFieldPaths(obj[0], prefix + '[0].', maxDepth, currentDepth + 1));
+      const firstElement = obj[0];
+
+      // Continue extraction even if nested element is an array
+      if (Array.isArray(firstElement)) {
+        // Nested array - extract from its first element
+        fields.push(...extractFieldPaths(firstElement, prefix + 'index(0).', maxDepth, currentDepth + 1));
+      } else if (firstElement && typeof firstElement === 'object') {
+        // Object - extract its fields
+        fields.push(...extractFieldPaths(firstElement, prefix + 'index(0).', maxDepth, currentDepth + 1));
+      }
+      // For primitive arrays, no fields to extract
     }
   } else {
     // For objects, extract all keys
@@ -653,10 +676,119 @@ function extractFieldPaths(obj, prefix, maxDepth, currentDepth = 0) {
       const path = prefix ? `${prefix}${key}` : key;
       fields.push(path);
 
-      // Recursively extract nested fields
+      // Recursively extract nested fields (including arrays)
       const value = obj[key];
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        fields.push(...extractFieldPaths(value, path + '.', maxDepth, currentDepth + 1));
+      if (value && typeof value === 'object') {
+        // Recurse into both objects and arrays
+        if (Array.isArray(value)) {
+          fields.push(...extractFieldPaths(value, path + '.', maxDepth, currentDepth + 1));
+        } else {
+          fields.push(...extractFieldPaths(value, path + '.', maxDepth, currentDepth + 1));
+        }
+      }
+    });
+  }
+
+  return fields;
+}
+
+// Extract metadata keys from input JSON
+function extractMetadataKeys(jsonString) {
+  try {
+    const obj = JSON.parse(jsonString);
+    const metaKeys = new Set();
+
+    // Look for explicit metadata fields
+    if (obj.metadata && typeof obj.metadata === 'object') {
+      Object.keys(obj.metadata).forEach(key => metaKeys.add(key));
+    }
+    if (obj.meta && typeof obj.meta === 'object') {
+      Object.keys(obj.meta).forEach(key => metaKeys.add(key));
+    }
+
+    // Top-level keys that look like metadata
+    // (prefixed with _, or SCREAMING_SNAKE_CASE, or specific known patterns)
+    Object.keys(obj).forEach(key => {
+      if (key.startsWith('_') ||
+          key.toUpperCase() === key && key.includes('_') ||
+          key.startsWith('kafka_') ||
+          key.startsWith('http_') ||
+          ['content_type', 'timestamp', 'correlation_id', 'trace_id'].includes(key)) {
+        metaKeys.add(key);
+      }
+    });
+
+    return Array.from(metaKeys);
+  } catch (e) {
+    return [];
+  }
+}
+
+// Extract metadata keys that are SET in the Bloblang mapping itself
+// Looks for patterns like: meta key_name = value
+function extractMetadataKeysFromMapping(mappingText) {
+  const metaKeys = new Set();
+
+  // Match: meta <key> = <anything>
+  // This regex captures metadata assignments in Bloblang mappings
+  const metaAssignRegex = /^\s*meta\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=/gm;
+
+  let match;
+  while ((match = metaAssignRegex.exec(mappingText)) !== null) {
+    metaKeys.add(match[1]);
+  }
+
+  return Array.from(metaKeys);
+}
+
+// Extract fields with type information for array-aware autocomplete
+function extractFieldPathsWithTypes(obj, prefix, maxDepth, currentDepth = 0) {
+  if (currentDepth >= maxDepth || obj === null || typeof obj !== 'object') {
+    return [];
+  }
+
+  const fields = [];
+
+  if (Array.isArray(obj)) {
+    // Mark this path as an array type
+    const arrayPath = prefix.slice(0, -1); // Remove trailing dot
+    if (arrayPath) {
+      fields.push({ path: arrayPath, type: 'array' });
+    }
+
+    if (obj.length > 0) {
+      const firstElement = obj[0];
+      if (Array.isArray(firstElement)) {
+        fields.push(...extractFieldPathsWithTypes(firstElement, prefix + 'index(0).', maxDepth, currentDepth + 1));
+      } else if (firstElement && typeof firstElement === 'object') {
+        fields.push(...extractFieldPathsWithTypes(firstElement, prefix + 'index(0).', maxDepth, currentDepth + 1));
+      }
+    }
+  } else {
+    // For objects, extract all keys with their types
+    Object.keys(obj).forEach(key => {
+      const path = prefix ? `${prefix}${key}` : key;
+      const value = obj[key];
+
+      // Determine type
+      let fieldType = 'unknown';
+      if (Array.isArray(value)) {
+        fieldType = 'array';
+      } else if (value && typeof value === 'object') {
+        fieldType = 'object';
+      } else if (typeof value === 'string') {
+        fieldType = 'string';
+      } else if (typeof value === 'number') {
+        fieldType = 'number';
+      } else if (typeof value === 'boolean') {
+        fieldType = 'boolean';
+      }
+
+      fields.push({ path, type: fieldType });
+
+      // Recursively extract nested fields
+      if (value && typeof value === 'object') {
+        fields.push(...extractFieldPathsWithTypes(value, path + '.', maxDepth, currentDepth + 1));
       }
     });
   }
@@ -667,11 +799,19 @@ function extractFieldPaths(obj, prefix, maxDepth, currentDepth = 0) {
 // Cache for field extraction to avoid re-parsing on every keystroke
 let cachedInputJSON = '';
 let cachedFields = [];
+let cachedFieldTypes = {}; // Maps field path -> type
 
 // Get context-aware completions based on cursor position
 function getContextCompletions(editor, session, pos) {
   const line = session.getLine(pos.row);
   const beforeCursor = line.substring(0, pos.column);
+
+  // Get ALL text before cursor (across multiple lines) for lambda detection
+  let fullTextBeforeCursor = '';
+  for (let i = 0; i < pos.row; i++) {
+    fullTextBeforeCursor += session.getLine(i) + '\n';
+  }
+  fullTextBeforeCursor += beforeCursor;
 
   // Check if cursor is inside a string literal - don't suggest completions
   const stringMatch = beforeCursor.match(/["']([^"']*)$/);
@@ -684,6 +824,98 @@ function getContextCompletions(editor, session, pos) {
     }
   }
 
+  // Check if we're accessing a lambda parameter inside map_each/filter/etc
+  // Pattern: map_each(param -> ... param. ) or filter(item -> ... item. )
+  // Look for: <method>(<param> -> ... <param>.<cursor>
+  // Use fullTextBeforeCursor to handle multi-line lambdas
+  const lambdaParamMatch = fullTextBeforeCursor.match(/\.(map_each|filter|map|fold|all|any)\((\w+)\s*->[\s\S]*\b\2\.(\w*)$/);
+  if (lambdaParamMatch) {
+    const method = lambdaParamMatch[1];
+    const paramName = lambdaParamMatch[2];
+
+    // Extract what we're calling the method on
+    // Look backwards from the method for the subject (e.g., "this" in "this.map_each")
+    const subjectMatch = fullTextBeforeCursor.match(/(\w+(?:\.\w+|\.\w+\(\d+\))*)\.(map_each|filter|map|fold|all|any)\(/);
+
+    if (subjectMatch) {
+      const subject = subjectMatch[1];
+
+      // If subject is "this", get fields from root array elements
+      if (subject === 'this') {
+        const inputValue = aceInputEditor ? aceInputEditor.getValue() : '';
+
+        try {
+          const obj = JSON.parse(inputValue);
+
+          if (Array.isArray(obj) && obj.length > 0) {
+            // Extract fields from array elements
+            const firstElement = obj[0];
+            if (firstElement && typeof firstElement === 'object' && !Array.isArray(firstElement)) {
+              const elementFields = extractFieldPaths(firstElement, '', 3);
+
+              return {
+                type: 'fields',
+                completions: elementFields.map(field => ({
+                  caption: field,
+                  value: field,
+                  meta: 'field',
+                  score: 2000,
+                  docHTML: `<b>${field}</b> - Field from ${paramName}`
+                }))
+              };
+            }
+          }
+        } catch (e) {
+          // Invalid JSON, return empty
+        }
+      } else {
+        // Subject is a field path like "orders" or "user.orders"
+        // Look up this field's type and get its element fields
+        const fieldPath = subject.replace(/^this\./, '').replace(/\.index\(\d+\)/g, '');
+
+        if (cachedFieldTypes[fieldPath] === 'array') {
+          // Get fields from this array's elements by navigating the input
+          const inputValue = aceInputEditor ? aceInputEditor.getValue() : '';
+
+          try {
+            const obj = JSON.parse(inputValue);
+
+            // Navigate to the field path
+            const pathParts = fieldPath.split('.');
+            let current = obj;
+
+            for (const part of pathParts) {
+              if (current && typeof current === 'object') {
+                current = current[part];
+              }
+            }
+
+            // If we found an array, extract from its first element
+            if (Array.isArray(current) && current.length > 0) {
+              const firstElement = current[0];
+              if (firstElement && typeof firstElement === 'object' && !Array.isArray(firstElement)) {
+                const elementFields = extractFieldPaths(firstElement, '', 3);
+
+                return {
+                  type: 'fields',
+                  completions: elementFields.map(field => ({
+                    caption: field,
+                    value: field,
+                    meta: 'field',
+                    score: 2000,
+                    docHTML: `<b>${field}</b> - Field from ${paramName}`
+                  }))
+                };
+              }
+            }
+          } catch (e) {
+            // Invalid JSON or path, return empty
+          }
+        }
+      }
+    }
+  }
+
   // Check if we're after "this."
   const thisMatch = beforeCursor.match(/this\.(\w*)$/);
   if (thisMatch) {
@@ -693,7 +925,54 @@ function getContextCompletions(editor, session, pos) {
     // Only re-extract if input has changed
     if (inputValue !== cachedInputJSON) {
       cachedInputJSON = inputValue;
-      cachedFields = extractFieldsFromJSON(inputValue);
+
+      // Extract fields with type information
+      try {
+        const obj = JSON.parse(inputValue);
+
+        // Check if the root input is an array
+        if (Array.isArray(obj)) {
+          // If input is an array, extract fields from array elements AND mark as array
+          cachedFieldTypes = { '__root__': 'array' };
+
+          // Extract fields from the array elements using index(0) syntax
+          const fieldsWithTypes = extractFieldPathsWithTypes(obj, '', 3);
+          cachedFields = [];
+          fieldsWithTypes.forEach(({ path, type }) => {
+            cachedFields.push(path);
+            cachedFieldTypes[path] = type;
+          });
+        } else {
+          const fieldsWithTypes = extractFieldPathsWithTypes(obj, '', 3);
+
+          // Build type map and field list
+          cachedFieldTypes = {};
+          cachedFields = [];
+          fieldsWithTypes.forEach(({ path, type }) => {
+            cachedFields.push(path);
+            cachedFieldTypes[path] = type;
+          });
+        }
+      } catch (e) {
+        // Fallback to simple extraction if JSON parsing fails
+        cachedFields = extractFieldsFromJSON(inputValue);
+        cachedFieldTypes = {};
+      }
+    }
+
+    // If input is an array, return both fields and array context
+    if (cachedFieldTypes['__root__'] === 'array') {
+      return {
+        type: 'fields-and-array-methods',
+        contextType: 'array',
+        completions: cachedFields.map(field => ({
+          caption: field,
+          value: field,
+          meta: 'field',
+          score: 2000,
+          docHTML: `<b>${field}</b> - Field from array element`
+        }))
+      };
     }
 
     return {
@@ -747,11 +1026,11 @@ function getContextCompletions(editor, session, pos) {
     }
   }
 
-  // Check if we're after "meta("
-  const metaMatch = beforeCursor.match(/meta\(["']?(\w*)$/);
-  if (metaMatch) {
-    // Suggest common metadata keys
-    const commonMetaKeys = [
+  // Check if we're after "@" for metadata references
+  const atMetaMatch = beforeCursor.match(/@(\w*)$/);
+  if (atMetaMatch) {
+    // Similar to meta( but for @ syntax
+    const hardcodedMetaKeys = [
       { key: 'kafka_key', desc: 'Kafka message key' },
       { key: 'kafka_topic', desc: 'Kafka topic name' },
       { key: 'kafka_partition', desc: 'Kafka partition' },
@@ -760,28 +1039,183 @@ function getContextCompletions(editor, session, pos) {
       { key: 'content_type', desc: 'Content type' },
     ];
 
-    return {
-      type: 'metadata',
-      completions: commonMetaKeys.map(({ key, desc }) => ({
-        caption: key,
-        value: key,
-        meta: 'metadata',
-        score: 1900,
-        docHTML: `<b>${key}</b> - ${desc}`
-      }))
-    };
+    try {
+      // Extract metadata from THREE sources:
+      // 1. Input JSON editor (aceInputEditor)
+      // 2. Metadata input box (aceInputMetadataEditor)
+      // 3. The mapping itself (metadata assignments defined earlier in the mapping)
+      const inputText = aceInputEditor ? aceInputEditor.getValue() : '{}';
+      const metadataText = aceInputMetadataEditor ? aceInputMetadataEditor.getValue() : '{}';
+      const mappingText = editor.getValue(); // The entire mapping content
+
+      const inputMetaKeys = extractMetadataKeys(inputText);
+      const metadataInputKeys = extractMetadataKeys(metadataText);
+      const mappingMetaKeys = extractMetadataKeysFromMapping(mappingText);
+
+      // Combine all sources, with mapping-defined metadata prioritized (higher score)
+      const allDynamicKeys = [...new Set([...inputMetaKeys, ...metadataInputKeys])];
+      const dynamicMetaKeys = allDynamicKeys.map(key => ({
+        key: key,
+        desc: 'Metadata from input',
+        score: 1900
+      }));
+
+      const mappingDefinedKeys = mappingMetaKeys.map(key => ({
+        key: key,
+        desc: 'Defined in this mapping',
+        score: 2000 // Higher priority for metadata defined in the current mapping
+      }));
+
+      const allMetaKeys = [...hardcodedMetaKeys.map(k => ({ ...k, score: 1850 }))];
+
+      // Add mapping-defined keys first (highest priority)
+      mappingDefinedKeys.forEach(mappingKey => {
+        if (!allMetaKeys.find(k => k.key === mappingKey.key)) {
+          allMetaKeys.push(mappingKey);
+        }
+      });
+
+      // Add input/metadata keys
+      dynamicMetaKeys.forEach(dynamicKey => {
+        if (!allMetaKeys.find(k => k.key === dynamicKey.key)) {
+          allMetaKeys.push(dynamicKey);
+        }
+      });
+
+      return {
+        type: 'metadata',
+        completions: allMetaKeys.map(({ key, desc, score }) => ({
+          caption: key,
+          value: key,
+          meta: 'metadata',
+          score: score || 1900,
+          docHTML: `<b>@${key}</b> - ${desc}`
+        }))
+      };
+    } catch (e) {
+      // Fallback to hardcoded keys only
+      return {
+        type: 'metadata',
+        completions: hardcodedMetaKeys.map(({ key, desc }) => ({
+          caption: key,
+          value: key,
+          meta: 'metadata',
+          score: 1850,
+          docHTML: `<b>@${key}</b> - ${desc}`
+        }))
+      };
+    }
+  }
+
+  // Check if we're after "meta(" (less common - mainly for interpolation strings)
+  // Note: In Bloblang mappings, prefer @ syntax for reading metadata
+  const metaMatch = beforeCursor.match(/meta\(["']?(\w*)$/);
+  if (metaMatch) {
+    // Combine hardcoded keys with dynamically extracted keys
+    const hardcodedMetaKeys = [
+      { key: 'kafka_key', desc: 'Kafka message key' },
+      { key: 'kafka_topic', desc: 'Kafka topic name' },
+      { key: 'kafka_partition', desc: 'Kafka partition' },
+      { key: 'kafka_offset', desc: 'Kafka offset' },
+      { key: 'kafka_timestamp', desc: 'Kafka timestamp' },
+      { key: 'content_type', desc: 'Content type' },
+    ];
+
+    try {
+      // Extract metadata from THREE sources (same as @ syntax)
+      const inputText = aceInputEditor ? aceInputEditor.getValue() : '{}';
+      const metadataText = aceInputMetadataEditor ? aceInputMetadataEditor.getValue() : '{}';
+      const mappingText = editor.getValue();
+
+      const inputMetaKeys = extractMetadataKeys(inputText);
+      const metadataInputKeys = extractMetadataKeys(metadataText);
+      const mappingMetaKeys = extractMetadataKeysFromMapping(mappingText);
+
+      const allDynamicKeys = [...new Set([...inputMetaKeys, ...metadataInputKeys])];
+      const dynamicMetaKeys = allDynamicKeys.map(key => ({
+        key: key,
+        desc: 'Metadata from input',
+        score: 1700
+      }));
+
+      const mappingDefinedKeys = mappingMetaKeys.map(key => ({
+        key: key,
+        desc: 'Defined in this mapping',
+        score: 1800 // Higher priority but still lower than @ syntax overall
+      }));
+
+      const allMetaKeys = [...hardcodedMetaKeys.map(k => ({ ...k, score: 1650 }))];
+
+      // Add mapping-defined keys first
+      mappingDefinedKeys.forEach(mappingKey => {
+        if (!allMetaKeys.find(k => k.key === mappingKey.key)) {
+          allMetaKeys.push(mappingKey);
+        }
+      });
+
+      // Add input/metadata keys
+      dynamicMetaKeys.forEach(dynamicKey => {
+        if (!allMetaKeys.find(k => k.key === dynamicKey.key)) {
+          allMetaKeys.push(dynamicKey);
+        }
+      });
+
+      return {
+        type: 'metadata',
+        completions: allMetaKeys.map(({ key, desc, score }) => ({
+          caption: key,
+          value: key,
+          meta: 'metadata',
+          score: score || 1700,
+          docHTML: `<b>${key}</b> - ${desc} (prefer @${key} in mappings)`
+        }))
+      };
+    } catch (e) {
+      // Fallback to hardcoded keys only
+      return {
+        type: 'metadata',
+        completions: hardcodedMetaKeys.map(({ key, desc }) => ({
+          caption: key,
+          value: key,
+          meta: 'metadata',
+          score: 1700,
+          docHTML: `<b>${key}</b> - ${desc} (prefer @${key} in mappings)`
+        }))
+      };
+    }
   }
 
   // Check if we're in a method-chaining context (after any value followed by .)
-  // Match: word/closing-bracket/closing-paren, then dot, optional whitespace
-  // This handles: field. function(). array[0]. (expr).
-  const methodChainMatch = beforeCursor.match(/[\w\]\)]\.\s*\w*$/);
+  // Match: word/closing-bracket/closing-paren/closing-quote, then dot, optional whitespace
+  // This handles: field. function(). array[0]. (expr). "string".
+  const methodChainMatch = beforeCursor.match(/[\w\]\)"']\.\s*\w*$/);
   if (methodChainMatch) {
     // Check if it's NOT root. or root.fieldname. (those are valid field assignments)
     // Only suppress methods after bare "root." at start of assignment
     const isRootFieldAssignment = beforeCursor.match(/^\s*root\.\w*$/) || beforeCursor.match(/=\s*root\.\w*$/);
     if (!isRootFieldAssignment) {
-      return { type: 'methods-only' };
+      // Detect if preceding field is an array for array-aware suggestions
+      const arrayFieldMatch = beforeCursor.match(/this\.([\w.]+)\.\w*$/);
+      let fieldType = 'unknown';
+
+      if (arrayFieldMatch) {
+        // Extract the field path and look up its type
+        const fieldPath = arrayFieldMatch[1]
+          .replace(/\.index\(\d+\)/g, '') // Remove .index(N) calls
+          .replace(/\(\)/g, ''); // Remove empty function calls
+        fieldType = cachedFieldTypes[fieldPath] || 'unknown';
+      }
+
+      // Check if we're after a string literal for string method suggestions
+      const stringLiteralMatch = beforeCursor.match(/["'].*["']\.\s*\w*$/);
+      if (stringLiteralMatch) {
+        fieldType = 'string';
+      }
+
+      return {
+        type: 'methods-only',
+        contextType: fieldType
+      };
     }
   }
 
@@ -808,10 +1242,46 @@ const bloblangCompleter = {
         completionsToUse = context.completions;
         break;
 
+      case 'fields-and-array-methods':
+        // Show both field completions (from array elements) AND array methods
+        const allCompletions2 = [...staticBloblangCompletions, ...dynamicCompletions];
+        const arrayMethods2 = ['map_each', 'map', 'filter', 'fold', 'sum', 'flatten',
+                               'append', 'reverse', 'sort', 'unique', 'length', 'slice',
+                               'index', 'all', 'any', 'contains'];
+
+        // Get array methods with boosted scores
+        const arrayMethodCompletions = allCompletions2
+          .filter(c => c.meta === 'method')
+          .map(c => {
+            const isArrayMethod = arrayMethods2.some(am => c.caption.toLowerCase().includes(am));
+            return isArrayMethod ? { ...c, score: c.score + 200 } : c;
+          });
+
+        // Combine field completions with array methods
+        completionsToUse = [...context.completions, ...arrayMethodCompletions];
+        break;
+
       case 'methods-only':
         // Only show methods, filter out keywords and functions
         const allCompletions = [...staticBloblangCompletions, ...dynamicCompletions];
-        completionsToUse = allCompletions.filter(c => c.meta === 'method');
+
+        if (context.contextType === 'array') {
+          // Prioritize array methods
+          const arrayMethods = ['map_each', 'map', 'filter', 'fold', 'sum', 'flatten',
+                                'append', 'reverse', 'sort', 'unique', 'length', 'slice',
+                                'index', 'all', 'any', 'contains'];
+
+          completionsToUse = allCompletions
+            .filter(c => c.meta === 'method')
+            .map(c => {
+              // Boost score for array methods
+              const isArrayMethod = arrayMethods.some(am => c.caption.toLowerCase().includes(am));
+              return isArrayMethod ? { ...c, score: c.score + 200 } : c;
+            });
+        } else {
+          // Standard method-only filtering
+          completionsToUse = allCompletions.filter(c => c.meta === 'method');
+        }
         break;
 
       case 'all':
@@ -838,13 +1308,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // Setup keyboard shortcuts
   setupKeyboardShortcuts();
 
-  // Setup auto-run toggle
+  // Setup auto-run toggle and manual run button
   const autoRunToggle = document.getElementById("auto-run-toggle");
+  const manualRunButton = document.getElementById("manual-run-button");
+
   autoRunToggle.addEventListener("change", (e) => {
     autoRunEnabled = e.target.checked;
+    // Show run button when auto-run is disabled, hide when enabled
+    manualRunButton.style.display = autoRunEnabled ? 'none' : 'inline-block';
     if (autoRunEnabled) {
       debouncedExecute();
     }
+  });
+
+  // Manual run button click handler
+  manualRunButton.addEventListener("click", () => {
+    execute();
   });
 
   // Initialize editors using the initial placeholders if URL/saved state exists
@@ -874,6 +1353,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Trigger autocomplete after typing "(" for function calls like meta(
         if (char === "(") {
           // Small delay to let the completer detect the context
+          setTimeout(() => {
+            aceMappingEditor.execCommand("startAutocomplete");
+          }, 50);
+        }
+        // Trigger autocomplete after typing "@" for metadata references
+        if (char === "@") {
           setTimeout(() => {
             aceMappingEditor.execCommand("startAutocomplete");
           }, 50);
