@@ -129,7 +129,7 @@ function unnestPlaceholders() {
       preprocessParentheses(codeElement);
       addConumSpans(codeElement);
 
-      if (!['xml', 'html', 'rust', 'coffeescript', 'text'].includes(codeElement.dataset.lang)) {
+      if (!['xml', 'html', 'rust', 'coffeescript', 'text', 'bloblang', 'blobl'].includes(codeElement.dataset.lang)) {
         addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement);
       }
     });

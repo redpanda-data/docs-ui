@@ -1,0 +1,874 @@
+/* Bloblang Interactive Features CSS */
+
+.has-documentation {
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+  transition: border-color 0.2s;
+}
+
+.has-documentation:hover,
+.has-documentation:focus {
+  border-bottom-style: solid;
+  outline: none;
+}
+
+/* Tippy theme for Bloblang docs */
+.tippy-box[data-theme~='bloblang-doc'] {
+  background-color: var(--panel-background, #fff);
+  color: var(--body-font-color, #333);
+  border: 1px solid var(--panel-border-color, #ddd);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.tippy-box[data-theme~='bloblang-doc'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: var(--panel-border-color, #ddd);
+}
+
+.tippy-box[data-theme~='bloblang-doc'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: var(--panel-border-color, #ddd);
+}
+
+.bloblang-doc-tooltip {
+  padding: 12px;
+  line-height: 1.5;
+}
+
+.bloblang-doc-tooltip .doc-signature {
+  font-family: var(--code-font-family, monospace);
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--link-color, #005cc5);
+  font-size: 0.9375rem;
+}
+
+.bloblang-doc-tooltip .doc-signature code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.bloblang-doc-tooltip .doc-description {
+  margin-bottom: 12px;
+  color: var(--body-font-color, #333);
+}
+
+.bloblang-doc-tooltip .doc-parameters {
+  margin-bottom: 12px;
+  font-size: 0.8125rem;
+}
+
+.bloblang-doc-tooltip .doc-parameters strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--heading-font-color, #111);
+}
+
+.bloblang-doc-tooltip .doc-parameters ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.bloblang-doc-tooltip .doc-parameters li {
+  margin: 4px 0;
+}
+
+.bloblang-doc-tooltip .doc-parameters code {
+  background: var(--code-background, #f6f8fa);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.875em;
+}
+
+.bloblang-doc-tooltip .doc-returns {
+  margin-bottom: 12px;
+  font-size: 0.8125rem;
+}
+
+.bloblang-doc-tooltip .doc-returns code {
+  background: var(--code-background, #f6f8fa);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--code-font-color, #24292e);
+}
+
+.bloblang-doc-tooltip .doc-example {
+  margin: 12px 0;
+  padding: 8px;
+  background: var(--pre-background, #f6f8fa);
+  border-radius: 4px;
+  border: 1px solid var(--panel-border-color, #e1e4e8);
+}
+
+.bloblang-doc-tooltip .doc-example pre {
+  margin: 0;
+  padding: 0;
+  background: none;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.bloblang-doc-tooltip .doc-example code {
+  font-family: var(--code-font-family, monospace);
+  background: none;
+  padding: 0;
+  color: var(--code-font-color, #24292e);
+}
+
+.bloblang-doc-tooltip .doc-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: var(--link-color, #005cc5);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.bloblang-doc-tooltip .doc-link:hover {
+  color: var(--link-color-hover, #004094);
+  text-decoration: underline;
+}
+
+/* Dark mode tooltip styles */
+html[data-theme="dark"] .tippy-box[data-theme~='bloblang-doc'] {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #3a3a3a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .tippy-box[data-theme~='bloblang-doc'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #3a3a3a;
+}
+
+html[data-theme="dark"] .tippy-box[data-theme~='bloblang-doc'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #3a3a3a;
+}
+
+html[data-theme="dark"] .tippy-box[data-theme~='bloblang-doc'] .tippy-arrow {
+  color: #1e1e1e;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-example {
+  background: #2a2a2a;
+  border-color: #3a3a3a;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-signature {
+  color: #58a6ff;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-description {
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-parameters {
+  color: #d0d0d0;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-parameters strong {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-parameters code,
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-returns code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-returns {
+  color: #d0d0d0;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-example code {
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-link {
+  color: #58a6ff;
+}
+
+html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
+  color: #79b8ff;
+}
+
+.try-bloblang-button {
+  background: var(--link-color, #005cc5);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: var(--body-font-family);
+  margin-left: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.try-bloblang-button:hover {
+  background: var(--link-color-hover, #004094);
+  transform: translateY(-1px);
+}
+
+.try-bloblang-button:active {
+  transform: translateY(0);
+}
+
+/* Mini Playground Modal */
+.bloblang-playground-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: bloblang-fadeIn 0.2s ease-out;
+  overflow: auto;
+}
+
+@keyframes bloblang-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bloblang-mini-playground {
+  background: var(--body-background, #fff);
+  color: var(--body-font-color, #24292e);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 900px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  animation: bloblang-slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes bloblang-slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.bloblang-mini-playground .mini-playground-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(204, 204, 204, 0.3);
+  flex-shrink: 0;
+  background: var(--body-background, #fff);
+}
+
+.bloblang-mini-playground .mini-playground-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--body-font-color, #24292e);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bloblang-mini-playground .mini-playground-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--body-font-color, #586069);
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.bloblang-mini-playground .mini-playground-close:hover {
+  background: rgba(128, 128, 128, 0.1);
+  opacity: 1;
+}
+
+.bloblang-mini-playground .mini-playground-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.bloblang-mini-playground .mini-playground-section {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.bloblang-mini-playground .mini-playground-section label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--body-font-color, #24292e);
+  font-size: 0.875rem;
+}
+
+/* Ace Editor containers for mini-playground */
+.bloblang-mini-playground .mini-ace-editor {
+  width: 100%;
+  height: 120px;
+  border: 1px solid rgba(204, 204, 204, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 13px;
+  background: var(--pre-background, #f6f8fa);
+}
+
+/* Ace requires !important to override inline styles */
+.bloblang-mini-playground .mini-ace-editor .ace_editor {
+  font-family: var(--code-font-family, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace) !important;
+  background: var(--pre-background, #f6f8fa) !important;
+}
+
+.bloblang-mini-playground .mini-ace-editor .ace_gutter {
+  background: var(--pre-background, #f6f8fa) !important;
+}
+
+.bloblang-mini-playground .mini-ace-editor .ace_scroller {
+  background: var(--pre-background, #f6f8fa) !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor {
+  height: 160px;
+}
+
+/* Ace Bloblang syntax highlighting - mapping editor (Light mode) */
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_string {
+  color: #22863a !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_comment {
+  color: #6a737d !important;
+  font-style: italic;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_keyword {
+  color: #6f42c1 !important;
+  font-weight: normal !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_support.ace_function {
+  color: #6f42c1 !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_support.ace_function.ace_method {
+  color: #6f42c1 !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_constant.ace_numeric {
+  color: #005cc5 !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_constant.ace_language {
+  color: #005cc5 !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_variable {
+  color: #005cc5 !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_keyword.ace_operator {
+  color: #d73a49 !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_keyword.ace_operator.ace_spread {
+  color: #d73a49 !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_punctuation {
+  color: #24292e !important;
+}
+
+.bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_paren {
+  color: #24292e !important;
+}
+
+/* Footer */
+.bloblang-mini-playground .mini-playground-footer {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(204, 204, 204, 0.3);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  background: var(--body-background, #fff);
+}
+
+.bloblang-mini-playground .mini-playground-status {
+  font-size: 0.8125rem;
+  padding: 6px 12px;
+  border-radius: 4px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.bloblang-mini-playground .mini-playground-status:empty {
+  display: none;
+}
+
+.bloblang-mini-playground .mini-playground-status-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.bloblang-mini-playground .mini-playground-status-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.bloblang-mini-playground .mini-playground-status-info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.bloblang-mini-playground .mini-playground-status-ready {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+.bloblang-mini-playground .mini-playground-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Buttons */
+.bloblang-mini-playground .mini-playground-button {
+  padding: 8px 16px;
+  background: var(--body-background, #fff);
+  border: 1.5px solid rgba(128, 152, 249, 0.5);
+  border-radius: 6px;
+  color: var(--body-font-color, #333);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: var(--body-font-family);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.bloblang-mini-playground .mini-playground-button:hover {
+  background: rgba(68, 76, 231, 0.06);
+  border-color: #4474e7;
+  transform: translateY(-1px);
+}
+
+.bloblang-mini-playground .mini-playground-button:active {
+  transform: translateY(0);
+}
+
+.bloblang-mini-playground .mini-playground-run {
+  background: #4474e7;
+  color: #fff;
+  border-color: #4474e7;
+}
+
+.bloblang-mini-playground .mini-playground-run:hover:not(:disabled) {
+  background: #365bd6;
+  border-color: #365bd6;
+}
+
+.bloblang-mini-playground .mini-playground-run:disabled {
+  background: #94a3a8;
+  border-color: #94a3a8;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+.bloblang-mini-playground .mini-playground-copy-output {
+  background: var(--body-background, #fff);
+  color: var(--body-font-color, #333);
+}
+
+.bloblang-mini-playground .mini-playground-copy-output:hover {
+  background: rgba(68, 76, 231, 0.06);
+  border-color: #4474e7;
+}
+
+.bloblang-mini-playground .mini-playground-link {
+  color: #4474e7;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 8px 0;
+}
+
+.bloblang-mini-playground .mini-playground-link:hover {
+  text-decoration: underline;
+  color: #365bd6;
+}
+
+/* Dark mode */
+html[data-theme="dark"] .bloblang-playground-overlay {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground {
+  background: var(--body-background, #101828);
+  color: var(--body-font-color, #e0e0e0);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-header {
+  background: var(--body-background, #101828);
+  border-color: rgba(204, 204, 204, 0.15);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-header h3 {
+  color: var(--body-font-color, #e0e0e0);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-close {
+  color: #a0a0a0;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-body {
+  background: var(--body-background, #101828);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section label {
+  color: var(--body-font-color, #e0e0e0);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-footer {
+  background: var(--body-background, #101828);
+  border-color: rgba(204, 204, 204, 0.15);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor {
+  border-color: rgba(204, 204, 204, 0.3);
+  background: var(--pre-background, #0d1117);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_editor {
+  background: var(--pre-background, #0d1117) !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_gutter {
+  background: var(--pre-background, #0d1117) !important;
+  color: #6e7681 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_scroller {
+  background: var(--pre-background, #0d1117) !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_content {
+  background: var(--pre-background, #0d1117) !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_marker-layer .ace_active-line {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_gutter-active-line {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_cursor {
+  color: #fff !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-ace-editor .ace_marker-layer .ace_selection {
+  background: rgba(68, 116, 231, 0.3) !important;
+}
+
+/* JSON syntax highlighting for dark mode (input/output editors) */
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_string {
+  color: #ce9178 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_constant.ace_numeric {
+  color: #b5cea8 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_constant.ace_language {
+  color: #569cd6 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_variable {
+  color: #9cdcfe !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_paren {
+  color: #ffd700 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_punctuation {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_line {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_identifier {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_keyword {
+  color: #569cd6 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_support {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor .ace_support.ace_type {
+  color: #9cdcfe !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section:not(.mini-playground-section-mapping) .mini-ace-editor [class^="ace_"] {
+  color: #d4d4d4;
+}
+
+/* Ace Bloblang syntax highlighting - mapping editor (Dark mode) */
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_string {
+  color: #ce9178 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_comment {
+  color: #6a9955 !important;
+  font-style: italic;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_keyword {
+  color: #c586c0 !important;
+  font-weight: normal !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_support.ace_function {
+  color: #dcdcaa !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_support.ace_function.ace_method {
+  color: #dcdcaa !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_constant.ace_numeric {
+  color: #b5cea8 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_constant.ace_language {
+  color: #569cd6 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_variable {
+  color: #9cdcfe !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_keyword.ace_operator {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_keyword.ace_operator.ace_spread {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_punctuation {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor .ace_paren {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-button {
+  background: var(--body-background, #1e1e1e);
+  border-color: rgba(128, 152, 249, 0.4);
+  color: var(--body-font-color, #e0e0e0);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-button:hover {
+  background: rgba(68, 76, 231, 0.2);
+  border-color: #667eea;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-run {
+  background: #4474e7;
+  color: #fff;
+  border-color: #4474e7;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-run:hover:not(:disabled) {
+  background: #5580e9;
+  border-color: #5580e9;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-run:disabled {
+  background: #555;
+  border-color: #555;
+  color: #999;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-copy-output {
+  background: var(--body-background, #1e1e1e);
+  color: var(--body-font-color, #e0e0e0);
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-copy-output:hover {
+  background: rgba(68, 76, 231, 0.2);
+  border-color: #667eea;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-link {
+  color: #58a6ff;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-link:hover {
+  color: #79b8ff;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-status-success {
+  background: #0a3d1a;
+  color: #7ee87e;
+  border-color: #0e5a24;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-status-error {
+  background: #4d0f15;
+  color: #ff9999;
+  border-color: #751923;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-status-info {
+  background: #0c3d51;
+  color: #7dd3fc;
+  border-color: #155875;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-status-ready {
+  background: #2a2a2a;
+  color: #a0a0a0;
+  border-color: #444;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 768px) {
+  .bloblang-playground-overlay {
+    padding: 8px;
+  }
+
+  .bloblang-mini-playground {
+    max-height: calc(100vh - 16px);
+    border-radius: 8px;
+  }
+
+  .bloblang-mini-playground .mini-playground-header {
+    padding: 12px 16px;
+  }
+
+  .bloblang-mini-playground .mini-playground-body {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .bloblang-mini-playground .mini-playground-footer {
+    padding: 12px 16px;
+  }
+
+  .bloblang-mini-playground .mini-ace-editor {
+    height: 100px;
+  }
+
+  .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor {
+    height: 140px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 480px) {
+  .bloblang-playground-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .bloblang-mini-playground {
+    max-height: 100vh;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .bloblang-mini-playground .mini-playground-header h3 {
+    font-size: 1rem;
+  }
+
+  .bloblang-mini-playground .mini-playground-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .bloblang-mini-playground .mini-playground-status {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .bloblang-mini-playground .mini-playground-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .bloblang-mini-playground .mini-playground-button {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+  }
+
+  .bloblang-mini-playground .mini-playground-link {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+  }
+}

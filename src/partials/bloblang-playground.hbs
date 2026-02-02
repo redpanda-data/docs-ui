@@ -286,7 +286,7 @@ const hasSavedState = sessionStorage.getItem(sessionStorageKeys.input) ||
 const loadingPlaceholder = "Loading...";
 
 const initialInput   = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultInput;
-const initialMeta    = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultMetaInput;
+const initialMeta    = defaultMetaInput; // Always use default empty object, never "Loading..."
 const initialMapping = (hasUrlData || hasSavedState) ? loadingPlaceholder : defaultMapping;
 
 // Utility Functions
@@ -1329,7 +1329,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize editors using the initial placeholders if URL/saved state exists
   aceInputEditor = initializeAceEditor("ace-input", 'ace/mode/json', false, initialInput);
   aceInputMetadataEditor = initializeAceEditor("ace-input-metadata", 'ace/mode/json', false, initialMeta);
-  aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/coffee', false, initialMapping);
+  aceMappingEditor = initializeAceEditor("ace-mapping", 'ace/mode/bloblang', false, initialMapping);
 
   // Enable autocomplete for Bloblang mapping editor
   try {

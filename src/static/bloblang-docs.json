@@ -1,0 +1,279 @@
+{
+  "functions": {
+    "uuid_v4": {
+      "signature": "uuid_v4()",
+      "description": "Generates a new version 4 UUID.",
+      "returns": "string",
+      "example": "root.id = uuid_v4()\n# Result: \"f47ac10b-58cc-4372-a567-0e02b2c3d479\"",
+      "category": "uuid",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#uuid_v4"
+    },
+    "now": {
+      "signature": "now()",
+      "description": "Returns the current Unix timestamp in seconds.",
+      "returns": "number",
+      "example": "root.timestamp = now()\n# Result: 1675123456",
+      "category": "time",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#now"
+    },
+    "timestamp_unix": {
+      "signature": "timestamp_unix(format: string, value: string)",
+      "description": "Parses a timestamp string using a format and returns Unix timestamp.",
+      "returns": "number",
+      "parameters": [
+        {"name": "format", "type": "string", "description": "The time format layout"},
+        {"name": "value", "type": "string", "description": "The timestamp string to parse"}
+      ],
+      "example": "root.ts = timestamp_unix(\"2006-01-02\", \"2023-02-01\")",
+      "category": "time",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#timestamp_unix"
+    },
+    "env": {
+      "signature": "env(name: string)",
+      "description": "Returns the value of an environment variable.",
+      "returns": "string",
+      "parameters": [
+        {"name": "name", "type": "string", "description": "The environment variable name"}
+      ],
+      "example": "root.api_key = env(\"API_KEY\")",
+      "category": "environment",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#env"
+    },
+    "deleted": {
+      "signature": "deleted()",
+      "description": "Returns a special value that deletes a field when assigned.",
+      "returns": "null",
+      "example": "root.password = deleted()\n# Removes the password field",
+      "category": "manipulation",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#deleted"
+    },
+    "content": {
+      "signature": "content()",
+      "description": "Returns the raw bytes content of the message.",
+      "returns": "bytes",
+      "example": "root.raw = content().string()",
+      "category": "message",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#content"
+    },
+    "json": {
+      "signature": "json()",
+      "description": "Returns the message parsed as JSON, same as 'this'.",
+      "returns": "any",
+      "example": "root = json()",
+      "category": "message",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#json"
+    },
+    "metadata": {
+      "signature": "metadata(key?: string)",
+      "description": "Returns message metadata. Without a key, returns all metadata as an object.",
+      "returns": "any",
+      "parameters": [
+        {"name": "key", "type": "string", "description": "Optional metadata key"}
+      ],
+      "example": "root.topic = metadata(\"kafka_topic\")\nroot.all_meta = metadata()",
+      "category": "metadata",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#metadata"
+    },
+    "throw": {
+      "signature": "throw(message: string)",
+      "description": "Throws an error with the given message, causing the mapping to fail.",
+      "returns": "error",
+      "parameters": [
+        {"name": "message", "type": "string", "description": "The error message"}
+      ],
+      "example": "root.value = if this.age < 0 { throw(\"Invalid age\") }",
+      "category": "error",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#throw"
+    },
+    "random_int": {
+      "signature": "random_int(min?: number, max?: number)",
+      "description": "Generates a random integer. With no args, returns any int. With min/max, returns value in that range.",
+      "returns": "number",
+      "parameters": [
+        {"name": "min", "type": "number", "description": "Optional minimum value"},
+        {"name": "max", "type": "number", "description": "Optional maximum value"}
+      ],
+      "example": "root.dice = random_int(1, 6)",
+      "category": "generation",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#random_int"
+    }
+  },
+  "methods": {
+    "uppercase": {
+      "signature": ".uppercase()",
+      "description": "Converts a string to uppercase.",
+      "returns": "string",
+      "example": "root.name = this.name.uppercase()\n# \"john\" → \"JOHN\"",
+      "category": "string",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#uppercase"
+    },
+    "lowercase": {
+      "signature": ".lowercase()",
+      "description": "Converts a string to lowercase.",
+      "returns": "string",
+      "example": "root.email = this.email.lowercase()\n# \"USER@EXAMPLE.COM\" → \"user@example.com\"",
+      "category": "string",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#lowercase"
+    },
+    "trim": {
+      "signature": ".trim()",
+      "description": "Removes leading and trailing whitespace from a string.",
+      "returns": "string",
+      "example": "root.name = this.name.trim()\n# \"  Alice  \" → \"Alice\"",
+      "category": "string",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#trim"
+    },
+    "split": {
+      "signature": ".split(delimiter: string)",
+      "description": "Splits a string into an array using the specified delimiter.",
+      "returns": "array",
+      "parameters": [
+        {"name": "delimiter", "type": "string", "description": "The string to split on"}
+      ],
+      "example": "root.parts = this.email.split(\"@\")\n# \"user@example.com\" → [\"user\", \"example.com\"]",
+      "category": "string",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#split"
+    },
+    "replace_all": {
+      "signature": ".replace_all(old: string, new: string)",
+      "description": "Replaces all occurrences of a substring with another string.",
+      "returns": "string",
+      "parameters": [
+        {"name": "old", "type": "string", "description": "The substring to replace"},
+        {"name": "new", "type": "string", "description": "The replacement string"}
+      ],
+      "example": "root.text = this.text.replace_all(\"foo\", \"bar\")\n# \"foo is foo\" → \"bar is bar\"",
+      "category": "string",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#replace_all"
+    },
+    "contains": {
+      "signature": ".contains(substring: string)",
+      "description": "Returns true if the string contains the given substring.",
+      "returns": "boolean",
+      "parameters": [
+        {"name": "substring", "type": "string", "description": "The substring to search for"}
+      ],
+      "example": "root.has_error = this.message.contains(\"error\")",
+      "category": "string",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#contains"
+    },
+    "map_each": {
+      "signature": ".map_each(mapping: query)",
+      "description": "Executes a mapping for each element of an array, returning a new array of the results.",
+      "returns": "array",
+      "parameters": [
+        {"name": "mapping", "type": "query", "description": "The mapping to execute for each element"}
+      ],
+      "example": "root.names = this.users.map_each(user -> user.name.uppercase())\n# Transforms each user to uppercase name",
+      "category": "array",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#map_each"
+    },
+    "filter": {
+      "signature": ".filter(predicate: query)",
+      "description": "Filters an array, keeping only elements where the predicate returns true.",
+      "returns": "array",
+      "parameters": [
+        {"name": "predicate", "type": "query", "description": "The condition to test each element"}
+      ],
+      "example": "root.adults = this.users.filter(user -> user.age >= 18)",
+      "category": "array",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#filter"
+    },
+    "length": {
+      "signature": ".length()",
+      "description": "Returns the length of a string or array.",
+      "returns": "number",
+      "example": "root.count = this.items.length()\nroot.name_len = this.name.length()",
+      "category": "general",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#length"
+    },
+    "parse_json": {
+      "signature": ".parse_json()",
+      "description": "Parses a string or byte array as JSON.",
+      "returns": "any",
+      "example": "root.data = this.json_string.parse_json()\n# \"{\\\"foo\\\":\\\"bar\\\"}\" → {\"foo\": \"bar\"}",
+      "category": "parsing",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#parse_json"
+    },
+    "format_json": {
+      "signature": ".format_json(indent?: string)",
+      "description": "Serializes a value to a JSON string. Optionally with indentation.",
+      "returns": "string",
+      "parameters": [
+        {"name": "indent", "type": "string", "description": "Optional indentation string"}
+      ],
+      "example": "root.json = this.data.format_json(\"  \")",
+      "category": "serialization",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#format_json"
+    },
+    "catch": {
+      "signature": ".catch(fallback: any)",
+      "description": "If the preceding mapping fails, returns the fallback value instead of erroring.",
+      "returns": "any",
+      "parameters": [
+        {"name": "fallback", "type": "any", "description": "The value to return on error"}
+      ],
+      "example": "root.safe = this.risky.parse_json().catch(null)\n# Returns null if parse fails",
+      "category": "error",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#catch"
+    },
+    "string": {
+      "signature": ".string()",
+      "description": "Converts a value to a string representation.",
+      "returns": "string",
+      "example": "root.count_str = this.count.string()\n# 42 → \"42\"",
+      "category": "type",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#string"
+    },
+    "number": {
+      "signature": ".number()",
+      "description": "Converts a value to a number. Strings are parsed.",
+      "returns": "number",
+      "example": "root.age = this.age_str.number()\n# \"25\" → 25",
+      "category": "type",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#number"
+    },
+    "flatten": {
+      "signature": ".flatten()",
+      "description": "Flattens a nested array by one level.",
+      "returns": "array",
+      "example": "root.flat = this.nested.flatten()\n# [[1,2],[3,4]] → [1,2,3,4]",
+      "category": "array",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#flatten"
+    },
+    "unique": {
+      "signature": ".unique()",
+      "description": "Returns an array with duplicate values removed.",
+      "returns": "array",
+      "example": "root.tags = this.tags.unique()\n# [\"a\",\"b\",\"a\",\"c\"] → [\"a\",\"b\",\"c\"]",
+      "category": "array",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#unique"
+    },
+    "sort": {
+      "signature": ".sort()",
+      "description": "Sorts an array in ascending order.",
+      "returns": "array",
+      "example": "root.sorted = this.numbers.sort()\n# [3,1,2] → [1,2,3]",
+      "category": "array",
+      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#sort"
+    }
+  },
+  "keywords": {
+    "root": {
+      "description": "Refers to the root of the output document being created. All assignments typically start with 'root'.",
+      "example": "root.id = this.user_id\nroot.name = this.user_name"
+    },
+    "this": {
+      "description": "Refers to the current context, which starts as the input document. Inside queries, it refers to the current scoped value.",
+      "example": "root = this\nroot.upper = this.name.uppercase()"
+    },
+    "let": {
+      "description": "Declares a variable that can be referenced later in the mapping with $variable_name.",
+      "example": "let source = \"kafka\"\nroot.source_type = $source"
+    },
+    "meta": {
+      "description": "Used to set or access message metadata. Metadata is separate from the message payload.",
+      "example": "meta processed_at = now()\nroot.topic = @kafka_topic"
+    }
+  }
+}

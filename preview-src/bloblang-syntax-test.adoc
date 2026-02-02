@@ -1,0 +1,142 @@
+= Bloblang Syntax Highlighting Test
+:page-layout: default
+
+Test page for Bloblang syntax highlighting and interactive features.
+
+TIP: Hover over functions and methods to see documentation. Click "Try It" to execute mappings!
+
+== Pure Bloblang Code Block
+
+[source,bloblang]
+----
+root = this
+root.id = uuid_v4()
+root.timestamp = now()
+
+# Variables
+let foo = "bar"
+root.message = $foo
+
+# Methods and functions
+root.uppercased = this.name.uppercase()
+root.replaced = this.text.replace_all("old", "new")
+
+# Boolean and arithmetic
+root.is_valid = this.count > 10 && this.status == "active"
+root.total = this.price * this.quantity
+
+# Arrays and objects
+root.items = this.data.map_each(item -> {
+  "name": item.name.uppercase(),
+  "value": item.value * 2
+})
+
+# Deletions
+root.sensitive = deleted()
+
+# In: {"name": "alice", "text": "hello old world", "count": 15, "status": "active", "price": 10.5, "quantity": 3, "data": [{"name": "item1", "value": 5}, {"name": "item2", "value": 10}], "sensitive": "secret123"}
+----
+
+== Bloblang with Alias (blobl)
+
+[source,blobl]
+----
+root.transformed = this.input.uppercase().trim()
+root.uuid = uuid_v4()
+
+# In: {"input": "  hello world  "}
+----
+
+== Bloblang in YAML Pipeline
+
+[source,yaml]
+----
+input:
+  kafka:
+    addresses: ["localhost:9092"]
+    topics: ["my-topic"]
+
+pipeline:
+  processors:
+    - mapping: |
+        # Transform the message
+        root.id = uuid_v4()
+        root.timestamp = now()
+        root.data = this.payload.parse_json()
+
+        # Uppercase all text fields
+        root.title = this.payload.title.uppercase()
+        root.body = this.payload.body
+
+        # Add metadata
+        meta processed_at = now()
+        meta source = @kafka_topic
+
+output:
+  http_client:
+    url: "https://api.example.com/data"
+    verb: POST
+----
+
+== Complex Bloblang Example
+
+[source,bloblang]
+----
+root = this
+root.id = uuid_v4()
+
+# Conditional transformations
+root.status = if this.score > 80 {
+  "excellent"
+} else if this.score > 60 {
+  "good"
+} else {
+  "needs_improvement"
+}
+
+# Array operations
+root.filtered_items = this.items.filter(item -> item.active == true)
+root.unique_tags = this.tags.unique()
+
+# String operations
+root.email = this.email.lowercase().trim()
+root.name = this.first_name + " " + this.last_name
+
+# Error handling
+root.safe_value = this.risky_field.catch("default_value")
+
+# Delete sensitive fields
+root.password = deleted()
+
+# In: {"score": 85, "items": [{"name": "a", "active": true}, {"name": "b", "active": false}, {"name": "c", "active": true}], "tags": ["red", "blue", "red", "green"], "email": "  JOHN@EXAMPLE.COM  ", "first_name": "John", "last_name": "Doe", "password": "secret"}
+----
+
+== Testing All Token Types
+
+[source,bloblang]
+----
+# Simple example showing basic transformations
+root.message = this.text.uppercase()
+root.length = this.text.length()
+root.sorted = this.items.sort()
+root.unique_nums = this.numbers.unique()
+root.id = uuid_v4()
+
+# In: {"text": "hello world", "items": ["c", "a", "b"], "numbers": [1, 2, 2, 3, 3, 3]}
+----
+
+== Multi-line Input Format
+
+[source,bloblang]
+----
+# This example shows the multi-line # In: format
+root.fullName = this.first + " " + this.last
+root.age = this.age + 1
+
+# In:
+# {
+#   "first": "Jane",
+#   "last": "Smith",
+#   "age": 29
+# }
+----
