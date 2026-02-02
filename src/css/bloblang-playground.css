@@ -1423,3 +1423,228 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 .bloblang-playground .ace_editor.ace_autocomplete .ace_scroller::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.5) !important;
 }
+
+/* ==========================================================================
+   Ace Bloblang Syntax Highlighting - Match Prism Colors
+   ========================================================================== */
+
+.bloblang-playground #ace-mapping .ace_string {
+  color: #22863a !important;
+}
+
+.bloblang-playground #ace-mapping .ace_comment {
+  color: #6a737d !important;
+  font-style: italic;
+}
+
+.bloblang-playground #ace-mapping .ace_keyword {
+  color: #6f42c1 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_constant.ace_language {
+  color: #005cc5 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_constant.ace_numeric {
+  color: #005cc5 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_support.ace_function {
+  color: #6f42c1 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_support.ace_function.ace_method {
+  color: #6f42c1 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_variable {
+  color: #005cc5 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_variable.ace_other {
+  color: #005cc5 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_variable.ace_other.ace_property {
+  color: #24292e !important;
+}
+
+.bloblang-playground #ace-mapping .ace_punctuation.ace_operator {
+  color: #24292e !important;
+}
+
+.bloblang-playground #ace-mapping .ace_punctuation.ace_operator.ace_arrow {
+  color: #d73a49 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_keyword.ace_operator {
+  color: #d73a49 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_keyword.ace_operator.ace_spread {
+  color: #d73a49 !important;
+}
+
+.bloblang-playground #ace-mapping .ace_paren {
+  color: #24292e !important;
+}
+
+/* Dark mode syntax highlighting */
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_string {
+  color: #ce9178 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_comment {
+  color: #6a9955 !important;
+  font-style: italic;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_keyword {
+  color: #c586c0 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_constant.ace_language {
+  color: #569cd6 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_constant.ace_numeric {
+  color: #b5cea8 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_support.ace_function {
+  color: #dcdcaa !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_support.ace_function.ace_method {
+  color: #dcdcaa !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_variable {
+  color: #9cdcfe !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_variable.ace_other {
+  color: #9cdcfe !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_variable.ace_other.ace_property {
+  color: #9cdcfe !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_punctuation.ace_operator {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_punctuation.ace_operator.ace_arrow {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_keyword.ace_operator {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_keyword.ace_operator.ace_spread {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-mapping .ace_paren {
+  color: #d4d4d4 !important;
+}
+
+/* JSON syntax highlighting for dark mode (input/metadata/output editors) */
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_string,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_string,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_string,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_string {
+  color: #ce9178 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_constant.ace_numeric,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_constant.ace_numeric,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_constant.ace_numeric,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_constant.ace_numeric {
+  color: #b5cea8 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_constant.ace_language,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_constant.ace_language,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_constant.ace_language,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_constant.ace_language {
+  color: #569cd6 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_variable,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_variable,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_variable,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_variable {
+  color: #9cdcfe !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_paren,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_paren,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_paren,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_paren {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_punctuation,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_punctuation,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_punctuation,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_punctuation {
+  color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_text,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_text,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_text,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_text {
+  color: #d4d4d4 !important;
+}
+
+/* Force all lines in dark mode JSON editors to be light */
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_line,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_line,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_line,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_line {
+  color: #d4d4d4 !important;
+}
+
+/* Override identifiers which may default to dark text */
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_identifier,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_identifier,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_identifier,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_identifier {
+  color: #d4d4d4 !important;
+}
+
+/* Override keywords (true, false, null) */
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_keyword,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_keyword,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_keyword,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_keyword {
+  color: #569cd6 !important;
+}
+
+/* Override support tokens */
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_support,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_support,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_support,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_support {
+  color: #d4d4d4 !important;
+}
+
+/* JSON object keys often use ace_support.ace_type */
+html[data-theme="dark"] .bloblang-playground #ace-input .ace_support.ace_type,
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata .ace_support.ace_type,
+html[data-theme="dark"] .bloblang-playground #ace-output .ace_support.ace_type,
+html[data-theme="dark"] .bloblang-playground #ace-metadata .ace_support.ace_type {
+  color: #9cdcfe !important;
+}
+
+/* Catch-all for any unmatched tokens in JSON editors */
+html[data-theme="dark"] .bloblang-playground #ace-input [class^="ace_"],
+html[data-theme="dark"] .bloblang-playground #ace-input-metadata [class^="ace_"],
+html[data-theme="dark"] .bloblang-playground #ace-output [class^="ace_"],
+html[data-theme="dark"] .bloblang-playground #ace-metadata [class^="ace_"] {
+  color: #d4d4d4;
+}
