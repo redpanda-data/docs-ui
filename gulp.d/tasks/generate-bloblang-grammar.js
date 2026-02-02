@@ -5,11 +5,11 @@ const path = require('path')
 const log = require('fancy-log')
 const https = require('https')
 
-const GITHUB_RELEASES_URL = 'https://api.github.com/repos/redpanda-data/connect/releases/latest'
+const ANTORA_YML_URL = 'https://raw.githubusercontent.com/redpanda-data/rp-connect-docs/main/antora.yml'
 const CONNECT_JSON_BASE = 'https://docs.redpanda.com/redpanda-connect/components/_attachments'
 const FALLBACK_VERSIONS = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0']
 
-function fetchJSON (url) {
+function fetchText (url) {
   return new Promise((resolve, reject) => {
     const options = {
       headers: { 'User-Agent': 'docs-ui-build' },
@@ -22,23 +22,26 @@ function fetchJSON (url) {
       }
       let data = ''
       res.on('data', (chunk) => { data += chunk })
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data))
-        } catch (err) {
-          reject(err)
-        }
-      })
+      res.on('end', () => resolve(data))
     }).on('error', reject)
   })
 }
 
+function fetchJSON (url) {
+  return fetchText(url).then((text) => JSON.parse(text))
+}
+
 async function getLatestVersion () {
   try {
-    const release = await fetchJSON(GITHUB_RELEASES_URL)
-    return release.tag_name.replace(/^v/, '')
+    const yaml = await fetchText(ANTORA_YML_URL)
+    const match = yaml.match(/latest-connect-version:\s*['"]?(\d+\.\d+\.\d+)/)
+    if (match) {
+      return match[1]
+    }
+    log.warn('Could not parse version from antora.yml')
+    return null
   } catch (err) {
-    log.warn('Could not fetch latest Connect version from GitHub:', err.message)
+    log.warn('Could not fetch Connect version from antora.yml:', err.message)
     return null
   }
 }
