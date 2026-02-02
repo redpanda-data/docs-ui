@@ -3,5 +3,6 @@
 /public/
 .DS_Store
 blobl.wasm
-src/static/
+src/static/*
+!src/static/bloblang-docs.json
 test-results.*
