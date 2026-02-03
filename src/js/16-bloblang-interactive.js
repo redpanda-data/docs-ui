@@ -29,6 +29,7 @@
     let inSeen = false;
     let metaSeen = false;
     let ignoreAll = false;
+    let skip = false;
     let currentSection = 'mapping';
 
     const lines = rawSnippet.split('\n');
@@ -37,6 +38,15 @@
       const trimmed = line.trim();
 
       if (ignoreAll) continue;
+
+      // Check for # Skip: directive (disables Try It button)
+      if (trimmed.startsWith('# Skip:')) {
+        const value = trimmed.slice('# Skip:'.length).trim().toLowerCase();
+        if (value === 'true' || value === '1' || value === 'yes') {
+          skip = true;
+        }
+        continue;
+      }
 
       // Ignore # Out: lines
       if (trimmed.startsWith('# Out:')) continue;
@@ -104,7 +114,8 @@
     return {
       mapping: mappingLines.join('\n').trim(),
       input: inputLines.join('\n').trim(),
-      meta: metaLines.join('\n').trim()
+      meta: metaLines.join('\n').trim(),
+      skip: skip
     };
   }
 
@@ -332,13 +343,13 @@
     let html = `
       <div class="bloblang-doc-tooltip">
         <div class="doc-signature"><code>${escapeHtml(doc.signature)}</code></div>
-        <div class="doc-description">${escapeHtml(doc.description)}</div>
+        <div class="doc-description">${formatDescription(doc.description)}</div>
     `;
 
     if (doc.parameters && doc.parameters.length > 0) {
       html += '<div class="doc-parameters"><strong>Parameters:</strong><ul>';
       doc.parameters.forEach(param => {
-        html += `<li><code>${escapeHtml(param.name)}</code> (${escapeHtml(param.type)}): ${escapeHtml(param.description)}</li>`;
+        html += `<li><code>${escapeHtml(param.name)}</code> (${escapeHtml(param.type)}): ${formatDescription(param.description)}</li>`;
       });
       html += '</ul></div>';
     }
@@ -366,6 +377,17 @@
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  /**
+   * Format description text - escape HTML but convert backticks to <code> tags
+   */
+  function formatDescription(text) {
+    if (!text) return '';
+    // First escape HTML
+    const escaped = escapeHtml(text);
+    // Then convert backtick-wrapped text to <code> tags
+    return escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
   }
 
   /**
@@ -482,6 +504,9 @@
 
     // Parse the code block to extract mapping, input, and metadata from comments
     const parsed = parseBloblangSnippet(code);
+
+    // Skip if # Skip: true directive is present
+    if (parsed.skip) return;
 
     // Helper to get attribute from listingblock, pre, or code element
     const getDataAttr = (name) => {
@@ -1006,4 +1031,7 @@
       }
     });
   }
+
+  // Export for use by other modules (e.g., 17-bloblang-yaml.js)
+  window.addBloblangTooltips = addDocumentationTooltips;
 })();

@@ -140,3 +140,231 @@ root.age = this.age + 1
 #   "age": 29
 # }
 ----
+
+== YAML Pipeline with Switch and Check
+
+[source,yaml]
+----
+input:
+  kafka:
+    addresses: ["localhost:9092"]
+    topics: ["events"]
+
+pipeline:
+  processors:
+    - switch:
+        - check: this.type == "order"
+          processors:
+            - mapping: |
+                root = this
+                root.processed_at = now()
+                root.order_id = uuid_v4()
+
+        - check: this.type == "user"
+          processors:
+            - mapping: |
+                root.user = this
+                root.user.email = this.email.lowercase()
+
+output:
+  stdout: {}
+----
+
+== YAML with Branch Processor
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - branch:
+        request_map: |
+          root.url = "https://api.example.com/enrich"
+          root.body = this.id
+
+        processors:
+          - http:
+              url: "${! this.url }"
+              verb: POST
+
+        result_map: |
+          root.enriched = this
+          root.enriched.fetched_at = now()
+----
+
+== YAML with Interpolation Functions
+
+[source,yaml]
+----
+input:
+  kafka:
+    addresses: ["localhost:9092"]
+    topics: ["events"]
+    consumer_group: "${! env(\"CONSUMER_GROUP\") }"
+
+pipeline:
+  processors:
+    - cache:
+        resource: my_cache
+        key: "${! meta(\"kafka_key\") }"
+        value: "${! content().hash(\"xxhash64\") }"
+
+    - dedupe:
+        key: "${! this.id }-${! meta(\"kafka_partition\") }"
+
+output:
+  http_client:
+    url: "${! env(\"TARGET_URL\") }/ingest"
+----
+
+== MCP Tool: Weather Service
+
+Real-world example from Redpanda Connect MCP tools.
+
+[source,yaml]
+----
+label: weather-service
+processors:
+  - label: validate_inputs
+    mutation: |
+      # Validate and sanitize city input
+      meta city = this.city.string().
+        re_replace_all("[^a-zA-Z\\s\\-]", "").
+        trim()
+
+      # Check for empty input
+      root = if @city == "" {
+        throw("City name cannot be empty")
+      } else { "" }
+
+  - label: fetch_weather_data
+    try:
+      - http:
+          url: "https://wttr.in/${! @city }?format=j1"
+          verb: GET
+          headers:
+            User-Agent: "redpanda-connect-mcp/1.0"
+          timeout: "10s"
+      - mutation: |
+          root = {
+            "city": @city,
+            "temperature_c": this.current_condition.0.temp_C.number(),
+            "temperature_f": this.current_condition.0.temp_F.number(),
+            "feels_like_c": this.current_condition.0.FeelsLikeC.number(),
+            "humidity": this.current_condition.0.humidity.number(),
+            "description": this.current_condition.0.weatherDesc.0.value,
+            "wind_speed_kmh": this.current_condition.0.windspeedKmph.number(),
+            "timestamp": now().format_timestamp("2006-01-02T15:04:05Z07:00")
+          }
+      - log:
+          message: "Weather data fetched for city: ${! @city }"
+          level: "INFO"
+
+  - label: handle_weather_errors
+    catch:
+      - mutation: |
+          root = {
+            "error": "Failed to fetch weather data",
+            "city": @city,
+            "details": error(),
+            "timestamp": now().format_timestamp("2006-01-02T15:04:05Z07:00")
+          }
+      - log:
+          message: "Weather API error for city ${! @city }: ${! error() }"
+          level: "ERROR"
+
+meta:
+  tags: [ weather, example ]
+  mcp:
+    enabled: true
+    description: "Get current weather conditions for any city worldwide"
+----
+
+== MCP Tool: Conditional Processing
+
+Switch-based conditional processing with different data formats.
+
+[source,yaml]
+----
+label: parse-data-by-type
+processors:
+  - label: conditional_processing
+    switch:
+      - check: this.data_type == "json"
+        processors:
+          - mapping: |
+              root.parsed_data = this.content.parse_json()
+              root.format = "json"
+      - check: this.data_type == "csv"
+        processors:
+          - mapping: |
+              root.parsed_data = this.content.parse_csv()
+              root.format = "csv"
+      - processors:
+          - mapping: |
+              root.error = "Unsupported data type"
+              root.supported_types = ["json", "csv"]
+
+meta:
+  mcp:
+    enabled: true
+    description: "Parse data based on specified type"
+----
+
+== Pipeline: Error Handling with Try/Catch
+
+[source,yaml]
+----
+input:
+  generate:
+    count: 1
+    interval: ""
+    mapping: |
+      root = {"request": "data"}
+
+pipeline:
+  processors:
+    - try:
+        - http:
+            url: "https://api.example.com/data"
+            verb: GET
+
+    - catch:
+        - mutation: |
+            root.error = true
+            root.message = "Request failed: " + error()
+
+output:
+  stdout: {}
+----
+
+== Regular YAML (Kubernetes - Should NOT Be Processed)
+
+This Kubernetes manifest should remain as normal YAML without Bloblang highlighting.
+
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  labels:
+    app: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app
+          image: my-registry/my-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              value: "postgres://localhost:5432/mydb"
+----

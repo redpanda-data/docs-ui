@@ -12,7 +12,7 @@ const map = (transform = () => {}, flush = undefined) => new Transform({ objectM
 const vfs = require('vinyl-fs')
 const yaml = require('js-yaml')
 
-const ASCIIDOC_ATTRIBUTES = { experimental: '', icons: 'font', sectanchors: '', 'source-highlighter': 'highlight.js' }
+const ASCIIDOC_ATTRIBUTES = { experimental: '', icons: 'font', sectanchors: '' }
 
 module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
   Promise.all([
