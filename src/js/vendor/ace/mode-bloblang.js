@@ -196,6 +196,7 @@ ace.define("ace/mode/bloblang_highlight_rules", ["require", "exports", "module",
         }
       ]
     };
+    this.normalizeRules();
   };
 
   oop.inherits(BloblangHighlightRules, TextHighlightRules);

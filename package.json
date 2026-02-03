@@ -77,6 +77,8 @@
   "scripts": {
     "test:headless": "node tests/bloblang-playground/test-runner.js",
     "test:playground": "npm run build:wasm && npm run test:headless",
+    "test:interactive": "node tests/bloblang-interactive/test-runner.js",
+    "test:all": "npm run test:playground && npm run test:interactive",
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
     "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
     "serve:playground": "npx serve ."

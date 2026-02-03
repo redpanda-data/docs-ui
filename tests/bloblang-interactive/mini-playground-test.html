@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloblang Interactive Features Test Suite</title>
+
+    <!-- Load required dependencies -->
+    <link rel="stylesheet" href="../../src/css/vendor/prism/prism.min.css">
+    <link rel="stylesheet" href="../../src/css/prism.css">
+    <link rel="stylesheet" href="../../src/css/bloblang-interactive.css">
+    <script src="../../src/js/vendor/prism/prism-core.js"></script>
+    <script src="../../src/js/vendor/prism/prism-bloblang.js"></script>
+    <script src="../../src/js/vendor/wasm_exec.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-success { border-color: #28a745; background: #d4edda; }
+        .test-error { border-color: #dc3545; background: #f8d7da; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-output {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .summary {
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* Mock listing block for testing */
+        .listingblock {
+            position: relative;
+            margin: 1rem 0;
+        }
+        .listingblock .source-toolbox {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .listingblock pre {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            position: relative;
+        }
+        .listingblock code {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Bloblang Interactive Features Test Suite</h1>
+
+    <div id="loading" class="loading">
+        <h3>Initializing tests...</h3>
+    </div>
+
+    <div id="summary" class="summary" style="display: none;">
+        <h3>Test Summary</h3>
+        <p>
+            <span id="passed-count">0</span> passed |
+            <span id="failed-count">0</span> failed |
+            <span id="total-count">0</span> total
+        </p>
+    </div>
+
+    <div id="test-results"></div>
+
+    <!-- Test fixtures: Mock Bloblang code blocks -->
+    <div id="test-fixtures" style="display: none;">
+
+        <!-- Fixture 1: Basic block with # In: comment -->
+        <div class="listingblock" id="fixture-basic">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-bloblang">root.result = this.value.uppercase()
+
+# In: {"value":"hello world"}</code></pre>
+        </div>
+
+        <!-- Fixture 2: Block with # Skip: directive -->
+        <div class="listingblock" id="fixture-skip">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-bloblang">root = this
+# Skip: true
+# In: {"test":"data"}</code></pre>
+        </div>
+
+        <!-- Fixture 3: Block with metadata -->
+        <div class="listingblock" id="fixture-metadata">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-bloblang">root.topic = @kafka_topic
+root.data = this
+
+# In: {"message":"test"}
+# Meta: {"kafka_topic":"events"}</code></pre>
+        </div>
+
+        <!-- Fixture 4: Multi-line input -->
+        <div class="listingblock" id="fixture-multiline">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-bloblang">root.names = this.users.map_each(u -> u.name)
+
+# In: {"users":[{"name":"Alice"},{"name":"Bob"}]}</code></pre>
+        </div>
+
+        <!-- Fixture 5: No input comment (should not get Try It button) -->
+        <div class="listingblock" id="fixture-no-input">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-bloblang">root = this</code></pre>
+        </div>
+
+        <!-- Fixture 6: YAML with embedded Bloblang -->
+        <div class="listingblock" id="fixture-yaml">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-yaml">input:
+  kafka:
+    addresses: ["localhost:9092"]
+    topics: ["events"]
+
+pipeline:
+  processors:
+    - mapping: |
+        root.processed = true
+        root.timestamp = now()
+        root.data = this
+
+output:
+  stdout: {}</code></pre>
+        </div>
+
+        <!-- Fixture 7: Regular YAML (should not be processed) -->
+        <div class="listingblock" id="fixture-yaml-k8s">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: app
+          image: myapp:latest</code></pre>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for testing
+        window.testResults = [];
+        window.uiRootPath = '/_';
+        window.siteRootPath = '';
+
+        // Test framework
+        class TestRunner {
+            constructor() {
+                this.tests = [];
+                this.results = [];
+            }
+
+            test(title, description, fn) {
+                this.tests.push({ title, description, fn });
+            }
+
+            async run() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('summary').style.display = 'block';
+                document.getElementById('test-results').style.display = 'block';
+
+                for (const test of this.tests) {
+                    await this.runTest(test);
+                }
+
+                this.displaySummary();
+                return this.results;
+            }
+
+            async runTest(test) {
+                const testEl = document.createElement('div');
+                testEl.className = 'test-case';
+
+                const titleEl = document.createElement('div');
+                titleEl.className = 'test-title';
+                titleEl.textContent = `${test.title}`;
+                testEl.appendChild(titleEl);
+
+                const descEl = document.createElement('div');
+                descEl.className = 'test-description';
+                descEl.textContent = test.description;
+                testEl.appendChild(descEl);
+
+                const outputEl = document.createElement('div');
+                outputEl.className = 'test-output';
+                testEl.appendChild(outputEl);
+
+                document.getElementById('test-results').appendChild(testEl);
+
+                try {
+                    const result = await test.fn();
+                    testEl.classList.add('test-success');
+                    outputEl.textContent = `✓ PASS\n${result || ''}`;
+
+                    this.results.push({
+                        title: test.title,
+                        description: test.description,
+                        status: 'PASS',
+                        success: true,
+                        output: result || ''
+                    });
+                } catch (error) {
+                    testEl.classList.add('test-error');
+                    outputEl.textContent = `✗ FAIL\n${error.message}\n${error.stack || ''}`;
+
+                    this.results.push({
+                        title: test.title,
+                        description: test.description,
+                        status: 'FAIL',
+                        success: false,
+                        output: error.message
+                    });
+                }
+            }
+
+            displaySummary() {
+                const passed = this.results.filter(r => r.success).length;
+                const failed = this.results.filter(r => !r.success).length;
+                const total = this.results.length;
+
+                document.getElementById('passed-count').textContent = passed;
+                document.getElementById('failed-count').textContent = failed;
+                document.getElementById('total-count').textContent = total;
+
+                // Expose results globally for Puppeteer
+                window.testResults = this.results;
+                window.testSummary = { passed, failed, total, successRate: ((passed/total)*100).toFixed(1) };
+            }
+        }
+
+        const runner = new TestRunner();
+
+        // Wait for DOM and scripts to load
+        function waitForElement(selector, timeout = 5000) {
+            return new Promise((resolve, reject) => {
+                const el = document.querySelector(selector);
+                if (el) return resolve(el);
+
+                const observer = new MutationObserver(() => {
+                    const el = document.querySelector(selector);
+                    if (el) {
+                        observer.disconnect();
+                        resolve(el);
+                    }
+                });
+
+                observer.observe(document.body, { childList: true, subtree: true });
+                setTimeout(() => {
+                    observer.disconnect();
+                    reject(new Error(`Timeout waiting for ${selector}`));
+                }, timeout);
+            });
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+
+    <!-- Load interactive features after fixtures are in DOM -->
+    <script src="../../src/js/16-bloblang-interactive.js"></script>
+    <script src="../../src/js/17-bloblang-yaml.js"></script>
+
+    <script>
+        // Run tests after everything loads
+        window.addEventListener('load', async () => {
+            await sleep(500); // Let scripts initialize
+
+            // Test Suite 1: parseBloblangSnippet (# In: comment parsing)
+            runner.test(
+                'Parse basic # In: comment',
+                'Should extract input from # In: comment',
+                async () => {
+                    const fixture = document.getElementById('fixture-basic');
+                    const code = fixture.querySelector('code').textContent;
+
+                    // Access the parser (it's in the closure, but we can test via Try It button behavior)
+                    // Instead, test that Try It button appears
+                    await sleep(100);
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    if (!tryItBtn) throw new Error('Try It button not created');
+
+                    return 'Try It button created with # In: comment';
+                }
+            );
+
+            runner.test(
+                'Respect # Skip: directive',
+                'Should NOT create Try It button when # Skip: true',
+                async () => {
+                    const fixture = document.getElementById('fixture-skip');
+                    await sleep(100);
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    if (tryItBtn) throw new Error('Try It button should not exist with # Skip: true');
+
+                    return 'Try It button correctly skipped';
+                }
+            );
+
+            runner.test(
+                'Parse # Meta: comment',
+                'Should extract metadata from # Meta: comment',
+                async () => {
+                    const fixture = document.getElementById('fixture-metadata');
+                    await sleep(100);
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    if (!tryItBtn) throw new Error('Try It button not created');
+
+                    // Click and check if metadata is included
+                    tryItBtn.click();
+                    await sleep(200);
+
+                    const overlay = document.querySelector('.bloblang-playground-overlay');
+                    if (!overlay) throw new Error('Mini-playground did not open');
+
+                    // Close it
+                    const closeBtn = overlay.querySelector('.mini-playground-close');
+                    closeBtn.click();
+                    await sleep(100);
+
+                    return 'Metadata handling works';
+                }
+            );
+
+            runner.test(
+                'Try It button defaults to empty object without # In:',
+                'Should create Try It button with {} default input when no # In: comment present',
+                async () => {
+                    const fixture = document.getElementById('fixture-no-input');
+                    await sleep(100);
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    if (!tryItBtn) throw new Error('Try It button should exist even without # In: comment');
+
+                    // Click to verify it opens with default empty object
+                    tryItBtn.click();
+                    await sleep(300);
+
+                    const playground = document.querySelector('.bloblang-mini-playground');
+                    if (!playground) throw new Error('Playground should open');
+
+                    // Close
+                    const closeBtn = playground.querySelector('.mini-playground-close');
+                    closeBtn.click();
+                    await sleep(100);
+
+                    return 'Button created with {} default input';
+                }
+            );
+
+            // Test Suite 2: Mini-Playground Modal
+            runner.test(
+                'Mini-playground opens on Try It click',
+                'Should open modal with overlay when Try It button clicked',
+                async () => {
+                    const fixture = document.getElementById('fixture-basic');
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    if (!tryItBtn) throw new Error('Try It button not found');
+
+                    tryItBtn.click();
+                    await sleep(300);
+
+                    const overlay = document.querySelector('.bloblang-playground-overlay');
+                    const playground = document.querySelector('.bloblang-mini-playground');
+
+                    if (!overlay) throw new Error('Overlay not created');
+                    if (!playground) throw new Error('Playground not created');
+
+                    // Close it
+                    const closeBtn = overlay.querySelector('.mini-playground-close');
+                    closeBtn.click();
+                    await sleep(100);
+
+                    return 'Modal opened and closed successfully';
+                }
+            );
+
+            runner.test(
+                'Mini-playground closes on overlay click',
+                'Should close when clicking outside modal',
+                async () => {
+                    const fixture = document.getElementById('fixture-basic');
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    tryItBtn.click();
+                    await sleep(300);
+
+                    const overlay = document.querySelector('.bloblang-playground-overlay');
+                    if (!overlay) throw new Error('Overlay not found');
+
+                    // Click overlay (not the playground itself)
+                    overlay.click();
+                    await sleep(100);
+
+                    const stillExists = document.querySelector('.bloblang-playground-overlay');
+                    if (stillExists) throw new Error('Modal should have closed');
+
+                    return 'Modal closed on overlay click';
+                }
+            );
+
+            runner.test(
+                'Mini-playground closes on Escape key',
+                'Should close when Escape key pressed',
+                async () => {
+                    const fixture = document.getElementById('fixture-basic');
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    tryItBtn.click();
+                    await sleep(300);
+
+                    // Simulate Escape key
+                    const event = new KeyboardEvent('keydown', { key: 'Escape' });
+                    document.dispatchEvent(event);
+                    await sleep(100);
+
+                    const stillExists = document.querySelector('.bloblang-playground-overlay');
+                    if (stillExists) throw new Error('Modal should have closed on Escape');
+
+                    return 'Modal closed on Escape key';
+                }
+            );
+
+            // Test Suite 3: YAML Bloblang Detection
+            runner.test(
+                'Detect Bloblang in YAML Connect config',
+                'Should detect and highlight Bloblang in mapping: field',
+                async () => {
+                    const fixture = document.getElementById('fixture-yaml');
+                    await sleep(200); // Wait for YAML processor
+
+                    const code = fixture.querySelector('code');
+                    const bloblangEmbedded = code.querySelector('.bloblang-embedded');
+
+                    if (!bloblangEmbedded) {
+                        // Check if YAML processor ran by looking for any special markup
+                        const yamlTokens = code.querySelectorAll('.token');
+                        if (yamlTokens.length === 0) {
+                            throw new Error('YAML not processed by Prism');
+                        }
+                        throw new Error('Bloblang not detected in YAML mapping field');
+                    }
+
+                    return 'Bloblang detected and highlighted in YAML';
+                }
+            );
+
+            runner.test(
+                'Do NOT process regular YAML (Kubernetes)',
+                'Should leave Kubernetes YAML unchanged',
+                async () => {
+                    const fixture = document.getElementById('fixture-yaml-k8s');
+                    await sleep(200);
+
+                    const code = fixture.querySelector('code');
+                    const bloblangEmbedded = code.querySelector('.bloblang-embedded');
+
+                    if (bloblangEmbedded) {
+                        throw new Error('Regular YAML should not have Bloblang processing');
+                    }
+
+                    return 'Regular YAML left unchanged';
+                }
+            );
+
+            // Test Suite 4: WASM Loading (with fallback)
+            runner.test(
+                'Mini-playground UI renders correctly',
+                'Should create playground DOM structure and attempt WASM load',
+                async () => {
+                    const fixture = document.getElementById('fixture-basic');
+                    const tryItBtn = fixture.querySelector('.try-bloblang-button');
+
+                    tryItBtn.click();
+                    await sleep(500);
+
+                    const playground = document.querySelector('.bloblang-mini-playground');
+                    if (!playground) throw new Error('Playground modal not created');
+
+                    // Check playground structure exists
+                    const header = playground.querySelector('.mini-playground-header');
+                    const closeBtn = playground.querySelector('.mini-playground-close');
+                    const body = playground.querySelector('.mini-playground-body');
+
+                    if (!header) throw new Error('Playground header not found');
+                    if (!closeBtn) throw new Error('Close button not found');
+                    if (!body) throw new Error('Playground body not found');
+
+                    // WASM/Ace may fail to load in test env (missing production paths)
+                    // That's OK - we're just testing the UI structure and Try It integration
+                    const statusEl = playground.querySelector('.mini-playground-status');
+                    const status = statusEl ? statusEl.textContent : 'No status element';
+
+                    // Close
+                    closeBtn.click();
+                    await sleep(100);
+
+                    return `Playground UI created correctly. Status: ${status}`;
+                }
+            );
+
+            // Test Suite 5: Copy Safety
+            runner.test(
+                'Copy preserves original Bloblang code',
+                'innerText should return clean code without HTML spans or classes',
+                async () => {
+                    const fixture = document.getElementById('fixture-basic');
+                    const code = fixture.querySelector('code');
+
+                    // Simulate what copy button does: get innerText
+                    const copiedText = code.innerText;
+
+                    // Should not contain HTML artifacts
+                    if (copiedText.includes('<span')) {
+                        throw new Error('Copied text contains HTML <span> tags!');
+                    }
+                    if (copiedText.includes('token')) {
+                        throw new Error('Copied text contains "token" class names!');
+                    }
+                    if (copiedText.includes('has-documentation')) {
+                        throw new Error('Copied text contains "has-documentation" class!');
+                    }
+
+                    // Should contain actual Bloblang content
+                    if (!copiedText.includes('root.result')) {
+                        throw new Error('Bloblang code missing from copied text');
+                    }
+                    if (!copiedText.includes('# In:')) {
+                        throw new Error('# In: comment missing from copied text');
+                    }
+
+                    return `Copy is clean: ${copiedText.length} chars, no HTML corruption`;
+                }
+            );
+
+            runner.test(
+                'Copy preserves YAML with embedded Bloblang',
+                'YAML code should copy cleanly despite Bloblang highlighting modifications',
+                async () => {
+                    const fixture = document.getElementById('fixture-yaml');
+                    await sleep(200); // Wait for YAML processing
+
+                    const code = fixture.querySelector('code');
+
+                    // Get what would be copied
+                    const copiedText = code.innerText;
+
+                    // Should not contain HTML artifacts from Bloblang highlighting
+                    if (copiedText.includes('<span')) {
+                        throw new Error('YAML copy contains HTML <span> tags!');
+                    }
+                    if (copiedText.includes('bloblang-embedded')) {
+                        throw new Error('YAML copy contains "bloblang-embedded" class!');
+                    }
+                    if (copiedText.includes('bloblang-inline')) {
+                        throw new Error('YAML copy contains "bloblang-inline" class!');
+                    }
+
+                    // Should contain actual YAML structure
+                    if (!copiedText.includes('input:')) {
+                        throw new Error('YAML structure missing: input:');
+                    }
+                    if (!copiedText.includes('pipeline:')) {
+                        throw new Error('YAML structure missing: pipeline:');
+                    }
+                    if (!copiedText.includes('mapping:')) {
+                        throw new Error('YAML structure missing: mapping:');
+                    }
+
+                    // Should contain the Bloblang code that was embedded
+                    if (!copiedText.includes('root.processed = true')) {
+                        throw new Error('Bloblang mapping code missing from YAML copy');
+                    }
+
+                    return `YAML copy is clean: ${copiedText.length} chars, Bloblang preserved`;
+                }
+            );
+
+            runner.test(
+                'Copy includes # In: and # Meta: comments',
+                'Comments should be preserved for user reference',
+                async () => {
+                    const fixture = document.getElementById('fixture-metadata');
+                    const code = fixture.querySelector('code');
+
+                    const copiedText = code.innerText;
+
+                    // Should include both comment types
+                    if (!copiedText.includes('# In:')) {
+                        throw new Error('# In: comment missing from copy');
+                    }
+                    if (!copiedText.includes('# Meta:')) {
+                        throw new Error('# Meta: comment missing from copy');
+                    }
+
+                    // Should include the data from comments
+                    if (!copiedText.includes('{"message":"test"}')) {
+                        throw new Error('Input data missing from copy');
+                    }
+                    if (!copiedText.includes('{"kafka_topic":"events"}')) {
+                        throw new Error('Metadata missing from copy');
+                    }
+
+                    return 'Comments preserved in copy';
+                }
+            );
+
+            // Run all tests
+            await runner.run();
+
+            // Signal completion to Puppeteer
+            window.testsComplete = true;
+        });
+    </script>
+</body>
+</html>

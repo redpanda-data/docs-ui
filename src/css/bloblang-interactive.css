@@ -12,6 +12,12 @@
   outline: none;
 }
 
+.has-documentation:focus-visible {
+  outline: 2px solid var(--link-color, #005cc5);
+  outline-offset: 2px;
+  border-bottom-style: solid;
+}
+
 /* Tippy theme for Bloblang docs */
 .tippy-box[data-theme~='bloblang-doc'] {
   background-color: var(--panel-background, #fff);
@@ -268,6 +274,13 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bloblang-playground-overlay,
+  .bloblang-mini-playground {
+    animation: none;
   }
 }
 

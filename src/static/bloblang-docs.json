@@ -17,14 +17,10 @@
       "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#now"
     },
     "timestamp_unix": {
-      "signature": "timestamp_unix(format: string, value: string)",
-      "description": "Parses a timestamp string using a format and returns Unix timestamp.",
+      "signature": "timestamp_unix()",
+      "description": "Returns the current Unix timestamp in seconds.",
       "returns": "number",
-      "parameters": [
-        {"name": "format", "type": "string", "description": "The time format layout"},
-        {"name": "value", "type": "string", "description": "The timestamp string to parse"}
-      ],
-      "example": "root.ts = timestamp_unix(\"2006-01-02\", \"2023-02-01\")",
+      "example": "root.ts = timestamp_unix()",
       "category": "time",
       "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#timestamp_unix"
     },

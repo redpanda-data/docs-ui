@@ -653,7 +653,12 @@
                 if (!response.ok) {
                   throw new Error('HTTP ' + response.status);
                 }
-                return WebAssembly.instantiateStreaming(response, go.importObject);
+                const responseClone = response.clone();
+                return WebAssembly.instantiateStreaming(response, go.importObject)
+                  .catch(async () => {
+                    const bytes = await responseClone.arrayBuffer();
+                    return WebAssembly.instantiate(bytes, go.importObject);
+                  });
               })
               .then((result) => {
                 go.run(result.instance);
