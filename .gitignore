@@ -6,3 +6,4 @@ blobl.wasm
 src/static/*
 !src/static/bloblang-docs.json
 test-results.*
+test-results-*.*
