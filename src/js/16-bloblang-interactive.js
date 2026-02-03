@@ -909,7 +909,9 @@
           let formattedResult = result;
           try {
             const parsed = JSON.parse(result);
-            formattedResult = JSON.stringify(parsed, null, 2);
+            // Extract .msg field like main playground does
+            const message = parsed.msg !== undefined ? parsed.msg : parsed;
+            formattedResult = JSON.stringify(message, null, 2);
           } catch {
             // Not JSON, use as-is
           }
