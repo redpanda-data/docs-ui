@@ -1,21 +1,33 @@
-name: Bloblang Playground Tests
+name: Bloblang Tests
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
     paths:
       - 'blobl-editor/**'
       - 'src/static/blobl.wasm'
       - 'src/js/vendor/wasm_exec.js'
+      - 'src/js/16-bloblang-interactive.js'
+      - 'src/js/17-bloblang-yaml.js'
+      - 'src/css/bloblang-interactive.css'
+      - 'src/static/bloblang-docs.json'
       - 'tests/bloblang-playground/**'
+      - 'tests/bloblang-interactive/**'
       - 'gulpfile.js'
+      - '.github/workflows/test-bloblang-playground.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
     paths:
       - 'blobl-editor/**'
       - 'src/static/blobl.wasm'
       - 'src/js/vendor/wasm_exec.js'
+      - 'src/js/16-bloblang-interactive.js'
+      - 'src/js/17-bloblang-yaml.js'
+      - 'src/css/bloblang-interactive.css'
+      - 'src/static/bloblang-docs.json'
       - 'tests/bloblang-playground/**'
+      - 'tests/bloblang-interactive/**'
       - 'gulpfile.js'
+      - '.github/workflows/test-bloblang-playground.yml'
   workflow_dispatch:
 jobs:
   test-bloblang-playground:
@@ -52,12 +64,20 @@ jobs:
       env:
         GOOS: js
         GOARCH: wasm
-    - name: Build and Test
+    - name: Build and Test Playground
       run: npx gulp test:build
-    - name: Upload test results
+    - name: Test Interactive Features
+      run: npm run test:interactive
+    - name: Upload playground test results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results
+        name: test-results-playground
         path: test-results.json
+    - name: Upload interactive test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-interactive
+        path: test-results-interactive.json
 

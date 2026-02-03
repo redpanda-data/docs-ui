@@ -18,6 +18,7 @@ const { reload: livereload } = process.env.LIVERELOAD === 'true' ? require('gulp
 const serverConfig = { host: '0.0.0.0', port: 5252, livereload }
 
 const task = require('./gulp.d/tasks')
+const generateBloblangGrammar = require('./gulp.d/tasks/generate-bloblang-grammar')
 const glob = {
   all: [srcDir, previewSrcDir],
   css: `${srcDir}/css/**/*.css`,
@@ -100,6 +101,12 @@ const buildTask = createTask({
   ),
 })
 
+const generateBloblangGrammarTask = createTask({
+  name: 'generate:bloblang-grammar',
+  desc: 'Generate Prism Bloblang grammar from Connect JSON',
+  call: generateBloblangGrammar(path.join(__dirname, srcDir, 'js', 'vendor', 'prism', 'prism-bloblang.js')),
+})
+
 const buildWasmTask = createTask({
   name: 'build:wasm',
   desc: 'Build the WebAssembly (.wasm) file using Go and the go.mod in blobl-editor/wasm',
@@ -130,7 +137,7 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, buildWasmTask, bundleReactTask, compileWidgets, buildTask),
+  call: series(cleanTask, lintTask, generateBloblangGrammarTask, buildWasmTask, bundleReactTask, compileWidgets, buildTask),
 })
 
 const bundlePackTask = createTask({
@@ -212,6 +219,7 @@ module.exports = exportTasks(
   cleanTask,
   lintTask,
   formatTask,
+  generateBloblangGrammarTask,
   buildWasmTask,
   bundleReactTask,
   buildTask,
