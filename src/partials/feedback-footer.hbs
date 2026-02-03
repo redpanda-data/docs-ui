@@ -26,6 +26,11 @@ var modal = document.getElementById("contributors-modal");
 
 function handleModal(event) {
   event.preventDefault();
+  // Move modal to body to escape containment context (contain: layout/content)
+  // which breaks position: fixed relative to viewport
+  if (modal.parentElement !== document.body) {
+    document.body.appendChild(modal);
+  }
   modal.classList.toggle('hidden');
   return false;
 }
