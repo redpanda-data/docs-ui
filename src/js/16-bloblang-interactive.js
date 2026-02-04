@@ -621,13 +621,13 @@
     wasmLoading = true;
 
     // WASM path varies by build type:
+    // - Production/Netlify: /blobl.wasm (site root) - try first to avoid 404 in console
     // - UI Preview (local dev): /_/blobl.wasm
-    // - Production/Netlify: /blobl.wasm (site root)
     const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
     const siteRoot = typeof siteRootPath !== 'undefined' ? siteRootPath : '';
     const wasmPaths = [
-      rootPath + '/blobl.wasm',
-      siteRoot + '/blobl.wasm'
+      siteRoot + '/blobl.wasm',
+      rootPath + '/blobl.wasm'
     ];
 
     wasmLoadPromise = new Promise((resolve, reject) => {
