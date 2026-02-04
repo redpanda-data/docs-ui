@@ -111,19 +111,27 @@
   border-radius: 4px;
 }
 
-/* Main container setup - CSS Grid for aligned columns */
+/* Main container setup - horizontal flow on desktop, vertical on mobile */
 .bloblang-playground .playground-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto;
-  gap: 20px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
   font-family: var(--body-font-family);
-  align-items: stretch;
 }
 
-/* Editor section (left side) */
+/* Responsive: switch to vertical layout on smaller screens */
+@media (max-width: 1024px) {
+  .bloblang-playground .playground-container {
+    flex-direction: column;
+  }
+}
+
+/* Editor sections - vertical flow */
 .bloblang-playground .editors {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   color: var(--code-font-color);
 }
 
@@ -317,35 +325,11 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   color: var(--body-font-color);
 }
 
-/* Editor container */
+/* Editor container - vertical layout */
 .bloblang-playground .editor-container {
-  display: contents;
-}
-
-/* Grid placement for aligned editors */
-.bloblang-playground .editor-container-input > .editor-section-always-open:first-child {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.bloblang-playground .editor-container-input > .editor-section-collapsible {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-.bloblang-playground .editor-container-input > .editor-section-always-open:last-child {
-  grid-column: 1;
-  grid-row: 3;
-}
-
-.bloblang-playground .editor-container-output > .editor-section-always-open {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.bloblang-playground .editor-container-output > .editor-section-collapsible {
-  grid-column: 2;
-  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Tab style for sections */
@@ -362,6 +346,51 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   transition: box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+/* Flow arrow divider between input/mapping and output */
+.bloblang-playground .flow-arrow {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .bloblang-playground .flow-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-basis: 100%;
+    padding: 8px 0;
+  }
+
+  .bloblang-playground .flow-arrow-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--link-highlight-color, #5865f2);
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Desktop layout: Input and Mapping side by side, Output below */
+@media (min-width: 1025px) {
+  /* Input and Mapping take half width each */
+  .bloblang-playground .playground-container > .editor-section-always-open:nth-child(1),
+  .bloblang-playground .playground-container > .editor-section-always-open:nth-child(2) {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  /* Output takes full width below (4th child after flow-arrow) */
+  .bloblang-playground .playground-container > .editor-section-always-open:nth-child(4) {
+    flex-basis: 100%;
+  }
 }
 
 .bloblang-playground .editor-section-always-open:hover {
@@ -406,22 +435,63 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   color: var(--body-font-color);
 }
 
-/* Output column visual separator - applied to output sections */
-.bloblang-playground .editor-container-output > .editor-section-always-open,
-.bloblang-playground .editor-container-output > .editor-section-collapsible {
-  position: relative;
-  padding-left: 16px;
+/* Output section */
+.bloblang-playground .output-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.bloblang-playground .editor-container-output > .editor-section-always-open::before,
-.bloblang-playground .editor-container-output > .editor-section-collapsible::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(204, 204, 204, 0.15);
+/* Advanced options panel - contains metadata fields */
+.bloblang-playground .advanced-options {
+  margin-top: 8px;
+  width: 100%;
+  flex-basis: 100%;
+}
+
+.bloblang-playground .advanced-options-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--body-background);
+  border: 1px solid rgba(204, 204, 204, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--body-font-color);
+  width: 100%;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.bloblang-playground .advanced-options-toggle:hover {
+  background: rgba(68, 76, 231, 0.04);
+  border-color: rgba(128, 152, 249, 0.4);
+}
+
+.bloblang-playground .advanced-options-toggle .toggle-icon {
+  transition: transform 0.2s ease;
+  font-size: 12px;
+  color: var(--body-font-color);
+  opacity: 0.6;
+}
+
+.bloblang-playground .advanced-options[open] .toggle-icon {
+  transform: rotate(90deg);
+}
+
+.bloblang-playground .advanced-options-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .bloblang-playground .advanced-options-content {
+    grid-template-columns: 1fr;
+  }
 }
 
 .bloblang-playground .editor-section-collapsible {
@@ -528,11 +598,6 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   flex: 1;
 }
 
-/* Output section (right side) */
-.bloblang-playground .output-section {
-  display: contents;
-}
-
 .bloblang-playground #ace-input-metadata {
   min-height: unset;
 }
@@ -601,46 +666,12 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     flex: 100% !important;
   }
 
-  /* Stack to single column on mobile */
-  .bloblang-playground .playground-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-    gap: 16px;
-  }
-
-  /* Reset grid placement for single column */
-  .bloblang-playground .editor-container-input > .editor-section-always-open:first-child,
-  .bloblang-playground .editor-container-input > .editor-section-collapsible,
-  .bloblang-playground .editor-container-input > .editor-section-always-open:last-child,
-  .bloblang-playground .editor-container-output > .editor-section-always-open,
-  .bloblang-playground .editor-container-output > .editor-section-collapsible {
-    grid-column: 1;
-    grid-row: auto;
-  }
-
   .bloblang-playground .doc {
     margin-right: unset;
   }
 
   .bloblang-snippet .row {
     flex-direction: column;
-  }
-
-  /* Adjust output section separator for mobile */
-  .bloblang-playground .editor-container-output > .editor-section-always-open,
-  .bloblang-playground .editor-container-output > .editor-section-collapsible {
-    padding-left: 0;
-    padding-top: 16px;
-  }
-
-  .bloblang-playground .editor-container-output > .editor-section-always-open::before,
-  .bloblang-playground .editor-container-output > .editor-section-collapsible::before {
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: auto;
-    width: auto;
-    height: 4px;
   }
 }
 
