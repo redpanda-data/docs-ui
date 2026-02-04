@@ -134,7 +134,7 @@
       const data = await response.json();
       return data;
     } catch (e) {
-      console.log(`Failed to fetch Connect ${version}:`, e);
+      // Silent fail - expected when trying fallback versions
       return null;
     }
   }
@@ -257,7 +257,7 @@
         }
       }
     } catch (e) {
-      console.log('Could not fetch Connect version from antora.yml', e);
+      // Silent fail - will use fallback versions
     }
 
     return null;
@@ -299,15 +299,13 @@
       // Transform data to our format
       if (data) {
         bloblangDocs = transformConnectData(data);
-        console.log(`Loaded ${Object.keys(bloblangDocs.functions).length} functions and ${Object.keys(bloblangDocs.methods).length} methods`);
       } else {
         // Fallback to static file if available
         try {
           const response = await fetch(uiRootPath + '/bloblang-docs.json');
           bloblangDocs = await response.json();
-          console.log('Loaded fallback static documentation');
         } catch (err) {
-          console.warn('Could not load any Bloblang documentation');
+          // No documentation available - tooltips will be disabled
           bloblangDocs = { functions: {}, methods: {} };
         }
       }
@@ -322,7 +320,7 @@
 
       return bloblangDocs;
     } catch (error) {
-      console.error('Failed to load Bloblang documentation:', error);
+      // Unexpected error - tooltips will be disabled
       docsLoading = false;
       bloblangDocs = { functions: {}, methods: {} };
 
