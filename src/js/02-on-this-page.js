@@ -115,7 +115,9 @@
   function onScroll () {
     var scrolledBy = window.scrollY
     var buffer = getNumericStyleVal(document.documentElement, 'fontSize') * 1.15
-    var ceil = article.offsetTop
+    // Account for sticky header height - use scroll-padding-top or fall back to article offset
+    var scrollPadding = getNumericStyleVal(document.documentElement, 'scrollPaddingTop') || 0
+    var ceil = scrollPadding || article.offsetTop
     if (scrolledBy && window.innerHeight + scrolledBy + 2 >= document.documentElement.scrollHeight) {
       lastActiveFragment = Array.isArray(lastActiveFragment) ? lastActiveFragment : Array(lastActiveFragment || 0)
       var activeFragments = []

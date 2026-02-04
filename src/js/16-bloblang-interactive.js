@@ -532,6 +532,11 @@
       openBloblangPlayground(mapping, inputData, metadata);
     });
 
+    // Preload WASM and scripts on hover for faster "Try It" experience
+    button.addEventListener('mouseenter', () => {
+      loadRequiredScripts().then(() => loadBloblangWasm());
+    }, { once: true });
+
     // Add to toolbox
     toolbox.appendChild(button);
 

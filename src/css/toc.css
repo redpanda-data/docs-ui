@@ -104,7 +104,7 @@
   }
 
   .toc.sidebar {
-    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
+    top: calc(var(--navbar-height) + var(--announcement-bar-height--desktop) + 1rem);
   }
 }
 
@@ -176,9 +176,10 @@
   text-overflow: ellipsis;
   flex: 0 0 var(--toc-width);
   word-wrap: break-word;
-  top: calc(var(--navbar-height) + var(--announcement-bar-height));
+  top: calc(var(--navbar-height) + var(--announcement-bar-height) + 1rem);
   /* Reserve space for TOC to prevent CLS when JavaScript populates it */
   min-width: var(--toc-width);
+  margin-right: 1rem;
 }
 
 /* Reserve space for TOC menu before JavaScript populates it */

@@ -1,0 +1,407 @@
+/* Connect Tools FAB Styles */
+/* FAB is mobile-only; desktop uses TOC section */
+
+/* Base container - hidden by default */
+.connect-tools-fab {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  z-index: 100;
+  display: none;
+}
+
+/* Only show on mobile when visible */
+@media screen and (max-width: 1023px) {
+  .connect-tools-fab.is-visible {
+    display: block;
+  }
+}
+
+/* Desktop: always hidden */
+@media screen and (min-width: 1024px) {
+  .connect-tools-fab {
+    display: none !important;
+  }
+}
+
+/* Main FAB trigger button (mobile-sized since FAB is mobile-only) */
+.connect-tools-fab-trigger {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--link-highlight-color);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(68, 76, 231, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  color: white;
+  position: relative;
+}
+
+.connect-tools-fab-trigger svg {
+  width: 20px;
+  height: 20px;
+}
+
+.connect-tools-fab-trigger:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(68, 76, 231, 0.4);
+}
+
+.connect-tools-fab-trigger:focus-visible {
+  outline: 3px solid var(--link-highlight-color);
+  outline-offset: 3px;
+}
+
+/* Icon states */
+.connect-tools-fab-trigger .fab-icon-close {
+  display: none;
+}
+
+.connect-tools-fab.is-expanded .connect-tools-fab-trigger .fab-icon-tools {
+  display: none;
+}
+
+.connect-tools-fab.is-expanded .connect-tools-fab-trigger .fab-icon-close {
+  display: block;
+}
+
+.connect-tools-fab.is-expanded .connect-tools-fab-trigger {
+  background: var(--color-gray-50);
+  color: var(--body-font-color);
+}
+
+/* First-time highlight animation */
+.connect-tools-fab.is-first-time .connect-tools-fab-trigger {
+  animation: fab-pulse 2s ease-in-out infinite;
+}
+
+@keyframes fab-pulse {
+  0%,
+  100% {
+    box-shadow: 0 4px 12px rgba(68, 76, 231, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 4px 24px rgba(68, 76, 231, 0.6), 0 0 0 8px rgba(68, 76, 231, 0.15);
+  }
+}
+
+/* First-time tooltip */
+.connect-tools-fab-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  right: 0;
+  background: var(--tooltip-background);
+  color: var(--tooltip-font-color);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: none;
+  align-items: center;
+  gap: 8px;
+  animation: tooltip-fade-in 0.3s ease;
+}
+
+.connect-tools-fab.is-first-time .connect-tools-fab-tooltip {
+  display: flex;
+}
+
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.connect-tools-fab-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: var(--tooltip-background);
+  transform: rotate(45deg);
+}
+
+.tooltip-dismiss {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  opacity: 0.7;
+  padding: 0;
+}
+
+.tooltip-dismiss:hover {
+  opacity: 1;
+}
+
+/* Expanded menu */
+.connect-tools-menu {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  right: 0;
+  background: var(--body-background);
+  border: 1px solid var(--panel-border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
+  transform-origin: bottom right;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.connect-tools-fab.is-expanded .connect-tools-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* Menu items */
+.connect-tools-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  color: var(--body-font-color);
+  transition: background-color 0.15s ease;
+}
+
+.connect-tools-menu-item:hover {
+  background: var(--link-highlight-background-color);
+}
+
+.connect-tools-menu-item:focus-visible {
+  outline: 2px solid var(--link-highlight-color);
+  outline-offset: -2px;
+}
+
+.menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--link-highlight-background-color);
+  border-radius: 8px;
+  color: var(--link-highlight-color);
+  flex-shrink: 0;
+}
+
+.menu-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-item-title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--body-font-color);
+}
+
+.menu-item-desc {
+  font-size: 0.8125rem;
+  color: var(--body-faint-font-color);
+}
+
+/* Dark mode */
+html[data-theme="dark"] .connect-tools-fab-trigger {
+  box-shadow: 0 4px 12px rgba(145, 132, 241, 0.3);
+}
+
+html[data-theme="dark"] .connect-tools-fab-trigger:hover {
+  box-shadow: 0 6px 16px rgba(145, 132, 241, 0.4);
+}
+
+html[data-theme="dark"] .connect-tools-fab.is-first-time .connect-tools-fab-trigger {
+  animation: fab-pulse-dark 2s ease-in-out infinite;
+}
+
+@keyframes fab-pulse-dark {
+  0%,
+  100% {
+    box-shadow: 0 4px 12px rgba(145, 132, 241, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 4px 24px rgba(145, 132, 241, 0.5), 0 0 0 8px rgba(145, 132, 241, 0.15);
+  }
+}
+
+html[data-theme="dark"] .connect-tools-fab.is-expanded .connect-tools-fab-trigger {
+  background: var(--color-gray-50);
+}
+
+html[data-theme="dark"] .connect-tools-menu {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode scrollbar for TOC */
+html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu {
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Small mobile - position FAB away from thumb zone */
+@media screen and (max-width: 480px) {
+  .connect-tools-fab {
+    bottom: 90px;
+    right: 12px;
+  }
+
+  .connect-tools-menu {
+    right: -8px;
+    min-width: 200px;
+  }
+}
+
+/* ============================================
+   TOC Connect Tools Section (Desktop)
+   ============================================ */
+
+/* When Connect Tools is visible, restructure TOC as flex column */
+.toc.sidebar.has-connect-tools {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--navbar-height) - var(--announcement-bar-height) - 3rem);
+}
+
+/* Make toc-menu scrollable when Connect Tools is visible */
+.toc.sidebar.has-connect-tools .toc-menu {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* Allow shrinking below min-height */
+  padding-right: 10px; /* Space for scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)) transparent;
+}
+
+.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2));
+  border-radius: 3px;
+}
+
+.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-color, rgba(0, 0, 0, 0.35));
+}
+
+/* Keep everything after toc-menu at the bottom */
+.toc.sidebar.has-connect-tools .toc-connect-tools,
+.toc.sidebar.has-connect-tools .thumbs {
+  flex-shrink: 0;
+}
+
+.toc.sidebar.has-connect-tools .thumbs {
+  margin-top: 1rem;
+  padding: 0;
+}
+
+.toc-connect-tools {
+  display: none;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--toc-border-color);
+}
+
+.toc-connect-tools.is-visible {
+  display: block;
+}
+
+.toc-connect-tools h4 {
+  color: var(--toc-heading-font-color);
+  font-size: var(--secondary-font-size);
+  font-family: var(--body-font-family-bold);
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+}
+
+.toc-connect-tools-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-connect-tools-list li {
+  margin: 0;
+}
+
+.toc-connect-tools-list a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  color: var(--toc-font-color);
+  text-decoration: none;
+  font-size: var(--secondary-font-size);
+  border-left: none;
+}
+
+.toc-connect-tools-list a:hover {
+  color: var(--link-highlight-color);
+}
+
+.toc-connect-tools-list svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+/* Hide TOC section on mobile (use FAB instead) */
+@media screen and (max-width: 1023px) {
+  .toc-connect-tools {
+    display: none !important;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .connect-tools-fab-trigger,
+  .connect-tools-menu,
+  .connect-tools-fab-tooltip {
+    animation: none;
+    transition: none;
+  }
+
+  .connect-tools-fab.is-first-time .connect-tools-fab-trigger {
+    animation: none;
+    box-shadow: 0 4px 24px rgba(68, 76, 231, 0.5), 0 0 0 4px rgba(68, 76, 231, 0.2);
+  }
+}

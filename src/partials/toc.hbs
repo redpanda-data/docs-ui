@@ -11,6 +11,31 @@
     {{/if}}
   </div>
   <div class="toc-menu"></div>
+  {{!-- Connect Tools section - fixed at bottom of TOC, populated by JS on Connect pages --}}
+  <div class="toc-connect-tools" id="toc-connect-tools">
+    <h4>Connect Tools</h4>
+    <ul class="toc-connect-tools-list">
+      <li>
+        <a href="{{{siteRootPath}}}/redpanda-connect/guides/bloblang/playground/">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          Bloblang Playground
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/redpanda-data/connect/blob/main/.claude-plugin/README.md" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+          Claude AI Skills
+        </a>
+      </li>
+    </ul>
+  </div>
   <div class="thumbs">
     <ul style="list-style:none">
       {{#each page.attributes.additional-resources}}
