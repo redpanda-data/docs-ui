@@ -201,11 +201,18 @@ For more details about this bundle and for the source code, see https://github.c
       <div class="editor-section editor-section-always-open">
         <div class="editor-header">
           <div class="editor-header-content">
-            <h4>Output <span class="editor-help-icon" data-tippy-content="Transformed result">ⓘ</span></h4>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h4>Output <span class="editor-help-icon" data-tippy-content="Transformed result">ⓘ</span></h4>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; min-height: 22px;">
+              <span style="visibility: hidden;">&nbsp;</span>
+            </div>
           </div>
-          <button id="copy-output" class="copy-output-button" data-tippy-content="Copy output to clipboard" aria-label="Copy output">
-            Copy
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button id="copy-output" class="copy-output-button" data-tippy-content="Copy output to clipboard" aria-label="Copy output">
+              Copy
+            </button>
+          </div>
         </div>
         <div class="editor editor-output" id="ace-output" role="log" aria-label="Output result" aria-live="polite">Output will appear here...</div>
       </div>
