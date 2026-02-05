@@ -1,6 +1,7 @@
 .bloblang-playground .doc {
   max-width: unset;
   margin-right: 48px;
+  overflow-x: hidden;
 }
 
 /* Form */
@@ -37,6 +38,19 @@
   gap: 6px;
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+/* Smaller Ask AI button when in editor header to fit within constrained height */
+.bloblang-playground .editor-header-content .custom-ai-help-button {
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+  gap: 4px;
+}
+
+.bloblang-playground .editor-header-content .custom-ai-help-button svg {
+  width: 12px;
+  height: 12px;
 }
 
 .bloblang-playground .custom-ai-help-button:hover {
@@ -98,22 +112,30 @@
   border-radius: 4px;
 }
 
-/* Main container setup */
+/* Main container setup - horizontal flow on desktop, vertical on mobile */
 .bloblang-playground .playground-container {
   display: flex;
-  font-family: var(--body-font-family);
-  gap: 20px;
+  flex-direction: row;
   flex-wrap: wrap;
+  gap: 16px;
+  font-family: var(--body-font-family);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-/* Editor section (left side) */
+/* Responsive: switch to vertical layout on smaller screens */
+@media (max-width: 1024px) {
+  .bloblang-playground .playground-container {
+    flex-direction: column;
+  }
+}
+
+/* Editor sections - vertical flow */
 .bloblang-playground .editors {
-  flex: 1 1 calc(50% - 20px);
   display: flex;
   flex-direction: column;
+  gap: 16px;
   color: var(--code-font-color);
-  box-sizing: border-box;
-  gap: 10px;
 }
 
 .bloblang-playground .doc .choices {
@@ -306,12 +328,11 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   color: var(--body-font-color);
 }
 
-/* Editor container */
+/* Editor container - vertical layout */
 .bloblang-playground .editor-container {
-  flex: 1 1 50%;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  gap: 16px;
 }
 
 /* Tab style for sections */
@@ -326,6 +347,47 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   background: var(--body-background);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Flow arrow divider between input/mapping and output */
+.bloblang-playground .flow-arrow {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .bloblang-playground .flow-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-basis: 100%;
+    padding: 4px 0;
+  }
+
+  .bloblang-playground .flow-arrow-icon {
+    color: var(--body-font-color, #6b7280);
+    font-size: 18px;
+    line-height: 1;
+    opacity: 0.6;
+  }
+}
+
+/* Desktop layout: Input and Mapping side by side, Output below */
+@media (min-width: 1025px) {
+  /* Input and Mapping take half width each */
+  .bloblang-playground .playground-container > .editor-section-always-open:nth-child(1),
+  .bloblang-playground .playground-container > .editor-section-always-open:nth-child(2) {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  /* Output takes full width below (4th child after flow-arrow) */
+  .bloblang-playground .playground-container > .editor-section-always-open:nth-child(4) {
+    flex-basis: 100%;
+  }
 }
 
 .bloblang-playground .editor-section-always-open:hover {
@@ -339,6 +401,11 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   padding: 10px 12px;
   background: var(--body-background);
   border-bottom: 1px solid rgba(204, 204, 204, 0.15);
+  flex-shrink: 0;
+  min-height: 70px;
+  max-height: 70px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .bloblang-playground .editor-header-content {
@@ -346,6 +413,16 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  overflow: hidden;
+  max-height: 48px;
+}
+
+/* Ensure consistent height for the status/validation row in headers */
+.bloblang-playground .editor-header-content > div:last-child {
+  min-height: 22px;
+  max-height: 22px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .bloblang-playground .editor-header h4 {
@@ -355,20 +432,87 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   color: var(--body-font-color);
 }
 
-.bloblang-playground .editor-container-output {
-  position: relative;
-  padding-left: 16px;
+/* Output section */
+.bloblang-playground .output-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.bloblang-playground .editor-container-output::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(204, 204, 204, 0.15);
-  border-radius: 0;
+/* Advanced options panel - contains metadata fields */
+.bloblang-playground .advanced-options {
+  margin-top: 8px;
+  flex: 1 1 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.bloblang-playground .advanced-options > summary {
+  display: block;
+  list-style: none;
+  list-style-type: none;
+  cursor: pointer;
+}
+
+/* Hide all possible disclosure markers across browsers */
+.bloblang-playground .advanced-options > summary::-webkit-details-marker,
+.bloblang-playground .advanced-options > summary::marker,
+.bloblang-playground .advanced-options::-webkit-details-marker,
+.bloblang-playground .advanced-options::marker {
+  display: none !important;
+  content: none !important;
+  list-style: none !important;
+}
+
+/* Override global .doc details > summary::after chevron */
+.bloblang-playground .advanced-options > summary::after {
+  display: none;
+  content: none;
+}
+
+.bloblang-playground .advanced-options-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--body-background);
+  border: 1px solid rgba(204, 204, 204, 0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--body-font-color);
+  width: 100%;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.bloblang-playground .advanced-options-toggle:hover {
+  background: rgba(68, 76, 231, 0.04);
+  border-color: rgba(128, 152, 249, 0.4);
+}
+
+.bloblang-playground .advanced-options-toggle .toggle-icon {
+  transition: transform 0.2s ease;
+  font-size: 12px;
+  color: var(--body-font-color);
+  opacity: 0.6;
+}
+
+.bloblang-playground .advanced-options[open] .toggle-icon {
+  transform: rotate(90deg);
+}
+
+.bloblang-playground .advanced-options-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .bloblang-playground .advanced-options-content {
+    grid-template-columns: 1fr;
+  }
 }
 
 .bloblang-playground .editor-section-collapsible {
@@ -376,7 +520,17 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   border: 1px solid rgba(204, 204, 204, 0.3);
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bloblang-playground .editor-section-collapsible[open] {
+  /* When open, allow content to stretch */
+}
+
+.bloblang-playground .editor-section-collapsible > .editor {
+  flex: 1;
 }
 
 .bloblang-playground .editor-section-collapsible summary {
@@ -460,20 +614,14 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   border-radius: 5px;
   position: relative;
   border: 1px solid rgb(204, 204, 204);
-  resize: horizontal;
-  min-width: 200px;
+  resize: vertical;
+  min-width: 0;
+  flex: 1;
 }
 
-/* Output section (right side) */
-.bloblang-playground .output-section {
-  flex: 1 1 45%;
-  gap: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.bloblang-playground #ace-input-metadata {
-  min-height: unset;
+.bloblang-playground #ace-input-metadata,
+.bloblang-playground #ace-metadata {
+  min-height: 130px;
 }
 
 .bloblang-playground .choices[data-type*=select-one] .choices__inner {
@@ -528,10 +676,6 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     gap: 10px;
   }
 
-  .bloblang-playground .output-section {
-    flex: 1 1 100%;
-  }
-
   .bloblang-playground .button-bar {
     align-items: flex-start;
   }
@@ -544,31 +688,12 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     flex: 100% !important;
   }
 
-  .bloblang-playground .playground-container {
-    flex-direction: column;
-    gap: 30px;
-  }
-
   .bloblang-playground .doc {
     margin-right: unset;
   }
 
   .bloblang-snippet .row {
     flex-direction: column;
-  }
-
-  .bloblang-playground .editor-container-output {
-    padding-left: 0;
-    padding-top: 16px;
-  }
-
-  .bloblang-playground .editor-container-output::before {
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: auto;
-    width: auto;
-    height: 4px;
   }
 }
 
@@ -663,15 +788,25 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     display: none;
   }
 
-  /* Fix editor header to prevent squishing */
+  /* Fix editor header to prevent squishing - remove fixed height on mobile */
   .bloblang-playground .editor-header {
     flex-direction: column;
     gap: 8px;
     align-items: stretch;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .bloblang-playground .editor-header-content {
     width: 100%;
+    max-height: none;
+  }
+
+  /* Remove fixed height from status row on mobile */
+  .bloblang-playground .editor-header-content > div:last-child {
+    min-height: auto;
+    max-height: none;
   }
 
   /* Stack editor header action buttons on mobile */
@@ -707,6 +842,8 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     text-align: left;
     word-break: break-word;
     white-space: normal;
+    max-width: none;
+    max-height: none;
   }
 
   /* Give Ask AI button more space on mobile */
@@ -897,11 +1034,18 @@ html[data-theme=dark] .bloblang-playground .notification-info {
 .bloblang-playground .validation-indicator {
   font-size: 11px;
   font-weight: 500;
-  padding: 3px 8px;
+  padding: 2px 8px;
   border-radius: 4px;
   display: inline-block;
   flex-shrink: 1;
   min-width: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+  box-sizing: border-box;
+  max-height: 20px;
 }
 
 .bloblang-playground .validation-success {
