@@ -766,15 +766,25 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     display: none;
   }
 
-  /* Fix editor header to prevent squishing */
+  /* Fix editor header to prevent squishing - remove fixed height on mobile */
   .bloblang-playground .editor-header {
     flex-direction: column;
     gap: 8px;
     align-items: stretch;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .bloblang-playground .editor-header-content {
     width: 100%;
+    max-height: none;
+  }
+
+  /* Remove fixed height from status row on mobile */
+  .bloblang-playground .editor-header-content > div:last-child {
+    min-height: auto;
+    max-height: none;
   }
 
   /* Stack editor header action buttons on mobile */
@@ -810,6 +820,8 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     text-align: left;
     word-break: break-word;
     white-space: normal;
+    max-width: none;
+    max-height: none;
   }
 
   /* Give Ask AI button more space on mobile */
