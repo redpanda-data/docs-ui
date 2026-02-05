@@ -25,7 +25,7 @@
   var tooltip = document.getElementById('connect-tools-fab-tooltip')
   var tooltipDismiss = tooltip ? tooltip.querySelector('.tooltip-dismiss') : null
 
-  if (!fab || !trigger) return
+  if (!fab || !trigger || !menu) return
 
   // Show FAB on mobile (CSS hides it on desktop where TOC section is visible)
   fab.classList.add('is-visible')
