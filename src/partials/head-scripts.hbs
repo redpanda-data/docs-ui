@@ -145,6 +145,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 {{/if}}
 <script>
   var uiRootPath="{{{uiRootPath}}}"
+  var isUiPreview={{#if (eq site.title 'UI Preview')}}true{{else}}false{{/if}}
 </script>
 {{#if (or (eq page.attributes.role 'bloblang-playground')(eq page.attributes.role 'bloblang-snippets') (eq page.attributes.role 'enable-ace-editor'))}}
 <script defer src="{{{uiRootPath}}}/js/vendor/ace/ace.js"></script>

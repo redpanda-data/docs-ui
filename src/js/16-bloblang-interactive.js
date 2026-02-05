@@ -624,14 +624,15 @@
     wasmLoading = true;
 
     // WASM path varies by build type:
-    // - Production/Netlify: /blobl.wasm (site root) - try first to avoid 404 in console
+    // - Production/Netlify: /blobl.wasm (site root)
     // - UI Preview (local dev): /_/blobl.wasm
+    // Use isUiPreview variable set in head-scripts.hbs to determine correct path
     const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
     const siteRoot = typeof siteRootPath !== 'undefined' ? siteRootPath : '';
-    const wasmPaths = [
-      siteRoot + '/blobl.wasm',
-      rootPath + '/blobl.wasm'
-    ];
+    const isPreview = typeof isUiPreview !== 'undefined' ? isUiPreview : false;
+
+    // Select the correct path based on environment - no fallback to avoid 404s
+    const wasmPath = isPreview ? rootPath + '/blobl.wasm' : siteRoot + '/blobl.wasm';
 
     wasmLoadPromise = new Promise((resolve, reject) => {
       loadRequiredScripts()
@@ -641,41 +642,26 @@
             return;
           }
 
-          // Try each path until one works
-          function tryLoadWasm(paths) {
-            if (paths.length === 0) {
-              reject(new Error('WASM file not found'));
-              return;
-            }
-
-            const wasmPath = paths[0];
-            const go = new Go();
-
-            fetch(wasmPath)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('HTTP ' + response.status);
-                }
-                const responseClone = response.clone();
-                return WebAssembly.instantiateStreaming(response, go.importObject)
-                  .catch(async () => {
-                    const bytes = await responseClone.arrayBuffer();
-                    return WebAssembly.instantiate(bytes, go.importObject);
-                  });
-              })
-              .then((result) => {
-                go.run(result.instance);
-                wasmLoaded = true;
-                wasmLoading = false;
-                resolve();
-              })
-              .catch(() => {
-                // Try next path
-                tryLoadWasm(paths.slice(1));
-              });
-          }
-
-          tryLoadWasm(wasmPaths);
+          const go = new Go();
+          fetch(wasmPath)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('WASM file not found at ' + wasmPath);
+              }
+              const responseClone = response.clone();
+              return WebAssembly.instantiateStreaming(response, go.importObject)
+                .catch(async () => {
+                  const bytes = await responseClone.arrayBuffer();
+                  return WebAssembly.instantiate(bytes, go.importObject);
+                });
+            })
+            .then((result) => {
+              go.run(result.instance);
+              wasmLoaded = true;
+              wasmLoading = false;
+              resolve();
+            })
+            .catch(reject);
         })
         .catch(reject);
     });
