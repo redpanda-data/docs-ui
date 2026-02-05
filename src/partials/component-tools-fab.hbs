@@ -7,7 +7,7 @@
   This is the mobile-only version of the tools section shown in the TOC sidebar.
   Both the FAB and TOC tools are configured per-component via antora.yml attributes:
     - toc-tools-title: Section heading displayed in tooltip and TOC
-    - toc-tools-links: Array of link objects (url, label, description, icon, external)
+    - toc-tools-links: Array of link objects (url, text, description, icon, external)
 
   Example antora.yml configuration:
     asciidoc:
@@ -15,11 +15,11 @@
         toc-tools-title: Connect Tools
         toc-tools-links:
           - url: redpanda-connect:guides:bloblang/playground.adoc
-            label: Bloblang Playground
+            text: Bloblang Playground
             description: Interactive data mapping
             icon: terminal
           - url: https://github.com/example/repo
-            label: External Link
+            text: External Link
             description: Opens in new tab
             icon: layers
             external: true
@@ -95,7 +95,7 @@
         {{/if}}
       </span>
       <span class="menu-item-text">
-        <span class="menu-item-title">{{{this.label}}}</span>
+        <span class="menu-item-title">{{{this.text}}}</span>
         {{#if this.description}}
         <span class="menu-item-desc">{{{this.description}}}</span>
         {{/if}}
