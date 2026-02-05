@@ -509,8 +509,8 @@ const mockConnectData = {
 
 // Fetch Redpanda Connect component data for dynamic completions
 async function fetchConnectCompletions() {
-  // If running on localhost, use mock data to avoid CORS issues
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  // Use mock data on docs-ui preview site - JSON files don't exist there
+  if (window.location.hostname.includes('docs-ui.netlify.app')) {
     return extractCompletionsFromConnectData(mockConnectData);
   }
 

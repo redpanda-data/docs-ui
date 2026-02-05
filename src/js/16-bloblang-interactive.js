@@ -280,19 +280,24 @@
     docsLoading = true;
 
     try {
-      // Try to get latest version from cached antora.yml
-      let data = null;
-      var latestVersion = await getConnectVersion();
-      if (latestVersion) {
-        data = await tryFetchConnectJSON(latestVersion);
-      }
+      var data = null;
+      var isDocsUiPreview = window.location.hostname.includes('docs-ui.netlify.app');
 
-      // Fallback: try known recent versions
-      if (!data) {
-        var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
-        for (var i = 0; i < fallbackVersions.length; i++) {
-          data = await tryFetchConnectJSON(fallbackVersions[i]);
-          if (data) break;
+      // Skip remote fetches on docs-ui preview site - JSON files don't exist there
+      if (!isDocsUiPreview) {
+        // Try to get latest version from cached antora.yml
+        var latestVersion = await getConnectVersion();
+        if (latestVersion) {
+          data = await tryFetchConnectJSON(latestVersion);
+        }
+
+        // Fallback: try known recent versions
+        if (!data) {
+          var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
+          for (var i = 0; i < fallbackVersions.length; i++) {
+            data = await tryFetchConnectJSON(fallbackVersions[i]);
+            if (data) break;
+          }
         }
       }
 
@@ -300,9 +305,9 @@
       if (data) {
         bloblangDocs = transformConnectData(data);
       } else {
-        // Fallback to static file if available
+        // Fallback to static file if available (or primary source on localhost)
         try {
-          const response = await fetch(uiRootPath + '/bloblang-docs.json');
+          var response = await fetch(uiRootPath + '/bloblang-docs.json');
           bloblangDocs = await response.json();
         } catch (err) {
           // No documentation available - tooltips will be disabled
