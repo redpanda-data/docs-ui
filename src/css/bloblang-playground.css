@@ -1,6 +1,7 @@
 .bloblang-playground .doc {
   max-width: unset;
   margin-right: 48px;
+  overflow-x: hidden;
 }
 
 /* Form */
@@ -118,6 +119,8 @@
   flex-wrap: wrap;
   gap: 16px;
   font-family: var(--body-font-family);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Responsive: switch to vertical layout on smaller screens */
@@ -347,6 +350,7 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  max-width: 100%;
 }
 
 /* Flow arrow divider between input/mapping and output */
@@ -445,8 +449,32 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 /* Advanced options panel - contains metadata fields */
 .bloblang-playground .advanced-options {
   margin-top: 8px;
-  width: 100%;
-  flex-basis: 100%;
+  flex: 1 1 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.bloblang-playground .advanced-options > summary {
+  display: block;
+  list-style: none;
+  list-style-type: none;
+  cursor: pointer;
+}
+
+/* Hide all possible disclosure markers across browsers */
+.bloblang-playground .advanced-options > summary::-webkit-details-marker,
+.bloblang-playground .advanced-options > summary::marker,
+.bloblang-playground .advanced-options::-webkit-details-marker,
+.bloblang-playground .advanced-options::marker {
+  display: none !important;
+  content: none !important;
+  list-style: none !important;
+}
+
+/* Override global .doc details > summary::after chevron */
+.bloblang-playground .advanced-options > summary::after {
+  display: none;
+  content: none;
 }
 
 .bloblang-playground .advanced-options-toggle {
@@ -457,12 +485,12 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   background: var(--body-background);
   border: 1px solid rgba(204, 204, 204, 0.3);
   border-radius: 8px;
-  cursor: pointer;
   font-size: 14px;
   font-weight: 500;
   color: var(--body-font-color);
   width: 100%;
   transition: background-color 0.15s ease, border-color 0.15s ease;
+  box-sizing: border-box;
 }
 
 .bloblang-playground .advanced-options-toggle:hover {
@@ -593,13 +621,14 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   border-radius: 5px;
   position: relative;
   border: 1px solid rgb(204, 204, 204);
-  resize: horizontal;
-  min-width: 200px;
+  resize: vertical;
+  min-width: 0;
   flex: 1;
 }
 
-.bloblang-playground #ace-input-metadata {
-  min-height: unset;
+.bloblang-playground #ace-input-metadata,
+.bloblang-playground #ace-metadata {
+  min-height: 130px;
 }
 
 .bloblang-playground .choices[data-type*=select-one] .choices__inner {
