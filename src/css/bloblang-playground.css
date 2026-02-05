@@ -365,21 +365,14 @@ html[data-theme=dark] .bloblang-playground .button:hover {
     align-items: center;
     width: 100%;
     flex-basis: 100%;
-    padding: 8px 0;
+    padding: 4px 0;
   }
 
   .bloblang-playground .flow-arrow-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--link-highlight-color, #5865f2);
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--body-font-color, #6b7280);
+    font-size: 18px;
+    line-height: 1;
+    opacity: 0.6;
   }
 }
 
