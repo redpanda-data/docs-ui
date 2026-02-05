@@ -1,12 +1,26 @@
 ;(function () {
   'use strict'
 
-  // Configuration
-  var STORAGE_KEY = 'connectToolsFabSeen'
-  var TOOLTIP_AUTO_DISMISS_MS = 5000
+  /*
+   * Component Tools FAB (Floating Action Button)
+   * =============================================
+   * A FAB is a circular button that floats above the UI, typically in the
+   * bottom-right corner. It provides quick access to primary actions.
+   *
+   * This script handles:
+   * - FAB menu expand/collapse on click
+   * - First-time visitor tooltip (pulsing animation, auto-dismiss)
+   * - Keyboard navigation (Escape to close, arrow keys in menu)
+   * - Click-outside-to-close behavior
+   *
+   * The FAB visibility is controlled by Handlebars templates using
+   * page.componentVersion.asciidoc.attributes.toc-tools-title.
+   * This JS only handles interactive behavior once the FAB is rendered.
+   */
 
-  // Connect Tools visibility is controlled by Handlebars templates using page.component.name
-  // This JS only handles interactive behavior (FAB menu, first-time tooltip)
+  // Configuration
+  var STORAGE_KEY = 'componentToolsFabSeen'
+  var TOOLTIP_AUTO_DISMISS_MS = 5000
 
   // Add class to parent sidebar for styling (avoids expensive :has() selector)
   var tocTools = document.getElementById('toc-tools')
@@ -17,17 +31,16 @@
     }
   }
 
-  // FAB is disabled - Connect Tools only shown in TOC on desktop
-  // Mobile users can access tools via the main navigation
-  var fab = document.getElementById('connect-tools-fab')
-  var trigger = document.getElementById('connect-tools-fab-trigger')
-  var menu = document.getElementById('connect-tools-menu')
-  var tooltip = document.getElementById('connect-tools-fab-tooltip')
+  // FAB elements - only shown on mobile (CSS hides on desktop where TOC section is visible)
+  var fab = document.getElementById('component-tools-fab')
+  var trigger = document.getElementById('component-tools-fab-trigger')
+  var menu = document.getElementById('component-tools-menu')
+  var tooltip = document.getElementById('component-tools-fab-tooltip')
   var tooltipDismiss = tooltip ? tooltip.querySelector('.tooltip-dismiss') : null
 
   if (!fab || !trigger || !menu) return
 
-  // Show FAB on mobile (CSS hides it on desktop where TOC section is visible)
+  // Show FAB (CSS handles mobile-only visibility via media queries)
   fab.classList.add('is-visible')
 
   // Check first-time experience
@@ -63,7 +76,7 @@
 
     // Focus first menu item when opened
     if (isExpanded) {
-      var firstItem = menu.querySelector('.connect-tools-menu-item')
+      var firstItem = menu.querySelector('.component-tools-menu-item')
       if (firstItem) {
         setTimeout(function () {
           firstItem.focus()
@@ -115,7 +128,7 @@
 
   // Keyboard navigation within menu
   menu.addEventListener('keydown', function (e) {
-    var items = menu.querySelectorAll('.connect-tools-menu-item')
+    var items = menu.querySelectorAll('.component-tools-menu-item')
     var currentIndex = Array.prototype.indexOf.call(items, document.activeElement)
 
     if (e.key === 'ArrowDown') {

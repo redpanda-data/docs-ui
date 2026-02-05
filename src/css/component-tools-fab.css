@@ -1,8 +1,22 @@
-/* Connect Tools FAB Styles */
-/* FAB is mobile-only; desktop uses TOC section */
+/*
+ * Component Tools FAB (Floating Action Button)
+ * =============================================
+ * A FAB is a circular button that floats above the UI, typically in the
+ * bottom-right corner. It provides quick access to primary actions.
+ *
+ * This FAB appears on mobile only - desktop users see the tools in the TOC sidebar.
+ * The FAB and TOC tools are configured per-component via Antora attributes:
+ *   - toc-tools-title: Section heading (e.g., "Connect Tools")
+ *   - toc-tools-links: Array of link objects with url, label, description, icon
+ *
+ * FAB states:
+ *   - is-visible: FAB is shown (set by JS based on component config)
+ *   - is-expanded: Menu is open
+ *   - is-first-time: Shows pulsing animation and tooltip for new visitors
+ */
 
 /* Base container - hidden by default */
-.connect-tools-fab {
+.component-tools-fab {
   position: fixed;
   bottom: 80px;
   right: 16px;
@@ -12,20 +26,20 @@
 
 /* Only show on mobile when visible */
 @media screen and (max-width: 1023px) {
-  .connect-tools-fab.is-visible {
+  .component-tools-fab.is-visible {
     display: block;
   }
 }
 
 /* Desktop: always hidden */
 @media screen and (min-width: 1024px) {
-  .connect-tools-fab {
+  .component-tools-fab {
     display: none !important;
   }
 }
 
 /* Main FAB trigger button (mobile-sized since FAB is mobile-only) */
-.connect-tools-fab-trigger {
+.component-tools-fab-trigger {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -41,41 +55,41 @@
   position: relative;
 }
 
-.connect-tools-fab-trigger svg {
+.component-tools-fab-trigger svg {
   width: 20px;
   height: 20px;
 }
 
-.connect-tools-fab-trigger:hover {
+.component-tools-fab-trigger:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(68, 76, 231, 0.4);
 }
 
-.connect-tools-fab-trigger:focus-visible {
+.component-tools-fab-trigger:focus-visible {
   outline: 3px solid var(--link-highlight-color);
   outline-offset: 3px;
 }
 
 /* Icon states */
-.connect-tools-fab-trigger .fab-icon-close {
+.component-tools-fab-trigger .fab-icon-close {
   display: none;
 }
 
-.connect-tools-fab.is-expanded .connect-tools-fab-trigger .fab-icon-tools {
+.component-tools-fab.is-expanded .component-tools-fab-trigger .fab-icon-tools {
   display: none;
 }
 
-.connect-tools-fab.is-expanded .connect-tools-fab-trigger .fab-icon-close {
+.component-tools-fab.is-expanded .component-tools-fab-trigger .fab-icon-close {
   display: block;
 }
 
-.connect-tools-fab.is-expanded .connect-tools-fab-trigger {
+.component-tools-fab.is-expanded .component-tools-fab-trigger {
   background: var(--color-gray-50);
   color: var(--body-font-color);
 }
 
 /* First-time highlight animation */
-.connect-tools-fab.is-first-time .connect-tools-fab-trigger {
+.component-tools-fab.is-first-time .component-tools-fab-trigger {
   animation: fab-pulse 2s ease-in-out infinite;
 }
 
@@ -91,7 +105,7 @@
 }
 
 /* First-time tooltip */
-.connect-tools-fab-tooltip {
+.component-tools-fab-tooltip {
   position: absolute;
   bottom: calc(100% + 12px);
   right: 0;
@@ -108,7 +122,7 @@
   animation: tooltip-fade-in 0.3s ease;
 }
 
-.connect-tools-fab.is-first-time .connect-tools-fab-tooltip {
+.component-tools-fab.is-first-time .component-tools-fab-tooltip {
   display: flex;
 }
 
@@ -124,7 +138,7 @@
   }
 }
 
-.connect-tools-fab-tooltip::after {
+.component-tools-fab-tooltip::after {
   content: "";
   position: absolute;
   bottom: -6px;
@@ -151,7 +165,7 @@
 }
 
 /* Expanded menu */
-.connect-tools-menu {
+.component-tools-menu {
   position: absolute;
   bottom: calc(100% + 12px);
   right: 0;
@@ -168,14 +182,14 @@
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
 
-.connect-tools-fab.is-expanded .connect-tools-menu {
+.component-tools-fab.is-expanded .component-tools-menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0) scale(1);
 }
 
 /* Menu items */
-.connect-tools-menu-item {
+.component-tools-menu-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -186,11 +200,11 @@
   transition: background-color 0.15s ease;
 }
 
-.connect-tools-menu-item:hover {
+.component-tools-menu-item:hover {
   background: var(--link-highlight-background-color);
 }
 
-.connect-tools-menu-item:focus-visible {
+.component-tools-menu-item:focus-visible {
   outline: 2px solid var(--link-highlight-color);
   outline-offset: -2px;
 }
@@ -225,15 +239,15 @@
 }
 
 /* Dark mode */
-html[data-theme="dark"] .connect-tools-fab-trigger {
+html[data-theme="dark"] .component-tools-fab-trigger {
   box-shadow: 0 4px 12px rgba(145, 132, 241, 0.3);
 }
 
-html[data-theme="dark"] .connect-tools-fab-trigger:hover {
+html[data-theme="dark"] .component-tools-fab-trigger:hover {
   box-shadow: 0 6px 16px rgba(145, 132, 241, 0.4);
 }
 
-html[data-theme="dark"] .connect-tools-fab.is-first-time .connect-tools-fab-trigger {
+html[data-theme="dark"] .component-tools-fab.is-first-time .component-tools-fab-trigger {
   animation: fab-pulse-dark 2s ease-in-out infinite;
 }
 
@@ -248,11 +262,11 @@ html[data-theme="dark"] .connect-tools-fab.is-first-time .connect-tools-fab-trig
   }
 }
 
-html[data-theme="dark"] .connect-tools-fab.is-expanded .connect-tools-fab-trigger {
+html[data-theme="dark"] .component-tools-fab.is-expanded .component-tools-fab-trigger {
   background: var(--color-gray-50);
 }
 
-html[data-theme="dark"] .connect-tools-menu {
+html[data-theme="dark"] .component-tools-menu {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   border-color: rgba(255, 255, 255, 0.1);
 }
@@ -272,12 +286,12 @@ html[data-theme="dark"] .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar-
 
 /* Small mobile - position FAB away from thumb zone */
 @media screen and (max-width: 480px) {
-  .connect-tools-fab {
+  .component-tools-fab {
     bottom: 90px;
     right: 12px;
   }
 
-  .connect-tools-menu {
+  .component-tools-menu {
     right: -8px;
     min-width: 200px;
   }
@@ -395,14 +409,14 @@ html[data-theme="dark"] .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar-
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .connect-tools-fab-trigger,
-  .connect-tools-menu,
-  .connect-tools-fab-tooltip {
+  .component-tools-fab-trigger,
+  .component-tools-menu,
+  .component-tools-fab-tooltip {
     animation: none;
     transition: none;
   }
 
-  .connect-tools-fab.is-first-time .connect-tools-fab-trigger {
+  .component-tools-fab.is-first-time .component-tools-fab-trigger {
     animation: none;
     box-shadow: 0 4px 24px rgba(68, 76, 231, 0.5), 0 0 0 4px rgba(68, 76, 231, 0.2);
   }
