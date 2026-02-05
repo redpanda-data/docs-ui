@@ -2,23 +2,15 @@
   'use strict'
 
   // Configuration
-  var CONNECT_COMPONENT = 'redpanda-connect'
   var STORAGE_KEY = 'connectToolsFabSeen'
   var TOOLTIP_AUTO_DISMISS_MS = 5000
 
-  // Check if we're on a Connect page or in preview mode
-  var navContainer = document.querySelector('.nav-container')
-  var component = navContainer && navContainer.dataset.component
-  var isPreview = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  var isConnectPage = component === CONNECT_COMPONENT || isPreview
+  // Connect Tools visibility is controlled by Handlebars templates using page.component.name
+  // This JS only handles interactive behavior (FAB menu, first-time tooltip)
 
-  if (!isConnectPage) return
-
-  // Show TOC Connect Tools section (desktop only)
+  // Add class to parent sidebar for styling (avoids expensive :has() selector)
   var tocConnectTools = document.getElementById('toc-connect-tools')
   if (tocConnectTools) {
-    tocConnectTools.classList.add('is-visible')
-    // Add class to parent sidebar for styling (avoids expensive :has() selector)
     var tocSidebar = tocConnectTools.closest('.toc.sidebar')
     if (tocSidebar) {
       tocSidebar.classList.add('has-connect-tools')
@@ -35,8 +27,8 @@
 
   if (!fab || !trigger) return
 
-  // Don't show FAB - desktop TOC only
-  // fab.classList.add('is-visible')
+  // Show FAB on mobile (CSS hides it on desktop where TOC section is visible)
+  fab.classList.add('is-visible')
 
   // Check first-time experience
   var hasSeenFab = false

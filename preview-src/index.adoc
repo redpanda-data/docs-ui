@@ -468,6 +468,110 @@ External links include an icon like so: link:https://awscli.amazonaws.com/v2/doc
 
 The link should not wrap, keeping the icon and the link text together and avoiding a single period on one line.
 
+== Additional Sections for TOC Testing
+
+These sections are added to test a long TOC with the Connect Tools section.
+
+=== Data Ingestion
+
+Lorem ipsum dolor sit amet.
+
+=== Data Processing
+
+Lorem ipsum dolor sit amet.
+
+=== Data Output
+
+Lorem ipsum dolor sit amet.
+
+=== Error Handling
+
+Lorem ipsum dolor sit amet.
+
+=== Monitoring and Metrics
+
+Lorem ipsum dolor sit amet.
+
+=== Security Configuration
+
+Lorem ipsum dolor sit amet.
+
+=== Authentication
+
+Lorem ipsum dolor sit amet.
+
+=== Authorization
+
+Lorem ipsum dolor sit amet.
+
+=== TLS Configuration
+
+Lorem ipsum dolor sit amet.
+
+=== Rate Limiting
+
+Lorem ipsum dolor sit amet.
+
+== Performance Tuning
+
+Lorem ipsum dolor sit amet.
+
+=== Memory Management
+
+Lorem ipsum dolor sit amet.
+
+=== CPU Optimization
+
+Lorem ipsum dolor sit amet.
+
+=== Disk I/O
+
+Lorem ipsum dolor sit amet.
+
+=== Network Optimization
+
+Lorem ipsum dolor sit amet.
+
+== Troubleshooting
+
+Lorem ipsum dolor sit amet.
+
+=== Common Errors
+
+Lorem ipsum dolor sit amet.
+
+=== Debug Logging
+
+Lorem ipsum dolor sit amet.
+
+=== Performance Issues
+
+Lorem ipsum dolor sit amet.
+
+=== Connection Problems
+
+Lorem ipsum dolor sit amet.
+
+== Advanced Topics
+
+Lorem ipsum dolor sit amet.
+
+=== Custom Processors
+
+Lorem ipsum dolor sit amet.
+
+=== Plugin Development
+
+Lorem ipsum dolor sit amet.
+
+=== API Extensions
+
+Lorem ipsum dolor sit amet.
+
+=== Integration Patterns
+
+Lorem ipsum dolor sit amet.
+
 == Fin
 
 That's all, folks!

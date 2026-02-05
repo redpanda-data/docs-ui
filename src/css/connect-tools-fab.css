@@ -287,49 +287,51 @@ html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scroll
    TOC Connect Tools Section (Desktop)
    ============================================ */
 
-/* When Connect Tools is visible, restructure TOC as flex column */
-.toc.sidebar.has-connect-tools {
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - var(--navbar-height) - var(--announcement-bar-height) - 3rem);
-}
+/* When Connect Tools is visible, restructure TOC as flex column (desktop only) */
+@media screen and (min-width: 1025px) {
+  .toc.sidebar.has-connect-tools {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - var(--navbar-height) - var(--announcement-bar-height) - 3rem);
+  }
 
-/* Make toc-menu scrollable when Connect Tools is visible */
-.toc.sidebar.has-connect-tools .toc-menu {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0; /* Allow shrinking below min-height */
-  padding-right: 10px; /* Space for scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)) transparent;
-}
+  /* Make toc-menu scrollable when Connect Tools is visible */
+  .toc.sidebar.has-connect-tools .toc-menu {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0; /* Allow shrinking below min-height */
+    padding-right: 10px; /* Space for scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)) transparent;
+  }
 
-.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar {
-  width: 6px;
-}
+  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar {
+    width: 6px;
+  }
 
-.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-track {
-  background: transparent;
-}
+  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2));
-  border-radius: 3px;
-}
+  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2));
+    border-radius: 3px;
+  }
 
-.toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-thumb-hover-color, rgba(0, 0, 0, 0.35));
-}
+  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover-color, rgba(0, 0, 0, 0.35));
+  }
 
-/* Keep everything after toc-menu at the bottom */
-.toc.sidebar.has-connect-tools .toc-connect-tools,
-.toc.sidebar.has-connect-tools .thumbs {
-  flex-shrink: 0;
-}
+  /* Keep everything after toc-menu at the bottom */
+  .toc.sidebar.has-connect-tools .toc-connect-tools,
+  .toc.sidebar.has-connect-tools .thumbs {
+    flex-shrink: 0;
+  }
 
-.toc.sidebar.has-connect-tools .thumbs {
-  margin-top: 1rem;
-  padding: 0;
+  .toc.sidebar.has-connect-tools .thumbs {
+    margin-top: 1rem;
+    padding: 0;
+  }
 }
 
 .toc-connect-tools {

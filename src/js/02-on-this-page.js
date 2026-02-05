@@ -107,10 +107,26 @@
     })
   }
 
+  // Get the scrollable container - could be menu (with Connect Tools) or list
+  var scrollableContainer = menu
+
   window.addEventListener('load', function () {
     onScroll()
     window.addEventListener('scroll', onScroll)
+    // On initial load, scroll active item into view (e.g., when navigating to a hash)
+    scrollActiveIntoView()
   })
+
+  function scrollActiveIntoView () {
+    var activeLink = scrollableContainer.querySelector('.is-active')
+    if (activeLink && scrollableContainer.scrollHeight > scrollableContainer.offsetHeight) {
+      // Center the active item in the scrollable area
+      var containerHeight = scrollableContainer.offsetHeight
+      var linkTop = activeLink.offsetTop - scrollableContainer.offsetTop
+      var linkHeight = activeLink.offsetHeight
+      scrollableContainer.scrollTop = Math.max(0, linkTop - (containerHeight / 2) + (linkHeight / 2))
+    }
+  }
 
   function onScroll () {
     var scrolledBy = window.scrollY
@@ -131,7 +147,7 @@
           links[lastActiveFragment.shift()].classList.remove('is-active')
         }
       })
-      list.scrollTop = list.scrollHeight - list.offsetHeight
+      scrollableContainer.scrollTop = scrollableContainer.scrollHeight - scrollableContainer.offsetHeight
       lastActiveFragment = activeFragments.length > 1 ? activeFragments : activeFragments[0]
       return
     }
@@ -151,8 +167,13 @@
       if (lastActiveFragment) links[lastActiveFragment].classList.remove('is-active')
       var activeLink = links[activeFragment]
       activeLink.classList.add('is-active')
-      if (list.scrollHeight > list.offsetHeight) {
-        list.scrollTop = Math.max(0, activeLink.offsetTop + activeLink.offsetHeight - list.offsetHeight)
+      if (scrollableContainer.scrollHeight > scrollableContainer.offsetHeight) {
+        // Scroll to keep active item visible, centered if possible
+        var containerHeight = scrollableContainer.offsetHeight
+        var linkTop = activeLink.offsetTop - scrollableContainer.offsetTop
+        var linkHeight = activeLink.offsetHeight
+        var targetScroll = linkTop - (containerHeight / 2) + (linkHeight / 2)
+        scrollableContainer.scrollTop = Math.max(0, targetScroll)
       }
       lastActiveFragment = activeFragment
     } else if (lastActiveFragment) {

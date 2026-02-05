@@ -36,12 +36,36 @@
 .toc .toc-menu-dropdown > .toc-menu a {
   color: var(--toc-font-color);
   border-left: none;
-  padding: 0.5em 0.5em 0.3em 0;
+  padding-top: 0.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  padding-left: 0;
   text-decoration: none;
+}
+
+/* Indentation for mobile dropdown - needs higher specificity than base dropdown rule */
+.toc .toc-menu-dropdown > .toc-menu li[data-level="2"] a {
+  padding-left: 0.75rem;
+}
+
+.toc .toc-menu-dropdown > .toc-menu li[data-level="3"] a {
+  padding-left: 1.25rem;
+}
+
+.toc .toc-menu-dropdown > .toc-menu li[data-level="4"] a {
+  padding-left: 1.75rem;
+}
+
+.toc .toc-menu-dropdown > .toc-menu li[data-level="5"] a {
+  padding-left: 2.25rem;
 }
 
 .toc .toc-menu-dropdown > .toc-menu {
   border-top: 1px solid #dadde1;
+}
+
+.toc .toc-menu-dropdown > .toc-menu ul {
+  padding-left: 0;
 }
 
 .toc.sidebar .thumbs {
