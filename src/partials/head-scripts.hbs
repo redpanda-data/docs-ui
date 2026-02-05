@@ -131,17 +131,78 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script defer src="https://plausible.io/js/plausible.js" data-domain="redpanda.com"></script>
 
 {{#if env.ALGOLIA_API_KEY}}
-<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-js.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
-<link
-  rel="stylesheet"
-  href="{{{uiRootPath}}}/css/vendor/algolia/autocomplete-theme-classic.css"
-/>
-<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-tags.js"></script>
-<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/autocomplete-tags-plugin.css">
-<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-recent-searches.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-query-suggestions.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-algolia-insights.js"></script>
+<!-- Algolia Search - Lazy loaded on search interaction for performance -->
+<link rel="prefetch" href="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-js.js" as="script">
+<link rel="prefetch" href="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js" as="script">
+<script>
+(function() {
+  var algoliaLoaded = false;
+  var uiRoot = '{{{uiRootPath}}}';
+  var pendingFocus = null;
+
+  function loadScript(src) {
+    return new Promise(function(resolve, reject) {
+      var script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  function loadAlgoliaScripts(targetElement) {
+    if (algoliaLoaded) return;
+    algoliaLoaded = true;
+    if (targetElement) pendingFocus = targetElement;
+
+    var styles = [
+      uiRoot + '/css/vendor/algolia/autocomplete-theme-classic.css',
+      uiRoot + '/css/vendor/algolia/autocomplete-tags-plugin.css'
+    ];
+    styles.forEach(function(href) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      document.head.appendChild(link);
+    });
+
+    // Load scripts sequentially to ensure dependencies are met
+    loadScript(uiRoot + '/js/vendor/algolia/algoliasearch-lite.umd.js')
+      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-js.js'); })
+      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-tags.js'); })
+      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-recent-searches.js'); })
+      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-query-suggestions.js'); })
+      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-algolia-insights.js'); })
+      .then(function() {
+        // Dispatch event to trigger Algolia initialization
+        window.dispatchEvent(new CustomEvent('algolia-scripts-loaded'));
+      });
+  }
+
+  // Load on search focus or input click
+  document.addEventListener('click', function(e) {
+    var target = e.target.closest('.search, .aa-Input, [data-search], input[type="search"], #autocomplete');
+    if (target) {
+      loadAlgoliaScripts(target);
+    }
+  });
+  document.addEventListener('focusin', function(e) {
+    var target = e.target.closest('.search, .aa-Input, [data-search], input[type="search"], #autocomplete');
+    if (target) {
+      loadAlgoliaScripts(target);
+    }
+  });
+  // Fallback: Load after idle
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(function() { setTimeout(function() { loadAlgoliaScripts(null); }, 3000); });
+  } else {
+    setTimeout(function() { loadAlgoliaScripts(null); }, 3000);
+  }
+
+  // Expose for algolia-script.hbs to check pending focus
+  window.__algoliaGetPendingFocus = function() { var f = pendingFocus; pendingFocus = null; return f; };
+})();
+</script>
 {{/if}}
 <script>
   var uiRootPath="{{{uiRootPath}}}"
@@ -157,22 +218,73 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
 {{/if}}
 {{#if (ne page.attributes.role 'home')}}
-<script defer
-src="https://widget.kapa.ai/kapa-widget.bundle.js"
-data-website-id="fe00d579-9e9a-4f83-8f9f-0ca7672262a6"
-data-project-name="Redpanda"
-data-project-color="#E14225"
-data-modal-override-open-class="custom-class-kapa"
-data-modal-open-on-command-k="true"
-data-button-hide="true"
-data-modal-size="800px"
-data-project-logo="https://avatars.githubusercontent.com/u/49406389?s=200&v=4"
-data-user-analytics-fingerprint-enabled="true"
-data-user-analytics-store-ip="true"
-data-mcp-enabled="true"
-data-mcp-server-url="https://docs.redpanda.com/mcp"
-data-modal-disclaimer="This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions. Review the [Redpanda privacy policy](https://www.redpanda.com/legal/privacy-policy) to understand how your data is used."
-></script>
+<!-- Kapa AI Widget - Lazy loaded on first interaction for performance -->
+<script>
+(function() {
+  var kapaLoaded = false;
+  var pendingOpen = false;
+  function loadKapa(shouldOpen) {
+    if (shouldOpen) pendingOpen = true;
+    if (kapaLoaded) {
+      // Already loaded, open if Kapa is ready
+      if (pendingOpen && window.Kapa) {
+        window.Kapa.open();
+        pendingOpen = false;
+      }
+      return;
+    }
+    kapaLoaded = true;
+    var script = document.createElement('script');
+    script.src = 'https://widget.kapa.ai/kapa-widget.bundle.js';
+    script.setAttribute('data-website-id', 'fe00d579-9e9a-4f83-8f9f-0ca7672262a6');
+    script.setAttribute('data-project-name', 'Redpanda');
+    script.setAttribute('data-project-color', '#E14225');
+    script.setAttribute('data-modal-override-open-class', 'custom-class-kapa');
+    script.setAttribute('data-modal-open-on-command-k', 'true');
+    script.setAttribute('data-button-hide', 'true');
+    script.setAttribute('data-modal-size', '800px');
+    script.setAttribute('data-project-logo', 'https://avatars.githubusercontent.com/u/49406389?s=200&v=4');
+    script.setAttribute('data-user-analytics-fingerprint-enabled', 'true');
+    script.setAttribute('data-user-analytics-store-ip', 'true');
+    script.setAttribute('data-mcp-enabled', 'true');
+    script.setAttribute('data-mcp-server-url', 'https://docs.redpanda.com/mcp');
+    script.setAttribute('data-modal-disclaimer', 'This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions. Review the [Redpanda privacy policy](https://www.redpanda.com/legal/privacy-policy) to understand how your data is used.');
+    script.onload = function() {
+      // Wait for Kapa to initialize, then open if pending
+      if (pendingOpen) {
+        var checkKapa = setInterval(function() {
+          if (window.Kapa) {
+            clearInterval(checkKapa);
+            window.Kapa.open();
+            pendingOpen = false;
+          }
+        }, 50);
+        // Stop checking after 5 seconds
+        setTimeout(function() { clearInterval(checkKapa); }, 5000);
+      }
+    };
+    document.head.appendChild(script);
+  }
+  // Load Kapa on Cmd/Ctrl+K or when clicking AI-related elements
+  document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      loadKapa(true);
+    }
+  });
+  // Load and open on interaction with AI buttons
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.custom-class-kapa, .ask-ai-button, [data-kapa-trigger]')) {
+      loadKapa(true);
+    }
+  });
+  // Fallback: Load (but don't open) after 5 seconds of idle time
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(function() { setTimeout(function() { loadKapa(false); }, 5000); });
+  } else {
+    setTimeout(function() { loadKapa(false); }, 5000);
+  }
+})();
+</script>
 {{/if}}
 {{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true'))}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css" media="print" onload="this.media='all'">
@@ -186,17 +298,21 @@ data-modal-disclaimer="This is a custom LLM for Redpanda with access to all deve
 <script defer src="{{{uiRootPath}}}/js/vendor/prism/prism-line-highlight-plugin.js"></script>
 <script defer src="{{{uiRootPath}}}/js/vendor/tabs.js" data-sync-storage-key="preferred-tab"></script>
 {{/if}}
-<!-- Start VWO Async SmartCode -->
+<!-- Start VWO Async SmartCode - Deferred for performance -->
 <link rel="preconnect" href="https://dev.visualwebsiteoptimizer.com" />
 <script type='text/javascript' id='vwoCode'>
-window._vwo_code || (function() {
-var account_id=946582,
-version=2.1,
-settings_tolerance=2000,
-hide_element='body',
-hide_element_style = 'opacity:0 !important;filter:alpha(opacity=0) !important;background:none !important;transition:none !important;',
-/* DO NOT EDIT BELOW THIS LINE */
-f=false,w=window,d=document,v=d.querySelector('#vwoCode'),cK='_vwo_'+account_id+'_settings',cc={};try{var c=JSON.parse(localStorage.getItem('_vwo_'+account_id+'_config'));cc=c&&typeof c==='object'?c:{}}catch(e){}var stT=cc.stT==='session'?w.sessionStorage:w.localStorage;code={nonce:v&&v.nonce,use_existing_jquery:function(){return typeof use_existing_jquery!=='undefined'?use_existing_jquery:undefined},library_tolerance:function(){return typeof library_tolerance!=='undefined'?library_tolerance:undefined},settings_tolerance:function(){return cc.sT||settings_tolerance},hide_element_style:function(){return'{'+(cc.hES||hide_element_style)+'}'},hide_element:function(){if(performance.getEntriesByName('first-contentful-paint')[0]){return''}return typeof cc.hE==='string'?cc.hE:hide_element},getVersion:function(){return version},finish:function(e){if(!f){f=true;var t=d.getElementById('_vis_opt_path_hides');if(t)t.parentNode.removeChild(t);if(e)(new Image).src='https://dev.visualwebsiteoptimizer.com/ee.gif?a='+account_id+e}},finished:function(){return f},addScript:function(e){var t=d.createElement('script');t.type='text/javascript';if(e.src){t.src=e.src}else{t.text=e.text}v&&t.setAttribute('nonce',v.nonce);d.getElementsByTagName('head')[0].appendChild(t)},load:function(e,t){var n=this.getSettings(),i=d.createElement('script'),r=this;t=t||{};if(n){i.textContent=n;d.getElementsByTagName('head')[0].appendChild(i);if(!w.VWO||VWO.caE){stT.removeItem(cK);r.load(e)}}else{var o=new XMLHttpRequest;o.open('GET',e,true);o.withCredentials=!t.dSC;o.responseType=t.responseType||'text';o.onload=function(){if(t.onloadCb){return t.onloadCb(o,e)}if(o.status===200||o.status===304){_vwo_code.addScript({text:o.responseText})}else{_vwo_code.finish('&e=loading_failure:'+e)}};o.onerror=function(){if(t.onerrorCb){return t.onerrorCb(e)}_vwo_code.finish('&e=loading_failure:'+e)};o.send()}},getSettings:function(){try{var e=stT.getItem(cK);if(!e){return}e=JSON.parse(e);if(Date.now()>e.e){stT.removeItem(cK);return}return e.s}catch(e){return}},init:function(){if(d.URL.indexOf('__vwo_disable__')>-1)return;var e=this.settings_tolerance();w._vwo_settings_timer=setTimeout(function(){_vwo_code.finish();stT.removeItem(cK)},e);var t;if(this.hide_element()!=='body'){t=d.createElement('style');var n=this.hide_element(),i=n?n+this.hide_element_style():'',r=d.getElementsByTagName('head')[0];t.setAttribute('id','_vis_opt_path_hides');v&&t.setAttribute('nonce',v.nonce);t.setAttribute('type','text/css');if(t.styleSheet)t.styleSheet.cssText=i;else t.appendChild(d.createTextNode(i));r.appendChild(t)}else{t=d.getElementsByTagName('head')[0];var i=d.createElement('div');i.style.cssText='z-index: 2147483647 !important;position: fixed !important;left: 0 !important;top: 0 !important;width: 100% !important;height: 100% !important;background: white !important;display: block !important;';i.setAttribute('id','_vis_opt_path_hides');i.classList.add('_vis_hide_layer');t.parentNode.insertBefore(i,t.nextSibling)}var o=window._vis_opt_url||d.URL,s='https://dev.visualwebsiteoptimizer.com/j.php?a='+account_id+'&u='+encodeURIComponent(o)+'&vn='+version;if(w.location.search.indexOf('_vwo_xhr')!==-1){this.addScript({src:s})}else{this.load(s+'&x=true')}}};w._vwo_code=code;code.init();})();
+// Defer VWO loading until after page load to improve performance
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    window._vwo_code || (function() {
+    var account_id=946582,
+    version=2.1,
+    settings_tolerance=2000,
+    hide_element='',
+    hide_element_style = '',
+    f=false,w=window,d=document,v=d.querySelector('#vwoCode'),cK='_vwo_'+account_id+'_settings',cc={};try{var c=JSON.parse(localStorage.getItem('_vwo_'+account_id+'_config'));cc=c&&typeof c==='object'?c:{}}catch(e){}var stT=cc.stT==='session'?w.sessionStorage:w.localStorage;code={nonce:v&&v.nonce,use_existing_jquery:function(){return typeof use_existing_jquery!=='undefined'?use_existing_jquery:undefined},library_tolerance:function(){return typeof library_tolerance!=='undefined'?library_tolerance:undefined},settings_tolerance:function(){return cc.sT||settings_tolerance},hide_element_style:function(){return'{'+(cc.hES||hide_element_style)+'}'},hide_element:function(){return''},getVersion:function(){return version},finish:function(e){if(!f){f=true;var t=d.getElementById('_vis_opt_path_hides');if(t)t.parentNode.removeChild(t);if(e)(new Image).src='https://dev.visualwebsiteoptimizer.com/ee.gif?a='+account_id+e}},finished:function(){return f},addScript:function(e){var t=d.createElement('script');t.type='text/javascript';if(e.src){t.src=e.src}else{t.text=e.text}v&&t.setAttribute('nonce',v.nonce);d.getElementsByTagName('head')[0].appendChild(t)},load:function(e,t){var n=this.getSettings(),i=d.createElement('script'),r=this;t=t||{};if(n){i.textContent=n;d.getElementsByTagName('head')[0].appendChild(i);if(!w.VWO||VWO.caE){stT.removeItem(cK);r.load(e)}}else{var o=new XMLHttpRequest;o.open('GET',e,true);o.withCredentials=!t.dSC;o.responseType=t.responseType||'text';o.onload=function(){if(t.onloadCb){return t.onloadCb(o,e)}if(o.status===200||o.status===304){_vwo_code.addScript({text:o.responseText})}else{_vwo_code.finish('&e=loading_failure:'+e)}};o.onerror=function(){if(t.onerrorCb){return t.onerrorCb(e)}_vwo_code.finish('&e=loading_failure:'+e)};o.send()}},getSettings:function(){try{var e=stT.getItem(cK);if(!e){return}e=JSON.parse(e);if(Date.now()>e.e){stT.removeItem(cK);return}return e.s}catch(e){return}},init:function(){if(d.URL.indexOf('__vwo_disable__')>-1)return;var e=this.settings_tolerance();w._vwo_settings_timer=setTimeout(function(){_vwo_code.finish();stT.removeItem(cK)},e);var o=window._vis_opt_url||d.URL,s='https://dev.visualwebsiteoptimizer.com/j.php?a='+account_id+'&u='+encodeURIComponent(o)+'&vn='+version;if(w.location.search.indexOf('_vwo_xhr')!==-1){this.addScript({src:s})}else{this.load(s+'&x=true')}}};w._vwo_code=code;code.init();})();
+  }, 100);
+});
 </script>
 <!-- End VWO Async SmartCode -->
 

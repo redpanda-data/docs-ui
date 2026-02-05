@@ -232,8 +232,8 @@ export default function ChatInterface() {
       setShowScrollDown(!atBottom)
     }
 
-    window.addEventListener('scroll', handleScroll)
-    window.addEventListener('resize', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll, { passive: true })
     handleScroll()
     return () => {
       window.removeEventListener('scroll', handleScroll)

@@ -17,8 +17,8 @@
       }
     }
 
-    // Check on scroll
-    window.addEventListener('scroll', toggleBackToTop)
+    // Check on scroll (passive for performance)
+    window.addEventListener('scroll', toggleBackToTop, { passive: true })
 
     // Check initial state
     toggleBackToTop()
@@ -112,7 +112,7 @@
 
   window.addEventListener('load', function () {
     onScroll()
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
     // On initial load, scroll active item into view (e.g., when navigating to a hash)
     scrollActiveIntoView()
   })
