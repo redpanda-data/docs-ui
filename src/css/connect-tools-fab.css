@@ -258,15 +258,15 @@ html[data-theme="dark"] .connect-tools-menu {
 }
 
 /* Dark mode scrollbar for TOC */
-html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu {
+html[data-theme="dark"] .toc.sidebar.has-toc-tools .toc-menu {
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 
-html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb {
+html[data-theme="dark"] .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.25);
 }
 
-html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb:hover {
+html[data-theme="dark"] .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -284,19 +284,19 @@ html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scroll
 }
 
 /* ============================================
-   TOC Connect Tools Section (Desktop)
+   TOC Tools Section (Desktop)
    ============================================ */
 
-/* When Connect Tools is visible, restructure TOC as flex column (desktop only) */
+/* When TOC tools is visible, restructure TOC as flex column (desktop only) */
 @media screen and (min-width: 1025px) {
-  .toc.sidebar.has-connect-tools {
+  .toc.sidebar.has-toc-tools {
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - var(--navbar-height) - var(--announcement-bar-height) - 3rem);
   }
 
-  /* Make toc-menu scrollable when Connect Tools is visible */
-  .toc.sidebar.has-connect-tools .toc-menu {
+  /* Make toc-menu scrollable when tools section is visible */
+  .toc.sidebar.has-toc-tools .toc-menu {
     flex: 1;
     overflow-y: auto;
     min-height: 0; /* Allow shrinking below min-height */
@@ -305,47 +305,47 @@ html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scroll
     scrollbar-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)) transparent;
   }
 
-  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar {
+  .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar {
     width: 6px;
   }
 
-  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-track {
+  .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb {
+  .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar-thumb {
     background-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2));
     border-radius: 3px;
   }
 
-  .toc.sidebar.has-connect-tools .toc-menu::-webkit-scrollbar-thumb:hover {
+  .toc.sidebar.has-toc-tools .toc-menu::-webkit-scrollbar-thumb:hover {
     background-color: var(--scrollbar-thumb-hover-color, rgba(0, 0, 0, 0.35));
   }
 
   /* Keep everything after toc-menu at the bottom */
-  .toc.sidebar.has-connect-tools .toc-connect-tools,
-  .toc.sidebar.has-connect-tools .thumbs {
+  .toc.sidebar.has-toc-tools .toc-tools,
+  .toc.sidebar.has-toc-tools .thumbs {
     flex-shrink: 0;
   }
 
-  .toc.sidebar.has-connect-tools .thumbs {
+  .toc.sidebar.has-toc-tools .thumbs {
     margin-top: 1rem;
     padding: 0;
   }
 }
 
-.toc-connect-tools {
+.toc-tools {
   display: none;
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--toc-border-color);
 }
 
-.toc-connect-tools.is-visible {
+.toc-tools.is-visible {
   display: block;
 }
 
-.toc-connect-tools h4 {
+.toc-tools h4 {
   color: var(--toc-heading-font-color);
   font-size: var(--secondary-font-size);
   font-family: var(--body-font-family-bold);
@@ -354,17 +354,17 @@ html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scroll
   padding: 0;
 }
 
-.toc-connect-tools-list {
+.toc-tools-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.toc-connect-tools-list li {
+.toc-tools-list li {
   margin: 0;
 }
 
-.toc-connect-tools-list a {
+.toc-tools-list a {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -375,11 +375,11 @@ html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scroll
   border-left: none;
 }
 
-.toc-connect-tools-list a:hover {
+.toc-tools-list a:hover {
   color: var(--link-highlight-color);
 }
 
-.toc-connect-tools-list svg {
+.toc-tools-list svg {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
@@ -388,7 +388,7 @@ html[data-theme="dark"] .toc.sidebar.has-connect-tools .toc-menu::-webkit-scroll
 
 /* Hide TOC section on mobile (use FAB instead) */
 @media screen and (max-width: 1023px) {
-  .toc-connect-tools {
+  .toc-tools {
     display: none !important;
   }
 }

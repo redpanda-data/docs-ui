@@ -13,12 +13,11 @@
   <div class="toc-menu"></div>
   {{!-- Configurable tools section - components can define toc-tools-title and toc-tools-links in antora.yml --}}
   {{#if page.componentVersion.asciidoc.attributes.toc-tools-title}}
-  <div class="toc-connect-tools is-visible" id="toc-connect-tools">
+  <div class="toc-tools is-visible" id="toc-tools">
     <h4>{{{page.componentVersion.asciidoc.attributes.toc-tools-title}}}</h4>
-    <ul class="toc-connect-tools-list">
+    <ul class="toc-tools-list">
       {{#each (obj page.componentVersion.asciidoc.attributes.toc-tools-links)}}
       <li>
-        {{!-- external URLs bypass resolution; URLs starting with / are already paths; others are Antora resource IDs --}}
         <a href="{{#if this.external}}{{{this.url}}}{{else if (starts-with this.url '/')}}{{{this.url}}}{{else}}{{{relativize (resolve-resource this.url)}}}{{/if}}"{{#if this.external}} target="_blank" rel="noopener"{{/if}}>
           {{#if (eq this.icon 'terminal')}}
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

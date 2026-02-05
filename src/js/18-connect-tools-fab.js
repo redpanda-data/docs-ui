@@ -9,11 +9,11 @@
   // This JS only handles interactive behavior (FAB menu, first-time tooltip)
 
   // Add class to parent sidebar for styling (avoids expensive :has() selector)
-  var tocConnectTools = document.getElementById('toc-connect-tools')
-  if (tocConnectTools) {
-    var tocSidebar = tocConnectTools.closest('.toc.sidebar')
+  var tocTools = document.getElementById('toc-tools')
+  if (tocTools) {
+    var tocSidebar = tocTools.closest('.toc.sidebar')
     if (tocSidebar) {
-      tocSidebar.classList.add('has-connect-tools')
+      tocSidebar.classList.add('has-toc-tools')
     }
   }
 
