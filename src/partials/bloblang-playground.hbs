@@ -509,9 +509,8 @@ const mockConnectData = {
 
 // Fetch Redpanda Connect component data for dynamic completions
 async function fetchConnectCompletions() {
-  // If running on localhost, use mock data to avoid CORS issues
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    console.log('Using mock Connect data for local development');
+  // Use mock data on docs-ui preview site - JSON files don't exist there
+  if (window.location.hostname.includes('docs-ui.netlify.app')) {
     return extractCompletionsFromConnectData(mockConnectData);
   }
 
@@ -525,10 +524,9 @@ async function fetchConnectCompletions() {
       if (result.length > 0) {
         return result;
       }
-      console.log(`Latest version ${version} returned no completions, trying fallbacks`);
     }
   } catch (e) {
-    console.log('Could not fetch latest Connect version, trying fallbacks', e);
+    // Silently fall back to known versions
   }
 
   // Fallback: try known recent versions
@@ -538,26 +536,21 @@ async function fetchConnectCompletions() {
     if (result.length > 0) return result;
   }
 
-  console.log('Using static completions only');
   return [];
 }
 
 async function tryFetchConnectJSON(version) {
   try {
     const url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
-    console.log(`Trying to fetch Connect completions from: ${url}`);
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.log(`Version ${version} not found`);
       return [];
     }
 
     const data = await response.json();
-    console.log(`Successfully loaded Connect ${version} data`);
     return extractCompletionsFromConnectData(data);
   } catch (e) {
-    console.log(`Failed to fetch Connect ${version}:`, e);
     return [];
   }
 }
@@ -629,10 +622,8 @@ function extractCompletionsFromConnectData(data) {
         completions.push(completion);
       });
     }
-
-    console.log(`Extracted ${completions.length} dynamic completions from Connect data`);
   } catch (e) {
-    console.error('Error parsing Connect data:', e);
+    // Silently continue with whatever completions we have
   }
 
   return completions;
@@ -1340,7 +1331,6 @@ document.addEventListener("DOMContentLoaded", () => {
       enableSnippets: true
     });
     aceMappingEditor.completers = [bloblangCompleter];
-    console.log('Bloblang autocomplete enabled');
 
     // Trigger autocomplete on specific characters
     aceMappingEditor.commands.on("afterExec", function(e) {
@@ -1369,10 +1359,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Load dynamic completions from Connect JSON (async)
     fetchConnectCompletions().then(completions => {
       dynamicCompletions = completions;
-      const totalCount = completions.length + staticBloblangCompletions.length;
-      console.log(`✓ Loaded ${completions.length} dynamic Bloblang completions (${totalCount} total)`);
-    }).catch(err => {
-      console.warn('⚠ Could not load dynamic completions, using static only:', err);
+    }).catch(() => {
+      // Fall back to static completions silently
     });
   } catch (e) {
     console.warn('Could not enable autocomplete:', e);

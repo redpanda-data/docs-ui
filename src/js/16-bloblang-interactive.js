@@ -134,7 +134,7 @@
       const data = await response.json();
       return data;
     } catch (e) {
-      console.log(`Failed to fetch Connect ${version}:`, e);
+      // Silent fail - expected when trying fallback versions
       return null;
     }
   }
@@ -257,7 +257,7 @@
         }
       }
     } catch (e) {
-      console.log('Could not fetch Connect version from antora.yml', e);
+      // Silent fail - will use fallback versions
     }
 
     return null;
@@ -280,34 +280,37 @@
     docsLoading = true;
 
     try {
-      // Try to get latest version from cached antora.yml
-      let data = null;
-      var latestVersion = await getConnectVersion();
-      if (latestVersion) {
-        data = await tryFetchConnectJSON(latestVersion);
-      }
+      var data = null;
+      var isDocsUiPreview = window.location.hostname.includes('docs-ui.netlify.app');
 
-      // Fallback: try known recent versions
-      if (!data) {
-        var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
-        for (var i = 0; i < fallbackVersions.length; i++) {
-          data = await tryFetchConnectJSON(fallbackVersions[i]);
-          if (data) break;
+      // Skip remote fetches on docs-ui preview site - JSON files don't exist there
+      if (!isDocsUiPreview) {
+        // Try to get latest version from cached antora.yml
+        var latestVersion = await getConnectVersion();
+        if (latestVersion) {
+          data = await tryFetchConnectJSON(latestVersion);
+        }
+
+        // Fallback: try known recent versions
+        if (!data) {
+          var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
+          for (var i = 0; i < fallbackVersions.length; i++) {
+            data = await tryFetchConnectJSON(fallbackVersions[i]);
+            if (data) break;
+          }
         }
       }
 
       // Transform data to our format
       if (data) {
         bloblangDocs = transformConnectData(data);
-        console.log(`Loaded ${Object.keys(bloblangDocs.functions).length} functions and ${Object.keys(bloblangDocs.methods).length} methods`);
       } else {
-        // Fallback to static file if available
+        // Fallback to static file if available (or primary source on localhost)
         try {
-          const response = await fetch(uiRootPath + '/bloblang-docs.json');
+          var response = await fetch(uiRootPath + '/bloblang-docs.json');
           bloblangDocs = await response.json();
-          console.log('Loaded fallback static documentation');
         } catch (err) {
-          console.warn('Could not load any Bloblang documentation');
+          // No documentation available - tooltips will be disabled
           bloblangDocs = { functions: {}, methods: {} };
         }
       }
@@ -322,7 +325,7 @@
 
       return bloblangDocs;
     } catch (error) {
-      console.error('Failed to load Bloblang documentation:', error);
+      // Unexpected error - tooltips will be disabled
       docsLoading = false;
       bloblangDocs = { functions: {}, methods: {} };
 
@@ -621,14 +624,15 @@
     wasmLoading = true;
 
     // WASM path varies by build type:
-    // - UI Preview (local dev): /_/blobl.wasm
     // - Production/Netlify: /blobl.wasm (site root)
+    // - UI Preview (local dev): /_/blobl.wasm
+    // Use isUiPreview variable set in head-scripts.hbs to determine correct path
     const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
     const siteRoot = typeof siteRootPath !== 'undefined' ? siteRootPath : '';
-    const wasmPaths = [
-      rootPath + '/blobl.wasm',
-      siteRoot + '/blobl.wasm'
-    ];
+    const isPreview = typeof isUiPreview !== 'undefined' ? isUiPreview : false;
+
+    // Select the correct path based on environment - no fallback to avoid 404s
+    const wasmPath = isPreview ? rootPath + '/blobl.wasm' : siteRoot + '/blobl.wasm';
 
     wasmLoadPromise = new Promise((resolve, reject) => {
       loadRequiredScripts()
@@ -638,41 +642,26 @@
             return;
           }
 
-          // Try each path until one works
-          function tryLoadWasm(paths) {
-            if (paths.length === 0) {
-              reject(new Error('WASM file not found'));
-              return;
-            }
-
-            const wasmPath = paths[0];
-            const go = new Go();
-
-            fetch(wasmPath)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('HTTP ' + response.status);
-                }
-                const responseClone = response.clone();
-                return WebAssembly.instantiateStreaming(response, go.importObject)
-                  .catch(async () => {
-                    const bytes = await responseClone.arrayBuffer();
-                    return WebAssembly.instantiate(bytes, go.importObject);
-                  });
-              })
-              .then((result) => {
-                go.run(result.instance);
-                wasmLoaded = true;
-                wasmLoading = false;
-                resolve();
-              })
-              .catch(() => {
-                // Try next path
-                tryLoadWasm(paths.slice(1));
-              });
-          }
-
-          tryLoadWasm(wasmPaths);
+          const go = new Go();
+          fetch(wasmPath)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error('WASM file not found at ' + wasmPath);
+              }
+              const responseClone = response.clone();
+              return WebAssembly.instantiateStreaming(response, go.importObject)
+                .catch(async () => {
+                  const bytes = await responseClone.arrayBuffer();
+                  return WebAssembly.instantiate(bytes, go.importObject);
+                });
+            })
+            .then((result) => {
+              go.run(result.instance);
+              wasmLoaded = true;
+              wasmLoading = false;
+              resolve();
+            })
+            .catch(reject);
         })
         .catch(reject);
     });
