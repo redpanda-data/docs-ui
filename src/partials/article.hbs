@@ -73,7 +73,7 @@
     // Initialize tooltips for limited availability badges if present
     const topLimitedAvailabilityBadge = metadataContainer.querySelector(".limited-availability-label p");
     const navLimitedAvailabilityBadge = navMetadataContainer.querySelector(".nav-limited-availability-label");
-    if (topLimitedAvailabilityBadge && navLimitedAvailabilityBadge) {
+    if (topLimitedAvailabilityBadge) {
       tippy(topLimitedAvailabilityBadge, {
         content: "{{page.attributes.limited-availability-text}}",
         animation: "scale",
@@ -81,7 +81,10 @@
         touch: "hold",
         interactive: true,
         allowHTML: true,
+        appendTo: () => document.body,
       });
+    }
+    if (navLimitedAvailabilityBadge) {
       tippy(navLimitedAvailabilityBadge, {
         content: "{{page.attributes.limited-availability-text}}",
         animation: "scale",
@@ -89,6 +92,7 @@
         touch: "hold",
         interactive: true,
         allowHTML: true,
+        appendTo: () => document.body,
       });
     }
 

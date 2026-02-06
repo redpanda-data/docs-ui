@@ -385,14 +385,8 @@ a.nav-text {
 
 .nav-link.cloud-limited-availability::after {
   height: 20px;
-  display: inline-block;
-  background-color: var(--limited-availability-label-background);
-  color: var(--limited-availability-label-color);
-  font-weight: bold;
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 10px;
-  margin-left: 6px;
-  content: 'Limited Availability';
-  vertical-align: middle;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: '(Limited)';
 }

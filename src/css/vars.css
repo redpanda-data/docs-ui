@@ -122,8 +122,9 @@ html[data-theme=dark] {
   --beta-label-background: var(--link-highlight-color);
   --beta-label-border: var(--slate-800);
   --limited-availability-label-color: #fff;
-  --limited-availability-label-background: var(--color-primitives-global-orange-orange-600);
-  --limited-availability-label-border: var(--color-primitives-global-orange-orange-800);
+  --limited-availability-label-background: var(--amber-600);
+  --limited-availability-label-border: var(--amber-800);
+  --limited-availability-highlight-background-color: rgba(202, 133, 4, 0.08);
   --limited-availability-highlight-background-color: rgba(248, 134, 57, 0.08);
   /* doc */
   --doc-font-size: inherit;
