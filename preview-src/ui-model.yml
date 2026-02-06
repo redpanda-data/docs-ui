@@ -70,7 +70,7 @@ page:
   origin:
     private: false
   attributes:
-    page-limited-availability: true
+    limited-availability: true
     limited-availability-text: 'This feature has limited availability. Contact Redpanda for access.'
   previous:
     content: Quickstart

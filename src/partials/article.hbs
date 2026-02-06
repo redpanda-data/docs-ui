@@ -22,7 +22,7 @@
       <p>beta</p>
     </div>
   {{/if}}
-  {{#if page.attributes.page-limited-availability}}
+  {{#if page.attributes.limited-availability}}
     <div class="limited-availability-label">
       <p>Limited Availability</p>
     </div>
@@ -32,7 +32,7 @@
   {{/if}}
   {{> markdown-dropdown}}
 </div>
-{{#if (or page.attributes.beta page.attributes.page-limited-availability page.attributes.context-switcher)}}
+{{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.context-switcher)}}
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const metadataContainer = document.querySelector(".metadata--main");
