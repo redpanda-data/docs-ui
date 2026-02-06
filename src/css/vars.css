@@ -121,6 +121,10 @@ html[data-theme=dark] {
   --beta-label-color: #fff;
   --beta-label-background: var(--link-highlight-color);
   --beta-label-border: var(--slate-800);
+  --limited-availability-label-color: #fff;
+  --limited-availability-label-background: var(--color-primitives-global-orange-orange-600);
+  --limited-availability-label-border: var(--color-primitives-global-orange-orange-800);
+  --limited-availability-highlight-background-color: rgba(248, 134, 57, 0.08);
   /* doc */
   --doc-font-size: inherit;
   --doc-font-size--desktop: var(--body-font-size);

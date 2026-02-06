@@ -69,6 +69,9 @@ page:
   editUrl: http://example.com/project-xyz/blob/main/index.adoc
   origin:
     private: false
+  attributes:
+    page-limited-availability: true
+    limited-availability-text: 'This feature has limited availability. Contact Redpanda for access.'
   previous:
     content: Quickstart
     url: '#'
@@ -332,5 +335,8 @@ page:
         urlType: internal
       - content: Data Loss Prevention
         url: '#'
+        urlType: internal
+      - content: Limited Availability Test
+        url: /xyz/24.3/limited-availability-test.html
         urlType: internal
 

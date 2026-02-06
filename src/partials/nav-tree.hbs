@@ -5,7 +5,7 @@
     {{#if ./content}}
     <div class="item {{#if (eq ./url @root.page.url)}}is-current-page{{/if}} {{#if ./items.length}}dropdown{{/if}}">
     {{#if ./url}}
-    <a class="nav-link {{~#if (is-beta-feature ./url)}} cloud-beta{{~/if}}" href="
+    <a class="nav-link {{~#if (is-beta-feature ./url)}} cloud-beta{{~/if}}{{~#if (is-limited-availability-feature ./url)}} cloud-limited-availability{{~/if}}" href="
       {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
       {{~else}}{{{./url}}}{{~/if}}">{{{./content}}} </a>
     {{else}}
