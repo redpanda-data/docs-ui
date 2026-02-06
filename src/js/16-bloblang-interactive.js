@@ -535,6 +535,11 @@
       openBloblangPlayground(mapping, inputData, metadata);
     });
 
+    // Preload WASM and scripts on hover for faster "Try It" experience
+    button.addEventListener('mouseenter', () => {
+      loadRequiredScripts().then(() => loadBloblangWasm());
+    }, { once: true });
+
     // Add to toolbox
     toolbox.appendChild(button);
 
@@ -780,7 +785,7 @@
           </div>
         </div>
         <div class="mini-playground-footer">
-          <div class="mini-playground-status">Loading WASM...</div>
+          <div class="mini-playground-status">Loading...</div>
           <div class="mini-playground-actions">
             <button class="mini-playground-button mini-playground-run" disabled>Run</button>
             <button class="mini-playground-button mini-playground-copy-output">Copy Output</button>
@@ -831,7 +836,7 @@
           inputEditor.focus();
         }
 
-        showStatus('Loading WASM...', 'info');
+        showStatus('Loading...', 'info');
 
         // Now load WASM
         return loadBloblangWasm();

@@ -1,0 +1,106 @@
+{{!--
+  Component Tools FAB (Floating Action Button)
+  ============================================
+  A FAB is a circular button that floats above the UI, typically in the
+  bottom-right corner. It provides quick access to primary actions.
+
+  This is the mobile-only version of the tools section shown in the TOC sidebar.
+  Both the FAB and TOC tools are configured per-component via antora.yml attributes:
+    - toc-tools-title: Section heading displayed in tooltip and TOC
+    - toc-tools-links: Array of link objects (url, text, description, icon, external)
+
+  Example antora.yml configuration:
+    asciidoc:
+      attributes:
+        toc-tools-title: Connect Tools
+        toc-tools-links:
+          - url: redpanda-connect:guides:bloblang/playground.adoc
+            text: Bloblang Playground
+            description: Interactive data mapping
+            icon: terminal
+          - url: https://github.com/example/repo
+            text: External Link
+            description: Opens in new tab
+            icon: layers
+            external: true
+--}}
+{{!-- Visibility controlled by body.hbs conditional based on toc-tools-title attribute --}}
+<div class="component-tools-fab" id="component-tools-fab" aria-label="{{{page.componentVersion.asciidoc.attributes.toc-tools-title}}}">
+  {{!-- Main FAB button --}}
+  <button
+    class="component-tools-fab-trigger"
+    id="component-tools-fab-trigger"
+    aria-expanded="false"
+    aria-controls="component-tools-menu"
+    aria-label="Open {{{page.componentVersion.asciidoc.attributes.toc-tools-title}}} menu"
+    title="{{{page.componentVersion.asciidoc.attributes.toc-tools-title}}}"
+  >
+    <svg class="fab-icon fab-icon-tools" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+    </svg>
+    <svg class="fab-icon fab-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  {{!-- First-time tooltip --}}
+  <div class="component-tools-fab-tooltip" id="component-tools-fab-tooltip" role="tooltip">
+    <span class="tooltip-text">Quick access to {{{page.componentVersion.asciidoc.attributes.toc-tools-title}}}</span>
+    <button class="tooltip-dismiss" aria-label="Dismiss tooltip">&times;</button>
+  </div>
+
+  {{!-- Expanded menu - dynamically populated from component attributes --}}
+  <div class="component-tools-menu" id="component-tools-menu" role="menu" aria-hidden="true">
+    {{#each (obj page.componentVersion.asciidoc.attributes.toc-tools-links)}}
+    <a
+      href="{{#if this.external}}{{{this.url}}}{{else if (starts-with this.url '/')}}{{{this.url}}}{{else}}{{{relativize (resolve-resource this.url)}}}{{/if}}"
+      class="component-tools-menu-item"
+      role="menuitem"
+      {{#if this.external}}target="_blank" rel="noopener"{{/if}}
+    >
+      <span class="menu-item-icon">
+        {{#if (eq this.icon 'terminal')}}
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+        {{else if (eq this.icon 'layers')}}
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+        {{else if (eq this.icon 'book')}}
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        {{else if (eq this.icon 'code')}}
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        {{else if (eq this.icon 'settings')}}
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        {{else}}
+        {{!-- Default icon: link --}}
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+        {{/if}}
+      </span>
+      <span class="menu-item-text">
+        <span class="menu-item-title">{{{this.text}}}</span>
+        {{#if this.description}}
+        <span class="menu-item-desc">{{{this.description}}}</span>
+        {{/if}}
+      </span>
+    </a>
+    {{/each}}
+  </div>
+</div>

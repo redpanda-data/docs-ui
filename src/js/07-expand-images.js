@@ -27,7 +27,8 @@
       modalContainer.appendChild(clone)
       modalOverlay.classList.add('active')
     })
-    block.addEventListener('touchmove', (e) => e.preventDefault())
+    // Note: Using passive: false is intentional here to prevent scrolling while expanding
+    block.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false })
   })
 
   modalClose.addEventListener('click', () => {

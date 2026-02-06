@@ -11,6 +11,43 @@
     {{/if}}
   </div>
   <div class="toc-menu"></div>
+  {{!-- Configurable tools section - components can define toc-tools-title and toc-tools-links in antora.yml --}}
+  {{#if page.componentVersion.asciidoc.attributes.toc-tools-title}}
+  <div class="toc-tools is-visible" id="toc-tools">
+    <h4>{{{page.componentVersion.asciidoc.attributes.toc-tools-title}}}</h4>
+    <ul class="toc-tools-list">
+      {{#each (obj page.componentVersion.asciidoc.attributes.toc-tools-links)}}
+      <li>
+        <a href="{{#if this.external}}{{{this.url}}}{{else if (starts-with this.url '/')}}{{{this.url}}}{{else}}{{{relativize (resolve-resource this.url)}}}{{/if}}"{{#if this.external}} target="_blank" rel="noopener"{{/if}}>
+          {{#if (eq this.icon 'terminal')}}
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          {{else if (eq this.icon 'layers')}}
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+          {{else if (eq this.icon 'book')}}
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          {{else if (eq this.icon 'link')}}
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          {{/if}}
+          {{{this.text}}}
+        </a>
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
   <div class="thumbs">
     <ul style="list-style:none">
       {{#each page.attributes.additional-resources}}

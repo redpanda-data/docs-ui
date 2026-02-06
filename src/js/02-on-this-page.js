@@ -17,8 +17,8 @@
       }
     }
 
-    // Check on scroll
-    window.addEventListener('scroll', toggleBackToTop)
+    // Check on scroll (passive for performance)
+    window.addEventListener('scroll', toggleBackToTop, { passive: true })
 
     // Check initial state
     toggleBackToTop()
@@ -69,8 +69,17 @@
 
   var title = document.createElement('h3')
   title.textContent = sidebar.dataset.title || ''
-  menu.appendChild(title)
   menu.appendChild(list)
+
+  // Insert h3 BEFORE .toc-menu so it's outside the scrollable area
+  // This keeps the h3 visible while the menu content scrolls
+  if (menu.parentNode) {
+    menu.parentNode.insertBefore(title, menu)
+  } else {
+    // Menu was dynamically created, add both to sidebar
+    sidebar.insertBefore(title, sidebar.firstChild)
+    sidebar.insertBefore(menu, title.nextSibling)
+  }
 
   var startOfContent = !document.getElementById('toc') && article.querySelector('h1.page ~ :not(.is-before-toc)')
   if (startOfContent) {
@@ -79,10 +88,10 @@
     var tocMenuDropdown = document.createElement('div')
     tocMenuDropdown.className = 'toc-menu-dropdown'
     var clonedMenu = menu.cloneNode(true)
-    var dropdownTitle = clonedMenu.querySelector('h3')
+    // Create a new h3 for the dropdown (h3 is now outside menu in sidebar)
+    var dropdownTitle = document.createElement('h3')
     dropdownTitle.classList.add('discrete')
     dropdownTitle.textContent = 'On this page'
-    clonedMenu.removeChild(dropdownTitle)
     tocMenuDropdown.insertBefore(dropdownTitle, tocMenuDropdown.firstChild)
     tocMenuDropdown.appendChild(clonedMenu)
     embeddedToc.appendChild(tocMenuDropdown)
@@ -107,15 +116,33 @@
     })
   }
 
+  // Get the scrollable container - could be menu (with Connect Tools) or list
+  var scrollableContainer = menu
+
   window.addEventListener('load', function () {
     onScroll()
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    // On initial load, scroll active item into view (e.g., when navigating to a hash)
+    scrollActiveIntoView()
   })
+
+  function scrollActiveIntoView () {
+    var activeLink = scrollableContainer.querySelector('.is-active')
+    if (activeLink && scrollableContainer.scrollHeight > scrollableContainer.offsetHeight) {
+      // Center the active item in the scrollable area
+      var containerHeight = scrollableContainer.offsetHeight
+      var linkTop = activeLink.offsetTop - scrollableContainer.offsetTop
+      var linkHeight = activeLink.offsetHeight
+      scrollableContainer.scrollTop = Math.max(0, linkTop - (containerHeight / 2) + (linkHeight / 2))
+    }
+  }
 
   function onScroll () {
     var scrolledBy = window.scrollY
     var buffer = getNumericStyleVal(document.documentElement, 'fontSize') * 1.15
-    var ceil = article.offsetTop
+    // Account for sticky header height - use scroll-padding-top or fall back to article offset
+    var scrollPadding = getNumericStyleVal(document.documentElement, 'scrollPaddingTop') || 0
+    var ceil = scrollPadding || article.offsetTop
     if (scrolledBy && window.innerHeight + scrolledBy + 2 >= document.documentElement.scrollHeight) {
       lastActiveFragment = Array.isArray(lastActiveFragment) ? lastActiveFragment : Array(lastActiveFragment || 0)
       var activeFragments = []
@@ -129,7 +156,7 @@
           links[lastActiveFragment.shift()].classList.remove('is-active')
         }
       })
-      list.scrollTop = list.scrollHeight - list.offsetHeight
+      scrollableContainer.scrollTop = scrollableContainer.scrollHeight - scrollableContainer.offsetHeight
       lastActiveFragment = activeFragments.length > 1 ? activeFragments : activeFragments[0]
       return
     }
@@ -149,8 +176,13 @@
       if (lastActiveFragment) links[lastActiveFragment].classList.remove('is-active')
       var activeLink = links[activeFragment]
       activeLink.classList.add('is-active')
-      if (list.scrollHeight > list.offsetHeight) {
-        list.scrollTop = Math.max(0, activeLink.offsetTop + activeLink.offsetHeight - list.offsetHeight)
+      if (scrollableContainer.scrollHeight > scrollableContainer.offsetHeight) {
+        // Scroll to keep active item visible, centered if possible
+        var containerHeight = scrollableContainer.offsetHeight
+        var linkTop = activeLink.offsetTop - scrollableContainer.offsetTop
+        var linkHeight = activeLink.offsetHeight
+        var targetScroll = linkTop - (containerHeight / 2) + (linkHeight / 2)
+        scrollableContainer.scrollTop = Math.max(0, targetScroll)
       }
       lastActiveFragment = activeFragment
     } else if (lastActiveFragment) {

@@ -30,7 +30,10 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
       })
       const asciidoc = { extensions }
       for (const component of baseUiModel.site.components) {
-        for (const version of component.versions || []) version.asciidoc = asciidoc
+        for (const version of component.versions || []) {
+          // Merge asciidoc properties, preserving attributes from ui-model.yml
+          version.asciidoc = { ...version.asciidoc, ...asciidoc }
+        }
       }
       baseUiModel = { ...baseUiModel, env: process.env }
       delete baseUiModel.asciidoc
