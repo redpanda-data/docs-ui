@@ -131,78 +131,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script defer src="https://plausible.io/js/plausible.js" data-domain="redpanda.com"></script>
 
 {{#if env.ALGOLIA_API_KEY}}
-<!-- Algolia Search - Lazy loaded on search interaction for performance -->
-<link rel="prefetch" href="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-js.js" as="script">
-<link rel="prefetch" href="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js" as="script">
-<script>
-(function() {
-  var algoliaLoaded = false;
-  var uiRoot = '{{{uiRootPath}}}';
-  var pendingFocus = null;
-
-  function loadScript(src) {
-    return new Promise(function(resolve, reject) {
-      var script = document.createElement('script');
-      script.src = src;
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  }
-
-  function loadAlgoliaScripts(targetElement) {
-    if (algoliaLoaded) return;
-    algoliaLoaded = true;
-    if (targetElement) pendingFocus = targetElement;
-
-    var styles = [
-      uiRoot + '/css/vendor/algolia/autocomplete-theme-classic.css',
-      uiRoot + '/css/vendor/algolia/autocomplete-tags-plugin.css'
-    ];
-    styles.forEach(function(href) {
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = href;
-      document.head.appendChild(link);
-    });
-
-    // Load scripts sequentially to ensure dependencies are met
-    loadScript(uiRoot + '/js/vendor/algolia/algoliasearch-lite.umd.js')
-      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-js.js'); })
-      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-tags.js'); })
-      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-recent-searches.js'); })
-      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-query-suggestions.js'); })
-      .then(function() { return loadScript(uiRoot + '/js/vendor/algolia/autocomplete-plugin-algolia-insights.js'); })
-      .then(function() {
-        // Dispatch event to trigger Algolia initialization
-        window.dispatchEvent(new CustomEvent('algolia-scripts-loaded'));
-      });
-  }
-
-  // Load on search focus or input click
-  document.addEventListener('click', function(e) {
-    var target = e.target.closest('.search, .aa-Input, [data-search], input[type="search"], #autocomplete');
-    if (target) {
-      loadAlgoliaScripts(target);
-    }
-  });
-  document.addEventListener('focusin', function(e) {
-    var target = e.target.closest('.search, .aa-Input, [data-search], input[type="search"], #autocomplete');
-    if (target) {
-      loadAlgoliaScripts(target);
-    }
-  });
-  // Fallback: Load after idle
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(function() { setTimeout(function() { loadAlgoliaScripts(null); }, 3000); });
-  } else {
-    setTimeout(function() { loadAlgoliaScripts(null); }, 3000);
-  }
-
-  // Expose for algolia-script.hbs to check pending focus
-  window.__algoliaGetPendingFocus = function() { var f = pendingFocus; pendingFocus = null; return f; };
-})();
-</script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-js.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/algoliasearch-lite.umd.js"></script>
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/autocomplete-theme-classic.css"/>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-tags.js"></script>
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/autocomplete-tags-plugin.css">
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-recent-searches.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-query-suggestions.js"></script>
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/autocomplete-plugin-algolia-insights.js"></script>
 {{/if}}
 <script>
   var uiRootPath="{{{uiRootPath}}}"

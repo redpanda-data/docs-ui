@@ -884,37 +884,7 @@ function initAlgolia() {
    * This is intentionally namespaced and “private”. See notes below.
    */
   window.__algoliaAutocompleteInstance = autocompleteInstance;
-
-  // If user clicked search before scripts loaded, focus the input now
-  var pendingFocus = window.__algoliaGetPendingFocus && window.__algoliaGetPendingFocus();
-  if (pendingFocus) {
-    var input = document.querySelector('.aa-Input');
-    if (input) {
-      setTimeout(function() { input.focus(); }, 100);
-    }
-  }
 }
 
-// Initialize when scripts are available
-function tryInitAlgolia() {
-  // Check if all required libraries are loaded
-  if (window['@algolia/autocomplete-js'] &&
-      window['@algolia/autocomplete-plugin-tags'] &&
-      window['@algolia/autocomplete-plugin-recent-searches'] &&
-      window.algoliasearch) {
-    initAlgolia();
-    return true;
-  }
-  return false;
-}
-
-// Try immediately if scripts already loaded (e.g., not lazy loaded)
-if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', tryInitAlgolia);
-} else {
-  // DOM already loaded, try init now or wait for lazy-loaded scripts
-  if (!tryInitAlgolia()) {
-    window.addEventListener('algolia-scripts-loaded', tryInitAlgolia);
-  }
-}
+window.addEventListener('DOMContentLoaded', initAlgolia);
 </script>
