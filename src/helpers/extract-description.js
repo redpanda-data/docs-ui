@@ -3,9 +3,9 @@
 /**
  * Extract a clean description from page content for meta tags
  * This helper strips HTML, removes excess whitespace, and truncates to a specified length
- * 
+ *
  * @param {string} content - The HTML content to extract description from
- * @param {number} maxLength - Maximum length of the description (default: 160)
+ * @param {number|object} maxLength - Maximum length (default: 160) or Handlebars options hash
  * @returns {string} Clean description text
  */
 module.exports = (content, maxLength = 160) => {
@@ -13,9 +13,17 @@ module.exports = (content, maxLength = 160) => {
     return ''
   }
 
+  // Handle Handlebars options hash
+  if (typeof maxLength === 'object' && maxLength.hash) {
+    maxLength = typeof maxLength.hash.maxLength === 'number' ? maxLength.hash.maxLength : 160
+  }
+
+  // Ensure maxLength is a number
+  maxLength = Number(maxLength) || 160
+
   // Remove HTML tags
   let cleanText = content.replace(/<[^>]*>/g, ' ')
-  
+
   // Remove AsciiDoc markup patterns
   cleanText = cleanText
     .replace(/\[.*?\]/g, '') // Remove attributes like [.class]
@@ -25,7 +33,7 @@ module.exports = (content, maxLength = 160) => {
     .replace(/`([^`]+)`/g, '$1') // Remove code markers
     .replace(/\+{3,}[\s\S]*?\+{3,}/g, '') // Remove code blocks
     .replace(/----[\s\S]*?----/g, '') // Remove literal blocks
-    
+
   // Clean up whitespace
   cleanText = cleanText
     .replace(/\s+/g, ' ') // Replace multiple spaces with single space
@@ -35,7 +43,7 @@ module.exports = (content, maxLength = 160) => {
   // Extract first sentence or paragraph that's meaningful
   const sentences = cleanText.split(/[.!?]+/)
   let description = ''
-  
+
   for (const sentence of sentences) {
     const trimmed = sentence.trim()
     if (trimmed.length > 20) { // Skip very short fragments
@@ -43,12 +51,12 @@ module.exports = (content, maxLength = 160) => {
       break
     }
   }
-  
+
   // If no good sentence found, use the beginning of the content
   if (!description && cleanText.length > 20) {
     description = cleanText
   }
-  
+
   // Truncate to max length, ensuring we don't cut words
   if (description.length > maxLength) {
     const truncated = description.substring(0, maxLength)
@@ -56,6 +64,6 @@ module.exports = (content, maxLength = 160) => {
     description = lastSpace > maxLength * 0.8 ? truncated.substring(0, lastSpace) : truncated
     description += '...'
   }
-  
+
   return description
 }

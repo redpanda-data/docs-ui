@@ -10,13 +10,13 @@ The orange "Limited Availability" badge should appear in three places:
 
 1. **Below this title** - In the main content area
 2. **In the TOC** (right side) - When you scroll, it appears in the sticky navigation
-3. **In the left nav** - As an orange pill-shaped badge next to this page's title
+3. **In the left nav** - An additional (Limited) will be shown next to the page title in the left navigation
 
 == Test the Tooltip
 
 Hover over any of the badges to see the tooltip text:
 
-_"This feature has limited availability. Contact Redpanda for access."_
+_"This feature has limited availability. Contact Redpanda Support for access."_
 
 == Compare with Beta
 
@@ -46,7 +46,7 @@ Additional content for testing the sticky navigation behavior.
 
 Use `:page-limited-availability: true` for features that:
 
-* Require contacting Redpanda for access
+* Require contacting Redpanda Support for access
 * Are in early access programs
 * Need special licensing or approval
 * Have restricted regional availability
