@@ -69,8 +69,17 @@
 
   var title = document.createElement('h3')
   title.textContent = sidebar.dataset.title || ''
-  menu.appendChild(title)
   menu.appendChild(list)
+
+  // Insert h3 BEFORE .toc-menu so it's outside the scrollable area
+  // This keeps the h3 visible while the menu content scrolls
+  if (menu.parentNode) {
+    menu.parentNode.insertBefore(title, menu)
+  } else {
+    // Menu was dynamically created, add both to sidebar
+    sidebar.insertBefore(title, sidebar.firstChild)
+    sidebar.insertBefore(menu, title.nextSibling)
+  }
 
   var startOfContent = !document.getElementById('toc') && article.querySelector('h1.page ~ :not(.is-before-toc)')
   if (startOfContent) {
@@ -79,10 +88,10 @@
     var tocMenuDropdown = document.createElement('div')
     tocMenuDropdown.className = 'toc-menu-dropdown'
     var clonedMenu = menu.cloneNode(true)
-    var dropdownTitle = clonedMenu.querySelector('h3')
+    // Create a new h3 for the dropdown (h3 is now outside menu in sidebar)
+    var dropdownTitle = document.createElement('h3')
     dropdownTitle.classList.add('discrete')
     dropdownTitle.textContent = 'On this page'
-    clonedMenu.removeChild(dropdownTitle)
     tocMenuDropdown.insertBefore(dropdownTitle, tocMenuDropdown.firstChild)
     tocMenuDropdown.appendChild(clonedMenu)
     embeddedToc.appendChild(tocMenuDropdown)
