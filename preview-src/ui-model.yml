@@ -71,7 +71,7 @@ page:
     private: false
   attributes:
     limited-availability: true
-    limited-availability-text: 'This feature has limited availability. Contact Redpanda for access.'
+    limited-availability-text: 'This feature has limited availability. Contact Redpanda Support for access.'
   previous:
     content: Quickstart
     url: '#'
