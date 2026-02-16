@@ -9,6 +9,9 @@
   // Check if current browser supports copy operations
   var supportsCopy = window.navigator.clipboard
 
+  // Check if device is touch-based
+  var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
   // Ensure each <pre> with a <code> child is styled appropriately
   document.querySelectorAll('pre').forEach(function (pre) {
     if (pre.firstElementChild && pre.firstElementChild.tagName.toLowerCase() === 'code') {
@@ -49,7 +52,10 @@
     // Create a "Copy" button (if not suppressed)
     if (supportsCopy && !pre.parentNode.parentNode.classList.contains('no-copy')) {
       ;(copy = document.createElement('button')).className = 'copy-button'
-      copy.setAttribute('title', 'Copy to clipboard')
+      // Only add tooltip on non-touch devices
+      if (!isTouch) {
+        copy.setAttribute('title', 'Copy to clipboard')
+      }
 
       // Create custom duplicate pages icon (two overlapping rectangles)
       var copySvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -98,7 +104,10 @@
     // Create an "Ask AI" button (if Kapa is available)
     if (window.Kapa && !pre.parentNode.parentNode.classList.contains('no-copy')) {
       ;(askAI = document.createElement('button')).className = 'ask-ai-button'
-      askAI.setAttribute('title', 'Ask AI about this code')
+      // Only add tooltip on non-touch devices
+      if (!isTouch) {
+        askAI.setAttribute('title', 'Ask AI about this code')
+      }
 
       // Create sparkles SVG icon
       var sparklesSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')

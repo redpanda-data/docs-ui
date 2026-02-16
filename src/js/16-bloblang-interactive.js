@@ -48,16 +48,18 @@
         continue;
       }
 
-      // Ignore # Out: lines
-      if (trimmed.startsWith('# Out:')) continue;
+      // Ignore # Out: and # Output: lines
+      if (trimmed.startsWith('# Out:') || trimmed.startsWith('# Output:')) continue;
 
-      // Check for # In: directive
-      if (trimmed.startsWith('# In:')) {
+      // Check for # In: or # Input: directive
+      if (trimmed.startsWith('# In:') || trimmed.startsWith('# Input:')) {
         if (!inSeen) {
           inSeen = true;
           currentSection = 'in';
-          const afterIn = trimmed.slice('# In:'.length).trim();
-          if (afterIn) inputLines.push(afterIn);
+          // Extract content after the directive (handle both # In: and # Input:)
+          const colonIndex = trimmed.indexOf(':');
+          const afterDirective = trimmed.slice(colonIndex + 1).trim();
+          if (afterDirective) inputLines.push(afterDirective);
         } else {
           ignoreAll = true;
         }
@@ -404,10 +406,7 @@
    * Add tooltips to Bloblang tokens
    */
   function addDocumentationTooltips(codeBlock) {
-    // Skip tooltips on touch devices - hover doesn't work naturally
-    if (isTouchDevice()) {
-      return;
-    }
+    const isTouch = isTouchDevice();
 
     if (!window.tippy) {
       console.warn('Tippy.js not loaded, skipping Bloblang tooltips');
@@ -416,6 +415,29 @@
 
     loadBloblangDocs().then(docs => {
       if (!docs) return;
+
+      // Tippy configuration - different trigger for touch vs mouse
+      const getTippyConfig = (doc) => ({
+        content: createDocTooltip(doc),
+        allowHTML: true,
+        interactive: true,
+        theme: 'bloblang-doc',
+        placement: 'top',
+        maxWidth: 450,
+        appendTo: document.body,
+        // Touch devices: show on click/tap, hide on click outside
+        // Mouse devices: show on hover
+        trigger: isTouch ? 'click' : 'mouseenter focus',
+        hideOnClick: isTouch ? 'toggle' : true,
+        onShow(instance) {
+          // Hide other tooltips
+          document.querySelectorAll('.tippy-box').forEach(box => {
+            if (box !== instance.popper) {
+              box._tippy && box._tippy.hide();
+            }
+          });
+        }
+      });
 
       // Add tooltips to functions
       codeBlock.querySelectorAll('.token.function').forEach(el => {
@@ -428,24 +450,11 @@
           el.setAttribute('tabindex', '0');
           el.setAttribute('role', 'button');
           el.setAttribute('aria-label', `${functionName} function documentation`);
+          if (isTouch) {
+            el.setAttribute('aria-haspopup', 'dialog');
+          }
 
-          tippy(el, {
-            content: createDocTooltip(doc),
-            allowHTML: true,
-            interactive: true,
-            theme: 'bloblang-doc',
-            placement: 'top',
-            maxWidth: 450,
-            appendTo: document.body,
-            onShow(instance) {
-              // Hide other tooltips
-              document.querySelectorAll('.tippy-box').forEach(box => {
-                if (box !== instance.popper) {
-                  box._tippy && box._tippy.hide();
-                }
-              });
-            }
-          });
+          tippy(el, getTippyConfig(doc));
         }
       });
 
@@ -461,23 +470,11 @@
           el.setAttribute('tabindex', '0');
           el.setAttribute('role', 'button');
           el.setAttribute('aria-label', `${methodName} method documentation`);
+          if (isTouch) {
+            el.setAttribute('aria-haspopup', 'dialog');
+          }
 
-          tippy(el, {
-            content: createDocTooltip(doc),
-            allowHTML: true,
-            interactive: true,
-            theme: 'bloblang-doc',
-            placement: 'top',
-            maxWidth: 450,
-            appendTo: document.body,
-            onShow(instance) {
-              document.querySelectorAll('.tippy-box').forEach(box => {
-                if (box !== instance.popper) {
-                  box._tippy && box._tippy.hide();
-                }
-              });
-            }
-          });
+          tippy(el, getTippyConfig(doc));
         }
       });
 
@@ -529,7 +526,6 @@
     button.className = 'try-bloblang-button';
     button.textContent = 'Try It';
     button.setAttribute('aria-label', 'Try this Bloblang mapping');
-    button.setAttribute('data-tippy-content', 'Execute this mapping in a mini-playground');
 
     button.addEventListener('click', () => {
       openBloblangPlayground(mapping, inputData, metadata);
@@ -543,8 +539,9 @@
     // Add to toolbox
     toolbox.appendChild(button);
 
-    // Initialize tooltip if tippy is available
-    if (window.tippy) {
+    // Initialize tooltip if tippy is available (skip on touch devices)
+    if (window.tippy && !isTouchDevice()) {
+      button.setAttribute('data-tippy-content', 'Execute this mapping in a mini-playground');
       tippy(button, {
         delay: [200, 0]
       });
@@ -677,7 +674,7 @@
   /**
    * Initialize an Ace editor instance
    */
-  function initAceEditor(elementId, mode, readOnly, initialValue) {
+  function initAceEditor(elementId, mode, readOnly, initialValue, options = {}) {
     if (typeof ace === 'undefined') {
       return null;
     }
@@ -695,7 +692,9 @@
     editor.session.setMode(mode);
     editor.setReadOnly(readOnly);
     editor.setValue(initialValue || '', -1);
-    editor.setOptions({
+
+    // Build editor options - if maxLines is null, don't set it (use CSS height instead)
+    const editorOptions = {
       fontSize: '13px',
       showPrintMargin: false,
       showGutter: true,
@@ -703,10 +702,16 @@
       tabSize: 2,
       useSoftTabs: true,
       wrap: true,
-      minLines: 4,
-      maxLines: 15,
+      minLines: options.minLines || 4,
       useWorker: false  // Disable workers to avoid 404s for missing worker files
-    });
+    };
+
+    // Only set maxLines if not explicitly null (null = use CSS height with scrollbar)
+    if (options.maxLines !== null) {
+      editorOptions.maxLines = options.maxLines !== undefined ? options.maxLines : 15;
+    }
+
+    editor.setOptions(editorOptions);
 
     // Force light background via CSS as fallback
     const container = document.getElementById(elementId);
@@ -765,31 +770,32 @@
     const initialPlaygroundUrl = buildPlaygroundUrl(inputData || '{}', mapping, metadata || '{}');
 
     overlay.innerHTML = `
-      <div class="bloblang-mini-playground">
+      <div class="bloblang-mini-playground" role="dialog" aria-modal="true" aria-labelledby="playground-title">
         <div class="mini-playground-header">
           <h3 id="playground-title">Bloblang Playground</h3>
           <button class="mini-playground-close" aria-label="Close playground">&times;</button>
         </div>
         <div class="mini-playground-body">
           <div class="mini-playground-section">
-            <label>Input</label>
-            <div id="mini-playground-input" class="mini-ace-editor"></div>
+            <span id="mini-input-label" class="mini-playground-label">Input</span>
+            <div id="mini-playground-input" class="mini-ace-editor" aria-labelledby="mini-input-label" role="textbox" aria-multiline="true"></div>
           </div>
           <div class="mini-playground-section mini-playground-section-mapping">
-            <label>Mapping</label>
-            <div id="mini-playground-mapping" class="mini-ace-editor"></div>
+            <span id="mini-mapping-label" class="mini-playground-label">Mapping</span>
+            <div id="mini-playground-mapping" class="mini-ace-editor" aria-labelledby="mini-mapping-label" role="textbox" aria-multiline="true"></div>
           </div>
           <div class="mini-playground-section">
-            <label>Output</label>
-            <div id="mini-playground-output" class="mini-ace-editor"></div>
+            <span id="mini-output-label" class="mini-playground-label">Output</span>
+            <div id="mini-playground-output" class="mini-ace-editor" aria-labelledby="mini-output-label" role="textbox" aria-multiline="true" aria-readonly="true"></div>
           </div>
         </div>
         <div class="mini-playground-footer">
-          <div class="mini-playground-status">Loading...</div>
+          <div class="mini-playground-status" role="status" aria-live="polite" aria-atomic="true">Loading...</div>
           <div class="mini-playground-actions">
             <button class="mini-playground-button mini-playground-run" disabled>Run</button>
-            <button class="mini-playground-button mini-playground-copy-output">Copy Output</button>
-            <a href="${initialPlaygroundUrl}" target="_blank" class="mini-playground-link">Open Full Playground →</a>
+            <button class="mini-playground-button mini-playground-copy-output" aria-label="Copy output to clipboard">Copy Output</button>
+            <a href="${initialPlaygroundUrl}" target="_blank" rel="noopener" class="mini-playground-link" aria-label="Open Full Playground in new window">Open Full Playground →</a>
+            <span class="mini-playground-shortcut-hint" aria-hidden="true"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> to run</span>
           </div>
         </div>
       </div>
@@ -798,10 +804,39 @@
     document.body.appendChild(overlay);
 
     // Get elements
+    const modal = overlay.querySelector('.bloblang-mini-playground');
     const closeBtn = overlay.querySelector('.mini-playground-close');
     const runBtn = overlay.querySelector('.mini-playground-run');
     const copyBtn = overlay.querySelector('.mini-playground-copy-output');
     const statusEl = overlay.querySelector('.mini-playground-status');
+
+    // Focus trap for accessibility
+    function setupFocusTrap() {
+      const focusableSelector = 'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+      modal.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+
+        const focusableElements = Array.from(modal.querySelectorAll(focusableSelector));
+        if (focusableElements.length === 0) return;
+
+        const firstEl = focusableElements[0];
+        const lastEl = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        } else if (!e.shiftKey && document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      });
+
+      // Focus first focusable element (close button)
+      closeBtn.focus();
+    }
+
+    setupFocusTrap();
 
     // Editor references (will be set after scripts load)
     let inputEditor = null;
@@ -815,9 +850,15 @@
     loadRequiredScripts()
       .then(() => {
         // Initialize Ace editors after scripts are loaded
-        inputEditor = initAceEditor('mini-playground-input', 'ace/mode/json', false, inputData || '{}');
-        mappingEditor = initAceEditor('mini-playground-mapping', 'ace/mode/bloblang', false, mapping);
-        outputEditor = initAceEditor('mini-playground-output', 'ace/mode/json', true, '');
+        // Disable maxLines auto-sizing so CSS controls height and Ace scrollbar works
+        inputEditor = initAceEditor('mini-playground-input', 'ace/mode/json', false, inputData || '{}', { maxLines: null });
+        mappingEditor = initAceEditor('mini-playground-mapping', 'ace/mode/bloblang', false, mapping, { maxLines: null });
+        outputEditor = initAceEditor('mini-playground-output', 'ace/mode/json', true, '', { maxLines: null });
+
+        // Force resize after initialization to ensure scrollbars work
+        if (inputEditor) inputEditor.resize(true);
+        if (mappingEditor) mappingEditor.resize(true);
+        if (outputEditor) outputEditor.resize(true);
 
         // Add keyboard shortcut for running
         if (mappingEditor) {
@@ -897,7 +938,10 @@
 
         if (typeof result === 'string' && result.startsWith('Error:')) {
           showStatus(result, 'error');
-          if (outputEditor) outputEditor.setValue('', -1);
+          if (outputEditor) {
+            outputEditor.setValue('', -1);
+            outputEditor.scrollToRow(0);
+          }
         } else {
           // Format JSON if possible
           let formattedResult = result;
@@ -909,18 +953,36 @@
           } catch {
             // Not JSON, use as-is
           }
-          if (outputEditor) outputEditor.setValue(formattedResult, -1);
+          if (outputEditor) {
+            outputEditor.setValue(formattedResult, -1);
+            // Resize to recalculate scrollbar after content change
+            outputEditor.resize(true);
+            // Explicitly scroll to top to fix Firefox rendering issue
+            outputEditor.scrollToRow(0);
+          }
           showStatus('Success!', 'success');
         }
       } catch (error) {
         showStatus('Error: ' + error.message, 'error');
-        if (outputEditor) outputEditor.setValue('', -1);
+        if (outputEditor) {
+          outputEditor.setValue('', -1);
+          outputEditor.scrollToRow(0);
+        }
       }
     }
 
     function showStatus(message, type) {
       statusEl.textContent = message;
       statusEl.className = 'mini-playground-status mini-playground-status-' + type;
+
+      // Use assertive announcements for errors, polite for other messages
+      if (type === 'error') {
+        statusEl.setAttribute('role', 'alert');
+        statusEl.setAttribute('aria-live', 'assertive');
+      } else {
+        statusEl.setAttribute('role', 'status');
+        statusEl.setAttribute('aria-live', 'polite');
+      }
 
       if (type === 'success') {
         setTimeout(() => {

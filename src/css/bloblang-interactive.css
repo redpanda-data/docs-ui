@@ -244,6 +244,7 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
   padding: 16px;
   animation: bloblang-fadeIn 0.2s ease-out;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 @keyframes bloblang-fadeIn {
@@ -332,6 +333,8 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
   outline: 2px solid var(--link-color, #4474e7);
   outline-offset: 2px;
   opacity: 1;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
 }
 
 .bloblang-mini-playground .mini-playground-body {
@@ -342,12 +345,20 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
   flex-direction: column;
   gap: 16px;
   min-height: 0;
+  overscroll-behavior: contain;
 }
 
 .bloblang-mini-playground .mini-playground-section {
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+/* Output section should expand to fill available space */
+.bloblang-mini-playground .mini-playground-section:last-of-type {
+  flex: 1 1 auto;
+  min-height: 150px;
 }
 
 .bloblang-mini-playground .mini-playground-section label {
@@ -357,15 +368,36 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
   font-size: 0.875rem;
 }
 
-/* Ace Editor containers for mini-playground */
+/* Ace Editor containers for mini-playground - fixed height for scrollbar support */
 .bloblang-mini-playground .mini-ace-editor {
   width: 100%;
-  height: 120px;
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
   border: 1px solid rgba(204, 204, 204, 0.3);
   border-radius: 6px;
   overflow: hidden;
   font-size: 13px;
   background: var(--pre-background, #f6f8fa);
+}
+
+/* Ensure Ace scrollbars are visible */
+.bloblang-mini-playground .ace_scrollbar-v {
+  width: 10px !important;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bloblang-mini-playground .ace_scrollbar-v::-webkit-scrollbar {
+  width: 10px;
+}
+
+.bloblang-mini-playground .ace_scrollbar-v::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+}
+
+.bloblang-mini-playground .ace_scrollbar-v::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
 }
 
 /* Ace requires !important to override inline styles */
@@ -382,8 +414,18 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
   background: var(--pre-background, #f6f8fa) !important;
 }
 
+/* Mapping editor - larger fixed height */
 .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor {
-  height: 160px;
+  height: 180px;
+  min-height: 180px;
+  max-height: 180px;
+}
+
+/* Output section - fixed height with scrollable content */
+.bloblang-mini-playground .mini-playground-section:last-of-type .mini-ace-editor {
+  height: 200px;
+  min-height: 200px;
+  max-height: 200px;
 }
 
 /* Ace Bloblang syntax highlighting - mapping editor (Light mode) */
@@ -541,11 +583,12 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
 }
 
 .bloblang-mini-playground .mini-playground-run:disabled {
-  background: #94a3a8;
-  border-color: #94a3a8;
+  background: #b0b8bf;
+  border-color: #b0b8bf;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 1;
   transform: none;
+  color: #fff;
 }
 
 .bloblang-mini-playground .mini-playground-copy-output {
@@ -605,6 +648,10 @@ html[data-theme="dark"] .bloblang-mini-playground .mini-playground-close {
 html[data-theme="dark"] .bloblang-mini-playground .mini-playground-close:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-close:focus-visible {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 html[data-theme="dark"] .bloblang-mini-playground .mini-playground-body {
@@ -853,11 +900,13 @@ html[data-theme="dark"] .bloblang-mini-playground .mini-playground-status-ready 
   }
 
   .bloblang-mini-playground .mini-ace-editor {
-    height: 100px;
+    min-height: 60px;
+    max-height: 120px;
   }
 
   .bloblang-mini-playground .mini-playground-section-mapping .mini-ace-editor {
-    height: 140px;
+    min-height: 100px;
+    max-height: 200px;
   }
 }
 
@@ -906,4 +955,61 @@ html[data-theme="dark"] .bloblang-mini-playground .mini-playground-status-ready 
     text-align: center;
     padding: 10px 0;
   }
+
+  /* Hide shortcut hint on mobile */
+  .bloblang-mini-playground .mini-playground-shortcut-hint {
+    display: none;
+  }
+}
+
+/* Keyboard shortcut hint styling */
+.bloblang-mini-playground .mini-playground-shortcut-hint {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bloblang-mini-playground .mini-playground-shortcut-hint kbd {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-size: 0.7rem;
+  font-family: inherit;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-shortcut-hint {
+  color: #999;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-shortcut-hint kbd {
+  background: #2d2d2d;
+  border-color: #444;
+  color: #ccc;
+}
+
+/* Touch-friendly tap targets for documentation tokens */
+@media (hover: none) and (pointer: coarse) {
+  .has-documentation {
+    padding: 6px 3px;
+    margin: -6px -3px;
+  }
+}
+
+/* Ensure labels use consistent styling */
+.bloblang-mini-playground .mini-playground-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--body-font-color, #333);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+html[data-theme="dark"] .bloblang-mini-playground .mini-playground-label {
+  color: var(--body-font-color, #e0e0e0);
 }
