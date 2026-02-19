@@ -1456,6 +1456,11 @@ html[data-theme=dark] code[class*=language-] .token.function {
   visibility: visible;
 }
 
+/* Show toolbox when any child has focus (keyboard navigation) */
+.doc .listingblock:focus-within .source-toolbox {
+  visibility: visible;
+}
+
 .doc .source-toolbox .source-lang {
   text-transform: uppercase;
   letter-spacing: 0.075em;

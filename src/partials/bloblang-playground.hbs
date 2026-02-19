@@ -362,8 +362,9 @@ function initializeAceEditor(editorId, mode, readOnly = false, initialValue = ''
   editor.session.setTabSize(TAB_SIZE);
   editor.session.setUseSoftTabs(true);
   editor.setOptions({
-    minLines: 1, // Minimum height
-    maxLines: 50, // Allow growth
+    minLines: 5, // Minimum height
+    wrap: true, // Enable word wrap so long lines are visible
+    // Note: maxLines removed - CSS max-height controls height with proper scrollbars
   });
 
   // Disable ACE's built-in validation to avoid conflicting error messages

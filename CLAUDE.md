@@ -111,3 +111,43 @@ Releases are automated via GitHub Actions. Push a new tag to trigger:
 3. Bundle upload to GitHub releases
 
 The bundle URL pattern: `https://github.com/redpanda-data/docs-ui/releases/latest/download/ui-bundle.zip`
+
+## Bloblang Playground Features
+
+The Bloblang Playground allows users to interactively execute Bloblang mappings. There are two implementations:
+
+### Full Playground (`src/partials/bloblang-playground.hbs`)
+- Standalone page at `/playground.html`
+- Three Ace editors: Input (JSON), Mapping (Bloblang), Output (read-only)
+- CSS in `src/css/bloblang-playground.css`
+
+### Mini Playground (`src/js/16-bloblang-interactive.js`)
+- Inline modal triggered by "Try It" buttons on code blocks
+- Dynamically created overlay with three Ace editors
+- CSS in `src/css/bloblang-interactive.css`
+
+### Key Technical Details
+
+**Ace Editor Configuration:**
+- `wrap: true` - Enables word wrapping to prevent horizontal text cutoff
+- `minLines: 5` - Minimum editor height
+- Do NOT use `maxLines` with CSS `max-height` - they conflict and cause invisible scrollbars
+- CSS `max-height: 400px` on `.editor` controls height with proper scrolling
+- Parent containers must NOT have `overflow: hidden` or scrollbars get clipped
+
+**Scrollbar Visibility:**
+macOS overlay scrollbars can be invisible. The CSS explicitly styles `.ace_scrollbar-v` and `.ace_scrollbar-h` with `width: 12px` for visibility.
+
+**Testing Changes:**
+1. Always test with large data (50+ items in Input, long mappings with many lines)
+2. Verify scrollbars appear and function in all three editors
+3. Run `gulp test:quick` to ensure all 19 tests pass
+4. Test both full playground (`/playground.html`) and mini playground ("Try It" buttons on `/bloblang-syntax-test.html`)
+
+### Important Files
+- `src/partials/bloblang-playground.hbs` - Full playground template and JS initialization
+- `src/css/bloblang-playground.css` - Full playground styles
+- `src/js/16-bloblang-interactive.js` - Mini playground modal logic
+- `src/css/bloblang-interactive.css` - Mini playground styles
+- `blobl-editor/wasm/` - Go source for WASM module
+- `preview-src/pages/bloblang-syntax-test.adoc` - Test page with code blocks
