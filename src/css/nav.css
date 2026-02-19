@@ -382,3 +382,11 @@ a.nav-text {
   background-size: contain;
   content: '(beta)';
 }
+
+.nav-link.cloud-limited-availability::after {
+  height: 20px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: '(Limited)';
+}
