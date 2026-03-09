@@ -1,0 +1,50 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://redpanda.com/#organization",
+      "name": "Redpanda Data",
+      "url": "https://redpanda.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://redpanda.com/favicon.ico",
+        "width": 512,
+        "height": 512
+      },
+      "description": "Redpanda is a streaming data platform for developers. Build real-time applications without the complexity of legacy platforms.",
+      "sameAs": [
+        "https://twitter.com/redpandadata",
+        "https://www.linkedin.com/company/redpanda-data",
+        "https://github.com/redpanda-data/redpanda",
+        "https://www.youtube.com/@RedpandaData",
+        "https://bsky.app/profile/redpanda.com"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Support",
+        "url": "https://redpanda.com/contact"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://docs.redpanda.com/#website",
+      "url": "https://docs.redpanda.com",
+      "name": "Redpanda Documentation",
+      "description": "Redpanda Documentation: Guides, API references, and resources for event streaming.",
+      "publisher": {
+        "@id": "https://redpanda.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://docs.redpanda.com/search/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
