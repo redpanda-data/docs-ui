@@ -1,0 +1,50 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://redpanda.com/#organization",
+      "name": "Redpanda Data",
+      "url": "https://redpanda.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://redpanda.com/favicon.ico",
+        "width": 512,
+        "height": 512
+      },
+      "description": "Redpanda is a streaming data platform and Agentic Data Plane for developers. Build real-time applications without the complexity of legacy platforms.",
+      "sameAs": [
+        "https://twitter.com/redpandadata",
+        "https://www.linkedin.com/company/redpanda-data",
+        "https://github.com/redpanda-data",
+        "https://www.youtube.com/@RedpandaData",
+        "https://bsky.app/profile/redpanda.com"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Support",
+        "url": "https://redpanda.com/contact"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}/#website",
+      "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}",
+      "name": "Redpanda Documentation",
+      "description": "Redpanda Documentation: Guides, API references, and resources for event streaming and Agentic Data Plane.",
+      "publisher": {
+        "@id": "https://redpanda.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}/search/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
