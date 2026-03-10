@@ -13,7 +13,7 @@
         "width": 512,
         "height": 512
       },
-      "description": "Redpanda is a streaming data platform for developers. Build real-time applications without the complexity of legacy platforms.",
+      "description": "Redpanda is a streaming data platform and Agentic Data Plane for developers. Build real-time applications without the complexity of legacy platforms.",
       "sameAs": [
         "https://twitter.com/redpandadata",
         "https://www.linkedin.com/company/redpanda-data",
@@ -29,8 +29,8 @@
     },
     {
       "@type": "WebSite",
-      "@id": "https://docs.redpanda.com/#website",
-      "url": "https://docs.redpanda.com",
+      "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}/#website",
+      "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}",
       "name": "Redpanda Documentation",
       "description": "Redpanda Documentation: Guides, API references, and resources for event streaming.",
       "publisher": {
@@ -40,7 +40,7 @@
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": "https://docs.redpanda.com/search/?q={search_term_string}"
+          "urlTemplate": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}/search/?q={search_term_string}"
         },
         "query-input": "required name=search_term_string"
       }
