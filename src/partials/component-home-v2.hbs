@@ -13,7 +13,7 @@
         <p class="home-ai-summary">{{{page.attributes.home-ai-summary}}}</p>
       {{/if}}
       {{#if page.attributes.home-image}}
-      <img style="max-height: 150px;min-height: 120px;" src="../_images/{{page.attributes.home-image}}" alt="{{#if page.attributes.home-image-alt}}{{{page.attributes.home-image-alt}}}{{else}}{{{page.title}}}{{/if}}" loading="lazy"/>
+      <img style="max-height: 150px;min-height: 120px;" src="../_images/{{page.attributes.home-image}}" alt="{{#if page.attributes.home-image-alt}}{{page.attributes.home-image-alt}}{{else}}{{page.title}}{{/if}}" loading="lazy"/>
       {{/if}}
     </div>
   </div>
@@ -21,6 +21,8 @@
 <section class="sect1 features" aria-labelledby="home-primary-title">
   {{#with page.attributes.home-primary-row-title}}
     <h2 id="home-primary-title">{{{this}}}<a class="anchor" href="#home-primary-title"></a></h2>
+  {{else}}
+    <h2 id="home-primary-title" class="visually-hidden">Featured content</h2>
   {{/with}}
   <div class="sectionbody container">
     <div class="grid-primary boxes">
@@ -45,6 +47,8 @@
 <section class="sect1 features" aria-labelledby="home-secondary-title">
   {{#with page.attributes.home-secondary-row-title}}
     <h2 id="home-secondary-title">{{{this}}}<a class="anchor" href="#home-secondary-title"></a></h2>
+  {{else}}
+    <h2 id="home-secondary-title" class="visually-hidden">More resources</h2>
   {{/with}}
   <div class="sectionbody container">
     <div class="grid-secondary boxes">
@@ -69,6 +73,8 @@
 <section class="sect1 features" aria-labelledby="home-tertiary-title">
   {{#with page.attributes.home-tertiary-row-title}}
     <h2 id="home-tertiary-title">{{{this}}}<a class="anchor" href="#home-tertiary-title"></a></h2>
+  {{else}}
+    <h2 id="home-tertiary-title" class="visually-hidden">Additional links</h2>
   {{/with}}
   <div class="sectionbody container">
     <nav aria-label="Additional resources">
