@@ -22,12 +22,17 @@
       <p>beta</p>
     </div>
   {{/if}}
+  {{#if page.attributes.limited-availability}}
+    <div class="limited-availability-label">
+      <p>Limited Availability</p>
+    </div>
+  {{/if}}
   {{#if page.attributes.context-switcher}}
     {{> context-switcher}}
   {{/if}}
   {{> markdown-dropdown}}
 </div>
-{{#if (or page.attributes.beta page.attributes.context-switcher)}}
+{{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.context-switcher)}}
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const metadataContainer = document.querySelector(".metadata--main");
@@ -38,14 +43,14 @@
     }
 
     // Initialize tooltips for beta badges if present
-    const topBadge = metadataContainer.querySelector(".beta-label p");
-    const navBadge = navMetadataContainer.querySelector(".nav-beta-label");
+    const topBetaBadge = metadataContainer.querySelector(".beta-label p");
+    const navBetaBadge = navMetadataContainer.querySelector(".nav-beta-label");
     // DEBUG: If you need to debug Tippy.js tooltips in Chrome DevTools, note that the "force element state"
     // feature doesn't work with JavaScript-based hover effects. Instead, use the Console to manually trigger events:
     // document.querySelector('.beta-label p').dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
     // This will show the tooltip without needing to hover, making it easier to inspect the generated DOM.
-    if (topBadge && navBadge) {
-      tippy(topBadge, {
+    if (topBetaBadge && navBetaBadge) {
+      tippy(topBetaBadge, {
         content: "{{page.attributes.beta-text}}",
         animation: "scale",
         theme: "redpanda-term",
@@ -54,8 +59,34 @@
         allowHTML: true,
         appendTo: () => document.body,
       });
-      tippy(navBadge, {
+      tippy(navBetaBadge, {
         content: "{{page.attributes.beta-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+        appendTo: () => document.body,
+      });
+    }
+
+    // Initialize tooltips for limited availability badges if present
+    const topLimitedAvailabilityBadge = metadataContainer.querySelector(".limited-availability-label p");
+    const navLimitedAvailabilityBadge = navMetadataContainer.querySelector(".nav-limited-availability-label");
+    if (topLimitedAvailabilityBadge) {
+      tippy(topLimitedAvailabilityBadge, {
+        content: "{{page.attributes.limited-availability-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+        appendTo: () => document.body,
+      });
+    }
+    if (navLimitedAvailabilityBadge) {
+      tippy(navLimitedAvailabilityBadge, {
+        content: "{{page.attributes.limited-availability-text}}",
         animation: "scale",
         theme: "redpanda-term",
         touch: "hold",
