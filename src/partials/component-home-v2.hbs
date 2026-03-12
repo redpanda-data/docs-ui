@@ -1,12 +1,12 @@
 <main class="home-content">
 <section id="preamble" aria-labelledby="home-overview">
+  {{#with page.attributes.home-overview-title}}
+    <h2 id="home-overview" class="visually-hidden">{{{this}}}</h2>
+  {{else}}
+    <h2 id="home-overview" class="visually-hidden">Overview</h2>
+  {{/with}}
   <div class="sectionbody">
     <div class="paragraph home-intro">
-      {{#with page.attributes.home-overview-title}}
-        <h2 id="home-overview">{{{this}}}</h2>
-      {{else}}
-        <h2 id="home-overview">Overview</h2>
-      {{/with}}
       <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{{relativize (resolve-resource this)}}}">Learn more</a>{{/with}}
       </p>
       {{#if page.attributes.home-ai-summary}}
