@@ -478,11 +478,15 @@ export default function ChatInterface() {
           <form onSubmit={handleSubmit}>
             <div className="chat-card">
               <div className="chat-content">
+              <label htmlFor="chat-message" className="visually-hidden">
+                Ask a question about Redpanda
+              </label>
               <textarea
                 ref={textareaRef}
                 id="chat-message"
                 name="chat-message"
                 className="chat-input"
+                autoComplete="off"
                 placeholder="How can we help you with Redpanda today?"
                 value={message}
                 onChange={(e) => {

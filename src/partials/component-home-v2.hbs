@@ -1,25 +1,36 @@
-<div id="preamble">
+<main class="home-content">
+<section id="preamble" aria-labelledby="home-overview">
   <div class="sectionbody">
     <div class="paragraph home-intro">
+      {{#with page.attributes.home-overview-title}}
+        <h2 id="home-overview">{{{this}}}</h2>
+      {{else}}
+        <h2 id="home-overview">Overview</h2>
+      {{/with}}
       <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{{relativize (resolve-resource this)}}}">Learn more</a>{{/with}}
       </p>
+      {{#if page.attributes.home-ai-summary}}
+        <p class="home-ai-summary">{{{page.attributes.home-ai-summary}}}</p>
+      {{/if}}
       {{#if page.attributes.home-image}}
-      <img style="max-height: 150px;min-height: 120px;" src="../_images/{{page.attributes.home-image}}" alt="{{{page.title}}}" loading="lazy"/>
+      <img style="max-height: 150px;min-height: 120px;" src="../_images/{{page.attributes.home-image}}" alt="{{#if page.attributes.home-image-alt}}{{page.attributes.home-image-alt}}{{else}}{{page.title}}{{/if}}" loading="lazy"/>
       {{/if}}
     </div>
   </div>
-</div>
-<section class="sect1 features">
+</section>
+<section class="sect1 features" aria-labelledby="home-primary-title">
   {{#with page.attributes.home-primary-row-title}}
-    <h2 id="{{{this}}}">{{{this}}}<a class="anchor" href="#{{{this}}}"></a></h2>
+    <h2 id="home-primary-title">{{{this}}}<a class="anchor" href="#home-primary-title"></a></h2>
+  {{else}}
+    <h2 id="home-primary-title" class="visually-hidden">Featured content</h2>
   {{/with}}
-  <div class='sectionbody container'>
+  <div class="sectionbody container">
     <div class="grid-primary boxes">
       {{#each page.attributes.home-primary-row}}
-      <a href="{{{relativize (resolve-resource  url)}}}" class="feature-link">
-        <div class="feature-box">
+      <article class="feature-box">
+        <a href="{{{relativize (resolve-resource url)}}}" class="feature-link">
           <div class="feature-text">
-            <h3 id="{{{title}}}" class="feature-title">{{{title}}}</h2>
+            <h3 class="feature-title">{{{title}}}</h3>
             {{#if description}}
               <p class="feature-description">{{{description}}}</p>
             {{/if}}
@@ -27,23 +38,25 @@
               <p class="feature-link-text get-started">{{{link-text}}}</p>
             {{/if}}
           </div>
-        </div>
-      </a>
+        </a>
+      </article>
       {{/each}}
     </div>
   </div>
 </section>
-<section class="sect1 features">
+<section class="sect1 features" aria-labelledby="home-secondary-title">
   {{#with page.attributes.home-secondary-row-title}}
-    <h2 id="{{{this}}}">{{{this}}}<a class="anchor" href="#{{{this}}}"></a></h2>
+    <h2 id="home-secondary-title">{{{this}}}<a class="anchor" href="#home-secondary-title"></a></h2>
+  {{else}}
+    <h2 id="home-secondary-title" class="visually-hidden">More resources</h2>
   {{/with}}
-  <div class='sectionbody container'>
+  <div class="sectionbody container">
     <div class="grid-secondary boxes">
       {{#each page.attributes.home-secondary-row}}
-      <a href="{{{relativize (resolve-resource  url)}}}" class="feature-link">
-        <div class="feature-box">
+      <article class="feature-box">
+        <a href="{{{relativize (resolve-resource url)}}}" class="feature-link">
           <div class="feature-text">
-            <h3 id="{{{title}}}" class="feature-title">{{{title}}}</h2>
+            <h3 class="feature-title">{{{title}}}</h3>
             {{#if description}}
               <p class="feature-description">{{{description}}}</p>
             {{/if}}
@@ -51,25 +64,28 @@
               <p class="feature-link-text">{{{link-text}}}</p>
             {{/if}}
           </div>
-        </div>
-      </a>
+        </a>
+      </article>
       {{/each}}
     </div>
   </div>
 </section>
-<section class="sect1 features">
+<section class="sect1 features" aria-labelledby="home-tertiary-title">
   {{#with page.attributes.home-tertiary-row-title}}
-    <h2 id="{{{this}}}">{{{this}}}<a class="anchor" href="#{{{this}}}"></a></h2>
+    <h2 id="home-tertiary-title">{{{this}}}<a class="anchor" href="#home-tertiary-title"></a></h2>
+  {{else}}
+    <h2 id="home-tertiary-title" class="visually-hidden">Additional links</h2>
   {{/with}}
-  <div class='sectionbody container'>
-    <div>
+  <div class="sectionbody container">
+    <nav aria-label="Additional resources">
       <ul class="grid-tertiary">
       {{#each page.attributes.home-tertiary-row}}
       <li>
-      <a href="{{{relativize (resolve-resource  url)}}}">{{{title}}}</a>
+      <a href="{{{relativize (resolve-resource url)}}}">{{{title}}}</a>
       </li>
       {{/each}}
       </ul>
-    </div>
+    </nav>
   </div>
 </section>
+</main>
