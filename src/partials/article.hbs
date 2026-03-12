@@ -16,6 +16,7 @@
     <h1 class="page">{{{this}}}</h1>
   {{/with}}
 {{/if}}
+{{#unless (eq page.attributes.role 'component-home-v2')}}
 <div class="metadata metadata--main">
   {{#if page.attributes.beta}}
     <div class="beta-label">
@@ -32,6 +33,7 @@
   {{/if}}
   {{> markdown-dropdown}}
 </div>
+{{/unless}}
 {{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.context-switcher)}}
   <script>
   document.addEventListener("DOMContentLoaded", () => {
