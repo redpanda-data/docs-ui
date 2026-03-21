@@ -50,11 +50,11 @@
       "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}#article",
       "headline": "{{page.title}}",
       {{#if page.attributes.description}}
-      "description": "{{{page.attributes.description}}}",
+      "description": "{{page.attributes.description}}",
       {{/if}}
       "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
-      "datePublished": "{{iso-date}}",
-      "dateModified": "{{iso-date}}",
+      "datePublished": "{{#with page.attributes.docdatetime}}{{this}}{{else}}{{#with page.attributes.revdate}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
+      "dateModified": "{{#with page.attributes.docdatetime}}{{this}}{{else}}{{#with page.attributes.revdate}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
       "author": {
         "@id": "https://redpanda.com/#organization"
       },
