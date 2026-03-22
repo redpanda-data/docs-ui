@@ -49,12 +49,26 @@
       "@type": "TechArticle",
       "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}#article",
       "headline": "{{page.title}}",
+      {{#if page.attributes.navtitle}}{{#unless (eq page.attributes.navtitle page.title)}}
+      "alternativeHeadline": "{{page.attributes.navtitle}}",
+      {{/unless}}{{/if}}
       {{#if page.attributes.description}}
       "description": "{{page.attributes.description}}",
       {{/if}}
+      {{#if page.attributes.keywords}}
+      "keywords": "{{page.attributes.keywords}}",
+      {{else}}{{#if page.attributes.categories}}
+      "keywords": "{{page.attributes.categories}}",
+      {{/if}}{{/if}}
       "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
-      "datePublished": "{{#with page.attributes.docdatetime}}{{this}}{{else}}{{#with page.attributes.revdate}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
+      "datePublished": "{{#with page.attributes.page-release-date}}{{this}}{{else}}{{#with page.attributes.docdatetime}}{{this}}{{else}}{{#with page.attributes.revdate}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}{{/with}}",
       "dateModified": "{{#with page.attributes.docdatetime}}{{this}}{{else}}{{#with page.attributes.revdate}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
+      {{#if page.attributes.page-role}}
+      "genre": "{{page.attributes.page-role}}",
+      {{/if}}
+      {{#if page.attributes.page-prerequisites}}
+      "dependencies": "{{page.attributes.page-prerequisites}}",
+      {{/if}}
       "author": {
         "@id": "https://redpanda.com/#organization"
       },
