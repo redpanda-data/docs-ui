@@ -61,8 +61,8 @@
       "keywords": "{{page.attributes.categories}}",
       {{/if}}{{/if}}
       "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
-      "datePublished": "{{#with page.attributes.page-release-date}}{{this}}{{else}}{{#with page.attributes.docdatetime}}{{this}}{{else}}{{#with page.attributes.revdate}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}{{/with}}",
-      "dateModified": "{{#with page.attributes.docdatetime}}{{this}}{{else}}{{#with page.attributes.revdate}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
+      "datePublished": "{{#with page.attributes.git-created-date}}{{this}}{{else}}{{#with page.attributes.page-release-date}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
+      "dateModified": "{{#with page.attributes.git-modified-date}}{{this}}{{else}}{{#with page.attributes.page-release-date}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
       {{#if page.attributes.page-role}}
       "genre": "{{page.attributes.page-role}}",
       {{/if}}
