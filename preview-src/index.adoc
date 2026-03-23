@@ -5,6 +5,7 @@
 :!example-caption:
 :!table-caption:
 :page-pagination:
+:page-has-markdown:
 
 {description}
 
