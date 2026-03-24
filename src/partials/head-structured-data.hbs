@@ -71,7 +71,7 @@
       {{else}}{{#with page.attributes.page-release-date}}
       "dateModified": "{{this}}",
       {{/with}}{{/with}}
-      {{#if page.attributes.page-role}}
+      {{#if page.attributes.page-topic-type}}
       "genre": "{{json-safe page.attributes.page-topic-type}}",
       {{/if}}
       {{#if page.attributes.page-prerequisites}}
