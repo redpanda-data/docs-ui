@@ -48,26 +48,34 @@
     {
       "@type": "TechArticle",
       "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}#article",
-      "headline": "{{page.title}}",
+      "headline": "{{json-safe page.title}}",
       {{#if page.attributes.navtitle}}{{#unless (eq page.attributes.navtitle page.title)}}
-      "alternativeHeadline": "{{page.attributes.navtitle}}",
+      "alternativeHeadline": "{{json-safe page.attributes.navtitle}}",
       {{/unless}}{{/if}}
       {{#if page.attributes.description}}
-      "description": "{{page.attributes.description}}",
+      "description": "{{json-safe page.attributes.description}}",
       {{/if}}
       {{#if page.attributes.keywords}}
-      "keywords": "{{page.attributes.keywords}}",
+      "keywords": "{{json-safe page.attributes.keywords}}",
       {{else}}{{#if page.attributes.categories}}
-      "keywords": "{{page.attributes.categories}}",
+      "keywords": "{{json-safe page.attributes.categories}}",
       {{/if}}{{/if}}
       "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
-      "datePublished": "{{#with (git-created-date)}}{{this}}{{else}}{{#with page.attributes.page-release-date}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
-      "dateModified": "{{#with (git-modified-date)}}{{this}}{{else}}{{#with page.attributes.page-release-date}}{{this}}{{else}}{{iso-date}}{{/with}}{{/with}}",
+      {{#with (git-created-date)}}
+      "datePublished": "{{this}}",
+      {{else}}{{#with page.attributes.page-release-date}}
+      "datePublished": "{{this}}",
+      {{/with}}{{/with}}
+      {{#with (git-modified-date)}}
+      "dateModified": "{{this}}",
+      {{else}}{{#with page.attributes.page-release-date}}
+      "dateModified": "{{this}}",
+      {{/with}}{{/with}}
       {{#if page.attributes.page-role}}
-      "genre": "{{page.attributes.page-role}}",
+      "genre": "{{json-safe page.attributes.page-role}}",
       {{/if}}
       {{#if page.attributes.page-prerequisites}}
-      "dependencies": "{{page.attributes.page-prerequisites}}",
+      "dependencies": "{{json-safe page.attributes.page-prerequisites}}",
       {{/if}}
       "author": {
         "@id": "https://redpanda.com/#organization"
@@ -81,8 +89,8 @@
       }{{#if page.component.title}},
       "about": {
         "@type": "SoftwareApplication",
-        "name": "{{page.component.title}}",
-        "applicationCategory": "Agentic Data Plane"
+        "name": "{{json-safe page.component.title}}"{{#if page.component.asciidoc.attributes.application-category}},
+        "applicationCategory": "{{json-safe page.component.asciidoc.attributes.application-category}}"{{/if}}
       }{{/if}}
     }{{/if}}
   ]
