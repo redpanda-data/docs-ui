@@ -49,34 +49,34 @@
       "@type": "TechArticle",
       "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}#article",
       "headline": "{{json-safe page.title}}",
-      {{#if page.attributes.navtitle}}{{#unless (eq page.attributes.navtitle page.title)}}
-      "alternativeHeadline": "{{json-safe page.attributes.navtitle}}",
-      {{/unless}}{{/if}}
-      {{#if page.attributes.description}}
-      "description": "{{json-safe page.attributes.description}}",
-      {{/if}}
-      {{#if page.attributes.keywords}}
-      "keywords": "{{json-safe page.attributes.keywords}}",
-      {{else}}{{#if page.attributes.categories}}
-      "keywords": "{{json-safe page.attributes.categories}}",
-      {{/if}}{{/if}}
+      {{#with page.attributes.navtitle}}{{#unless (eq this ../page.title)}}
+      "alternativeHeadline": "{{json-safe this}}",
+      {{/unless}}{{/with}}
+      {{#with (page-attribute "description")}}
+      "description": "{{json-safe this}}",
+      {{/with}}
+      {{#with (page-attribute "keywords")}}
+      "keywords": "{{json-safe this}}",
+      {{else}}{{#with (page-attribute "page-categories")}}
+      "keywords": "{{json-safe this}}",
+      {{/with}}{{/with}}
       "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
       {{#with (git-created-date)}}
       "datePublished": "{{this}}",
-      {{else}}{{#with page.attributes.page-release-date}}
+      {{else}}{{#with (page-attribute "page-release-date")}}
       "datePublished": "{{this}}",
       {{/with}}{{/with}}
       {{#with (git-modified-date)}}
       "dateModified": "{{this}}",
-      {{else}}{{#with page.attributes.page-release-date}}
+      {{else}}{{#with (page-attribute "page-release-date")}}
       "dateModified": "{{this}}",
       {{/with}}{{/with}}
-      {{#if page.attributes.page-topic-type}}
-      "genre": "{{json-safe page.attributes.page-topic-type}}",
-      {{/if}}
-      {{#if page.attributes.page-prerequisites}}
-      "dependencies": "{{json-safe page.attributes.page-prerequisites}}",
-      {{/if}}
+      {{#with (page-attribute "page-topic-type")}}
+      "genre": "{{json-safe this}}",
+      {{/with}}
+      {{#with (page-attribute "page-prerequisites")}}
+      "dependencies": "{{json-safe this}}",
+      {{/with}}
       "author": {
         "@id": "https://redpanda.com/#organization"
       },
