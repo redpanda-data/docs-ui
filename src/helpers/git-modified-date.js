@@ -2,7 +2,10 @@
  * Get git modified date from contentCatalog
  *
  * Queries contentCatalog to access page.asciidoc.attributes which contains
- * git-modified-date added by the add-git-dates extension.
+ * page-git-modified-date added by the add-git-dates extension.
+ *
+ * The extension uses the page- prefix so the attribute is also accessible
+ * via page.attributes['git-modified-date'] in the UI model.
  */
 
 module.exports = ({ data: { root } }) => {
@@ -20,5 +23,6 @@ module.exports = ({ data: { root } }) => {
     relative: page.relativeSrcPath,
   })
 
-  return pageInfo?.asciidoc?.attributes?.['git-modified-date'] || null
+  // The extension sets page-git-modified-date (with page- prefix)
+  return pageInfo?.asciidoc?.attributes?.['page-git-modified-date'] || null
 }

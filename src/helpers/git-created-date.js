@@ -2,7 +2,10 @@
  * Get git created date from contentCatalog
  *
  * Queries contentCatalog to access page.asciidoc.attributes which contains
- * git-created-date added by the add-git-dates extension.
+ * page-git-created-date added by the add-git-dates extension.
+ *
+ * The extension uses the page- prefix so the attribute is also accessible
+ * via page.attributes['git-created-date'] in the UI model.
  */
 
 module.exports = ({ data: { root } }) => {
@@ -20,5 +23,6 @@ module.exports = ({ data: { root } }) => {
     relative: page.relativeSrcPath,
   })
 
-  return pageInfo?.asciidoc?.attributes?.['git-created-date'] || null
+  // The extension sets page-git-created-date (with page- prefix)
+  return pageInfo?.asciidoc?.attributes?.['page-git-created-date'] || null
 }
