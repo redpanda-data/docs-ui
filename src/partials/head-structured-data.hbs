@@ -73,10 +73,27 @@
       {{/with}}{{/with}}
       {{#with (page-attribute "page-topic-type")}}
       "genre": "{{json-safe this}}",
+      "learningResourceType": "{{json-safe this}}",
       {{/with}}
       {{#with (page-attribute "page-prerequisites")}}
       "dependencies": "{{json-safe this}}",
       {{/with}}
+      {{#with (page-attribute "personas")}}
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "{{json-safe this}}"
+      },
+      {{/with}}
+      {{#with page.attributes.learning-objective-1}}
+      "teaches": "{{json-safe this}}{{#with @root.page.attributes.learning-objective-2}}; {{json-safe this}}{{/with}}{{#with @root.page.attributes.learning-objective-3}}; {{json-safe this}}{{/with}}",
+      {{/with}}
+      {{#with page.version}}
+      "version": "{{this}}",
+      {{/with}}
+      {{#with page.module}}
+      "articleSection": "{{this}}",
+      {{/with}}
+      "isAccessibleForFree": true,
       "author": {
         "@id": "https://redpanda.com/#organization"
       },
