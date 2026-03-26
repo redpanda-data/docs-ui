@@ -1,38 +1,33 @@
 'use strict'
 
-let navGroupCache = null
-let componentCache = null
+// Cache: Map<url, isLimitedAvailability>
+let urlCache = null
+let cachedComponent = null
 
 module.exports = (navUrl, { data: { root } }) => {
   const { contentCatalog, page } = root
   if (page.layout === '404') return false
 
   // Preview mode: contentCatalog doesn't contain preview pages
-  // Fall back to checking if this nav item is the current page
   if (!contentCatalog) {
     const currentPageUrl = page.url
-    // Check if this navigation URL matches the current page
     const isCurrentPage = navUrl === currentPageUrl ||
                           (navUrl && page.src && navUrl.endsWith(page.src.basename.replace('.adoc', '.html')))
-    // Return the current page's limited availability status
     return isCurrentPage && page.attributes && page.attributes['limited-availability']
   }
 
-  // Only perform lookup if caches are invalid or stale
-  if (!navGroupCache || componentCache !== page.component.name) {
-    navGroupCache = contentCatalog.findBy({ component: page.component.name, family: 'page' })
-    componentCache = page.component.name
-  }
+  // Build URL map once per component (O(n) once, then O(1) lookups)
+  if (cachedComponent !== page.component.name) {
+    urlCache = new Map()
+    cachedComponent = page.component.name
 
-  // Iterate through cached pages and check for limited availability status
-  for (const navGroup of navGroupCache) {
-    // Guard against missing properties
-    if (navGroup.pub && navGroup.pub.url === navUrl &&
-        navGroup.asciidoc && navGroup.asciidoc.attributes &&
-        navGroup.asciidoc.attributes['page-limited-availability']) {
-      return true
+    const pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
+    for (const p of pages) {
+      if (p.pub?.url) {
+        urlCache.set(p.pub.url, !!p.asciidoc?.attributes?.['page-limited-availability'])
+      }
     }
   }
 
-  return false
+  return urlCache.get(navUrl) || false
 }
