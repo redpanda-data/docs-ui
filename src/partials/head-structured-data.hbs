@@ -61,12 +61,12 @@
       "keywords": "{{json-safe this}}",
       {{/with}}{{/with}}
       "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
-      {{#with (git-created-date)}}
+      {{#with page.attributes.git-created-date}}
       "datePublished": "{{this}}",
       {{else}}{{#with (page-attribute "page-release-date")}}
       "datePublished": "{{this}}",
       {{/with}}{{/with}}
-      {{#with (git-modified-date)}}
+      {{#with page.attributes.git-modified-date}}
       "dateModified": "{{this}}",
       {{else}}{{#with (page-attribute "page-release-date")}}
       "dateModified": "{{this}}",
