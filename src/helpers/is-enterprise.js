@@ -1,47 +1,25 @@
 'use strict'
 
-/* Put this in nav-tree.hbs
-{{#if navigation.length}}
-  <ul class="nav-list">
-    {{#each navigation}}
-      <li class="nav-item{{#if (eq ./url @root.page.url)}} is-current-page{{/if}}" data-depth="{{or ../level 0}}">
-        {{#if ./content}}
-          {{#if ./url}}
-            <a class="nav-link
-              {{~#if (is-enterprise ./url)}} enterprise{{/if}}
-*/
-
-// Cache for component pages (cleared between render cycles)
-const cache = new Map()
-let currentComponent = null
+// Cache: Map<url, isEnterprise>
+let urlCache = null
+let cachedComponent = null
 
 module.exports = (navUrl, { data: { root } }) => {
   const { contentCatalog, page } = root
+  if (!contentCatalog) return false
 
-  // Reset cache if component changed
-  if (currentComponent !== page.component.name) {
-    cache.clear()
-    currentComponent = page.component.name
-  }
+  // Build URL map once per component (O(n) once, then O(1) lookups)
+  if (cachedComponent !== page.component.name) {
+    urlCache = new Map()
+    cachedComponent = page.component.name
 
-  // Check cache first
-  if (cache.has(navUrl)) {
-    return cache.get(navUrl)
-  }
-
-  // Query and cache result
-  const pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
-
-  for (let i = 0; i < pages.length; i++) {
-    const isEnterprise = pages[i].pub.url === navUrl &&
-      pages[i].asciidoc.attributes['page-enterprise'] === 'true'
-
-    if (pages[i].pub.url === navUrl) {
-      cache.set(navUrl, isEnterprise)
-      return isEnterprise
+    const pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
+    for (const p of pages) {
+      if (p.pub?.url) {
+        urlCache.set(p.pub.url, p.asciidoc?.attributes?.['page-enterprise'] === 'true')
+      }
     }
   }
 
-  cache.set(navUrl, false)
-  return false
+  return urlCache.get(navUrl) || false
 }

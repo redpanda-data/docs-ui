@@ -44,7 +44,71 @@
         },
         "query-input": "required name=search_term_string"
       }
-    }
+    }{{#if page.title}},
+    {
+      "@type": "TechArticle",
+      "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}#article",
+      "headline": "{{json-safe page.title}}",
+      {{#with page.attributes.navtitle}}{{#unless (eq this ../page.title)}}
+      "alternativeHeadline": "{{json-safe this}}",
+      {{/unless}}{{/with}}
+      {{#with page.description}}
+      "description": "{{json-safe this}}",
+      {{/with}}
+      {{#with page.keywords}}
+      "keywords": "{{json-safe this}}",
+      {{else}}{{#with page.attributes.categories}}
+      "keywords": "{{json-safe this}}",
+      {{/with}}{{/with}}
+      "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
+      {{#with page.attributes.git-created-date}}
+      "datePublished": "{{this}}",
+      {{else}}{{#with page.attributes.release-date}}
+      "datePublished": "{{this}}",
+      {{/with}}{{/with}}
+      {{#with page.attributes.git-modified-date}}
+      "dateModified": "{{this}}",
+      {{else}}{{#with page.attributes.release-date}}
+      "dateModified": "{{this}}",
+      {{/with}}{{/with}}
+      {{#with page.attributes.topic-type}}
+      "learningResourceType": "{{json-safe this}}",
+      {{/with}}
+      {{#with page.attributes.prerequisites}}
+      "dependencies": "{{json-safe this}}",
+      {{/with}}
+      {{#with (page-attribute "personas")}}
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "{{json-safe this}}"
+      },
+      {{/with}}
+      {{#with (page-attribute "learning-objective-1")}}
+      "teaches": "{{json-safe this}}{{#with (page-attribute "learning-objective-2")}}; {{json-safe this}}{{/with}}{{#with (page-attribute "learning-objective-3")}}; {{json-safe this}}{{/with}}",
+      {{/with}}
+      {{#with page.version}}
+      "version": "{{this}}",
+      {{/with}}
+      {{#with page.module}}
+      "articleSection": "{{this}}",
+      {{/with}}
+      "isAccessibleForFree": true,
+      "author": {
+        "@id": "https://redpanda.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://redpanda.com/#organization"
+      },
+      "inLanguage": "en",
+      "isPartOf": {
+        "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}/#website"
+      }{{#if page.component.title}},
+      "about": {
+        "@type": "SoftwareApplication",
+        "name": "{{json-safe page.component.title}}",
+        "applicationCategory": "Agentic Data Plane"
+      }{{/if}}
+    }{{/if}}
   ]
 }
 </script>
