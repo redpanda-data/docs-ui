@@ -108,7 +108,8 @@
         "name": "{{json-safe page.component.title}}",
         "applicationCategory": "Agentic Data Plane"
       }{{/if}}
-    }{{/if}}
+    }{{/if}}{{#with page.attributes.faq-json-ld}},
+    {{{this}}}{{/with}}
   ]
 }
 </script>
