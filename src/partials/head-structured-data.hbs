@@ -108,8 +108,21 @@
         "name": "{{json-safe page.component.title}}",
         "applicationCategory": "Agentic Data Plane"
       }{{/if}}
-    }{{/if}}{{#with page.attributes.faq-json-ld}},
-    {{{this}}}{{/with}}
+    }{{/if}}{{#if page.attributes.has-faqs}},
+    {
+      "@type": "FAQPage",
+      "mainEntity": [{{#each (obj page.attributes.faqs)}}{{#unless @first}},{{/unless}}
+        {
+          "@type": "Question",
+          "name": "{{json-safe this.question}}"{{#if this.anchor}},
+          "url": "{{#with @root.site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{@root.page.url}}{{#unless (starts-with this.anchor '#')}}#{{/unless}}{{this.anchor}}"{{/if}},
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "{{json-safe this.answer}}"
+          }
+        }{{/each}}
+      ]
+    }{{/if}}
   ]
 }
 </script>
