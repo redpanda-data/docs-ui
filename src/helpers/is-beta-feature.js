@@ -1,36 +1,26 @@
 'use strict'
 
-// Cache for beta status lookups (cleared between components)
-const cache = new Map()
-let currentComponent = null
+// Cache: Map<componentName, Map<url, isBeta>>
+let urlCache = null
+let cachedComponent = null
 
 module.exports = (navUrl, { data: { root } }) => {
   const { contentCatalog, page } = root
   if (page.layout === '404') return false
   if (!contentCatalog) return false
 
-  // Reset cache if component changed
-  if (currentComponent !== page.component.name) {
-    cache.clear()
-    currentComponent = page.component.name
-  }
+  // Build URL map once per component (O(n) once, then O(1) lookups)
+  if (cachedComponent !== page.component.name) {
+    urlCache = new Map()
+    cachedComponent = page.component.name
 
-  // Check cache first
-  if (cache.has(navUrl)) {
-    return cache.get(navUrl)
-  }
-
-  // Query and cache result
-  const pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
-
-  for (const navGroup of pages) {
-    if (navGroup.pub.url === navUrl) {
-      const isBeta = !!navGroup.asciidoc.attributes['page-beta']
-      cache.set(navUrl, isBeta)
-      return isBeta
+    const pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
+    for (const p of pages) {
+      if (p.pub?.url) {
+        urlCache.set(p.pub.url, !!p.asciidoc?.attributes?.['page-beta'])
+      }
     }
   }
 
-  cache.set(navUrl, false)
-  return false
+  return urlCache.get(navUrl) || false
 }

@@ -13,6 +13,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
+          cache-dependency-path: blobl-editor/wasm/go.sum
       - name: Lint Go code
         uses: golangci/golangci-lint-action@v8
         with:
@@ -26,7 +27,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
+      - name: Cache generated files
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/js/vendor/prism/prism-bloblang.js
+            src/static/blobl.wasm
+          key: generated-${{ hashFiles('blobl-editor/wasm/go.sum') }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            generated-${{ hashFiles('blobl-editor/wasm/go.sum') }}-
+            generated-
       - name: Bundle UI
         run: |
-          npm i
+          npm ci
           gulp bundle

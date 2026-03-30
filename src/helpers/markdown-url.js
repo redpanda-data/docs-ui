@@ -30,9 +30,14 @@ module.exports = ({ data: { root } }) => {
 
   const url = pageInfo.pub.url
 
-  // If URL ends with / (indexify format), append index.md
+  // Handle root path special case
+  if (url === '/') {
+    return '/index.md'
+  }
+
+  // If URL ends with / (indexify format), convert to .md (without index)
   if (url.endsWith('/')) {
-    const result = `${url}index.md`
+    const result = `${url.slice(0, -1)}.md`
     return result
   }
 

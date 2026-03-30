@@ -2,6 +2,9 @@
 {{!-- Prevent old versions from being indexed by search engines --}}
 {{#if (or (is-prerelease page) site.keys.preview)}}
 <meta name="robots" content="noindex">
+{{else}}
+{{!-- AI-friendly indexing directives for production pages --}}
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 {{/if}}
 {{#with site.components.ROOT}}
 <meta name="latest-redpanda-version" content="{{this.latest.version}}">

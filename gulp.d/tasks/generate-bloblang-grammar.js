@@ -13,8 +13,9 @@ function fetchText (url) {
   return new Promise((resolve, reject) => {
     const options = {
       headers: { 'User-Agent': 'docs-ui-build' },
+      timeout: 10000, // 10 second timeout
     }
-    https.get(url, options, (res) => {
+    const req = https.get(url, options, (res) => {
       if (res.statusCode !== 200) {
         reject(new Error(`HTTP ${res.statusCode}`))
         res.resume()
@@ -23,7 +24,12 @@ function fetchText (url) {
       let data = ''
       res.on('data', (chunk) => { data += chunk })
       res.on('end', () => resolve(data))
-    }).on('error', reject)
+    })
+    req.on('error', reject)
+    req.on('timeout', () => {
+      req.destroy()
+      reject(new Error(`Request timeout after 10s: ${url}`))
+    })
   })
 }
 
