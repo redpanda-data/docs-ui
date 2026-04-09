@@ -70,7 +70,28 @@ module.exports = (resource, { data, hash: context }) => {
 
   // For preview builds where contentCatalog.resolveResource might not exist
   if (!contentCatalog || !contentCatalog.resolveResource) {
-    // Only log for xref-like patterns that would need resolution
+    // Generate realistic URLs for preview builds
+    const component = context.component || 'ROOT'
+    const module = context.module || 'ROOT'
+
+    // Parse resource ID: page$path/to/file.adoc or attachment$file.json
+    if (resource.startsWith('page$')) {
+      const pagePath = resource.slice(5).replace(/\.adoc$/, '/')
+      // ROOT module pages go directly under component
+      if (module === 'ROOT') {
+        return `/${component}/${pagePath}`
+      }
+      return `/${component}/${module}/${pagePath}`
+    }
+    if (resource.startsWith('attachment$')) {
+      const attachmentPath = resource.slice(11)
+      if (module === 'ROOT') {
+        return `/${component}/_attachments/${attachmentPath}`
+      }
+      return `/${component}/${module}/_attachments/${attachmentPath}`
+    }
+
+    // Handle xref-like patterns that would need resolution
     if (resource.includes(':') && resource.endsWith('.adoc')) {
       // Preview mode - return placeholder
       return '#'

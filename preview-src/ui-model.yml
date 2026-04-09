@@ -33,6 +33,7 @@ site:
       displayVersion: '6.0'
       asciidoc:
         attributes:
+          latest-redpanda-tag: 'v25.1.1'
           component-metadata:
             title: Streaming
             parent-component: self-managed
@@ -91,6 +92,7 @@ site:
       displayVersion: '4.0'
       asciidoc:
         attributes:
+          latest-connect-version: '4.43.0'
           component-metadata:
             title: Connect
             parent-component: self-managed
