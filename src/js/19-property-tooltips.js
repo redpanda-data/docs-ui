@@ -253,12 +253,51 @@
   }
 
   /**
-   * Format description - escape HTML and convert backticks to code
+   * Format description - sanitize HTML while preserving safe links and code
+   *
+   * Handles:
+   * - Pre-resolved <a> tags from JSON (safe, with href attribute)
+   * - Backticks converted to <code> tags
+   * - Fallback xref resolution for any unresolved xrefs
    */
   function formatDescription (text) {
     if (!text) return ''
-    var escaped = escapeHtml(text)
-    return escaped.replace(/`([^`]+)`/g, '<code>$1</code>')
+
+    // Extract and preserve <a> tags (already resolved in JSON generation)
+    var linkPlaceholders = []
+    var withPlaceholders = text.replace(/<a\s+href="([^"]+)"[^>]*>([^<]+)<\/a>/g, function (match, href, display) {
+      var index = linkPlaceholders.length
+      // Sanitize href to prevent javascript: URLs
+      if (href.match(/^(https?:|\/)/i)) {
+        linkPlaceholders.push('<a href="' + escapeHtml(href) + '">' + escapeHtml(display) + '</a>')
+      } else {
+        linkPlaceholders.push(escapeHtml(display))
+      }
+      return '___LINK_' + index + '___'
+    })
+
+    // Escape remaining HTML for security
+    var escaped = escapeHtml(withPlaceholders)
+
+    // Convert backticks to code tags
+    var withCode = escaped.replace(/`([^`]+)`/g, '<code>$1</code>')
+
+    // Fallback: resolve any remaining xrefs that weren't pre-resolved
+    var withXrefs = withCode.replace(
+      /xref:\.?\/?([^[]+)\.adoc(?:#([^[]*))?\[([^\]]+)\]/g,
+      function (match, path, anchor, display) {
+        var href = path.replace(/^\.\//, '') + '/'
+        if (anchor) href += '#' + anchor
+        return '<a href="' + href + '">' + display + '</a>'
+      }
+    )
+
+    // Restore preserved links
+    var result = withXrefs.replace(/___LINK_(\d+)___/g, function (match, index) {
+      return linkPlaceholders[parseInt(index, 10)] || match
+    })
+
+    return result
   }
 
   /**
