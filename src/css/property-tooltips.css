@@ -1,0 +1,216 @@
+/* Property Tooltips CSS
+ * Styling for Redpanda configuration property hover tooltips
+ */
+
+/* Indicator styling for code elements with property tooltips */
+/* Use higher specificity to override .doc code border */
+.doc code.has-property-tooltip,
+article code.has-property-tooltip,
+code.has-property-tooltip {
+  border: none;
+  border-bottom: 2px dotted var(--link-highlight-color, #444ce7);
+  cursor: help;
+  transition: border-color 0.2s;
+}
+
+.doc code.has-property-tooltip:hover,
+.doc code.has-property-tooltip:focus,
+article code.has-property-tooltip:hover,
+article code.has-property-tooltip:focus,
+code.has-property-tooltip:hover,
+code.has-property-tooltip:focus {
+  border-bottom-style: solid;
+  border-bottom-color: var(--link-color, #005cc5);
+  outline: none;
+}
+
+.doc code.has-property-tooltip:focus-visible,
+article code.has-property-tooltip:focus-visible,
+code.has-property-tooltip:focus-visible {
+  outline: 2px solid var(--link-color, #005cc5);
+  outline-offset: 2px;
+  border-bottom-style: solid;
+}
+
+/* Tooltip content container */
+.property-doc-tooltip {
+  padding: 12px;
+  line-height: 1.5;
+}
+
+/* Property signature (name: type) */
+.property-doc-tooltip .prop-tooltip-signature {
+  font-family: var(--code-font-family, monospace);
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--link-color, #005cc5);
+  font-size: 0.9375rem;
+}
+
+.property-doc-tooltip .prop-tooltip-signature code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Badge container */
+.property-doc-tooltip .prop-tooltip-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+/* Badge base styling */
+.property-doc-tooltip .prop-badge {
+  font-size: 0.6875rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Scope badge (cluster, broker, topic) */
+.property-doc-tooltip .prop-badge-scope {
+  background: var(--code-background, #f0f4f8);
+  color: var(--code-font-color, #24292e);
+  border: 1px solid var(--panel-border-color, #ddd);
+}
+
+/* Restart required badge */
+.property-doc-tooltip .prop-badge-restart {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+/* Enterprise badge */
+.property-doc-tooltip .prop-badge-enterprise {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* Deprecated badge */
+.property-doc-tooltip .prop-badge-deprecated {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Self-hosted only badge */
+.property-doc-tooltip .prop-badge-self-hosted {
+  background: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+/* Description text */
+.property-doc-tooltip .prop-tooltip-description {
+  margin-bottom: 12px;
+  color: var(--body-font-color, #333);
+}
+
+.property-doc-tooltip .prop-tooltip-description code {
+  background: var(--code-background, #f6f8fa);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.875em;
+}
+
+/* Default value and range */
+.property-doc-tooltip .prop-tooltip-default,
+.property-doc-tooltip .prop-tooltip-range {
+  margin-bottom: 8px;
+  font-size: 0.8125rem;
+}
+
+.property-doc-tooltip .prop-tooltip-default code,
+.property-doc-tooltip .prop-tooltip-range code {
+  background: var(--code-background, #f6f8fa);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--code-font-color, #24292e);
+  border: none;
+}
+
+/* Documentation link */
+.property-doc-tooltip .prop-tooltip-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: var(--link-color, #005cc5);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.property-doc-tooltip .prop-tooltip-link:hover {
+  color: var(--link-color-hover, #004094);
+  text-decoration: underline;
+}
+
+/* Dark mode styles */
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-signature {
+  color: #58a6ff;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description {
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description code,
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-default code,
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-range code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-badge-scope {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-badge-restart {
+  background: #453a1f;
+  color: #ffd54f;
+  border-color: #5a4a28;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-badge-enterprise {
+  background: #0a3d1a;
+  color: #7ee87e;
+  border-color: #0e5a24;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-badge-deprecated {
+  background: #4d0f15;
+  color: #ff9999;
+  border-color: #751923;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-badge-self-hosted {
+  background: #2a2a2a;
+  color: #a0a0a0;
+  border-color: #444;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link {
+  color: #58a6ff;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link:hover {
+  color: #79b8ff;
+}
+
+/* Touch device support - larger tap targets */
+@media (hover: none) and (pointer: coarse) {
+  code.has-property-tooltip {
+    padding: 6px 3px;
+    margin: -6px -3px;
+  }
+}

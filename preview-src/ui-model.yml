@@ -25,6 +25,9 @@ site:
       url: /xyz/6.0/index.html
       version: '6.0'
       displayVersion: '6.0'
+      asciidoc:
+        attributes:
+          latest-redpanda-tag: '25.1.1'
     - &component_version
       title: *component_title
       url: '#'
@@ -56,6 +59,19 @@ site:
       version: '2.0'
       displayVersion: '2.0'
     latestVersion: *latest_version_123
+  - &connect_component
+    name: redpanda-connect
+    title: Redpanda Connect
+    url: /redpanda-connect/latest/index.html
+    versions:
+    - &latest_version_connect
+      url: /redpanda-connect/latest/index.html
+      version: 'latest'
+      displayVersion: 'Latest'
+      asciidoc:
+        attributes:
+          latest-connect-version: '4.43.0'
+    latestVersion: *latest_version_connect
 page:
   url: *home_url
   home: true
