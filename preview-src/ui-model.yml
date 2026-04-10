@@ -48,6 +48,7 @@ site:
       displayVersion: '24.3'
       asciidoc:
         attributes:
+          latest-redpanda-tag: 'v24.3.1'
           component-metadata:
             title: Streaming
             parent-component: self-managed
