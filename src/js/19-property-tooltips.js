@@ -78,7 +78,9 @@
 
     var CACHE_KEY = 'redpanda-properties-cache'
     var CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
-    var cacheVersion = url // Use URL as cache key since it contains version
+    // Extract version from URL (e.g., 'v26.1.2' from 'redpanda-properties-v26.1.2.json')
+    var versionMatch = url.match(/redpanda-properties-(v[\d.]+)\.json/)
+    var cacheVersion = versionMatch ? versionMatch[1] : url
 
     // Check localStorage cache (skip in preview mode for easier testing)
     if (!isPreviewMode()) {
@@ -268,8 +270,8 @@
     var linkPlaceholders = []
     var withPlaceholders = text.replace(/<a\s+href="([^"]+)"[^>]*>([^<]+)<\/a>/g, function (match, href, display) {
       var index = linkPlaceholders.length
-      // Sanitize href to prevent javascript: URLs
-      if (href.match(/^(https?:|\/)/i)) {
+      // Sanitize href to prevent javascript: URLs - allow http(s), absolute, relative, and anchor links
+      if (href.match(/^(https?:|\/|#|\.\.?\/)/i)) {
         linkPlaceholders.push('<a href="' + escapeHtml(href) + '">' + escapeHtml(display) + '</a>')
       } else {
         linkPlaceholders.push(escapeHtml(display))
@@ -389,7 +391,8 @@
    */
   function getDocVersion () {
     // Try to extract version from URL path (e.g., /25.3/reference/... or /current/...)
-    var match = window.location.pathname.match(/^\/(\d+\.\d+|current)\//)
+    // Match with or without trailing slash to handle edge cases
+    var match = window.location.pathname.match(/^\/(\d+\.\d+|current)(?:\/|$)/)
     if (match) {
       return match[1]
     }
