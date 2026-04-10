@@ -385,14 +385,15 @@
   /**
    * Get the current documentation version from the URL path
    * Returns 'current' as fallback if version cannot be determined
+   * Note: beta versions may not have property attachments, so fall back to current
    */
   function getDocVersion () {
     // Try to extract version from URL path (e.g., /25.3/reference/... or /current/...)
-    var match = window.location.pathname.match(/^\/(\d+\.\d+|current|beta)\//)
+    var match = window.location.pathname.match(/^\/(\d+\.\d+|current)\//)
     if (match) {
       return match[1]
     }
-    // Fallback to 'current' for unversioned or root pages
+    // Fallback to 'current' for beta, unversioned, or root pages
     return 'current'
   }
 
