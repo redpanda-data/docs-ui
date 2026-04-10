@@ -234,9 +234,10 @@
       parts.push('<div class="prop-tooltip-range"><strong>Range:</strong> ' + range.join(', ') + '</div>')
     }
 
-    // Link to full documentation
+    // Link to full documentation (use current page version)
     var scope = prop.configScope || 'cluster'
-    var docUrl = '/current/reference/properties/' + scope + '-properties/#' + prop.name.replace(/_/g, '-')
+    var version = getDocVersion()
+    var docUrl = '/' + version + '/reference/properties/' + scope + '-properties/#' + prop.name.replace(/_/g, '-')
     parts.push('<a href="' + escapeHtml(docUrl) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
     return '<div class="property-doc-tooltip">' + parts.join('') + '</div>'
@@ -382,25 +383,50 @@
   }
 
   /**
-   * Initialize property tooltips
+   * Get the current documentation version from the URL path
+   * Returns 'current' as fallback if version cannot be determined
+   */
+  function getDocVersion () {
+    // Try to extract version from URL path (e.g., /25.3/reference/... or /current/...)
+    var match = window.location.pathname.match(/^\/(\d+\.\d+|current|beta)\//)
+    if (match) {
+      return match[1]
+    }
+    // Fallback to 'current' for unversioned or root pages
+    return 'current'
+  }
+
+  /**
+   * Initialize property tooltips with retry for Tippy.js loading
    */
   function init () {
     if (isPropertyTooltipsDisabled()) {
       return
     }
 
-    if (!window.tippy) {
-      console.warn('Property tooltips: Tippy.js not loaded')
-      return
+    // Retry mechanism for Tippy.js - it may still be loading
+    var maxRetries = 5
+    var retryDelay = 100 // ms
+
+    function tryInit (retriesLeft) {
+      if (window.tippy) {
+        // Use requestIdleCallback for non-blocking processing
+        var schedule = window.requestIdleCallback || function (cb) {
+          setTimeout(cb, 100)
+        }
+        schedule(function () {
+          processCodeElements()
+        })
+      } else if (retriesLeft > 0) {
+        setTimeout(function () {
+          tryInit(retriesLeft - 1)
+        }, retryDelay)
+      } else {
+        console.warn('Property tooltips: Tippy.js not loaded after retries')
+      }
     }
 
-    // Use requestIdleCallback for non-blocking processing
-    var schedule = window.requestIdleCallback || function (cb) {
-      setTimeout(cb, 100)
-    }
-    schedule(function () {
-      processCodeElements()
-    })
+    tryInit(maxRetries)
   }
 
   // Initialize when DOM is ready
