@@ -35,6 +35,7 @@ site:
       displayVersion: '24.3'
       asciidoc:
         attributes:
+          latest-redpanda-tag: 'v24.3.1'
           toc-tools-title: Connect Tools
           toc-tools-links: '[{"text": "Bloblang Playground", "url": "/playground", "icon": "terminal"}, {"text": "Claude AI Skills", "url": "https://github.com/redpanda-data/connect/blob/main/.claude-plugin/README.md", "icon": "layers", "external": true}]'
     - url: '#'

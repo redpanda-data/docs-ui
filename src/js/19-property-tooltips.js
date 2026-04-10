@@ -64,11 +64,14 @@
     // Determine the URL - prefer meta tag, fall back to static for preview
     var url = getPropertiesJsonUrl()
 
+    // Static fallback URL for preview mode
+    var rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_'
+    var staticFallbackUrl = rootPath + '/redpanda-properties.json'
+
     if (!url) {
       if (isPreviewMode()) {
         // Use static fallback for preview/development when no meta tag
-        var rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_'
-        url = rootPath + '/redpanda-properties.json'
+        url = staticFallbackUrl
       } else {
         console.warn('Property tooltips: No properties-json-url meta tag found')
         propertiesLoading = false
@@ -137,6 +140,37 @@
         return propertiesData
       })
       .catch(function (error) {
+        // In preview mode, retry with static fallback if versioned URL fails
+        if (isPreviewMode() && url !== staticFallbackUrl) {
+          console.info('Property tooltips: Versioned URL failed, trying static fallback')
+          return fetch(staticFallbackUrl)
+            .then(function (response) {
+              if (!response.ok) {
+                throw new Error('HTTP ' + response.status)
+              }
+              return response.json()
+            })
+            .then(function (json) {
+              propertiesData = buildPropertyLookup(json)
+              propertiesLoading = false
+              propertiesLoadQueue.forEach(function (resolve) {
+                resolve(propertiesData)
+              })
+              propertiesLoadQueue = []
+              return propertiesData
+            })
+            .catch(function (fallbackError) {
+              console.warn('Property tooltips: Static fallback also failed:', fallbackError)
+              propertiesLoading = false
+              propertiesData = {}
+              propertiesLoadQueue.forEach(function (resolve) {
+                resolve(propertiesData)
+              })
+              propertiesLoadQueue = []
+              return propertiesData
+            })
+        }
+
         console.warn('Property tooltips: Failed to load properties data:', error)
         propertiesLoading = false
         propertiesData = {}

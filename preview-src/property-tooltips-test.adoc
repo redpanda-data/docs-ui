@@ -1,0 +1,55 @@
+= Property Tooltips Test
+:page-layout: default
+:page-enable-property-tooltips: true
+
+Test page for Redpanda configuration property tooltips.
+
+TIP: Hover over property names to see documentation tooltips!
+
+== Cluster Properties in Paragraphs
+
+When configuring Redpanda, you may need to adjust `log_segment_size` for optimal storage performance. The default segment size works for most workloads, but large messages may benefit from larger segments.
+
+To enable authentication, set `enable_sasl` to true. This requires clients to authenticate using SASL mechanisms.
+
+== Topic Properties in Lists
+
+Topic-level configuration properties:
+
+* `retention_bytes` - Controls maximum partition size before deletion
+* This is a topic-scoped property that can override cluster defaults
+
+== Enterprise and Self-Hosted Properties
+
+Some properties are enterprise-only:
+
+* `cloud_storage_enabled` - Requires Enterprise license (self-hosted only)
+
+== Broker Properties
+
+Per-broker settings like `kafka_connections_max` control resource limits.
+
+== Deprecated Properties
+
+The property `group_max_session_timeout_ms` is deprecated but still shown with appropriate styling.
+
+== Properties in Code Blocks
+
+[source,yaml]
+----
+redpanda:
+  log_segment_size: 134217728
+  enable_sasl: true
+----
+
+== Non-Property Code
+
+Regular code elements should NOT have tooltips:
+
+* `this_is_not_a_property` - No tooltip
+* `some_random_function()` - No tooltip
+* `myVariable` - No tooltip
+
+== Mixed Content
+
+In a paragraph with both properties and regular text: Set `enable_sasl` to configure authentication, then use `kubectl apply` to deploy. Only `enable_sasl` should have a tooltip.
