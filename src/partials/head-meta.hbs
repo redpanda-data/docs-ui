@@ -10,9 +10,12 @@
 <meta name="latest-redpanda-version" content="{{this.latest.version}}">
 {{#if this.latest.asciidoc.attributes.latest-redpanda-tag}}
 <meta name="latest-redpanda-tag" content="{{this.latest.asciidoc.attributes.latest-redpanda-tag}}">
-<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this.latest.asciidoc.attributes.latest-redpanda-tag '.json') component='ROOT' module='reference'}}">
 {{/if}}
 {{/with}}
+{{!-- Properties JSON URL uses current page's version, not site latest --}}
+{{#if page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
+<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' page.componentVersion.asciidoc.attributes.latest-redpanda-tag '.json') component='ROOT' module='reference' version=page.version}}">
+{{/if}}
 {{!-- Redpanda Connect JSON for Bloblang tooltips --}}
 {{#with site.components.redpanda-connect}}
 {{#if this.latest.asciidoc.attributes.latest-connect-version}}
