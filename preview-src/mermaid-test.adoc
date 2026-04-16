@@ -1,0 +1,137 @@
+= Mermaid Diagram Test
+:page-layout: default
+
+Test page for Mermaid diagram sizing, zoom, and clickable links.
+
+TIP: Click any diagram to zoom. Click nodes with links to navigate to sections.
+
+++++
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad: true, securityLevel: 'loose'});</script>
+++++
+
+== Clickable Navigation
+
+This flowchart has clickable nodes that link to sections below:
+
+++++
+<div class="mermaid">
+flowchart LR
+    A[Start Here] --> B[View Flowchart]
+    B --> C[See Sequence]
+    C --> D[Check Classes]
+    click B "#larger-flowchart" "Jump to Larger Flowchart"
+    click C "#sequence-diagram" "Jump to Sequence Diagram"
+    click D "#class-diagram" "Jump to Class Diagram"
+</div>
+++++
+
+== Simple Flowchart
+
+++++
+<div class="mermaid">
+flowchart LR
+    A[Start] --> B[Process]
+    B --> C[End]
+</div>
+++++
+
+[[larger-flowchart]]
+== Larger Flowchart
+
+++++
+<div class="mermaid">
+flowchart TD
+    A[Client] --> B[Load Balancer]
+    B --> C[Server 1]
+    B --> D[Server 2]
+    B --> E[Server 3]
+    C --> F[(Database)]
+    D --> F
+    E --> F
+    F --> G[Cache]
+    G --> H[Response]
+</div>
+++++
+
+[[sequence-diagram]]
+== Sequence Diagram
+
+++++
+<div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    Client->>API: Request
+    API->>Database: Query
+    Database-->>API: Results
+    API-->>Client: Response
+</div>
+++++
+
+== Wide Sequence Diagram
+
+++++
+<div class="mermaid">
+sequenceDiagram
+    participant Browser
+    participant CDN
+    participant LoadBalancer
+    participant AppServer
+    participant Cache
+    participant Database
+    participant MessageQueue
+
+    Browser->>CDN: Request static assets
+    CDN-->>Browser: Return cached assets
+    Browser->>LoadBalancer: API Request
+    LoadBalancer->>AppServer: Forward request
+    AppServer->>Cache: Check cache
+    Cache-->>AppServer: Cache miss
+    AppServer->>Database: Query data
+    Database-->>AppServer: Return data
+    AppServer->>Cache: Store in cache
+    AppServer->>MessageQueue: Publish event
+    AppServer-->>LoadBalancer: Response
+    LoadBalancer-->>Browser: Return response
+</div>
+++++
+
+[[class-diagram]]
+== Class Diagram
+
+++++
+<div class="mermaid">
+classDiagram
+    class Animal {
+        +String name
+        +int age
+        +makeSound()
+    }
+    class Dog {
+        +String breed
+        +bark()
+    }
+    class Cat {
+        +String color
+        +meow()
+    }
+    Animal <|-- Dog
+    Animal <|-- Cat
+</div>
+++++
+
+== State Diagram
+
+++++
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Processing : start
+    Processing --> Success : complete
+    Processing --> Error : fail
+    Success --> [*]
+    Error --> Idle : retry
+</div>
+++++

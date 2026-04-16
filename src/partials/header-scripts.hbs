@@ -18,5 +18,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!--  https://github.com/snt/antora-mermaid-extension -->
 <!-- Only load Mermaid on pages that aren't home/labs to avoid request chain on landing pages -->
 {{#unless (or (eq page.attributes.role 'home') (eq page.layout 'labs-search'))}}
+<script>
+  // Configure Mermaid before it loads to enable clickable links in diagrams
+  // securityLevel: 'loose' allows click events and links to work
+  window.mermaidConfig = { securityLevel: 'loose', startOnLoad: true };
+</script>
 {{> mermaid-scripts}}
 {{/unless}}

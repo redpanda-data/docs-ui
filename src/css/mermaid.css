@@ -1,3 +1,27 @@
+.mermaid {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
 .mermaid > svg {
   background-color: var(--body-background) !important;
+  max-width: 100%;
+  height: auto;
+  min-width: 200px;
+  /* Override any inherited aspect-ratio (e.g., from .doc .image > svg) */
+  aspect-ratio: auto !important;
+}
+
+/* Styling for clickable links in Mermaid diagrams */
+.mermaid a {
+  text-decoration: none;
+}
+
+.mermaid .node:hover {
+  filter: brightness(1.05);
+}
+
+.mermaid .clickable {
+  cursor: pointer;
 }

@@ -1,0 +1,133 @@
+.mermaid-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a1a;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483647;
+  padding: 2rem;
+  box-sizing: border-box;
+  isolation: isolate;
+}
+
+.mermaid-modal-overlay.active {
+  display: flex;
+}
+
+.mermaid-modal-container {
+  display: block;
+  max-width: calc(100vw - 4rem);
+  max-height: calc(100vh - 6rem);
+  overflow: auto;
+  text-align: center;
+  background: var(--body-background, #fff);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+}
+
+.mermaid-modal-container:active {
+  cursor: grabbing;
+}
+
+/* Always show scrollbars for discoverability */
+.mermaid-modal-container::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.mermaid-modal-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.mermaid-modal-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+}
+
+.mermaid-modal-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.mermaid-modal-container svg {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Scroll hint that appears briefly */
+.mermaid-modal-hint {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.mermaid-modal-hint.hidden {
+  opacity: 0;
+}
+
+.mermaid-modal-close {
+  position: fixed;
+  top: 1rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  font-size: 1.5rem;
+  color: #333;
+  cursor: pointer;
+  z-index: 10;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mermaid-modal-close:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.mermaid-modal-close:focus {
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}
+
+/* Zoom-in cursor hint on mermaid diagrams */
+.mermaid {
+  cursor: zoom-in;
+}
+
+.mermaid:focus-visible {
+  outline: 2px solid var(--body-font-color, #333);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mermaid-modal-close,
+  .mermaid-modal-hint {
+    transition: none;
+  }
+}
