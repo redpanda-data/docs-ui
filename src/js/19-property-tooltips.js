@@ -35,6 +35,17 @@
   }
 
   /**
+   * Get the latest Redpanda tag from meta tag (for cache versioning)
+   */
+  function getLatestRedpandaTag () {
+    var meta = document.querySelector('meta[name="latest-redpanda-tag"]')
+    if (meta && meta.content) {
+      return meta.content
+    }
+    return null
+  }
+
+  /**
    * Check if running in preview/development mode
    */
   function isPreviewMode () {
@@ -81,9 +92,8 @@
 
     var CACHE_KEY = 'redpanda-properties-cache'
     var CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
-    // Extract version from URL (e.g., 'v26.1.2' from 'redpanda-properties-v26.1.2.json')
-    var versionMatch = url.match(/redpanda-properties-(v[\d.]+)\.json/)
-    var cacheVersion = versionMatch ? versionMatch[1] : url
+    // Use latest-redpanda-tag meta tag for cache versioning
+    var cacheVersion = getLatestRedpandaTag() || 'unknown'
 
     // Check localStorage cache (skip in preview mode for easier testing)
     if (!isPreviewMode()) {
