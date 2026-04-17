@@ -198,7 +198,6 @@
           description: prop.description,
           configScope: prop.config_scope,
           needsRestart: prop.needs_restart,
-          cloudSupported: prop.cloud_supported,
           isDeprecated: prop.is_deprecated,
           isEnterprise: prop.is_enterprise,
           visibility: prop.visibility,
@@ -240,9 +239,6 @@
     }
     if (prop.isDeprecated) {
       badges.push('<span class="prop-badge prop-badge-deprecated">deprecated</span>')
-    }
-    if (prop.cloudSupported === false) {
-      badges.push('<span class="prop-badge prop-badge-self-hosted">self-hosted only</span>')
     }
 
     if (badges.length > 0) {
