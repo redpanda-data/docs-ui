@@ -1,8 +1,7 @@
 = Property Tooltips Test
 :page-layout: default
-:page-enable-property-tooltips: true
 
-Test page for Redpanda configuration property tooltips.
+Test page for Redpanda configuration property tooltips. Property tooltips are enabled by default on all pages. To disable on a specific page, use `:page-disable-property-tooltips: true`.
 
 TIP: Hover over property names to see documentation tooltips!
 
