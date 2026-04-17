@@ -101,13 +101,6 @@ code.has-property-tooltip:focus-visible {
   border: 1px solid #f5c6cb;
 }
 
-/* Self-hosted only badge */
-.property-doc-tooltip .prop-badge-self-hosted {
-  background: #e2e3e5;
-  color: #383d41;
-  border: 1px solid #d6d8db;
-}
-
 /* Description text */
 .property-doc-tooltip .prop-tooltip-description {
   margin-bottom: 12px;
@@ -191,12 +184,6 @@ html[data-theme="dark"] .property-doc-tooltip .prop-badge-deprecated {
   background: #4d0f15;
   color: #ff9999;
   border-color: #751923;
-}
-
-html[data-theme="dark"] .property-doc-tooltip .prop-badge-self-hosted {
-  background: #2a2a2a;
-  color: #a0a0a0;
-  border-color: #444;
 }
 
 html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link {
