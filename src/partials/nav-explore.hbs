@@ -17,14 +17,24 @@ keyboard_arrow_down
         {{#if (ne @root.page.componentVersion.displayVersion 'default')}}
             {{#each this}}
               {{#if (ne ./version @root.page.version)}}
-                {{#with (resolve-resource ./url) as |targetPage|}}
-                  <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
-                    {{../displayVersion}}
-                    {{#if (is-eol ../asciidoc.attributes)}}
+                {{!-- Skip resolve-resource for absolute URLs --}}
+                {{#if (or (starts-with ./url '/') (starts-with ./url 'http'))}}
+                  <a class="version{{#if ./missing}} is-missing{{/if}}" href="{{{./url}}}">
+                    {{./displayVersion}}
+                    {{#if (is-eol ./asciidoc.attributes)}}
                       <span class="eol-label">(end of life)</span>
                     {{/if}}
                   </a>
-                {{/with}}
+                {{else}}
+                  {{#with (resolve-resource ./url) as |targetPage|}}
+                    <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
+                      {{../displayVersion}}
+                      {{#if (is-eol ../asciidoc.attributes)}}
+                        <span class="eol-label">(end of life)</span>
+                      {{/if}}
+                    </a>
+                  {{/with}}
+                {{/if}}
               {{/if}}
             {{/each}}
         {{/if}}

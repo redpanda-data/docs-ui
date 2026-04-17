@@ -11,7 +11,27 @@ module.exports = (resource, { data, hash: context }) => {
 
   // For preview builds where contentCatalog.resolveResource might not exist
   if (!contentCatalog || !contentCatalog.resolveResource) {
-    // Return the resource as-is for preview builds
+    // Generate a realistic URL for preview builds
+    const component = context.component || 'ROOT'
+    const module = context.module || 'ROOT'
+
+    // Parse resource ID: page$path/to/file.adoc or attachment$file.json
+    if (resource.startsWith('page$')) {
+      const pagePath = resource.slice(5).replace(/\.adoc$/, '/')
+      // ROOT module pages go directly under component
+      if (module === 'ROOT') {
+        return `/${component}/${pagePath}`
+      }
+      return `/${component}/${module}/${pagePath}`
+    }
+    if (resource.startsWith('attachment$')) {
+      const attachmentPath = resource.slice(11)
+      if (module === 'ROOT') {
+        return `/${component}/_attachments/${attachmentPath}`
+      }
+      return `/${component}/${module}/_attachments/${attachmentPath}`
+    }
+    // Fallback: return as-is
     return resource
   }
 

@@ -34,6 +34,14 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
           // Merge asciidoc properties, preserving attributes from ui-model.yml
           version.asciidoc = { ...version.asciidoc, ...asciidoc }
         }
+        // Set latest version reference
+        component.latest = component.latestVersion || component.versions?.[0]
+      }
+      // Convert components array to object keyed by name (like real Antora)
+      const componentsArray = baseUiModel.site.components
+      baseUiModel.site.components = {}
+      for (const component of componentsArray) {
+        baseUiModel.site.components[component.name] = component
       }
       baseUiModel = { ...baseUiModel, env: process.env }
       delete baseUiModel.asciidoc
