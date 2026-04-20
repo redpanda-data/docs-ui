@@ -134,6 +134,9 @@ page:
       - content: Bloblang Playground
         url: /xyz/24.3/playground.html
         urlType: internal
+      - content: Property Tooltips
+        url: /xyz/24.3/property-tooltips-test.html
+        urlType: internal
       - content: Home page
         url: /xyz/24.3/home.html
         urlType: internal
