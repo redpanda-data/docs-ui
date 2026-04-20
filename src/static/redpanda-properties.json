@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "log_segment_size": {
+      "name": "log_segment_size",
+      "type": "integer",
+      "default": 134217728,
+      "description": "The maximum size of a log segment file. When a segment file reaches this size, Redpanda closes it and creates a new segment.",
+      "config_scope": "cluster",
+      "needs_restart": true,
+      "cloud_supported": true,
+      "is_deprecated": false,
+      "is_enterprise": false,
+      "visibility": "user",
+      "minimum": 1,
+      "maximum": 4294967295
+    },
+    "enable_sasl": {
+      "name": "enable_sasl",
+      "type": "boolean",
+      "default": false,
+      "description": "Enable SASL authentication for Kafka connections. When enabled, clients must authenticate using one of the configured SASL mechanisms.",
+      "config_scope": "cluster",
+      "needs_restart": false,
+      "cloud_supported": true,
+      "is_deprecated": false,
+      "is_enterprise": false,
+      "visibility": "user"
+    },
+    "retention_bytes": {
+      "name": "retention_bytes",
+      "type": "integer",
+      "default": null,
+      "description": "The maximum size of a partition's log before old segments are deleted. A value of -1 or `null` means no size-based retention limit. Can be overridden per topic.",
+      "config_scope": "topic",
+      "needs_restart": false,
+      "cloud_supported": true,
+      "is_deprecated": false,
+      "is_enterprise": false,
+      "visibility": "user",
+      "nullable": true
+    },
+    "cloud_storage_enabled": {
+      "name": "cloud_storage_enabled",
+      "type": "boolean",
+      "default": false,
+      "description": "Enable Tiered Storage. When enabled, Redpanda can offload log segments to object storage.",
+      "config_scope": "cluster",
+      "needs_restart": true,
+      "cloud_supported": false,
+      "is_deprecated": false,
+      "is_enterprise": true,
+      "visibility": "user"
+    },
+    "kafka_connections_max": {
+      "name": "kafka_connections_max",
+      "type": "integer",
+      "default": null,
+      "description": "The maximum number of Kafka client connections allowed per broker. A value of `null` means unlimited connections.",
+      "config_scope": "broker",
+      "needs_restart": false,
+      "cloud_supported": true,
+      "is_deprecated": false,
+      "is_enterprise": false,
+      "visibility": "user",
+      "nullable": true
+    },
+    "group_max_session_timeout_ms": {
+      "name": "group_max_session_timeout_ms",
+      "type": "integer",
+      "default": 300000,
+      "description": "The maximum session timeout for consumer groups. If a consumer does not send a heartbeat within this time, it is considered dead and removed from the group.",
+      "config_scope": "cluster",
+      "needs_restart": false,
+      "cloud_supported": true,
+      "is_deprecated": true,
+      "is_enterprise": false,
+      "visibility": "user",
+      "minimum": 0
+    }
+  }
+}

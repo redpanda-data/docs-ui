@@ -5,6 +5,7 @@
 blobl.wasm
 src/static/*
 !src/static/bloblang-docs.json
+!src/static/redpanda-properties.json
 test-results.*
 test-results-*.*
 .playwright-mcp/
