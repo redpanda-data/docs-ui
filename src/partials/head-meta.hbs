@@ -9,4 +9,27 @@
 {{#with site.components.ROOT}}
 <meta name="latest-redpanda-version" content="{{this.latest.version}}">
 {{/with}}
+{{!-- Properties JSON: use page's version for ROOT component, site latest for others --}}
+{{#if page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
+{{!-- ROOT component page: use this version's tag for both meta and URL --}}
+<meta name="latest-redpanda-tag" content="{{page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}">
+<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' page.componentVersion.asciidoc.attributes.latest-redpanda-tag '.json') component='ROOT' module='reference' version=page.version}}">
+{{else}}
+{{!-- Non-ROOT component (cloud, connect): use ROOT's latest --}}
+{{#with site.components.ROOT}}
+{{#if this.latest.asciidoc.attributes.latest-redpanda-tag}}
+<meta name="latest-redpanda-tag" content="{{this.latest.asciidoc.attributes.latest-redpanda-tag}}">
+<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this.latest.asciidoc.attributes.latest-redpanda-tag '.json') component='ROOT' module='reference'}}">
+{{/if}}
+{{/with}}
+{{/if}}
+{{!-- Redpanda Connect JSON for Bloblang tooltips --}}
+{{#with site.components.redpanda-connect}}
+{{#if this.latest.asciidoc.attributes.latest-connect-version}}
+<meta name="connect-json-url" content="{{resolve-resource (concat 'attachment$connect-' this.latest.asciidoc.attributes.latest-connect-version '.json') component='redpanda-connect' module='components'}}">
+{{/if}}
+{{/with}}
+{{#if page.attributes.disable-property-tooltips}}
+<meta name="disable-property-tooltips" content="true">
+{{/if}}
 <meta itemprop="datePublished" content="{{iso-date}}">
