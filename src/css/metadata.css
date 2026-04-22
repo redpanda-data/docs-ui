@@ -282,6 +282,30 @@
   margin: 0;
 }
 
+/* BYOC Badge */
+.badge--byoc {
+  color: var(--byoc-label-background);
+  font-weight: bold;
+  background-color: var(--byoc-highlight-background-color);
+}
+
+.badge--large.badge--byoc {
+  background-color: var(--byoc-label-background);
+  color: var(--byoc-label-color);
+}
+
+/* Cloud Badge */
+.badge--cloud {
+  color: var(--cloud-label-background);
+  font-weight: bold;
+  background-color: var(--cloud-highlight-background-color);
+}
+
+.badge--large.badge--cloud {
+  background-color: var(--cloud-label-background);
+  color: var(--cloud-label-color);
+}
+
 @media (max-width: 768px) {
   .article .metadata {
     flex-direction: column;

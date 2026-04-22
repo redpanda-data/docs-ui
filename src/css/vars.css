@@ -126,6 +126,14 @@ html[data-theme=dark] {
   --limited-availability-label-border: var(--amber-800);
   --limited-availability-highlight-background-color: rgba(202, 133, 4, 0.08);
   --limited-availability-highlight-background-color: rgba(248, 134, 57, 0.08);
+  /* BYOC badge */
+  --byoc-label-color: #fff;
+  --byoc-label-background: #014f86;
+  --byoc-highlight-background-color: rgba(1, 79, 134, 0.08);
+  /* Cloud badge */
+  --cloud-label-color: #fff;
+  --cloud-label-background: #6c63ff;
+  --cloud-highlight-background-color: rgba(108, 99, 255, 0.08);
   /* doc */
   --doc-font-size: inherit;
   --doc-font-size--desktop: var(--body-font-size);
