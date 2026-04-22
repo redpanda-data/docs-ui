@@ -252,3 +252,38 @@ window.addEventListener('load', function() {
 </script>
 <!-- End VWO Async SmartCode -->
 
+<!-- Axiom do11y - Documentation Observability -->
+<script>
+window.Do11yConfig = {
+  framework: 'custom',
+
+  // Use Netlify edge function proxy (token stored in environment variable)
+  axiomHost: '/api/do11y',
+
+  // Antora/Redpanda UI selectors
+  searchSelector: '#autocomplete, [class*="search"]',
+  copyButtonSelector: '.copy-button',
+  codeBlockSelector: '.doc pre.highlight, .doc .literalblock pre',
+  navigationSelector: '.nav, .nav-container',
+  footerSelector: '.footer',
+  contentSelector: '.doc, .body',
+  tabContainerSelector: '.tabs, .tabset',
+  tocSelector: '.toc, .toc-menu',
+  feedbackSelector: null,
+
+  // Enable all tracking features
+  trackOutboundLinks: true,
+  trackInternalLinks: true,
+  trackScrollDepth: true,
+  trackSectionVisibility: true,
+  trackTabSwitches: true,
+  trackTocClicks: true,
+  trackExpandCollapse: true,
+  trackFeedback: false,
+
+  // Privacy
+  respectDNT: true
+};
+</script>
+<script defer src="{{{uiRootPath}}}/js/vendor/do11y.js"></script>
+
