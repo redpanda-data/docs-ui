@@ -390,3 +390,21 @@ a.nav-text {
   background-size: contain;
   content: '(Limited)';
 }
+
+.nav-link.cloud-byoc::after {
+  height: 20px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: '(BYOC)';
+  color: var(--byoc-label-background);
+}
+
+.nav-link.cloud-only::after {
+  height: 20px;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: '(Cloud)';
+  color: var(--cloud-label-background);
+}

@@ -21,7 +21,7 @@ html.is-clipped--navbar {
 
 .navbar {
   background: var(--navbar-background);
-  color: var(--navbar-font-color);
+  color: var(--nav-text-color, var(--navbar-font-color));
   font-size: var(--secondary-font-size);
   height: var(--navbar-height);
   align-content: center;
@@ -39,7 +39,7 @@ html.is-clipped--navbar {
 }
 
 .navbar-menu {
-  color: #a8b2c7;
+  color: var(--nav-text-color, #a8b2c7);
   justify-content: flex-start;
 }
 
@@ -52,7 +52,7 @@ html.is-clipped--navbar {
 }
 
 .navbar-brand .navbar-item {
-  color: var(--navbar-font-color);
+  color: var(--nav-text-color, var(--navbar-font-color));
   margin-left: 8px;
 }
 
@@ -152,7 +152,7 @@ html.is-clipped--navbar {
 
 .navbar-item,
 .navbar-link {
-  color: var(--navbar-menu-font-color);
+  color: var(--nav-text-color, var(--navbar-menu-font-color));
   display: block;
   line-height: var(--doc-line-height);
   padding: 6px 8px;

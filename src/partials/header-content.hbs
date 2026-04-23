@@ -1,6 +1,6 @@
 <header class="header">
     {{> announcement-bar}}
-  <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: var(--default-header-color)"{{/if}}
+  <nav class="navbar" {{#if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}; {{#if this.text-color}}--nav-text-color: {{this.text-color}};{{/if}}"{{/with}}{{else}}style="background-color: var(--default-header-color)"{{/if}}
 >
     <div class="navbar-brand" id="brand">
       {{#with site.homeUrl}}
@@ -13,9 +13,9 @@
       </button>
       <span class="platform-indicator-mobile">{{page.component.title}}</span>
     </div>
-    <div id="topbar-nav" class="navbar-menu" {{#if isStandaloneWidget}}style="background-color: inherit;"{{else if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}"{{/with}}{{else}}style="background-color: var(--default-header-color)"{{/if}}>
+    <div id="topbar-nav" class="navbar-menu" {{#if isStandaloneWidget}}style="background-color: inherit;"{{else if page.component.latest.asciidoc.attributes.page-header-data}}{{#with page.component.latest.asciidoc.attributes.page-header-data}}style="background-color: {{this.color}}; {{#if this.text-color}}--nav-text-color: {{this.text-color}};{{/if}}"{{/with}}{{else}}style="background-color: var(--default-header-color)"{{/if}}>
       {{#each (sort-components site.components)}}
-      <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" {{#if @root.isStandaloneWidget}}style="color: white;"{{/if}} href="{{{this.url}}}">{{this.title}}</a>
+      <a class="navbar-item {{#if (eq this.title @root.page.component.title)}}is-current{{/if}}" {{#if @root.isStandaloneWidget}}style="color: white;"{{else if @root.page.component.latest.asciidoc.attributes.page-header-data.text-color}}style="color: {{@root.page.component.latest.asciidoc.attributes.page-header-data.text-color}};"{{/if}} href="{{{this.url}}}">{{this.title}}</a>
       {{/each}}
       <div class="navbar-end">
           {{#if (and (ne page.layout 'search') env.ALGOLIA_API_KEY)}}

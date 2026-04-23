@@ -11,6 +11,19 @@
       <p class="nav-limited-availability-label" aria-hidden="true">Limited Availability</p>
     </div>
     {{/if}}
+    {{!-- Only show BYOC/Cloud badges on non-ADP pages (ADP uses availability block instead) --}}
+    {{#unless page.attributes.adp}}
+    {{#if page.attributes.byoc}}
+    <div class="nav-byoc-container">
+      <p class="nav-byoc-label" aria-hidden="true">BYOC</p>
+    </div>
+    {{/if}}
+    {{#if page.attributes.cloud-only}}
+    <div class="nav-cloud-container">
+      <p class="nav-cloud-label" aria-hidden="true">Cloud</p>
+    </div>
+    {{/if}}
+    {{/unless}}
     {{#if page.attributes.context-switcher}}
       {{> context-switcher}}
     {{/if}}

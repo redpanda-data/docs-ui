@@ -986,6 +986,47 @@ details[open] > summary {
   margin-top: 0;
 }
 
+/* Availability block - shows platform support (Cloud, BYOC, etc.) */
+.doc .sidebarblock.availability-block,
+.doc .availability-block {
+  background: var(--availability-block-background, var(--note-background));
+  border-left: 4px solid var(--availability-block-border, var(--note-border-color));
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9em;
+}
+
+.doc .sidebarblock.availability-block > .content,
+.doc .availability-block {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.doc .sidebarblock.availability-block > .content > p,
+.doc .availability-block > p {
+  margin: 0;
+}
+
+.doc .availability-block .availability-info {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  cursor: help;
+  color: var(--availability-block-border);
+  vertical-align: middle;
+}
+
+.doc .availability-block .availability-info:hover,
+.doc .availability-block .availability-info:focus {
+  color: var(--link-font-color);
+}
+
+.doc .availability-block .availability-info svg {
+  display: block;
+}
+
 /* NEEDS REVIEW prevent pre in table from causing article to exceed bounds */
 .doc .tableblock pre,
 .doc .listingblock.wrap pre {

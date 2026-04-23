@@ -182,6 +182,19 @@ html[data-theme=dark] {
   --highlight-background: rgba(255, 255, 0, 0.23);
 }
 
+/* Dark mode overrides */
+html[data-theme=dark] {
+  /* BYOC badge - brighter blue for dark mode visibility */
+  --byoc-label-background: #4da8da;
+  --byoc-highlight-background-color: rgba(77, 168, 218, 0.15);
+  /* Cloud badge - brighter purple for dark mode visibility */
+  --cloud-label-background: #9d97ff;
+  --cloud-highlight-background-color: rgba(157, 151, 255, 0.15);
+  /* Availability block - brighter for dark mode */
+  --availability-block-background: rgba(173, 181, 189, 0.15);
+  --availability-block-border: #adb5bd;
+}
+
 html:not([data-theme=dark]) {
   --body-font-color: #181818;
   --body-faint-font-color: #667085;
@@ -264,6 +277,9 @@ html:not([data-theme=dark]) {
   --caution-background: rgba(249, 161, 101, 0.1);
   --caution-on-color: var(--body-font-color);
   --caution-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
+  /* availability block */
+  --availability-block-background: rgba(108, 117, 125, 0.08);
+  --availability-block-border: #6c757d;
   /* doc */
   --doc-font-color: var(--color-jet-50);
   --heading-font-color: var(--color-jet-80);
