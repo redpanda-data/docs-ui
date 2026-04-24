@@ -1014,7 +1014,7 @@ details[open] > summary {
   align-items: center;
   margin-left: 0.5rem;
   cursor: help;
-  color: var(--availability-block-border);
+  color: var(--availability-block-border, var(--note-border-color));
   vertical-align: middle;
 }
 

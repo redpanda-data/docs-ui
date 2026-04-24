@@ -54,21 +54,15 @@
 {{#unless (eq page.layout 'index')}}
 <div class="availability-block">
   <strong>Available in:</strong>
-  {{#if page.attributes.byoc}}
-    {{#unless page.attributes.cloud-only}}
-      BYOC
-    {{/unless}}
+  {{#if (and page.attributes.byoc page.attributes.cloud-only)}}
+    Cloud, BYOC
+  {{else if page.attributes.byoc}}
+    BYOC
+  {{else if page.attributes.cloud-only}}
+    Cloud
+  {{else}}
+    Cloud, BYOC
   {{/if}}
-  {{#if page.attributes.cloud-only}}
-    {{#unless page.attributes.byoc}}
-      Cloud
-    {{/unless}}
-  {{/if}}
-  {{#unless page.attributes.byoc}}
-    {{#unless page.attributes.cloud-only}}
-      Cloud, BYOC
-    {{/unless}}
-  {{/unless}}
   <span class="availability-info" tabindex="0" aria-label="Availability information">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>

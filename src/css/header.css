@@ -374,7 +374,7 @@ html.is-clipped--navbar {
 
   .navbar-end > .navbar-item,
   .navbar-end .navbar-link {
-    color: var(--navbar-font-color);
+    color: var(--nav-text-color, var(--navbar-menu-font-color));
   }
 
   .navbar-end > a.navbar-item:hover,

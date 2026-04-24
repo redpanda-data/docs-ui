@@ -184,10 +184,12 @@ html[data-theme=dark] {
 
 /* Dark mode overrides */
 html[data-theme=dark] {
-  /* BYOC badge - brighter blue for dark mode visibility */
+  /* BYOC badge - brighter blue for dark mode visibility with dark text for contrast */
+  --byoc-label-color: #101828;
   --byoc-label-background: #4da8da;
   --byoc-highlight-background-color: rgba(77, 168, 218, 0.15);
-  /* Cloud badge - brighter purple for dark mode visibility */
+  /* Cloud badge - brighter purple for dark mode visibility with dark text for contrast */
+  --cloud-label-color: #101828;
   --cloud-label-background: #9d97ff;
   --cloud-highlight-background-color: rgba(157, 151, 255, 0.15);
   /* Availability block - brighter for dark mode */
