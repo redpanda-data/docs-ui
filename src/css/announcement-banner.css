@@ -1,48 +1,74 @@
+/* Announcement bar - smooth animated reveal without CLS */
 .announcement-bar {
+  display: flex;
   flex-basis: 100%;
-  display: none;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  background: #101828;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: white;
   z-index: var(--z-index-navbar);
   font-size: var(--secondary-font-size);
   position: fixed;
   top: 0;
+  left: 0;
   width: 100%;
   text-align: center;
-  height: var(--announcement-bar-height);
+  /* Start collapsed - JS will reveal */
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 0.3s ease-out,
+    opacity 0.2s ease-out;
+}
+
+/* Show when active (set by JavaScript) */
+.announcement-bar.is-active {
+  max-height: 60px; /* Mobile height */
+  opacity: 1;
+}
+
+.announcement-bar .announcement-content {
+  padding: 10px 40px 10px 16px;
+  line-height: 1.4;
 }
 
 .announcement-bar .announcement-content a {
   padding-left: 5px;
-  color: white;
+  color: #93c5fd;
   text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.announcement-bar .announcement-content a:hover {
+  color: #bfdbfe;
 }
 
 .announcement-bar button.close {
   border: none;
-  color: white;
+  color: rgba(255, 255, 255, 0.7);
   background: none;
   margin-top: 0;
-  padding: 0;
+  padding: 8px;
   position: absolute;
-  right: 20px;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition: color 0.15s;
 }
 
-@media screen and (max-width: 550px) {
-  .announcement-bar button.close {
-    margin-top: 1.2rem;
-  }
+.announcement-bar button.close:hover {
+  color: white;
 }
 
 @media screen and (min-width: 1024px) {
-  .announcement-bar {
-    height: var(--announcement-bar-height--desktop);
+  .announcement-bar.is-active {
+    max-height: 36px; /* Desktop height */
   }
 
   .announcement-bar button.close {
-    right: 40px;
+    right: 16px;
   }
 }

@@ -1,8 +1,19 @@
 .breadcrumbs {
   line-height: var(--nav-line-height);
   width: 100%;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 32px;
+}
+
+/* On desktop, hide article-level breadcrumbs (shown in topbar instead) */
+@media screen and (min-width: 1024px) {
+  article .breadcrumbs,
+  .article .breadcrumbs:not(.topbar-crumbs .breadcrumbs) {
+    display: none;
+  }
 }
 
 a + .breadcrumbs {
@@ -49,4 +60,59 @@ a + .breadcrumbs {
 .breadcrumbs li:hover a,
 .breadcrumbs li:last-child a {
   text-decoration: none;
+}
+
+/* Version selector in breadcrumbs */
+.breadcrumbs .sm-ver {
+  position: relative;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Adjust pill colors for light background context */
+.breadcrumbs .sm-ver-pill {
+  background: var(--color-smoke-30, #f4f4f5);
+  border-color: var(--color-smoke-70, #dcdcde);
+}
+
+.breadcrumbs .sm-ver-pill:hover {
+  background: var(--color-smoke-50, #e8e8ea);
+  border-color: var(--color-smoke-90, #c3c4c6);
+}
+
+.breadcrumbs .sm-ver-pill-label,
+.breadcrumbs .sm-ver-pill-num {
+  color: var(--color-jet-80, #48484a);
+}
+
+.breadcrumbs .sm-ver-pill-caret {
+  color: var(--color-jet-50, #9ca3af);
+}
+
+/* Panel positioning for breadcrumbs context */
+.breadcrumbs .sm-ver-panel {
+  right: 0;
+  left: auto;
+}
+
+/* Hide version selector from breadcrumbs on component-home-v3 pages (shown in hero instead) */
+.component-home-v3 .breadcrumbs .sm-ver {
+  display: none;
+}
+
+/* Mobile: Stack version selector below breadcrumbs */
+@media screen and (max-width: 768px) {
+  .breadcrumbs {
+    flex-wrap: wrap;
+  }
+
+  .breadcrumbs ul {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .breadcrumbs .sm-ver {
+    width: 100%;
+    margin-left: 0;
+  }
 }

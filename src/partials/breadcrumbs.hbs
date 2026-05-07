@@ -3,22 +3,58 @@
     {{#with site.homeUrl}}
     <li><a href="{{{relativize this}}}" aria-label="Go to home page">Docs</a></li>
     {{/with}}
+    {{!-- Show section from page-header-data (e.g., "Data Platform") - skip if same as title --}}
+    {{#with (get-header-data page)}}
+      {{#if this.section}}
+        {{#unless (eq this.section this.title)}}
+          {{#if (eq this.section 'Data Platform')}}
+    <li><a href="{{{relativize '/data-platform/'}}}" class="breadcrumb-section">{{{this.section}}}</a></li>
+          {{else}}
+    <li><span class="breadcrumb-section">{{{this.section}}}</span></li>
+          {{/if}}
+        {{/unless}}
+      {{/if}}
+    {{/with}}
+    {{!-- Component title (product name) --}}
     {{#if (ne page.component.name 'api')}}
     <li>
+      {{#with (get-header-data page)}}
+        {{#if this.title}}
+      <a href="{{{relativize @root.page.component.url}}}">{{{this.title}}}</a>
+        {{else}}
+      <a href="{{{relativize @root.page.component.url}}}">{{{@root.page.component.title}}}</a>
+        {{/if}}
+      {{else}}
       <a href="{{{relativize page.component.url}}}">{{{page.component.title}}}</a>
+      {{/with}}
     </li>
     {{/if}}
+    {{!-- Page breadcrumbs - skip items that match section or component title (already shown above) --}}
     {{#if page.breadcrumbs}}
       {{#each page.breadcrumbs}}
-        {{#if (ne (relativize ./url) (relativize @root.page.component.url))}}
+        {{#with (get-header-data @root.page)}}
+          {{#unless (or (eq ../content this.section) (eq ../content this.title))}}
+            {{#if (ne (relativize ../url) (relativize @root.page.component.url))}}
           <li>
-          {{~#if (and ./url (eq ./urlType 'internal'))~}}
-          <a href="{{{relativize ./url}}}">{{{./content}}}</a>
-          {{~else~}}
-          {{{./content}}}
-          {{~/if~}}
+              {{~#if (and ../url (eq ../urlType 'internal'))~}}
+          <a href="{{{relativize ../url}}}">{{{../content}}}</a>
+              {{~else~}}
+          {{{../content}}}
+              {{~/if~}}
           </li>
-        {{/if}}
+            {{/if}}
+          {{/unless}}
+        {{else}}
+          {{#if (ne (relativize ./url) (relativize @root.page.component.url))}}
+          <li>
+            {{~#if (and ./url (eq ./urlType 'internal'))~}}
+          <a href="{{{relativize ./url}}}">{{{./content}}}</a>
+            {{~else~}}
+          {{{./content}}}
+            {{~/if~}}
+          </li>
+          {{/if}}
+        {{/with}}
       {{/each}}
     {{/if}}
   </ul>

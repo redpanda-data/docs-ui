@@ -358,14 +358,15 @@ article.search .ais-Pagination-list {
   justify-content: space-evenly;
 }
 
-.aa-DetachedSearchButton:hover {
-  box-shadow: inset 0 0 0 2px !important;
-}
-
+/* Header search button is visually hidden but clickable for programmatic access */
 .aa-DetachedSearchButton {
-  border-radius: 10px !important;
-  height: 32px !important;
-  gap: 5px !important;
+  position: fixed !important;
+  top: -100px !important;
+  left: -100px !important;
+  opacity: 0 !important;
+  pointer-events: auto !important;
+  width: 1px !important;
+  height: 1px !important;
 }
 
 .aa-DetachedSearchButtonIcon {

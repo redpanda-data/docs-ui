@@ -60,9 +60,187 @@ html {
 }
 
 .doc h1 {
-  font-size: calc(36 / var(--rem-base) * 1rem);
+  font-size: calc(32 / var(--rem-base) * 1rem);
   margin-bottom: 0;
   margin-top: 0;
+  letter-spacing: -0.025em;
+}
+
+/* Component indicator sticky wrapper - contains pill and version selector */
+.component-indicator-sticky {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: var(--body-top, 100px);
+  z-index: 10;
+  padding: 12px 0;
+  margin: -12px 0 12px;
+  background: var(--page-background, #fff);
+}
+
+.component-indicator-sticky.is-stuck {
+  border-bottom: 1px solid var(--grey-200-new, #e5e5e5);
+  padding-bottom: 11px;
+  margin-left: -24px;
+  margin-right: -24px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+html[data-theme="dark"] .component-indicator-sticky {
+  background: var(--page-background, #0d1117);
+}
+
+html[data-theme="dark"] .component-indicator-sticky.is-stuck {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Component indicator pill above page title - matches hero chip styling */
+.component-indicator {
+  margin-bottom: 0;
+}
+
+.component-indicator-sticky .component-indicator {
+  flex-shrink: 0;
+}
+
+.component-indicator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 5px;
+  color: #fff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Version selector inline with component indicator - light background context */
+.component-indicator-sticky .sm-ver {
+  flex-shrink: 0;
+}
+
+.component-indicator-sticky .sm-ver-pill {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: var(--grey-100-new, #f4f4f5);
+  border-color: var(--grey-200-new, #e5e5e5);
+}
+
+.component-indicator-sticky .sm-ver-pill:hover {
+  background: var(--grey-200-new, #e5e5e5);
+  border-color: var(--grey-300-new, #d4d4d4);
+}
+
+.component-indicator-sticky .sm-ver-pill-label {
+  display: none;
+}
+
+.component-indicator-sticky .sm-ver-pill-num {
+  color: var(--grey-900-new, #171717);
+  font-weight: 600;
+}
+
+.component-indicator-sticky .sm-ver-pill-sep {
+  display: none;
+}
+
+.component-indicator-sticky .sm-ver-pill-status {
+  font-weight: 600;
+}
+
+.component-indicator-sticky .sm-ver-pill-status[data-status="current"] {
+  color: #059669;
+}
+
+.component-indicator-sticky .sm-ver-pill-status[data-status="supported"] {
+  color: #059669;
+}
+
+.component-indicator-sticky .sm-ver-pill-status[data-status="eol"] {
+  color: #d97706;
+}
+
+.component-indicator-sticky .sm-ver-pill-caret {
+  color: var(--grey-500-new, #737373);
+}
+
+/* Dark mode overrides */
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-num {
+  color: #fff;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="current"] {
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="supported"] {
+  color: #a7f3d0;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="eol"] {
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Status badges (Beta, Limited Availability) in sticky header */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.status-badge svg {
+  flex-shrink: 0;
+}
+
+.status-badge--beta {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.status-badge--la {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+}
+
+html[data-theme="dark"] .status-badge--beta {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fcd34d;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+html[data-theme="dark"] .status-badge--la {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  border-color: rgba(139, 92, 246, 0.3);
 }
 
 @media screen and (min-width: 600px) {
@@ -80,7 +258,7 @@ html {
 
 @media screen and (min-width: 769px) {
   .doc h1 {
-    font-size: calc(44 / var(--rem-base) * 1rem);
+    font-size: calc(40 / var(--rem-base) * 1rem);
   }
 
   .admonitionblock .content a {
@@ -105,30 +283,32 @@ html {
 }
 
 .doc h2:not(.discrete) {
-  font-size: calc(32 / var(--rem-base) * 1rem);
+  font-size: calc(24 / var(--rem-base) * 1rem);
   margin-left: -1rem;
   margin-right: -1rem;
   padding: 0.4rem 1rem 0.1rem;
+  letter-spacing: -0.015em;
 }
 
 .doc h3:not(.discrete),
 .aa-PreviewTitle {
-  font-size: calc(24 / var(--rem-base) * 1rem);
+  font-size: calc(20 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
+  letter-spacing: -0.0125em;
 }
 
 .doc h4:not(.discrete) {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
 .doc h5:not(.discrete) {
-  font-size: calc(17.5 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
 .doc h6:not(.discrete) {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
@@ -241,6 +421,15 @@ html {
   padding: 0.125em 0.25em;
 }
 
+/* Code inside pre blocks should not have inline code styling */
+.doc pre code,
+.doc pre > code {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
 /* Override Prism.js styles */
 .doc code .token.operator,
 .doc code .token.url {
@@ -248,11 +437,33 @@ html {
 }
 
 .doc pre {
-  font-size: calc(17 / var(--rem-base) * 1rem);
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.65;
   margin: 0;
-  padding: 1em;
-  padding-top: 1.5em;
+  padding: 16px 18px;
+  padding-top: 40px; /* Extra space for toolbar */
+  color: var(--grey-800-new, #1f2937); /* Light mode: dark text */
+  overflow-x: auto;
+}
+
+html[data-theme="dark"] .doc pre {
+  color: #dbe2ee;
+}
+
+/* Code blocks: override Prism defaults */
+.doc .listingblock pre,
+.doc .listingblock pre[class*="language-"],
+.doc .listingblock pre.highlight {
+  background: transparent !important; /* Inherit from parent .content */
+  color: var(--grey-800-new, #1f2937) !important; /* Dark text in light mode */
+  text-shadow: none !important; /* Remove Prism's light text shadow */
+}
+
+/* Dark mode: light text */
+html[data-theme="dark"] .doc .listingblock pre,
+html[data-theme="dark"] .doc .listingblock pre[class*="language-"],
+html[data-theme="dark"] .doc .listingblock pre.highlight {
+  color: #dbe2ee !important;
 }
 
 .doc pre > code,
@@ -268,8 +479,16 @@ html {
   margin: 0;
 }
 
-.doc .paragraph.lead > p {
-  font-size: calc(18 / var(--rem-base) * 1rem);
+/* Lead/intro paragraphs - larger font for opening text
+   Only applies to consecutive paragraphs at the start of preamble.
+   Lists, admonitions, code blocks break the chain and reset to normal font. */
+.doc .paragraph.lead > p,
+.doc #preamble > .sectionbody > .paragraph:first-child > p,
+.doc #preamble > .sectionbody > .paragraph:first-child + .paragraph > p,
+.doc #preamble > .sectionbody > .paragraph:first-child + .paragraph + .paragraph > p {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--grey-600-new, #4b5563);
 }
 
 .doc .right {
@@ -476,38 +695,42 @@ html {
 .admonitionblock {
   position: relative;
   margin: 1.4rem 0 0;
-  box-shadow: var(--admonition-border-box-shadow);
-  padding: var(--admonition-padding);
+  display: flex;
+  gap: 12px; /* Prototype: 12px */
+  padding: 14px 16px; /* Prototype: 14px 16px */
+  border-radius: 10px; /* Prototype: 10px */
+  font-size: 14px; /* Prototype: 14px */
+  line-height: 1.55; /* Prototype: 1.55 */
 }
 
 .admonitionblock.note {
-  background-color: var(--note-background);
-  border-left-width: var(--admonition-border-left-width);
-  border-radius: var(--admonition-border-radius);
+  background: var(--indigo-50-new, #eef2ff); /* Prototype: indigo-50 */
+  border: 1px solid var(--indigo-100-new, #e0e7ff); /* Prototype: indigo-100 */
+  color: var(--indigo-900-new, #312e81); /* Prototype: indigo-900 */
 }
 
 .admonitionblock.warning {
-  background-color: var(--warning-background);
-  border-left-width: var(--admonition-border-left-width);
-  border-radius: var(--admonition-border-radius);
+  background: #fff7ed; /* Prototype: exact */
+  border: 1px solid #fde2b5; /* Prototype: exact */
+  color: #7c2d12; /* Prototype: exact */
 }
 
 .admonitionblock.tip {
-  background-color: var(--tip-background);
-  border-left-width: var(--admonition-border-left-width);
-  border-radius: var(--admonition-border-radius);
+  background: #f2faf6; /* Prototype: exact */
+  border: 1px solid #cce9d9; /* Prototype: exact */
+  color: #14532d; /* Prototype: exact */
 }
 
 .admonitionblock.caution {
-  background-color: var(--caution-background);
-  border-left-width: var(--admonition-border-left-width);
-  border-radius: var(--admonition-border-radius);
+  background: #fef2f2; /* Red-based caution */
+  border: 1px solid #fecaca; /* Red border */
+  color: #7f1d1d; /* Dark red text */
 }
 
 .admonitionblock.important {
-  background-color: var(--important-background);
-  border-left-width: var(--admonition-border-left-width);
-  border-radius: var(--admonition-border-radius);
+  background: #fdf4ff; /* Purple-based important */
+  border: 1px solid #f5d0fe; /* Purple border */
+  color: #581c87; /* Dark purple text */
 }
 
 .admonitionblock td.content > :not(.title):first-child,
@@ -531,28 +754,90 @@ html {
   display: block;
   width: 100%;
   word-wrap: anywhere;
-  margin-top: 8px;
-  padding-left: 1.8rem;
+  margin-top: 0;
+  padding-left: 0; /* No left padding - icon provides gap */
 }
 
 .admonitionblock .icon {
-  display: block;
+  display: flex;
+  flex-shrink: 0;
   font-size: calc(18 / var(--rem-base) * 1rem);
   height: 1.25rem;
   line-height: 1;
   font-weight: var(--admonition-label-font-weight);
+  margin-top: 1px; /* Prototype: slight offset */
 }
 
 .admonitionblock.caution .icon {
-  color: var(--caution-on-color);
+  color: #dc2626; /* Red icon for caution */
 }
 
 .admonitionblock.important .icon {
-  color: var(--important-on-color);
+  color: #9333ea; /* Purple icon for important */
 }
 
 .admonitionblock.note .icon {
-  color: var(--note-on-color);
+  color: var(--indigo-600-new, #444ce7); /* Prototype: indigo-600 */
+}
+
+.admonitionblock.tip .icon {
+  color: var(--green-600, #059669); /* Prototype: green-600 */
+}
+
+.admonitionblock.warning .icon {
+  color: var(--orange-600, #ea580c); /* Prototype: orange-600 */
+}
+
+/* Dark mode admonition styles */
+html[data-theme="dark"] .admonitionblock.note {
+  background: rgba(99, 102, 241, 0.15); /* Indigo tint for dark */
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #c7d2fe; /* Light indigo text */
+}
+
+html[data-theme="dark"] .admonitionblock.tip {
+  background: rgba(16, 185, 129, 0.15); /* Green tint for dark */
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #a7f3d0; /* Light green text */
+}
+
+html[data-theme="dark"] .admonitionblock.warning {
+  background: rgba(251, 146, 60, 0.15); /* Orange tint for dark */
+  border-color: rgba(251, 146, 60, 0.3);
+  color: #fed7aa; /* Light orange text */
+}
+
+html[data-theme="dark"] .admonitionblock.caution {
+  background: rgba(248, 113, 113, 0.15); /* Red tint for dark */
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fecaca; /* Light red text */
+}
+
+html[data-theme="dark"] .admonitionblock.important {
+  background: rgba(192, 132, 252, 0.15); /* Purple tint for dark */
+  border-color: rgba(192, 132, 252, 0.3);
+  color: #e9d5ff; /* Light purple text */
+}
+
+/* Dark mode admonition icon colors - brighter for visibility */
+html[data-theme="dark"] .admonitionblock.note .icon {
+  color: #818cf8; /* Brighter indigo for dark mode */
+}
+
+html[data-theme="dark"] .admonitionblock.tip .icon {
+  color: #34d399; /* Brighter green for dark mode */
+}
+
+html[data-theme="dark"] .admonitionblock.warning .icon {
+  color: #fb923c; /* Brighter orange for dark mode */
+}
+
+html[data-theme="dark"] .admonitionblock.caution .icon {
+  color: #f87171; /* Brighter red for dark mode */
+}
+
+html[data-theme="dark"] .admonitionblock.important .icon {
+  color: #c084fc; /* Brighter purple for dark mode */
 }
 
 .icon-note::before {
@@ -620,12 +905,40 @@ table code {
   word-wrap: unset;
 }
 
+/* When listingblock has a title, wrap with border and radius */
+.listingblock:has(.title) {
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+html[data-theme="dark"] .listingblock:has(.title) {
+  border-color: #1c2638;
+}
+
+/* Remove border from .content when title exists (parent has it) */
+.doc .listingblock:has(.title) > .content {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
 .listingblock .title {
-  margin-top: 0.5rem;
-  font-style: italic;
-  background: var(--code-background);
-  padding: 5px;
-  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 14px;
+  background: var(--grey-50-new, #f9fafb);
+  border-bottom: 1px solid var(--grey-200-new, #e5e7eb);
+  font-size: 12px;
+  font-style: normal;
+  color: var(--grey-600-new, #4b5563);
+}
+
+html[data-theme="dark"] .listingblock .title {
+  background: #0f1727;
+  border-bottom-color: #1c2638;
+  color: #8098b3;
 }
 
 .doc .imageblock,
@@ -688,7 +1001,8 @@ table code {
   background: var(--abstract-background);
   border-left: 5px solid var(--abstract-border-color);
   color: var(--abstract-font-color);
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
+  line-height: 1.55;
   padding: 0.75em 1em;
 }
 
@@ -1036,7 +1350,7 @@ details[open] > summary {
 .doc pre.highlight code,
 .doc .listingblock pre:not(.highlight),
 .doc .literalblock pre {
-  background: var(--code-background);
+  background: transparent; /* Inherit from dark parent container */
   display: block;
   overflow-x: auto;
   font-weight: 300;
@@ -1425,7 +1739,8 @@ img.dark-mode-filter,
   cursor: pointer;
 }
 
-code[class*=language-],
+/* Only apply background to standalone code elements, not code inside pre */
+code[class*=language-]:not(pre code),
 pre[class*=language-] {
   color: var(--code-font-color) !important;
   font-size: calc(17 / var(--rem-base) * 1rem) !important;
@@ -1433,6 +1748,11 @@ pre[class*=language-] {
   white-space: pre-wrap !important;
   margin-top: 0 !important;
   font-weight: lighter !important;
+}
+
+/* Code inside pre should have transparent background */
+pre code[class*=language-] {
+  background: transparent !important;
 }
 
 pre.code-first-child {
@@ -1475,22 +1795,39 @@ html[data-theme=dark] code[class*=language-] .token.function {
   color: #d7aefb;
 }
 
+/* Code blocks: Light mode has light background with border */
 .doc .listingblock > .content {
   position: relative;
+  background: var(--grey-50-new, #f9fafb);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+}
+
+/* Dark mode: dark background */
+html[data-theme="dark"] .doc .listingblock > .content {
+  background: #0f1727;
+  border-color: #1c2638;
 }
 
 .doc .source-toolbox {
   display: flex;
+  align-items: center;
+  gap: 10px;
   visibility: hidden;
   position: absolute;
-  top: 0.25rem;
-  right: 0.5rem;
-  color: var(--pre-annotation-font-color);
+  top: 8px;
+  right: 14px;
+  color: var(--grey-500-new, #6b7280); /* Light mode */
   font-family: var(--body-font-family);
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: 11px;
   line-height: 1.5;
   white-space: nowrap;
   z-index: 1;
+}
+
+html[data-theme="dark"] .doc .source-toolbox {
+  color: #a8b2c7;
 }
 
 .doc .listingblock:hover .source-toolbox {
@@ -1503,14 +1840,20 @@ html[data-theme=dark] code[class*=language-] .token.function {
 }
 
 .doc .source-toolbox .source-lang {
+  font-family: var(--body-font-family-mono, monospace);
+  font-size: 11px;
+  color: var(--grey-500-new, #6b7280); /* Light mode */
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  letter-spacing: 0.075em;
+}
+
+html[data-theme="dark"] .doc .source-toolbox .source-lang {
+  color: #a8b2c7;
 }
 
 .doc .source-toolbox > :not(:last-child)::after {
-  content: "|";
-  letter-spacing: 0;
-  padding: 0 1ch;
+  content: "";
+  display: none;
 }
 
 .doc .source-toolbox .run-button {
@@ -1530,17 +1873,33 @@ html[data-theme=dark] code[class*=language-] .token.function {
 .doc .source-toolbox .copy-button {
   display: inline-flex;
   align-items: center;
-  background: none;
-  border: none;
-  color: inherit;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--grey-300-new, #d1d5db); /* Light mode border */
+  color: var(--grey-600-new, #4b5563); /* Light mode text */
   outline: none;
-  padding: 0;
-  font-size: inherit;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: var(--body-font-family);
   line-height: inherit;
   cursor: pointer;
-  position: relative;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  border-radius: 5px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.doc .source-toolbox .copy-button:hover {
+  background: var(--grey-100-new, #f3f4f6); /* Light mode hover */
+  color: var(--grey-900-new, #111827);
+}
+
+html[data-theme="dark"] .doc .source-toolbox .copy-button {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #a8b2c7;
+}
+
+html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
 }
 
 .doc .source-toolbox .copy-icon {

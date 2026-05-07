@@ -47,7 +47,7 @@ module.exports = (src, dest, preview) => () => {
         },
       },
     ]),
-    postcssVar({ preserve: preview }),
+    postcssVar({ preserve: true }),
     // NOTE to make vars.css available to all top-level stylesheets, use the next line in place of the previous one
     //postcssVar({ importFrom: path.join(src, 'css', 'vars.css'), preserve: preview }),
     preview ? postcssCalc : () => {}, // cssnano already applies postcssCalc
@@ -82,7 +82,7 @@ module.exports = (src, dest, preview) => () => {
     vfs
       .src(['css/site.css', 'css/vendor/*.css'], { ...opts, sourcemaps })
       .pipe(postcss((file) => ({ plugins: postcssPlugins, options: { file } }))),
-    vfs.src('font/*.{ttf,woff*(2)}', opts),
+    vfs.src('font/**/*.{ttf,woff*(2)}', opts),
     vfs.src('img/**/*.{gif,ico,jpg,png,svg}', opts).pipe(
       preview
         ? through()

@@ -1,39 +1,76 @@
+/* =============================================================================
+   INTER TYPEFACE
+   Primary body font. Includes weights from Light (300) to Bold (700).
+   ============================================================================= */
+
+/* Light - 300 */
 @font-face {
-  font-family: "Inter Light";
+  font-family: "Inter";
   font-style: normal;
   font-weight: 300;
-  src:
-    local("Inter"),
-    url(../font/Inter-Light.ttf) format("truetype");
   font-display: swap;
+  src:
+    local("Inter Light"),
+    local("Inter-Light"),
+    url(../font/Inter-Light.ttf) format("truetype");
 }
 
+/* Regular - 400 */
 @font-face {
   font-family: "Inter";
   font-style: normal;
   font-weight: 400;
-  src:
-    local("Inter"),
-    url(../font/Inter-Regular.ttf) format("truetype");
   font-display: swap;
+  src:
+    local("Inter Regular"),
+    local("Inter-Regular"),
+    url(../font/Inter-Regular.ttf) format("truetype");
 }
 
+/* Medium - 500 */
 @font-face {
-  font-family: "Inter Medium";
+  font-family: "Inter";
   font-style: normal;
   font-weight: 500;
-  src:
-    local("Inter"),
-    url(../font/Inter-Medium.ttf) format("truetype");
   font-display: swap;
+  src:
+    local("Inter Medium"),
+    local("Inter-Medium"),
+    url(../font/Inter-Medium.ttf) format("truetype");
 }
 
+/* SemiBold - 600 */
 @font-face {
-  font-family: "Inter SemiBold";
+  font-family: "Inter";
   font-style: normal;
   font-weight: 600;
-  src:
-    local("Inter"),
-    url(../font/Inter-SemiBold.ttf) format("truetype");
   font-display: swap;
+  src:
+    local("Inter SemiBold"),
+    local("Inter-SemiBold"),
+    url(../font/Inter-SemiBold.ttf) format("truetype");
+}
+
+/* Bold - 700 */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Inter Bold"),
+    local("Inter-Bold"),
+    url(../font/Inter-Bold.ttf) format("truetype");
+}
+
+/* ExtraBold - 800 */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src:
+    local("Inter ExtraBold"),
+    local("Inter-ExtraBold"),
+    url(../font/Inter-ExtraBold.ttf) format("truetype");
 }

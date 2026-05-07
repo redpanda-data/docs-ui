@@ -71,16 +71,35 @@
 .toc.sidebar .thumbs {
   align-items: flex-start;
   padding: 0.25rem 0 1rem 1rem;
-  margin-top: 40px;
+  margin-top: 1.5rem;
+  flex-shrink: 0; /* Don't shrink, stay at bottom */
+}
+
+.toc.sidebar .toc-additional-resources {
+  padding: 0.25rem 0 0 1rem;
+  margin-top: 1.5rem;
+}
+
+.toc.sidebar .toc-additional-resources ul {
+  margin: 0;
+  padding: 0;
+}
+
+.toc.sidebar .toc-additional-resources a {
+  color: var(--toc-font-color);
+  font-size: var(--secondary-font-size);
 }
 
 .toc h3 {
   color: var(--toc-heading-font-color);
-  font-size: var(--secondary-font-size);
+  font-size: 11px; /* Prototype: 11px */
   font-family: var(--body-font-family-bold);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em; /* Prototype tracking */
   line-height: 1.3;
-  margin: 0 -0.5px;
-  padding-bottom: 0.25rem;
+  margin: 0 0 12px 0; /* Prototype: margin-bottom 12px */
+  padding-bottom: 0;
 }
 
 .toc.sidebar h3 {
@@ -97,20 +116,39 @@
   padding: 0;
 }
 
+/* Prototype: toc-list has border-left */
+.toc.sidebar .toc-menu > ul {
+  border-left: 1px solid var(--toc-border-color, var(--grey-100-new, #dcdcde));
+}
+
 .toc.sidebar ul {
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
 
-@supports (scrollbar-width: none) {
-  .toc.sidebar ul {
-    scrollbar-width: none;
+/* TOC scrollbar - thin and subtle */
+@supports (scrollbar-width: thin) {
+  .toc.sidebar .toc-menu {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb-color, #c0c0c0) transparent;
   }
 }
 
-.toc ul::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+.toc.sidebar .toc-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.toc.sidebar .toc-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc.sidebar .toc-menu::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color, #c0c0c0);
+  border-radius: 3px;
+}
+
+.toc.sidebar .toc-menu::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar_hover-thumb-color, #a0a0a0);
 }
 
 @media screen and (min-width: 1024px) {
@@ -137,27 +175,34 @@
 }
 
 .toc li[data-level="2"] a {
-  padding-left: 1.5rem;
+  padding-left: 22px; /* Prototype: 22px for nested */
 }
 
 .toc li[data-level="3"] a {
-  padding-left: 2rem;
+  padding-left: 32px; /* Prototype: additional indent */
+  font-size: 12.5px; /* Prototype: smaller for deeper levels */
 }
 
 .toc li[data-level="4"] a {
-  padding-left: 2.5rem;
+  padding-left: 42px;
+  font-size: 12.5px;
 }
 
 .toc li[data-level="5"] a {
-  padding-left: 3rem;
+  padding-left: 52px;
+  font-size: 12.5px;
 }
 
 .toc a {
   color: var(--toc-font-color);
-  border-left: 2px solid var(--toc-border-color);
-  display: inline-block;
-  padding: 6px 0 6px 1rem;
+  border-left: 2px solid transparent; /* Prototype: left border on list */
+  display: block;
+  padding: 5px 12px; /* Prototype: 5px 12px */
+  margin-left: -1px;
   text-decoration: none;
+  letter-spacing: -0.0125em; /* Prototype letter-spacing */
+  line-height: 1.4;
+  transition: color 0.1s;
 }
 
 .toc .thumbs a {
@@ -171,12 +216,13 @@
 }
 
 .toc a:hover {
-  color: var(--link-highlight-color);
+  color: var(--grey-900-new, var(--grey-900, #181818)); /* Prototype: grey-900 on hover */
 }
 
 .toc a.is-active {
   border-left-color: var(--link-highlight-color);
   color: var(--link-highlight-color);
+  font-weight: 500; /* Prototype: active items are bolder */
 }
 
 .sidebar.toc a:focus {
@@ -189,29 +235,42 @@
 
 .toc.sidebar {
   position: sticky;
-  height: fit-content;
-  max-height: var(--nav-height);
-  font-size: var(--secondary-font-size);
-  font-weight: 300;
+  top: 80px; /* Prototype: 80px */
+  max-height: calc(100vh - 100px); /* Prototype formula */
+  font-size: 13px; /* Prototype: 13px */
+  font-weight: 400;
   color: var(--toc-font-color);
   max-width: var(--toc-width);
-  overflow-y: auto;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
   flex: 0 0 var(--toc-width);
   word-wrap: break-word;
-  top: calc(var(--navbar-height) + var(--announcement-bar-height) + 1rem);
   /* Reserve space for TOC to prevent CLS when JavaScript populates it */
   min-width: var(--toc-width);
-  margin-right: 1rem;
+  /* Override sidebar background - TOC should be transparent */
+  background: transparent !important;
+  padding-top: 4px; /* Prototype padding */
+  /* Flexbox layout: menu scrolls, thumbs stays at bottom */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Don't scroll the whole sidebar */
 }
 
-/* Reserve space for TOC menu before JavaScript populates it */
-/* Apply containment to inner wrapper to preserve position: sticky on parent */
+/* TOC menu scrolls independently, thumbs stays at bottom */
 .toc.sidebar .toc-menu {
-  min-height: 300px;
-  /* Isolate rendering without breaking parent sticky positioning */
-  contain: layout style;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0; /* Required for flex scroll to work */
+}
+
+/* Narrow desktop: reduce TOC width to fit content area */
+@media screen and (min-width: 1024px) and (max-width: 1349px) {
+  .toc.sidebar {
+    --toc-width: 180px;
+
+    max-width: 180px;
+    flex: 0 0 180px;
+    min-width: 160px;
+  }
 }
 
 @media screen and (min-width: 1350px) {

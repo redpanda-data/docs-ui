@@ -1629,25 +1629,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const input = aceInputEditor.getValue();
       const inputFormat = document.getElementById('input-format')?.value || 'auto';
       const inputError = document.getElementById('input-validation')?.textContent || '';
-      const kapa = window.Kapa;
 
-      if (kapa) {
-        let aiPromptText = "I'm using the Bloblang playground and have an error with my input data:\n\n";
-        aiPromptText += `Input Format: ${inputFormat}\n\n`;
-        if (input) {
-          aiPromptText += `Input Data:\n\`\`\`\n${input}\n\`\`\`\n\n`;
-        }
-        if (inputError) {
-          aiPromptText += `Error: ${inputError}\n\n`;
-        }
-        aiPromptText += "Can you help me understand and fix this input error?";
-        kapa.open({
-          mode: 'ai',
-          query: aiPromptText,
-          submit: true
-        });
+      let aiPromptText = "I'm using the Bloblang playground and have an error with my input data:\n\n";
+      aiPromptText += `Input Format: ${inputFormat}\n\n`;
+      if (input) {
+        aiPromptText += `Input Data:\n\`\`\`\n${input}\n\`\`\`\n\n`;
+      }
+      if (inputError) {
+        aiPromptText += `Error: ${inputError}\n\n`;
+      }
+      aiPromptText += "Can you help me understand and fix this input error?";
+
+      // Use the chat drawer instead of modal
+      if (typeof window.openChatWithQuery === 'function') {
+        window.openChatWithQuery(aiPromptText, true);
       } else {
-        console.warn('Kapa AI is not available.');
+        console.warn('Chat panel is not available.');
       }
     });
   }
@@ -1660,31 +1657,28 @@ document.addEventListener("DOMContentLoaded", () => {
       const meta = aceInputMetadataEditor.getValue();
       const output = aceOutputEditor.getValue();
       const inputFormat = document.getElementById('input-format')?.value || 'auto';
-      const kapa = window.Kapa;
 
-      if (kapa) {
-        let aiPromptText = "I'm using the Bloblang playground and my mapping is producing an error:\n\n";
-        aiPromptText += `Input Format: ${inputFormat}\n\n`;
-        if (input && input !== "{}") {
-          aiPromptText += `Input:\n\`\`\`\n${input}\n\`\`\`\n\n`;
-        }
-        if (meta && meta !== "{}") {
-          aiPromptText += `Input Metadata:\n\`\`\`json\n${meta}\n\`\`\`\n\n`;
-        }
-        if (mapping) {
-          aiPromptText += `Mapping:\n\`\`\`bloblang\n${mapping}\n\`\`\`\n\n`;
-        }
-        if (output) {
-          aiPromptText += `Error Output:\n\`\`\`\n${output}\n\`\`\`\n\n`;
-        }
-        aiPromptText += "Can you help debug this Bloblang mapping?";
-        kapa.open({
-          mode: 'ai',
-          query: aiPromptText,
-          submit: true
-        });
+      let aiPromptText = "I'm using the Bloblang playground and my mapping is producing an error:\n\n";
+      aiPromptText += `Input Format: ${inputFormat}\n\n`;
+      if (input && input !== "{}") {
+        aiPromptText += `Input:\n\`\`\`\n${input}\n\`\`\`\n\n`;
+      }
+      if (meta && meta !== "{}") {
+        aiPromptText += `Input Metadata:\n\`\`\`json\n${meta}\n\`\`\`\n\n`;
+      }
+      if (mapping) {
+        aiPromptText += `Mapping:\n\`\`\`bloblang\n${mapping}\n\`\`\`\n\n`;
+      }
+      if (output) {
+        aiPromptText += `Error Output:\n\`\`\`\n${output}\n\`\`\`\n\n`;
+      }
+      aiPromptText += "Can you help debug this Bloblang mapping?";
+
+      // Use the chat drawer instead of modal
+      if (typeof window.openChatWithQuery === 'function') {
+        window.openChatWithQuery(aiPromptText, true);
       } else {
-        console.warn('Kapa AI is not available.');
+        console.warn('Chat panel is not available.');
       }
     });
   }

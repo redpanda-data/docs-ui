@@ -34,7 +34,7 @@ body.status-404 main > .content {
   }
 
   main:not(.labs):not(.home-content) {
-    width: calc(100% - var(--nav-width));
+    width: 100%;
   }
 
   .home main {
@@ -53,8 +53,12 @@ body.status-404 main > .content {
     display: flex;
     /* display: grid; */
     /* grid-template-columns: 3fr 1fr; */
-    gap: 50px;
+    gap: 56px; /* Prototype exact value */
     justify-content: center;
+    max-width: 1280px; /* Prototype page-wrap max-width */
+    width: 100%;
+    margin: 0 auto;
+    padding: 40px 48px 120px; /* Prototype exact padding */
     /* Prevent CLS by isolating content layout */
     contain: layout;
   }
@@ -68,12 +72,26 @@ body.status-404 main > .content {
   }
 }
 
+/* Narrow desktop: reduce gap and padding to fit content area */
+@media screen and (min-width: 1024px) and (max-width: 1399px) {
+  main > .content {
+    gap: 32px;
+    padding: 32px 32px 80px;
+  }
+}
+
 @media screen and (min-width: 1400px) {
   aside.toc.sidebar {
     flex-basis: var(--toc-width--widescreen);
   }
 
   main > .content {
-    gap: 150px;
+    gap: 64px; /* Slightly larger gap on wide screens */
   }
+}
+
+/* Chat panel overlay - no content push, panel floats over TOC */
+/* The .chat-push class is added by JS but we don't modify layout */
+main.article.chat-push {
+  /* Intentionally empty - chat panel overlays content via position: fixed */
 }

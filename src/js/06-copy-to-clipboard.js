@@ -101,8 +101,8 @@
 
       copy.addEventListener('click', writeToClipboard.bind(copy, code))
     }
-    // Create an "Ask AI" button (if Kapa is available)
-    if (window.Kapa && !pre.parentNode.parentNode.classList.contains('no-copy')) {
+    // Create an "Ask AI" button (if chat panel is available)
+    if (document.querySelector('[data-chat-panel]') && !pre.parentNode.parentNode.classList.contains('no-copy')) {
       ;(askAI = document.createElement('button')).className = 'ask-ai-button'
       // Only add tooltip on non-touch devices
       if (!isTouch) {
@@ -253,25 +253,21 @@
     )
   }
 
-  // Handles opening Kapa AI with the code snippet
+  // Handles opening chat drawer with the code snippet
   function handleAskAI (code) {
     var text = code.innerText.replace(TRAILING_SPACE_RX, '')
     if (code.dataset.lang === 'console' && text.startsWith('$ ')) {
       text = extractCommands(text)
     }
 
-    var kapa = window.Kapa
-    if (kapa) {
-      // Create the prompt with the code snippet
-      var aiPromptText = 'Explain this code snippet:\n\n```\n' + text + '\n```'
+    // Create the prompt with the code snippet
+    var aiPromptText = 'Explain this code snippet:\n\n```\n' + text + '\n```'
 
-      kapa.open({
-        mode: 'ai',
-        query: aiPromptText,
-        submit: true,
-      })
+    // Use the chat drawer instead of modal
+    if (typeof window.openChatWithQuery === 'function') {
+      window.openChatWithQuery(aiPromptText, true)
     } else {
-      console.warn('Kapa AI is not available.')
+      console.warn('Chat panel is not available.')
     }
   }
 

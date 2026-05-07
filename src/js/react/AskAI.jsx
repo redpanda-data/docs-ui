@@ -46,7 +46,15 @@ function App() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const el = document.getElementById('kapa-chat-root')
-  if (!el) return
-  createRoot(el).render(<App />)
+  // Mount to home page chat root
+  const homeEl = document.getElementById('kapa-chat-root')
+  if (homeEl) {
+    createRoot(homeEl).render(<App />)
+  }
+
+  // Mount to chat panel root (for article pages)
+  const panelEl = document.getElementById('chat-panel-kapa-root')
+  if (panelEl) {
+    createRoot(panelEl).render(<App />)
+  }
 })

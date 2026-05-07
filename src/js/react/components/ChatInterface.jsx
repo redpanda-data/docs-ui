@@ -9,6 +9,8 @@ import {
   ClipboardCopy,
   CircleStop,
   FileSearch,
+  Check,
+  AlertCircle,
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { Marked } from 'marked'
@@ -54,6 +56,27 @@ const marked = new Marked(
 )
 
 
+// ——— Toast component ————————————————————————————————————————————————————
+function Toast({ message, type = 'success', onDismiss }) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onDismiss) onDismiss()
+    }, 3000)
+    return () => clearTimeout(timer)
+  }, [onDismiss])
+
+  const isError = type === 'error'
+
+  return (
+    <div className={`chat-toast ${isError ? 'chat-toast-error' : 'chat-toast-success'}`}>
+      <span className="chat-toast-icon">
+        {isError ? <AlertCircle size={16} /> : <Check size={16} />}
+      </span>
+      <span className="chat-toast-message">{message}</span>
+    </div>
+  )
+}
+
 // ——— Answer component ———————————————————————————————————————————————————
 function Answer({ md }) {
   const containerRef = useRef(null)
@@ -77,22 +100,22 @@ function Answer({ md }) {
 }
 
 // ——— FeedbackButtons —————————————————————————————————————————————————————
-function FeedbackButtons({ questionAnswerId, setFeedbackToast }) {
+function FeedbackButtons({ questionAnswerId, showToast }) {
   const { addFeedback } = useChat()
 
   const handleFeedback = async (reaction) => {
     try {
       await addFeedback(questionAnswerId, reaction)
-      setFeedbackToast(
+      showToast(
         reaction === 'upvote'
-          ? "Thanks! Glad you found that helpful."
-          : "We've got your feedback."
+          ? 'Thanks for the feedback!'
+          : 'Feedback received',
+        'success'
       )
     } catch (err) {
       console.error('Feedback error', err)
-      setFeedbackToast('⚠️ Could not send your feedback. Try again.')
+      showToast('Could not send feedback', 'error')
     }
-    setTimeout(() => setFeedbackToast(null), 3000)
   }
 
   return (
@@ -102,6 +125,7 @@ function FeedbackButtons({ questionAnswerId, setFeedbackToast }) {
           className="feedback-button"
           type="button"
           onClick={() => handleFeedback('upvote')}
+          title="This was helpful"
         >
           <ThumbsUp className="feedback-icon" />
         </button>
@@ -109,6 +133,7 @@ function FeedbackButtons({ questionAnswerId, setFeedbackToast }) {
           className="feedback-button"
           type="button"
           onClick={() => handleFeedback('downvote')}
+          title="This wasn't helpful"
         >
           <ThumbsDown className="feedback-icon" />
         </button>
@@ -118,16 +143,15 @@ function FeedbackButtons({ questionAnswerId, setFeedbackToast }) {
 }
 
 // ——— ActionButtons ———————————————————————————————————————————————————————
-function ActionButtons({ onReset, onCopy, setCopyToast }) {
-  const safeCopy = () => {
+function ActionButtons({ onReset, onCopy, showToast }) {
+  const safeCopy = async () => {
     try {
-      onCopy()
-      setCopyToast('Copied to clipboard!')
+      await onCopy()
+      showToast('Copied to clipboard', 'success')
     } catch (e) {
       console.error('Copy error:', e)
-      setCopyToast('⚠️ Copy failed.')
+      showToast('Failed to copy', 'error')
     }
-    setTimeout(() => setCopyToast(null), 2000)
   }
 
   return (
@@ -154,9 +178,16 @@ export default function ChatInterface() {
   const [stoppedIds, setStoppedIds]         = useState(new Set())
   const [suggestions, setSuggestions]       = useState([])
   const [hasInteracted, setHasInteracted]   = useState(false)
-  const [copyToast, setCopyToast]           = useState(null)
-  const [feedbackToast, setFeedbackToast]   = useState(null)
+  const [toast, setToast]                   = useState(null)
   const textareaRef = useRef(null)
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+  }
+
+  const dismissToast = () => {
+    setToast(null)
+  }
 
   const resetTextareaHeight = () => {
     if (!textareaRef.current) return
@@ -213,17 +244,32 @@ export default function ChatInterface() {
 
   const latestQA = conversation.getLatest()
 
-  // Show/hide “scroll down” button
+  // Show/hide "scroll down" button
   useEffect(() => {
     if (!hasInteracted || isPreparingAnswer) return
     const THRESHOLD = 300
 
+    // Check if we're in chat panel drawer
+    const chatScroll = document.querySelector('.chat-scroll')
+    const isInPanel = chatScroll && chatScroll.contains(document.getElementById('chat-panel-kapa-root'))
+
     const handleScroll = () => {
-      const scrollTop = window.scrollY
-      const innerH    = window.innerHeight
-      const scrollH   = document.documentElement.scrollHeight
+      let scrollTop, innerH, scrollH
+
+      if (isInPanel && chatScroll) {
+        // Use chat panel scroll container
+        scrollTop = chatScroll.scrollTop
+        innerH = chatScroll.clientHeight
+        scrollH = chatScroll.scrollHeight
+      } else {
+        // Use window scroll (home page)
+        scrollTop = window.scrollY
+        innerH = window.innerHeight
+        scrollH = document.documentElement.scrollHeight
+      }
+
       const canScroll = scrollH > innerH
-      const atBottom  = scrollTop + innerH >= scrollH - THRESHOLD
+      const atBottom = scrollTop + innerH >= scrollH - THRESHOLD
 
       if (!canScroll) {
         setShowScrollDown(false)
@@ -232,20 +278,32 @@ export default function ChatInterface() {
       setShowScrollDown(!atBottom)
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    const scrollTarget = isInPanel ? chatScroll : window
+    scrollTarget.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleScroll, { passive: true })
     handleScroll()
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      scrollTarget.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
     }
   }, [hasInteracted, isPreparingAnswer, isGeneratingAnswer])
 
   const scrollToBottom = () => {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    })
+    // Check if we're in the chat panel drawer
+    const chatScroll = document.querySelector('.chat-scroll')
+    if (chatScroll && chatScroll.contains(document.getElementById('chat-panel-kapa-root'))) {
+      // Scroll within the chat panel
+      chatScroll.scrollTo({
+        top: chatScroll.scrollHeight,
+        behavior: 'smooth',
+      })
+    } else {
+      // Scroll the window (home page behavior)
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
   }
 
   // “Preparing answer…” dots animation
@@ -289,6 +347,25 @@ export default function ChatInterface() {
     setMessage('')
     setDropdownOpen(false) // close dropdown when you tap anything
   }
+
+  // Expose submitChatQuery globally for external components (playground, code blocks)
+  useEffect(() => {
+    window.submitChatQuery = (query, autoSubmit = true) => {
+      if (!query || !query.trim()) return
+      if (autoSubmit) {
+        doQuery(query)
+      } else {
+        setMessage(query)
+        // Focus the textarea
+        if (textareaRef.current) {
+          textareaRef.current.focus()
+        }
+      }
+    }
+    return () => {
+      delete window.submitChatQuery
+    }
+  }, [submitQuery, hasInteracted])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -415,9 +492,18 @@ export default function ChatInterface() {
   return (
     <ErrorBoundary>
       <div className="chat-container">
+        {/* Toast notification */}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onDismiss={dismissToast}
+          />
+        )}
+
         <div
           className="conversation-area"
-          style={hasInteracted ? { paddingBottom: '230px' } : { paddingBottom: '0px' }}
+          style={hasInteracted ? { paddingBottom: '280px' } : { paddingBottom: '20px' }}
         >
           <div className="conversation">
             {conversation.map((qa, idx) => {
@@ -434,19 +520,14 @@ export default function ChatInterface() {
                       <ActionButtons
                         onReset={handleReset}
                         onCopy={handleCopy}
-                        setCopyToast={setCopyToast}
+                        showToast={showToast}
                       />
                       {!wasStopped && (
                         <FeedbackButtons
                           questionAnswerId={qa.id}
-                          setFeedbackToast={setFeedbackToast}
+                          showToast={showToast}
                         />
                       )}
-                    </div>
-                  )}
-                  {(copyToast || feedbackToast) && (
-                    <div className="toast-inline">
-                      {copyToast || feedbackToast}
                     </div>
                   )}
                 </div>
@@ -552,9 +633,6 @@ export default function ChatInterface() {
           )}
 
           <div className="disclaimer">
-            <p>
-              Responses are generated using AI and may contain mistakes.
-            </p>
             <p>
               Review the{' '}
               <a

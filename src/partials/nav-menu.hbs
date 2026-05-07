@@ -1,10 +1,19 @@
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
+    {{!-- Product Switcher at top of sidebar --}}
+    {{> product-switcher}}
+
+    {{!-- Version Selector below product switcher --}}
+    {{> nav-explore}}
+
     <!--{{#with @root.page.componentVersion}}
     <h3 class="title"><a href="{{{relativize ./url}}}">{{./title}}</a></h3>
     {{/with}}-->
 {{#if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
 {{> nav-tree-lab}}
+{{else if (eq page.attributes.role 'home')}}
+{{!-- Home page: use ADP nav with ROOT fallback --}}
+{{> nav-tree navigation=(get-home-navigation site page)}}
 {{else}}
 {{> nav-tree navigation=page.navigation}}
 {{/if}}

@@ -11,7 +11,13 @@ module.exports = (resource, { data, hash: context }) => {
 
   // For preview builds where contentCatalog.resolveResource might not exist
   if (!contentCatalog || !contentCatalog.resolveResource) {
-    // Return the resource as-is for preview builds
+    // Convert Antora xref patterns to placeholder URLs for preview
+    // Pattern: ROOT:module:path/to/file.adoc or component:module:path/to/file.adoc
+    if (resource.includes(':') && resource.endsWith('.adoc')) {
+      // Use anchor for preview since these pages don't exist
+      return '#'
+    }
+    // Return the resource as-is for other cases
     return resource
   }
 

@@ -220,3 +220,139 @@ footer.footer {
     max-width: 400px;
   }
 }
+
+/* =============================================================================
+   DOCS FOOTER — Simplified stacked footer for docs pages
+   Always uses dark background regardless of theme
+   ============================================================================= */
+.docs-footer {
+  background: #0b1430;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 56px 48px 40px;
+  margin-top: 64px;
+  position: relative;
+}
+
+.docs-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+
+.docs-footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  text-align: center;
+}
+
+.docs-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.85;
+  transition: opacity 0.14s;
+}
+
+.docs-footer-brand:hover {
+  opacity: 1;
+}
+
+.docs-footer-brand img {
+  height: 22px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.docs-footer-social {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.docs-footer .docs-footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.14s, transform 0.14s;
+}
+
+.docs-footer .docs-footer-social-link:hover {
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.docs-footer-social-link svg {
+  display: block;
+}
+
+.docs-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px 28px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  width: 100%;
+  max-width: 720px;
+}
+
+.docs-footer-copy {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0;
+}
+
+.docs-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.docs-footer .docs-footer-link {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 0.14s;
+}
+
+/* Remove external link icons from docs-footer links */
+.docs-footer a::after,
+.docs-footer-brand::after,
+.docs-footer-social-link::after,
+.docs-footer-link::after {
+  content: none !important;
+  display: none !important;
+}
+
+.docs-footer .docs-footer-link:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+@media screen and (max-width: 720px) {
+  .docs-footer {
+    padding: 44px 24px 32px;
+  }
+
+  .docs-footer-social {
+    gap: 18px;
+  }
+
+  .docs-footer-meta {
+    flex-direction: column;
+    gap: 14px;
+  }
+}

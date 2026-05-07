@@ -201,12 +201,13 @@
   }
 
   function showNav (e, collapse) {
-    if (navToggle.classList.contains('is-active')) return hideNav(e)
+    if (navToggle && navToggle.classList.contains('is-active')) return hideNav(e)
     trapEvent(e)
     var html = document.documentElement
+    var body = document.querySelector('.body')
     if (!collapse) {
       html.classList.add('is-clipped--nav')
-      navToggle.classList.add('is-active')
+      if (navToggle) navToggle.classList.add('is-active')
       navContainer.classList.add('is-active')
       // Note - Dan removed the height calculations - this should all be handled by css or we have overrides that work against us
       // var bounds = nav.getBoundingClientRect()
@@ -217,6 +218,7 @@
       navContainer.classList.remove('hidden')
       navExpand.classList.add('hidden')
       if (toolbar) toolbar.style.paddingLeft = 'unset'
+      if (body) body.style.marginLeft = ''
       main.style.width = 'unset'
     }
   }
@@ -224,9 +226,10 @@
   function hideNav (e, collapse) {
     trapEvent(e)
     var html = document.documentElement
+    var body = document.querySelector('.body')
     if (!collapse) {
       html.classList.remove('is-clipped--nav')
-      navToggle.classList.remove('is-active')
+      if (navToggle) navToggle.classList.remove('is-active')
       navContainer.classList.remove('is-active')
       nav.style.height = ''
       html.removeEventListener('click', hideNav)
@@ -234,6 +237,7 @@
       navContainer.classList.add('hidden')
       navExpand.classList.remove('hidden')
       if (toolbar) toolbar.style.paddingLeft = '10px'
+      if (body) body.style.marginLeft = '0'
       main.style.width = '100%'
     }
   }
