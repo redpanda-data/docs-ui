@@ -201,6 +201,12 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
   color: rgba(255, 255, 255, 0.65);
 }
 
+/* Version dropdown panel positioning in sticky header - align left with button */
+.component-indicator-sticky .sm-ver-panel {
+  left: 0;
+  right: auto;
+}
+
 /* Status badges (Beta, Limited Availability) in sticky header */
 .status-badge {
   display: inline-flex;
@@ -241,6 +247,20 @@ html[data-theme="dark"] .status-badge--la {
   background: rgba(139, 92, 246, 0.15);
   color: #c4b5fd;
   border-color: rgba(139, 92, 246, 0.3);
+}
+
+.status-badge--byoc,
+.status-badge--cloud {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+}
+
+html[data-theme="dark"] .status-badge--byoc,
+html[data-theme="dark"] .status-badge--cloud {
+  background: rgba(14, 165, 233, 0.15);
+  color: #7dd3fc;
+  border-color: rgba(14, 165, 233, 0.3);
 }
 
 @media screen and (min-width: 600px) {

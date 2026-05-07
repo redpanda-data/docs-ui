@@ -41,6 +41,24 @@
       Limited Availability
     </span>
     {{/if}}
+    {{!-- ADP platform badges: only show when limited to one platform --}}
+    {{#if page.attributes.adp}}
+    {{#if page.attributes.byoc-only}}
+    <span class="status-badge status-badge--byoc" data-tippy-content="This feature is only available in BYOC (Bring Your Own Cloud) clusters.">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+      </svg>
+      Only in BYOC
+    </span>
+    {{else if page.attributes.cloud-only}}
+    <span class="status-badge status-badge--cloud" data-tippy-content="This feature is only available in fully managed Redpanda Cloud clusters.">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+      </svg>
+      Only in Cloud
+    </span>
+    {{/if}}
+    {{/if}}
   </div>
   {{#with page.title}}
     <h1 class="page">{{{this}}}</h1>
@@ -48,7 +66,7 @@
 {{/if}}
 {{#unless (or (eq page.attributes.role 'component-home-v2') (eq page.attributes.role 'component-home-v3'))}}
 <div class="metadata metadata--main">
-  {{!-- Only show BYOC/Cloud badges on non-ADP pages (ADP uses availability block instead) --}}
+  {{!-- Only show BYOC/Cloud badges on non-ADP pages (ADP uses inline status badges instead) --}}
   {{#unless page.attributes.adp}}
   {{#if page.attributes.byoc}}
     <div class="byoc-label">
@@ -72,53 +90,6 @@
   {{> markdown-dropdown}}
 </div>
 {{/unless}}
-{{!-- Availability block for ADP pages showing platform support --}}
-{{#if page.attributes.adp}}
-{{#unless (eq page.attributes.role 'component-home-v2')}}
-{{#unless (eq page.attributes.role 'component-home-v3')}}
-{{#unless (eq page.attributes.role 'home')}}
-{{#unless (eq page.layout 'index')}}
-<div class="availability-block">
-  <strong>Available in:</strong>
-  {{#if (and page.attributes.byoc page.attributes.cloud-only)}}
-    Cloud, BYOC
-  {{else if page.attributes.byoc}}
-    BYOC
-  {{else if page.attributes.cloud-only}}
-    Cloud
-  {{else}}
-    Cloud, BYOC
-  {{/if}}
-  <span class="availability-info" tabindex="0" aria-label="Availability information">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="12" y1="16" x2="12" y2="12"></line>
-      <line x1="12" y1="8" x2="12.01" y2="8"></line>
-    </svg>
-  </span>
-</div>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const availabilityInfo = document.querySelector(".availability-info");
-  if (availabilityInfo && typeof tippy !== 'undefined') {
-    tippy(availabilityInfo, {
-      content: "This indicates which Redpanda Cloud cluster types support this feature. Cloud refers to fully managed clusters. BYOC (Bring Your Own Cloud) refers to clusters running in your own cloud account.",
-      animation: "scale",
-      theme: "redpanda-term",
-      touch: "hold",
-      interactive: true,
-      allowHTML: true,
-      appendTo: () => document.body,
-      maxWidth: 300
-    });
-  }
-});
-</script>
-{{/unless}}
-{{/unless}}
-{{/unless}}
-{{/unless}}
-{{/if}}
 {{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.byoc page.attributes.cloud-only page.attributes.context-switcher)}}
   <script>
   document.addEventListener("DOMContentLoaded", () => {
