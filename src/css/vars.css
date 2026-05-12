@@ -934,8 +934,8 @@ body[data-component="redpanda-adp"] {
   --topbar-border: rgba(226, 67, 40, 0.15);
 }
 
-/* Data Platform / ROOT (Indigo - default, explicit for clarity) */
-body[data-component="ROOT"] {
+/* Data Platform / Streaming (Indigo - default, explicit for clarity) */
+body[data-component="streaming"] {
   --component-50: var(--indigo-50-new);
   --component-100: var(--indigo-100-new);
   --component-200: var(--indigo-200-new);
@@ -950,7 +950,7 @@ body[data-component="ROOT"] {
 }
 
 /* Redpanda Connect (Teal/Green) */
-body[data-component="redpanda-connect"] {
+body[data-component="connect"] {
   --component-50: var(--teal-50-new);
   --component-100: var(--teal-100-new);
   --component-200: var(--teal-200-new);
@@ -964,8 +964,8 @@ body[data-component="redpanda-connect"] {
   --topbar-border: rgba(11, 140, 107, 0.15);
 }
 
-/* Redpanda Cloud (Sky Blue) */
-body[data-component="redpanda-cloud"] {
+/* Cloud Data Platform (Sky Blue) */
+body[data-component="cloud-data-platform"] {
   --component-50: var(--sky-50-new);
   --component-100: var(--sky-100-new);
   --component-200: var(--sky-200-new);

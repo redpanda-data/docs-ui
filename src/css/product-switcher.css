@@ -1,0 +1,531 @@
+/* =============================================================================
+   PRODUCT SWITCHER — Dropdown for switching between Redpanda products
+   ============================================================================= */
+
+.sb-product-wrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 0 16px;
+}
+
+.sb-product-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--component-color, #4f46e5);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, filter 0.15s;
+  text-align: left;
+}
+
+.sb-product-switch:hover {
+  filter: brightness(1.1);
+}
+
+.sb-product-switch.is-open {
+  filter: brightness(1.15);
+}
+
+/* Small color indicator chip - hidden when button has full color bg */
+.sb-product-chip {
+  display: none;
+}
+
+.sb-product-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+  flex: 1;
+  letter-spacing: -0.01em;
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+/* Hierarchy display for child products (e.g., Cloud under Data Platform) */
+.sb-product-name--hierarchy {
+  gap: 0;
+}
+
+.sb-product-parent-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.sb-product-child-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.sb-product-section {
+  font-size: 10px;
+  font-weight: 500;
+  color: #8098b3;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sb-product-sep {
+  /* Hidden in stacked layout */
+  display: none;
+}
+
+.sb-product-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* On very narrow viewports, hide section */
+@media (max-width: 900px) {
+  .sb-product-section {
+    display: none;
+  }
+}
+
+/* Version badge - shown when multiple versions exist */
+.sb-product-version {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #a8b2c7;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.sb-product-caret {
+  color: #8098b3;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.sb-product-caret.rot {
+  transform: rotate(180deg);
+  color: #fff;
+}
+
+/* Light theme overrides - keep full color background in light mode too */
+.sidebar[data-theme="light"] .sb-product-switch {
+  background: var(--component-color, #4f46e5);
+}
+
+.sidebar[data-theme="light"] .sb-product-switch:hover {
+  filter: brightness(1.1);
+}
+
+.sidebar[data-theme="light"] .sb-product-name {
+  color: #fff;
+}
+
+.sidebar[data-theme="light"] .sb-product-section {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sidebar[data-theme="light"] .sb-product-title {
+  color: #fff;
+}
+
+.sidebar[data-theme="light"] .sb-product-caret {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sidebar[data-theme="light"] .sb-product-caret.rot {
+  color: #fff;
+}
+
+.sidebar[data-theme="light"] .sb-product-version {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Dropdown menu */
+.sb-product-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #1a2332;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  padding: 8px;
+  z-index: 100;
+  animation: sbProductMenuIn 0.12s ease-out;
+}
+
+@keyframes sbProductMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sidebar[data-theme="light"] .sb-product-menu {
+  background: #fff;
+  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.sb-product-menu-head {
+  padding: 8px 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #a3b1c6;
+}
+
+/* Section header within dropdown (e.g., "Data Platform") */
+.sb-product-menu-head.sb-product-menu-section {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar[data-theme="light"] .sb-product-menu-head {
+  color: var(--grey-500-new, var(--grey-500, #79797d));
+}
+
+.sidebar[data-theme="light"] .sb-product-menu-head.sb-product-menu-section {
+  border-top-color: var(--grey-100-new, var(--grey-100, #dcdcde));
+}
+
+.sb-product-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  color: inherit;
+}
+
+.sb-product-opt:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar[data-theme="light"] .sb-product-opt:hover {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+}
+
+.sb-product-opt.is-current {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sidebar[data-theme="light"] .sb-product-opt.is-current {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+}
+
+.sb-product-opt .sb-product-chip {
+  /* Show color indicator chip in dropdown */
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.sb-product-opt-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sb-product-opt-name {
+  display: flex;
+  align-items: baseline;
+  gap: 4px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e8eef6;
+  letter-spacing: -0.005em;
+  flex-wrap: wrap;
+  line-height: 1.35;
+}
+
+.sidebar[data-theme="light"] .sb-product-opt-name {
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+.sb-product-opt-tag {
+  /* Hide CURRENT tag - checkmark already indicates selection */
+  display: none;
+}
+
+.sidebar[data-theme="light"] .sb-product-opt-tag {
+  background: rgba(226, 67, 40, 0.1);
+  color: var(--brand-600-new, #e24328);
+}
+
+.sb-product-opt-desc {
+  font-size: 11.5px;
+  color: #9aa8bc;
+  line-height: 1.4;
+  letter-spacing: -0.003em;
+}
+
+.sidebar[data-theme="light"] .sb-product-opt-desc {
+  color: var(--grey-500-new, var(--grey-500, #79797d));
+}
+
+.sb-product-opt-check {
+  color: var(--component-500, var(--indigo-500-new, #6172f3));
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+/* Footer */
+.sb-product-menu-foot {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar[data-theme="light"] .sb-product-menu-foot {
+  border-top-color: var(--grey-100-new, var(--grey-100, #dcdcde));
+}
+
+.sb-product-menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #c0cad8;
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  letter-spacing: -0.005em;
+}
+
+.sb-product-menu-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.sidebar[data-theme="light"] .sb-product-menu-link {
+  color: var(--grey-600-new, var(--grey-600, #606164));
+}
+
+.sidebar[data-theme="light"] .sb-product-menu-link:hover {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+/* Clickable section header link (e.g., "Data Platform" → landing page) */
+.sb-product-menu-section-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  border-radius: 6px;
+  margin-left: -4px;
+  margin-right: -4px;
+  padding-left: 16px;
+  padding-right: 12px;
+}
+
+.sb-product-menu-section-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8eef6;
+}
+
+.sidebar[data-theme="light"] .sb-product-menu-section-link:hover {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+.sb-product-menu-section-cta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--indigo-400, #818cf8);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.sb-product-menu-section-link:hover .sb-product-menu-section-cta {
+  opacity: 1;
+}
+
+.sidebar[data-theme="light"] .sb-product-menu-section-cta {
+  color: var(--indigo-600, #4f46e5);
+}
+
+/* =============================================================================
+   HIERARCHICAL PRODUCT STRUCTURE
+   ============================================================================= */
+
+/* Product group container (parent + children) */
+.sb-product-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Parent item styling (Data Platform) */
+.sb-product-opt.sb-product-parent {
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+}
+
+.sb-product-opt.sb-product-parent.is-current-group {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.sidebar[data-theme="light"] .sb-product-opt.sb-product-parent.is-current-group {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Children container */
+.sb-product-children {
+  display: flex;
+  flex-direction: column;
+  padding-left: 12px;
+  margin-left: 16px;
+  border-left: 2px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 4px;
+}
+
+.sidebar[data-theme="light"] .sb-product-children {
+  border-left-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+}
+
+/* Child item styling (Streaming, Connect) */
+.sb-product-opt.sb-product-child {
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.sb-product-opt.sb-product-child .sb-product-chip {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+}
+
+.sb-product-opt.sb-product-child .sb-product-opt-name {
+  font-size: 12.5px;
+}
+
+.sb-product-opt.sb-product-child .sb-product-opt-desc {
+  font-size: 11px;
+}
+
+/* Highlight current child */
+.sb-product-opt.sb-product-child.is-current {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar[data-theme="light"] .sb-product-opt.sb-product-child.is-current {
+  background: var(--grey-100-new, var(--grey-100, #dcdcde));
+}
+
+/* =============================================================================
+   NESTED SUBGROUPS (e.g., Self-Managed containing Streaming + Connect)
+   ============================================================================= */
+
+.sb-product-subgroup {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+}
+
+/* Clickable Self-Managed button (parent of Streaming/Connect) */
+.sb-product-subgroup-btn {
+  margin-bottom: 2px;
+}
+
+.sb-product-subgroup-btn.is-current-group {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebar[data-theme="light"] .sb-product-subgroup-btn.is-current-group {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+}
+
+.sb-product-subgroup-label {
+  padding: 6px 12px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8098b3;
+}
+
+.sidebar[data-theme="light"] .sb-product-subgroup-label {
+  color: var(--grey-500-new, var(--grey-500, #79797d));
+}
+
+.sb-product-subgroup-children {
+  display: flex;
+  flex-direction: column;
+  padding-left: 8px;
+  margin-left: 16px;
+  border-left: 2px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar[data-theme="light"] .sb-product-subgroup-children {
+  border-left-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+}
+
+/* Grandchild items (Streaming, Connect under Self-Managed) */
+.sb-product-opt.sb-product-grandchild {
+  padding: 6px 10px;
+}
+
+.sb-product-opt.sb-product-grandchild .sb-product-chip {
+  width: 6px;
+  height: 6px;
+  margin-top: 6px;
+}
+
+.sb-product-opt.sb-product-grandchild .sb-product-opt-name {
+  font-size: 12px;
+}
+
+.sb-product-opt.sb-product-grandchild .sb-product-opt-desc {
+  font-size: 10.5px;
+}

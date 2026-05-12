@@ -1,0 +1,343 @@
+{{!-- Data Platform Landing Page
+     This serves as the umbrella landing for Self-managed, Cloud, and Connect docs.
+     --}}
+<div class="dp-page">
+  {{!-- HERO --}}
+  <header class="dp-hero">
+    <div class="dp-hero-bg" aria-hidden="true">
+      <div class="dp-hero-glow dp-hero-glow-1"></div>
+      <div class="dp-hero-glow dp-hero-glow-2"></div>
+      <div class="dp-hero-grid"></div>
+    </div>
+    <div class="dp-hero-inner">
+      <div class="dp-hero-eyebrow">
+        <span>REDPANDA DATA PLATFORM</span>
+      </div>
+      <h1 class="dp-hero-title">
+        The streaming foundation<br>
+        for everything you build.
+      </h1>
+      <p class="dp-hero-sub">
+        Run Redpanda on your infrastructure or let us manage it in the cloud.
+        Then connect it to everything else with declarative pipelines.
+      </p>
+      <div class="dp-hero-stats">
+        <div><strong>10x</strong><span>faster than Kafka, same wire</span></div>
+        <div><strong>200+</strong><span>connectors</span></div>
+      </div>
+    </div>
+  </header>
+
+  {{!-- TWO DEPLOYMENT OPTIONS --}}
+  <section class="dp-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">Choose how you'll run Redpanda</h2>
+      <p class="dp-section-sub">Self-Managed or Cloud &mdash; same Kafka-compatible engine, different operations model. Both include Redpanda Connect for building data pipelines.</p>
+    </div>
+    <div class="dp-products">
+      {{!-- Self-Managed Card --}}
+      <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}" class="dp-product" style="--dp-accent: #0F8B66">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">Self-Managed</h3>
+            <p class="dp-product-tagline">Run Redpanda on your own infrastructure.</p>
+          </div>
+        </div>
+        <p class="dp-product-desc">Bare metal, VMs, or Kubernetes. Full control over networking, storage, and upgrades &mdash; with the same single binary used in Cloud.</p>
+        <ul class="dp-product-bullets">
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l9 4.9V17L12 22l-9-5V7L12 2z"/>
+              </svg>
+            </span>
+            <span>Single binary, no JVM</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <span>Air-gapped &amp; FedRAMP-ready</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </span>
+            <span>Tune every knob</span>
+          </li>
+        </ul>
+        <div class="dp-product-stats">
+          <div><strong>K8s</strong><span>Operator + Helm</span></div>
+          {{#with site.components.redpanda.latest}}<div><strong>v{{version}}</strong><span>Latest release</span></div>{{/with}}
+        </div>
+        <div class="dp-product-cta">
+          <span>Open Self-Managed docs</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </a>
+
+      {{!-- Cloud Card (Featured) --}}
+      <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}" class="dp-product is-featured" style="--dp-accent: #1F5BD6">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">Cloud</h3>
+            <p class="dp-product-tagline">Streaming, fully managed.</p>
+          </div>
+        </div>
+        <p class="dp-product-desc">Spin up a cluster in minutes. We handle upgrades, scaling, and failover &mdash; you bring the data. Available as Dedicated, Serverless, or Bring Your Own Cloud.</p>
+        <ul class="dp-product-bullets">
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+              </svg>
+            </span>
+            <span>Provisioned in 90 seconds</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+              </svg>
+            </span>
+            <span>AWS, GCP, Azure</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </span>
+            <span>24/7 SRE on call</span>
+          </li>
+        </ul>
+        <div class="dp-product-stats">
+          <div><strong>99.99%</strong><span>SLA on Dedicated</span></div>
+          <div><strong>BYOC</strong><span>Run in your VPC</span></div>
+        </div>
+        <div class="dp-product-cta">
+          <span>Open Cloud docs</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  {{!-- DECISION GUIDE --}}
+  <section class="dp-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">Not sure which to pick?</h2>
+      <p class="dp-section-sub">A quick decision matrix &mdash; most teams start with one of these two options.</p>
+    </div>
+    <div class="dp-matrix">
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
+          <p>need full control over networking, storage, and security posture</p>
+        </div>
+        <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}" class="dp-matrix-pick" style="--dp-accent: #0F8B66">
+          <span>
+            Start with Self-Managed
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </span>
+        </a>
+      </div>
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
+          <p>want streaming as a service with an SLA and zero ops</p>
+        </div>
+        <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}" class="dp-matrix-pick" style="--dp-accent: #1F5BD6">
+          <span>
+            Start with Cloud
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {{!-- POPULAR ACROSS DP --}}
+  <section class="dp-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">Popular across Data Platform</h2>
+      <p class="dp-section-sub">The guides teams open most when they're getting started.</p>
+    </div>
+    <div class="dp-popular">
+      <a href="{{#if page.attributes.self-managed-quickstart}}{{{relativize (resolve-resource page.attributes.self-managed-quickstart)}}}{{else}}#{{/if}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>Deploy a Kafka-compatible cluster</h4>
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">Self-Managed</span>
+          </div>
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+      <a href="{{#if page.attributes.self-managed-tiered-storage}}{{{relativize (resolve-resource page.attributes.self-managed-tiered-storage)}}}{{else}}#{{/if}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>Tiered storage on S3</h4>
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">Self-Managed</span>
+          </div>
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+      <a href="{{#if page.attributes.cloud-byoc}}{{{relativize (resolve-resource page.attributes.cloud-byoc)}}}{{else}}#{{/if}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>Create your first BYOC cluster</h4>
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">Cloud</span>
+          </div>
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+      <a href="{{#if page.attributes.connect-quickstart}}{{{relativize (resolve-resource page.attributes.connect-quickstart)}}}{{else}}#{{/if}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v6m0 8v6M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66l4.24-4.24"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>Connect Postgres CDC to Snowflake</h4>
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">Connect</span>
+          </div>
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+      <a href="{{#if page.attributes.self-managed-migrate}}{{{relativize (resolve-resource page.attributes.self-managed-migrate)}}}{{else}}#{{/if}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>Migrate from Apache Kafka</h4>
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">All</span>
+          </div>
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+
+      <a href="{{#if page.attributes.self-managed-schema-registry}}{{{relativize (resolve-resource page.attributes.self-managed-schema-registry)}}}{{else}}#{{/if}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>Schema Registry &amp; validation</h4>
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">All</span>
+          </div>
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  {{!-- CORE CONCEPTS --}}
+  <section class="dp-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">Core concepts</h2>
+      <p class="dp-section-sub">The mental model that applies everywhere &mdash; Self-Managed, Cloud, and Connect.</p>
+    </div>
+    <div class="dp-concepts">
+      <a href="{{#if page.attributes.self-managed-producers}}{{{relativize (resolve-resource page.attributes.self-managed-producers)}}}{{else}}#{{/if}}" class="dp-concept">
+        <div class="dp-concept-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h4>Topics &amp; partitions</h4>
+        <p>How Redpanda lays out data on disk and parallelizes reads.</p>
+      </a>
+
+      <a href="{{#if page.attributes.self-managed-tiered-storage}}{{{relativize (resolve-resource page.attributes.self-managed-tiered-storage)}}}{{else}}#{{/if}}" class="dp-concept">
+        <div class="dp-concept-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l9 4.9V17L12 22l-9-5V7L12 2z"/>
+          </svg>
+        </div>
+        <h4>Tiered storage</h4>
+        <p>Offload cold segments to S3-compatible storage automatically.</p>
+      </a>
+
+      <a href="{{#if page.attributes.self-managed-consumers}}{{{relativize (resolve-resource page.attributes.self-managed-consumers)}}}{{else}}#{{/if}}" class="dp-concept">
+        <div class="dp-concept-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <h4>Consumer groups</h4>
+        <p>Coordinated, fault-tolerant consumption across many workers.</p>
+      </a>
+
+      <a href="{{#if page.attributes.self-managed-schema-registry}}{{{relativize (resolve-resource page.attributes.self-managed-schema-registry)}}}{{else}}#{{/if}}" class="dp-concept">
+        <div class="dp-concept-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h4>Schemas &amp; contracts</h4>
+        <p>Validate every message at the broker with Avro, Protobuf, or JSON Schema.</p>
+      </a>
+    </div>
+  </section>
+
+  {{!-- HELP FOOTER --}}
+  <div class="dp-help">
+    <div>
+      <h3>Need help choosing?</h3>
+      <p>Our team can walk you through the options and help you get started.</p>
+    </div>
+    <div class="dp-help-actions">
+      <a href="https://redpanda.com/contact" class="dp-help-btn">Talk to sales</a>
+      <a href="https://redpanda.com/slack" class="dp-help-btn dp-help-btn-secondary">Join Slack</a>
+    </div>
+  </div>
+</div>

@@ -458,8 +458,16 @@ html[data-theme="light"] .nav-item > .nav-list {
 }
 
 /* Target the very first nav-menu and remove the margin-left */
+/* Style top-level nav (parent component's own nav before buckets) like a bucket */
 .nav-menu > .nav-list {
   margin-left: 0;
+  padding-left: 10px;
+  margin-bottom: 12px;
+  border-left: 2px solid rgba(122, 145, 176, 0.15);
+}
+
+html[data-theme="light"] .nav-menu > .nav-list {
+  border-left-color: rgba(107, 108, 111, 0.15);
 }
 
 li.nav-item {
@@ -948,6 +956,39 @@ html[data-theme="light"] .sb-search-kbd kbd {
   color: var(--grey-600-new, var(--grey-600, #606164));
 }
 
+/* Sidebar Version Selector Wrapper */
+.sb-version-wrap {
+  padding: 0 14px 12px;
+}
+
+.sb-version-wrap:empty {
+  display: none;
+}
+
+/* Adjust version selector pill styling for sidebar context */
+.sb-version-wrap .sm-ver-pill {
+  width: 100%;
+  justify-content: flex-start;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.sb-version-wrap .sm-ver-pill:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+html[data-theme="light"] .sb-version-wrap .sm-ver-pill {
+  background: #fff;
+  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+}
+
+html[data-theme="light"] .sb-version-wrap .sm-ver-pill:hover {
+  background: #fff;
+  border-color: var(--grey-300-new, var(--grey-300, #aaabae));
+}
+
 html[data-theme="light"] .nav-list {
   color: var(--grey-600-new, var(--grey-600, #606164)); /* Prototype: grey-600 for items */
 }
@@ -974,4 +1015,473 @@ html[data-theme="light"] .nav-list .is-current-path > div.item:first-child {
 html[data-theme="light"] .nav-status-footer {
   background: var(--grey-50-new, var(--grey-50, #f8f8f8));
   border-top-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+}
+
+/* =============================================================================
+   UNIFIED NAVIGATION BUCKETS — Data Platform grouped sidebar
+   ============================================================================= */
+
+/* Umbrella nav items (shown at top without bucket header) */
+.nav-umbrella {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Always show umbrella nav items - override the collapse behavior */
+.nav-menu .nav-umbrella .nav-item > .nav-list,
+.nav-menu .nav-umbrella .nav-item:not(.is-active) > .nav-list {
+  display: block !important;
+}
+
+/* Hide the empty depth-0 wrapper in umbrella */
+.nav-umbrella > .nav-list > .nav-item[data-depth="0"] > .nav-list {
+  margin-left: 0;
+  border-left: none;
+  padding-left: 0;
+}
+
+html[data-theme="light"] .nav-umbrella {
+  border-bottom-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+}
+
+.nav-bucket {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 4px;
+}
+
+.nav-bucket-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background 0.12s;
+  /* Sticky bucket headers */
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--sidebar-bg, #161e2d);
+  margin: 0 -10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.nav-bucket-header:hover {
+  background: color-mix(in sRGB, var(--sidebar-bg, #161e2d) 90%, white);
+}
+
+html[data-theme="light"] .nav-bucket-header {
+  background: var(--nav-background, #fff);
+}
+
+html[data-theme="light"] .nav-bucket-header:hover {
+  background: var(--grey-100-new, var(--grey-100, #f0f0f0));
+}
+
+.nav-bucket-header.is-current {
+  background: color-mix(in sRGB, var(--sidebar-bg, #161e2d) 85%, white);
+}
+
+html[data-theme="light"] .nav-bucket-header.is-current {
+  background: var(--grey-100-new, var(--grey-100, #f0f0f0));
+}
+
+/* Bucket link - clickable icon + title that navigates to bucket home */
+.nav-bucket-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Bucket icon container */
+.nav-bucket-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--bucket-color, #54478c);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.nav-bucket-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Bucket title */
+.nav-bucket-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8eef6;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+html[data-theme="light"] .nav-bucket-title {
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+/* Bucket expand/collapse caret button - separate from toggle for alignment */
+.nav-bucket-caret-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+
+.nav-bucket-caret-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="light"] .nav-bucket-caret-btn:hover {
+  background: var(--grey-200-new, var(--grey-200, rgba(0, 0, 0, 0.08)));
+}
+
+/* Bucket expand/collapse caret */
+.nav-bucket-caret {
+  color: #5972a6;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+html[data-theme="light"] .nav-bucket-caret {
+  color: var(--grey-500-new, var(--grey-500, #79797d));
+}
+
+/* Rotate caret when bucket is expanded - default is down (180deg when expanded) */
+.nav-bucket:not(:has(.nav-bucket-content.is-collapsed)) .nav-bucket-caret {
+  transform: rotate(180deg);
+}
+
+/* Bucket content (nav tree container) */
+.nav-bucket-content {
+  margin-top: 4px;
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 2px solid var(--bucket-color, #54478c);
+  opacity: 0.25;
+}
+
+.nav-bucket-content.is-collapsed {
+  display: none;
+}
+
+/* Active bucket has full opacity border */
+.nav-bucket-header.is-current + .nav-bucket-content,
+.nav-bucket-content:not(.is-collapsed) {
+  opacity: 1;
+}
+
+/* Per-bucket version selector */
+.nav-bucket-version {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* When version dropdown is open, elevate the entire bucket above others */
+.nav-bucket:has(.nav-bucket-version-btn[aria-expanded="true"]) {
+  z-index: 100;
+}
+
+/* Fallback for JS-controlled class */
+.nav-bucket.is-dropdown-open {
+  z-index: 100;
+}
+
+.nav-bucket-version-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #a8b2c7;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.nav-bucket-version-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+html[data-theme="light"] .nav-bucket-version-btn {
+  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+  background: #fff;
+  color: var(--grey-700-new, var(--grey-700, #44454a));
+}
+
+html[data-theme="light"] .nav-bucket-version-btn:hover {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+  border-color: var(--grey-300-new, var(--grey-300, #aaabae));
+}
+
+.nav-bucket-version-btn svg {
+  transition: transform 0.15s ease;
+}
+
+.nav-bucket-version-btn[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+/* Version dropdown menu */
+.nav-bucket-version-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 100px;
+  padding: 6px;
+  background: #1a2332;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  z-index: 200;
+  animation: bucketVersionMenuIn 0.15s ease-out;
+}
+
+@keyframes bucketVersionMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html[data-theme="light"] .nav-bucket-version-menu {
+  background: #fff;
+  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Version dropdown options */
+.nav-bucket-version-opt {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c6cedc;
+  text-decoration: none;
+  transition: background 0.12s;
+}
+
+.nav-bucket-version-opt:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.nav-bucket-version-opt.is-selected {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+html[data-theme="light"] .nav-bucket-version-opt {
+  color: var(--grey-700-new, var(--grey-700, #44454a));
+}
+
+html[data-theme="light"] .nav-bucket-version-opt:hover {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+html[data-theme="light"] .nav-bucket-version-opt.is-selected {
+  background: var(--grey-100-new, var(--grey-100, #f0f0f0));
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+/* EOL badge in version dropdown */
+.version-eol {
+  font-size: 10px;
+  font-weight: 600;
+  color: #f59e0b;
+  margin-left: 4px;
+}
+
+html[data-theme="light"] .version-eol {
+  color: #d97706;
+}
+
+/* Version toggle button - show/hide older versions */
+.nav-bucket-version-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: none;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8098b3;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.12s;
+  border-radius: 0 0 6px 6px;
+}
+
+.nav-bucket-version-toggle:hover {
+  color: #c6cedc;
+}
+
+.nav-bucket-version-toggle svg {
+  flex-shrink: 0;
+  margin-left: 6px;
+  transition: transform 0.2s ease;
+}
+
+html[data-theme="light"] .nav-bucket-version-toggle {
+  border-top-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+  color: var(--grey-600-new, var(--grey-600, #6b6c6f));
+}
+
+html[data-theme="light"] .nav-bucket-version-toggle:hover {
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+/* Older versions container */
+.nav-bucket-version-older {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+html[data-theme="light"] .nav-bucket-version-older {
+  border-top-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+}
+
+/* =============================================================================
+   NESTED BUCKET SUPPORT — Parent buckets containing child buckets
+   ============================================================================= */
+
+/* Children container for nested buckets */
+/* Parent bucket with children - subtle distinction */
+.nav-bucket:has(.nav-bucket-children) > .nav-bucket-header .nav-bucket-title {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.nav-bucket:has(.nav-bucket-children) > .nav-bucket-header:hover {
+  background: color-mix(in sRGB, var(--sidebar-bg, #161e2d) 93%, white);
+}
+
+html[data-theme="light"] .nav-bucket:has(.nav-bucket-children) > .nav-bucket-header:hover {
+  background: var(--grey-50-new, #f9fafb);
+}
+
+.nav-bucket-children {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Top-level nav items (parent component's own nav before child buckets) */
+/* Style the nav items to match bucket content items */
+.nav-menu > .nav-list > .nav-item .item {
+  font-size: 13px;
+  padding: 6px 10px;
+  min-height: 28px;
+  color: #9daabe;
+  border-radius: 6px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.nav-menu > .nav-list > .nav-item .item:hover {
+  background: rgba(122, 145, 176, 0.08);
+  color: #c6d4e6;
+}
+
+.nav-menu > .nav-list > .nav-item .item.is-current-page {
+  background: rgba(122, 145, 176, 0.12);
+  color: #ffffff;
+  font-weight: 500;
+}
+
+html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item {
+  color: var(--grey-700-new, #4b4c4e);
+}
+
+html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item:hover {
+  background: var(--grey-100-new, #f0f0f0);
+  color: var(--grey-900-new, #1a1b1d);
+}
+
+html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item.is-current-page {
+  background: var(--grey-200-new, #e0e1e2);
+  color: var(--grey-900-new, #1a1b1d);
+  font-weight: 500;
+}
+
+/* Add spacing between parent component's nav and child buckets */
+.nav-menu > .nav-list + .nav-bucket {
+  margin-top: 16px;
+}
+
+/* Child buckets - indent and reduce visual weight */
+.nav-bucket-children > .nav-bucket {
+  margin-left: 24px; /* Indent child buckets */
+}
+
+/* Child bucket headers - smaller and less prominent */
+.nav-bucket-children > .nav-bucket .nav-bucket-header {
+  padding: 4px 8px;
+}
+
+/* Child bucket icons - slightly smaller */
+.nav-bucket-children > .nav-bucket .nav-bucket-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+
+.nav-bucket-children > .nav-bucket .nav-bucket-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Child bucket titles - slightly smaller font */
+.nav-bucket-children > .nav-bucket .nav-bucket-title {
+  font-size: 12px;
+}
+
+/* Child bucket content - thinner border */
+.nav-bucket-children > .nav-bucket .nav-bucket-content {
+  border-left-width: 1.5px;
+  margin-left: 10px;
+  padding-left: 10px;
 }

@@ -59,6 +59,8 @@
     </span>
     {{/if}}
     {{/if}}
+    {{!-- Page options dropdown - now in sticky header with other metadata --}}
+    {{> markdown-dropdown}}
   </div>
   {{#with page.title}}
     <h1 class="page">{{{this}}}</h1>
@@ -82,12 +84,6 @@
   {{#if page.attributes.context-switcher}}
     {{> context-switcher}}
   {{/if}}
-</div>
-{{/unless}}
-{{!-- Page options dropdown - positioned after preamble via JS --}}
-{{#unless (eq page.attributes.role 'component-home-v3')}}
-<div class="page-options-container">
-  {{> markdown-dropdown}}
 </div>
 {{/unless}}
 {{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.byoc page.attributes.cloud-only page.attributes.context-switcher)}}

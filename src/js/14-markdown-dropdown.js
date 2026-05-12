@@ -23,49 +23,10 @@
   }
 
   function init () {
-    // Position the page options container before the first paragraph
-    positionPageOptions()
-
     const dropdowns = document.querySelectorAll('.markdown-dropdown')
     if (!dropdowns.length) return
 
     dropdowns.forEach(initDropdown)
-  }
-
-  /**
-   * Move page options container to appear AFTER the first paragraph
-   * The first paragraph is the lede/intro with larger font - page options come after it
-   */
-  function positionPageOptions () {
-    const container = document.querySelector('.page-options-container')
-    if (!container) return
-
-    const article = document.querySelector('article.doc')
-    if (!article) return
-
-    // Find the preamble section and get its first paragraph
-    const preamble = article.querySelector('#preamble, .preamble')
-
-    if (preamble) {
-      // Look for first paragraph inside the preamble's sectionbody
-      const sectionBody = preamble.querySelector('.sectionbody')
-      const firstParagraph = sectionBody
-        ? sectionBody.querySelector(':scope > .paragraph')
-        : preamble.querySelector('.paragraph')
-
-      if (firstParagraph) {
-        // Insert AFTER the first paragraph (the lede)
-        firstParagraph.parentNode.insertBefore(container, firstParagraph.nextSibling)
-        return
-      }
-    }
-
-    // Fallback: find the first section (h2) and insert before it
-    const firstSection = article.querySelector('.sect1, .sect2')
-
-    if (firstSection) {
-      firstSection.parentNode.insertBefore(container, firstSection)
-    }
   }
 
   function initDropdown (dropdown) {

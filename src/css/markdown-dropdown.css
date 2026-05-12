@@ -6,24 +6,16 @@
   gap: 10px;
 }
 
-/* Page options container - positioned before first paragraph via JS */
-.page-options-container {
-  display: flex;
-  justify-content: flex-end;
-  margin: 0.25rem 0 0.5rem;
-  /* Prevent focus outline from being clipped */
-  padding-right: 4px;
-}
-
-/* Hide container if empty (no markdown dropdown) */
-.page-options-container:empty {
-  display: none;
-}
-
-/* Position dropdown within container */
-.page-options-container .markdown-dropdown {
+/* Markdown dropdown in sticky header */
+.component-indicator-sticky .markdown-dropdown {
   position: relative;
   display: inline-block;
+  margin-left: auto;
+  /* Ensure focus outline isn't clipped - needs 8px for 2px outline + 2px offset + 4px buffer */
+  padding: 8px;
+  margin-top: -8px;
+  margin-bottom: -8px;
+  /* Don't use negative right margin - menu positioning handles alignment */
 }
 
 /* Toggle Button - styled to match version selector pill */
@@ -36,11 +28,17 @@
   border-radius: 99px;
   background: var(--color-smoke-30, #f4f4f5);
   color: var(--color-jet-80, #48484a);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* In sticky header context - ensure consistent sizing */
+.component-indicator-sticky .markdown-dropdown-toggle {
+  padding: 4px 10px;
+  font-size: 11px;
 }
 
 .markdown-dropdown-toggle:hover {
@@ -84,7 +82,7 @@ html[data-theme=dark] .dropdown-caret {
 .markdown-dropdown-menu {
   top: calc(100% + 6px);
   position: absolute;
-  right: 0;
+  right: 8px; /* Align with toggle button (compensate for dropdown's 8px padding) */
   z-index: 1000;
   min-width: 220px;
   padding: 6px;

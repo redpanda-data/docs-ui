@@ -9,7 +9,7 @@ For more details about this bundle and for the source code, see https://github.c
 <div class="playground-tip" id="playground-tip">
   <div class="playground-tip-content">
     Enter your data in <strong>Input</strong>, write a Bloblang mapping to transform it, and see the result in <strong>Output</strong>. Or,
-     <a href="https://docs.redpanda.com/redpanda-connect/guides/bloblang/about/" target="_blank" rel="noopener">learn Bloblang</a>.
+     <a href="https://docs.redpanda.com/connect/guides/bloblang/about/" target="_blank" rel="noopener">learn Bloblang</a>.
     <button id="dismiss-tip" class="dismiss-tip" aria-label="Dismiss tip">&times;</button>
   </div>
 </div>
@@ -524,7 +524,7 @@ async function fetchConnectCompletions() {
 
 async function tryFetchConnectJSON(version) {
   try {
-    const url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
+    const url = `/connect/components/_attachments/connect-${version}.json`;
     const response = await fetch(url);
 
     if (!response.ok) {

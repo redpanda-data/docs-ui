@@ -213,7 +213,7 @@
 
         // Build the URL with query params for the snippet sections
         // You can also wrap each in encodeURIComponent(...) if your environment needs extra safety.
-        var runUrl = '/redpanda-connect/guides/bloblang/playground/?map=' + encodedMap +
+        var runUrl = '/connect/guides/bloblang/playground/?map=' + encodedMap +
                     '&input=' + encodedIn +
                     '&meta=' + encodedMeta
         window.open(runUrl, '_blank')

@@ -39,13 +39,13 @@ false
 const COMPONENT_NAME = `{{{page.component.title}}}`.trim();
 
 /**
- * The “catalog” of product/API tags we want available by default.
+ * The "catalog" of product/API tags we want available by default.
  * For Cloud, we intentionally exclude "Admin API" from defaults.
- * For Self-Managed, we intentionally exclude Cloud Control Plane/Data Plane APIs from defaults.
+ * For Streaming, we intentionally exclude Cloud Control Plane/Data Plane APIs from defaults.
  */
 const TAGS_BY_COMPONENT = {
   Cloud: ['Labs', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
-  'Self-Managed': ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
+  'Streaming': ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
 };
 const DEFAULT_TAGS = ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
 const INITIAL_TAGS = TAGS_BY_COMPONENT[COMPONENT_NAME] || DEFAULT_TAGS;
@@ -467,7 +467,7 @@ function initAlgolia() {
       const componentTitle = '{{{page.component.title}}}';
       const productParams = (() => {
         if (componentTitle === 'Cloud') return '&product[0]=Cloud&product[1]=Connect';
-        if (componentTitle === 'Self-Managed') return '&product[0]=Self-Managed&product[1]=Connect';
+        if (componentTitle === 'Streaming') return '&product[0]=Streaming&product[1]=Connect';
         return '';
       })();
       const viewAllLink = currentQuery

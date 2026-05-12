@@ -530,22 +530,59 @@ html[data-theme="dark"] .doc h2.home-products-heading {
 h3.home-products-section-heading,
 .doc h3.home-products-section-heading,
 .article.home .doc h3.home-products-section-heading {
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: var(--grey-700-new, #374151) !important;
-  margin: 0 0 12px !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: var(--grey-900-new, #111827) !important;
+  margin: 0 0 16px !important;
   padding: 0 !important;
-  line-height: 1 !important;
+  line-height: 1.2 !important;
 }
 
 html[data-theme="dark"] .home-products-section-heading,
 html[data-theme="dark"] .doc h3.home-products-section-heading {
-  color: var(--grey-300-new, #d1d5db) !important;
+  color: var(--grey-100-new, #f3f4f6) !important;
 }
 
 .home-products-section-heading:not(:first-of-type) {
-  margin-top: 32px !important;
-  padding-top: 24px !important;
+  margin-top: 40px !important;
+  padding-top: 32px !important;
+  border-top: 1px solid var(--grey-200-new, #e5e7eb);
+}
+
+html[data-theme="dark"] .home-products-section-heading:not(:first-of-type) {
+  border-top-color: var(--grey-700-new, #374151);
+}
+
+/* Sub-sub-section heading (Self-Managed within Data Platform) */
+.home-products-subsection-heading,
+.doc .home-products-subsection-heading,
+h4.home-products-subsection-heading,
+.doc h4.home-products-subsection-heading,
+.article.home .doc h4.home-products-subsection-heading {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: var(--grey-500-new, #6b7280) !important;
+  margin: 20px 0 10px 16px !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+html[data-theme="dark"] .home-products-subsection-heading,
+html[data-theme="dark"] .doc h4.home-products-subsection-heading {
+  color: var(--grey-400-new, #9ca3af) !important;
+}
+
+/* Nested product cards (indent for Self-Managed children) */
+.home-product-cards--nested {
+  margin-left: 16px;
+  padding-left: 12px;
+  border-left: 2px solid var(--grey-200-new, #e5e7eb);
+}
+
+html[data-theme="dark"] .home-product-cards--nested {
+  border-left-color: var(--grey-700-new, #374151);
 }
 
 /* Product cards grid */

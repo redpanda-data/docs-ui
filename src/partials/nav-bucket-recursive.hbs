@@ -1,0 +1,41 @@
+{{!--
+  Recursive bucket rendering for unified navigation
+  Supports nested bucket structures (parent buckets containing child buckets)
+
+  On umbrella page: ALL buckets render with headers (including parents)
+  On nested pages: Parent buckets unpack (show nav items + children without header)
+--}}
+{{#if bucket.children}}
+  {{#if (eq @root.page.attributes.is-umbrella-nav "true")}}
+    {{!-- Umbrella page: parent renders as a bucket with header, nav items and child buckets at same level --}}
+    <div class="nav-bucket nav-bucket-parent" data-bucket="{{bucket.componentName}}" style="--bucket-color: {{bucket.color}};">
+      {{> bucket-header bucket=bucket}}
+      <div class="nav-bucket-content{{#unless (or bucket.isCurrentBucket bucket.hasCurrentChild)}} is-collapsed{{/unless}}" id="nav-bucket-{{bucket.componentName}}">
+        {{#if bucket.items}}
+          {{> nav-tree navigation=bucket.items}}
+        {{/if}}
+        {{!-- Child buckets appear at same level as parent's nav items --}}
+        {{#each bucket.children}}
+          {{> nav-bucket-recursive bucket=this}}
+        {{/each}}
+      </div>
+    </div>
+  {{else}}
+    {{!-- Nested page: parent unpacks completely - NO bucket header, just nav items + child buckets at top level --}}
+    {{#if bucket.items}}
+      {{> nav-tree navigation=bucket.items}}
+    {{/if}}
+    {{!-- Child buckets render as normal buckets at same level --}}
+    {{#each bucket.children}}
+      {{> nav-bucket-recursive bucket=this}}
+    {{/each}}
+  {{/if}}
+{{else}}
+  {{!-- Leaf bucket: always render with bucket header --}}
+  <div class="nav-bucket" data-bucket="{{bucket.componentName}}" style="--bucket-color: {{bucket.color}};">
+    {{> bucket-header bucket=bucket}}
+    <div class="nav-bucket-content{{#unless bucket.isCurrentBucket}} is-collapsed{{/unless}}" id="nav-bucket-{{bucket.componentName}}">
+      {{> nav-tree navigation=bucket.items}}
+    </div>
+  </div>
+{{/if}}

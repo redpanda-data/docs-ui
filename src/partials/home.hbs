@@ -105,7 +105,7 @@
     <h3 class="home-products-section-heading">Data Platform</h3>
     <div class="home-product-cards">
       {{!-- Cloud --}}
-      <div class="home-product-card" style="--product-color: {{get-component-color site 'redpanda-cloud'}};">
+      <div class="home-product-card" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
         <div class="home-product-card-content">
           <div class="home-product-card-header">
             <span class="home-product-card-title">Cloud</span>
@@ -117,15 +117,19 @@
           </div>
         </div>
       </div>
+    </div>
 
-      {{!-- Self-Managed --}}
-      <div class="home-product-card" style="--product-color: {{get-component-color site 'ROOT'}};">
+    {{!-- Self-Managed (nested under Data Platform) --}}
+    <h4 class="home-products-subsection-heading">Self-Managed</h4>
+    <div class="home-product-cards home-product-cards--nested">
+      {{!-- Streaming --}}
+      <div class="home-product-card" style="--product-color: {{get-component-color site 'streaming'}};">
         <div class="home-product-card-content">
           <div class="home-product-card-header">
-            <span class="home-product-card-title">Self-Managed</span>
-            {{#with site.components.ROOT.latest}}<span class="home-product-card-version">v{{version}}</span>{{/with}}
+            <span class="home-product-card-title">Streaming</span>
+            {{#with site.components.streaming.latest}}<span class="home-product-card-version">v{{version}}</span>{{/with}}
           </div>
-          <p class="home-product-card-desc">Run on your own infrastructure</p>
+          <p class="home-product-card-desc">Redpanda broker and rpk CLI</p>
           <div class="home-product-card-links">
             <a href="{{#if page.attributes.self-managed-quickstart}}{{{relativize (resolve-resource page.attributes.self-managed-quickstart)}}}{{else}}#{{/if}}">Get started</a>
             <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}">Docs</a>
@@ -134,12 +138,12 @@
       </div>
 
       {{!-- Connect --}}
-      <div class="home-product-card" style="--product-color: {{get-component-color site 'redpanda-connect'}};">
+      <div class="home-product-card" style="--product-color: {{get-component-color site 'connect'}};">
         <div class="home-product-card-content">
           <div class="home-product-card-header">
             <span class="home-product-card-title">Connect</span>
           </div>
-          <p class="home-product-card-desc">Pipelines and connectors</p>
+          <p class="home-product-card-desc">Data pipelines and transformations</p>
           <div class="home-product-card-links">
             <a href="{{#if page.attributes.connect-quickstart}}{{{relativize (resolve-resource page.attributes.connect-quickstart)}}}{{else}}#{{/if}}">Get started</a>
             <a href="{{#if page.attributes.connect-docs}}{{{relativize (resolve-resource page.attributes.connect-docs)}}}{{else}}#{{/if}}">Docs</a>

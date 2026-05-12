@@ -76,7 +76,8 @@ html {
   z-index: 10;
   padding: 12px 0;
   margin: -12px 0 12px;
-  background: var(--page-background, #fff);
+  background: var(--body-background, #fff);
+  overflow: visible;
 }
 
 .component-indicator-sticky.is-stuck {
@@ -89,7 +90,7 @@ html {
 }
 
 html[data-theme="dark"] .component-indicator-sticky {
-  background: var(--page-background, #0d1117);
+  background: var(--body-background);
 }
 
 html[data-theme="dark"] .component-indicator-sticky.is-stuck {
@@ -509,6 +510,13 @@ html[data-theme="dark"] .doc .listingblock pre.highlight {
   font-size: 17px;
   line-height: 1.55;
   color: var(--grey-600-new, #4b5563);
+}
+
+html[data-theme="dark"] .doc .paragraph.lead > p,
+html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child > p,
+html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child + .paragraph > p,
+html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child + .paragraph + .paragraph > p {
+  color: var(--grey-300-new, #d1d5db);
 }
 
 .doc .right {
@@ -2184,4 +2192,161 @@ html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
   margin-left: -2em;
   text-align: right;
   width: 1.5em;
+}
+
+/* =============================================================================
+   CARD GRID — For landing pages using AsciiDoc roles
+   Usage: [.card-grid] wrapping [.card] sections
+   ============================================================================= */
+
+.doc .card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin: 2rem 0;
+}
+
+.doc .card-grid .card {
+  background: var(--grey-50-new, #f9fafb);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.doc .card-grid .card:hover {
+  border-color: var(--component-600, var(--indigo-600-new, #4f46e5));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.doc .card-grid .card h3,
+.doc .card-grid .card .title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--heading-font-color);
+  margin: 0 0 12px;
+  letter-spacing: -0.01em;
+}
+
+.doc .card-grid .card p {
+  font-size: 14px;
+  color: var(--grey-600-new, #4b5563);
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.doc .card-grid .card ul {
+  font-size: 14px;
+  color: var(--grey-600-new, #4b5563);
+  margin: 0 0 16px;
+  padding-left: 1.25rem;
+}
+
+.doc .card-grid .card li {
+  margin-bottom: 6px;
+}
+
+.doc .card-grid .card a.button,
+.doc .card-grid .card a[role="button"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--component-600, var(--indigo-600-new, #4f46e5));
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.doc .card-grid .card a.button:hover,
+.doc .card-grid .card a[role="button"]:hover {
+  opacity: 0.9;
+  text-decoration: none;
+}
+
+/* Dark mode card grid */
+html[data-theme="dark"] .doc .card-grid .card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .doc .card-grid .card:hover {
+  border-color: var(--component-500, var(--indigo-500-new, #6172f3));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .doc .card-grid .card h3,
+html[data-theme="dark"] .doc .card-grid .card .title {
+  color: #fff;
+}
+
+html[data-theme="dark"] .doc .card-grid .card p,
+html[data-theme="dark"] .doc .card-grid .card ul {
+  color: var(--grey-400-new, #9ca3af);
+}
+
+/* =============================================================================
+   LINK CARDS — Simpler card style for navigation links
+   Usage: [.link-cards] wrapping [.link-card] sections
+   ============================================================================= */
+
+.doc .link-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 1.5rem 0;
+}
+
+.doc .link-cards .link-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--grey-50-new, #f9fafb);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 10px;
+  padding: 16px;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.doc .link-cards .link-card:hover {
+  border-color: var(--grey-300-new, #d1d5db);
+  background: #fff;
+}
+
+.doc .link-cards .link-card h4,
+.doc .link-cards .link-card .title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--heading-font-color);
+  margin: 0 0 4px;
+}
+
+.doc .link-cards .link-card p {
+  font-size: 13px;
+  color: var(--grey-600-new, #4b5563);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Dark mode link cards */
+html[data-theme="dark"] .doc .link-cards .link-card {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .doc .link-cards .link-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+html[data-theme="dark"] .doc .link-cards .link-card h4,
+html[data-theme="dark"] .doc .link-cards .link-card .title {
+  color: #fff;
+}
+
+html[data-theme="dark"] .doc .link-cards .link-card p {
+  color: var(--grey-400-new, #9ca3af);
 }
