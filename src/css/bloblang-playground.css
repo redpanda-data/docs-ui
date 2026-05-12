@@ -1,14 +1,6 @@
-/* Ensure page title is visible */
-.bloblang-playground .doc h1.page {
-  display: block;
-  font-size: calc(32 / var(--rem-base) * 1rem);
-  margin: 1rem 0 1.5rem;
-  letter-spacing: -0.025em;
-}
-
-/* Fix component indicator overlapping H1 - remove negative margin */
+/* Hide component indicator on playground - not needed and causes overlap */
 .bloblang-playground .component-indicator-sticky {
-  margin-top: 0;
+  display: none;
 }
 
 @media screen and (min-width: 769px) {
