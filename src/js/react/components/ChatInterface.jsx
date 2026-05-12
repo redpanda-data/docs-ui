@@ -16,6 +16,7 @@ import DOMPurify from 'dompurify'
 import { Marked } from 'marked'
 import { markedHighlight } from 'marked-highlight'
 import hljs from 'highlight.js'
+import { loadConversation, clearConversation } from '../chatPersistence.js'
 
 // ——— ErrorBoundary ——————————————————————————————————————————————————
 class ErrorBoundary extends Component {
@@ -179,6 +180,7 @@ export default function ChatInterface() {
   const [suggestions, setSuggestions]       = useState([])
   const [hasInteracted, setHasInteracted]   = useState(false)
   const [toast, setToast]                   = useState(null)
+  const [restoredConversation, setRestoredConversation] = useState(null)
   const textareaRef = useRef(null)
 
   const showToast = (message, type = 'success') => {
@@ -216,6 +218,15 @@ export default function ChatInterface() {
     }
   }, []);
 
+  // Restore conversation from localStorage on mount (cross-page persistence)
+  useEffect(() => {
+    const saved = loadConversation()
+    if (saved?.conversation?.length > 0) {
+      setRestoredConversation(saved.conversation)
+      setHasInteracted(true)
+    }
+  }, [])
+
   // Update isMobile on resize. Close dropdown if switching breakpoints.
   useEffect(() => {
     const handleResize = () => {
@@ -242,7 +253,14 @@ export default function ChatInterface() {
 
   const deepThinking = useDeepThinking()
 
-  const latestQA = conversation.getLatest()
+  // Merge restored conversation with live conversation for display
+  // Show restored conversation when live is empty, otherwise show live
+  // (live conversation will include new queries that continue the thread)
+  const displayConversation = restoredConversation && conversation.length === 0
+    ? restoredConversation
+    : conversation
+
+  const latestQA = conversation.length > 0 ? conversation.getLatest() : null
 
   // Show/hide "scroll down" button
   useEffect(() => {
@@ -374,9 +392,11 @@ export default function ChatInterface() {
   }
 
   const handleReset = () => {
+    clearConversation()  // Clear localStorage persistence
     resetConversation()
     setMessage('')
     setStoppedIds(new Set())
+    setRestoredConversation(null)
     setHasInteracted(false)
     setShowScrollDown(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -387,7 +407,7 @@ export default function ChatInterface() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(
-        conversation
+        displayConversation
           .map((q) => `Question: ${q.question}\nAnswer: ${q.answer}`)
           .join('\n---\n')
       )
@@ -506,10 +526,13 @@ export default function ChatInterface() {
           style={hasInteracted ? { paddingBottom: '280px' } : { paddingBottom: '20px' }}
         >
           <div className="conversation">
-            {conversation.map((qa, idx) => {
+            {displayConversation.map((qa, idx) => {
               const key        = qa.id ?? `temp-${idx}`
               const wasStopped = stoppedIds.has(key)
-              const isLast     = latestQA?.id === qa.id
+              // For restored conversations, show action buttons on the last item
+              const isLast     = idx === displayConversation.length - 1
+              // Feedback only available for live conversation items (not restored)
+              const canFeedback = conversation.length > 0 && latestQA?.id === qa.id
               return (
                 <div key={key} className="qa-pair">
                   <hr className="section-divider" />
@@ -522,7 +545,7 @@ export default function ChatInterface() {
                         onCopy={handleCopy}
                         showToast={showToast}
                       />
-                      {!wasStopped && (
+                      {!wasStopped && canFeedback && (
                         <FeedbackButtons
                           questionAnswerId={qa.id}
                           showToast={showToast}
