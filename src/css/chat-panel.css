@@ -376,19 +376,20 @@
 
 /* Footer wrapper - fixed at bottom */
 #chat-panel-kapa-root .chat-footer-wrapper {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: #fff;
-  border-top: 1px solid var(--grey-100-new, #e5e5e5);
+  border-top: none;
   padding: 0;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 #chat-panel-kapa-root .chat-footer-wrapper.fixed-bottom {
   position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--grey-100-new, #e5e5e5);
 }
 
 #chat-panel-kapa-root .chat-footer-wrapper form {
@@ -533,62 +534,149 @@
   flex-shrink: 0;
 }
 
-/* Suggestion chips */
-#chat-panel-kapa-root .suggestion-chips,
-#chat-panel-kapa-root .chip-group-desktop {
+/* =============================================================================
+   WELCOME SCREEN
+   Centered welcome message with sparkle icon and suggestion cards
+   ============================================================================= */
+
+#chat-panel-kapa-root .welcome-screen {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 10px 14px;
-  border-top: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px 24px;
+  text-align: center;
+  flex: 1;
+  min-height: 0;
 }
 
-#chat-panel-kapa-root .chip {
-  display: inline-block;
-  padding: 8px 12px;
-  background: #fff;
-  border: 1px solid var(--grey-200-new, #e5e5e5);
-  border-radius: 8px;
-  font-size: 12px;
-  color: var(--grey-700-new, #374151);
-  cursor: pointer;
-  transition: all 0.12s ease;
+#chat-panel-kapa-root .welcome-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  border-radius: 16px;
+  color: #4f46e5;
+  margin-bottom: 20px;
 }
 
-#chat-panel-kapa-root .chip:hover {
-  background: var(--grey-50-new, #f9fafb);
-  border-color: var(--grey-300-new, #d1d5db);
+#chat-panel-kapa-root .welcome-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--grey-900-new, #181818);
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
 }
 
-#chat-panel-kapa-root .more-chip {
+#chat-panel-kapa-root .welcome-description {
+  font-size: 14px;
   color: var(--grey-500-new, #6b7280);
-  font-weight: 500;
+  line-height: 1.6;
+  margin: 0 0 28px;
+  max-width: 320px;
 }
 
-/* Pulldown menu for expanded suggestions */
-#chat-panel-kapa-root .pulldown-menu-desktop {
+/* Suggestion cards - full width buttons */
+#chat-panel-kapa-root .suggestion-cards {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
+  max-width: 360px;
 }
 
-#chat-panel-kapa-root .pulldown-item {
-  display: inline-block;
-  padding: 8px 12px;
+#chat-panel-kapa-root .suggestion-card {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
   background: #fff;
   border: 1px solid var(--grey-200-new, #e5e5e5);
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: 12px;
+  font-size: 14px;
   color: var(--grey-700-new, #374151);
+  text-align: left;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: all 0.15s ease;
+  font-family: inherit;
 }
 
-#chat-panel-kapa-root .pulldown-item:hover {
+#chat-panel-kapa-root .suggestion-card:hover {
   background: var(--grey-50-new, #f9fafb);
   border-color: var(--grey-300-new, #d1d5db);
+}
+
+/* =============================================================================
+   INPUT FORM - New rounded design
+   ============================================================================= */
+
+#chat-panel-kapa-root .chat-input-form {
+  padding: 16px;
+}
+
+#chat-panel-kapa-root .chat-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 2px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 28px;
+  padding: 6px 6px 6px 18px;
+  transition: border-color 0.15s ease;
+}
+
+#chat-panel-kapa-root .chat-input-wrapper:focus-within {
+  border-color: #6366f1;
+}
+
+#chat-panel-kapa-root .chat-input-wrapper .chat-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--grey-900-new, #181818);
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
+}
+
+#chat-panel-kapa-root .chat-input-wrapper .chat-input::placeholder {
+  color: var(--grey-400-new, #9ca3af);
+}
+
+#chat-panel-kapa-root .submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #6366f1;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+#chat-panel-kapa-root .submit-button:hover:not(:disabled) {
+  background: #4f46e5;
+}
+
+#chat-panel-kapa-root .submit-button:disabled {
+  background: var(--grey-200-new, #e5e5e5);
+  color: var(--grey-400-new, #9ca3af);
+  cursor: not-allowed;
+}
+
+#chat-panel-kapa-root .submit-button.stop-button {
+  background: #ef4444;
+}
+
+#chat-panel-kapa-root .submit-button.stop-button:hover {
+  background: #dc2626;
 }
 
 /* Disclaimer - always visible at bottom */
@@ -863,6 +951,64 @@
   background: #2a3a4d !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
   color: #e8eef6 !important;
+}
+
+/* Dark mode - Welcome screen */
+.dark-theme #chat-panel-kapa-root .welcome-icon {
+  background: linear-gradient(135deg, #312e81 0%, #3730a3 100%) !important;
+  color: #a5b4fc !important;
+}
+
+.dark-theme #chat-panel-kapa-root .welcome-title {
+  color: #e8eef6 !important;
+}
+
+.dark-theme #chat-panel-kapa-root .welcome-description {
+  color: #7c8ca8 !important;
+}
+
+.dark-theme #chat-panel-kapa-root .suggestion-card {
+  background: #232f3e !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #aab8ca !important;
+}
+
+.dark-theme #chat-panel-kapa-root .suggestion-card:hover {
+  background: #2a3a4d !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #e8eef6 !important;
+}
+
+/* Dark mode - Input form */
+.dark-theme #chat-panel-kapa-root .chat-input-wrapper {
+  background: #232f3e !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark-theme #chat-panel-kapa-root .chat-input-wrapper:focus-within {
+  border-color: #6366f1 !important;
+}
+
+.dark-theme #chat-panel-kapa-root .chat-input-wrapper .chat-input {
+  background: transparent !important;
+  color: #e8eef6 !important;
+}
+
+.dark-theme #chat-panel-kapa-root .chat-input-wrapper .chat-input::placeholder {
+  color: #7c8ca8 !important;
+}
+
+.dark-theme #chat-panel-kapa-root .submit-button {
+  background: #6366f1 !important;
+}
+
+.dark-theme #chat-panel-kapa-root .submit-button:hover:not(:disabled) {
+  background: #818cf8 !important;
+}
+
+.dark-theme #chat-panel-kapa-root .submit-button:disabled {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #7c8ca8 !important;
 }
 
 .dark-theme #chat-panel-kapa-root .disclaimer {

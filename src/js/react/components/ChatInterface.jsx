@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, Component } from 'react'
 import { useChat, useDeepThinking } from '@kapaai/react-sdk'
 import {
-  ArrowUp,
+  ArrowRight,
   ArrowDown,
   ThumbsUp,
   ThumbsDown,
@@ -11,6 +11,7 @@ import {
   FileSearch,
   Check,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { Marked } from 'marked'
@@ -521,9 +522,36 @@ export default function ChatInterface() {
           />
         )}
 
+        {/* Welcome screen - shown before interaction */}
+        {!hasInteracted && (
+          <div className="welcome-screen">
+            <div className="welcome-icon">
+              <Sparkles size={28} />
+            </div>
+            <h2 className="welcome-title">How can I help?</h2>
+            <p className="welcome-description">
+              I can answer questions about Redpanda docs, write quickstarts, and help you troubleshoot.
+            </p>
+            {suggestions.length > 0 && (
+              <div className="suggestion-cards">
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className="suggestion-card"
+                    onClick={() => doQuery(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div
           className="conversation-area"
-          style={hasInteracted ? { paddingBottom: '280px' } : { paddingBottom: '20px' }}
+          style={hasInteracted ? { paddingBottom: '180px' } : { display: 'none' }}
         >
           <div className="conversation">
             {displayConversation.map((qa, idx) => {
@@ -579,81 +607,44 @@ export default function ChatInterface() {
             </button>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="chat-card">
-              <div className="chat-content">
+          <form onSubmit={handleSubmit} className="chat-input-form">
+            <div className="chat-input-wrapper">
               <label htmlFor="chat-message" className="visually-hidden">
                 Ask a question about Redpanda
               </label>
-              <textarea
+              <input
                 ref={textareaRef}
+                type="text"
                 id="chat-message"
                 name="chat-message"
                 className="chat-input"
                 autoComplete="off"
-                placeholder="How can we help you with Redpanda today?"
+                placeholder="Ask anything about Redpanda docs..."
                 value={message}
-                onChange={(e) => {
-                  setMessage(e.target.value)
-
-                  const el = e.target
-                  el.style.height = 'auto'
-                  el.style.height = Math.min(el.scrollHeight, 200) + 'px'
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit(e)
-                  }
-                }}
+                onChange={(e) => setMessage(e.target.value)}
                 disabled={isGeneratingAnswer || isPreparingAnswer}
               />
-              </div>
-              <div className="chat-footer">
-                {isPreparingAnswer || isGeneratingAnswer ? (
-                  <button
-                    type="button"
-                    onClick={handleStop}
-                    className="main-button flex items-center gap-1"
-                  >
-                    <CircleStop className="h-5 w-5" />
-                    <span className="button-text">Stop</span>
-                  </button>
-                ) : (
-                  <div className="chat-footer-buttons">
-                    <button
-                      type="button"
-                      onClick={deepThinking.toggle}
-                      className={`deep-thinking-button outlined ${deepThinking.active ? 'active' : ''}`}
-                      title="For harder questions. Search longer across all sources. Takes up to 1 minute."
-                    >
-                      <span className="button-icon-left">
-                        {/* Tabler FileSearch icon from lucide-react */}
-                        <FileSearch className="button-icon" />
-                      </span>
-                      <span className="button-text">Deep thinking</span>
-                    </button>
-                    <button type="submit" className="main-button">
-                      <ArrowUp className="button-icon" />
-                      <span className="button-text">Submit</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+              {isPreparingAnswer || isGeneratingAnswer ? (
+                <button
+                  type="button"
+                  onClick={handleStop}
+                  className="submit-button stop-button"
+                  aria-label="Stop"
+                >
+                  <CircleStop size={18} />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="submit-button"
+                  aria-label="Submit"
+                  disabled={!message.trim()}
+                >
+                  <ArrowRight size={18} />
+                </button>
+              )}
             </div>
           </form>
-
-          {/* ——— SUGGESTION CHIPS ————————————————————————————————————————————————— */}
-          {suggestions.length > 0 && (
-            <div
-              className="suggestion-chips"
-              style={hasInteracted ? { display: 'none' } : { display: 'flex' }}
-            >
-              {isMobile
-                ? renderMobileChips()
-                : renderDesktopChips()}
-            </div>
-          )}
 
           <div className="disclaimer">
             <p>

@@ -1,6 +1,11 @@
-/* Hide component indicator on playground - not needed and causes overlap */
+/* Fix component indicator spacing on playground - remove negative margin that causes overlap */
 .bloblang-playground .component-indicator-sticky {
-  display: none;
+  margin-top: 0;
+}
+
+/* Add spacing to H1 to prevent overlap with sticky indicator */
+.bloblang-playground .doc h1.page {
+  margin-top: 24px;
 }
 
 @media screen and (min-width: 769px) {
