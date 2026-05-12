@@ -500,22 +500,17 @@ html[data-theme="dark"] .doc .listingblock pre.highlight {
   margin: 0;
 }
 
-/* Lead/intro paragraphs - larger font for opening text
-   Only applies to consecutive paragraphs at the start of preamble.
-   Lists, admonitions, code blocks break the chain and reset to normal font. */
+/* Lead/intro paragraph - larger font for opening text
+   Only applies to the first paragraph in preamble or paragraphs with .lead class. */
 .doc .paragraph.lead > p,
-.doc #preamble > .sectionbody > .paragraph:first-child > p,
-.doc #preamble > .sectionbody > .paragraph:first-child + .paragraph > p,
-.doc #preamble > .sectionbody > .paragraph:first-child + .paragraph + .paragraph > p {
+.doc #preamble > .sectionbody > .paragraph:first-child > p {
   font-size: 17px;
   line-height: 1.55;
   color: var(--grey-600-new, #4b5563);
 }
 
 html[data-theme="dark"] .doc .paragraph.lead > p,
-html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child > p,
-html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child + .paragraph > p,
-html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child + .paragraph + .paragraph > p {
+html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child > p {
   color: var(--grey-300-new, #d1d5db);
 }
 
