@@ -2,7 +2,7 @@ antoraVersion: '1.0.0'
 site:
   url: https://deploy-preview-327--docs-ui.netlify.app
   title: UI Preview
-  homeUrl: &home_url /xyz/24.3/index.html
+  homeUrl: &home_url /streaming/24.3/index.html
   components:
   # Agentic Data Plane component
   - name: redpanda-adp
@@ -22,23 +22,25 @@ site:
             color: '#7C3AED'
             order: 1
     latestVersion: *latest_version_adp
-  # Self-Managed (ROOT) component - under Data Platform
+  # Streaming component - under Data Platform (formerly Self-Managed/ROOT)
   - &component
-    name: ROOT
-    title: &component_title Self-Managed
-    url: /xyz/6.0/index.html
+    name: streaming
+    title: &component_title Streaming
+    url: /streaming/6.0/index.html
     versions:
     - &latest_version_xyz
-      url: /xyz/6.0/index.html
+      url: /streaming/6.0/index.html
       version: '6.0'
       displayVersion: '6.0'
       asciidoc:
         attributes:
           page-header-data:
-            title: Self-Managed
+            title: Streaming
             section: Data Platform
+            parent-component: self-managed
             description: Run Redpanda on your own infrastructure.
-            color: '#014F86'
+            color: '#6366f1'
+            icon: activity
             order: 1
     - &component_version
       title: *component_title
@@ -48,10 +50,12 @@ site:
       asciidoc:
         attributes:
           page-header-data:
-            title: Self-Managed
+            title: Streaming
             section: Data Platform
+            parent-component: self-managed
             description: Run Redpanda on your own infrastructure.
-            color: '#014F86'
+            color: '#6366f1'
+            icon: activity
             order: 1
           toc-tools-title: Connect Tools
           toc-tools-links: '[{"text": "Bloblang Playground", "url": "/playground", "icon": "terminal"}, {"text": "Claude AI Skills", "url": "https://github.com/redpanda-data/connect/blob/main/.claude-plugin/README.md", "icon": "layers", "external": true}]'
@@ -80,9 +84,9 @@ site:
             color: '#0891B2'
             order: 2
     latestVersion: *latest_version_cloud
-  # Connect component - under Data Platform
-  - name: redpanda-connect
-    title: Redpanda Connect
+  # Connect component - under Data Platform (formerly redpanda-connect)
+  - name: connect
+    title: Connect
     url: '#'
     versions:
     - &latest_version_connect
@@ -92,11 +96,13 @@ site:
       asciidoc:
         attributes:
           page-header-data:
-            title: Redpanda Connect
+            title: Connect
             section: Data Platform
+            parent-component: self-managed
             description: Stream processing and integration connectors.
             color: '#059669'
-            order: 3
+            icon: plug-connected
+            order: 2
     latestVersion: *latest_version_connect
 page:
   url: *home_url
@@ -126,14 +132,14 @@ page:
   - content: Data Platform
     url: '#'
     urlType: internal
-  - content: Self-Managed
+  - content: Streaming
     url: '#'
     urlType: internal
   - content: Quickstart
     url: '#'
     urlType: internal
   - content: Brand&#8217;s Hardware &amp; Software Requirements
-    url: /xyz/24.3/index.html
+    url: /streaming/24.3/index.html
     urlType: internal
   versions:
   - version: '6.0'
@@ -157,16 +163,16 @@ page:
       urlType: internal
       items:
       - content: Brand&#8217;s Hardware &amp; Software Requirements
-        url: /xyz/24.3/index.html
+        url: /streaming/24.3/index.html
         urlType: internal
       - content: Bloblang Syntax
-        url: /xyz/24.3/bloblang-syntax-test.html
+        url: /streaming/24.3/bloblang-syntax-test.html
         urlType: internal
       - content: Bloblang Playground
-        url: /xyz/24.3/playground.html
+        url: /streaming/24.3/playground.html
         urlType: internal
       - content: Home page
-        url: /xyz/24.3/home.html
+        url: /streaming/24.3/home.html
         urlType: internal
     - content: Get Started
       url: '#'
@@ -385,6 +391,6 @@ page:
         url: '#'
         urlType: internal
       - content: Limited Availability Test
-        url: /xyz/24.3/limited-availability-test.html
+        url: /streaming/24.3/limited-availability-test.html
         urlType: internal
 

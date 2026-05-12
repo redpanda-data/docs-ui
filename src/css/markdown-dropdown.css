@@ -11,11 +11,8 @@
   position: relative;
   display: inline-block;
   margin-left: auto;
-  /* Ensure focus outline isn't clipped - needs 8px for 2px outline + 2px offset + 4px buffer */
-  padding: 8px;
-  margin-top: -8px;
-  margin-bottom: -8px;
-  /* Don't use negative right margin - menu positioning handles alignment */
+  /* Ensure focus outline isn't clipped - use padding without negative margins */
+  padding: 4px;
 }
 
 /* Toggle Button - styled to match version selector pill */
@@ -82,9 +79,10 @@ html[data-theme=dark] .dropdown-caret {
 .markdown-dropdown-menu {
   top: calc(100% + 6px);
   position: absolute;
-  right: 8px; /* Align with toggle button (compensate for dropdown's 8px padding) */
+  right: 0;
   z-index: 1000;
   min-width: 220px;
+  max-width: calc(100vw - 32px); /* Prevent overflow on narrow viewports */
   padding: 6px;
   border: 1px solid var(--color-smoke-70, #dcdcde);
   border-radius: 12px;
@@ -172,9 +170,11 @@ html[data-theme=dark] .dropdown-caret {
     justify-content: flex-start;
   }
 
+  /* On mobile, position dropdown to stay within viewport */
   .markdown-dropdown-menu {
-    right: auto;
-    left: 0;
+    right: -8px; /* Slight offset to stay within viewport */
+    left: auto;
+    min-width: 200px;
   }
 
   .markdown-text {
@@ -183,6 +183,17 @@ html[data-theme=dark] .dropdown-caret {
 
   .markdown-dropdown-toggle {
     padding: 0.375rem 0.5rem;
+  }
+}
+
+/* Very narrow viewports - ensure dropdown doesn't overflow */
+@media (max-width: 480px) {
+  .markdown-dropdown-menu {
+    /* Keep absolute positioning relative to parent */
+    right: -12px;
+    left: auto;
+    min-width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
   }
 }
 
