@@ -3,31 +3,38 @@
     {{#with site.homeUrl}}
     <li><a href="{{{relativize this}}}" aria-label="Go to home page">Docs</a></li>
     {{/with}}
-    {{!-- Show section from page-header-data (e.g., "Data Platform") - skip if same as title --}}
-    {{#with (get-header-data page)}}
-      {{#if this.section}}
-        {{#unless (eq this.section this.title)}}
-          {{#if (eq this.section 'Data Platform')}}
-    <li><a href="{{{relativize '/data-platform/'}}}" class="breadcrumb-section">{{{this.section}}}</a></li>
-          {{else}}
-    <li><span class="breadcrumb-section">{{{this.section}}}</span></li>
-          {{/if}}
-        {{/unless}}
-      {{/if}}
-    {{/with}}
-    {{!-- Component title (product name) --}}
-    {{#if (ne page.component.name 'api')}}
-    <li>
+    {{!-- Config-driven breadcrumbs from unified navigation --}}
+    {{#if page.attributes.breadcrumb-hierarchy}}
+      {{#each (parse-json page.attributes.breadcrumb-hierarchy)}}
+    <li><a href="{{{relativize this.url}}}" class="breadcrumb-section">{{{this.title}}}</a></li>
+      {{/each}}
+    {{else}}
+      {{!-- Legacy breadcrumbs: Show section from component-metadata - skip if same as title --}}
       {{#with (get-header-data page)}}
-        {{#if this.title}}
-      <a href="{{{relativize @root.page.component.url}}}">{{{this.title}}}</a>
-        {{else}}
-      <a href="{{{relativize @root.page.component.url}}}">{{{@root.page.component.title}}}</a>
+        {{#if this.section}}
+          {{#unless (eq this.section this.title)}}
+            {{#if (eq this.section 'Data Platform')}}
+      <li><a href="{{{relativize '/data-platform/'}}}" class="breadcrumb-section">{{{this.section}}}</a></li>
+            {{else}}
+      <li><span class="breadcrumb-section">{{{this.section}}}</span></li>
+            {{/if}}
+          {{/unless}}
         {{/if}}
-      {{else}}
-      <a href="{{{relativize page.component.url}}}">{{{page.component.title}}}</a>
       {{/with}}
-    </li>
+      {{!-- Component title (product name) --}}
+      {{#if (ne page.component.name 'api')}}
+      <li>
+        {{#with (get-header-data page)}}
+          {{#if this.title}}
+        <a href="{{{relativize @root.page.component.url}}}">{{{this.title}}}</a>
+          {{else}}
+        <a href="{{{relativize @root.page.component.url}}}">{{{@root.page.component.title}}}</a>
+          {{/if}}
+        {{else}}
+        <a href="{{{relativize page.component.url}}}">{{{page.component.title}}}</a>
+        {{/with}}
+      </li>
+      {{/if}}
     {{/if}}
     {{!-- Page breadcrumbs - skip items that match section or component title (already shown above) --}}
     {{#if page.breadcrumbs}}

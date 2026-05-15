@@ -1,18 +1,41 @@
 {{!--
   Product Switcher - Dropdown for switching between Redpanda product areas
-  Shows hierarchical structure with Data Platform containing Streaming + Connect
 
-  Destinations (in order):
-    1. ADP → /redpanda-adp/ (Agentic Data Plane)
-    2. Data Platform → /data-platform/ (umbrella)
-       - Cloud → /cloud-data-platform/
-       - Self-Managed → /self-managed/
-         - Streaming → /streaming/current/
-         - Connect → /connect/
+  STRUCTURE:
+  The product switcher shows a fixed hierarchical structure:
+    1. Agentic Data Plane (agentic-data-plane component)
+    2. Data Platform (data-platform component) - umbrella containing:
+       - Cloud (cloud-data-platform component)
+       - Self-Managed (self-managed component) containing:
+         - Streaming (streaming component)
+         - Connect (connect component)
 
-  Expects page-header-data in each component's antora.yml with:
-    title, section, description, color, order
+  CONFIGURATION:
+  Each component must have component-metadata in its antora.yml:
+
+  asciidoc:
+    attributes:
+      component-metadata:
+        title: "Component Display Name"       # Shown in product switcher
+        description: "Short description"      # Shown below component name
+        color: "#hexcolor"                    # Brand color for component chip
+        order: 1                              # Optional: sort order in listings
+        icon: "tabler-icon-name"              # Optional: icon name from Tabler Icons
+
+  The product switcher automatically:
+  - Gets metadata (title, color, description) from component-metadata
+  - Builds component URLs from Antora's component catalog
+  - Shows hierarchy based on page-navigation config
+  - Highlights current component/parent
+
+  ADDING A NEW COMPONENT:
+  To add a component to the product switcher:
+  1. Add component-metadata to the component's antora.yml
+  2. Update this template to include the component in the appropriate section
+  3. Components appear in a fixed structure (not auto-discovered)
 --}}
+{{!-- Hide product switcher on home page (two-bucket nav already shows both) --}}
+{{#unless (eq page.attributes.role 'home')}}
 <div class="sb-product-wrap" data-product-switcher>
   {{!-- Current product button --}}
   <button
@@ -21,7 +44,7 @@
     aria-haspopup="listbox"
     aria-expanded="false"
     title="Switch product"
-    {{#if (eq page.attributes.role 'home')}}style="--component-color: {{get-component-color site 'redpanda-adp'}};"{{else if (or (eq page.component.name 'streaming') (eq page.component.name 'connect') (eq page.component.name 'self-managed') (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform') page.attributes.is-unified-nav)}}style="--component-color: #4338ca;"{{else}}{{#with (get-header-data page)}}{{#if this.color}}style="--component-color: {{this.color}};"{{/if}}{{/with}}{{/if}}
+    {{#if (eq page.attributes.role 'home')}}style="--component-color: {{get-component-color site 'agentic-data-plane'}};"{{else if (eq page.component.name 'cloud-data-platform')}}{{#with (find-component site 'cloud-data-platform')}}{{#with (get-component-header-data this)}}style="--component-color: {{this.color}};"{{/with}}{{/with}}{{else if (or (eq page.component.name 'streaming') (eq page.component.name 'connect') (eq page.component.name 'self-managed'))}}{{#with (find-component site 'self-managed')}}{{#with (get-component-header-data this)}}style="--component-color: {{this.color}};"{{/with}}{{/with}}{{else if (or (eq page.component.name 'data-platform') page.attributes.is-unified-nav)}}{{#with (find-component site 'data-platform')}}{{#with (get-component-header-data this)}}style="--component-color: {{this.color}};"{{/with}}{{/with}}{{else}}{{#with (get-header-data page)}}{{#if this.color}}style="--component-color: {{this.color}};"{{/if}}{{/with}}{{/if}}
   >
     {{!-- For Labs pages, show "Product Docs" instead of "Labs" --}}
     {{#if (eq page.component.name 'labs')}}
@@ -29,26 +52,54 @@
       <span class="sb-product-name">View Product Docs</span>
     {{else if (eq page.attributes.role 'home')}}
     {{!-- Home page: show ADP as current product --}}
-      <span class="sb-product-chip" style="background: {{get-component-color site 'redpanda-adp'}};"></span>
+      <span class="sb-product-chip" style="background: {{get-component-color site 'agentic-data-plane'}};"></span>
       <span class="sb-product-name">Agentic Data Plane</span>
     {{else if (eq page.component.name 'cloud-data-platform')}}
     {{!-- Cloud pages: show hierarchy "Data Platform > Cloud" --}}
-      <span class="sb-product-chip" style="background: #4338ca;"></span>
+      {{#with (find-component site 'cloud-data-platform')}}
+        {{#with (get-component-header-data this)}}
+      <span class="sb-product-chip" style="background: {{this.color}};"></span>
+        {{/with}}
+      {{/with}}
       <span class="sb-product-name sb-product-name--hierarchy">
-        <span class="sb-product-parent-label">Data Platform</span>
-        <span class="sb-product-child-label">Cloud</span>
+        {{#with (find-component site 'data-platform')}}
+          {{#with (get-component-header-data this)}}
+        <span class="sb-product-parent-label">{{this.title}}</span>
+          {{/with}}
+        {{/with}}
+        {{#with (find-component site 'cloud-data-platform')}}
+          {{#with (get-component-header-data this)}}
+        <span class="sb-product-child-label">{{this.title}}</span>
+          {{/with}}
+        {{/with}}
       </span>
     {{else if (or (eq page.component.name 'streaming') (eq page.component.name 'connect') (eq page.component.name 'self-managed'))}}
     {{!-- Self-Managed pages (Streaming, Connect, Self-Managed home): show hierarchy "Data Platform > Self-Managed" --}}
-      <span class="sb-product-chip" style="background: #4338ca;"></span>
+      {{#with (find-component site 'self-managed')}}
+        {{#with (get-component-header-data this)}}
+      <span class="sb-product-chip" style="background: {{this.color}};"></span>
+        {{/with}}
+      {{/with}}
       <span class="sb-product-name sb-product-name--hierarchy">
-        <span class="sb-product-parent-label">Data Platform</span>
-        <span class="sb-product-child-label">Self-Managed</span>
+        {{#with (find-component site 'data-platform')}}
+          {{#with (get-component-header-data this)}}
+        <span class="sb-product-parent-label">{{this.title}}</span>
+          {{/with}}
+        {{/with}}
+        {{#with (find-component site 'self-managed')}}
+          {{#with (get-component-header-data this)}}
+        <span class="sb-product-child-label">{{this.title}}</span>
+          {{/with}}
+        {{/with}}
       </span>
     {{else if (or (eq page.component.name 'data-platform') page.attributes.is-unified-nav)}}
     {{!-- Data Platform landing: show "Data Platform" --}}
-      <span class="sb-product-chip" style="background: #4338ca;"></span>
-      <span class="sb-product-name">Data Platform</span>
+      {{#with (find-component site 'data-platform')}}
+        {{#with (get-component-header-data this)}}
+      <span class="sb-product-chip" style="background: {{this.color}};"></span>
+      <span class="sb-product-name">{{this.title}}</span>
+        {{/with}}
+      {{/with}}
     {{else}}
     {{!-- Other components: show their product name --}}
     {{#with page.component}}
@@ -74,7 +125,7 @@
 
     {{!-- 1. ADP (Agentic Data Plane) - First --}}
     {{#each site.components}}
-      {{#if (eq this.name 'redpanda-adp')}}
+      {{#if (eq this.name 'agentic-data-plane')}}
         {{#with (get-component-header-data this)}}
     <button
       role="option"
@@ -104,21 +155,23 @@
     {{/each}}
 
     {{!-- 2. Data Platform (umbrella with Cloud and Self-Managed) --}}
+    {{#with (find-component site 'data-platform')}}
+      {{#with (get-component-header-data this)}}
     <div class="sb-product-group">
       <button
         role="option"
-        aria-selected="{{#if (eq page.component.name 'data-platform')}}true{{else}}false{{/if}}"
-        class="sb-product-opt sb-product-parent {{#if (or (eq page.component.name 'data-platform') (eq page.component.name 'cloud-data-platform') (eq page.component.name 'self-managed') (eq page.component.name 'streaming') (eq page.component.name 'connect'))}}is-current-group{{/if}}"
+        aria-selected="{{#if (eq @root.page.component.name 'data-platform')}}true{{else}}false{{/if}}"
+        class="sb-product-opt sb-product-parent {{#if (or (eq @root.page.component.name 'data-platform') (eq @root.page.component.name 'cloud-data-platform') (eq @root.page.component.name 'self-managed') (eq @root.page.component.name 'streaming') (eq @root.page.component.name 'connect'))}}is-current-group{{/if}}"
         data-product-id="data-platform"
-        data-product-url="{{{relativize '/data-platform/'}}}"
-        style="--product-color: #4338ca;"
+        data-product-url="{{{relativize ../url}}}"
+        style="--product-color: {{this.color}};"
       >
-        <span class="sb-product-chip" style="background: #4338ca;"></span>
+        <span class="sb-product-chip" style="background: {{this.color}};"></span>
         <span class="sb-product-opt-text">
-          <span class="sb-product-opt-name">Data Platform</span>
-          <span class="sb-product-opt-desc">Stream, process, and manage your data</span>
+          <span class="sb-product-opt-name">{{this.title}}</span>
+          <span class="sb-product-opt-desc">{{this.description}}</span>
         </span>
-        {{#if (eq page.component.name 'data-platform')}}
+        {{#if (eq @root.page.component.name 'data-platform')}}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sb-product-opt-check">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
@@ -128,91 +181,111 @@
       {{!-- Data Platform children: Cloud and Self-Managed --}}
       <div class="sb-product-children">
         {{!-- Cloud --}}
+        {{#with (find-component @root.site 'cloud-data-platform')}}
+          {{#with (get-component-header-data this)}}
         <button
           role="option"
-          aria-selected="{{#if (eq page.component.name 'cloud-data-platform')}}true{{else}}false{{/if}}"
-          class="sb-product-opt sb-product-child {{#if (eq page.component.name 'cloud-data-platform')}}is-current{{/if}}"
+          aria-selected="{{#if (eq @root.page.component.name 'cloud-data-platform')}}true{{else}}false{{/if}}"
+          class="sb-product-opt sb-product-child {{#if (eq @root.page.component.name 'cloud-data-platform')}}is-current{{/if}}"
           data-product-id="cloud-data-platform"
-          data-product-url="{{{relativize '/cloud-data-platform/'}}}"
-          style="--product-color: #0ea5e9;"
+          data-product-url="{{{relativize ../url}}}"
+          style="--product-color: {{this.color}};"
         >
-          <span class="sb-product-chip" style="background: #0ea5e9;"></span>
+          <span class="sb-product-chip" style="background: {{this.color}};"></span>
           <span class="sb-product-opt-text">
-            <span class="sb-product-opt-name">Cloud</span>
-            <span class="sb-product-opt-desc">Fully managed Redpanda</span>
+            <span class="sb-product-opt-name">{{this.title}}</span>
+            <span class="sb-product-opt-desc">{{this.description}}</span>
           </span>
-          {{#if (eq page.component.name 'cloud-data-platform')}}
+          {{#if (eq @root.page.component.name 'cloud-data-platform')}}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sb-product-opt-check">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
           {{/if}}
         </button>
+          {{/with}}
+        {{/with}}
 
         {{!-- Self-Managed (clickable with nested Streaming and Connect) --}}
+        {{#with (find-component @root.site 'self-managed')}}
+          {{#with (get-component-header-data this)}}
         <div class="sb-product-subgroup">
           <button
             role="option"
-            aria-selected="{{#if (eq page.component.name 'self-managed')}}true{{else}}false{{/if}}"
-            class="sb-product-opt sb-product-child sb-product-subgroup-btn {{#if (or (eq page.component.name 'self-managed') (eq page.component.name 'streaming') (eq page.component.name 'connect'))}}is-current-group{{/if}} {{#if (eq page.component.name 'self-managed')}}is-current{{/if}}"
+            aria-selected="{{#if (eq @root.page.component.name 'self-managed')}}true{{else}}false{{/if}}"
+            class="sb-product-opt sb-product-child sb-product-subgroup-btn {{#if (or (eq @root.page.component.name 'self-managed') (eq @root.page.component.name 'streaming') (eq @root.page.component.name 'connect'))}}is-current-group{{/if}} {{#if (eq @root.page.component.name 'self-managed')}}is-current{{/if}}"
             data-product-id="self-managed"
-            data-product-url="{{{relativize '/self-managed/'}}}"
-            style="--product-color: #107569;"
+            data-product-url="{{{relativize ../url}}}"
+            style="--product-color: {{this.color}};"
           >
-            <span class="sb-product-chip" style="background: #107569;"></span>
+            <span class="sb-product-chip" style="background: {{this.color}};"></span>
             <span class="sb-product-opt-text">
-              <span class="sb-product-opt-name">Self-Managed</span>
-              <span class="sb-product-opt-desc">Run on your own infrastructure</span>
+              <span class="sb-product-opt-name">{{this.title}}</span>
+              <span class="sb-product-opt-desc">{{this.description}}</span>
             </span>
-            {{#if (eq page.component.name 'self-managed')}}
+            {{#if (eq @root.page.component.name 'self-managed')}}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sb-product-opt-check">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
             {{/if}}
           </button>
           <div class="sb-product-subgroup-children">
+            {{!-- Streaming --}}
+            {{#with (find-component @root.site 'streaming')}}
+              {{#with (get-component-header-data this)}}
             <button
               role="option"
-              aria-selected="{{#if (eq page.component.name 'streaming')}}true{{else}}false{{/if}}"
-              class="sb-product-opt sb-product-child sb-product-grandchild {{#if (eq page.component.name 'streaming')}}is-current{{/if}}"
+              aria-selected="{{#if (eq @root.page.component.name 'streaming')}}true{{else}}false{{/if}}"
+              class="sb-product-opt sb-product-child sb-product-grandchild {{#if (eq @root.page.component.name 'streaming')}}is-current{{/if}}"
               data-product-id="streaming"
-              data-product-url="{{{relativize '/streaming/current/'}}}"
-              style="--product-color: #107569;"
+              data-product-url="{{{relativize ../url}}}"
+              style="--product-color: {{this.color}};"
             >
-              <span class="sb-product-chip" style="background: #107569;"></span>
+              <span class="sb-product-chip" style="background: {{this.color}};"></span>
               <span class="sb-product-opt-text">
-                <span class="sb-product-opt-name">Streaming</span>
-                <span class="sb-product-opt-desc">Redpanda broker and rpk CLI</span>
+                <span class="sb-product-opt-name">{{this.title}}</span>
+                <span class="sb-product-opt-desc">{{this.description}}</span>
               </span>
-              {{#if (eq page.component.name 'streaming')}}
+              {{#if (eq @root.page.component.name 'streaming')}}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sb-product-opt-check">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
               {{/if}}
             </button>
+              {{/with}}
+            {{/with}}
 
+            {{!-- Connect --}}
+            {{#with (find-component @root.site 'connect')}}
+              {{#with (get-component-header-data this)}}
             <button
               role="option"
-              aria-selected="{{#if (eq page.component.name 'connect')}}true{{else}}false{{/if}}"
-              class="sb-product-opt sb-product-child sb-product-grandchild {{#if (eq page.component.name 'connect')}}is-current{{/if}}"
+              aria-selected="{{#if (eq @root.page.component.name 'connect')}}true{{else}}false{{/if}}"
+              class="sb-product-opt sb-product-child sb-product-grandchild {{#if (eq @root.page.component.name 'connect')}}is-current{{/if}}"
               data-product-id="connect"
-              data-product-url="{{{relativize '/connect/'}}}"
-              style="--product-color: #54478C;"
+              data-product-url="{{{relativize ../url}}}"
+              style="--product-color: {{this.color}};"
             >
-              <span class="sb-product-chip" style="background: #54478C;"></span>
+              <span class="sb-product-chip" style="background: {{this.color}};"></span>
               <span class="sb-product-opt-text">
-                <span class="sb-product-opt-name">Connect</span>
-                <span class="sb-product-opt-desc">Data pipelines and transformations</span>
+                <span class="sb-product-opt-name">{{this.title}}</span>
+                <span class="sb-product-opt-desc">{{this.description}}</span>
               </span>
-              {{#if (eq page.component.name 'connect')}}
+              {{#if (eq @root.page.component.name 'connect')}}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sb-product-opt-check">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
               {{/if}}
             </button>
+              {{/with}}
+            {{/with}}
           </div>
         </div>
+          {{/with}}
+        {{/with}}
       </div>
     </div>
+      {{/with}}
+    {{/with}}
 
     {{!-- Footer with Cloud link --}}
     <div class="sb-product-menu-foot">
@@ -226,3 +299,4 @@
     </div>
   </div>
 </div>
+{{/unless}}

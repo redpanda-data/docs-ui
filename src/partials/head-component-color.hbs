@@ -1,6 +1,6 @@
 {{#with (get-header-color page)}}
 <style>
-  /* Dynamic component color from page-header-data - higher specificity to override defaults */
+  /* Dynamic component color from component-metadata - higher specificity to override defaults */
   body[data-component-color] {
     --component-color: {{{this}}};
     /* Tinted backgrounds using color-mix (light mode) */
