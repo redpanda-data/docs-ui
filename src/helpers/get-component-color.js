@@ -1,11 +1,11 @@
 'use strict'
 
 /**
- * Gets the color for a component from its page-header-data attributes
+ * Gets the color for a component from its component-metadata attributes
  * Usage: {{get-component-color site "redpanda-adp"}}
  *
  * Looks up a component by name in site.components and returns its
- * page-header-data color value.
+ * component-metadata color value.
  *
  * @param {object} site - The site object containing components
  * @param {string} componentName - The component name to look up
@@ -29,9 +29,7 @@ module.exports = function (site, componentName) {
     component = site.components[componentName]
     // Or iterate over values
     if (!component) {
-      const components = Array.isArray(site.components)
-        ? site.components
-        : Object.values(site.components)
+      const components = Array.isArray(site.components) ? site.components : Object.values(site.components)
       component = components.find((c) => c && c.name === componentName)
     }
   }
@@ -42,11 +40,8 @@ module.exports = function (site, componentName) {
   const version = component.latestVersion || (component.versions && component.versions[0])
   if (!version) return undefined
 
-  // Get page-header-data from version attributes
-  const headerData =
-    version.asciidoc &&
-    version.asciidoc.attributes &&
-    version.asciidoc.attributes['page-header-data']
+  // Get component-metadata from version attributes
+  const headerData = version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
 
   if (headerData && headerData.color) {
     return headerData.color
