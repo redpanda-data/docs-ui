@@ -2,6 +2,12 @@
    This page serves as the umbrella landing for Self-managed, Cloud, and Connect docs.
    =================================================================================== */
 
+/* Hide all icons on landing page */
+.dp-product-bullet-icon,
+.dp-popular-icon {
+  display: none !important;
+}
+
 /* Layout: full-width content area */
 .data-platform .dp-content {
   padding: 0;
