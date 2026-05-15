@@ -35,53 +35,6 @@
       <p class="dp-section-sub">Self-Managed or Cloud &mdash; same Kafka-compatible engine, different operations model. Both include Redpanda Connect for building data pipelines.</p>
     </div>
     <div class="dp-products">
-      {{!-- Self-Managed Card --}}
-      <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}" class="dp-product" style="--dp-accent: #0F8B66">
-        <div class="dp-product-head">
-          <div class="dp-product-titles">
-            <h3 class="dp-product-name">Self-Managed</h3>
-            <p class="dp-product-tagline">Run Redpanda on your own infrastructure.</p>
-          </div>
-        </div>
-        <p class="dp-product-desc">Bare metal, VMs, or Kubernetes. Full control over networking, storage, and upgrades &mdash; with the same single binary used in Cloud.</p>
-        <ul class="dp-product-bullets">
-          <li>
-            <span class="dp-product-bullet-icon">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2l9 4.9V17L12 22l-9-5V7L12 2z"/>
-              </svg>
-            </span>
-            <span>Single binary, no JVM</span>
-          </li>
-          <li>
-            <span class="dp-product-bullet-icon">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </span>
-            <span>Air-gapped &amp; FedRAMP-ready</span>
-          </li>
-          <li>
-            <span class="dp-product-bullet-icon">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-              </svg>
-            </span>
-            <span>Tune every knob</span>
-          </li>
-        </ul>
-        <div class="dp-product-stats">
-          <div><strong>K8s</strong><span>Operator + Helm</span></div>
-          {{#with site.components.redpanda.latest}}<div><strong>v{{version}}</strong><span>Latest release</span></div>{{/with}}
-        </div>
-        <div class="dp-product-cta">
-          <span>Open Self-Managed docs</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
-        </div>
-      </a>
-
       {{!-- Cloud Card (Featured) --}}
       <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}" class="dp-product is-featured" style="--dp-accent: #1F5BD6">
         <div class="dp-product-head">
@@ -123,6 +76,53 @@
         </div>
         <div class="dp-product-cta">
           <span>Open Cloud docs</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </a>
+
+      {{!-- Self-Managed Card --}}
+      <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}" class="dp-product" style="--dp-accent: #0F8B66">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">Self-Managed</h3>
+            <p class="dp-product-tagline">Run Redpanda on your own infrastructure.</p>
+          </div>
+        </div>
+        <p class="dp-product-desc">Bare metal, VMs, or Kubernetes. Full control over networking, storage, and upgrades &mdash; with the same single binary used in Cloud.</p>
+        <ul class="dp-product-bullets">
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l9 4.9V17L12 22l-9-5V7L12 2z"/>
+              </svg>
+            </span>
+            <span>Single binary, no JVM</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <span>Air-gapped &amp; FedRAMP-ready</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </span>
+            <span>Tune every knob</span>
+          </li>
+        </ul>
+        <div class="dp-product-stats">
+          <div><strong>K8s</strong><span>Operator + Helm</span></div>
+          {{#with site.components.redpanda.latest}}<div><strong>v{{version}}</strong><span>Latest release</span></div>{{/with}}
+        </div>
+        <div class="dp-product-cta">
+          <span>Open Self-Managed docs</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"/>
           </svg>
