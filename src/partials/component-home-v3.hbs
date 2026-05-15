@@ -112,7 +112,7 @@
         {{#if page.attributes.path-self-2}}<li>{{{page.attributes.path-self-2}}}</li>{{/if}}
         {{#if page.attributes.path-self-3}}<li>{{{page.attributes.path-self-3}}}</li>{{/if}}
       </ul>
-      <a class="ch3-path-cta" href="{{#if page.attributes.path-self-link}}{{{relativize (resolve-resource page.attributes.path-self-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-path-cta" href="{{#if page.attributes.path-self-link}}{{{relativize (resolve-resource page.attributes.path-self-link)}}}{{/if}}">
         {{#if page.attributes.path-self-cta}}{{{page.attributes.path-self-cta}}}{{else}}Get started{{/if}}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
@@ -137,7 +137,7 @@
         {{#if page.attributes.path-cloud-2}}<li>{{{page.attributes.path-cloud-2}}}</li>{{/if}}
         {{#if page.attributes.path-cloud-3}}<li>{{{page.attributes.path-cloud-3}}}</li>{{/if}}
       </ul>
-      <a class="ch3-path-cta" href="{{#if page.attributes.path-cloud-link}}{{{relativize (resolve-resource page.attributes.path-cloud-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-path-cta" href="{{#if page.attributes.path-cloud-link}}{{{relativize (resolve-resource page.attributes.path-cloud-link)}}}{{/if}}">
         {{#if page.attributes.path-cloud-cta}}{{{page.attributes.path-cloud-cta}}}{{else}}Try Redpanda Cloud{{/if}}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
@@ -155,7 +155,7 @@
     <div class="ch3-deploy-grid">
       {{!-- Deploy card 1 --}}
       {{#if page.attributes.deploy-1-title}}
-      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-1-link}}{{{relativize (resolve-resource page.attributes.deploy-1-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-1-link}}{{{relativize (resolve-resource page.attributes.deploy-1-link)}}}{{/if}}">
         <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-1-icon}}">
           {{#if (eq page.attributes.deploy-1-icon 'lightning')}}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -178,13 +178,13 @@
         <p class="ch3-deploy-desc">{{{page.attributes.deploy-1-desc}}}</p>
         {{/if}}
         <div class="ch3-deploy-foot">
-          <span class="ch3-deploy-cta">Get started <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+          <span class="ch3-deploy-cta">Get started</span>
         </div>
       </a>
       {{/if}}
       {{!-- Deploy card 2 --}}
       {{#if page.attributes.deploy-2-title}}
-      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-2-link}}{{{relativize (resolve-resource page.attributes.deploy-2-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-2-link}}{{{relativize (resolve-resource page.attributes.deploy-2-link)}}}{{/if}}">
         <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-2-icon}}">
           {{#if (eq page.attributes.deploy-2-icon 'lightning')}}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -207,13 +207,13 @@
         <p class="ch3-deploy-desc">{{{page.attributes.deploy-2-desc}}}</p>
         {{/if}}
         <div class="ch3-deploy-foot">
-          <span class="ch3-deploy-cta">Get started <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+          <span class="ch3-deploy-cta">Get started</span>
         </div>
       </a>
       {{/if}}
       {{!-- Deploy card 3 --}}
       {{#if page.attributes.deploy-3-title}}
-      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-3-link}}{{{relativize (resolve-resource page.attributes.deploy-3-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-3-link}}{{{relativize (resolve-resource page.attributes.deploy-3-link)}}}{{/if}}">
         <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-3-icon}}">
           {{#if (eq page.attributes.deploy-3-icon 'lightning')}}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -236,7 +236,97 @@
         <p class="ch3-deploy-desc">{{{page.attributes.deploy-3-desc}}}</p>
         {{/if}}
         <div class="ch3-deploy-foot">
-          <span class="ch3-deploy-cta">Get started <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+          <span class="ch3-deploy-cta">Get started</span>
+        </div>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Features Section (with NEW badge support) --}}
+  {{#if page.attributes.features-title}}
+  <section class="ch3-section">
+    <h2 class="ch3-section-title">{{{page.attributes.features-title}}}</h2>
+    <div class="ch3-features-grid">
+      {{!-- Feature card 1 --}}
+      {{#if page.attributes.features-1-title}}
+      <a class="ch3-feature-card" href="{{#if page.attributes.features-1-link}}{{{relativize (resolve-resource page.attributes.features-1-link)}}}{{/if}}">
+        <div class="ch3-feature-icon" data-icon="{{page.attributes.features-1-icon}}">
+          {{#if (eq page.attributes.features-1-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.features-1-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.features-1-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-feature-content">
+          <div class="ch3-feature-header">
+            <h3 class="ch3-feature-title">{{{page.attributes.features-1-title}}}</h3>
+            {{#if page.attributes.features-1-new}}
+            <span class="ch3-feature-badge">NEW</span>
+            {{/if}}
+          </div>
+          {{#if page.attributes.features-1-desc}}
+          <p class="ch3-feature-desc">{{{page.attributes.features-1-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Feature card 2 --}}
+      {{#if page.attributes.features-2-title}}
+      <a class="ch3-feature-card" href="{{#if page.attributes.features-2-link}}{{{relativize (resolve-resource page.attributes.features-2-link)}}}{{/if}}">
+        <div class="ch3-feature-icon" data-icon="{{page.attributes.features-2-icon}}">
+          {{#if (eq page.attributes.features-2-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.features-2-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.features-2-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-feature-content">
+          <div class="ch3-feature-header">
+            <h3 class="ch3-feature-title">{{{page.attributes.features-2-title}}}</h3>
+            {{#if page.attributes.features-2-new}}
+            <span class="ch3-feature-badge">NEW</span>
+            {{/if}}
+          </div>
+          {{#if page.attributes.features-2-desc}}
+          <p class="ch3-feature-desc">{{{page.attributes.features-2-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Feature card 3 --}}
+      {{#if page.attributes.features-3-title}}
+      <a class="ch3-feature-card" href="{{#if page.attributes.features-3-link}}{{{relativize (resolve-resource page.attributes.features-3-link)}}}{{/if}}">
+        <div class="ch3-feature-icon" data-icon="{{page.attributes.features-3-icon}}">
+          {{#if (eq page.attributes.features-3-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.features-3-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.features-3-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-feature-content">
+          <div class="ch3-feature-header">
+            <h3 class="ch3-feature-title">{{{page.attributes.features-3-title}}}</h3>
+            {{#if page.attributes.features-3-new}}
+            <span class="ch3-feature-badge">NEW</span>
+            {{/if}}
+          </div>
+          {{#if page.attributes.features-3-desc}}
+          <p class="ch3-feature-desc">{{{page.attributes.features-3-desc}}}</p>
+          {{/if}}
         </div>
       </a>
       {{/if}}
@@ -251,7 +341,7 @@
     <div class="ch3-popular-grid">
       {{!-- Popular card 1 --}}
       {{#if page.attributes.popular-1-title}}
-      <a class="ch3-popular-card" href="{{#if page.attributes.popular-1-link}}{{{relativize (resolve-resource page.attributes.popular-1-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-1-link}}{{{relativize (resolve-resource page.attributes.popular-1-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-1-icon}}">
           {{#if (eq page.attributes.popular-1-icon 'sparkles')}}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
@@ -285,12 +375,11 @@
           <p>{{{page.attributes.popular-1-desc}}}</p>
           {{/if}}
         </div>
-        <svg class="ch3-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
       {{/if}}
       {{!-- Popular card 2 --}}
       {{#if page.attributes.popular-2-title}}
-      <a class="ch3-popular-card" href="{{#if page.attributes.popular-2-link}}{{{relativize (resolve-resource page.attributes.popular-2-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-2-link}}{{{relativize (resolve-resource page.attributes.popular-2-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-2-icon}}">
           {{#if (eq page.attributes.popular-2-icon 'sparkles')}}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
@@ -324,12 +413,11 @@
           <p>{{{page.attributes.popular-2-desc}}}</p>
           {{/if}}
         </div>
-        <svg class="ch3-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
       {{/if}}
       {{!-- Popular card 3 --}}
       {{#if page.attributes.popular-3-title}}
-      <a class="ch3-popular-card" href="{{#if page.attributes.popular-3-link}}{{{relativize (resolve-resource page.attributes.popular-3-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-3-link}}{{{relativize (resolve-resource page.attributes.popular-3-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-3-icon}}">
           {{#if (eq page.attributes.popular-3-icon 'sparkles')}}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
@@ -363,12 +451,11 @@
           <p>{{{page.attributes.popular-3-desc}}}</p>
           {{/if}}
         </div>
-        <svg class="ch3-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
       {{/if}}
       {{!-- Popular card 4 --}}
       {{#if page.attributes.popular-4-title}}
-      <a class="ch3-popular-card" href="{{#if page.attributes.popular-4-link}}{{{relativize (resolve-resource page.attributes.popular-4-link)}}}{{else}}#{{/if}}">
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-4-link}}{{{relativize (resolve-resource page.attributes.popular-4-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-4-icon}}">
           {{#if (eq page.attributes.popular-4-icon 'sparkles')}}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
@@ -402,7 +489,6 @@
           <p>{{{page.attributes.popular-4-desc}}}</p>
           {{/if}}
         </div>
-        <svg class="ch3-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
       {{/if}}
     </div>
@@ -415,30 +501,30 @@
     <div class="ch3-labs-head">
       <h2 class="ch3-section-title">{{{page.attributes.labs-title}}}</h2>
       {{#if page.attributes.labs-link}}
-      <a class="ch3-labs-all" href="{{page.attributes.labs-link}}" target="_blank" rel="noopener">Browse all labs <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <a class="ch3-labs-all" href="{{#if (is-external-url page.attributes.labs-link)}}{{{page.attributes.labs-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-link)}}}{{/if}}">Browse all labs</a>
       {{/if}}
     </div>
     <ul class="ch3-labs-list">
       {{#if page.attributes.labs-1-title}}
-      <li><a href="{{#if page.attributes.labs-1-link}}{{page.attributes.labs-1-link}}{{else}}#{{/if}}"{{#if page.attributes.labs-1-link}} target="_blank" rel="noopener"{{/if}}>
+      <li><a href="{{#if (is-external-url page.attributes.labs-1-link)}}{{{page.attributes.labs-1-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-1-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-1-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
         <span>{{{page.attributes.labs-1-title}}}</span>
       </a></li>
       {{/if}}
       {{#if page.attributes.labs-2-title}}
-      <li><a href="{{#if page.attributes.labs-2-link}}{{page.attributes.labs-2-link}}{{else}}#{{/if}}"{{#if page.attributes.labs-2-link}} target="_blank" rel="noopener"{{/if}}>
+      <li><a href="{{#if (is-external-url page.attributes.labs-2-link)}}{{{page.attributes.labs-2-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-2-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-2-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
         <span>{{{page.attributes.labs-2-title}}}</span>
       </a></li>
       {{/if}}
       {{#if page.attributes.labs-3-title}}
-      <li><a href="{{#if page.attributes.labs-3-link}}{{page.attributes.labs-3-link}}{{else}}#{{/if}}"{{#if page.attributes.labs-3-link}} target="_blank" rel="noopener"{{/if}}>
+      <li><a href="{{#if (is-external-url page.attributes.labs-3-link)}}{{{page.attributes.labs-3-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-3-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-3-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
         <span>{{{page.attributes.labs-3-title}}}</span>
       </a></li>
       {{/if}}
       {{#if page.attributes.labs-4-title}}
-      <li><a href="{{#if page.attributes.labs-4-link}}{{page.attributes.labs-4-link}}{{else}}#{{/if}}"{{#if page.attributes.labs-4-link}} target="_blank" rel="noopener"{{/if}}>
+      <li><a href="{{#if (is-external-url page.attributes.labs-4-link)}}{{{page.attributes.labs-4-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-4-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-4-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
         <span>{{{page.attributes.labs-4-title}}}</span>
       </a></li>
