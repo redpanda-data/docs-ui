@@ -34,7 +34,20 @@ module.exports = (resource, { data, hash: context }) => {
   }
 
   const file = contentCatalog.resolveResource(resource, context)
-  const result = file ? file.pub.url : resource
+  let result
+
+  if (file) {
+    result = file.pub.url
+  } else {
+    // Log error for unresolved resource
+    console.error(`[resolve-resource] Unresolved resource: "${resource}" in context:`, {
+      component: context.component,
+      version: context.version,
+      module: context.module,
+      page: page.src?.relative || page.relativePath || 'unknown',
+    })
+    result = resource
+  }
 
   cache.set(cacheKey, result)
 
