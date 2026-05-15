@@ -19,9 +19,337 @@ html.is-clipped--navbar {
   cursor: pointer;
 }
 
-.navbar {
+/* =============================================================================
+   TOPBAR — Sticky header with breadcrumbs and actions
+   ============================================================================= */
+
+.navbar.topbar {
+  position: fixed;
+  top: var(--announcement-bar-height);
+  left: 0;
+  right: 0;
+  z-index: var(--z-index-navbar);
+  height: var(--navbar-height);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  background: var(--topbar-bg, rgba(255, 255, 255, 0.92));
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--topbar-border, var(--grey-100-new, #e5e6e8));
+  font-size: var(--secondary-font-size);
+}
+
+/* On desktop, topbar starts after sidebar */
+@media screen and (min-width: 1024px) {
+  .navbar.topbar {
+    left: var(--sidebar-width, 260px);
+    padding: 0 32px; /* Prototype: 12px 32px, but height is controlled by --navbar-height */
+    top: var(--announcement-bar-height--desktop);
+  }
+
+  /* Home page: hide breadcrumbs (landing page doesn't need them) */
+  body.home .topbar-crumbs {
+    display: none;
+  }
+
+  /* Hide mobile brand section on desktop */
+  .navbar.topbar .navbar-brand {
+    display: none;
+  }
+}
+
+/* Mobile: show brand with logo */
+@media screen and (max-width: 1023px) {
+  .topbar-crumbs {
+    display: none;
+  }
+}
+
+/* Breadcrumbs container in topbar */
+.topbar-crumbs {
+  flex: 1;
+  min-width: 0;
+  /* overflow visible to allow dropdown to appear */
+  overflow: visible;
+  position: relative;
+  z-index: 1; /* Lower z-index than navbar-end */
+}
+
+.topbar-crumbs .breadcrumbs {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.topbar-crumbs .breadcrumbs ul {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--grey-600-new, #606164);
+  letter-spacing: -0.0125em;
+  width: 100%;
+  /* Overflow visible to allow dropdown to appear */
+  overflow: visible;
+}
+
+.topbar-crumbs .breadcrumbs li {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Middle items can shrink and show ellipsis (but not the ellipsis li itself) */
+.topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li) {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li) a,
+.topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li) span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Collapsed state - hide middle items */
+.topbar-crumbs.is-collapsed .breadcrumbs li.bc-hidden {
+  display: none;
+}
+
+/* In collapsed state, ensure visible items don't truncate */
+.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li) {
+  flex-shrink: 0;
+  min-width: auto;
+  overflow: visible;
+}
+
+.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li) a,
+.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li) span {
+  overflow: visible;
+  text-overflow: unset;
+}
+
+/* Ellipsis list item container - positioned relative for dropdown */
+.topbar-crumbs .breadcrumbs li.bc-ellipsis-li {
+  display: none;
+  position: relative;
+}
+
+.topbar-crumbs.is-collapsed .breadcrumbs li.bc-ellipsis-li {
+  display: flex;
+  align-items: center;
+}
+
+/* Remove chevron before ellipsis */
+.topbar-crumbs .breadcrumbs li.bc-ellipsis-li::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Ellipsis button for collapsed breadcrumbs */
+.topbar-crumbs .bc-ellipsis {
+  display: flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin: 0 4px;
+  background: var(--grey-100-new, #e5e6e8);
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--grey-600-new, #606164);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  line-height: 1;
+}
+
+.topbar-crumbs .bc-ellipsis:hover {
+  background: var(--grey-200-new, #c3c4c6);
+  color: var(--grey-900-new, #181818);
+}
+
+.topbar-crumbs .bc-ellipsis.is-open {
+  background: var(--grey-200-new, #c3c4c6);
+  color: var(--grey-900-new, #181818);
+}
+
+html[data-theme="dark"] .topbar-crumbs .bc-ellipsis {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--grey-400-new, #919295);
+}
+
+html[data-theme="dark"] .topbar-crumbs .bc-ellipsis:hover,
+html[data-theme="dark"] .topbar-crumbs .bc-ellipsis.is-open {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--grey-100-new, #dcdcde);
+}
+
+/* Breadcrumb dropdown for hidden items */
+.bc-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 200px;
+  max-width: 320px;
+  background: #fff;
+  border: 1px solid var(--grey-200-new, #c3c4c6);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  z-index: 100;
+  animation: bcDropdownIn 0.15s ease-out;
+}
+
+@keyframes bcDropdownIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+html[data-theme="dark"] .bc-dropdown {
+  background: #1a2332;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32);
+}
+
+.bc-dropdown a {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--grey-700-new, #3f3f46);
+  text-decoration: none;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.12s;
+}
+
+.bc-dropdown a:hover {
+  background: var(--grey-50-new, #f5f5f5);
+  color: var(--grey-900-new, #181818);
+}
+
+html[data-theme="dark"] .bc-dropdown a {
+  color: var(--grey-300-new, #a4a4a8);
+}
+
+html[data-theme="dark"] .bc-dropdown a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* Chevron icon before dropdown items */
+.bc-dropdown a::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23aaabae'%3E%3Cpath d='M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.topbar-crumbs .breadcrumbs li::before {
+  content: none;
+}
+
+.topbar-crumbs .breadcrumbs li + li::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23aaabae'%3E%3Cpath d='M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+.topbar-crumbs .breadcrumbs a {
+  color: var(--grey-600-new, #606164);
+  text-decoration: none;
+  transition: color 0.12s;
+}
+
+.topbar-crumbs .breadcrumbs a:hover {
+  color: var(--grey-900-new, #181818);
+}
+
+.topbar-crumbs .breadcrumbs li:last-child {
+  color: var(--grey-900-new, #181818);
+  font-weight: 500;
+}
+
+.topbar-crumbs .breadcrumbs li:last-child a {
+  color: var(--grey-900-new, #181818);
+  font-weight: 500;
+}
+
+/* Hide the ::after chevrons from breadcrumbs.css - we use ::before instead */
+.topbar-crumbs .breadcrumbs li::after {
+  content: none;
+  display: none;
+}
+
+/* =============================================================================
+   TOPBAR DARK MODE
+   ============================================================================= */
+
+html[data-theme="dark"] .navbar.topbar {
+  /* Use dynamic component color from page-header-data, falls back to neutral dark */
+  background: var(--topbar-bg, rgba(16, 24, 40, 0.92));
+  border-bottom-color: var(--topbar-border, rgba(255, 255, 255, 0.1));
+}
+
+html[data-theme="dark"] .topbar-crumbs .breadcrumbs a {
+  color: var(--grey-400-new, #919295);
+}
+
+html[data-theme="dark"] .topbar-crumbs .breadcrumbs a:hover {
+  color: var(--grey-100-new, #dcdcde);
+}
+
+html[data-theme="dark"] .topbar-crumbs .breadcrumbs li:last-child,
+html[data-theme="dark"] .topbar-crumbs .breadcrumbs li:last-child a {
+  color: var(--grey-100-new, #dcdcde);
+}
+
+html[data-theme="dark"] .topbar-crumbs .breadcrumbs li + li::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23666'%3E%3Cpath d='M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+}
+
+/* Theme toggle icon - better visibility in topbar */
+.navbar.topbar .theme-image {
+  filter: brightness(0) saturate(100%) invert(40%) sepia(10%) saturate(500%) hue-rotate(180deg);
+}
+
+html[data-theme="dark"] .navbar.topbar .theme-image {
+  filter: brightness(0) saturate(100%) invert(80%) sepia(10%) saturate(200%) hue-rotate(180deg);
+}
+
+/* Legacy navbar styles kept for compatibility */
+.navbar:not(.topbar) {
   background: var(--navbar-background);
-  color: var(--navbar-font-color);
+  color: var(--nav-text-color, var(--navbar-font-color));
   font-size: var(--secondary-font-size);
   height: var(--navbar-height);
   align-content: center;
@@ -39,8 +367,9 @@ html.is-clipped--navbar {
 }
 
 .navbar-menu {
-  color: #a8b2c7;
+  color: var(--nav-text-color, #a8b2c7);
   justify-content: flex-start;
+  flex-shrink: 0; /* Never squeeze the right nav items */
 }
 
 .navbar-brand {
@@ -52,7 +381,7 @@ html.is-clipped--navbar {
 }
 
 .navbar-brand .navbar-item {
-  color: var(--navbar-font-color);
+  color: var(--nav-text-color, var(--navbar-font-color));
   margin-left: 8px;
 }
 
@@ -104,55 +433,11 @@ html.is-clipped--navbar {
   outline: none;
 }
 
-.navbar-burger {
-  background: none;
-  border: none;
-  outline: none;
-  line-height: 1;
-  position: relative;
-  width: 3rem;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  min-width: 0;
-}
-
-.navbar-burger span {
-  background-color: var(--navbar-font-color);
-  height: 1.5px;
-  width: 1rem;
-}
-
-.navbar-burger:not(.is-active) span {
-  transition: transform ease-out 0.25s, opacity 0s 0.25s, margin-top ease-out 0.25s 0.25s;
-}
-
-.navbar-burger span + span {
-  margin-top: 0.25rem;
-}
-
-.navbar-burger.is-active span + span {
-  margin-top: -1.5px;
-}
-
-.navbar-burger.is-active span:nth-child(1) {
-  transform: rotate(45deg);
-}
-
-.navbar-burger.is-active span:nth-child(2) {
-  opacity: 0;
-}
-
-.navbar-burger.is-active span:nth-child(3) {
-  transform: rotate(-45deg);
-}
+/* Burger menu removed - topnav items displayed inline */
 
 .navbar-item,
 .navbar-link {
-  color: var(--navbar-menu-font-color);
+  color: var(--nav-text-color, var(--navbar-menu-font-color));
   display: block;
   line-height: var(--doc-line-height);
   padding: 6px 8px;
@@ -233,11 +518,15 @@ html.is-clipped--navbar {
 
 .navbar-end {
   display: flex;
-  flex: auto;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-shrink: 0; /* Prevent right side items from being squeezed */
   justify-content: flex-end;
+  position: relative;
+  z-index: 10; /* Ensure navbar-end items are above breadcrumb elements */
+  margin-left: auto; /* Push to right edge */
+  padding-left: 24px; /* Min space from breadcrumbs */
+  height: 100%;
 }
 
 @media screen and (max-width: 768.5px) {
@@ -266,11 +555,12 @@ html.is-clipped--navbar {
   }
 
   .platform-indicator-mobile {
-    display: inline-block;
-    margin-left: 12px;
-    margin-right: 16px;
-    color: #fff;
-    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    color: var(--grey-600-new, #52525b);
+    font-size: 13px;
+    font-weight: 500;
     order: 1;
     flex: 1 1 auto;
     min-width: 0;
@@ -280,8 +570,13 @@ html.is-clipped--navbar {
     text-overflow: ellipsis;
   }
 
+  html[data-theme="dark"] .platform-indicator-mobile {
+    color: var(--grey-300-new, #d4d4d8);
+  }
+
   .theme-switcher {
-    margin-right: 16px;
+    display: flex;
+    align-items: center;
   }
 
   .header {
@@ -293,32 +588,30 @@ html.is-clipped--navbar {
     display: flex;
   }
 
+  /* No burger menu - always show navbar-menu inline */
   .navbar-menu {
-    background: var(--navbar-menu-background);
-    box-shadow: 0 8px 16px rgba(10, 10, 10, 0.1);
-    max-height: var(--body-min-height);
-    overflow-y: auto;
-    overscroll-behavior: none;
-    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
   }
 
-  .navbar-menu:not(.is-active) {
-    display: none;
+  .navbar-end {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
   }
 
-  .navbar-burger {
-    order: 2;
-    margin-left: 4px;
+  /* Ensure all items align properly */
+  .navbar-end > * {
+    display: flex;
+    align-items: center;
   }
 }
 
 @media screen and (min-width: 1025px) {
   .body {
     padding-top: var(--body-top--desktop);
-  }
-
-  .navbar-burger {
-    display: none;
   }
 
   .navbar,
@@ -374,7 +667,7 @@ html.is-clipped--navbar {
 
   .navbar-end > .navbar-item,
   .navbar-end .navbar-link {
-    color: var(--navbar-font-color);
+    color: var(--nav-text-color, var(--navbar-menu-font-color));
   }
 
   .navbar-end > a.navbar-item:hover,
@@ -470,8 +763,24 @@ html.is-clipped--navbar {
 }
 
 #switch-theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border: none;
-  background: none;
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+#switch-theme:hover {
+  background: var(--grey-100-new, #e5e6e8);
+}
+
+html[data-theme="dark"] #switch-theme:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 #switch-theme label {
@@ -482,6 +791,177 @@ html.is-clipped--navbar {
   width: 20px;
   height: 20px;
   cursor: pointer;
-  transform: rotate(110deg);
-  filter: invert(100%) sepia(5%) saturate(1016%) hue-rotate(181deg) brightness(100%) contrast(106%);
+  /* Light mode - dark icon */
+  filter: brightness(0) saturate(100%) invert(30%) sepia(10%) saturate(500%) hue-rotate(180deg);
+}
+
+html[data-theme="dark"] .theme-image {
+  /* Dark mode - light icon */
+  filter: brightness(0) saturate(100%) invert(80%) sepia(10%) saturate(200%) hue-rotate(180deg);
+}
+
+/* =============================================================================
+   TOPBAR BUTTONS — Ask AI and utility buttons
+   ============================================================================= */
+
+.tb-ai-btn,
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s;
+  text-decoration: none;
+  line-height: 1.4;
+  letter-spacing: -0.0125em;
+}
+
+/* Ask AI button - Light mode (default) */
+.tb-ai-btn {
+  background: linear-gradient(135deg, #eef2ff 0%, #f3e8ff 100%);
+  border-color: #d1d9ff;
+  color: #4338ca;
+}
+
+.tb-ai-btn:hover {
+  background: linear-gradient(135deg, #e0e7ff 0%, #ede3ff 100%);
+  border-color: #c7d2fe;
+  transform: translateY(-1px);
+}
+
+/* Ask AI button - Dark mode */
+html[data-theme="dark"] .tb-ai-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 1px 3px rgba(102, 126, 234, 0.2);
+}
+
+html[data-theme="dark"] .tb-ai-btn:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b3fa0 100%);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+/* Utility button (.tb-btn) - Light mode */
+.tb-btn {
+  background: transparent;
+  color: var(--grey-700-new, #3f3f46);
+}
+
+.tb-btn:hover {
+  background: var(--grey-50-new, #f5f5f5);
+  color: var(--grey-900-new, #181818);
+}
+
+.tb-btn.outlined {
+  border: 1px solid var(--grey-200-new, #c3c4c6);
+}
+
+/* Utility button - Dark mode */
+html[data-theme="dark"] .tb-btn {
+  color: var(--grey-400-new, #919295);
+}
+
+html[data-theme="dark"] .tb-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.tb-ai-btn svg,
+.tb-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Hide Ask AI button when chat panel is open */
+.chat-panel.is-open ~ header .tb-ai-btn,
+body:has(.chat-panel.is-open) .tb-ai-btn {
+  display: none;
+}
+
+@media screen and (max-width: 1024px) {
+  .tb-ai-btn span,
+  .tb-btn {
+    display: none;
+  }
+
+  .tb-ai-btn {
+    padding: 8px;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+  }
+}
+
+/* Top nav text links */
+.tb-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--grey-700, #475467);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tb-link:hover {
+  background: var(--grey-50, rgba(0, 0, 0, 0.04));
+  color: var(--grey-900, #101828);
+  text-decoration: none;
+}
+
+html[data-theme="dark"] .tb-link {
+  color: var(--grey-300, #d0d5dd);
+}
+
+html[data-theme="dark"] .tb-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+/* Responsive sizing for topbar - compact mode at medium widths */
+@media screen and (min-width: 1024px) and (max-width: 1400px) {
+  /* Hide version selector label to save space */
+  .topbar-crumbs .sm-ver-pill-label {
+    display: none;
+  }
+
+  /* Compact version status badge */
+  .topbar-crumbs .sm-ver-pill-status {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  /* Smaller topbar links */
+  .tb-link {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  /* Smaller Ask AI button */
+  .tb-ai-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .tb-ai-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media screen and (max-width: 1023px) {
+  .tb-link {
+    padding: 6px 8px;
+    font-size: 12px;
+    min-height: 30px;
+  }
 }

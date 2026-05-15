@@ -1,0 +1,28 @@
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+{{#if page.attributes.is-unified-nav}}
+    {{!-- Unified Navigation for Data Platform umbrella --}}
+    {{#each (parse-json page.attributes.unified-navigation)}}
+      {{> nav-bucket-recursive bucket=this}}
+    {{/each}}
+{{else if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
+{{> nav-tree-lab}}
+{{else if (eq page.attributes.role 'home')}}
+{{!-- Home page: find ADP component's navigation directly --}}
+{{#each site.components}}
+  {{#if (eq this.name 'redpanda-adp')}}
+    {{!-- Try latestVersion first, then first version --}}
+    {{#if this.latestVersion.navigation}}
+      {{> nav-tree navigation=this.latestVersion.navigation}}
+    {{else if this.versions}}
+      {{#with this.versions.[0]}}
+        {{> nav-tree navigation=this.navigation}}
+      {{/with}}
+    {{/if}}
+  {{/if}}
+{{/each}}
+{{else}}
+{{> nav-tree navigation=page.navigation}}
+{{/if}}
+  </nav>
+</div>

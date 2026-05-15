@@ -51,7 +51,7 @@ function unnestPlaceholders() {
   'use strict';
 
   // Check if Prism is available, exit if not
-  if (!Prism.highlightAll) {
+  if (typeof Prism === 'undefined' || !Prism.highlightAll) {
     return;
   }
 

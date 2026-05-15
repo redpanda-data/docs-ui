@@ -1,10 +1,31 @@
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
-    <!--{{#with @root.page.componentVersion}}
-    <h3 class="title"><a href="{{{relativize ./url}}}">{{./title}}</a></h3>
-    {{/with}}-->
-{{#if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
+    {{!-- Product Switcher at top of sidebar --}}
+    {{> product-switcher}}
+
+    {{!-- Version Selector below product switcher (hidden for unified nav) --}}
+    {{#unless page.attributes.is-unified-nav}}
+    {{> nav-explore}}
+    {{/unless}}
+
+    {{!-- DEBUG: Show unified-nav attribute value --}}
+    <!-- DEBUG: is-unified-nav = "{{page.attributes.is-unified-nav}}" -->
+
+{{#if page.attributes.is-unified-nav}}
+    {{!-- Unified Navigation for Data Platform umbrella --}}
+    {{#each (parse-json page.attributes.unified-navigation)}}
+    <div class="nav-bucket" data-bucket="{{this.componentName}}" style="--bucket-color: {{this.color}};">
+      {{> bucket-header bucket=this}}
+      <div class="nav-bucket-content{{#unless this.isCurrentBucket}} is-collapsed{{/unless}}" id="nav-bucket-{{this.componentName}}">
+        {{> nav-tree navigation=this.items}}
+      </div>
+    </div>
+    {{/each}}
+{{else if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
 {{> nav-tree-lab}}
+{{else if (eq page.attributes.role 'home')}}
+{{!-- Home page: use ADP nav with ROOT fallback --}}
+{{> nav-tree navigation=(get-home-navigation site page)}}
 {{else}}
 {{> nav-tree navigation=page.navigation}}
 {{/if}}

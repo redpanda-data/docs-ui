@@ -12,7 +12,15 @@
 ;(function () {
   'use strict'
 
-  document.addEventListener('DOMContentLoaded', init)
+  // Run init when DOM is ready - handle both cases:
+  // 1. If DOM is still loading, wait for DOMContentLoaded
+  // 2. If DOM is already ready (interactive or complete), run immediately
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init)
+  } else {
+    // DOM already ready, run immediately
+    setTimeout(init, 0)
+  }
 
   function init () {
     const dropdowns = document.querySelectorAll('.markdown-dropdown')

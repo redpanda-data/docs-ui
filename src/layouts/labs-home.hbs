@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Redpanda Labs'}}
+<link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/satellite-min.css">
+{{!-- Note: algoliasearch-lite is already loaded via head-scripts partial with defer --}}
+<script defer src="{{{uiRootPath}}}/js/vendor/algolia/instantsearch.production.min.js"></script>
+  </head>
+  <body class="labs-wrap" data-component="{{page.component.name}}">
+{{> header}}
+<div class="body no-keep-markup">
+{{!-- Custom Labs Sidebar with Filters --}}
+<div class="nav-container" data-component="{{page.component.name}}" data-version="{{page.version}}">
+  <aside class="nav sidebar labs-nav">
+    {{!-- Sidebar Header: Logo + Branding --}}
+    <div class="sb-head">
+      {{#with site.homeUrl}}
+      <a class="sb-head-link" href="{{{relativize this}}}" aria-label="Go to home page">
+        <div class="sb-logomark">
+          <img src="{{{@root.uiRootPath}}}/img/Redpanda_Favicon_32px.svg" width="28" height="28" alt="Redpanda" />
+        </div>
+        <div class="sb-brand">
+          <div class="sb-brand-title">Redpanda</div>
+          <div class="sb-brand-sub">Documentation</div>
+        </div>
+      </a>
+      {{/with}}
+    </div>
+
+    {{!-- Search Bar (triggers global Algolia search) --}}
+    <div class="sb-search" data-action="open-search" role="button" tabindex="0" aria-label="Search docs">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <span class="sb-search-text">Search docs</span>
+    </div>
+
+    {{!-- Scrollable Filters Area with Product Selector --}}
+    <div class="sb-scroll">
+      {{!-- Product Selector (shows "Product Docs" for Labs via product-switcher partial) --}}
+      <div class="nav-panel-menu is-active" data-panel="menu">
+        <nav class="nav-menu">
+          {{> product-switcher}}
+        </nav>
+      </div>
+
+      {{!-- Labs Filters --}}
+      <div class="labs-nav-filters">
+        <div class="labs-nav-filters-head">
+          <span>Filters</span>
+          <button class="labs-nav-clear" id="labs-clear-all" style="display: none;">Clear</button>
+        </div>
+
+        {{!-- Category Filter --}}
+        <div class="labs-nav-filter-group">
+          <div class="labs-nav-filter-title">Category</div>
+          <ul class="labs-nav-filter-list" id="filter-categories">
+            {{!-- Populated by Algolia --}}
+          </ul>
+        </div>
+
+        {{!-- Deployment Filter --}}
+        <div class="labs-nav-filter-group">
+          <div class="labs-nav-filter-title">Deployment</div>
+          <ul class="labs-nav-filter-list" id="filter-deployment">
+            {{!-- Populated by Algolia --}}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    {{!-- Status indicator --}}
+    {{> status-footer}}
+
+    {{!-- Sidebar Footer: Theme toggle + Collapse --}}
+    <div class="sb-footer">
+      <button class="sb-theme-toggle" id="sidebar-theme-toggle" type="button" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">
+        <svg class="sb-theme-icon sb-theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="sb-theme-icon sb-theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+      <button class="sb-collapse-toggle nav-collapse" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="9" y1="3" x2="9" y2="21"></line>
+          <polyline points="14 9 11 12 14 15"></polyline>
+        </svg>
+      </button>
+    </div>
+  </aside>
+</div>
+{{> nav-expand}}
+  <main class="article labs">
+    {{> toolbar}}
+    <div class="labs-page">
+      {{!-- Hero Section --}}
+      <header class="labs-hero">
+        <div class="labs-hero-bg" aria-hidden="true">
+          <div class="labs-hero-glow"></div>
+          <div class="labs-hero-grid"></div>
+        </div>
+        <div class="labs-hero-inner">
+          <div class="labs-hero-eyebrow">
+            <span class="labs-hero-dot"></span>
+            Redpanda Labs
+          </div>
+          <h1 class="labs-hero-title">Real projects you can build with Redpanda.</h1>
+          <p class="labs-hero-sub">
+            Hands-on tutorials and example applications that show what's possible with Redpanda.
+            Clone a repo, run the code, and learn by doing.
+          </p>
+          <div class="labs-hero-stats">
+            <div>
+              <strong id="labs-total-count">--</strong>
+              <span>Labs</span>
+            </div>
+            <div>
+              <strong id="labs-category-count">--</strong>
+              <span>Categories</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {{!-- Main Content Area (single column now) --}}
+      <div class="labs-body">
+        {{!-- Labs Search --}}
+        <div class="labs-search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input type="text" id="labs-search-input" placeholder="Search labs by title, category, or technology..." autocomplete="off">
+          <button class="labs-search-clear" id="labs-search-clear" style="display: none;" aria-label="Clear search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        {{!-- Results --}}
+        <main class="labs-results">
+          <div class="labs-results-head">
+            <div class="labs-results-count">
+              <span id="labs-results-num"></span> labs<span class="labs-results-filter-note" id="labs-filter-note" style="display: none;"> &middot; filtered</span>
+            </div>
+            <div class="labs-results-controls">
+              <div class="labs-view-toggle" role="tablist" aria-label="View">
+                <button class="is-on" data-view="cards" aria-label="Card view">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                </button>
+                <button data-view="list" aria-label="List view">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {{!-- Labs Grid --}}
+          <div class="labs-grid view-cards" id="labs-grid">
+            {{!-- Populated by Algolia --}}
+          </div>
+
+          {{!-- Empty State --}}
+          <div class="labs-empty" id="labs-empty" style="display: none;">
+            <div class="labs-empty-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </div>
+            <h3>No labs match your filters</h3>
+            <p>Try adjusting your search or filter criteria.</p>
+            <button class="labs-empty-clear" id="labs-empty-clear">Clear filters</button>
+          </div>
+
+          {{!-- Pagination --}}
+          <nav class="labs-pager" id="labs-pagination" aria-label="Pagination">
+            {{!-- Populated by Algolia --}}
+          </nav>
+
+          {{!-- CTA Section --}}
+          <div class="labs-cta">
+            <div>
+              <h3>Have an idea for a lab?</h3>
+              <p>Labs are open source. Open a PR or file an issue with a recipe you'd like to see.</p>
+            </div>
+            <a class="labs-cta-btn" href="https://github.com/redpanda-data/redpanda-labs" target="_blank" rel="noopener noreferrer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.28-.01-1-.02-1.96-3.2.69-3.87-1.54-3.87-1.54-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.92 10.92 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.4-5.25 5.68.41.36.77 1.06.77 2.13 0 1.54-.01 2.78-.01 3.16 0 .31.21.67.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
+              </svg>
+              Contribute on GitHub
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+    {{> tracking-pixel}}
+    {{> back-to-top}}
+    {{> footer}}
+  </main>
+</div>
+{{> chat-panel}}
+<script>
+(function() {
+  var algoliaAppId = '{{{env.ALGOLIA_APP_ID}}}';
+  var algoliaApiKey = '{{{env.ALGOLIA_API_KEY}}}';
+  var algoliaIndexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
+  var maxRetries = 20;
+  var retryCount = 0;
+
+  function initLabsSearch() {
+    // Check if Algolia is available and configured
+    if (typeof window.algoliasearch === "undefined" || typeof window.instantsearch === "undefined") {
+      retryCount++;
+      if (retryCount < maxRetries) {
+        setTimeout(initLabsSearch, 100);
+        return;
+      }
+      console.warn('Algolia scripts failed to load after retries');
+      showFallback();
+      return;
+    }
+
+    if (!algoliaAppId || !algoliaApiKey) {
+      console.warn('Algolia credentials not configured');
+      showFallback();
+      return;
+    }
+
+    var searchClient = window.algoliasearch(algoliaAppId, algoliaApiKey);
+    initSearch(searchClient);
+  }
+
+  function showFallback() {
+    var grid = document.getElementById('labs-grid');
+    if (grid) {
+      grid.innerHTML = '<div class="labs-empty" style="display: block;"><div class="labs-empty-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></div><h3>Labs will load when Algolia is configured</h3><p>The Labs search requires Algolia credentials. Visit the <a href="https://github.com/redpanda-data/redpanda-labs">Redpanda Labs GitHub repo</a> to browse labs directly.</p></div>';
+    }
+  }
+
+  function initSearch(searchClient) {
+    var indexName = algoliaIndexName;
+
+  var search = window.instantsearch({
+    indexName,
+    searchClient,
+    insights: true,
+    routing: {
+      stateMapping: {
+        stateToRoute(uiState) {
+          const indexUiState = uiState[indexName] || {};
+          return {
+            q: indexUiState.query,
+            category: indexUiState.refinementList && indexUiState.refinementList.categories,
+            deployment: indexUiState.refinementList && indexUiState.refinementList.deployment
+          };
+        },
+        routeToState(routeState) {
+          return {
+            [indexName]: {
+              query: routeState.q,
+              refinementList: {
+                categories: routeState.category ?
+                  (Array.isArray(routeState.category) ? routeState.category : [routeState.category]) : [],
+                deployment: routeState.deployment ?
+                  (Array.isArray(routeState.deployment) ? routeState.deployment : [routeState.deployment]) : []
+              }
+            }
+          };
+        }
+      }
+    }
+  });
+
+  // Configure to only show Labs
+  search.addWidget(
+    window.instantsearch.widgets.configure({
+      filters: 'type:"Lab"',
+      hitsPerPage: 12
+    })
+  );
+
+  // Custom search box
+  const searchInput = document.getElementById('labs-search-input');
+  const searchClear = document.getElementById('labs-search-clear');
+
+  search.addWidget({
+    $$type: 'custom.searchBox',
+    init({ helper }) {
+      searchInput.addEventListener('input', function() {
+        helper.setQuery(this.value).search();
+        searchClear.style.display = this.value ? 'block' : 'none';
+      });
+      searchClear.addEventListener('click', function() {
+        searchInput.value = '';
+        helper.setQuery('').search();
+        searchClear.style.display = 'none';
+      });
+    },
+    render({ state }) {
+      searchInput.value = state.query || '';
+      searchClear.style.display = state.query ? 'block' : 'none';
+    }
+  });
+
+  // Category refinement
+  search.addWidget(
+    window.instantsearch.widgets.refinementList({
+      container: '#filter-categories',
+      attribute: 'categories',
+      operator: 'and',
+      limit: 5,
+      showMore: true,
+      showMoreLimit: 50,
+      templates: {
+        item(item, { html }) {
+          return html`
+            <li>
+              <label class="labs-filter-row ${item.isRefined ? 'is-on' : ''}">
+                <input type="checkbox" checked=${item.isRefined} />
+                <span class="labs-filter-check">
+                  ${item.isRefined ? html`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+                </span>
+                <span class="labs-filter-label">${item.label}</span>
+                <span class="labs-filter-count">${item.count}</span>
+              </label>
+            </li>
+          `;
+        }
+      }
+    })
+  );
+
+  // Deployment refinement
+  search.addWidget(
+    window.instantsearch.widgets.refinementList({
+      container: '#filter-deployment',
+      attribute: 'deployment',
+      operator: 'and',
+      limit: 10,
+      templates: {
+        item(item, { html }) {
+          return html`
+            <li>
+              <label class="labs-filter-row ${item.isRefined ? 'is-on' : ''}">
+                <input type="checkbox" checked=${item.isRefined} />
+                <span class="labs-filter-check">
+                  ${item.isRefined ? html`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+                </span>
+                <span class="labs-filter-label">${item.label}</span>
+                <span class="labs-filter-count">${item.count}</span>
+              </label>
+            </li>
+          `;
+        }
+      }
+    })
+  );
+
+  // Hits (Labs cards)
+  search.addWidget(
+    window.instantsearch.widgets.hits({
+      container: '#labs-grid',
+      templates: {
+        item(hit, { html, components }) {
+          const isExternal = hit.objectID.startsWith('https');
+          const url = isExternal ? hit.objectID : hit.objectID;
+          const categories = hit.categories || [];
+          const deployment = hit.deployment || [];
+
+          return html`
+            <a class="labs-card" href="${url}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+              <div class="labs-card-head">
+                <h3 class="labs-card-title">${components.Highlight({ attribute: 'title', hit })}</h3>
+              </div>
+              <p class="labs-card-desc">${components.Snippet({ attribute: 'intro', hit }) || hit.intro || ''}</p>
+              <div class="labs-card-foot">
+                <div class="labs-card-meta">
+                  ${hit.product && html`<span class="labs-card-diff">${Array.isArray(hit.product) ? hit.product[0] : hit.product}</span>`}
+                </div>
+                <div class="labs-card-tags">
+                  ${categories.slice(0, 2).map(cat => html`<span class="labs-card-tag">${cat}</span>`)}
+                </div>
+              </div>
+            </a>
+          `;
+        },
+        empty(results, { html }) {
+          document.getElementById('labs-empty').style.display = 'block';
+          document.getElementById('labs-grid').style.display = 'none';
+          return '';
+        }
+      }
+    })
+  );
+
+  // Stats for count
+  search.addWidget(
+    window.instantsearch.widgets.stats({
+      container: '#labs-results-num',
+      templates: {
+        text(data) {
+          document.getElementById('labs-total-count').textContent = data.nbHits;
+          document.getElementById('labs-empty').style.display = data.nbHits === 0 ? 'block' : 'none';
+          document.getElementById('labs-grid').style.display = data.nbHits === 0 ? 'none' : 'grid';
+          return data.nbHits;
+        }
+      }
+    })
+  );
+
+  // Custom widget to count unique categories from Algolia facet data
+  search.addWidget({
+    $$type: 'custom.categoryCount',
+    render({ results }) {
+      if (results) {
+        // Get all category facet values (not limited by refinementList limit)
+        const facetValues = results.getFacetValues('categories', { sortBy: ['count:desc'] });
+        if (facetValues && facetValues.length > 0) {
+          document.getElementById('labs-category-count').textContent = facetValues.length;
+        }
+      }
+    }
+  });
+
+  // Pagination
+  search.addWidget(
+    window.instantsearch.widgets.pagination({
+      container: '#labs-pagination',
+      totalPages: 10,
+      templates: {
+        first: '&laquo;',
+        previous: '&lsaquo; Prev',
+        next: 'Next &rsaquo;',
+        last: '&raquo;'
+      },
+      cssClasses: {
+        root: 'labs-pager',
+        list: 'labs-pager-list',
+        item: 'labs-pager-item',
+        link: 'labs-pager-num',
+        selectedItem: 'is-on',
+        disabledItem: 'is-disabled',
+        firstPageItem: 'labs-pager-first',
+        previousPageItem: 'labs-pager-prev',
+        nextPageItem: 'labs-pager-next',
+        lastPageItem: 'labs-pager-last'
+      }
+    })
+  );
+
+  // Clear all filters
+  const clearAllBtn = document.getElementById('labs-clear-all');
+  const emptyClearBtn = document.getElementById('labs-empty-clear');
+  const filterNote = document.getElementById('labs-filter-note');
+
+  search.addWidget({
+    $$type: 'custom.clearFilters',
+    render({ state }) {
+      const hasFilters = state.query ||
+        (state.disjunctiveFacetsRefinements && Object.keys(state.disjunctiveFacetsRefinements).some(k => state.disjunctiveFacetsRefinements[k].length > 0));
+      clearAllBtn.style.display = hasFilters ? 'block' : 'none';
+      filterNote.style.display = hasFilters ? 'inline' : 'none';
+    }
+  });
+
+  clearAllBtn.addEventListener('click', function() {
+    search.helper.setQuery('').clearRefinements().search();
+    searchInput.value = '';
+    searchClear.style.display = 'none';
+  });
+
+  emptyClearBtn.addEventListener('click', function() {
+    search.helper.setQuery('').clearRefinements().search();
+    searchInput.value = '';
+    searchClear.style.display = 'none';
+  });
+
+  // View toggle (cards/list)
+  const viewToggle = document.querySelectorAll('.labs-view-toggle button');
+  const labsGrid = document.getElementById('labs-grid');
+
+  viewToggle.forEach(btn => {
+    btn.addEventListener('click', function() {
+      viewToggle.forEach(b => b.classList.remove('is-on'));
+      this.classList.add('is-on');
+      const view = this.dataset.view;
+      labsGrid.classList.remove('view-cards', 'view-list');
+      labsGrid.classList.add('view-' + view);
+    });
+  });
+
+    // Start the search
+    search.start();
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLabsSearch);
+  } else {
+    initLabsSearch();
+  }
+})();
+</script>
+  </body>
+</html>

@@ -11,7 +11,13 @@ module.exports = (resource, { data, hash: context }) => {
 
   // For preview builds where contentCatalog.resolveResource might not exist
   if (!contentCatalog || !contentCatalog.resolveResource) {
-    // Return the resource as-is for preview builds
+    // Convert Antora xref patterns to placeholder URLs for preview
+    // Pattern: ROOT:module:path/to/file.adoc or component:module:path/to/file.adoc
+    if (resource.includes(':') && resource.endsWith('.adoc')) {
+      // Use anchor for preview since these pages don't exist
+      return '#'
+    }
+    // Return the resource as-is for other cases
     return resource
   }
 
@@ -28,7 +34,20 @@ module.exports = (resource, { data, hash: context }) => {
   }
 
   const file = contentCatalog.resolveResource(resource, context)
-  const result = file ? file.pub.url : resource
+  let result
+
+  if (file) {
+    result = file.pub.url
+  } else {
+    // Log error for unresolved resource
+    console.error(`[resolve-resource] Unresolved resource: "${resource}" in context:`, {
+      component: context.component,
+      version: context.version,
+      module: context.module,
+      page: page.src?.relative || page.relativePath || 'unknown',
+    })
+    result = resource
+  }
 
   cache.set(cacheKey, result)
 

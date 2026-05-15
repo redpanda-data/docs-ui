@@ -47,6 +47,11 @@ html[data-theme=dark] .nav-toggle {
   background-size: 41.5%;
 }
 
+/* Ensure toolbar is above nav panel when nav is open */
+.toolbar:has(.nav-toggle.is-active) {
+  z-index: 10;
+}
+
 html[data-theme=dark] .home-link {
   filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(248deg) brightness(105%) contrast(101%);
 }

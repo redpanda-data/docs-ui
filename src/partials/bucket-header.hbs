@@ -1,0 +1,132 @@
+{{!--
+  Bucket Header - Shows icon, title, and version selector for a navigation bucket
+
+  Expects bucket object with:
+    - componentName: Component identifier
+    - title: Display title
+    - icon: Tabler icon name (activity, plug-connected, etc.)
+    - color: Theme color hex
+    - versions: Array of version objects
+    - currentVersion: Current version display string
+    - isCurrentBucket: Boolean if this is the active bucket
+    - componentUrl: URL to component root
+--}}
+<div class="nav-bucket-header{{#if bucket.isCurrentBucket}} is-current{{/if}}">
+  {{!-- Clickable bucket title/icon - navigates to bucket home --}}
+  <a href="{{bucket.componentUrl}}" class="nav-bucket-link">
+    {{!-- Bucket Icon --}}
+    <span class="nav-bucket-icon" aria-hidden="true">
+      {{#if (eq bucket.icon 'lightning')}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+      </svg>
+      {{else if (eq bucket.icon 'plug')}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 2v4"></path>
+        <path d="M17 2v4"></path>
+        <path d="M9 6H5a3 3 0 00-3 3v5a3 3 0 003 3h4M15 6h4a3 3 0 013 3v5a3 3 0 01-3 3h-4"></path>
+        <path d="M9 6v11a3 3 0 003 3 3 3 0 003-3V6"></path>
+      </svg>
+      {{else if (eq bucket.icon 'activity')}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      {{else if (eq bucket.icon 'plug-connected')}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 2v4"></path>
+        <path d="M17 2v4"></path>
+        <path d="M7 6h10a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4h-6a4 4 0 0 1-4-4V8a2 2 0 0 1 2-2"></path>
+        <path d="M12 18v4"></path>
+      </svg>
+      {{else if (eq bucket.icon 'database')}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+        <path d="M3 5v14a9 3 0 0 0 18 0V5"></path>
+        <path d="M3 12a9 3 0 0 0 18 0"></path>
+      </svg>
+      {{else if (eq bucket.icon 'server')}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+        <line x1="6" y1="6" x2="6.01" y2="6"></line>
+        <line x1="6" y1="18" x2="6.01" y2="18"></line>
+      </svg>
+      {{else}}
+      {{!-- Default icon (layers) --}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+      </svg>
+      {{/if}}
+    </span>
+    <span class="nav-bucket-title">{{bucket.title}}</span>
+  </a>
+
+  {{!-- Per-bucket version selector (only if multiple versions) --}}
+  {{#if (and bucket.versions (gt bucket.versions.length 1))}}
+  <div class="nav-bucket-version" data-bucket-version>
+    <button type="button" class="nav-bucket-version-btn" aria-haspopup="listbox" aria-expanded="false">
+      <span>v{{bucket.currentVersion}}</span>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+    <div class="nav-bucket-version-menu" role="listbox" style="display: none;">
+      {{!-- Show first 5 versions by default (recent versions) --}}
+      {{#each bucket.versions}}
+      {{#if (lt @index 5)}}
+      <a class="nav-bucket-version-opt{{#if (eq this.displayVersion ../bucket.currentVersion)}} is-selected{{/if}}"
+         role="option"
+         href="{{{this.url}}}">
+        v{{this.displayVersion}}
+        {{#if this.isEol}}<span class="version-eol">(EOL)</span>{{/if}}
+      </a>
+      {{/if}}
+      {{/each}}
+
+      {{!-- Older versions (hidden by default if more than 6 total) --}}
+      {{#if (gt bucket.versions.length 6)}}
+      <div class="nav-bucket-version-older" style="display: none;">
+        {{#each bucket.versions}}
+        {{#if (gte @index 5)}}
+        <a class="nav-bucket-version-opt{{#if (eq this.displayVersion ../bucket.currentVersion)}} is-selected{{/if}}"
+           role="option"
+           href="{{{this.url}}}">
+          v{{this.displayVersion}}
+          {{#if this.isEol}}<span class="version-eol">(EOL)</span>{{/if}}
+        </a>
+        {{/if}}
+        {{/each}}
+      </div>
+      <button type="button" class="nav-bucket-version-toggle" data-version-toggle>
+        <span class="version-toggle-show">Show {{subtract bucket.versions.length 5}} older versions</span>
+        <span class="version-toggle-hide" style="display: none;">Hide older versions</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      {{else}}
+      {{!-- If 6 or fewer versions, show remaining without toggle --}}
+      {{#each bucket.versions}}
+      {{#if (gte @index 5)}}
+      <a class="nav-bucket-version-opt{{#if (eq this.displayVersion ../bucket.currentVersion)}} is-selected{{/if}}"
+         role="option"
+         href="{{{this.url}}}">
+        v{{this.displayVersion}}
+        {{#if this.isEol}}<span class="version-eol">(EOL)</span>{{/if}}
+      </a>
+      {{/if}}
+      {{/each}}
+      {{/if}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{!-- Expand/collapse caret - always at far right --}}
+  <button type="button" class="nav-bucket-caret-btn" aria-hidden="true" tabindex="-1" data-bucket-caret>
+    <svg class="nav-bucket-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </button>
+</div>

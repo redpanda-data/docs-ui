@@ -39,13 +39,13 @@ false
 const COMPONENT_NAME = `{{{page.component.title}}}`.trim();
 
 /**
- * The “catalog” of product/API tags we want available by default.
+ * The "catalog" of product/API tags we want available by default.
  * For Cloud, we intentionally exclude "Admin API" from defaults.
- * For Self-Managed, we intentionally exclude Cloud Control Plane/Data Plane APIs from defaults.
+ * For Streaming, we intentionally exclude Cloud Control Plane/Data Plane APIs from defaults.
  */
 const TAGS_BY_COMPONENT = {
   Cloud: ['Labs', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
-  'Self-Managed': ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
+  'Streaming': ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
 };
 const DEFAULT_TAGS = ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
 const INITIAL_TAGS = TAGS_BY_COMPONENT[COMPONENT_NAME] || DEFAULT_TAGS;
@@ -167,7 +167,7 @@ function initAlgolia() {
    * Algolia JS client instance used by Autocomplete helpers.
    * Client install/start: https://www.algolia.com/doc/api-client/getting-started/install/javascript/
    */
-  const searchClient = algoliasearch(
+  const searchClient = window.algoliasearch(
     '{{{env.ALGOLIA_APP_ID}}}',
     '{{{env.ALGOLIA_API_KEY}}}'
   );
@@ -467,7 +467,7 @@ function initAlgolia() {
       const componentTitle = '{{{page.component.title}}}';
       const productParams = (() => {
         if (componentTitle === 'Cloud') return '&product[0]=Cloud&product[1]=Connect';
-        if (componentTitle === 'Self-Managed') return '&product[0]=Self-Managed&product[1]=Connect';
+        if (componentTitle === 'Streaming') return '&product[0]=Streaming&product[1]=Connect';
         return '';
       })();
       const viewAllLink = currentQuery
@@ -881,9 +881,27 @@ function initAlgolia() {
   /**
    * Expose the Autocomplete instance globally so other UI (our custom dropdown)
    * can drive its context without capturing stale references across re-renders.
-   * This is intentionally namespaced and “private”. See notes below.
+   * This is intentionally namespaced and "private". See notes below.
    */
   window.__algoliaAutocompleteInstance = autocompleteInstance;
+
+  /**
+   * Wire up sidebar search button (.sb-search with data-action="open-search")
+   * to open the Algolia search modal by clicking the hidden detached button.
+   */
+  document.querySelectorAll('[data-action="open-search"]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var algoliaBtn = document.querySelector('.aa-DetachedSearchButton');
+      if (algoliaBtn) algoliaBtn.click();
+    });
+    btn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        var algoliaBtn = document.querySelector('.aa-DetachedSearchButton');
+        if (algoliaBtn) algoliaBtn.click();
+      }
+    });
+  });
 }
 
 window.addEventListener('DOMContentLoaded', initAlgolia);

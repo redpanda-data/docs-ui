@@ -1,5 +1,5 @@
 <article class="doc {{#if page.attributes.no-toc}}no-toc{{/if}}">
-{{#if (ne page.attributes.role 'home')}}
+{{#if (and (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3'))}}
 {{> breadcrumbs}}
 {{/if}}
 {{#unless page.attributes.cloud}}
@@ -11,49 +11,94 @@
 {{#if (eq page.attributes.role 'home')}}
   {{> home}}
   {{page.contents}}
+{{else if (eq page.attributes.role 'component-home-v3')}}
+  {{!-- component-home-v3 renders its own title in the hero section --}}
 {{else}}
+  {{!-- Component indicator pill, version selector, and status badges - sticky header --}}
+  <div class="component-indicator-sticky">
+    {{#with (get-header-data page)}}
+    <div class="component-indicator">
+      <span class="component-indicator-pill" style="background: var(--component-color, #6366f1);">
+        {{#if this.title}}{{{this.title}}}{{else}}{{@root.page.component.title}}{{/if}}
+      </span>
+    </div>
+    {{/with}}
+    {{> version-selector}}
+    {{!-- Status badges: Beta, Limited Availability --}}
+    {{#if page.attributes.beta}}
+    <span class="status-badge status-badge--beta" {{#if page.attributes.beta-text}}data-tippy-content="{{page.attributes.beta-text}}"{{/if}}>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+      Beta
+    </span>
+    {{/if}}
+    {{#if page.attributes.limited-availability}}
+    <span class="status-badge status-badge--la" {{#if page.attributes.limited-availability-text}}data-tippy-content="{{page.attributes.limited-availability-text}}"{{/if}}>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
+      Limited Availability
+    </span>
+    {{/if}}
+    {{!-- ADP platform badges: only show when limited to one platform --}}
+    {{#if page.attributes.adp}}
+    {{#if page.attributes.byoc-only}}
+    <span class="status-badge status-badge--byoc" data-tippy-content="This feature is only available in BYOC (Bring Your Own Cloud) clusters.">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+      </svg>
+      Only in BYOC
+    </span>
+    {{else if page.attributes.cloud-only}}
+    <span class="status-badge status-badge--cloud" data-tippy-content="This feature is only available in fully managed Redpanda Cloud clusters.">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+      </svg>
+      Only in Cloud
+    </span>
+    {{/if}}
+    {{/if}}
+    {{!-- Page options dropdown - now in sticky header with other metadata --}}
+    {{> markdown-dropdown}}
+  </div>
   {{#with page.title}}
     <h1 class="page">{{{this}}}</h1>
   {{/with}}
 {{/if}}
-{{#unless (eq page.attributes.role 'component-home-v2')}}
+{{#unless (or (eq page.attributes.role 'component-home-v2') (eq page.attributes.role 'component-home-v3'))}}
 <div class="metadata metadata--main">
-  {{#if page.attributes.beta}}
-    <div class="beta-label">
-      <p>beta</p>
+  {{!-- Only show BYOC/Cloud badges on non-ADP pages (ADP uses inline status badges instead) --}}
+  {{#unless page.attributes.adp}}
+  {{#if page.attributes.byoc}}
+    <div class="byoc-label">
+      <p>BYOC</p>
     </div>
   {{/if}}
-  {{#if page.attributes.limited-availability}}
-    <div class="limited-availability-label">
-      <p>Limited Availability</p>
+  {{#if page.attributes.cloud-only}}
+    <div class="cloud-label">
+      <p>Cloud</p>
     </div>
   {{/if}}
+  {{/unless}}
   {{#if page.attributes.context-switcher}}
     {{> context-switcher}}
   {{/if}}
-  {{> markdown-dropdown}}
 </div>
 {{/unless}}
-{{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.context-switcher)}}
+{{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.byoc page.attributes.cloud-only page.attributes.context-switcher)}}
   <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const metadataContainer = document.querySelector(".metadata--main");
+    const stickyHeader = document.querySelector(".component-indicator-sticky");
     const navMetadataContainer = document.querySelector(".metadata--nav");
 
-    if (!metadataContainer || !navMetadataContainer) {
-      return;
-    }
+    // Initialize tooltips for status badges in sticky header
+    const betaBadge = stickyHeader?.querySelector(".status-badge--beta");
+    const navBetaBadge = navMetadataContainer?.querySelector(".nav-beta-label");
 
-    // Initialize tooltips for beta badges if present
-    const topBetaBadge = metadataContainer.querySelector(".beta-label p");
-    const navBetaBadge = navMetadataContainer.querySelector(".nav-beta-label");
-    // DEBUG: If you need to debug Tippy.js tooltips in Chrome DevTools, note that the "force element state"
-    // feature doesn't work with JavaScript-based hover effects. Instead, use the Console to manually trigger events:
-    // document.querySelector('.beta-label p').dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-    // This will show the tooltip without needing to hover, making it easier to inspect the generated DOM.
-    if (topBetaBadge && navBetaBadge) {
-      tippy(topBetaBadge, {
-        content: "{{page.attributes.beta-text}}",
+    if (betaBadge && betaBadge.dataset.tippyContent) {
+      tippy(betaBadge, {
+        content: betaBadge.dataset.tippyContent,
         animation: "scale",
         theme: "redpanda-term",
         touch: "hold",
@@ -61,6 +106,8 @@
         allowHTML: true,
         appendTo: () => document.body,
       });
+    }
+    if (navBetaBadge) {
       tippy(navBetaBadge, {
         content: "{{page.attributes.beta-text}}",
         animation: "scale",
@@ -72,12 +119,13 @@
       });
     }
 
-    // Initialize tooltips for limited availability badges if present
-    const topLimitedAvailabilityBadge = metadataContainer.querySelector(".limited-availability-label p");
-    const navLimitedAvailabilityBadge = navMetadataContainer.querySelector(".nav-limited-availability-label");
-    if (topLimitedAvailabilityBadge) {
-      tippy(topLimitedAvailabilityBadge, {
-        content: "{{page.attributes.limited-availability-text}}",
+    // Initialize tooltips for limited availability badges
+    const laBadge = stickyHeader?.querySelector(".status-badge--la");
+    const navLimitedAvailabilityBadge = navMetadataContainer?.querySelector(".nav-limited-availability-label");
+
+    if (laBadge && laBadge.dataset.tippyContent) {
+      tippy(laBadge, {
+        content: laBadge.dataset.tippyContent,
         animation: "scale",
         theme: "redpanda-term",
         touch: "hold",
@@ -89,6 +137,58 @@
     if (navLimitedAvailabilityBadge) {
       tippy(navLimitedAvailabilityBadge, {
         content: "{{page.attributes.limited-availability-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+        appendTo: () => document.body,
+      });
+    }
+
+    // Initialize tooltips for BYOC badges if present
+    const topByocBadge = metadataContainer.querySelector(".byoc-label p");
+    const navByocBadge = navMetadataContainer.querySelector(".nav-byoc-label");
+    if (topByocBadge) {
+      tippy(topByocBadge, {
+        content: "{{page.attributes.byoc-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+        appendTo: () => document.body,
+      });
+    }
+    if (navByocBadge) {
+      tippy(navByocBadge, {
+        content: "{{page.attributes.byoc-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+        appendTo: () => document.body,
+      });
+    }
+
+    // Initialize tooltips for Cloud badges if present
+    const topCloudBadge = metadataContainer.querySelector(".cloud-label p");
+    const navCloudBadge = navMetadataContainer.querySelector(".nav-cloud-label");
+    if (topCloudBadge) {
+      tippy(topCloudBadge, {
+        content: "{{page.attributes.cloud-only-text}}",
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+        appendTo: () => document.body,
+      });
+    }
+    if (navCloudBadge) {
+      tippy(navCloudBadge, {
+        content: "{{page.attributes.cloud-only-text}}",
         animation: "scale",
         theme: "redpanda-term",
         touch: "hold",
@@ -123,6 +223,8 @@
   {{> component-home}}
 {{else if (eq page.attributes.role 'component-home-v2')}}
   {{> component-home-v2}}
+{{else if (eq page.attributes.role 'component-home-v3')}}
+  {{> component-home-v3}}
 {{else if (eq page.attributes.role 'bloblang-playground')}}
   {{> bloblang-playground}}
 {{else if (eq page.attributes.role 'index-list')}}
@@ -138,7 +240,7 @@
     {{{suggestedLabs}}}
   {{/with}}
 {{/if}}
-{{#if (ne page.attributes.role 'home')}}
+{{#if (and (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3'))}}
 {{> back-to-top}}
 {{/if}}
 {{> feedback-footer}}

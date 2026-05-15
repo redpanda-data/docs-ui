@@ -1,3 +1,16 @@
+/* Fix component indicator spacing on playground - remove negative margin and add bottom spacing */
+.bloblang-playground .component-indicator-sticky {
+  margin-top: 0;
+  margin-bottom: 48px;
+}
+
+/* Adjust H1 font size on larger screens */
+@media screen and (min-width: 769px) {
+  .bloblang-playground .doc h1.page {
+    font-size: calc(40 / var(--rem-base) * 1rem);
+  }
+}
+
 .bloblang-playground .doc {
   max-width: unset;
   margin-right: 48px;
@@ -108,8 +121,21 @@
 .bloblang-playground #contact-email {
   padding: 8px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 6px;
+  background: var(--body-background);
+  color: var(--body-font-color);
+  transition: border-color 0.15s ease;
+}
+
+html[data-theme=dark] .bloblang-playground #contact-email {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.bloblang-playground #contact-email:focus {
+  outline: none;
+  border-color: var(--component-color, #6366f1);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
 /* Main container setup - horizontal flow on desktop, vertical on mobile */
@@ -169,8 +195,12 @@
   padding: 10px 12px !important;
   margin: 8px 8px 16px 8px !important;
   background: var(--body-background);
-  border: 1px solid var(--panel-border-color);
-  border-radius: 4px;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 6px;
+}
+
+html[data-theme=dark] .bloblang-playground .choices__list--dropdown .choices__input {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Dropdown items - ensure proper spacing from search input */
@@ -255,47 +285,69 @@ html[data-theme=dark] .bloblang-playground .execution-time-error {
 
 .bloblang-playground input#bloblang-email {
   padding: 6px 8px;
-  background: rgba(68, 76, 231, 0);
-  border: 1px solid #8098f9;
+  background: var(--body-background);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 6px;
   color: var(--body-font-color);
   margin-top: 0;
   font-size: 14px;
+  transition: border-color 0.15s ease;
 }
 
+html[data-theme=dark] .bloblang-playground input#bloblang-email {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.bloblang-playground input#bloblang-email:focus {
+  outline: none;
+  border-color: var(--component-color, #6366f1);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+/* Modern button styling matching redesign */
 .bloblang-playground .button:not(#sample-dropdown),
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
-  padding: 8px 16px;
+  padding: 8px 14px;
   background: var(--body-background);
-  border: 1.5px solid rgba(128, 152, 249, 0.5);
-  border-radius: 6px;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 8px;
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  font-size: 13px;
+  transition: all 0.15s ease;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme=dark] .bloblang-playground .button:not(#sample-dropdown),
+html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .bloblang-playground #sample-dropdown {
   padding: 8px 12px;
-  background: rgba(68, 76, 231, 0);
-  border: 1px solid rgba(128, 152, 249, 1);
-  border-radius: 6px;
+  background: var(--body-background);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 8px;
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  font-size: 13px;
+  transition: all 0.15s ease;
   font-weight: 500;
   display: inline-block;
   width: auto;
   min-width: 200px;
+}
+
+html[data-theme=dark] .bloblang-playground #sample-dropdown {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground #sample-dropdown option {
@@ -303,28 +355,34 @@ html[data-theme=dark] .bloblang-playground .execution-time-error {
 }
 
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton) {
-  background-color: #4474e7;
+  background-color: var(--component-color, #6366f1);
   color: #ffffff;
+  border-color: var(--component-color, #6366f1);
 }
 
 .bloblang-playground button[type=submit]:not(.aa-SubmitButton):hover {
-  background-color: #365bd6;
-  transform: translateY(-2px);
+  filter: brightness(1.1);
   color: #ffffff;
 }
 
 .bloblang-playground .button {
-  border: 1px solid rgba(128, 152, 249, 1);
-  border-radius: 6px;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 8px;
+}
+
+html[data-theme=dark] .bloblang-playground .button {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .button:hover {
-  background: rgba(68, 76, 231, 0.06);
+  background: var(--grey-50-new, #f9fafb);
+  border-color: var(--grey-300-new, #d1d5db);
   color: var(--body-font-color);
 }
 
 html[data-theme=dark] .bloblang-playground .button:hover {
-  background: rgba(68, 76, 231);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
   color: var(--body-font-color);
 }
 
@@ -341,16 +399,21 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 }
 
 .bloblang-playground .editor-section-always-open {
-  border: 1px solid rgba(204, 204, 204, 0.3);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 8px;
   overflow: visible;
   background: var(--body-background);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
   display: flex;
   flex-direction: column;
   min-width: 0;
   max-width: 100%;
+}
+
+html[data-theme=dark] .bloblang-playground .editor-section-always-open {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Flow arrow divider between input/mapping and output */
@@ -391,7 +454,13 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 }
 
 .bloblang-playground .editor-section-always-open:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border-color: var(--grey-300-new, #d1d5db);
+}
+
+html[data-theme=dark] .bloblang-playground .editor-section-always-open:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .bloblang-playground .editor-header {
@@ -400,12 +469,14 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   align-items: flex-start;
   padding: 10px 12px;
   background: var(--body-background);
-  border-bottom: 1px solid rgba(204, 204, 204, 0.15);
+  border-bottom: 1px solid var(--grey-100-new, #f3f4f6);
   flex-shrink: 0;
   min-height: 70px;
-  max-height: 70px;
   box-sizing: border-box;
-  overflow: hidden;
+}
+
+html[data-theme=dark] .bloblang-playground .editor-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 .bloblang-playground .editor-header-content {
@@ -413,16 +484,17 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   flex-direction: column;
   gap: 4px;
   flex: 1;
-  overflow: hidden;
-  max-height: 48px;
+  min-width: 0;
 }
 
-/* Ensure consistent height for the status/validation row in headers */
+/* Status/validation row in headers - allow expansion for errors */
 .bloblang-playground .editor-header-content > div:last-child {
   min-height: 22px;
-  max-height: 22px;
-  overflow: hidden;
   box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .bloblang-playground .editor-header h4 {
@@ -476,7 +548,7 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   gap: 8px;
   padding: 12px 16px;
   background: var(--body-background);
-  border: 1px solid rgba(204, 204, 204, 0.3);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
@@ -486,9 +558,18 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   box-sizing: border-box;
 }
 
+html[data-theme=dark] .bloblang-playground .advanced-options-toggle {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .bloblang-playground .advanced-options-toggle:hover {
-  background: rgba(68, 76, 231, 0.04);
-  border-color: rgba(128, 152, 249, 0.4);
+  background: var(--grey-50-new, #f9fafb);
+  border-color: var(--grey-300-new, #d1d5db);
+}
+
+html[data-theme=dark] .bloblang-playground .advanced-options-toggle:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .bloblang-playground .advanced-options-toggle .toggle-icon {
@@ -517,12 +598,16 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 
 .bloblang-playground .editor-section-collapsible {
   background: var(--body-background);
-  border: 1px solid rgba(204, 204, 204, 0.3);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 0;
   display: flex;
   flex-direction: column;
+}
+
+html[data-theme=dark] .bloblang-playground .editor-section-collapsible {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .editor-section-collapsible[open] {
@@ -593,14 +678,19 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 }
 
 .bloblang-playground .optional-badge {
-  font-size: 11px;
-  background: rgba(68, 76, 231, 0.1);
-  color: #4474e7;
+  font-size: 10px;
+  background: var(--grey-100-new, #f3f4f6);
+  color: var(--grey-600-new, #4b5563);
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: 4px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+}
+
+html[data-theme=dark] .bloblang-playground .optional-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Editor areas */
@@ -612,12 +702,26 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   max-height: 400px;
   padding: 10px;
   overflow-y: auto;
-  border-radius: 5px;
+  border-radius: 6px;
   position: relative;
-  border: 1px solid rgb(204, 204, 204);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   resize: vertical;
   min-width: 0;
   flex: 1;
+  transition: border-color 0.15s ease;
+}
+
+html[data-theme=dark] .bloblang-playground .editor {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.bloblang-playground .editor:focus-within {
+  border-color: var(--component-color, #6366f1);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+html[data-theme=dark] .bloblang-playground .editor:focus-within {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 /* Ensure Ace editor scrollbars are always visible when content overflows */
@@ -666,10 +770,15 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   flex-direction: column;
   gap: 1em;
   padding: 1.5em;
-  border: 1px solid rgb(204, 204, 204);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   margin: 2em 0;
+}
+
+html[data-theme=dark] .bloblang-snippet {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .bloblang-snippet .bloblang-editor {
@@ -694,11 +803,15 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 
 .bloblang-snippet .ace-editor {
   width: 100%;
-  border: 1px solid rgb(204, 204, 204);
-  border-radius: 5px;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 6px;
   min-height: 75px;
   color: var(--code-font-color);
   background-color: var(--pre-background);
+}
+
+html[data-theme=dark] .bloblang-snippet .ace-editor {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 1024px) {
@@ -732,14 +845,19 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 
 /* Playground tip */
 .bloblang-playground .playground-tip {
-  background: linear-gradient(135deg, rgba(68, 116, 231, 0.08) 0%, rgba(68, 116, 231, 0.04) 100%);
-  border: 1px solid rgba(68, 116, 231, 0.2);
+  background: var(--grey-50-new, #f9fafb);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 16px;
   position: relative;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
+}
+
+html[data-theme=dark] .bloblang-playground .playground-tip {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .playground-tip-content {
@@ -747,38 +865,37 @@ html[data-theme=dark] .bloblang-playground .button:hover {
 }
 
 .bloblang-playground .playground-tip-content strong {
-  color: var(--link-highlight-color);
+  color: var(--body-font-color);
+  font-weight: 600;
 }
 
 .bloblang-playground .playground-tip-content a {
-  color: var(--link-highlight-color);
-  text-decoration: underline;
+  color: var(--component-color, #6366f1);
+  text-decoration: none;
   font-weight: 500;
 }
 
 .bloblang-playground .playground-tip-content a:hover {
-  color: var(--link_hover-font-color);
+  text-decoration: underline;
 }
 
 .bloblang-playground .try-example-button {
-  background: #4474e7;
+  background: var(--component-color, #6366f1);
   color: white;
-  border: 1.5px solid #4474e7;
-  border-radius: 5px;
+  border: none;
+  border-radius: 6px;
   padding: 6px 12px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: inline-block;
-  box-shadow: 0 2px 4px rgba(68, 116, 231, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .bloblang-playground .try-example-button:hover {
-  background: #365bd6;
-  border-color: #365bd6;
-  box-shadow: 0 3px 6px rgba(68, 116, 231, 0.3);
-  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .bloblang-playground .dismiss-tip {
@@ -995,15 +1112,22 @@ html[data-theme=dark] .bloblang-playground .button:hover {
   right: 20px;
   padding: 12px 20px;
   border-radius: 8px;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--body-background);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 10000;
   opacity: 0;
   transform: translateX(400px);
   transition: all 0.3s ease;
   max-width: 400px;
   font-size: 14px;
-  border-left: 4px solid #4474e7;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-left: 4px solid var(--component-color, #6366f1);
+}
+
+html[data-theme=dark] .bloblang-playground .notification {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-left-color: var(--component-color, #6366f1);
 }
 
 .bloblang-playground {
@@ -1067,23 +1191,20 @@ html[data-theme=dark] .bloblang-playground .notification-info {
 .bloblang-playground .validation-indicator {
   font-size: 11px;
   font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
   display: inline-block;
   flex-shrink: 1;
   min-width: 0;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: 1.3;
+  line-height: 1.4;
   box-sizing: border-box;
-  max-height: 20px;
 }
 
+/* Success state - compact single line */
 .bloblang-playground .validation-success {
   color: var(--color-primitives-global-green-green-700);
   background: var(--color-primitives-global-green-green-50);
+  white-space: nowrap;
 }
 
 html[data-theme=dark] .bloblang-playground .validation-success {
@@ -1091,11 +1212,14 @@ html[data-theme=dark] .bloblang-playground .validation-success {
   background: rgba(56, 161, 105, 0.15);
 }
 
+/* Error state - allow full message to show */
 .bloblang-playground .validation-error {
   color: var(--color-primitives-global-red-red-700);
   background: var(--color-primitives-global-red-red-50);
-  max-width: 100%;
+  white-space: normal;
   word-break: break-word;
+  flex: 1 1 auto;
+  max-width: 100%;
 }
 
 html[data-theme=dark] .bloblang-playground .validation-error {
@@ -1117,22 +1241,34 @@ html[data-theme=dark] .bloblang-playground .validation-info {
 .bloblang-playground .input-format-selector {
   font-size: 12px;
   padding: 4px 8px;
-  border: 1px solid rgba(128, 152, 249, 0.3);
-  border-radius: 4px;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 6px;
   background: var(--body-background);
   color: var(--body-font-color);
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.15s ease;
+}
+
+html[data-theme=dark] .bloblang-playground .input-format-selector {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .input-format-selector:hover {
-  border-color: rgba(128, 152, 249, 0.6);
+  border-color: var(--grey-300-new, #d1d5db);
+}
+
+html[data-theme=dark] .bloblang-playground .input-format-selector:hover {
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .bloblang-playground .input-format-selector:focus {
   outline: none;
-  border-color: #4474e7;
-  box-shadow: 0 0 0 2px rgba(68, 116, 231, 0.2);
+  border-color: var(--component-color, #6366f1);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+html[data-theme=dark] .bloblang-playground .input-format-selector:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
 }
 
 /* Streamlined tooltips for playground */
@@ -1167,26 +1303,33 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 /* Copy output button */
 .bloblang-playground .copy-output-button {
   background: var(--body-background);
-  border: 1.5px solid rgba(128, 152, 249, 0.4);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   color: var(--body-font-color);
   padding: 5px 12px;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme=dark] .bloblang-playground .copy-output-button {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .copy-output-button:hover {
-  background: rgba(68, 76, 231, 0.06);
-  border-color: #4474e7;
+  background: var(--grey-50-new, #f9fafb);
+  border-color: var(--grey-300-new, #d1d5db);
   color: var(--body-font-color);
-  box-shadow: 0 2px 4px rgba(68, 116, 231, 0.15);
-  transform: translateY(-1px);
+}
+
+html[data-theme=dark] .bloblang-playground .copy-output-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Shortcuts overlay */
@@ -1213,7 +1356,13 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   max-width: 500px;
   width: 90%;
   position: relative;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+}
+
+html[data-theme=dark] .bloblang-playground .shortcuts-content {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .shortcuts-content h3 {
@@ -1248,11 +1397,15 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 
 .bloblang-playground .shortcuts-list li {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(204, 204, 204, 0.2);
+  border-bottom: 1px solid var(--grey-100-new, #f3f4f6);
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: var(--body-font-color);
+}
+
+html[data-theme=dark] .bloblang-playground .shortcuts-list li {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 .bloblang-playground .shortcuts-list li:last-child {
@@ -1260,18 +1413,28 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 }
 
 .bloblang-playground .shortcuts-list kbd {
-  background: rgba(68, 76, 231, 0.1);
+  background: var(--grey-100-new, #f3f4f6);
   padding: 4px 8px;
   border-radius: 4px;
   font-family: var(--monospace-font-family);
   font-size: 12px;
-  color: #4474e7;
-  border: 1px solid rgba(68, 76, 231, 0.2);
+  color: var(--body-font-color);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme=dark] .bloblang-playground .shortcuts-list kbd {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .shortcuts-divider {
-  border-top: 2px solid rgba(102, 126, 234, 0.2);
+  border-top: 1px solid var(--grey-200-new, #e5e5e5);
   margin: 24px 0 20px 0;
+}
+
+html[data-theme=dark] .bloblang-playground .shortcuts-divider {
+  border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .shortcuts-claude-section {
@@ -1288,7 +1451,7 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 }
 
 .bloblang-playground .shortcuts-claude-title svg {
-  color: #667eea;
+  color: var(--component-color, #6366f1);
 }
 
 .bloblang-playground .shortcuts-claude-description {
@@ -1313,45 +1476,31 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 
 .bloblang-playground .shortcuts-claude-list strong {
   font-family: var(--monospace-font-family);
-  color: #667eea;
+  color: var(--component-color, #6366f1);
   font-weight: 600;
   font-size: 12px;
-  background: rgba(102, 126, 234, 0.08);
+  background: rgba(99, 102, 241, 0.08);
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: 4px;
   margin-right: 4px;
+}
+
+html[data-theme="dark"] .bloblang-playground .shortcuts-claude-list strong {
+  background: rgba(99, 102, 241, 0.15);
 }
 
 .bloblang-playground .shortcuts-claude-link {
   display: inline-flex;
   align-items: center;
-  color: #667eea;
+  color: var(--component-color, #6366f1);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .bloblang-playground .shortcuts-claude-link:hover {
-  color: #5a67d8;
   text-decoration: underline;
-}
-
-[data-theme="dark"] .bloblang-playground .shortcuts-claude-title svg {
-  color: #8b9ef7;
-}
-
-[data-theme="dark"] .bloblang-playground .shortcuts-claude-list strong {
-  color: #8b9ef7;
-  background: rgba(139, 158, 247, 0.12);
-}
-
-[data-theme="dark"] .bloblang-playground .shortcuts-claude-link {
-  color: #8b9ef7;
-}
-
-[data-theme="dark"] .bloblang-playground .shortcuts-claude-link:hover {
-  color: #a5b4f9;
 }
 
 /* Share modal */
@@ -1377,7 +1526,13 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   border-radius: 12px;
   max-width: 600px;
   width: 90%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+}
+
+html[data-theme=dark] .bloblang-playground .share-modal-content {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .bloblang-playground .share-modal-content h3 {
@@ -1394,7 +1549,7 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 .bloblang-playground .share-url-container input {
   flex: 1;
   padding: 10px;
-  border: 1px solid rgba(204, 204, 204, 0.5);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 6px;
   font-family: var(--monospace-font-family);
   font-size: 12px;
@@ -1402,34 +1557,43 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   color: var(--code-font-color);
 }
 
+html[data-theme=dark] .bloblang-playground .share-url-container input {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .bloblang-playground .button-primary {
-  background: #4474e7;
+  background: var(--component-color, #6366f1);
   color: white;
-  border: 1.5px solid #4474e7;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(68, 116, 231, 0.2);
+  border: 1px solid var(--component-color, #6366f1);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .bloblang-playground .button-primary:hover {
-  background: #365bd6;
-  border-color: #365bd6;
+  filter: brightness(1.1);
   color: white;
-  box-shadow: 0 3px 6px rgba(68, 116, 231, 0.3);
-  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .bloblang-playground .button-secondary {
   background: var(--body-background);
-  border: 1.5px solid rgba(128, 152, 249, 0.5);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   color: var(--body-font-color);
 }
 
+html[data-theme=dark] .bloblang-playground .button-secondary {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .bloblang-playground .button-secondary:hover {
-  background: rgba(68, 76, 231, 0.06);
-  border-color: #4474e7;
+  background: var(--grey-50-new, #f9fafb);
+  border-color: var(--grey-300-new, #d1d5db);
   color: var(--body-font-color);
-  box-shadow: 0 2px 4px rgba(68, 116, 231, 0.15);
-  transform: translateY(-1px);
+}
+
+html[data-theme=dark] .bloblang-playground .button-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .bloblang-playground #show-shortcuts {
@@ -1439,16 +1603,16 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  font-weight: 700;
-  border-radius: 6px;
+  font-weight: 500;
+  border-radius: 8px;
 }
 
 /* ACE Editor Autocomplete Styles */
 .bloblang-playground .ace_editor.ace_autocomplete {
   background: var(--body-background) !important;
-  border: 1px solid rgba(128, 152, 249, 0.3) !important;
+  border: 1px solid var(--grey-200-new, #e5e5e5) !important;
   border-radius: 8px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(68, 116, 231, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
   padding: 4px 0 !important;
   font-family: var(--body-font-family) !important;
   font-size: 13px !important;
@@ -1456,8 +1620,9 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   max-width: 360px !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(68, 116, 231, 0.2) !important;
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Autocomplete rows */
@@ -1467,7 +1632,7 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   line-height: 1.4 !important;
   border-radius: 0 !important;
   border: none !important;
-  border-bottom: 1px solid rgba(128, 152, 249, 0.08) !important;
+  border-bottom: 1px solid var(--grey-100-new, #f3f4f6) !important;
   transition: background-color 0.15s ease !important;
 }
 
@@ -1475,35 +1640,34 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   border-bottom: none !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line {
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line {
   border-bottom-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 .bloblang-playground .ace_editor.ace_autocomplete .ace_line:hover {
-  background: rgba(68, 116, 231, 0.08) !important;
+  background: var(--grey-50-new, #f9fafb) !important;
+}
+
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* Selected/highlighted row */
 .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected {
-  background: linear-gradient(135deg, rgba(68, 116, 231, 0.12) 0%, rgba(102, 126, 234, 0.12) 100%) !important;
-  border-left: 3px solid #4474e7 !important;
+  background: var(--grey-100-new, #f3f4f6) !important;
+  border-left: 3px solid var(--component-color, #6366f1) !important;
   padding-left: 9px !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected {
-  background: linear-gradient(135deg, rgba(68, 116, 231, 0.2) 0%, rgba(102, 126, 234, 0.2) 100%) !important;
-  border-left-color: #667eea !important;
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Completion text */
 .bloblang-playground .ace_editor.ace_autocomplete .ace_completion-highlight {
-  color: #4474e7 !important;
+  color: var(--component-color, #6366f1) !important;
   font-weight: 600 !important;
   text-shadow: none !important;
-}
-
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_completion-highlight {
-  color: #8098ff !important;
 }
 
 /* Meta labels (function, method, keyword, field) */
@@ -1520,32 +1684,31 @@ html[data-theme=dark] .bloblang-playground .editor-success {
 
 /* Meta type colors */
 .bloblang-playground .ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
-  background: rgba(156, 163, 175, 0.15) !important;
-  color: #6b7280 !important;
+  background: var(--grey-100-new, #f3f4f6) !important;
+  color: var(--grey-600-new, #4b5563) !important;
 }
 
 .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
-  background: rgba(68, 116, 231, 0.15) !important;
-  color: #4474e7 !important;
-  font-weight: 700 !important;
+  background: rgba(99, 102, 241, 0.12) !important;
+  color: var(--component-color, #6366f1) !important;
+  font-weight: 600 !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
-  background: rgba(156, 163, 175, 0.25) !important;
-  color: #9ca3af !important;
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line .ace_completion-meta {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
-  background: rgba(128, 152, 255, 0.25) !important;
-  color: #8098ff !important;
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_line.ace_selected .ace_completion-meta {
+  background: rgba(99, 102, 241, 0.2) !important;
 }
 
 /* Documentation popup */
 .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip {
   background: var(--body-background) !important;
-  border: 1px solid rgba(128, 152, 249, 0.3) !important;
+  border: 1px solid var(--grey-200-new, #e5e5e5) !important;
   border-radius: 8px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
   padding: 12px !important;
   font-family: var(--body-font-family) !important;
   font-size: 13px !important;
@@ -1554,28 +1717,25 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   max-width: 400px !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
 .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip b {
-  color: #4474e7 !important;
+  color: var(--component-color, #6366f1) !important;
   font-weight: 600 !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip b {
-  color: #8098ff !important;
-}
-
 .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip em {
-  color: #6b7280 !important;
+  color: var(--grey-600-new, #4b5563) !important;
   font-style: normal !important;
   font-size: 11px !important;
   font-weight: 600 !important;
 }
 
-[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip em {
-  color: #9ca3af !important;
+html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip em {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* Scrollbar for autocomplete */

@@ -2,7 +2,7 @@
 
 module.exports = (attributes, content, { data: { root } }) => {
   const { contentCatalog } = root
-  if (attributes['component-name'] === 'redpanda-labs') return content
+  if (attributes['component-name'] === 'labs') return content
   if (attributes['exclude-related-labs'] === 'true') return content
   if (!contentCatalog) return content
 
@@ -26,7 +26,7 @@ module.exports = (attributes, content, { data: { root } }) => {
   if (relatedLabs.length > 5) {
     contentString += '<div class="badge-button" id="see-more-btn">See more</div>'
   }
-  contentString += '<div class="badge-button"><a href="/redpanda-labs" class="search-all-labs-btn">Search all labs</a></div>'
+  contentString += '<div class="badge-button"><a href="/labs" class="search-all-labs-btn">Search all labs</a></div>'
   contentString += `
       </div>
     </div>

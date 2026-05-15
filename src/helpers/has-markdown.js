@@ -8,9 +8,17 @@
 module.exports = ({ data: { root } }) => {
   const { contentCatalog, page } = root
 
+  // In preview mode (no contentCatalog), show dropdown for testing
+  if (!contentCatalog) {
+    // Only show on pages that would normally have it
+    const excludedRoles = ['bloblang-playground', 'component-home-v2', 'home']
+    if (page?.attributes?.role && excludedRoles.includes(page.attributes.role)) return false
+    return true
+  }
+
   // Safety checks for 404 pages and pages without components
   // Note: page.version can be null for unversioned components (cloud, connect, labs)
-  if (!contentCatalog || !page || !page.component || page.version === undefined) return false
+  if (!page || !page.component || page.version === undefined) return false
 
   // Only show dropdown on specific page layouts
   const allowedLayouts = ['default', 'index', 'lab']

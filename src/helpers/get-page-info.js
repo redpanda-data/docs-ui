@@ -49,8 +49,8 @@ module.exports = (url, { data: { root } }) => {
     return /v?\d+(\.\d+)?/.test(str)
   }
 
-  // If the page component name is ROOT, the first part of the URL will be a version: https://docs.antora.org/antora/latest/component-name-key/#root-component
-  if (urlParts[0] && page.component.name === 'ROOT' && containsVersionNumber(urlParts[0])) {
+  // If the page component name is streaming, the first part of the URL will be a version: https://docs.antora.org/antora/latest/component-name-key/#root-component
+  if (urlParts[0] && page.component.name === 'streaming' && containsVersionNumber(urlParts[0])) {
     isCurrentComponent = true
   } else if (urlParts[0] && urlParts[0] === page.component.name) {
     isCurrentComponent = true

@@ -8,3 +8,7 @@ src/static/*
 test-results.*
 test-results-*.*
 .playwright-mcp/
+
+# Test screenshots
+*.png
+!/src/img/*.png

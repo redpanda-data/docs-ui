@@ -1,0 +1,213 @@
+{{!--
+  Version Selector Pill
+  Shows version with EOL status and dropdown to switch versions.
+  Only renders when component has multiple versions.
+
+  Version status logic:
+  - @first in page.versions = Latest (the most recent version)
+  - is-eol = End of life
+  - Otherwise = Supported
+--}}
+{{#if (and page.versions (gt page.versions.length 1))}}
+  {{#if (ne page.componentVersion.displayVersion 'default')}}
+<div class="sm-ver" data-version-selector>
+  <button type="button" class="sm-ver-pill" aria-haspopup="dialog" aria-expanded="false">
+    {{!-- Status dot - determine version status: current (latest), supported, or eol --}}
+    {{#each page.versions as |ver|}}
+      {{#if (eq ver.version @root.page.version)}}
+    <span class="sm-ver-pill-dot" data-status="{{#if @first}}current{{else if (is-eol ver.asciidoc.attributes)}}eol{{else}}supported{{/if}}" aria-hidden="true"></span>
+      {{/if}}
+    {{/each}}
+    <span class="sm-ver-pill-label">Docs for</span>
+    <span class="sm-ver-pill-num">v{{page.componentVersion.displayVersion}}</span>
+    <span class="sm-ver-pill-sep" aria-hidden="true"></span>
+    {{!-- Status label: Latest (first), End of life (eol), or Supported --}}
+    {{#each page.versions as |ver|}}
+      {{#if (eq ver.version @root.page.version)}}
+    <span class="sm-ver-pill-status" data-status="{{#if @first}}current{{else if (is-eol ver.asciidoc.attributes)}}eol{{else}}supported{{/if}}">{{#if @first}}Latest{{else if (is-eol ver.asciidoc.attributes)}}End of life{{else}}Supported{{/if}}</span>
+      {{/if}}
+    {{/each}}
+    <svg class="sm-ver-pill-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </button>
+  <div class="sm-ver-panel" role="dialog" aria-label="Choose version">
+    <div class="sm-ver-panel-head">
+      <div class="sm-ver-panel-title">
+        {{#with (get-header-data page)}}
+        <span>{{#if this.title}}{{{this.title}}}{{else}}{{@root.page.component.title}}{{/if}} releases</span>
+        {{else}}
+        <span>{{page.component.title}} releases</span>
+        {{/with}}
+        <span class="sm-ver-panel-meta">{{page.versions.length}} versions</span>
+      </div>
+      <div class="sm-ver-tabs" role="tablist">
+        <button class="sm-ver-tab is-active" data-filter="all" role="tab" aria-selected="true">All</button>
+        <button class="sm-ver-tab" data-filter="current" role="tab" aria-selected="false">Latest</button>
+        <button class="sm-ver-tab" data-filter="supported" role="tab" aria-selected="false">Supported</button>
+        <button class="sm-ver-tab" data-filter="eol" role="tab" aria-selected="false">EOL</button>
+      </div>
+    </div>
+    <div class="sm-ver-list">
+      {{!-- Current/Latest version group - only the first (latest) version --}}
+      <div class="sm-ver-group" data-group="current">
+        <div class="sm-ver-group-head">
+          <span class="sm-ver-group-label">Latest</span>
+          <span class="sm-ver-group-count" data-count="current">0</span>
+        </div>
+        <div class="sm-ver-rows">
+          {{#each page.versions}}
+          {{#if @first}}
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="current" href="{{{relativize ./url}}}">
+            <div class="sm-ver-row-num">
+              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
+              <span class="sm-ver-row-note">Latest</span>
+            </div>
+            {{#if ./asciidoc.attributes.page-release-date}}
+            <div class="sm-ver-row-dates">
+              <span class="sm-ver-row-date">
+                <span class="sm-ver-row-date-l">Released</span>
+                <span class="sm-ver-row-date-v">{{format-release-date ./asciidoc.attributes.page-release-date}}</span>
+              </span>
+              <span class="sm-ver-row-date">
+                <span class="sm-ver-row-date-l">Until</span>
+                <span class="sm-ver-row-date-v">{{#if ./asciidoc.attributes.page-eol-date}}{{{./asciidoc.attributes.page-eol-date}}}{{else}}{{support-end-date ./asciidoc.attributes.page-release-date ./asciidoc.attributes.page-support-months}}{{/if}}</span>
+              </span>
+            </div>
+            {{/if}}
+            <span class="sm-ver-row-status" data-status="current">
+              <span class="sm-ver-row-status-dot"></span>
+              Latest
+            </span>
+            {{#if (eq ./version @root.page.version)}}
+            <span class="sm-ver-row-check" aria-label="Selected">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <polyline points="5 13 9 17 19 7"></polyline>
+              </svg>
+            </span>
+            {{/if}}
+          </a>
+          {{/if}}
+          {{/each}}
+        </div>
+      </div>
+      {{!-- Supported versions group - non-EOL versions that aren't the latest --}}
+      <div class="sm-ver-group" data-group="supported">
+        <div class="sm-ver-group-head">
+          <span class="sm-ver-group-label">Supported</span>
+          <span class="sm-ver-group-count" data-count="supported">0</span>
+        </div>
+        <div class="sm-ver-rows">
+          {{#each page.versions}}
+          {{#unless @first}}
+          {{#unless (is-eol ./asciidoc.attributes)}}
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="supported" href="{{{relativize ./url}}}">
+            <div class="sm-ver-row-num">
+              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
+            </div>
+            {{#if ./asciidoc.attributes.page-release-date}}
+            <div class="sm-ver-row-dates">
+              <span class="sm-ver-row-date">
+                <span class="sm-ver-row-date-l">Released</span>
+                <span class="sm-ver-row-date-v">{{format-release-date ./asciidoc.attributes.page-release-date}}</span>
+              </span>
+              <span class="sm-ver-row-date">
+                <span class="sm-ver-row-date-l">Until</span>
+                <span class="sm-ver-row-date-v">{{#if ./asciidoc.attributes.page-eol-date}}{{{./asciidoc.attributes.page-eol-date}}}{{else}}{{support-end-date ./asciidoc.attributes.page-release-date ./asciidoc.attributes.page-support-months}}{{/if}}</span>
+              </span>
+            </div>
+            {{/if}}
+            <span class="sm-ver-row-status" data-status="supported">
+              <span class="sm-ver-row-status-dot"></span>
+              Supported
+            </span>
+            {{#if (eq ./version @root.page.version)}}
+            <span class="sm-ver-row-check" aria-label="Selected">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <polyline points="5 13 9 17 19 7"></polyline>
+              </svg>
+            </span>
+            {{/if}}
+          </a>
+          {{/unless}}
+          {{/unless}}
+          {{/each}}
+        </div>
+      </div>
+      {{!-- End of life versions group --}}
+      <div class="sm-ver-group" data-group="eol">
+        <div class="sm-ver-group-head">
+          <span class="sm-ver-group-label">End of life</span>
+          <span class="sm-ver-group-count" data-count="eol">0</span>
+        </div>
+        <div class="sm-ver-rows">
+          {{#each page.versions}}
+          {{#unless @first}}
+          {{#if (is-eol ./asciidoc.attributes)}}
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="eol" href="{{{relativize ./url}}}">
+            <div class="sm-ver-row-num">
+              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
+            </div>
+            {{#if ./asciidoc.attributes.page-release-date}}
+            <div class="sm-ver-row-dates">
+              <span class="sm-ver-row-date">
+                <span class="sm-ver-row-date-l">Released</span>
+                <span class="sm-ver-row-date-v">{{format-release-date ./asciidoc.attributes.page-release-date}}</span>
+              </span>
+              <span class="sm-ver-row-date">
+                <span class="sm-ver-row-date-l">Ended</span>
+                <span class="sm-ver-row-date-v">{{#if ./asciidoc.attributes.page-eol-date}}{{{./asciidoc.attributes.page-eol-date}}}{{else}}{{support-end-date ./asciidoc.attributes.page-release-date ./asciidoc.attributes.page-support-months}}{{/if}}</span>
+              </span>
+            </div>
+            {{/if}}
+            <span class="sm-ver-row-status" data-status="eol">
+              <span class="sm-ver-row-status-dot"></span>
+              End of life
+            </span>
+            {{#if (eq ./version @root.page.version)}}
+            <span class="sm-ver-row-check" aria-label="Selected">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <polyline points="5 13 9 17 19 7"></polyline>
+              </svg>
+            </span>
+            {{/if}}
+          </a>
+          {{/if}}
+          {{/unless}}
+          {{/each}}
+        </div>
+      </div>
+    </div>
+    <div class="sm-ver-foot">
+      {{!-- What's new / Release notes link --}}
+      {{#if page.attributes.whats-new-doc}}
+      <a class="sm-ver-foot-link" href="{{{relativize (resolve-resource page.attributes.whats-new-doc)}}}">
+      {{else}}
+      <a class="sm-ver-foot-link" href="{{{relativize '../get-started/release-notes/redpanda/'}}}">
+      {{/if}}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        What's new
+      </a>
+      {{!-- Upgrade guide link from extension config (page-upgrade-doc) --}}
+      {{#if page.attributes.upgrade-doc}}
+      <a class="sm-ver-foot-link" href="{{{relativize (resolve-resource page.attributes.upgrade-doc)}}}">
+      {{else}}
+      <a class="sm-ver-foot-link" href="{{{relativize '../upgrade/'}}}">
+      {{/if}}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        Upgrade guide
+      </a>
+      {{!-- Support policy link from extension config (page-eol-doc) --}}
+      {{#if page.attributes.eol-doc}}
+      <a class="sm-ver-foot-link" href="{{page.attributes.eol-doc}}" target="_blank" rel="noopener">
+      {{else}}
+      <a class="sm-ver-foot-link" href="https://docs.redpanda.com/current/reference/versions/" target="_blank" rel="noopener">
+      {{/if}}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M12 9v6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Support policy
+      </a>
+    </div>
+  </div>
+</div>
+  {{/if}}
+{{/if}}

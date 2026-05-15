@@ -1,3 +1,9 @@
+/* =============================================================================
+   LEGACY DESIGN TOKENS (Pre-2025)
+   These will be gradually phased out as components are updated to use the new
+   design system tokens in the :root selector below.
+   ============================================================================= */
+
 html:not([data-theme=dark]),
 html[data-theme=dark] {
   --ash-900: #212121;
@@ -100,15 +106,15 @@ html[data-theme=dark] {
   --color-black: var(--slate-900);
   /* fonts */
   --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
-  --body-font-size: calc(17.5 / var(--rem-base) * 1rem);
+  --body-font-size: 15px; /* Prototype: 15px body text */
   --body-font-size--desktop: var(--body-font-size);
-  --secondary-font-size: calc(15.5 / var(--rem-base) * 1rem);
+  --secondary-font-size: calc(14 / var(--rem-base) * 1rem);
   --body-font-size--print: 0.9375em;
   --body-line-height: 1.15;
-  --body-font-family: "Inter", sans-serif;
-  --body-font-weight-bold: bold;
-  --body-font-family-bold: "Inter SemiBold", "Calibre Regular", "Open Sans", arial, helvetica, sans-serif;
-  --monospace-font-family: "IBM Plex Mono", "Courier Prime", courier, monospace;
+  --body-font-family: var(--font-sans, "Inter", sans-serif);
+  --body-font-weight-bold: 600;
+  --body-font-family-bold: var(--font-sans, "Inter", sans-serif);
+  --monospace-font-family: var(--font-mono, "JetBrains Mono", ui-monospace, monospace);
   --monospace-font-weight-bold: 500;
   --alt-heading-font-weight: bold;
   /* nav */
@@ -126,12 +132,20 @@ html[data-theme=dark] {
   --limited-availability-label-border: var(--amber-800);
   --limited-availability-highlight-background-color: rgba(202, 133, 4, 0.08);
   --limited-availability-highlight-background-color: rgba(248, 134, 57, 0.08);
+  /* BYOC badge */
+  --byoc-label-color: #fff;
+  --byoc-label-background: #014f86;
+  --byoc-highlight-background-color: rgba(1, 79, 134, 0.08);
+  /* Cloud badge */
+  --cloud-label-color: #fff;
+  --cloud-label-background: #6c63ff;
+  --cloud-highlight-background-color: rgba(108, 99, 255, 0.08);
   /* doc */
   --doc-font-size: inherit;
   --doc-font-size--desktop: var(--body-font-size);
-  --doc-line-height: 1.6;
-  --heading-font-weight: 500;
-  --heading-font-family: "Inter", sans-serif;
+  --doc-line-height: 1.7;
+  --heading-font-weight: 600;
+  --heading-font-family: var(--font-display, "Inter Display", "Inter", sans-serif);
   --admonition-label-font-weight: var(--body-font-weight-bold);
   --caption-font-style: normal;
   --caption-font-weight: var(--body-font-weight-bold);
@@ -151,17 +165,17 @@ html[data-theme=dark] {
   --nav-height: calc(var(--body-min-height) - var(--toolbar-height));
   --nav-collapse-height: 40px;
   --default-header-color: var(--redpanda-800);
-  --announcement-bar-height: 0px; /* stylelint-disable-line */
-  --announcement-bar-height--desktop: 0px; /* stylelint-disable-line */
+  --announcement-bar-height: 0px; /* Set by JS when announcement is shown */
+  --announcement-bar-height--desktop: 0px; /* Set by JS when announcement is shown */
   --nav-height--desktop: var(--body-min-height);
   --nav-panel-menu-height: calc(100% - var(--drawer-height));
   --nav-panel-explore-height: calc(50% + var(--drawer-height));
-  --nav-width: 250px;
+  --nav-width: 280px;
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);
-  --toc-width: calc(250 / var(--rem-base) * 1rem);
-  --toc-width--widescreen: calc(350 / var(--rem-base) * 1rem);
-  --doc-max-width: 1000px;
+  --toc-width: 232px;
+  --toc-width--widescreen: calc(280 / var(--rem-base) * 1rem);
+  --doc-max-width: 920px;
   /* stacking */
   --z-index-page-version-menu: 2;
   --z-index-nav: 3;
@@ -172,6 +186,21 @@ html[data-theme=dark] {
   --aa-spacing-factor: 0.8;
   /* Prism */
   --highlight-background: rgba(255, 255, 0, 0.23);
+}
+
+/* Dark mode overrides */
+html[data-theme=dark] {
+  /* BYOC badge - brighter blue for dark mode visibility with dark text for contrast */
+  --byoc-label-color: #101828;
+  --byoc-label-background: #4da8da;
+  --byoc-highlight-background-color: rgba(77, 168, 218, 0.15);
+  /* Cloud badge - brighter purple for dark mode visibility with dark text for contrast */
+  --cloud-label-color: #101828;
+  --cloud-label-background: #9d97ff;
+  --cloud-highlight-background-color: rgba(157, 151, 255, 0.15);
+  /* Availability block - brighter for dark mode */
+  --availability-block-background: rgba(173, 181, 189, 0.15);
+  --availability-block-border: #adb5bd;
 }
 
 html:not([data-theme=dark]) {
@@ -256,6 +285,9 @@ html:not([data-theme=dark]) {
   --caution-background: rgba(249, 161, 101, 0.1);
   --caution-on-color: var(--body-font-color);
   --caution-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
+  /* availability block */
+  --availability-block-background: rgba(108, 117, 125, 0.08);
+  --availability-block-border: #6c757d;
   /* doc */
   --doc-font-color: var(--color-jet-50);
   --heading-font-color: var(--color-jet-80);
@@ -309,8 +341,160 @@ html:not([data-theme=dark]) {
   --highlight-container-background: #f9fafb;
 }
 
-/* RedPanda DS */
+/* =============================================================================
+   NEW DESIGN SYSTEM TOKENS - GLOBAL (All Themes)
+   ============================================================================= */
+
 :root {
+  /* Typography - Font Families */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter Display", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, sfmono-regular, menlo, monospace;
+  /* Typography - Tracking */
+  --tracking-heading: -0.01em;
+  --tracking-label: -0.0125em;
+  --tracking-caption: 0.01em;
+  --tracking-number: -0.05em;
+  --tracking-number-tight: -0.025em;
+  --tracking-caption-wide: 0.05em;
+  /* Typography scale */
+  --text-9xl: 4.5rem;
+  --text-8xl: 3.5rem;
+  --text-7xl: 3rem;
+  --text-6xl: 2.5rem;
+  --text-5xl: 2rem;
+  --text-4xl: 1.5rem;
+  --text-3xl: 1.25rem;
+  --text-2xl: 1.125rem;
+  --text-xl: 1rem;
+  /* New color scales - Grey */
+  --grey-50-new: #f5f5f5;
+  --grey-100-new: #dcdcde;
+  --grey-200-new: #c3c4c6;
+  --grey-300-new: #aaabae;
+  --grey-400-new: #919295;
+  --grey-500-new: #79797d;
+  --grey-600-new: #606164;
+  --grey-700-new: #48484a;
+  --grey-800-new: #303032;
+  --grey-900-new: #181818;
+  /* Brand (Redpanda Red) - New scale */
+  --brand-50-new: #fff5f5;
+  --brand-100-new: #fcebe9;
+  --brand-200-new: #fae0db;
+  --brand-300-new: #f4b9ae;
+  --brand-400-new: #ee9281;
+  --brand-500-new: #e86b54;
+  --brand-600-new: #e24328;
+  --brand-700-new: #c1331a;
+  --brand-800-new: #9e2e1a;
+  --brand-900-new: #711e0f;
+  /* Indigo (Primary UI) - New scale */
+  --indigo-50-new: #eef4ff;
+  --indigo-100-new: #e0eaff;
+  --indigo-200-new: #c7d2fe;
+  --indigo-300-new: #a4bcfd;
+  --indigo-400-new: #8098f9;
+  --indigo-500-new: #6172f3;
+  --indigo-600-new: #444ce7;
+  --indigo-700-new: #3538cd;
+  --indigo-800-new: #2c30a0;
+  --indigo-900-new: #2d3282;
+  /* Teal/Green (Redpanda Connect) - New scale */
+  --teal-50-new: #f0fdf9;
+  --teal-100-new: #ccfbef;
+  --teal-200-new: #99f6df;
+  --teal-300-new: #5fe9ca;
+  --teal-400-new: #2ed3ae;
+  --teal-500-new: #14b895;
+  --teal-600-new: #0b8c6b;
+  --teal-700-new: #0e7058;
+  --teal-800-new: #105947;
+  --teal-900-new: #12493b;
+  /* Sky Blue (Cloud) - New scale */
+  --sky-50-new: #f0f9ff;
+  --sky-100-new: #e0f2fe;
+  --sky-200-new: #bae6fd;
+  --sky-300-new: #7dd3fc;
+  --sky-400-new: #38bdf8;
+  --sky-500-new: #0ea5e9;
+  --sky-600-new: #0284c7;
+  --sky-700-new: #0369a1;
+  --sky-800-new: #075985;
+  --sky-900-new: #0c4a6e;
+  /* Slate (Self-managed) - New scale */
+  --slate-50-new: #f8fafc;
+  --slate-100-new: #f1f5f9;
+  --slate-200-new: #e2e8f0;
+  --slate-300-new: #cbd5e1;
+  --slate-400-new: #94a3b8;
+  --slate-500-new: #64748b;
+  --slate-600-new: #475569;
+  --slate-700-new: #334155;
+  --slate-800-new: #1e293b;
+  --slate-900-new: #0f172a;
+  /* =============================================================================
+     COMPONENT COLORS - Dynamic theming based on current product
+     These colors are applied via data-component attribute on the body element
+     ============================================================================= */
+  /* Default/fallback component colors (Data Platform - Indigo) */
+  --component-50: var(--indigo-50-new);
+  --component-100: var(--indigo-100-new);
+  --component-200: var(--indigo-200-new);
+  --component-500: var(--indigo-500-new);
+  --component-600: var(--indigo-600-new);
+  --component-700: var(--indigo-700-new);
+  --component-bg-tint: rgba(79, 70, 229, 0.06);
+  --component-bg-tint-hover: rgba(79, 70, 229, 0.1);
+  --component-bg-tint-active: rgba(79, 70, 229, 0.14);
+  /* Dark Blue (Sidebar) - New scale */
+  --dark-blue-50-new: #eff1f6;
+  --dark-blue-100-new: #e5e9f0;
+  --dark-blue-200-new: #c6cedc;
+  --dark-blue-300-new: #a8b2c7;
+  --dark-blue-400-new: #5972a6;
+  --dark-blue-500-new: #475b85;
+  --dark-blue-600-new: #2d3a53;
+  --dark-blue-700-new: #20293c;
+  --dark-blue-800-new: #161e2d;
+  --dark-blue-900-new: #101828;
+  /* Semantic colors - New design system */
+  --fg-strong-new: var(--grey-900-new);
+  --fg-new: var(--grey-700-new);
+  --fg-muted-new: var(--grey-600-new);
+  --fg-subtle-new: var(--grey-500-new);
+  --fg-disabled-new: var(--grey-400-new);
+  --brand-new: var(--brand-600-new);
+  --brand-hover-new: var(--brand-700-new);
+  --primary-new: var(--indigo-600-new);
+  --primary-hover-new: var(--indigo-700-new);
+  /* Sidebar theme variables */
+  --sidebar-bg: #0f1727; /* Exact prototype color - slightly deeper than dark-blue-800 */
+  --sidebar-fg: #c6cedc; /* Exact prototype color */
+  --sidebar-fg-muted: var(--dark-blue-300-new);
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-border: rgba(255, 255, 255, 0.04); /* Exact prototype border */
+  --sidebar-item-hover-bg: rgba(255, 255, 255, 0.05);
+  --sidebar-item-active-bg: rgba(255, 255, 255, 0.1);
+  /* Border radius - New scale */
+  --radius-xs-new: 0.125rem;
+  --radius-sm-new: 0.25rem;
+  --radius-md-new: 0.375rem;
+  --radius-lg-new: 0.5rem;
+  --radius-xl-new: 0.75rem;
+  --radius-2xl-new: 1rem;
+  --radius-3xl-new: 1.25rem;
+  --radius-full-new: 9999px;
+  /* Shadows - New design */
+  --shadow-sm-new: 0 1px 4px 0 rgba(0, 0, 0, 0.08);
+  --shadow-md-new: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg-new: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-elevated-new: 4px 4px 0px 0px rgba(0, 0, 0, 0.08);
+
+  /* =============================================================================
+     LEGACY REDPANDA DS TOKENS
+     ============================================================================= */
+
   /* Light Mode */
   /* color */
   --color-aliases-interactive-palette-opacity-brand-disabled: var(--color-primitives-alpha-primary-brand-primary-brand-alpha-500);
@@ -728,4 +912,69 @@ html:not([data-theme=dark]) {
   --spacings-spacing-8xl: 5.5rem;
   --spacings-spacing-9xl: 8rem;
   --spacings-spacing-10xl: 9rem;
+}
+
+/* =============================================================================
+   COMPONENT COLOR OVERRIDES
+   Applied based on data-component attribute on body element
+   ============================================================================= */
+
+/* ADP - Agentic Data Plane (Redpanda Brand Red) */
+body[data-component="redpanda-adp"] {
+  --component-50: var(--brand-50-new);
+  --component-100: var(--brand-100-new);
+  --component-200: var(--brand-200-new);
+  --component-500: var(--brand-500-new);
+  --component-600: var(--brand-600-new);
+  --component-700: var(--brand-700-new);
+  --component-bg-tint: rgba(226, 67, 40, 0.06);
+  --component-bg-tint-hover: rgba(226, 67, 40, 0.1);
+  --component-bg-tint-active: rgba(226, 67, 40, 0.14);
+  --topbar-bg: rgba(226, 67, 40, 0.08);
+  --topbar-border: rgba(226, 67, 40, 0.15);
+}
+
+/* Data Platform / Streaming (Indigo - default, explicit for clarity) */
+body[data-component="streaming"] {
+  --component-50: var(--indigo-50-new);
+  --component-100: var(--indigo-100-new);
+  --component-200: var(--indigo-200-new);
+  --component-500: var(--indigo-500-new);
+  --component-600: var(--indigo-600-new);
+  --component-700: var(--indigo-700-new);
+  --component-bg-tint: rgba(79, 70, 229, 0.06);
+  --component-bg-tint-hover: rgba(79, 70, 229, 0.1);
+  --component-bg-tint-active: rgba(79, 70, 229, 0.14);
+  --topbar-bg: rgba(79, 70, 229, 0.08);
+  --topbar-border: rgba(79, 70, 229, 0.15);
+}
+
+/* Redpanda Connect (Teal/Green) */
+body[data-component="connect"] {
+  --component-50: var(--teal-50-new);
+  --component-100: var(--teal-100-new);
+  --component-200: var(--teal-200-new);
+  --component-500: var(--teal-500-new);
+  --component-600: var(--teal-600-new);
+  --component-700: var(--teal-700-new);
+  --component-bg-tint: rgba(11, 140, 107, 0.06);
+  --component-bg-tint-hover: rgba(11, 140, 107, 0.1);
+  --component-bg-tint-active: rgba(11, 140, 107, 0.14);
+  --topbar-bg: rgba(11, 140, 107, 0.08);
+  --topbar-border: rgba(11, 140, 107, 0.15);
+}
+
+/* Cloud Data Platform (Sky Blue) */
+body[data-component="cloud-data-platform"] {
+  --component-50: var(--sky-50-new);
+  --component-100: var(--sky-100-new);
+  --component-200: var(--sky-200-new);
+  --component-500: var(--sky-500-new);
+  --component-600: var(--sky-600-new);
+  --component-700: var(--sky-700-new);
+  --component-bg-tint: rgba(14, 165, 233, 0.06);
+  --component-bg-tint-hover: rgba(14, 165, 233, 0.1);
+  --component-bg-tint-active: rgba(14, 165, 233, 0.14);
+  --topbar-bg: rgba(14, 165, 233, 0.08);
+  --topbar-border: rgba(14, 165, 233, 0.15);
 }

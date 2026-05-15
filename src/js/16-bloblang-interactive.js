@@ -126,7 +126,7 @@
    */
   async function tryFetchConnectJSON(version) {
     try {
-      const url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
+      const url = `/connect/components/_attachments/connect-${version}.json`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -169,7 +169,7 @@
           parameters: params,
           returns: 'any',
           category: fn.category || 'general',
-          url: `https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#${fn.name.toLowerCase().replace(/_/g, '-')}`
+          url: `https://docs.redpanda.com/connect/guides/bloblang/functions/#${fn.name.toLowerCase().replace(/_/g, '-')}`
         };
 
         // Add example if available
@@ -201,7 +201,7 @@
           parameters: params,
           returns: 'any',
           category: method.categories && method.categories.length > 0 ? method.categories[0].Category : 'general',
-          url: `https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#${method.name.toLowerCase().replace(/_/g, '-')}`
+          url: `https://docs.redpanda.com/connect/guides/bloblang/methods/#${method.name.toLowerCase().replace(/_/g, '-')}`
         };
 
         // Add example if available
@@ -739,7 +739,7 @@
    * Build the full playground URL with encoded parameters
    */
   function buildPlaygroundUrl(input, mapping, meta) {
-    const baseUrl = '/redpanda-connect/guides/bloblang/playground/';
+    const baseUrl = '/connect/guides/bloblang/playground/';
     const params = new URLSearchParams();
 
     if (input) {

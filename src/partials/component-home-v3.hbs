@@ -1,0 +1,556 @@
+{{!--
+  Component Home V3 - Landing page with hero, tabs, deploy cards, popular topics, and labs
+
+  Required page attributes:
+    :page-role: component-home-v3
+    :page-hero-description: Component description text for hero section
+
+  Optional page attributes:
+    :page-hero-title: Override for h1 title
+    :page-tabs: Get started;;Common workflows;;Reference (tab labels separated by ;;)
+    :page-tabs-links: #deploy;;#popular;;#reference (corresponding links, optional)
+    :page-tabs-active: 0 (0-indexed active tab, defaults to 0)
+    :page-deploy-title: "Deploy Self-Managed Redpanda"
+    :page-deploy-1-title: "Docker quickstart"
+    :page-deploy-1-desc: "Spin up Redpanda in a container..."
+    :page-deploy-1-link: xref:deploy/docker.adoc[]
+    :page-deploy-1-time: "5 min"
+    :page-deploy-1-icon: package|cloud|terminal
+    :page-deploy-2-*, :page-deploy-3-* (same format)
+    :page-popular-title: "Popular topics"
+    :page-popular-1-title: "What's new"
+    :page-popular-1-desc: "Explore new features..."
+    :page-popular-1-link: xref:upgrade/whats-new.adoc[]
+    :page-popular-1-icon: sparkles|flow|chart|lightning|book|plug
+    :page-popular-2-*, :page-popular-3-*, :page-popular-4-* (same format)
+    :page-labs-title: "Labs for Self-Managed"
+    :page-labs-link: https://redpanda.com/labs
+    :page-labs-1-title: "Build a chat room with Rust"
+    :page-labs-1-link: https://...
+    :page-labs-2-*, :page-labs-3-*, :page-labs-4-* (same format)
+--}}
+{{!-- Hero Section --}}
+<section class="ch3-hero"{{#with (get-header-data page)}}{{#if this.heroGradient}} style="background: {{{this.heroGradient}}};"{{/if}}{{/with}}>
+  <div class="ch3-hero-bg" aria-hidden="true">
+    <div class="ch3-hero-glow"></div>
+    <div class="ch3-hero-grid"></div>
+  </div>
+  <div class="ch3-hero-inner">
+    {{!-- Status chip row --}}
+    <div class="ch3-eyebrow-row">
+      {{#with (get-header-data page)}}
+      {{!-- Status chip: "SELF-MANAGED • v25.1 | GA" format --}}
+      <span class="ch3-product-chip">
+        {{#if this.eyebrow}}{{{this.eyebrow}}}{{else if this.title}}{{{this.title}}}{{else}}{{@root.page.component.title}}{{/if}}{{#if (and @root.page.versions (gt @root.page.versions.length 1))}}{{#if (ne @root.page.componentVersion.displayVersion 'default')}} • v{{@root.page.componentVersion.displayVersion}}{{/if}}{{/if}}
+      </span>
+      {{/with}}
+      {{#if page.attributes.status-badge}}
+      <span class="ch3-ga-badge">{{{page.attributes.status-badge}}}</span>
+      {{/if}}
+      {{!-- Version selector pill --}}
+      {{> version-selector}}
+      {{#if page.attributes.beta}}
+      <span class="ch3-status-chip beta">Beta</span>
+      {{/if}}
+    </div>
+
+    {{!-- Main title --}}
+    <h1 class="ch3-page-title">
+      {{#if page.attributes.hero-title}}
+        {{{page.attributes.hero-title}}}
+      {{else}}
+        {{{page.title}}}
+      {{/if}}
+    </h1>
+
+    {{!-- Description --}}
+    {{#if page.attributes.hero-description}}
+    <p class="ch3-page-lede">{{{page.attributes.hero-description}}}</p>
+    {{/if}}
+
+    {{!-- Stats bar (optional) --}}
+    {{#if page.attributes.stats}}
+    <div class="ch3-hero-stats">
+      {{#each (split page.attributes.stats ';;')}}
+      {{#with (split this '|')}}
+      <div class="ch3-hero-stat">
+        <strong>{{lookup this 0}}</strong>
+        <span>{{lookup this 1}}</span>
+      </div>
+      {{/with}}
+      {{/each}}
+    </div>
+    {{/if}}
+  </div>
+</section>
+
+{{!-- Tab Navigation (optional) --}}
+{{#if page.attributes.tabs}}
+<nav class="ch3-tabs" aria-label="Page sections">
+  {{#each (split page.attributes.tabs ';;')}}
+  <a class="ch3-tab{{#if (eq @index 0)}} is-active{{/if}}" href="#" data-tab-index="{{@index}}">{{this}}</a>
+  {{/each}}
+</nav>
+{{/if}}
+
+{{!-- Choose Your Path Section (two-column comparison) --}}
+{{#if page.attributes.path-title}}
+<section class="ch3-path-compare">
+  <h2 class="ch3-section-title">{{{page.attributes.path-title}}}</h2>
+  <div class="ch3-path-grid">
+    {{!-- Self-hosted column --}}
+    <div class="ch3-path-col ch3-path-self">
+      <div class="ch3-path-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+        </svg>
+      </div>
+      <h3 class="ch3-path-heading">{{#if page.attributes.path-self-title}}{{{page.attributes.path-self-title}}}{{else}}Run it yourself{{/if}}</h3>
+      <p class="ch3-path-desc">{{#if page.attributes.path-self-desc}}{{{page.attributes.path-self-desc}}}{{else}}Deploy and manage Redpanda on your own infrastructure.{{/if}}</p>
+      <ul class="ch3-path-features">
+        {{#if page.attributes.path-self-1}}<li>{{{page.attributes.path-self-1}}}</li>{{/if}}
+        {{#if page.attributes.path-self-2}}<li>{{{page.attributes.path-self-2}}}</li>{{/if}}
+        {{#if page.attributes.path-self-3}}<li>{{{page.attributes.path-self-3}}}</li>{{/if}}
+      </ul>
+      <a class="ch3-path-cta" href="{{#if page.attributes.path-self-link}}{{{relativize (resolve-resource page.attributes.path-self-link)}}}{{/if}}">
+        {{#if page.attributes.path-self-cta}}{{{page.attributes.path-self-cta}}}{{else}}Get started{{/if}}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    {{!-- Center divider with "or" --}}
+    <div class="ch3-path-divider">
+      <div class="ch3-path-or">or</div>
+    </div>
+
+    {{!-- Cloud/managed column --}}
+    <div class="ch3-path-col ch3-path-cloud">
+      <div class="ch3-path-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>
+        </svg>
+      </div>
+      <h3 class="ch3-path-heading">{{#if page.attributes.path-cloud-title}}{{{page.attributes.path-cloud-title}}}{{else}}Use Redpanda Cloud{{/if}}</h3>
+      <p class="ch3-path-desc">{{#if page.attributes.path-cloud-desc}}{{{page.attributes.path-cloud-desc}}}{{else}}Let us handle the infrastructure so you can focus on your data.{{/if}}</p>
+      <ul class="ch3-path-features">
+        {{#if page.attributes.path-cloud-1}}<li>{{{page.attributes.path-cloud-1}}}</li>{{/if}}
+        {{#if page.attributes.path-cloud-2}}<li>{{{page.attributes.path-cloud-2}}}</li>{{/if}}
+        {{#if page.attributes.path-cloud-3}}<li>{{{page.attributes.path-cloud-3}}}</li>{{/if}}
+      </ul>
+      <a class="ch3-path-cta" href="{{#if page.attributes.path-cloud-link}}{{{relativize (resolve-resource page.attributes.path-cloud-link)}}}{{/if}}">
+        {{#if page.attributes.path-cloud-cta}}{{{page.attributes.path-cloud-cta}}}{{else}}Try Redpanda Cloud{{/if}}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+{{/if}}
+
+{{!-- Main content area --}}
+<div class="ch3-content">
+  {{!-- Deploy Section --}}
+  {{#if page.attributes.deploy-title}}
+  <section class="ch3-section">
+    <h2 class="ch3-section-title">{{{page.attributes.deploy-title}}}</h2>
+    <div class="ch3-deploy-grid">
+      {{!-- Deploy card 1 --}}
+      {{#if page.attributes.deploy-1-title}}
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-1-link}}{{{relativize (resolve-resource page.attributes.deploy-1-link)}}}{{/if}}">
+        <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-1-icon}}">
+          {{#if (eq page.attributes.deploy-1-icon 'lightning')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          {{else if (eq page.attributes.deploy-1-icon 'plug-connected')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v4"/><path d="M17 2v4"/><path d="M7 6h10a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4h-6a4 4 0 0 1-4-4V8a2 2 0 0 1 2-2"/><path d="M12 18v4"/></svg>
+          {{else if (eq page.attributes.deploy-1-icon 'plug')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v4"/><path d="M17 2v4"/><path d="M9 6H5a3 3 0 00-3 3v5a3 3 0 003 3h4M15 6h4a3 3 0 013 3v5a3 3 0 01-3 3h-4"/><path d="M9 6v11a3 3 0 003 3 3 3 0 003-3V6"/></svg>
+          {{else if (eq page.attributes.deploy-1-icon 'package')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+          {{else if (eq page.attributes.deploy-1-icon 'cloud')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+          {{else if (eq page.attributes.deploy-1-icon 'terminal')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          {{else}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <h3 class="ch3-deploy-title">{{{page.attributes.deploy-1-title}}}</h3>
+        {{#if page.attributes.deploy-1-desc}}
+        <p class="ch3-deploy-desc">{{{page.attributes.deploy-1-desc}}}</p>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">Get started</span>
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Deploy card 2 --}}
+      {{#if page.attributes.deploy-2-title}}
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-2-link}}{{{relativize (resolve-resource page.attributes.deploy-2-link)}}}{{/if}}">
+        <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-2-icon}}">
+          {{#if (eq page.attributes.deploy-2-icon 'lightning')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          {{else if (eq page.attributes.deploy-2-icon 'plug-connected')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v4"/><path d="M17 2v4"/><path d="M7 6h10a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4h-6a4 4 0 0 1-4-4V8a2 2 0 0 1 2-2"/><path d="M12 18v4"/></svg>
+          {{else if (eq page.attributes.deploy-2-icon 'plug')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v4"/><path d="M17 2v4"/><path d="M9 6H5a3 3 0 00-3 3v5a3 3 0 003 3h4M15 6h4a3 3 0 013 3v5a3 3 0 01-3 3h-4"/><path d="M9 6v11a3 3 0 003 3 3 3 0 003-3V6"/></svg>
+          {{else if (eq page.attributes.deploy-2-icon 'package')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+          {{else if (eq page.attributes.deploy-2-icon 'cloud')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+          {{else if (eq page.attributes.deploy-2-icon 'terminal')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          {{else}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <h3 class="ch3-deploy-title">{{{page.attributes.deploy-2-title}}}</h3>
+        {{#if page.attributes.deploy-2-desc}}
+        <p class="ch3-deploy-desc">{{{page.attributes.deploy-2-desc}}}</p>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">Get started</span>
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Deploy card 3 --}}
+      {{#if page.attributes.deploy-3-title}}
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-3-link}}{{{relativize (resolve-resource page.attributes.deploy-3-link)}}}{{/if}}">
+        <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-3-icon}}">
+          {{#if (eq page.attributes.deploy-3-icon 'lightning')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          {{else if (eq page.attributes.deploy-3-icon 'plug-connected')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v4"/><path d="M17 2v4"/><path d="M7 6h10a2 2 0 0 1 2 2v6a4 4 0 0 1-4 4h-6a4 4 0 0 1-4-4V8a2 2 0 0 1 2-2"/><path d="M12 18v4"/></svg>
+          {{else if (eq page.attributes.deploy-3-icon 'plug')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v4"/><path d="M17 2v4"/><path d="M9 6H5a3 3 0 00-3 3v5a3 3 0 003 3h4M15 6h4a3 3 0 013 3v5a3 3 0 01-3 3h-4"/><path d="M9 6v11a3 3 0 003 3 3 3 0 003-3V6"/></svg>
+          {{else if (eq page.attributes.deploy-3-icon 'package')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+          {{else if (eq page.attributes.deploy-3-icon 'cloud')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+          {{else if (eq page.attributes.deploy-3-icon 'terminal')}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          {{else}}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <h3 class="ch3-deploy-title">{{{page.attributes.deploy-3-title}}}</h3>
+        {{#if page.attributes.deploy-3-desc}}
+        <p class="ch3-deploy-desc">{{{page.attributes.deploy-3-desc}}}</p>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">Get started</span>
+        </div>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Features Section (with NEW badge support) --}}
+  {{#if page.attributes.features-title}}
+  <section class="ch3-section">
+    <h2 class="ch3-section-title">{{{page.attributes.features-title}}}</h2>
+    <div class="ch3-features-grid">
+      {{!-- Feature card 1 --}}
+      {{#if page.attributes.features-1-title}}
+      <a class="ch3-feature-card" href="{{#if page.attributes.features-1-link}}{{{relativize (resolve-resource page.attributes.features-1-link)}}}{{/if}}">
+        <div class="ch3-feature-icon" data-icon="{{page.attributes.features-1-icon}}">
+          {{#if (eq page.attributes.features-1-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.features-1-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.features-1-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-feature-content">
+          <div class="ch3-feature-header">
+            <h3 class="ch3-feature-title">{{{page.attributes.features-1-title}}}</h3>
+            {{#if page.attributes.features-1-new}}
+            <span class="ch3-feature-badge">NEW</span>
+            {{/if}}
+          </div>
+          {{#if page.attributes.features-1-desc}}
+          <p class="ch3-feature-desc">{{{page.attributes.features-1-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Feature card 2 --}}
+      {{#if page.attributes.features-2-title}}
+      <a class="ch3-feature-card" href="{{#if page.attributes.features-2-link}}{{{relativize (resolve-resource page.attributes.features-2-link)}}}{{/if}}">
+        <div class="ch3-feature-icon" data-icon="{{page.attributes.features-2-icon}}">
+          {{#if (eq page.attributes.features-2-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.features-2-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.features-2-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-feature-content">
+          <div class="ch3-feature-header">
+            <h3 class="ch3-feature-title">{{{page.attributes.features-2-title}}}</h3>
+            {{#if page.attributes.features-2-new}}
+            <span class="ch3-feature-badge">NEW</span>
+            {{/if}}
+          </div>
+          {{#if page.attributes.features-2-desc}}
+          <p class="ch3-feature-desc">{{{page.attributes.features-2-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Feature card 3 --}}
+      {{#if page.attributes.features-3-title}}
+      <a class="ch3-feature-card" href="{{#if page.attributes.features-3-link}}{{{relativize (resolve-resource page.attributes.features-3-link)}}}{{/if}}">
+        <div class="ch3-feature-icon" data-icon="{{page.attributes.features-3-icon}}">
+          {{#if (eq page.attributes.features-3-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.features-3-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.features-3-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-feature-content">
+          <div class="ch3-feature-header">
+            <h3 class="ch3-feature-title">{{{page.attributes.features-3-title}}}</h3>
+            {{#if page.attributes.features-3-new}}
+            <span class="ch3-feature-badge">NEW</span>
+            {{/if}}
+          </div>
+          {{#if page.attributes.features-3-desc}}
+          <p class="ch3-feature-desc">{{{page.attributes.features-3-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Popular Topics Section --}}
+  {{#if page.attributes.popular-title}}
+  <section class="ch3-section">
+    <h2 class="ch3-section-title">{{{page.attributes.popular-title}}}</h2>
+    <div class="ch3-popular-grid">
+      {{!-- Popular card 1 --}}
+      {{#if page.attributes.popular-1-title}}
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-1-link}}{{{relativize (resolve-resource page.attributes.popular-1-link)}}}{{/if}}">
+        <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-1-icon}}">
+          {{#if (eq page.attributes.popular-1-icon 'sparkles')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'lightning')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'book')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'terminal')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'package')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'kubernetes')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4.5 6v6c0 5.3 3.2 10.3 7.5 12 4.3-1.7 7.5-6.7 7.5-12V6L12 2z"/><circle cx="12" cy="11" r="3"/><path d="M12 8v-2"/><path d="M12 14v2"/><path d="M9.5 9.5L8 8"/><path d="M14.5 12.5L16 14"/><path d="M14.5 9.5L16 8"/><path d="M9.5 12.5L8 14"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'docker')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0-1.5-1-2.5-2-3h-1V7h-3V4h-4v3H9V4H5v3H2c-1 .5-2 1.5-2 3 0 3 3 6 10 8h2c7-2 10-5 10-8z"/><rect x="5" y="8" width="3" height="3"/><rect x="9" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="9" y="4" width="3" height="3"/></svg>
+          {{else if (eq page.attributes.popular-1-icon 'linux')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 00-4 4v2a4 4 0 008 0V6a4 4 0 00-4-4z"/><path d="M10 9v1"/><path d="M14 9v1"/><path d="M8 14c0 2.5 1.5 4 4 4s4-1.5 4-4"/><path d="M5 21c0-3 2-5 7-5s7 2 7 5"/><path d="M12 16v5"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-popular-text">
+          <h4>{{{page.attributes.popular-1-title}}}</h4>
+          {{#if page.attributes.popular-1-desc}}
+          <p>{{{page.attributes.popular-1-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Popular card 2 --}}
+      {{#if page.attributes.popular-2-title}}
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-2-link}}{{{relativize (resolve-resource page.attributes.popular-2-link)}}}{{/if}}">
+        <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-2-icon}}">
+          {{#if (eq page.attributes.popular-2-icon 'sparkles')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'lightning')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'book')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'terminal')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'package')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'kubernetes')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4.5 6v6c0 5.3 3.2 10.3 7.5 12 4.3-1.7 7.5-6.7 7.5-12V6L12 2z"/><circle cx="12" cy="11" r="3"/><path d="M12 8v-2"/><path d="M12 14v2"/><path d="M9.5 9.5L8 8"/><path d="M14.5 12.5L16 14"/><path d="M14.5 9.5L16 8"/><path d="M9.5 12.5L8 14"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'docker')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0-1.5-1-2.5-2-3h-1V7h-3V4h-4v3H9V4H5v3H2c-1 .5-2 1.5-2 3 0 3 3 6 10 8h2c7-2 10-5 10-8z"/><rect x="5" y="8" width="3" height="3"/><rect x="9" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="9" y="4" width="3" height="3"/></svg>
+          {{else if (eq page.attributes.popular-2-icon 'linux')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 00-4 4v2a4 4 0 008 0V6a4 4 0 00-4-4z"/><path d="M10 9v1"/><path d="M14 9v1"/><path d="M8 14c0 2.5 1.5 4 4 4s4-1.5 4-4"/><path d="M5 21c0-3 2-5 7-5s7 2 7 5"/><path d="M12 16v5"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-popular-text">
+          <h4>{{{page.attributes.popular-2-title}}}</h4>
+          {{#if page.attributes.popular-2-desc}}
+          <p>{{{page.attributes.popular-2-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Popular card 3 --}}
+      {{#if page.attributes.popular-3-title}}
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-3-link}}{{{relativize (resolve-resource page.attributes.popular-3-link)}}}{{/if}}">
+        <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-3-icon}}">
+          {{#if (eq page.attributes.popular-3-icon 'sparkles')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'lightning')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'book')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'terminal')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'package')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'kubernetes')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4.5 6v6c0 5.3 3.2 10.3 7.5 12 4.3-1.7 7.5-6.7 7.5-12V6L12 2z"/><circle cx="12" cy="11" r="3"/><path d="M12 8v-2"/><path d="M12 14v2"/><path d="M9.5 9.5L8 8"/><path d="M14.5 12.5L16 14"/><path d="M14.5 9.5L16 8"/><path d="M9.5 12.5L8 14"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'docker')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0-1.5-1-2.5-2-3h-1V7h-3V4h-4v3H9V4H5v3H2c-1 .5-2 1.5-2 3 0 3 3 6 10 8h2c7-2 10-5 10-8z"/><rect x="5" y="8" width="3" height="3"/><rect x="9" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="9" y="4" width="3" height="3"/></svg>
+          {{else if (eq page.attributes.popular-3-icon 'linux')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 00-4 4v2a4 4 0 008 0V6a4 4 0 00-4-4z"/><path d="M10 9v1"/><path d="M14 9v1"/><path d="M8 14c0 2.5 1.5 4 4 4s4-1.5 4-4"/><path d="M5 21c0-3 2-5 7-5s7 2 7 5"/><path d="M12 16v5"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-popular-text">
+          <h4>{{{page.attributes.popular-3-title}}}</h4>
+          {{#if page.attributes.popular-3-desc}}
+          <p>{{{page.attributes.popular-3-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+      {{!-- Popular card 4 --}}
+      {{#if page.attributes.popular-4-title}}
+      <a class="ch3-popular-card" href="{{#if page.attributes.popular-4-link}}{{{relativize (resolve-resource page.attributes.popular-4-link)}}}{{/if}}">
+        <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-4-icon}}">
+          {{#if (eq page.attributes.popular-4-icon 'sparkles')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 19l.5 1.5L7 21l-1.5.5L5 23l-.5-1.5L3 21l1.5-.5L5 19z"/><path d="M19 5l.5 1.5L21 7l-1.5.5L19 9l-.5-1.5L17 7l1.5-.5L19 5z"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'flow')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'chart')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'lightning')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'book')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'plug')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22v-5"/><path d="M9 7V2"/><path d="M15 7V2"/><path d="M6 13V7h12v6a4 4 0 01-4 4h-4a4 4 0 01-4-4z"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'terminal')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'package')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.79 0l-8-4a2 2 0 01-1.1-1.8V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"/><polyline points="2.32 6.16 12 11 21.68 6.16"/><line x1="12" y1="22.76" x2="12" y2="11"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'kubernetes')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4.5 6v6c0 5.3 3.2 10.3 7.5 12 4.3-1.7 7.5-6.7 7.5-12V6L12 2z"/><circle cx="12" cy="11" r="3"/><path d="M12 8v-2"/><path d="M12 14v2"/><path d="M9.5 9.5L8 8"/><path d="M14.5 12.5L16 14"/><path d="M14.5 9.5L16 8"/><path d="M9.5 12.5L8 14"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'docker')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0-1.5-1-2.5-2-3h-1V7h-3V4h-4v3H9V4H5v3H2c-1 .5-2 1.5-2 3 0 3 3 6 10 8h2c7-2 10-5 10-8z"/><rect x="5" y="8" width="3" height="3"/><rect x="9" y="8" width="3" height="3"/><rect x="13" y="8" width="3" height="3"/><rect x="9" y="4" width="3" height="3"/></svg>
+          {{else if (eq page.attributes.popular-4-icon 'linux')}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 00-4 4v2a4 4 0 008 0V6a4 4 0 00-4-4z"/><path d="M10 9v1"/><path d="M14 9v1"/><path d="M8 14c0 2.5 1.5 4 4 4s4-1.5 4-4"/><path d="M5 21c0-3 2-5 7-5s7 2 7 5"/><path d="M12 16v5"/></svg>
+          {{else}}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          {{/if}}
+        </div>
+        <div class="ch3-popular-text">
+          <h4>{{{page.attributes.popular-4-title}}}</h4>
+          {{#if page.attributes.popular-4-desc}}
+          <p>{{{page.attributes.popular-4-desc}}}</p>
+          {{/if}}
+        </div>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Labs Section --}}
+  {{#if page.attributes.labs-title}}
+  <section class="ch3-section">
+    <div class="ch3-labs-head">
+      <h2 class="ch3-section-title">{{{page.attributes.labs-title}}}</h2>
+      {{#if page.attributes.labs-link}}
+      <a class="ch3-labs-all" href="{{#if (is-external-url page.attributes.labs-link)}}{{{page.attributes.labs-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-link)}}}{{/if}}">Browse all labs</a>
+      {{/if}}
+    </div>
+    <ul class="ch3-labs-list">
+      {{#if page.attributes.labs-1-title}}
+      <li><a href="{{#if (is-external-url page.attributes.labs-1-link)}}{{{page.attributes.labs-1-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-1-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-1-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        <span>{{{page.attributes.labs-1-title}}}</span>
+      </a></li>
+      {{/if}}
+      {{#if page.attributes.labs-2-title}}
+      <li><a href="{{#if (is-external-url page.attributes.labs-2-link)}}{{{page.attributes.labs-2-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-2-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-2-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        <span>{{{page.attributes.labs-2-title}}}</span>
+      </a></li>
+      {{/if}}
+      {{#if page.attributes.labs-3-title}}
+      <li><a href="{{#if (is-external-url page.attributes.labs-3-link)}}{{{page.attributes.labs-3-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-3-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-3-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        <span>{{{page.attributes.labs-3-title}}}</span>
+      </a></li>
+      {{/if}}
+      {{#if page.attributes.labs-4-title}}
+      <li><a href="{{#if (is-external-url page.attributes.labs-4-link)}}{{{page.attributes.labs-4-link}}}{{else}}{{{relativize (resolve-resource page.attributes.labs-4-link)}}}{{/if}}" {{#if (is-external-url page.attributes.labs-4-link)}}target="_blank" rel="noopener noreferrer"{{/if}}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+        <span>{{{page.attributes.labs-4-title}}}</span>
+      </a></li>
+      {{/if}}
+    </ul>
+  </section>
+  {{/if}}
+
+  {{!-- Render any additional AsciiDoc content --}}
+  {{{page.contents}}}
+
+  {{!-- Help Section --}}
+  <section class="ch3-help">
+    <div>
+      <h3>Need a hand?</h3>
+      <p>Ask Redpanda AI, search the docs, or talk to a real human in Slack.</p>
+    </div>
+    <div class="ch3-help-actions">
+      <button class="ch3-help-btn" type="button" data-action="open-chat">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.01942 4.14696C0.821273 4.07417 0.615365 4.0169 0.403168 3.97662C0.387588 3.97367 0.371975 3.9708 0.356327 3.96802C0.214558 3.94289 0.214558 3.74081 0.356327 3.71568C0.371975 3.7129 0.387588 3.71003 0.403168 3.70709C0.615365 3.6668 0.821273 3.60953 1.01942 3.53675C1.138 3.49318 1.2538 3.44407 1.36651 3.38969C2.14702 3.01321 2.77911 2.38509 3.158 1.60949C3.2127 1.49749 3.26214 1.38242 3.30596 1.26458C3.37921 1.06768 3.43684 0.863067 3.47738 0.652204C3.48035 0.636723 3.48323 0.621208 3.48603 0.605658C3.51132 0.464781 3.71467 0.464781 3.73997 0.605658C3.74277 0.621208 3.74565 0.636723 3.74861 0.652204C3.78916 0.863067 3.84678 1.06768 3.92003 1.26458C3.96387 1.38242 4.01329 1.49749 4.06802 1.60949C4.44688 2.38509 5.07898 3.01321 5.8595 3.38969C5.9722 3.44407 6.088 3.49318 6.20657 3.53675C6.40473 3.60953 6.61063 3.6668 6.82284 3.70709C6.83842 3.71003 6.85402 3.7129 6.86967 3.71568C7.01144 3.74081 7.01144 3.94289 6.86967 3.96802C6.85402 3.9708 6.83842 3.97367 6.82284 3.97662C6.61063 4.0169 6.40473 4.07417 6.20657 4.14696C6.088 4.19052 5.9722 4.23963 5.8595 4.29401C5.07898 4.67049 4.44688 5.29861 4.06802 6.07422C4.01329 6.18622 3.96387 6.30129 3.92003 6.41912C3.84678 6.61602 3.78916 6.82063 3.74861 7.03151C3.74565 7.04697 3.74277 7.06249 3.73997 7.07804C3.71467 7.21893 3.51132 7.21893 3.48603 7.07804C3.48323 7.06249 3.48035 7.04697 3.47738 7.03151C3.43684 6.82063 3.37921 6.61602 3.30596 6.41912C3.26214 6.30129 3.2127 6.18622 3.158 6.07422C2.77911 5.29861 2.14702 4.67049 1.36651 4.29401C1.2538 4.23963 1.138 4.19052 1.01942 4.14696ZM5.75667 9.15294C5.61809 9.11583 5.47758 9.08326 5.3353 9.05541C5.31306 9.05107 5.29079 9.04684 5.26848 9.04271L5.26172 9.04146L5.25257 9.0398C5.23849 9.03725 5.22303 9.03451 5.19212 9.02901L5.18132 9.0271C4.9546 8.98447 4.9546 8.66184 5.18132 8.61921L5.19212 8.6173C5.22303 8.6118 5.23849 8.60906 5.25257 8.60651L5.26172 8.60485L5.26848 8.60361C5.29079 8.59947 5.31306 8.59524 5.33528 8.5909C5.47756 8.56305 5.61809 8.53048 5.75667 8.49337C5.87504 8.46168 5.992 8.42664 6.10746 8.38841C7.9755 7.76963 9.44545 6.30893 10.0681 4.45264C10.1066 4.33791 10.1419 4.22168 10.1738 4.10403C10.2111 3.96634 10.2439 3.8267 10.2719 3.68531C10.2763 3.66323 10.2805 3.6411 10.2847 3.61894L10.286 3.61221L10.2876 3.60312C10.2902 3.5893 10.2929 3.57413 10.2983 3.54409L10.2985 3.54306L10.3004 3.53232C10.3433 3.30702 10.668 3.30702 10.7109 3.53232L10.7128 3.54306C10.7183 3.57377 10.7211 3.58913 10.7237 3.60312L10.7253 3.61221L10.7266 3.61894C10.7307 3.6411 10.735 3.66323 10.7394 3.68531C10.7674 3.82672 10.8002 3.96634 10.8375 4.10403C10.8694 4.22168 10.9047 4.33791 10.9431 4.45264C11.5658 6.30893 13.0358 7.76963 14.9038 8.38841C15.0193 8.42664 15.1362 8.46168 15.2546 8.49337C15.3932 8.53048 15.5337 8.56305 15.676 8.5909C15.6982 8.59524 15.7205 8.59947 15.7428 8.60361L15.7496 8.60485L15.7587 8.60651C15.7728 8.60906 15.7882 8.6118 15.8192 8.6173L15.83 8.61921C16.0567 8.66184 16.0567 8.98447 15.83 9.0271L15.8192 9.02901L15.7864 9.03482L15.7587 9.0398L15.7496 9.04146L15.7428 9.04271C15.7205 9.04684 15.6982 9.05107 15.676 9.05541C15.5337 9.08326 15.3932 9.11583 15.2546 9.15294C15.1362 9.18463 15.0193 9.21967 14.9038 9.2579C13.0358 9.87668 11.5658 11.3374 10.9431 13.1937C10.9047 13.3084 10.8694 13.4246 10.8375 13.5423C10.8002 13.68 10.7674 13.8196 10.7394 13.961C10.735 13.9831 10.7307 14.0052 10.7266 14.0274L10.7253 14.0341L10.7237 14.0432L10.7199 14.0637L10.713 14.1021L10.7109 14.114C10.668 14.3393 10.3433 14.3393 10.3004 14.114L10.2985 14.1033C10.293 14.0726 10.2902 14.0572 10.2876 14.0432L10.286 14.0341L10.2847 14.0274C10.2805 14.0052 10.2763 13.9831 10.2719 13.961C10.2439 13.8196 10.2111 13.68 10.1738 13.5423C10.1419 13.4246 10.1066 13.3084 10.0681 13.1937C9.44545 11.3374 7.9755 9.87668 6.10746 9.2579C5.992 9.21967 5.87504 9.18463 5.75667 9.15294ZM2.63009 13.4745C2.86838 13.5197 3.09411 13.5989 3.30206 13.7067C3.39456 13.7547 3.48354 13.8084 3.56853 13.8673C3.80536 14.0313 4.01129 14.236 4.17642 14.4713C4.23567 14.5558 4.28969 14.6442 4.33796 14.7361C4.44653 14.9428 4.52617 15.1671 4.57168 15.4039C4.57356 15.4137 4.5754 15.4234 4.57715 15.4333C4.59313 15.5222 4.72156 15.5222 4.73754 15.4333C4.7393 15.4234 4.74111 15.4137 4.74299 15.4039C4.78853 15.1671 4.86817 14.9428 4.97672 14.7361C5.02501 14.6442 5.07902 14.5558 5.13828 14.4713C5.30339 14.236 5.50933 14.0313 5.74616 13.8673C5.83115 13.8084 5.92013 13.7547 6.01262 13.7067C6.22059 13.5989 6.44631 13.5197 6.68461 13.4745C6.69445 13.4726 6.7043 13.4708 6.71418 13.469C6.80373 13.4532 6.80373 13.3255 6.71418 13.3097C6.7043 13.3079 6.69445 13.3061 6.68461 13.3042C6.44631 13.259 6.22059 13.1798 6.01262 13.072C5.92013 13.024 5.83115 12.9703 5.74616 12.9114C5.50933 12.7474 5.30339 12.5427 5.13828 12.3074C5.07902 12.2229 5.02501 12.1345 4.97672 12.0426C4.86817 11.836 4.78853 11.6116 4.74299 11.3748C4.74111 11.3651 4.7393 11.3553 4.73754 11.3454C4.72156 11.2565 4.59313 11.2565 4.57715 11.3454C4.5754 11.3553 4.57356 11.3651 4.57168 11.3748C4.52617 11.6116 4.44653 11.836 4.33796 12.0426C4.28969 12.1345 4.23567 12.2229 4.17642 12.3074C4.01129 12.5427 3.80536 12.7474 3.56853 12.9114C3.48354 12.9703 3.39456 13.024 3.30206 13.072C3.09411 13.1798 2.86838 13.259 2.63009 13.3042C2.62025 13.3061 2.61039 13.3079 2.60049 13.3097C2.51097 13.3255 2.51097 13.4532 2.60049 13.469C2.61039 13.4708 2.62025 13.4726 2.63009 13.4745Z"/></svg>
+        Ask Redpanda AI
+      </button>
+      <a class="ch3-help-btn ch3-help-btn-secondary" href="https://redpanda.com/slack" target="_blank" rel="noopener">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Join the community
+      </a>
+    </div>
+  </section>
+</div>

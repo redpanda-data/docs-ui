@@ -1,0 +1,33 @@
+{{#with (get-header-color page)}}
+<style>
+  /* Dynamic component color from component-metadata - higher specificity to override defaults */
+  body[data-component-color] {
+    --component-color: {{{this}}};
+    /* Tinted backgrounds using color-mix (light mode) */
+    --component-bg-tint: color-mix(in srgb, {{{this}}} 6%, transparent);
+    --component-bg-tint-hover: color-mix(in srgb, {{{this}}} 10%, transparent);
+    --component-bg-tint-active: color-mix(in srgb, {{{this}}} 14%, transparent);
+    --topbar-bg: color-mix(in srgb, {{{this}}} 8%, transparent);
+    --topbar-border: color-mix(in srgb, {{{this}}} 15%, transparent);
+    /* Component color shades */
+    --component-600: {{{this}}};
+    --component-500: color-mix(in srgb, {{{this}}}, white 15%);
+    --component-700: color-mix(in srgb, {{{this}}}, black 15%);
+  }
+
+  /* Dark mode - adjust tints for dark backgrounds */
+  html[data-theme="dark"] body[data-component-color] {
+    /* Lighter tints that show up on dark backgrounds */
+    --component-bg-tint: color-mix(in srgb, {{{this}}} 20%, transparent);
+    --component-bg-tint-hover: color-mix(in srgb, {{{this}}} 28%, transparent);
+    --component-bg-tint-active: color-mix(in srgb, {{{this}}} 35%, transparent);
+    /* Topbar - mix 30% component color with dark slate for noticeable tint */
+    --topbar-bg: color-mix(in srgb, {{{this}}} 30%, #0f172a);
+    --topbar-border: color-mix(in srgb, {{{this}}} 50%, rgba(255, 255, 255, 0.2));
+    /* Brighter component colors for dark mode visibility */
+    --component-600: color-mix(in srgb, {{{this}}}, white 15%);
+    --component-500: color-mix(in srgb, {{{this}}}, white 30%);
+    --component-700: {{{this}}};
+  }
+</style>
+{{/with}}

@@ -282,6 +282,112 @@
   margin: 0;
 }
 
+/* BYOC Badge */
+.badge--byoc {
+  color: var(--byoc-label-background);
+  font-weight: bold;
+  background-color: var(--byoc-highlight-background-color);
+}
+
+.badge--large.badge--byoc {
+  background-color: var(--byoc-label-background);
+  color: var(--byoc-label-color);
+}
+
+.byoc-label {
+  display: inline-flex;
+  margin: 0;
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.byoc-label > p {
+  flex: 0 1 auto;
+  border-radius: 10px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--byoc-label-color);
+  background-color: var(--byoc-label-background);
+  padding: 3px;
+  min-width: 100px;
+  margin: 0;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-byoc-container {
+  display: inline-flex;
+}
+
+.nav-byoc-label {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-weight: bold;
+  min-width: 100px;
+  padding: 3px;
+  border-radius: 10px;
+  color: var(--byoc-label-color);
+  background-color: var(--byoc-label-background);
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+/* Cloud Badge */
+.badge--cloud {
+  color: var(--cloud-label-background);
+  font-weight: bold;
+  background-color: var(--cloud-highlight-background-color);
+}
+
+.badge--large.badge--cloud {
+  background-color: var(--cloud-label-background);
+  color: var(--cloud-label-color);
+}
+
+.cloud-label {
+  display: inline-flex;
+  margin: 0;
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.cloud-label > p {
+  flex: 0 1 auto;
+  border-radius: 10px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--cloud-label-color);
+  background-color: var(--cloud-label-background);
+  padding: 3px;
+  min-width: 100px;
+  margin: 0;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-cloud-container {
+  display: inline-flex;
+}
+
+.nav-cloud-label {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-weight: bold;
+  min-width: 100px;
+  padding: 3px;
+  border-radius: 10px;
+  color: var(--cloud-label-color);
+  background-color: var(--cloud-label-background);
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .article .metadata {
     flex-direction: column;

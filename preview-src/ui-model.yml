@@ -2,29 +2,46 @@ antoraVersion: '1.0.0'
 site:
   url: https://deploy-preview-327--docs-ui.netlify.app
   title: UI Preview
-  homeUrl: &home_url /xyz/24.3/index.html
+  homeUrl: &home_url /streaming/24.3/index.html
   components:
-  - name: abc
-    title: Project ABC
+  # Agentic Data Plane component
+  - name: redpanda-adp
+    title: Agentic Data Plane
     url: '#'
     versions:
-    - &latest_version_abc
+    - &latest_version_adp
       url: '#'
-      version: '1.1'
-      displayVersion: '1.1'
-    - url: '#'
       version: '1.0'
       displayVersion: '1.0'
-    latestVersion: *latest_version_abc
+      asciidoc:
+        attributes:
+          page-header-data:
+            title: Agentic Data Plane
+            section: Agentic Data Plane
+            description: Build, connect, and govern AI agents.
+            color: '#7C3AED'
+            order: 1
+    latestVersion: *latest_version_adp
+  # Streaming component - under Data Platform (formerly Self-Managed/ROOT)
   - &component
-    name: ROOT
-    title: &component_title Redpanda
-    url: /xyz/6.0/index.html
+    name: streaming
+    title: &component_title Streaming
+    url: /streaming/6.0/index.html
     versions:
     - &latest_version_xyz
-      url: /xyz/6.0/index.html
+      url: /streaming/6.0/index.html
       version: '6.0'
       displayVersion: '6.0'
+      asciidoc:
+        attributes:
+          page-header-data:
+            title: Streaming
+            section: Data Platform
+            parent-component: self-managed
+            description: Run Redpanda on your own infrastructure.
+            color: '#6366f1'
+            icon: activity
+            order: 1
     - &component_version
       title: *component_title
       url: '#'
@@ -32,6 +49,14 @@ site:
       displayVersion: '24.3'
       asciidoc:
         attributes:
+          page-header-data:
+            title: Streaming
+            section: Data Platform
+            parent-component: self-managed
+            description: Run Redpanda on your own infrastructure.
+            color: '#6366f1'
+            icon: activity
+            order: 1
           toc-tools-title: Connect Tools
           toc-tools-links: '[{"text": "Bloblang Playground", "url": "/playground", "icon": "terminal"}, {"text": "Claude AI Skills", "url": "https://github.com/redpanda-data/connect/blob/main/.claude-plugin/README.md", "icon": "layers", "external": true}]'
     - url: '#'
@@ -41,21 +66,44 @@ site:
       version: '5.0'
       displayVersion: '5.0'
     latestVersion: *latest_version_xyz
-  - name: '123'
-    title: Project 123
+  # Cloud component - under Data Platform
+  - name: redpanda-cloud
+    title: Cloud
     url: '#'
     versions:
-    - &latest_version_123
+    - &latest_version_cloud
       url: '#'
-      version: '2.2'
-      displayVersion: '2.2'
-    - url: '#'
-      version: '2.1'
-      displayVersion: '2.1'
-    - url: '#'
-      version: '2.0'
-      displayVersion: '2.0'
-    latestVersion: *latest_version_123
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          page-header-data:
+            title: Cloud
+            section: Data Platform
+            description: Fully managed Redpanda clusters.
+            color: '#0891B2'
+            order: 2
+    latestVersion: *latest_version_cloud
+  # Connect component - under Data Platform (formerly redpanda-connect)
+  - name: connect
+    title: Connect
+    url: '#'
+    versions:
+    - &latest_version_connect
+      url: '#'
+      version: '4.0'
+      displayVersion: '4.0'
+      asciidoc:
+        attributes:
+          page-header-data:
+            title: Connect
+            section: Data Platform
+            parent-component: self-managed
+            description: Stream processing and integration connectors.
+            color: '#059669'
+            icon: plug-connected
+            order: 2
+    latestVersion: *latest_version_connect
 page:
   url: *home_url
   home: true
@@ -81,11 +129,17 @@ page:
     url: '#'
     urlType: 'internal'
   breadcrumbs:
+  - content: Data Platform
+    url: '#'
+    urlType: internal
+  - content: Streaming
+    url: '#'
+    urlType: internal
   - content: Quickstart
     url: '#'
     urlType: internal
   - content: Brand&#8217;s Hardware &amp; Software Requirements
-    url: /xyz/24.3/index.html
+    url: /streaming/24.3/index.html
     urlType: internal
   versions:
   - version: '6.0'
@@ -109,16 +163,16 @@ page:
       urlType: internal
       items:
       - content: Brand&#8217;s Hardware &amp; Software Requirements
-        url: /xyz/24.3/index.html
+        url: /streaming/24.3/index.html
         urlType: internal
       - content: Bloblang Syntax
-        url: /xyz/24.3/bloblang-syntax-test.html
+        url: /streaming/24.3/bloblang-syntax-test.html
         urlType: internal
       - content: Bloblang Playground
-        url: /xyz/24.3/playground.html
+        url: /streaming/24.3/playground.html
         urlType: internal
       - content: Home page
-        url: /xyz/24.3/home.html
+        url: /streaming/24.3/home.html
         urlType: internal
     - content: Get Started
       url: '#'
@@ -337,6 +391,6 @@ page:
         url: '#'
         urlType: internal
       - content: Limited Availability Test
-        url: /xyz/24.3/limited-availability-test.html
+        url: /streaming/24.3/limited-availability-test.html
         urlType: internal
 

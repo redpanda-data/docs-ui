@@ -6,43 +6,51 @@
   gap: 10px;
 }
 
-/* Position in metadata container */
-.article .metadata .markdown-dropdown {
+/* Markdown dropdown in sticky header */
+.component-indicator-sticky .markdown-dropdown {
   position: relative;
   display: inline-block;
-  margin-left: auto; /* Push to right */
-  height: 30px;
+  margin-left: auto;
+  /* Ensure focus outline isn't clipped - use padding without negative margins */
+  padding: 4px;
 }
 
-/* Toggle Button */
+/* Toggle Button - styled to match version selector pill */
 .markdown-dropdown-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  border: 1px solid var(--color-smoke-70, #ddd);
-  border-radius: 0.25rem;
-  background: var(--color-white, #fff);
-  color: var(--color-jet-70, #333);
-  font-size: 0.875rem;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-smoke-70, #dcdcde);
+  border-radius: 99px;
+  background: var(--color-smoke-30, #f4f4f5);
+  color: var(--color-jet-80, #48484a);
+  font-size: 11px;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* In sticky header context - ensure consistent sizing */
+.component-indicator-sticky .markdown-dropdown-toggle {
+  padding: 4px 10px;
+  font-size: 11px;
 }
 
 .markdown-dropdown-toggle:hover {
-  background: var(--color-smoke-10, #f8f8f8);
-  border-color: var(--color-smoke-90, #bbb);
+  background: var(--color-smoke-50, #e8e8ea);
+  border-color: var(--color-smoke-90, #c3c4c6);
 }
 
 .markdown-dropdown-toggle:focus {
-  outline: 2px solid var(--color-blue-50, #0066cc);
+  outline: 2px solid var(--link-highlight-color, #444ce7);
   outline-offset: 2px;
 }
 
 .markdown-dropdown-toggle[aria-expanded="true"] {
-  background: var(--color-smoke-10, #f8f8f8);
-  border-color: var(--color-smoke-90, #bbb);
+  background: var(--color-smoke-50, #e8e8ea);
+  border-color: var(--color-smoke-90, #c3c4c6);
 }
 
 .markdown-icon {
@@ -55,6 +63,7 @@
 
 .dropdown-caret {
   flex-shrink: 0;
+  opacity: 0.6;
   transition: transform 0.2s ease;
 }
 
@@ -62,24 +71,29 @@
   transform: rotate(180deg);
 }
 
-/* Dropdown Menu */
+html[data-theme=dark] .dropdown-caret {
+  opacity: 0.5;
+}
+
+/* Dropdown Menu - styled to match version selector panel */
 .markdown-dropdown-menu {
-  top: calc(100% + 0.25rem);
+  top: calc(100% + 6px);
   position: absolute;
   right: 0;
   z-index: 1000;
-  min-width: 200px;
-  padding: 0.25rem;
-  border: 1px solid var(--color-smoke-70, #ddd);
-  border-radius: 0.375rem;
+  min-width: 220px;
+  max-width: calc(100vw - 32px); /* Prevent overflow on narrow viewports */
+  padding: 6px;
+  border: 1px solid var(--color-smoke-70, #dcdcde);
+  border-radius: 12px;
   background: var(--color-white, #fff);
   box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.04);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-0.5rem);
-  transition: all 0.15s ease;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
 }
 
 .markdown-dropdown-menu.is-open {
@@ -92,14 +106,14 @@
 .markdown-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 10px 12px;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 8px;
   background: transparent;
-  color: var(--color-jet-70, #333);
-  font-size: 0.875rem;
+  color: var(--color-jet-80, #48484a);
+  font-size: 14px;
   font-family: inherit;
   text-align: left;
   cursor: pointer;
@@ -107,12 +121,12 @@
 }
 
 .markdown-dropdown-item:hover {
-  background: var(--color-smoke-10, #f8f8f8);
+  background: var(--color-smoke-30, #f4f4f5);
 }
 
 .markdown-dropdown-item:focus {
   outline: none;
-  background: var(--color-smoke-30, #e8e8e8);
+  background: var(--color-smoke-50, #e8e8ea);
 }
 
 .markdown-dropdown-item svg {
@@ -152,13 +166,15 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .article .metadata .markdown-dropdown {
-    margin-left: 0; /* Reset margin on mobile */
+  .page-options-container {
+    justify-content: flex-start;
   }
 
+  /* On mobile, position dropdown to stay within viewport */
   .markdown-dropdown-menu {
-    right: auto;
-    left: 0;
+    right: -8px; /* Slight offset to stay within viewport */
+    left: auto;
+    min-width: 200px;
   }
 
   .markdown-text {
@@ -170,37 +186,48 @@
   }
 }
 
-/* Dark mode support */
+/* Very narrow viewports - ensure dropdown doesn't overflow */
+@media (max-width: 480px) {
+  .markdown-dropdown-menu {
+    /* Keep absolute positioning relative to parent */
+    right: -12px;
+    left: auto;
+    min-width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* Dark mode support - styled to match version selector */
 html[data-theme=dark] .markdown-dropdown-toggle {
-  border-color: var(--color-smoke-90);
-  background: var(--body-background);
-  color: var(--body-font-color);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e4e9;
 }
 
 html[data-theme=dark] .markdown-dropdown-toggle:hover,
 html[data-theme=dark] .markdown-dropdown-toggle[aria-expanded="true"] {
-  background: var(--panel-background);
-  border-color: var(--color-smoke-70);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 html[data-theme=dark] .markdown-dropdown-menu {
-  border-color: var(--color-smoke-90);
-  background: var(--body-background);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: #1d1e26;
   box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.5),
-    0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 html[data-theme=dark] .markdown-dropdown-item {
-  color: var(--body-font-color);
+  color: #e2e4e9;
 }
 
 html[data-theme=dark] .markdown-dropdown-item:hover {
-  background: var(--panel-background);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 html[data-theme=dark] .markdown-dropdown-item:focus {
-  background: var(--nav-background);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Accessibility: Reduce motion */
