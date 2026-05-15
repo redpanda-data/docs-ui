@@ -3,6 +3,14 @@
    Matches "docs design (2)" with hero, tabs, and "Choose your path" cards
    ============================================================================= */
 
+/* Hide all icons on landing pages */
+.ch3-path-icon,
+.ch3-deploy-icon,
+.ch3-feature-icon,
+.ch3-popular-icon {
+  display: none !important;
+}
+
 /* Component home layout - ensure hero gets its own row */
 .component-content {
   display: flex !important;
@@ -899,6 +907,127 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* Features Grid (with NEW badge support) ----------------------------------- */
+.ch3-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.ch3-feature-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--color-smoke-70, #dcdcde);
+  border-radius: 12px;
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.14s, box-shadow 0.14s, transform 0.14s;
+}
+
+.ch3-feature-card:hover {
+  border-color: var(--component-600, var(--indigo-600-new, #4f46e5));
+  box-shadow: 0 8px 24px rgba(13, 18, 38, 0.08);
+  transform: translateY(-2px);
+}
+
+.ch3-feature-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--component-bg-tint, rgba(79, 70, 229, 0.08));
+  color: var(--component-600, var(--indigo-600-new, #4f46e5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ch3-feature-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ch3-feature-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ch3-feature-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-jet, #181818);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.ch3-feature-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.ch3-feature-desc {
+  font-size: 13.5px;
+  color: var(--color-jet-70, #606164);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ch3-feature-arrow {
+  flex-shrink: 0;
+  color: var(--color-jet-30, #c8cacc);
+  transition: transform 0.12s, color 0.14s;
+}
+
+.ch3-feature-card:hover .ch3-feature-arrow {
+  color: var(--component-600, var(--indigo-600-new, #4f46e5));
+  transform: translateX(2px);
+}
+
+html[data-theme="dark"] .ch3-feature-card {
+  background: var(--dark-blue-900-new, #0f172a);
+  border-color: var(--dark-blue-700-new, #334155);
+}
+
+html[data-theme="dark"] .ch3-feature-card:hover {
+  border-color: var(--component-500, var(--indigo-500-new, #6366f1));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .ch3-feature-icon {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
+}
+
+html[data-theme="dark"] .ch3-feature-title {
+  color: var(--grey-50-new, #f9fafb);
+}
+
+html[data-theme="dark"] .ch3-feature-desc {
+  color: var(--grey-400-new, #a1a1aa);
+}
+
+html[data-theme="dark"] .ch3-feature-arrow {
+  color: var(--grey-600-new, #71717a);
+}
+
+html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
+}
+
 /* Popular Topics Grid ----------------------------------------------------- */
 .ch3-popular-grid {
   display: grid;
@@ -1332,7 +1461,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left: none;
-  background: linear-gradient(135deg, #0f8b66 0%, #065f46 100%);
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
   border-color: transparent;
   color: #fff;
 }
@@ -1439,7 +1568,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
 
 .ch3-path-cloud .ch3-path-cta {
   background: #fff;
-  color: #065f46;
+  color: #0369a1;
 }
 
 .ch3-path-cloud .ch3-path-cta:hover {
@@ -1500,6 +1629,19 @@ html[data-theme="dark"] .ch3-path-self .ch3-path-cta {
 
 html[data-theme="dark"] .ch3-path-self .ch3-path-cta:hover {
   background: rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme="dark"] .ch3-path-cloud {
+  background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%);
+}
+
+html[data-theme="dark"] .ch3-path-cloud .ch3-path-cta {
+  background: #fff;
+  color: #0c4a6e;
+}
+
+html[data-theme="dark"] .ch3-path-cloud .ch3-path-cta:hover {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 html[data-theme="dark"] .ch3-path-or {
