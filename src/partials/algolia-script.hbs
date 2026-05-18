@@ -134,6 +134,14 @@ let __dropdownKeydownHandler = null;
 function initAlgolia() {
   // Prevent double initialization
   if (window.__algoliaInitialized) return;
+
+  // Check if autocomplete container exists
+  const container = document.querySelector('#autocomplete');
+  if (!container) {
+    console.warn('Algolia autocomplete container #autocomplete not found, skipping initialization');
+    return;
+  }
+
   window.__algoliaInitialized = true;
   /**
    * We load Algolia Autocomplete UMD bundles via <script>, so they live on `window`.
