@@ -13,7 +13,8 @@ module.exports = (attributes, content, { data: { root } }) => {
 
   // Append "Suggested labs" heading if there are matching labs
   let contentString = content.toString('utf8')
-  contentString += '<div class="sect1">\n<h2 id="suggested-labs">Suggested labs</h2>\n<div class="sectionbody">\n<div class="ulist">\n<ul>'
+  contentString +=
+    '<div class="sect1">\n<h2 id="suggested-labs">Suggested labs</h2>\n<div class="sectionbody">\n<div class="ulist">\n<ul>'
 
   relatedLabs.forEach((lab, index) => {
     if (index > 10) return

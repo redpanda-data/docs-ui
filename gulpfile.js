@@ -137,7 +137,15 @@ const buildWasmTask = createTask({
 
 const bundleBuildTask = createTask({
   name: 'bundle:build',
-  call: series(cleanTask, lintTask, generateBloblangGrammarTask, buildWasmTask, bundleReactTask, compileWidgets, buildTask),
+  call: series(
+    cleanTask,
+    lintTask,
+    generateBloblangGrammarTask,
+    buildWasmTask,
+    bundleReactTask,
+    compileWidgets,
+    buildTask
+  ),
 })
 
 const bundlePackTask = createTask({
@@ -176,7 +184,9 @@ const previewBuildTask = createTask({
 
 const previewServeTask = createTask({
   name: 'preview:serve',
-  call: task.serve(previewDestDir, serverConfig, () => watch([`${srcDir}/**/*`, `${previewSrcDir}/**/*`, `!${srcDir}/static/**`], previewBuildTask)),
+  call: task.serve(previewDestDir, serverConfig, () =>
+    watch([`${srcDir}/**/*`, `${previewSrcDir}/**/*`, `!${srcDir}/static/**`], previewBuildTask)
+  ),
 })
 
 const previewTask = createTask({

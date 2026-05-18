@@ -90,22 +90,25 @@
     });
   function setTheme(theme) {
     const switchButton = document.getElementById('switch-theme');
+    const sidebarToggle = document.getElementById('sidebar-theme-toggle');
     const img = switchButton ? switchButton.querySelector('img:first-child') : null;
     const sidebar = document.querySelector('.sidebar');
 
     if (theme === 'dark') {
+      // Update header toggle icon - show sun in dark mode (to switch TO light)
       if (img) {
-        img.src = img.src.replace('view-sun', 'view-moon');
-        img.classList.add('moon');
+        img.src = img.src.replace('view-moon', 'view-sun');
+        img.classList.remove('moon');
       }
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark-theme');
       document.body.setAttribute('data-theme', 'dark');
       if (sidebar) sidebar.setAttribute('data-theme', 'dark');
     } else {
+      // Update header toggle icon - show moon in light mode (to switch TO dark)
       if (img) {
-        img.src = img.src.replace('view-moon', 'view-sun');
-        img.classList.remove('moon');
+        img.src = img.src.replace('view-sun', 'view-moon');
+        img.classList.add('moon');
       }
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('dark-theme');
@@ -181,12 +184,32 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   var isUiPreview={{#if (eq site.title 'UI Preview')}}true{{else}}false{{/if}}
 </script>
 {{#if (or (eq page.attributes.role 'bloblang-playground')(eq page.attributes.role 'bloblang-snippets') (eq page.attributes.role 'enable-ace-editor'))}}
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/ace.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/theme-github.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-json.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-bloblang.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/worker-json.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/ext-language_tools.js"></script>
+<script>
+// Load ACE editor and its modules sequentially to avoid race conditions
+(function() {
+  var aceBase = "{{{uiRootPath}}}/js/vendor/ace/";
+  var scripts = [
+    aceBase + "ace.js",
+    aceBase + "theme-github.js",
+    aceBase + "mode-json.js",
+    aceBase + "mode-bloblang.js",
+    aceBase + "worker-json.js",
+    aceBase + "ext-language_tools.js"
+  ];
+
+  function loadScript(index) {
+    if (index >= scripts.length) return;
+    var script = document.createElement('script');
+    script.src = scripts[index];
+    script.onload = function() {
+      loadScript(index + 1);
+    };
+    document.head.appendChild(script);
+  }
+
+  loadScript(0);
+})();
+</script>
 <script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
 {{/if}}
 {{#if (ne page.attributes.role 'home')}}

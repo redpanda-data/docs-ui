@@ -153,7 +153,7 @@ footer.footer {
 }
 
 /* Remove external link icon from footer links */
-.doc .footer a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+.doc .footer a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: '';
 }
 

@@ -320,6 +320,7 @@ h2.home-intent-heading,
   line-height: 1 !important;
 }
 
+html[data-theme="dark"] .article.home .doc h2.home-intent-heading,
 html[data-theme="dark"] .home-intent-heading,
 html[data-theme="dark"] .doc h2.home-intent-heading {
   color: var(--grey-400-new, #9ca3af) !important;
@@ -388,7 +389,7 @@ html[data-theme="dark"] .home-intent-card-icon {
   color: var(--indigo-400-new, #818cf8);
 }
 
-/* Brand variant for ADP - uses color from page-header-data via --adp-color */
+/* Brand variant for ADP - uses color from component-metadata via --adp-color */
 .home-intent-card-icon--brand,
 .home-intent-card-icon.home-intent-card-icon--brand {
   background: color-mix(in sRGB, var(--adp-color) 8%, transparent);
@@ -421,6 +422,7 @@ h3.home-intent-card-title,
   color: var(--grey-900-new, #111827) !important;
 }
 
+html[data-theme="dark"] .article.home .doc h3.home-intent-card-title,
 html[data-theme="dark"] .home-intent-card-title,
 html[data-theme="dark"] .doc h3.home-intent-card-title {
   color: #fff !important;
@@ -476,7 +478,7 @@ html[data-theme="dark"] .home-intent-card-tags {
   transform: translateX(2px);
 }
 
-/* ADP card variant - uses color from page-header-data via --adp-color */
+/* ADP card variant - uses color from component-metadata via --adp-color */
 .home-intent-card--adp .home-intent-card-cta {
   color: var(--adp-color);
 }
@@ -519,6 +521,7 @@ h2.home-products-heading,
   line-height: 1 !important;
 }
 
+html[data-theme="dark"] .article.home .doc h2.home-products-heading,
 html[data-theme="dark"] .home-products-heading,
 html[data-theme="dark"] .doc h2.home-products-heading {
   color: var(--grey-400-new, #9ca3af) !important;
@@ -534,10 +537,10 @@ h3.home-products-section-heading,
   font-weight: 600 !important;
   color: var(--grey-900-new, #111827) !important;
   margin: 0 0 16px !important;
-  padding: 0 !important;
   line-height: 1.2 !important;
 }
 
+html[data-theme="dark"] .article.home .doc h3.home-products-section-heading,
 html[data-theme="dark"] .home-products-section-heading,
 html[data-theme="dark"] .doc h3.home-products-section-heading {
   color: var(--grey-100-new, #f3f4f6) !important;
@@ -569,6 +572,7 @@ h4.home-products-subsection-heading,
   line-height: 1 !important;
 }
 
+html[data-theme="dark"] .article.home .doc h4.home-products-subsection-heading,
 html[data-theme="dark"] .home-products-subsection-heading,
 html[data-theme="dark"] .doc h4.home-products-subsection-heading {
   color: var(--grey-400-new, #9ca3af) !important;
@@ -591,6 +595,76 @@ html[data-theme="dark"] .home-product-cards--nested {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   padding-bottom: 20px;
+}
+
+/* Data Platform hierarchical layout */
+.home-products-data-platform {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .home-products-data-platform {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Product group container */
+.home-product-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Self-Managed group with nested children */
+.home-product-group--with-children {
+  background: var(--grey-50-new, #f9fafb);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+html[data-theme="dark"] .home-product-group--with-children {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Parent product card (Self-Managed) */
+.home-product-card--parent {
+  border-left-width: 3px;
+}
+
+/* Nested children container */
+.home-product-children {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 2px solid var(--grey-300-new, #d1d5db);
+}
+
+html[data-theme="dark"] .home-product-children {
+  border-left-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Child product cards (Streaming, Connect) */
+.home-product-card--child {
+  font-size: 13px;
+  padding: 12px 14px;
+}
+
+.home-product-card--child .home-product-card-title {
+  font-size: 13px;
+}
+
+.home-product-card--child .home-product-card-desc {
+  font-size: 12px;
+}
+
+.home-product-card--child .home-product-card-links a {
+  font-size: 11px;
 }
 
 /* Individual product card */
@@ -1331,6 +1405,11 @@ main.article.labs footer.footer .footer__social-link:hover {
   color: black;
 }
 
+html[data-theme="dark"] .home .chip:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
 .home .doc .more-chip {
   flex: 1;
   background: var(--chip-color);
@@ -1344,6 +1423,11 @@ main.article.labs footer.footer .footer__social-link:hover {
 .home .doc .more-chip:hover {
   background: #e5e7eb;
   color: black;
+}
+
+html[data-theme="dark"] .home .doc .more-chip:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .home .doc .pulldown-menu-desktop,
@@ -1492,6 +1576,11 @@ main.article.labs footer.footer .footer__social-link:hover {
 .home .feature-box:hover {
   background: #e5e7eb;
   color: black;
+}
+
+html[data-theme="dark"] .home .feature-box:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .home .feature-image {
@@ -2233,6 +2322,23 @@ html[data-theme="dark"] .home-nav-tree-section .nav-link:hover {
 
 html[data-theme="dark"] .home-nav-tree-section .nav-list .nav-list {
   border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Dark mode text color fixes for accessibility */
+html[data-theme="dark"] .home .disclaimer {
+  color: var(--grey-400-new, #9ca3af);
+}
+
+html[data-theme="dark"] .home .disclaimer a {
+  color: var(--grey-400-new, #9ca3af);
+}
+
+html[data-theme="dark"] .home .intro {
+  color: var(--grey-400-new, #9ca3af);
+}
+
+html[data-theme="dark"] .home .loading {
+  color: var(--grey-400-new, #9ca3af);
 }
 
 /* Collapsed state */

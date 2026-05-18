@@ -4,7 +4,7 @@
  * - Add async decoding for better rendering performance
  * - Add explicit dimensions to prevent layout shifts
  */
-(function () {
+;(function () {
   'use strict'
 
   // Wait for DOM to be ready
@@ -40,9 +40,13 @@
           setImageDimensions(img)
         } else {
           // Otherwise wait for load event
-          img.addEventListener('load', function () {
-            setImageDimensions(this)
-          }, { once: true })
+          img.addEventListener(
+            'load',
+            function () {
+              setImageDimensions(this)
+            },
+            { once: true }
+          )
         }
       }
     })
@@ -79,14 +83,18 @@
       img.setAttribute('height', height)
 
       // Log warning if image is significantly oversized (developer tool)
-      if (naturalWidth > 0 && displayedWidth > 0 &&
-          (naturalWidth > displayedWidth * 2 || naturalHeight > displayedHeight * 2)) {
-        const savings = Math.round(((naturalWidth * naturalHeight) - (displayedWidth * displayedHeight)) /
-          (naturalWidth * naturalHeight) * 100)
+      if (
+        naturalWidth > 0 &&
+        displayedWidth > 0 &&
+        (naturalWidth > displayedWidth * 2 || naturalHeight > displayedHeight * 2)
+      ) {
+        const savings = Math.round(
+          ((naturalWidth * naturalHeight - displayedWidth * displayedHeight) / (naturalWidth * naturalHeight)) * 100
+        )
         console.info(
           `Image oversized: ${img.src.split('/').pop()} ` +
-          `(${naturalWidth}×${naturalHeight} displayed as ${displayedWidth}×${displayedHeight}, ` +
-          `~${savings}% potential savings)`
+            `(${naturalWidth}×${naturalHeight} displayed as ${displayedWidth}×${displayedHeight}, ` +
+            `~${savings}% potential savings)`
         )
       }
     }

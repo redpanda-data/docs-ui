@@ -203,7 +203,7 @@ html[data-theme=dark] {
 }
 */
 
-.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;

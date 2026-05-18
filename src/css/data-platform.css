@@ -106,7 +106,8 @@ html[data-theme="dark"] .data-platform.article {
   border-radius: 5px;
 }
 
-.dp-hero-title {
+/* Use .dp-hero prefix for specificity over .doc h1 */
+.dp-hero .dp-hero-title {
   font-family: var(--inter-display, var(--sans-serif-font, 'Inter', sans-serif));
   font-size: 52px;
   font-weight: 700;

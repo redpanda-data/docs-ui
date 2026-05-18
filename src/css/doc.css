@@ -59,6 +59,25 @@ html {
   font-weight: var(--heading-font-weight);
 }
 
+/* Offset anchor links to account for sticky bar (navbar + component indicator) */
+.doc h2[id],
+.doc h3[id],
+.doc h4[id],
+.doc h5[id],
+.doc h6[id] {
+  scroll-margin-top: calc(var(--navbar-height) + 16px);
+}
+
+@media screen and (min-width: 1024px) {
+  .doc h2[id],
+  .doc h3[id],
+  .doc h4[id],
+  .doc h5[id],
+  .doc h6[id] {
+    scroll-margin-top: calc(var(--navbar-height) + 24px);
+  }
+}
+
 .doc h1 {
   font-size: calc(32 / var(--rem-base) * 1rem);
   margin-bottom: 0;
@@ -95,6 +114,175 @@ html[data-theme="dark"] .component-indicator-sticky {
 
 html[data-theme="dark"] .component-indicator-sticky.is-stuck {
   border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Inline metadata in sticky bar - compact badges on the right */
+.component-indicator-sticky .metadata-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+/* Compact context switcher in sticky bar */
+.component-indicator-sticky .context-switcher {
+  position: relative;
+}
+
+.component-indicator-sticky .context-dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  background: var(--body-background);
+  border-radius: 4px;
+  color: var(--body-font-color);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .context-dropdown-toggle {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.component-indicator-sticky .context-dropdown-toggle:hover {
+  background: var(--grey-50-new, #f9fafb);
+  border-color: var(--grey-300-new, #d1d5db);
+}
+
+html[data-theme="dark"] .component-indicator-sticky .context-dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Add "Type:" label before dropdown */
+.component-indicator-sticky .context-dropdown-toggle::before {
+  content: 'Type:';
+  font-weight: 600;
+  opacity: 0.7;
+  margin-right: 4px;
+}
+
+.component-indicator-sticky .context-dropdown-arrow {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s ease;
+}
+
+.component-indicator-sticky .context-dropdown-toggle[aria-expanded="true"] .context-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Compact inline badges in sticky bar */
+.component-indicator-sticky .byoc-label--inline,
+.component-indicator-sticky .cloud-label--inline {
+  margin: 0;
+  font-size: 11px;
+}
+
+.component-indicator-sticky .byoc-label--inline > p,
+.component-indicator-sticky .cloud-label--inline > p {
+  padding: 4px 10px;
+  min-width: auto;
+  font-size: 11px;
+  border-radius: 6px;
+}
+
+/* Context dropdown menu in sticky bar */
+.component-indicator-sticky .context-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+  min-width: 180px;
+  background: var(--body-background);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .context-dropdown-menu {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.component-indicator-sticky .context-dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.component-indicator-sticky .context-dropdown-item {
+  display: block;
+  padding: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  color: var(--body-font-color);
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid var(--grey-100-new, #f3f4f6);
+}
+
+html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.component-indicator-sticky .context-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.component-indicator-sticky .context-dropdown-item:hover,
+.component-indicator-sticky .context-dropdown-item:focus {
+  background: var(--grey-100-new, #f3f4f6);
+  outline: none;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:hover,
+html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.component-indicator-sticky .context-dropdown-item.active {
+  background: var(--component-color, #6366f1);
+  color: white;
+  font-weight: 600;
+}
+
+/* Mobile: stack metadata below */
+@media (max-width: 1024px) {
+  .component-indicator-sticky {
+    flex-wrap: wrap;
+  }
+
+  .component-indicator-sticky .metadata-inline {
+    flex-basis: 100%;
+    margin-left: 0;
+    padding-left: 0;
+    padding-top: 8px;
+    border-top: 1px solid var(--grey-100-new, #f3f4f6);
+    justify-content: flex-start;
+  }
+
+  html[data-theme="dark"] .component-indicator-sticky .metadata-inline {
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
 }
 
 /* Component indicator pill above page title - matches hero chip styling */
@@ -411,7 +599,7 @@ html[data-theme="dark"] .status-badge--cloud {
 }
 */
 
-.doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+.doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;
@@ -788,7 +976,8 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   height: 1.25rem;
   line-height: 1;
   font-weight: var(--admonition-label-font-weight);
-  margin-top: 1px; /* Prototype: slight offset */
+  margin-top: 1px;
+  margin-bottom: 5px;
 }
 
 .admonitionblock.caution .icon {
@@ -1185,6 +1374,7 @@ html[data-theme="dark"] .listingblock .title {
 
 .admonitionblock .title {
   font-weight: bold;
+  margin-top: 10px;
 }
 
 .doc summary .title {
@@ -1210,7 +1400,7 @@ html[data-theme="dark"] .listingblock .title {
 
 /* immediate sibling of an element with the class title, where this title class element is a direct child of a td element with the class content */
 .admonitionblock td.content > .title + * {
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .doc .tableblock caption {
@@ -2344,4 +2534,148 @@ html[data-theme="dark"] .doc .link-cards .link-card .title {
 
 html[data-theme="dark"] .doc .link-cards .link-card p {
   color: var(--grey-400-new, #9ca3af);
+}
+
+/* Availability Selector Dropdown - matches version selector style */
+.availability-selector {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.availability-selector-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--body-background);
+  border: 1px solid var(--grey-300-new, #d1d5db);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--body-font-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.availability-selector-toggle:hover {
+  background: var(--grey-50-new, #f9fafb);
+  border-color: var(--grey-400-new, #9ca3af);
+}
+
+.availability-selector-toggle[aria-expanded="true"] {
+  background: var(--grey-100-new, #f3f4f6);
+  border-color: var(--grey-400-new, #9ca3af);
+}
+
+.availability-selector-toggle--disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.availability-selector-toggle--disabled:hover {
+  background: var(--body-background);
+  border-color: var(--grey-300-new, #d1d5db);
+}
+
+.availability-label {
+  color: var(--grey-600-new, #4b5563);
+  font-weight: 500;
+}
+
+.availability-value {
+  color: var(--body-font-color);
+  font-weight: 600;
+}
+
+.availability-arrow {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: var(--grey-500-new, #6b7280);
+}
+
+.availability-selector-toggle[aria-expanded="true"] .availability-arrow {
+  transform: rotate(180deg);
+}
+
+.availability-selector-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 240px;
+  background: var(--body-background);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  display: none;
+  z-index: 100;
+}
+
+.availability-selector-menu.show {
+  display: block;
+}
+
+.availability-selector-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--body-font-color);
+  text-decoration: none;
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+
+.availability-selector-item:hover {
+  background: var(--grey-100-new, #f3f4f6);
+}
+
+.availability-selector-item svg:first-child {
+  flex-shrink: 0;
+  color: var(--grey-500-new, #6b7280);
+}
+
+.availability-selector-item span {
+  flex: 1;
+}
+
+.availability-selector-item--disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.availability-selector-item--disabled:hover {
+  background: transparent;
+}
+
+/* Dark mode */
+html[data-theme="dark"] .availability-selector-toggle {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .availability-selector-toggle:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .availability-selector-toggle[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .availability-label {
+  color: var(--grey-400-new, #9ca3af);
+}
+
+html[data-theme="dark"] .availability-selector-menu {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .availability-selector-item:hover {
+  background: rgba(255, 255, 255, 0.06);
 }

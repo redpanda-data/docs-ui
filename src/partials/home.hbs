@@ -10,17 +10,15 @@
   <div class="home-hero-inner">
     <div class="home-hero-eyebrow">
       <span class="home-hero-dot"></span>
-      Redpanda Documentation
+      {{page.attributes.hero-eyebrow}}
     </div>
 
     <h1 class="home-hero-title">
-      Everything you need to move data<br>
-      and put agents to work on&nbsp;it.
+      {{{page.attributes.hero-title}}}
     </h1>
 
     <p class="home-hero-sub">
-      Guides, concepts, and references for the two platforms that power Redpanda &mdash;
-      from streaming your data reliably to letting AI agents act on it safely.
+      {{{page.attributes.hero-subtitle}}}
     </p>
 
     {{!-- Ask AI Input Form - Opens drawer on submit --}}
@@ -35,7 +33,7 @@
         type="text"
         class="home-hero-ask-input"
         id="home-ask-input"
-        placeholder="Ask Redpanda AI &mdash; &quot;how do I rotate a key?&quot;, &quot;what is a budget?&quot;"
+        placeholder="{{page.attributes.hero-ask-placeholder}}"
         autocomplete="off"
       >
       <button type="submit" class="home-hero-ask-submit" aria-label="Ask">
@@ -48,10 +46,10 @@
 
     {{!-- Suggestion Chips --}}
     <div class="home-hero-ask-hints">
-      <span class="home-hero-ask-hints-label">Try:</span>
-      <button type="button" class="home-hero-chip" data-suggestion="How do I connect Salesforce as an MCP source?">How do I connect Salesforce as an MCP source?</button>
-      <button type="button" class="home-hero-chip" data-suggestion="Set a monthly token budget">Set a monthly token budget</button>
-      <button type="button" class="home-hero-chip" data-suggestion="Deploy Redpanda on Kubernetes">Deploy Redpanda on Kubernetes</button>
+      <span class="home-hero-ask-hints-label">{{page.attributes.hero-suggestions-label}}</span>
+      <button type="button" class="home-hero-chip" data-suggestion="{{page.attributes.hero-suggestion-1}}">{{page.attributes.hero-suggestion-1}}</button>
+      <button type="button" class="home-hero-chip" data-suggestion="{{page.attributes.hero-suggestion-2}}">{{page.attributes.hero-suggestion-2}}</button>
+      <button type="button" class="home-hero-chip" data-suggestion="{{page.attributes.hero-suggestion-3}}">{{page.attributes.hero-suggestion-3}}</button>
     </div>
   </div>
 </section>
@@ -59,9 +57,25 @@
 {{!-- What Are You Here For Section --}}
 <section class="home-intent">
   <div class="home-intent-container">
-    <h2 class="home-intent-heading">What are you here for</h2>
+    <h2 class="home-intent-heading">{{page.attributes.intent-heading}}</h2>
 
     <div class="home-intent-grid">
+      {{!-- Build Agentic Data Flows Card --}}
+      <a href="{{{relativize '/agentic-data-plane/'}}}" class="home-intent-card home-intent-card--adp" style="--adp-color: {{get-component-color site 'agentic-data-plane'}};">
+        <div class="home-intent-card-icon home-intent-card-icon--brand">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/>
+            <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
+          </svg>
+        </div>
+        <div class="home-intent-card-content">
+          <h3 class="home-intent-card-title">{{page.attributes.intent-adp-title}}</h3>
+          <p class="home-intent-card-desc">{{page.attributes.intent-adp-desc}}</p>
+          <div class="home-intent-card-tags">{{page.attributes.intent-adp-tags}}</div>
+          <span class="home-intent-card-cta">{{page.attributes.intent-adp-cta}} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+        </div>
+      </a>
+
       {{!-- Stream and Process Data Card --}}
       <a href="{{{relativize '/data-platform/'}}}" class="home-intent-card">
         <div class="home-intent-card-icon">
@@ -70,26 +84,10 @@
           </svg>
         </div>
         <div class="home-intent-card-content">
-          <h3 class="home-intent-card-title">Stream and process data</h3>
-          <p class="home-intent-card-desc">Run topics, schemas, connectors, and SQL on Cloud or your own infrastructure.</p>
-          <div class="home-intent-card-tags">Cloud · Self-Managed · Connect</div>
-          <span class="home-intent-card-cta">Get started with Data Platform <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
-        </div>
-      </a>
-
-      {{!-- Build Agentic Data Flows Card --}}
-      <a href="{{{relativize '/redpanda-adp/'}}}" class="home-intent-card home-intent-card--adp" style="--adp-color: {{get-component-color site 'redpanda-adp'}};">
-        <div class="home-intent-card-icon home-intent-card-icon--brand">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/>
-            <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
-          </svg>
-        </div>
-        <div class="home-intent-card-content">
-          <h3 class="home-intent-card-title">Build agentic data flows</h3>
-          <p class="home-intent-card-desc">Compose multi-agent systems on top of your data platform &mdash; tools, memory, observability.</p>
-          <div class="home-intent-card-tags">Agentic Data Plane</div>
-          <span class="home-intent-card-cta">Get started with ADP <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <h3 class="home-intent-card-title">{{page.attributes.intent-dp-title}}</h3>
+          <p class="home-intent-card-desc">{{page.attributes.intent-dp-desc}}</p>
+          <div class="home-intent-card-tags">{{page.attributes.intent-dp-tags}}</div>
+          <span class="home-intent-card-cta">{{page.attributes.intent-dp-cta}} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </a>
     </div>
@@ -99,72 +97,88 @@
 {{!-- Jump Straight to a Product Section --}}
 <section class="home-products">
   <div class="home-products-container">
-    <h2 class="home-products-heading">Or jump straight to a product</h2>
-
-    {{!-- Data Platform Products --}}
-    <h3 class="home-products-section-heading">Data Platform</h3>
-    <div class="home-product-cards">
-      {{!-- Cloud --}}
-      <div class="home-product-card" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
-        <div class="home-product-card-content">
-          <div class="home-product-card-header">
-            <span class="home-product-card-title">Cloud</span>
-          </div>
-          <p class="home-product-card-desc">Fully managed Redpanda</p>
-          <div class="home-product-card-links">
-            <a href="{{#if page.attributes.cloud-quickstart}}{{{relativize (resolve-resource page.attributes.cloud-quickstart)}}}{{else}}#{{/if}}">Get started</a>
-            <a href="{{#if page.attributes.cloud-docs}}{{{relativize (resolve-resource page.attributes.cloud-docs)}}}{{else}}#{{/if}}">Docs</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {{!-- Self-Managed (nested under Data Platform) --}}
-    <h4 class="home-products-subsection-heading">Self-Managed</h4>
-    <div class="home-product-cards home-product-cards--nested">
-      {{!-- Streaming --}}
-      <div class="home-product-card" style="--product-color: {{get-component-color site 'streaming'}};">
-        <div class="home-product-card-content">
-          <div class="home-product-card-header">
-            <span class="home-product-card-title">Streaming</span>
-            {{#with site.components.streaming.latest}}<span class="home-product-card-version">v{{version}}</span>{{/with}}
-          </div>
-          <p class="home-product-card-desc">Redpanda broker and rpk CLI</p>
-          <div class="home-product-card-links">
-            <a href="{{#if page.attributes.self-managed-quickstart}}{{{relativize (resolve-resource page.attributes.self-managed-quickstart)}}}{{else}}#{{/if}}">Get started</a>
-            <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}">Docs</a>
-          </div>
-        </div>
-      </div>
-
-      {{!-- Connect --}}
-      <div class="home-product-card" style="--product-color: {{get-component-color site 'connect'}};">
-        <div class="home-product-card-content">
-          <div class="home-product-card-header">
-            <span class="home-product-card-title">Connect</span>
-          </div>
-          <p class="home-product-card-desc">Data pipelines and transformations</p>
-          <div class="home-product-card-links">
-            <a href="{{#if page.attributes.connect-quickstart}}{{{relativize (resolve-resource page.attributes.connect-quickstart)}}}{{else}}#{{/if}}">Get started</a>
-            <a href="{{#if page.attributes.connect-docs}}{{{relativize (resolve-resource page.attributes.connect-docs)}}}{{else}}#{{/if}}">Docs</a>
-          </div>
-        </div>
-      </div>
-    </div>
+    <h2 class="home-products-heading">{{page.attributes.products-heading}}</h2>
 
     {{!-- Agentic Data Plane --}}
-    <h3 class="home-products-section-heading">Agentic Data Plane</h3>
+    <h3 class="home-products-section-heading">{{page.attributes.products-adp-heading}}</h3>
     <div class="home-product-cards">
       {{!-- ADP --}}
-      <div class="home-product-card home-product-card--adp" style="--product-color: {{get-component-color site 'redpanda-adp'}};">
+      <div class="home-product-card home-product-card--adp" style="--product-color: {{get-component-color site 'agentic-data-plane'}};">
         <div class="home-product-card-content">
           <div class="home-product-card-header">
-            <span class="home-product-card-title">Agentic Data Plane</span>
+            <span class="home-product-card-title">{{page.attributes.product-adp-title}}</span>
           </div>
-          <p class="home-product-card-desc">Multi-agent infrastructure</p>
+          <p class="home-product-card-desc">{{page.attributes.product-adp-desc}}</p>
           <div class="home-product-card-links">
-            <a href="{{#if page.attributes.adp-quickstart}}{{{relativize (resolve-resource page.attributes.adp-quickstart)}}}{{else}}#{{/if}}">Get started</a>
-            <a href="{{#if page.attributes.adp-docs}}{{{relativize (resolve-resource page.attributes.adp-docs)}}}{{else}}#{{/if}}">Docs</a>
+            <a href="{{#if page.attributes.adp-quickstart}}{{{relativize (resolve-resource page.attributes.adp-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
+            <a href="{{#if page.attributes.adp-docs}}{{{relativize (resolve-resource page.attributes.adp-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- Data Platform Products --}}
+    <h3 class="home-products-section-heading">{{page.attributes.products-dp-heading}}</h3>
+    <div class="home-products-data-platform">
+      {{!-- Cloud --}}
+      <div class="home-product-group">
+        <div class="home-product-card" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
+          <div class="home-product-card-content">
+            <div class="home-product-card-header">
+              <span class="home-product-card-title">{{page.attributes.product-cloud-title}}</span>
+            </div>
+            <p class="home-product-card-desc">{{page.attributes.product-cloud-desc}}</p>
+            <div class="home-product-card-links">
+              <a href="{{#if page.attributes.cloud-quickstart}}{{{relativize (resolve-resource page.attributes.cloud-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
+              <a href="{{#if page.attributes.cloud-docs}}{{{relativize (resolve-resource page.attributes.cloud-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{!-- Self-Managed with nested Streaming and Connect --}}
+      <div class="home-product-group home-product-group--with-children">
+        <div class="home-product-card home-product-card--parent" style="--product-color: {{get-component-color site 'self-managed'}};">
+          <div class="home-product-card-content">
+            <div class="home-product-card-header">
+              <span class="home-product-card-title">{{page.attributes.product-self-managed-title}}</span>
+            </div>
+            <p class="home-product-card-desc">{{page.attributes.product-self-managed-desc}}</p>
+            <div class="home-product-card-links">
+              <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+            </div>
+          </div>
+        </div>
+
+        {{!-- Nested children cards --}}
+        <div class="home-product-children">
+          {{!-- Streaming --}}
+          <div class="home-product-card home-product-card--child" style="--product-color: {{get-component-color site 'streaming'}};">
+            <div class="home-product-card-content">
+              <div class="home-product-card-header">
+                <span class="home-product-card-title">{{page.attributes.product-streaming-title}}</span>
+                {{#with site.components.streaming.latest}}<span class="home-product-card-version">v{{version}}</span>{{/with}}
+              </div>
+              <p class="home-product-card-desc">{{page.attributes.product-streaming-desc}}</p>
+              <div class="home-product-card-links">
+                <a href="{{#if page.attributes.self-managed-quickstart}}{{{relativize (resolve-resource page.attributes.self-managed-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
+                <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+              </div>
+            </div>
+          </div>
+
+          {{!-- Connect --}}
+          <div class="home-product-card home-product-card--child" style="--product-color: {{get-component-color site 'connect'}};">
+            <div class="home-product-card-content">
+              <div class="home-product-card-header">
+                <span class="home-product-card-title">{{page.attributes.product-connect-title}}</span>
+              </div>
+              <p class="home-product-card-desc">{{page.attributes.product-connect-desc}}</p>
+              <div class="home-product-card-links">
+                <a href="{{#if page.attributes.connect-quickstart}}{{{relativize (resolve-resource page.attributes.connect-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
+                <a href="{{#if page.attributes.connect-docs}}{{{relativize (resolve-resource page.attributes.connect-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+              </div>
+            </div>
           </div>
         </div>
       </div>

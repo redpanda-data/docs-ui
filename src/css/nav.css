@@ -395,7 +395,7 @@ html.is-clipped--nav {
 .nav-menu {
   position: relative;
   line-height: var(--nav-line-height);
-  padding: 8px var(--nav-side-padding) 32px;
+  padding: 4px var(--nav-side-padding) 32px;
   /* Isolate rendering for performance */
   contain: layout style;
 }
@@ -822,7 +822,7 @@ html[data-theme="light"] .nav-item-toggle {
   color: #fff;
 }
 
-/* Theme toggle icons - show sun in dark mode, moon in light mode */
+/* Theme toggle icons - show sun in dark mode (to switch to light), moon in light mode (to switch to dark) */
 .sb-theme-icon--moon {
   display: none;
 }
@@ -831,6 +831,16 @@ html[data-theme="light"] .nav-item-toggle {
   display: block;
 }
 
+/* Dark mode: show sun icon (to switch to light) */
+html[data-theme="dark"] .sb-theme-icon--moon {
+  display: none;
+}
+
+html[data-theme="dark"] .sb-theme-icon--sun {
+  display: block;
+}
+
+/* Light mode: show moon icon (to switch to dark) */
 html[data-theme="light"] .sb-theme-icon--moon {
   display: block;
 }
@@ -853,6 +863,25 @@ html[data-theme="light"] .sb-collapse-toggle {
 
 html[data-theme="light"] .sb-theme-toggle:hover,
 html[data-theme="light"] .sb-collapse-toggle:hover {
+  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
+  border-color: var(--grey-300-new, var(--grey-300, #aaabae));
+  color: var(--grey-900-new, var(--grey-900, #181818));
+}
+
+/* Light mode sidebar footer styles - for sidebar-level theme attribute */
+.sidebar[data-theme="light"] .sb-footer {
+  border-top-color: var(--grey-100-new, var(--grey-100, #e9eaeb));
+  color: var(--grey-500-new, var(--grey-500, #79797d));
+}
+
+.sidebar[data-theme="light"] .sb-theme-toggle,
+.sidebar[data-theme="light"] .sb-collapse-toggle {
+  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+  color: var(--grey-600-new, var(--grey-600, #606164));
+}
+
+.sidebar[data-theme="light"] .sb-theme-toggle:hover,
+.sidebar[data-theme="light"] .sb-collapse-toggle:hover {
   background: var(--grey-50-new, var(--grey-50, #f5f5f5));
   border-color: var(--grey-300-new, var(--grey-300, #aaabae));
   color: var(--grey-900-new, var(--grey-900, #181818));
@@ -907,6 +936,21 @@ html[data-theme="dark"] .nav-expand:hover {
   background: #232d3f;
   border-color: rgba(255, 255, 255, 0.2);
   color: #fff;
+}
+
+/* Light mode expand button - ensure visibility */
+html[data-theme="light"] .nav-expand {
+  background: #fff;
+  border: 2px solid var(--grey-400-new, var(--grey-400, #94959a));
+  color: var(--grey-700-new, var(--grey-700, #44454a));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .nav-expand:hover {
+  background: var(--grey-100-new, var(--grey-100, #e9eaeb));
+  border-color: var(--grey-500-new, var(--grey-500, #79797d));
+  color: var(--grey-900-new, var(--grey-900, #181818));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 @media screen and (min-width: 1024px) {
@@ -1161,6 +1205,11 @@ html[data-theme="light"] .nav-bucket-caret-btn:hover {
   background: var(--grey-200-new, var(--grey-200, rgba(0, 0, 0, 0.08)));
 }
 
+/* Hide caret for link-only buckets (no/trivial nav content) */
+.nav-bucket--link-only .nav-bucket-caret-btn {
+  display: none;
+}
+
 /* Bucket expand/collapse caret */
 .nav-bucket-caret {
   color: #5972a6;
@@ -1256,7 +1305,7 @@ html[data-theme="light"] .nav-bucket-version-btn:hover {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  min-width: 100px;
+  min-width: 120px;
   padding: 6px;
   background: #1a2332;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1445,6 +1494,16 @@ html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item.is-current-page
   background: var(--grey-200-new, #e0e1e2);
   color: var(--grey-900-new, #1a1b1d);
   font-weight: 500;
+}
+
+/* Parent context navigation - shown on child pages without bucket header */
+.nav-parent-context {
+  margin-bottom: 16px;
+}
+
+/* Add spacing between parent context nav and sibling buckets */
+.nav-parent-context + .nav-bucket {
+  margin-top: 8px;
 }
 
 /* Add spacing between parent component's nav and child buckets */

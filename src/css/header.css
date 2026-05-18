@@ -34,9 +34,7 @@ html.is-clipped--navbar {
   align-items: center;
   gap: 16px;
   padding: 0 16px;
-  background: var(--topbar-bg, rgba(255, 255, 255, 0.92));
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  background: var(--topbar-bg, #fff);
   border-bottom: 1px solid var(--topbar-border, var(--grey-100-new, #e5e6e8));
   font-size: var(--secondary-font-size);
 }
@@ -315,8 +313,8 @@ html[data-theme="dark"] .bc-dropdown a:hover {
    ============================================================================= */
 
 html[data-theme="dark"] .navbar.topbar {
-  /* Use dynamic component color from page-header-data, falls back to neutral dark */
-  background: var(--topbar-bg, rgba(16, 24, 40, 0.92));
+  /* Use dynamic component color from component-metadata, falls back to neutral dark */
+  background: var(--topbar-bg, #101828);
   border-bottom-color: var(--topbar-border, rgba(255, 255, 255, 0.1));
 }
 
@@ -536,6 +534,124 @@ html[data-theme="dark"] .navbar.topbar .theme-image {
   }
 }
 
+/* =============================================================================
+   MOBILE OVERFLOW MENU
+   On narrow screens, secondary items go into a "..." overflow dropdown
+   ============================================================================= */
+
+/* Desktop: show individual items, hide overflow menu */
+.tb-desktop-items {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tb-overflow-menu {
+  display: none;
+}
+
+/* Mobile: hide individual items, show overflow menu */
+@media screen and (max-width: 480px) {
+  .tb-desktop-items {
+    display: none;
+  }
+
+  .tb-overflow-menu {
+    display: block;
+  }
+
+  /* Reduce gap in navbar-end for more space */
+  .navbar-end {
+    gap: 4px;
+  }
+
+  /* Compact AI button - icon only */
+  .tb-ai-btn {
+    padding: 5px 8px;
+  }
+
+  .tb-ai-btn span {
+    display: none;
+  }
+
+  /* Ensure theme toggle stays visible */
+  .theme-switcher {
+    flex-shrink: 0;
+  }
+
+  #switch-theme {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Truncate long platform names on narrow screens */
+  .platform-indicator-mobile {
+    max-width: 100px;
+  }
+}
+
+/* Overflow trigger button styling */
+.tb-overflow-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--grey-600, #475467);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tb-overflow-trigger:hover {
+  background: var(--grey-50, rgba(0, 0, 0, 0.04));
+  color: var(--grey-900, #101828);
+}
+
+html[data-theme="dark"] .tb-overflow-trigger {
+  color: var(--grey-400, #98a2b3);
+}
+
+html[data-theme="dark"] .tb-overflow-trigger:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+/* Overflow dropdown styling */
+.tb-overflow-dropdown {
+  min-width: 180px;
+}
+
+.tb-overflow-section {
+  padding: 4px 0;
+}
+
+.tb-overflow-label {
+  padding: 6px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--grey-500, #667085);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+html[data-theme="dark"] .tb-overflow-label {
+  color: var(--grey-400, #98a2b3);
+}
+
+.tb-overflow-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--grey-100, #f2f4f7);
+}
+
+html[data-theme="dark"] .tb-overflow-divider {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 @media screen and (min-width: 769px) {
   #search-input {
     width: 200px;
@@ -606,6 +722,13 @@ html[data-theme="dark"] .navbar.topbar .theme-image {
   .navbar-end > * {
     display: flex;
     align-items: center;
+  }
+
+  /* Mobile overflow menu - hide desktop items on narrow screens */
+  @media screen and (max-width: 480px) {
+    .tb-desktop-items {
+      display: none;
+    }
   }
 }
 
@@ -924,6 +1047,88 @@ html[data-theme="dark"] .tb-link {
 
 html[data-theme="dark"] .tb-link:hover {
   background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+/* Log into Cloud link styling */
+.tb-link-cloud svg {
+  flex-shrink: 0;
+}
+
+/* Top nav dropdown (Ask a Human) */
+.tb-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.tb-dropdown-trigger {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.tb-dropdown-trigger svg {
+  transition: transform 0.2s;
+}
+
+.tb-dropdown:hover .tb-dropdown-trigger svg,
+.tb-dropdown-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.tb-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid var(--grey-200, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+  z-index: 100;
+}
+
+.tb-dropdown:hover .tb-dropdown-menu,
+.tb-dropdown-trigger[aria-expanded="true"] + .tb-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+html[data-theme="dark"] .tb-dropdown-menu {
+  background: var(--dark-blue-800-new, #1e293b);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.tb-dropdown-item {
+  display: block;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--grey-700, #475467);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tb-dropdown-item:hover {
+  background: var(--grey-50, rgba(0, 0, 0, 0.04));
+  color: var(--grey-900, #101828);
+  text-decoration: none;
+}
+
+html[data-theme="dark"] .tb-dropdown-item {
+  color: var(--grey-300, #d0d5dd);
+}
+
+html[data-theme="dark"] .tb-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 

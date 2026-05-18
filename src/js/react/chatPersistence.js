@@ -16,15 +16,18 @@ export function saveConversation (threadId, conversation) {
   if (!threadId || !conversation) return
 
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      threadId,
-      conversation: conversation.map((qa) => ({
-        id: qa.id || qa.questionAnswerId,
-        question: qa.question,
-        answer: qa.answer,
-      })),
-      timestamp: Date.now(),
-    }))
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        threadId,
+        conversation: conversation.map((qa) => ({
+          id: qa.id || qa.questionAnswerId,
+          question: qa.question,
+          answer: qa.answer,
+        })),
+        timestamp: Date.now(),
+      })
+    )
   } catch (err) {
     console.warn('Failed to save chat conversation:', err)
   }

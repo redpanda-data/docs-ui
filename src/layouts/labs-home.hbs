@@ -2,11 +2,12 @@
 <html lang="en">
   <head>
 {{> head defaultPageTitle='Redpanda Labs'}}
+{{> head-component-color}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/algolia/satellite-min.css">
 {{!-- Note: algoliasearch-lite is already loaded via head-scripts partial with defer --}}
 <script defer src="{{{uiRootPath}}}/js/vendor/algolia/instantsearch.production.min.js"></script>
   </head>
-  <body class="labs-wrap" data-component="{{page.component.name}}">
+  <body class="labs-wrap" data-component="{{page.component.name}}" data-component-color="{{get-header-color page}}">
 {{> header}}
 <div class="body no-keep-markup">
 {{!-- Custom Labs Sidebar with Filters --}}
@@ -114,12 +115,11 @@
         <div class="labs-hero-inner">
           <div class="labs-hero-eyebrow">
             <span class="labs-hero-dot"></span>
-            Redpanda Labs
+            {{#if page.attributes.page-hero-eyebrow}}{{page.attributes.page-hero-eyebrow}}{{else}}Redpanda Labs{{/if}}
           </div>
-          <h1 class="labs-hero-title">Real projects you can build with Redpanda.</h1>
+          <h1 class="labs-hero-title">{{#if page.attributes.page-hero-title}}{{page.attributes.page-hero-title}}{{else}}Real projects you can build with Redpanda.{{/if}}</h1>
           <p class="labs-hero-sub">
-            Hands-on tutorials and example applications that show what's possible with Redpanda.
-            Clone a repo, run the code, and learn by doing.
+            {{#if page.attributes.page-hero-subtitle}}{{page.attributes.page-hero-subtitle}}{{else}}Hands-on tutorials and example applications that show what's possible with Redpanda. Clone a repo, run the code, and learn by doing.{{/if}}
           </p>
           <div class="labs-hero-stats">
             <div>

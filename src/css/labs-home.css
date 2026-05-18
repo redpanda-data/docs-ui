@@ -81,7 +81,8 @@
   box-shadow: 0 0 10px rgba(226, 67, 40, 0.6);
 }
 
-.labs-hero-title {
+/* Use .labs-hero prefix for specificity over .doc h1 */
+.labs-hero .labs-hero-title {
   font-size: clamp(28px, 5vw, 40px);
   font-weight: 700;
   line-height: 1.2;

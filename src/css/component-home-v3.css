@@ -679,8 +679,8 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   color: #a4bcfd;
 }
 
-/* Main title - use .doc prefix to override doc.css specificity */
-.doc .ch3-page-title {
+/* Use .ch3-hero prefix for specificity over .doc h1 */
+.ch3-hero .ch3-page-title {
   font-family: var(--font-display, "Inter Display", "Inter", sans-serif);
   font-size: 40px;
   line-height: 1.1;
@@ -1365,8 +1365,12 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
 /* Responsive -------------------------------------------------------------- */
 @media (max-width: 768px) {
   .ch3-hero {
-    padding: 32px 24px;
+    padding: 32px 20px;
     border-radius: 12px;
+    /* Reset full-bleed negative margins on mobile to prevent content cutoff */
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
   }
 
   .doc .ch3-page-title {
@@ -1392,6 +1396,9 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
 
   .ch3-section {
     margin-bottom: 40px;
+    /* Add breathing room from screen edges on mobile */
+    padding-left: 4px;
+    padding-right: 4px;
   }
 
   .ch3-deploy-grid {

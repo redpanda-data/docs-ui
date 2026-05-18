@@ -1000,10 +1000,12 @@
 
 .dark-theme #chat-panel-kapa-root .submit-button {
   background: #6366f1 !important;
+  color: #fff !important;
 }
 
 .dark-theme #chat-panel-kapa-root .submit-button:hover:not(:disabled) {
   background: #818cf8 !important;
+  color: #fff !important;
 }
 
 .dark-theme #chat-panel-kapa-root .submit-button:disabled {

@@ -133,7 +133,7 @@
       var containerHeight = scrollableContainer.offsetHeight
       var linkTop = activeLink.offsetTop - scrollableContainer.offsetTop
       var linkHeight = activeLink.offsetHeight
-      scrollableContainer.scrollTop = Math.max(0, linkTop - (containerHeight / 2) + (linkHeight / 2))
+      scrollableContainer.scrollTop = Math.max(0, linkTop - containerHeight / 2 + linkHeight / 2)
     }
   }
 
@@ -181,7 +181,7 @@
         var containerHeight = scrollableContainer.offsetHeight
         var linkTop = activeLink.offsetTop - scrollableContainer.offsetTop
         var linkHeight = activeLink.offsetHeight
-        var targetScroll = linkTop - (containerHeight / 2) + (linkHeight / 2)
+        var targetScroll = linkTop - containerHeight / 2 + linkHeight / 2
         scrollableContainer.scrollTop = Math.max(0, targetScroll)
       }
       lastActiveFragment = activeFragment

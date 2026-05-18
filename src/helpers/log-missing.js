@@ -21,9 +21,11 @@ module.exports = (latest, missing, previousVersion, { data: { root } }) => {
   const intentionalRemovals = latest.asciidoc.attributes['removals-without-aliases']
 
   // Check if the content was intentionally removed
-  const isIntentionallyRemoved = intentionalRemovals && intentionalRemovals.some((removal) => {
-    return previousVersionWithoutPrefix.includes(removal.page)
-  })
+  const isIntentionallyRemoved =
+    intentionalRemovals &&
+    intentionalRemovals.some((removal) => {
+      return previousVersionWithoutPrefix.includes(removal.page)
+    })
 
   // Log a warning if the content was not intentionally removed
   if (!isIntentionallyRemoved) {

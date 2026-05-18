@@ -1,10 +1,10 @@
 <article class="doc {{#if page.attributes.no-toc}}no-toc{{/if}}">
-{{#if (and (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3'))}}
+{{#if (and (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3') (ne page.attributes.role 'bloblang-playground'))}}
 {{> breadcrumbs}}
 {{/if}}
-{{#unless page.attributes.cloud}}
+{{#if (and (not page.attributes.cloud) (ne page.attributes.role 'bloblang-playground'))}}
 {{> latest-banner}}
-{{/unless}}
+{{/if}}
 {{#if (eq page.attributes.role 'bloblang-playground')}}
 {{> bloblang-signup-form}}
 {{/if}}
@@ -59,6 +59,52 @@
     </span>
     {{/if}}
     {{/if}}
+    {{!-- Inline metadata: context switcher and availability badges --}}
+    {{#if (or page.attributes.context-switcher page.attributes.cloud-available page.attributes.self-managed-available page.attributes.self-managed-only page.attributes.byoc page.attributes.cloud-only)}}
+    {{#unless page.attributes.adp}}
+    <div class="metadata-inline">
+      {{#if page.attributes.context-switcher}}
+        {{> context-switcher}}
+      {{/if}}
+      {{!-- Connector availability badges with links --}}
+      {{#if page.attributes.cloud-available}}
+        <a href="{{page.attributes.cloud-available-url}}" class="status-badge status-badge--cloud-link" title="Also available in Redpanda Cloud - click to view">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          </svg>
+          Also in Cloud
+        </a>
+      {{/if}}
+      {{#if page.attributes.self-managed-available}}
+        <a href="{{page.attributes.self-managed-available-url}}" class="status-badge status-badge--self-managed-link" title="Also available in Self-Managed - click to view">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Also in Self-Managed
+        </a>
+      {{/if}}
+      {{#if page.attributes.self-managed-only}}
+        <span class="status-badge status-badge--self-managed-only" title="Only available in Self-Managed">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Self-Managed Only
+        </span>
+      {{/if}}
+      {{!-- Legacy BYOC/Cloud badges for ADP and other uses --}}
+      {{#if page.attributes.byoc}}
+        <div class="byoc-label byoc-label--inline">
+          <p>BYOC</p>
+        </div>
+      {{/if}}
+      {{#if page.attributes.cloud-only}}
+        <div class="cloud-label cloud-label--inline">
+          <p>Cloud</p>
+        </div>
+      {{/if}}
+    </div>
+    {{/unless}}
+    {{/if}}
     {{!-- Page options dropdown - now in sticky header with other metadata --}}
     {{> markdown-dropdown}}
   </div>
@@ -66,24 +112,10 @@
     <h1 class="page">{{{this}}}</h1>
   {{/with}}
 {{/if}}
+{{!-- Metadata moved to sticky bar above, this block kept for backwards compatibility but hidden --}}
 {{#unless (or (eq page.attributes.role 'component-home-v2') (eq page.attributes.role 'component-home-v3'))}}
-<div class="metadata metadata--main">
-  {{!-- Only show BYOC/Cloud badges on non-ADP pages (ADP uses inline status badges instead) --}}
-  {{#unless page.attributes.adp}}
-  {{#if page.attributes.byoc}}
-    <div class="byoc-label">
-      <p>BYOC</p>
-    </div>
-  {{/if}}
-  {{#if page.attributes.cloud-only}}
-    <div class="cloud-label">
-      <p>Cloud</p>
-    </div>
-  {{/if}}
-  {{/unless}}
-  {{#if page.attributes.context-switcher}}
-    {{> context-switcher}}
-  {{/if}}
+<div class="metadata metadata--main" style="display: none;">
+  {{!-- Metadata now shown in sticky bar above --}}
 </div>
 {{/unless}}
 {{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.byoc page.attributes.cloud-only page.attributes.context-switcher)}}
@@ -147,8 +179,8 @@
     }
 
     // Initialize tooltips for BYOC badges if present
-    const topByocBadge = metadataContainer.querySelector(".byoc-label p");
-    const navByocBadge = navMetadataContainer.querySelector(".nav-byoc-label");
+    const topByocBadge = stickyHeader?.querySelector(".byoc-label--inline p");
+    const navByocBadge = navMetadataContainer?.querySelector(".nav-byoc-label");
     if (topByocBadge) {
       tippy(topByocBadge, {
         content: "{{page.attributes.byoc-text}}",
@@ -173,8 +205,8 @@
     }
 
     // Initialize tooltips for Cloud badges if present
-    const topCloudBadge = metadataContainer.querySelector(".cloud-label p");
-    const navCloudBadge = navMetadataContainer.querySelector(".nav-cloud-label");
+    const topCloudBadge = stickyHeader?.querySelector(".cloud-label--inline p");
+    const navCloudBadge = navMetadataContainer?.querySelector(".nav-cloud-label");
     if (topCloudBadge) {
       tippy(topCloudBadge, {
         content: "{{page.attributes.cloud-only-text}}",

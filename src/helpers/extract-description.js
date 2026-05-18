@@ -46,7 +46,8 @@ module.exports = (content, maxLength = 160) => {
 
   for (const sentence of sentences) {
     const trimmed = sentence.trim()
-    if (trimmed.length > 20) { // Skip very short fragments
+    if (trimmed.length > 20) {
+      // Skip very short fragments
       description = trimmed
       break
     }

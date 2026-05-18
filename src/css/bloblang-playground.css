@@ -1,7 +1,14 @@
-/* Fix component indicator spacing on playground - remove negative margin and add bottom spacing */
 .bloblang-playground .component-indicator-sticky {
   margin-top: 0;
-  margin-bottom: 48px;
+}
+
+.bloblang-playground .doc h1.page {
+  margin-bottom: 16px;
+  visibility: visible !important;
+  display: block !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 /* Adjust H1 font size on larger screens */
@@ -14,7 +21,7 @@
 .bloblang-playground .doc {
   max-width: unset;
   margin-right: 48px;
-  overflow-x: hidden;
+  overflow-x: clip; /* Use clip instead of hidden to preserve sticky positioning */
 }
 
 /* Form */

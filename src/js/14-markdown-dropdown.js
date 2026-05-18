@@ -134,7 +134,8 @@
    */
   function handleCopy (markdownUrl, button) {
     // Fetch markdown content and copy to clipboard
-    window.fetch(markdownUrl)
+    window
+      .fetch(markdownUrl)
       .then(function (response) {
         if (!response.ok) throw new Error('Failed to fetch')
         return response.text()

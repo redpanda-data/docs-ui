@@ -19,9 +19,6 @@
     {{!-- Right side: Actions (always visible, no burger menu) --}}
     <div id="topbar-nav" class="navbar-menu">
       <div class="navbar-end">
-        {{#if (and (ne page.layout 'search') env.ALGOLIA_API_KEY)}}
-          <div class="autocomplete" id="autocomplete"></div>
-        {{/if}}
         {{!-- Ask AI button (opens chat drawer) --}}
         {{#if (ne page.attributes.role 'home')}}
         <button class="tb-ai-btn" data-action="open-chat" type="button" title="Ask Redpanda AI" aria-label="Ask Redpanda AI">
@@ -29,9 +26,59 @@
           <span>Ask AI</span>
         </button>
         {{/if}}
-        {{!-- Top nav links --}}
-        <a class="tb-link" href="/labs" target="_blank" rel="noopener noreferrer">Labs</a>
-        <a class="tb-link" href="https://redpanda.com/slack" target="_blank" rel="noopener noreferrer">Community</a>
+
+        {{!-- Desktop: Individual nav items --}}
+        <div class="tb-desktop-items">
+          {{!-- Ask a Human dropdown --}}
+          <div class="tb-dropdown">
+            <button class="tb-link tb-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+              Ask a Human
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style="margin-left: 4px;">
+                <path d="M6 8L2 4h8z"/>
+              </svg>
+            </button>
+            <div class="tb-dropdown-menu" role="menu">
+              <a class="tb-dropdown-item" href="https://support.redpanda.com/hc/en-us" target="_blank" rel="noopener noreferrer">Support</a>
+              <a class="tb-dropdown-item" href="https://redpanda.com/slack" target="_blank" rel="noopener noreferrer">Community</a>
+            </div>
+          </div>
+          {{!-- Log into Cloud - only show for cloud-data-platform and data-platform components --}}
+          {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
+          <a class="tb-link tb-link-cloud" href="https://cloud.redpanda.com" target="_blank" rel="noopener noreferrer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <span class="tb-link-text">Log into Cloud</span>
+          </a>
+          {{/if}}
+          <a class="tb-link tb-link-labs" href="/labs" target="_blank" rel="noopener noreferrer">Labs</a>
+        </div>
+
+        {{!-- Mobile: Overflow menu with ellipsis --}}
+        <div class="tb-dropdown tb-overflow-menu">
+          <button class="tb-overflow-trigger" aria-haspopup="true" aria-expanded="false" aria-label="More options">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="5" r="2"/>
+              <circle cx="12" cy="12" r="2"/>
+              <circle cx="12" cy="19" r="2"/>
+            </svg>
+          </button>
+          <div class="tb-dropdown-menu tb-overflow-dropdown" role="menu">
+            <div class="tb-overflow-section">
+              <div class="tb-overflow-label">Get Help</div>
+              <a class="tb-dropdown-item" href="https://support.redpanda.com/hc/en-us" target="_blank" rel="noopener noreferrer">Support</a>
+              <a class="tb-dropdown-item" href="https://redpanda.com/slack" target="_blank" rel="noopener noreferrer">Community</a>
+            </div>
+            <div class="tb-overflow-divider"></div>
+            <a class="tb-dropdown-item" href="/labs" target="_blank" rel="noopener noreferrer">Labs</a>
+            {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
+            <a class="tb-dropdown-item" href="https://cloud.redpanda.com" target="_blank" rel="noopener noreferrer">Log into Cloud</a>
+            {{/if}}
+          </div>
+        </div>
+
         {{!-- Theme switcher --}}
         <div class="theme-switcher">
           <button id="switch-theme" type="button" title="Switch between dark and light mode" aria-label="Switch between dark and light mode" aria-live="polite">

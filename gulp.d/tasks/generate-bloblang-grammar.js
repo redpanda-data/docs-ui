@@ -22,7 +22,9 @@ function fetchText (url) {
         return
       }
       let data = ''
-      res.on('data', (chunk) => { data += chunk })
+      res.on('data', (chunk) => {
+        data += chunk
+      })
       res.on('end', () => resolve(data))
     })
     req.on('error', reject)

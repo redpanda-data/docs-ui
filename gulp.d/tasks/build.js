@@ -103,13 +103,16 @@ module.exports = (src, dest, preview) => () => {
     ),
     vfs.src('css/vendor/**/*.css', opts),
     // Copy remaining vendor JS files (excluding already minified/processed ones)
-    vfs.src([
-      'js/vendor/**/*.js',
-      '!js/vendor/prism/prism-line-highlight-plugin.js',
-      '!js/vendor/prism/prism-line-numbers-plugin.js',
-      '!js/vendor/*.bundle.js',
-      '!js/vendor/*.min.js',
-    ], opts),
+    vfs.src(
+      [
+        'js/vendor/**/*.js',
+        '!js/vendor/prism/prism-line-highlight-plugin.js',
+        '!js/vendor/prism/prism-line-numbers-plugin.js',
+        '!js/vendor/*.bundle.js',
+        '!js/vendor/*.min.js',
+      ],
+      opts
+    ),
     vfs.src('helpers/*.js', opts),
     vfs.src('layouts/*.hbs', opts),
     vfs.src('partials/*.hbs', opts),

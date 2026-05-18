@@ -181,7 +181,11 @@
     var rect = this.getBoundingClientRect()
     var menuPanelRect = menuPanel.getBoundingClientRect()
     var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
-    if (event.target.classList.contains('nav-link') || event.target.classList.contains('nav-text') || (event.target.classList.contains('item') && !event.target.classList.contains('dropdown'))) {
+    if (
+      event.target.classList.contains('nav-link') ||
+      event.target.classList.contains('nav-text') ||
+      (event.target.classList.contains('item') && !event.target.classList.contains('dropdown'))
+    ) {
       // Follow the link
       var a = event.target.closest('a')
       if (!a) {
@@ -209,6 +213,12 @@
       html.classList.add('is-clipped--nav')
       if (navToggle) navToggle.classList.add('is-active')
       navContainer.classList.add('is-active')
+      // Fix: remove hidden class and reset styles if set by collapse
+      navContainer.classList.remove('hidden')
+      if (navExpand) navExpand.classList.add('hidden')
+      if (toolbar) toolbar.style.paddingLeft = ''
+      if (body) body.style.marginLeft = ''
+      if (main) main.style.width = ''
       // Note - Dan removed the height calculations - this should all be handled by css or we have overrides that work against us
       // var bounds = nav.getBoundingClientRect()
       // var expectedHeight = window.innerHeight - Math.round(bounds.top)
@@ -235,10 +245,14 @@
       html.removeEventListener('click', hideNav)
     } else {
       navContainer.classList.add('hidden')
+      navContainer.classList.remove('is-active')
+      // Also reset navToggle so hamburger can reopen the nav
+      if (navToggle) navToggle.classList.remove('is-active')
       navExpand.classList.remove('hidden')
       if (toolbar) toolbar.style.paddingLeft = '10px'
       if (body) body.style.marginLeft = '0'
       main.style.width = '100%'
+      html.classList.remove('is-clipped--nav')
     }
   }
 

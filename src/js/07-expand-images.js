@@ -1,4 +1,4 @@
-(function () {
+;(function () {
   'use strict'
 
   const modalOverlay = document.createElement('div')

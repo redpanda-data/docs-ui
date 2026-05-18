@@ -5,7 +5,7 @@ site:
   homeUrl: &home_url /streaming/24.3/index.html
   components:
   # Agentic Data Plane component
-  - name: redpanda-adp
+  - name: agentic-data-plane
     title: Agentic Data Plane
     url: '#'
     versions:
@@ -15,9 +15,8 @@ site:
       displayVersion: '1.0'
       asciidoc:
         attributes:
-          page-header-data:
+          component-metadata:
             title: Agentic Data Plane
-            section: Agentic Data Plane
             description: Build, connect, and govern AI agents.
             color: '#7C3AED'
             order: 1
@@ -34,9 +33,8 @@ site:
       displayVersion: '6.0'
       asciidoc:
         attributes:
-          page-header-data:
+          component-metadata:
             title: Streaming
-            section: Data Platform
             parent-component: self-managed
             description: Run Redpanda on your own infrastructure.
             color: '#6366f1'
@@ -49,9 +47,8 @@ site:
       displayVersion: '24.3'
       asciidoc:
         attributes:
-          page-header-data:
+          component-metadata:
             title: Streaming
-            section: Data Platform
             parent-component: self-managed
             description: Run Redpanda on your own infrastructure.
             color: '#6366f1'
@@ -67,7 +64,7 @@ site:
       displayVersion: '5.0'
     latestVersion: *latest_version_xyz
   # Cloud component - under Data Platform
-  - name: redpanda-cloud
+  - name: cloud-data-platform
     title: Cloud
     url: '#'
     versions:
@@ -77,9 +74,8 @@ site:
       displayVersion: '1.0'
       asciidoc:
         attributes:
-          page-header-data:
+          component-metadata:
             title: Cloud
-            section: Data Platform
             description: Fully managed Redpanda clusters.
             color: '#0891B2'
             order: 2
@@ -95,9 +91,8 @@ site:
       displayVersion: '4.0'
       asciidoc:
         attributes:
-          page-header-data:
+          component-metadata:
             title: Connect
-            section: Data Platform
             parent-component: self-managed
             description: Stream processing and integration connectors.
             color: '#059669'

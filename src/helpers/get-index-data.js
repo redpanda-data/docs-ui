@@ -19,9 +19,8 @@ module.exports = ({ data: { root } }) => {
           const isNotCurrentPage = page.url !== currentPageUrl
 
           // Optional filtering by component and version
-          const matchesComponentVersion = !matchComponentVersion || (
-            item.component === currentComponent && item.version === currentVersion
-          )
+          const matchesComponentVersion =
+            !matchComponentVersion || (item.component === currentComponent && item.version === currentVersion)
 
           return isNotCurrentPage && matchesComponentVersion
         })

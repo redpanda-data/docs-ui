@@ -10,7 +10,7 @@ module.exports = (attributes, currentVersion, thisVersion) => {
     if (!isNaN(release.getTime())) {
       const now = new Date()
       const msInYear = 365 * 24 * 60 * 60 * 1000
-      if ((now - release) >= msInYear) return 'eol'
+      if (now - release >= msInYear) return 'eol'
     }
   }
   // If this is the current/latest version

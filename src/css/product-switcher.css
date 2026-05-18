@@ -5,7 +5,7 @@
 .sb-product-wrap {
   position: relative;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   padding: 0 16px;
 }
 
@@ -115,8 +115,8 @@
 }
 
 .sb-product-caret {
-  color: #8098b3;
-  transition: transform 0.15s;
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.15s, color 0.15s;
   flex-shrink: 0;
 }
 
@@ -170,7 +170,7 @@
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
   padding: 8px;
-  z-index: 100;
+  z-index: 150;
   animation: sbProductMenuIn 0.12s ease-out;
 }
 

@@ -14,7 +14,10 @@ module.exports = (input, supportedMonths) => {
     if (input['page-eol'] === true || input['page-eol'] === 'true') return true
     // Use support months from extension if available
     const extensionMonths = input['page-support-months']
-    if (typeof extensionMonths === 'number' || (typeof extensionMonths === 'string' && !isNaN(parseInt(extensionMonths, 10)))) {
+    if (
+      typeof extensionMonths === 'number' ||
+      (typeof extensionMonths === 'string' && !isNaN(parseInt(extensionMonths, 10)))
+    ) {
       supportedMonths = parseInt(extensionMonths, 10)
     }
     // Fallback to release date if available

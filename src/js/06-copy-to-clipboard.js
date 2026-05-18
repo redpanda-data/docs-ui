@@ -121,7 +121,8 @@
       sparklesPath.setAttribute('fill-rule', 'evenodd')
       sparklesPath.setAttribute('clip-rule', 'evenodd')
       // SVG path data for sparkles icon (broken into multiple lines for readability)
-      var pathData = 'M1.01942 4.14696C0.821273 4.07417 0.615365 4.0169 0.403168 3.97662C0.387588 3.97367 ' +
+      var pathData =
+        'M1.01942 4.14696C0.821273 4.07417 0.615365 4.0169 0.403168 3.97662C0.387588 3.97367 ' +
         '0.371975 3.9708 0.356327 3.96802C0.214558 3.94289 0.214558 3.74081 0.356327 3.71568C0.371975 ' +
         '3.7129 0.387588 3.71003 0.403168 3.70709C0.615365 3.6668 0.821273 3.60953 1.01942 3.53675C1.138 ' +
         '3.49318 1.2538 3.44407 1.36651 3.38969C2.14702 3.01321 2.77911 2.38509 3.158 1.60949C3.2127 ' +
@@ -213,9 +214,8 @@
 
         // Build the URL with query params for the snippet sections
         // You can also wrap each in encodeURIComponent(...) if your environment needs extra safety.
-        var runUrl = '/connect/guides/bloblang/playground/?map=' + encodedMap +
-                    '&input=' + encodedIn +
-                    '&meta=' + encodedMeta
+        var runUrl =
+          '/connect/guides/bloblang/playground/?map=' + encodedMap + '&input=' + encodedIn + '&meta=' + encodedMeta
         window.open(runUrl, '_blank')
       })
     }
