@@ -17,7 +17,7 @@ module.exports = (navUrl, { data: { root } }) => {
     const pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
     for (const p of pages) {
       if (p.pub?.url) {
-        urlCache.set(p.pub.url, !!p.asciidoc?.attributes?.['page-byoc'])
+        urlCache.set(p.pub.url, !!p.asciidoc?.attributes?.['page-byoc-only'])
       }
     }
   }

@@ -1279,6 +1279,15 @@ document.addEventListener("DOMContentLoaded", () => {
   inputAIButton = document.getElementById("input-ai-help");
   mappingAIButton = document.getElementById("mapping-ai-help");
 
+  // Disable AI help buttons if chat panel is not available
+  const chatAvailable = typeof window.openChatWithQuery === 'function';
+  if (!chatAvailable) {
+    if (inputAIButton) inputAIButton.remove();
+    if (mappingAIButton) mappingAIButton.remove();
+    inputAIButton = null;
+    mappingAIButton = null;
+  }
+
   // Setup keyboard shortcuts
   setupKeyboardShortcuts();
 

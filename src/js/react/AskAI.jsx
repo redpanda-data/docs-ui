@@ -57,15 +57,11 @@ function App() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Mount to home page chat root
+  // Mount to exactly one root to prevent duplicate App instances
   const homeEl = document.getElementById('kapa-chat-root')
-  if (homeEl) {
-    createRoot(homeEl).render(<App />)
-  }
-
-  // Mount to chat panel root (for article pages)
   const panelEl = document.getElementById('chat-panel-kapa-root')
-  if (panelEl) {
-    createRoot(panelEl).render(<App />)
+  const mountEl = homeEl || panelEl
+  if (mountEl) {
+    createRoot(mountEl).render(<App />)
   }
 })
