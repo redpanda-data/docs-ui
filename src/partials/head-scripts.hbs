@@ -22,7 +22,8 @@
       // Show banner with smooth animation
       if (announcementType !== 'bloblang') {
         // Set CSS variables for other elements that need to account for banner height
-        const height = window.innerWidth >= 1024 ? '36px' : '50px';
+        // Mobile uses 60px to match CSS max-height, desktop uses 36px
+        const height = window.innerWidth >= 1024 ? '36px' : '60px';
         document.documentElement.style.setProperty('--announcement-bar-height', height);
         document.documentElement.style.setProperty('--announcement-bar-height--desktop', '36px');
       }

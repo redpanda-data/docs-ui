@@ -104,12 +104,18 @@
 
     dropdownContainers.forEach((container) => {
       container.addEventListener('click', () => {
-        container.classList.toggle('is-active')
+        var isActive = container.classList.toggle('is-active')
+        // Update aria-expanded on the button trigger for accessibility
+        var trigger = container.querySelector('.version-selector-trigger')
+        if (trigger) trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false')
       })
     })
     document.documentElement.addEventListener('click', function () {
       dropdownContainers.forEach((container) => {
         container.classList.remove('is-active')
+        // Reset aria-expanded when closing dropdowns
+        var trigger = container.querySelector('.version-selector-trigger')
+        if (trigger) trigger.setAttribute('aria-expanded', 'false')
       })
     })
   }

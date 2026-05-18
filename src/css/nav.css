@@ -69,6 +69,20 @@
 }
 
 /* Sidebar Search Bar */
+/* Search button - reset default button styles */
+button.sb-search {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  width: calc(100% - 28px); /* Account for margins */
+}
+
+button.sb-search:focus-visible {
+  outline: 2px solid var(--link-font-color);
+  outline-offset: 2px;
+}
+
 .sb-search {
   display: flex;
   align-items: center;
@@ -294,6 +308,24 @@ html .nav-container.is-active {
 .sidebar[data-theme="light"] .context .container:not(.has-dropdown) {
   background: var(--grey-100-new, var(--grey-100, #f0f0f0));
   color: var(--grey-700-new, var(--grey-700, #4a4a4a));
+}
+
+/* Version selector button - reset button styles for accessibility */
+.version-selector-trigger {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.version-selector-trigger:focus-visible {
+  outline: 2px solid var(--link-font-color);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .context .container.has-dropdown:hover {
