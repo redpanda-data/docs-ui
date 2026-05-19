@@ -17,3 +17,19 @@
 :product-cloud-sql-desc: Query streaming data with SQL in real-time (Cloud BYOC only)
 :cloud-sql-quickstart: cloud-data-platform:sql:quickstart.adoc
 :cloud-sql-docs: cloud-data-platform:sql:index.adoc
+// What's New - SQL feature for Cloud BYOC
+:component-whats-new-1-title: Redpanda SQL
+:component-whats-new-1-desc: Query your streaming data in real-time with SQL. Run analytical queries directly on topics without ETL pipelines.
+:component-whats-new-1-link: cloud-data-platform:sql:index.adoc
+:component-whats-new-1-tag: Cloud BYOC
+// Home page links (matching data-platform structure)
+:cloud-home: cloud-data-platform:ROOT:index.adoc
+:self-managed-home: streaming:ROOT:index.adoc
+:self-managed-quickstart: streaming:get-started:quick-start.adoc
+:self-managed-tiered-storage: streaming:manage:tiered-storage.adoc
+:cloud-byoc: cloud-data-platform:get-started:cluster-types/byoc.adoc
+:connect-quickstart: connect:get-started:quickstarts/rpk.adoc
+:self-managed-migrate: streaming:migrate:from-kafka.adoc
+:self-managed-schema-registry: streaming:manage:schema-registry.adoc
+:self-managed-producers: streaming:develop:produce-data:index.adoc
+:self-managed-consumers: streaming:develop:consume-data:index.adoc
