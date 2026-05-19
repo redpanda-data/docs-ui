@@ -1,8 +1,7 @@
 'use strict'
 
-// Cache: Map<componentName, Map<url, isNew>>
+// Cache: Map<url, isNew>
 let urlCache = null
-let cachedComponent = null
 
 /**
  * Checks if a resource URL points to a page with page-new attribute
@@ -18,12 +17,11 @@ module.exports = (resourceUrl, { data: { root } }) => {
   if (!contentCatalog) return false
   if (!resourceUrl || typeof resourceUrl !== 'string') return false
 
-  // Build URL map once per component (O(n) once, O(1) lookups)
-  if (cachedComponent !== page.component.name) {
+  // Build URL map once for all pages (O(n) once, O(1) lookups)
+  if (!urlCache) {
     urlCache = new Map()
-    cachedComponent = page.component.name
 
-    const pages = contentCatalog.findBy({ component: page.component.name, family: 'page' })
+    const pages = contentCatalog.findBy({ family: 'page' })
     for (const p of pages) {
       if (p.pub?.url) {
         urlCache.set(p.pub.url, !!p.asciidoc?.attributes?.['page-new'])

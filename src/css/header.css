@@ -546,8 +546,8 @@ html[data-theme="dark"] .navbar.topbar .theme-image {
   gap: 4px;
 }
 
-.tb-overflow-menu {
-  display: none;
+.tb-dropdown.tb-overflow-menu {
+  display: none !important;
 }
 
 /* Mobile: hide individual items, show overflow menu */

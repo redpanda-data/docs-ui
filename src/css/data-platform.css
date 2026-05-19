@@ -157,6 +157,142 @@ html[data-theme="dark"] .data-platform.article {
   line-height: 1.35;
 }
 
+/* ---- Hero Ask AI Input ---- */
+.dp-hero-ask {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 600px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: background 0.12s, border-color 0.12s;
+  margin-top: 32px;
+}
+
+.dp-hero-ask:hover,
+.dp-hero-ask:focus-within {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dp-hero-ask-icon {
+  display: flex;
+  align-items: center;
+  color: var(--brand-500-new, #f04438);
+}
+
+.dp-hero-ask-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dp-hero-ask-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #fff;
+  font-family: var(--body-font-family);
+}
+
+.dp-hero-ask-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Hero Ask Submit Button */
+.dp-hero-ask-submit,
+button.dp-hero-ask-submit,
+.dp-hero-ask button.dp-hero-ask-submit {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  background: var(--brand-600-new, #e24328) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  transition: background 0.12s !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.dp-hero-ask-submit:hover,
+button.dp-hero-ask-submit:hover {
+  background: var(--brand-700-new, #c9190b) !important;
+}
+
+.dp-hero-ask-submit svg,
+button.dp-hero-ask-submit svg,
+.dp-hero-ask button.dp-hero-ask-submit svg {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  display: block !important;
+  stroke: #fff !important;
+  fill: none !important;
+  flex-shrink: 0 !important;
+}
+
+/* Hero Ask Hints (suggestion chips) */
+.dp-hero-ask-hints {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.dp-hero-ask-hints-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.dp-hero-ask-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  font-family: var(--body-font-family);
+}
+
+.dp-hero-ask-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* NEW badge for BYOC SQL */
+.dp-product-badge--new {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 /* ---- Sections ---- */
 .dp-section {
   max-width: 1180px;
