@@ -203,6 +203,8 @@ html[data-theme=dark] {
   /* Availability block - brighter for dark mode */
   --availability-block-background: rgba(173, 181, 189, 0.15);
   --availability-block-border: #adb5bd;
+  /* Topbar background - solid for dark mode */
+  --topbar-bg: var(--ash-800, #252525);
 }
 
 html:not([data-theme=dark]) {
@@ -247,6 +249,8 @@ html:not([data-theme=dark]) {
   --navbar-boxshadow: 1px 3px 5px var(--ash-50);
   --navbar-dropdown-boxshadow: 0 4px 10px #0003;
   --navbar-dropdown-background-hover-color: #0000000d;
+  /* Topbar background - solid for light mode */
+  --topbar-bg: #fff;
 
   /* navbar animations */
   --transition-timing-default: cubic-bezier(0.08, 0.52, 0.52, 1);
@@ -979,13 +983,4 @@ body[data-component="cloud-data-platform"] {
   --component-bg-tint-active: rgba(14, 165, 233, 0.14);
   --topbar-bg: rgba(14, 165, 233, 0.08);
   --topbar-border: rgba(14, 165, 233, 0.15);
-}
-
-/* Override topbar transparency - make it solid for both light and dark modes */
-html:not([data-theme=dark]) {
-  --topbar-bg: #fff;
-}
-
-html[data-theme=dark] {
-  --topbar-bg: var(--ash-800, #252525);
 }
