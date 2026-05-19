@@ -4,6 +4,11 @@
 const cache = new Map()
 
 module.exports = (resource, { data, hash: context }) => {
+  // Return undefined if resource is not provided
+  if (!resource || typeof resource !== 'string') {
+    return undefined
+  }
+
   if (resource.startsWith('http')) {
     return resource
   }

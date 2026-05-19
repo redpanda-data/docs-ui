@@ -60,7 +60,8 @@
     <h2 class="home-intent-heading">{{page.attributes.intent-heading}}</h2>
 
     <div class="home-intent-grid">
-      {{!-- Build Agentic Data Flows Card --}}
+      {{!-- Build Agentic Data Flows Card (hide if component doesn't exist) --}}
+      {{#if (has-component site 'agentic-data-plane')}}
       <a href="{{{relativize '/agentic-data-plane/'}}}" class="home-intent-card home-intent-card--adp" style="--adp-color: {{get-component-color site 'agentic-data-plane'}};">
         <div class="home-intent-card-icon home-intent-card-icon--brand">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -75,6 +76,7 @@
           <span class="home-intent-card-cta">{{page.attributes.intent-adp-cta}} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
         </div>
       </a>
+      {{/if}}
 
       {{!-- Stream and Process Data Card --}}
       <a href="{{{relativize '/data-platform/'}}}" class="home-intent-card">
@@ -99,7 +101,8 @@
   <div class="home-products-container">
     <h2 class="home-products-heading">{{page.attributes.products-heading}}</h2>
 
-    {{!-- Agentic Data Plane --}}
+    {{!-- Agentic Data Plane (hide section if component doesn't exist) --}}
+    {{#if (has-component site 'agentic-data-plane')}}
     <h3 class="home-products-section-heading">{{page.attributes.products-adp-heading}}</h3>
     <div class="home-product-cards">
       {{!-- ADP --}}
@@ -116,21 +119,69 @@
         </div>
       </div>
     </div>
+    {{/if}}
 
     {{!-- Data Platform Products --}}
     <h3 class="home-products-section-heading">{{page.attributes.products-dp-heading}}</h3>
     <div class="home-products-data-platform">
-      {{!-- Cloud --}}
-      <div class="home-product-group">
-        <div class="home-product-card" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
+      {{!-- Cloud with nested Streaming, Connect, SQL sub-cards --}}
+      <div class="home-product-group home-product-group--with-children">
+        <div class="home-product-card home-product-card--parent" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
           <div class="home-product-card-content">
             <div class="home-product-card-header">
               <span class="home-product-card-title">{{page.attributes.product-cloud-title}}</span>
             </div>
             <p class="home-product-card-desc">{{page.attributes.product-cloud-desc}}</p>
             <div class="home-product-card-links">
-              <a href="{{#if page.attributes.cloud-quickstart}}{{{relativize (resolve-resource page.attributes.cloud-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
               <a href="{{#if page.attributes.cloud-docs}}{{{relativize (resolve-resource page.attributes.cloud-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+            </div>
+          </div>
+        </div>
+
+        {{!-- Nested children cards --}}
+        <div class="home-product-children">
+          {{!-- Cloud Streaming --}}
+          <div class="home-product-card home-product-card--child" style="--product-color: {{get-component-color site 'streaming'}};">
+            <div class="home-product-card-content">
+              <div class="home-product-card-header">
+                <span class="home-product-card-title">{{page.attributes.product-cloud-streaming-title}}</span>
+              </div>
+              <p class="home-product-card-desc">{{page.attributes.product-cloud-streaming-desc}}</p>
+              <div class="home-product-card-links">
+                <a href="{{#if page.attributes.cloud-streaming-quickstart}}{{{relativize (resolve-resource page.attributes.cloud-streaming-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
+                <a href="{{#if page.attributes.cloud-streaming-docs}}{{{relativize (resolve-resource page.attributes.cloud-streaming-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+              </div>
+            </div>
+          </div>
+
+          {{!-- Cloud Connect --}}
+          <div class="home-product-card home-product-card--child" style="--product-color: {{get-component-color site 'connect'}};">
+            <div class="home-product-card-content">
+              <div class="home-product-card-header">
+                <span class="home-product-card-title">{{page.attributes.product-cloud-connect-title}}</span>
+              </div>
+              <p class="home-product-card-desc">{{page.attributes.product-cloud-connect-desc}}</p>
+              <div class="home-product-card-links">
+                <a href="{{#if page.attributes.cloud-connect-quickstart}}{{{relativize (resolve-resource page.attributes.cloud-connect-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
+                <a href="{{#if page.attributes.cloud-connect-docs}}{{{relativize (resolve-resource page.attributes.cloud-connect-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+              </div>
+            </div>
+          </div>
+
+          {{!-- Cloud SQL (with NEW badge) --}}
+          <div class="home-product-card home-product-card--child" style="--product-color: #10b981;">
+            <div class="home-product-card-content">
+              <div class="home-product-card-header">
+                <span class="home-product-card-title">{{page.attributes.product-cloud-sql-title}}</span>
+                {{#if (is-new-resource (resolve-resource page.attributes.cloud-sql-docs))}}
+                <span class="home-product-badge--new">NEW</span>
+                {{/if}}
+              </div>
+              <p class="home-product-card-desc">{{page.attributes.product-cloud-sql-desc}}</p>
+              <div class="home-product-card-links">
+                <a href="{{#if page.attributes.cloud-sql-quickstart}}{{{relativize (resolve-resource page.attributes.cloud-sql-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
+                <a href="{{#if page.attributes.cloud-sql-docs}}{{{relativize (resolve-resource page.attributes.cloud-sql-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
+              </div>
             </div>
           </div>
         </div>

@@ -792,6 +792,37 @@ html[data-theme="dark"] .home-product-card-links a {
   color: var(--product-color);
 }
 
+/* NEW badge for home product cards */
+.home-product-badge--new {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+
+/* NEW badge for intent cards */
+.home-intent-card-badge--new {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
 /* Down arrow indicator */
 .home-products-more {
   display: flex;
