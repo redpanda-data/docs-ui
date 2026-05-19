@@ -1677,3 +1677,16 @@ html[data-theme="dark"] .ch3-path-or {
     display: none;
   }
 }
+
+/* What's New Section in Component Home V3 --------------------------------- */
+.ch3-whats-new-wrapper {
+  max-width: 720px;
+  margin: 0 auto 48px;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .ch3-whats-new-wrapper {
+    margin-bottom: 32px;
+  }
+}

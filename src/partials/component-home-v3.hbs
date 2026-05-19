@@ -84,6 +84,15 @@
   </div>
 </section>
 
+{{!-- What's New Section --}}
+{{#with (get-whats-new-items)}}
+{{#if hasItems}}
+<div class="ch3-whats-new-wrapper">
+  {{> whats-new-section items=items}}
+</div>
+{{/if}}
+{{/with}}
+
 {{!-- Tab Navigation (optional) --}}
 {{#if page.attributes.tabs}}
 <nav class="ch3-tabs" aria-label="Page sections">
