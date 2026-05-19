@@ -1344,10 +1344,10 @@ html[data-theme="light"] .nav-bucket-version-btn:hover {
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
   z-index: 200;
-  animation: bucketVersionMenuIn 0.15s ease-out;
+  animation: bucket-version-menu-in 0.15s ease-out;
 }
 
-@keyframes bucketVersionMenuIn {
+@keyframes bucket-version-menu-in {
   from {
     opacity: 0;
     transform: translateY(-4px);

@@ -64,9 +64,11 @@
     chatPanel.setAttribute('aria-hidden', 'false')
     if (main) main.classList.add('chat-push')
 
-    // Hide Ask AI button if it exists
-    var askAiBtn = document.querySelector('[data-action="open-chat"]')
-    if (askAiBtn) askAiBtn.style.display = 'none'
+    // Hide all Ask AI buttons if they exist
+    var askAiBtns = document.querySelectorAll('[data-action="open-chat"]')
+    askAiBtns.forEach(function (btn) {
+      btn.style.display = 'none'
+    })
 
     // Persist state to localStorage
     try {
@@ -82,9 +84,11 @@
     chatPanel.setAttribute('aria-hidden', 'true')
     if (main) main.classList.remove('chat-push')
 
-    // Show Ask AI button if it exists
-    var askAiBtn = document.querySelector('[data-action="open-chat"]')
-    if (askAiBtn) askAiBtn.style.display = ''
+    // Show all Ask AI buttons if they exist
+    var askAiBtns = document.querySelectorAll('[data-action="open-chat"]')
+    askAiBtns.forEach(function (btn) {
+      btn.style.display = ''
+    })
 
     // Remove from localStorage (panel explicitly closed)
     try {

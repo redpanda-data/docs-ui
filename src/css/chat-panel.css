@@ -289,7 +289,7 @@
   font-family: var(--monospace-font-family, var(--font-mono, "JetBrains Mono", monospace));
   font-weight: lighter;
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 #chat-panel-kapa-root .answer pre code {
@@ -739,7 +739,7 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -1064,11 +1064,11 @@
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   z-index: 200;
-  animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: toast-slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 
-@keyframes toastSlideIn {
+@keyframes toast-slide-in {
   from {
     opacity: 0;
     transform: translateX(-50%) translateY(-12px);

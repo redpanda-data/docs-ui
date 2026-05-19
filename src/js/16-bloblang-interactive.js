@@ -660,6 +660,10 @@
       loadRequiredScripts()
         .then(() => {
           if (typeof Go === 'undefined') {
+            // Reset state before rejecting to allow retry
+            wasmLoading = false
+            wasmLoadPromise = null
+            wasmLoaded = false
             reject(new Error('Go WASM runtime not available'))
             return
           }
@@ -682,9 +686,21 @@
               wasmLoading = false
               resolve()
             })
-            .catch(reject)
+            .catch((error) => {
+              // Reset state before rejecting to allow retry
+              wasmLoading = false
+              wasmLoadPromise = null
+              wasmLoaded = false
+              reject(error)
+            })
         })
-        .catch(reject)
+        .catch((error) => {
+          // Reset state before rejecting to allow retry
+          wasmLoading = false
+          wasmLoadPromise = null
+          wasmLoaded = false
+          reject(error)
+        })
     })
 
     return wasmLoadPromise
@@ -721,7 +737,7 @@
       tabSize: 2,
       useSoftTabs: true,
       wrap: true,
-      minLines: options.minLines || 4,
+      minLines: options.minLines || 5,
       useWorker: false, // Disable workers to avoid 404s for missing worker files
     }
 
@@ -863,6 +879,9 @@
     let mappingEditor = null
     let outputEditor = null
 
+    // Store metadata for reuse in runMapping and full playground link
+    const playgroundMetadata = metadata || '{}'
+
     // Show loading status
     showStatus('Loading editor...', 'info')
 
@@ -958,7 +977,7 @@
 
       try {
         showStatus('Running...', 'info')
-        const result = window.blobl(currentMapping, currentInput, '{}')
+        const result = window.blobl(currentMapping, currentInput, playgroundMetadata)
 
         if (typeof result === 'string' && result.startsWith('Error:')) {
           showStatus(result, 'error')
@@ -1069,8 +1088,8 @@
         // Get current editor values
         const currentInput = inputEditor ? inputEditor.getValue() : '{}'
         const currentMapping = mappingEditor ? mappingEditor.getValue() : ''
-        // Build URL with encoded parameters
-        const url = buildPlaygroundUrl(currentInput, currentMapping, '{}')
+        // Build URL with encoded parameters (use stored metadata)
+        const url = buildPlaygroundUrl(currentInput, currentMapping, playgroundMetadata)
         playgroundLink.href = url
       })
     }

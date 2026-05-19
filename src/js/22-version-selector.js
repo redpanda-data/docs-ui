@@ -59,23 +59,36 @@
       btn.classList.toggle('is-open')
       btn.setAttribute('aria-expanded', smVer.classList.contains('is-open'))
     })
+  })
 
-    // Close on outside click
-    document.addEventListener('mousedown', function (e) {
-      if (!smVer.contains(e.target)) {
+  // Global handlers for closing dropdowns (outside the loop to avoid duplicates)
+  // Close on outside click
+  document.addEventListener('mousedown', function (e) {
+    selectors.forEach(function (smVer) {
+      var btn = smVer.querySelector('.sm-ver-pill')
+      if (!smVer.contains(e.target) && smVer.classList.contains('is-open')) {
         smVer.classList.remove('is-open')
-        btn.classList.remove('is-open')
-        btn.setAttribute('aria-expanded', 'false')
+        if (btn) {
+          btn.classList.remove('is-open')
+          btn.setAttribute('aria-expanded', 'false')
+        }
       }
     })
+  })
 
-    // Close on Escape
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        smVer.classList.remove('is-open')
-        btn.classList.remove('is-open')
-        btn.setAttribute('aria-expanded', 'false')
-      }
-    })
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      selectors.forEach(function (smVer) {
+        var btn = smVer.querySelector('.sm-ver-pill')
+        if (smVer.classList.contains('is-open')) {
+          smVer.classList.remove('is-open')
+          if (btn) {
+            btn.classList.remove('is-open')
+            btn.setAttribute('aria-expanded', 'false')
+          }
+        }
+      })
+    }
   })
 })()

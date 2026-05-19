@@ -123,8 +123,7 @@
       } else {
         var span = item.querySelector('span')
         if (span) {
-          var dropdownSpan = document.createElement('a')
-          dropdownSpan.href = '#'
+          var dropdownSpan = document.createElement('span')
           dropdownSpan.textContent = span.textContent
           dropdown.appendChild(dropdownSpan)
         }

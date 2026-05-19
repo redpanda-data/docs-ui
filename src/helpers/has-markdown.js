@@ -5,13 +5,15 @@
  * custom attributes added by extensions.
  */
 
+// Page roles that should not show the markdown dropdown
+const excludedRoles = ['bloblang-playground', 'component-home-v2', 'home']
+
 module.exports = ({ data: { root } }) => {
   const { contentCatalog, page } = root
 
   // In preview mode (no contentCatalog), show dropdown for testing
   if (!contentCatalog) {
     // Only show on pages that would normally have it
-    const excludedRoles = ['bloblang-playground', 'component-home-v2', 'home']
     if (page?.attributes?.role && excludedRoles.includes(page.attributes.role)) return false
     return true
   }
@@ -25,7 +27,6 @@ module.exports = ({ data: { root } }) => {
   if (!allowedLayouts.includes(page.layout)) return false
 
   // Exclude specific page roles
-  const excludedRoles = ['bloblang-playground', 'component-home-v2', 'home']
   if (page.attributes?.role && excludedRoles.includes(page.attributes.role)) return false
 
   // Query contentCatalog for full page object

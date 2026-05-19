@@ -171,10 +171,10 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
   padding: 8px;
   z-index: 150;
-  animation: sbProductMenuIn 0.12s ease-out;
+  animation: sb-product-menu-in 0.12s ease-out;
 }
 
-@keyframes sbProductMenuIn {
+@keyframes sb-product-menu-in {
   from {
     opacity: 0;
     transform: translateY(-4px);

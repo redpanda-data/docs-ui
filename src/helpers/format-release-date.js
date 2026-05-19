@@ -7,5 +7,5 @@ module.exports = (dateStr) => {
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return ''
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  return `${months[date.getMonth()]} ${date.getFullYear()}`
+  return `${months[date.getUTCMonth()]} ${date.getUTCFullYear()}`
 }

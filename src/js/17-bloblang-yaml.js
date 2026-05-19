@@ -40,15 +40,17 @@
   var INTERPOLATION_PATTERN = /\$\{!\s*([^}]+)\s*\}/g
 
   // Connect-specific patterns to detect if YAML is a Connect config
+  // Accept both underscore and hyphenated variants (e.g., request_map and request-map)
   var CONNECT_INDICATORS = [
     /\bmapping\s*:/,
     /\bprocessors\s*:/,
-    /\brequest_map\s*:/,
-    /\bresult_map\s*:/,
+    /\brequest[-_]map\s*:/,
+    /\bresult[-_]map\s*:/,
     /\bcheck\s*:/,
     /\binput\s*:/,
     /\boutput\s*:/,
     /\bpipeline\s*:/,
+    /\bskip[-_]on\s*:/,
     /\$\{!\s*/,
   ]
 
