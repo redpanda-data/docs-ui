@@ -936,7 +936,7 @@ body[data-component="redpanda-adp"] {
   --component-bg-tint: rgba(226, 67, 40, 0.06);
   --component-bg-tint-hover: rgba(226, 67, 40, 0.1);
   --component-bg-tint-active: rgba(226, 67, 40, 0.14);
-  --topbar-bg: rgba(226, 67, 40, 0.08);
+  --topbar-bg: color-mix(in srgb, #e24328 8%, white);
   --topbar-border: rgba(226, 67, 40, 0.15);
 }
 
@@ -951,7 +951,7 @@ body[data-component="streaming"] {
   --component-bg-tint: rgba(79, 70, 229, 0.06);
   --component-bg-tint-hover: rgba(79, 70, 229, 0.1);
   --component-bg-tint-active: rgba(79, 70, 229, 0.14);
-  --topbar-bg: rgba(79, 70, 229, 0.08);
+  --topbar-bg: color-mix(in srgb, #4f46e5 8%, white);
   --topbar-border: rgba(79, 70, 229, 0.15);
 }
 
@@ -966,7 +966,7 @@ body[data-component="connect"] {
   --component-bg-tint: rgba(11, 140, 107, 0.06);
   --component-bg-tint-hover: rgba(11, 140, 107, 0.1);
   --component-bg-tint-active: rgba(11, 140, 107, 0.14);
-  --topbar-bg: rgba(11, 140, 107, 0.08);
+  --topbar-bg: color-mix(in srgb, #0b8c6b 8%, white);
   --topbar-border: rgba(11, 140, 107, 0.15);
 }
 
@@ -981,6 +981,6 @@ body[data-component="cloud-data-platform"] {
   --component-bg-tint: rgba(14, 165, 233, 0.06);
   --component-bg-tint-hover: rgba(14, 165, 233, 0.1);
   --component-bg-tint-active: rgba(14, 165, 233, 0.14);
-  --topbar-bg: rgba(14, 165, 233, 0.08);
+  --topbar-bg: color-mix(in srgb, #0ea5e9 8%, white);
   --topbar-border: rgba(14, 165, 233, 0.15);
 }

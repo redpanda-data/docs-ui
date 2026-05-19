@@ -7,7 +7,8 @@
     --component-bg-tint: color-mix(in srgb, {{{this}}} 6%, transparent);
     --component-bg-tint-hover: color-mix(in srgb, {{{this}}} 10%, transparent);
     --component-bg-tint-active: color-mix(in srgb, {{{this}}} 14%, transparent);
-    --topbar-bg: color-mix(in srgb, {{{this}}} 8%, transparent);
+    /* Topbar - solid tinted white background */
+    --topbar-bg: color-mix(in srgb, {{{this}}} 8%, white);
     --topbar-border: color-mix(in srgb, {{{this}}} 15%, transparent);
     /* Component color shades */
     --component-600: {{{this}}};
@@ -21,7 +22,7 @@
     --component-bg-tint: color-mix(in srgb, {{{this}}} 20%, transparent);
     --component-bg-tint-hover: color-mix(in srgb, {{{this}}} 28%, transparent);
     --component-bg-tint-active: color-mix(in srgb, {{{this}}} 35%, transparent);
-    /* Topbar - mix 30% component color with dark slate for noticeable tint */
+    /* Topbar - solid tinted dark background (30% component color, 70% dark slate) */
     --topbar-bg: color-mix(in srgb, {{{this}}} 30%, #0f172a);
     --topbar-border: color-mix(in srgb, {{{this}}} 50%, rgba(255, 255, 255, 0.2));
     /* Brighter component colors for dark mode visibility */
