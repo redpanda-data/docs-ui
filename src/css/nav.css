@@ -1347,6 +1347,15 @@ html[data-theme="light"] .nav-bucket-version-btn:hover {
   animation: bucket-version-menu-in 0.15s ease-out;
 }
 
+/* On mobile, prevent dropdown from extending beyond viewport */
+@media (max-width: 768px) {
+  .nav-bucket-version-menu {
+    left: 0;
+    right: auto;
+    max-width: calc(100vw - 40px);
+  }
+}
+
 @keyframes bucket-version-menu-in {
   from {
     opacity: 0;

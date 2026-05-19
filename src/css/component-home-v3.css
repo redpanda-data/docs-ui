@@ -1678,11 +1678,48 @@ html[data-theme="dark"] .ch3-path-or {
   }
 }
 
+/* Two-Column Layout: What's New + Path Compare ---------------------------- */
+.ch3-hero-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 48px;
+  max-width: var(--ch3-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--ch3-gutter);
+}
+
+@media (min-width: 1024px) {
+  .ch3-hero-columns--with-whats-new {
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+  }
+
+  .ch3-hero-columns--with-whats-new .ch3-whats-new-wrapper {
+    order: 2;
+  }
+
+  .ch3-hero-columns--with-whats-new .ch3-path-compare {
+    order: 1;
+    margin-bottom: 0;
+  }
+}
+
+/* Remove margin from path-compare when in grid layout */
+.ch3-hero-columns .ch3-path-compare {
+  margin-bottom: 0;
+}
+
 /* What's New Section in Component Home V3 --------------------------------- */
 .ch3-whats-new-wrapper {
-  max-width: 720px;
-  margin: 0 auto 48px;
+  max-width: none;
+  margin: 0;
   padding: 0;
+}
+
+.ch3-hero-columns .ch3-whats-new-wrapper {
+  margin-bottom: 0;
 }
 
 @media (max-width: 768px) {

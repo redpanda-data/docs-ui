@@ -6,7 +6,10 @@
     {{!-- Config-driven breadcrumbs from unified navigation --}}
     {{#if page.attributes.breadcrumb-hierarchy}}
       {{#each (parse-json page.attributes.breadcrumb-hierarchy)}}
+        {{!-- Skip "Home" component in breadcrumbs --}}
+        {{#unless (eq this.title 'Home')}}
     <li><a href="{{{relativize this.url}}}" class="breadcrumb-section">{{{this.title}}}</a></li>
+        {{/unless}}
       {{/each}}
     {{else}}
       {{!-- Legacy breadcrumbs: Show section from component-metadata - skip if same as title --}}

@@ -84,29 +84,21 @@
   </div>
 </section>
 
-{{!-- What's New Section --}}
+{{!-- What's New + Path Two-Column Layout --}}
 {{#with (get-whats-new-items)}}
-{{#if hasItems}}
-<div class="ch3-whats-new-wrapper">
-  {{> whats-new-section items=items}}
-</div>
-{{/if}}
-{{/with}}
+<div class="ch3-hero-columns{{#if hasItems}} ch3-hero-columns--with-whats-new{{/if}}">
+  {{!-- What's New Column --}}
+  {{#if hasItems}}
+  <div class="ch3-whats-new-wrapper">
+    {{> whats-new-section items=items}}
+  </div>
+  {{/if}}
 
-{{!-- Tab Navigation (optional) --}}
-{{#if page.attributes.tabs}}
-<nav class="ch3-tabs" aria-label="Page sections">
-  {{#each (split page.attributes.tabs ';;')}}
-  <a class="ch3-tab{{#if (eq @index 0)}} is-active{{/if}}" href="#" data-tab-index="{{@index}}">{{this}}</a>
-  {{/each}}
-</nav>
-{{/if}}
-
-{{!-- Choose Your Path Section (two-column comparison) --}}
-{{#if page.attributes.path-title}}
-<section class="ch3-path-compare">
-  <h2 class="ch3-section-title">{{{page.attributes.path-title}}}</h2>
-  <div class="ch3-path-grid">
+  {{!-- Path Comparison Column --}}
+  {{#if ../page.attributes.path-title}}
+  <section class="ch3-path-compare">
+    <h2 class="ch3-section-title">{{{../page.attributes.path-title}}}</h2>
+    <div class="ch3-path-grid">
     {{!-- Self-hosted column --}}
     <div class="ch3-path-col ch3-path-self">
       <div class="ch3-path-icon">
@@ -114,15 +106,15 @@
           <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
         </svg>
       </div>
-      <h3 class="ch3-path-heading">{{#if page.attributes.path-self-title}}{{{page.attributes.path-self-title}}}{{else}}Run it yourself{{/if}}</h3>
-      <p class="ch3-path-desc">{{#if page.attributes.path-self-desc}}{{{page.attributes.path-self-desc}}}{{else}}Deploy and manage Redpanda on your own infrastructure.{{/if}}</p>
+      <h3 class="ch3-path-heading">{{#if ../page.attributes.path-self-title}}{{{../page.attributes.path-self-title}}}{{else}}Run it yourself{{/if}}</h3>
+      <p class="ch3-path-desc">{{#if ../page.attributes.path-self-desc}}{{{../page.attributes.path-self-desc}}}{{else}}Deploy and manage Redpanda on your own infrastructure.{{/if}}</p>
       <ul class="ch3-path-features">
-        {{#if page.attributes.path-self-1}}<li>{{{page.attributes.path-self-1}}}</li>{{/if}}
-        {{#if page.attributes.path-self-2}}<li>{{{page.attributes.path-self-2}}}</li>{{/if}}
-        {{#if page.attributes.path-self-3}}<li>{{{page.attributes.path-self-3}}}</li>{{/if}}
+        {{#if ../page.attributes.path-self-1}}<li>{{{../page.attributes.path-self-1}}}</li>{{/if}}
+        {{#if ../page.attributes.path-self-2}}<li>{{{../page.attributes.path-self-2}}}</li>{{/if}}
+        {{#if ../page.attributes.path-self-3}}<li>{{{../page.attributes.path-self-3}}}</li>{{/if}}
       </ul>
-      <a class="ch3-path-cta" href="{{#if page.attributes.path-self-link}}{{{relativize (resolve-resource page.attributes.path-self-link)}}}{{/if}}">
-        {{#if page.attributes.path-self-cta}}{{{page.attributes.path-self-cta}}}{{else}}Get started{{/if}}
+      <a class="ch3-path-cta" href="{{#if ../page.attributes.path-self-link}}{{{relativize (resolve-resource ../page.attributes.path-self-link)}}}{{/if}}">
+        {{#if ../page.attributes.path-self-cta}}{{{../page.attributes.path-self-cta}}}{{else}}Get started{{/if}}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
@@ -139,20 +131,31 @@
           <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>
         </svg>
       </div>
-      <h3 class="ch3-path-heading">{{#if page.attributes.path-cloud-title}}{{{page.attributes.path-cloud-title}}}{{else}}Use Redpanda Cloud{{/if}}</h3>
-      <p class="ch3-path-desc">{{#if page.attributes.path-cloud-desc}}{{{page.attributes.path-cloud-desc}}}{{else}}Let us handle the infrastructure so you can focus on your data.{{/if}}</p>
+      <h3 class="ch3-path-heading">{{#if ../page.attributes.path-cloud-title}}{{{../page.attributes.path-cloud-title}}}{{else}}Use Redpanda Cloud{{/if}}</h3>
+      <p class="ch3-path-desc">{{#if ../page.attributes.path-cloud-desc}}{{{../page.attributes.path-cloud-desc}}}{{else}}Let us handle the infrastructure so you can focus on your data.{{/if}}</p>
       <ul class="ch3-path-features">
-        {{#if page.attributes.path-cloud-1}}<li>{{{page.attributes.path-cloud-1}}}</li>{{/if}}
-        {{#if page.attributes.path-cloud-2}}<li>{{{page.attributes.path-cloud-2}}}</li>{{/if}}
-        {{#if page.attributes.path-cloud-3}}<li>{{{page.attributes.path-cloud-3}}}</li>{{/if}}
+        {{#if ../page.attributes.path-cloud-1}}<li>{{{../page.attributes.path-cloud-1}}}</li>{{/if}}
+        {{#if ../page.attributes.path-cloud-2}}<li>{{{../page.attributes.path-cloud-2}}}</li>{{/if}}
+        {{#if ../page.attributes.path-cloud-3}}<li>{{{../page.attributes.path-cloud-3}}}</li>{{/if}}
       </ul>
-      <a class="ch3-path-cta" href="{{#if page.attributes.path-cloud-link}}{{{relativize (resolve-resource page.attributes.path-cloud-link)}}}{{/if}}">
-        {{#if page.attributes.path-cloud-cta}}{{{page.attributes.path-cloud-cta}}}{{else}}Try Redpanda Cloud{{/if}}
+      <a class="ch3-path-cta" href="{{#if ../page.attributes.path-cloud-link}}{{{relativize (resolve-resource ../page.attributes.path-cloud-link)}}}{{/if}}">
+        {{#if ../page.attributes.path-cloud-cta}}{{{../page.attributes.path-cloud-cta}}}{{else}}Try Redpanda Cloud{{/if}}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
   </div>
 </section>
+  {{/if}}
+</div>
+{{/with}}
+
+{{!-- Tab Navigation (optional) --}}
+{{#if page.attributes.tabs}}
+<nav class="ch3-tabs" aria-label="Page sections">
+  {{#each (split page.attributes.tabs ';;')}}
+  <a class="ch3-tab{{#if (eq @index 0)}} is-active{{/if}}" href="#" data-tab-index="{{@index}}">{{this}}</a>
+  {{/each}}
+</nav>
 {{/if}}
 
 {{!-- Main content area --}}

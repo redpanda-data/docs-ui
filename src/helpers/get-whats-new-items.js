@@ -25,18 +25,28 @@
  */
 module.exports = function (options) {
   const { page } = options.data.root
-  if (!page || !page.attributes) return { items: [] }
+  if (!page || !page.attributes) {
+    console.log('[DEBUG get-whats-new-items] No page or attributes')
+    return { items: [] }
+  }
+
+  console.log('[DEBUG get-whats-new-items] Page:', page.src?.relative, 'Component:', page.component.name)
+
+  // Debug: Check what whats-new attributes exist
+  const whatsNewAttrs = Object.keys(page.attributes).filter((k) => k.includes('whats-new'))
+  console.log('[DEBUG get-whats-new-items] Found whats-new attributes:', whatsNewAttrs)
 
   const items = []
   const maxItems = 10 // Support up to 10 items
 
   for (let i = 1; i <= maxItems; i++) {
-    const title = page.attributes[`component-whats-new-${i}-title`]
+    // Antora strips page- and component- prefixes, so we look for whats-new-* directly
+    const title = page.attributes[`whats-new-${i}-title`]
     if (!title) continue // No more items
 
-    const desc = page.attributes[`component-whats-new-${i}-desc`]
-    const link = page.attributes[`component-whats-new-${i}-link`]
-    const tag = page.attributes[`component-whats-new-${i}-tag`]
+    const desc = page.attributes[`whats-new-${i}-desc`]
+    const link = page.attributes[`whats-new-${i}-link`]
+    const tag = page.attributes[`whats-new-${i}-tag`]
 
     items.push({
       title,
