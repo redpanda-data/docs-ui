@@ -81,11 +81,49 @@
       {{/each}}
     </div>
     {{/if}}
+
+    {{!-- Ask AI Input Form - Opens chat drawer on submit --}}
+    <form class="ch3-hero-ask" id="ch3-ask-form">
+      <span class="ch3-hero-ask-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/>
+          <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
+        </svg>
+      </span>
+      <input
+        type="text"
+        class="ch3-hero-ask-input"
+        id="ch3-ask-input"
+        placeholder="{{#if page.attributes.hero-ask-placeholder}}{{page.attributes.hero-ask-placeholder}}{{else}}Ask AI about Redpanda...{{/if}}"
+        autocomplete="off"
+      >
+      <button type="submit" class="ch3-hero-ask-submit" aria-label="Ask">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
+    </form>
+
+    {{!-- Suggestion Chips (optional) --}}
+    {{#if page.attributes.hero-suggestion-1}}
+    <div class="ch3-hero-ask-hints">
+      <span class="ch3-hero-ask-hints-label">{{#if page.attributes.hero-suggestions-label}}{{page.attributes.hero-suggestions-label}}{{else}}Try asking:{{/if}}</span>
+      <button type="button" class="ch3-hero-ask-chip" data-suggestion="{{page.attributes.hero-suggestion-1}}">{{page.attributes.hero-suggestion-1}}</button>
+      {{#if page.attributes.hero-suggestion-2}}
+      <button type="button" class="ch3-hero-ask-chip" data-suggestion="{{page.attributes.hero-suggestion-2}}">{{page.attributes.hero-suggestion-2}}</button>
+      {{/if}}
+      {{#if page.attributes.hero-suggestion-3}}
+      <button type="button" class="ch3-hero-ask-chip" data-suggestion="{{page.attributes.hero-suggestion-3}}">{{page.attributes.hero-suggestion-3}}</button>
+      {{/if}}
+    </div>
+    {{/if}}
   </div>
 </section>
 
 {{!-- What's New + Path Two-Column Layout --}}
 {{#with (get-whats-new-items)}}
+{{#if (or hasItems ../page.attributes.path-title)}}
 <div class="ch3-hero-columns{{#if hasItems}} ch3-hero-columns--with-whats-new{{/if}}">
   {{!-- What's New Column --}}
   {{#if hasItems}}
@@ -147,6 +185,7 @@
 </section>
   {{/if}}
 </div>
+{{/if}}
 {{/with}}
 
 {{!-- Tab Navigation (optional) --}}
@@ -566,3 +605,36 @@
     </div>
   </section>
 </div>
+
+{{!-- JavaScript for Ask AI Form --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('ch3-ask-form');
+    var input = document.getElementById('ch3-ask-input');
+
+    // Handle form submission - open chat drawer with query
+    if (form && input) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var query = input.value.trim();
+        if (typeof window.openChatWithQuery === 'function') {
+          window.openChatWithQuery(query, true);
+        } else if (typeof window.openChatPanel === 'function') {
+          window.openChatPanel();
+        }
+        input.value = '';
+      });
+    }
+
+    // Handle suggestion chip clicks
+    var chips = document.querySelectorAll('.ch3-hero-ask-chip');
+    chips.forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var suggestion = chip.dataset.suggestion;
+        if (typeof window.openChatWithQuery === 'function') {
+          window.openChatWithQuery(suggestion, true);
+        }
+      });
+    });
+  });
+</script>

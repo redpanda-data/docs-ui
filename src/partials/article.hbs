@@ -231,6 +231,7 @@
     }
 
     // Show nav metadata when main metadata is not visible
+    const metadataContainer = document.querySelector(".metadata--main");
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -244,7 +245,9 @@
       threshold: 0.1 // Trigger when 10% of the container is visible
     });
 
-    observer.observe(metadataContainer);
+    if (metadataContainer) {
+      observer.observe(metadataContainer);
+    }
   });
   </script>
 {{/if}}

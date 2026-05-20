@@ -19,20 +19,18 @@
         <span class="material-symbols-outlined">keyboard_arrow_down</span>
       </button>
       <div id="version-dropdown" class="versions">
-        {{#if (ne page.componentVersion.displayVersion 'default')}}
-            {{#each page.versions}}
-              {{#if (ne ./version @root.page.version)}}
-                {{#with (resolve-resource ./url) as |targetPage|}}
-                  <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
-                    {{../displayVersion}}
-                    {{#if (is-eol ../asciidoc.attributes)}}
-                      <span class="eol-label">(end of life)</span>
-                    {{/if}}
-                  </a>
-                {{/with}}
-              {{/if}}
-            {{/each}}
-        {{/if}}
+        {{#each page.versions}}
+          {{#if (ne ./version @root.page.version)}}
+            {{#with (resolve-resource ./url) as |targetPage|}}
+              <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
+                {{../displayVersion}}
+                {{#if (is-eol ../asciidoc.attributes)}}
+                  <span class="eol-label">(end of life)</span>
+                {{/if}}
+              </a>
+            {{/with}}
+          {{/if}}
+        {{/each}}
       </div>
       {{else}}
       {{!-- Single version: just display the version --}}

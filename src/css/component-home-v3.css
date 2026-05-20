@@ -17,6 +17,22 @@
   flex-direction: column !important;
 }
 
+/* Full-width layout for component home pages */
+/* Higher specificity selector to override main > .content (main.css:52-64) */
+main.component-home > .component-content {
+  padding: 0;
+  max-width: none;
+
+  --ch3-max-width: 1180px;
+  --ch3-gutter: 40px;
+}
+
+@media (min-width: 1024px) {
+  main.component-home > .component-content {
+    --ch3-gutter: 56px;
+  }
+}
+
 /* Override .doc a underline for all card links */
 .doc .ch3-deploy-card,
 .doc .ch3-popular-card,
@@ -37,10 +53,11 @@
 .ch3-hero {
   position: relative;
   background: linear-gradient(180deg, #0f1727 0%, #161e2d 100%);
-  padding: 48px 40px 40px;
-  margin: 0 -40px 32px;
+  padding: 48px var(--ch3-gutter, 40px) 40px;
+  margin: 0 0 24px;
   overflow: visible;
-  width: calc(100% + 80px);
+  width: 100%;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -715,6 +732,8 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   gap: 2px;
   border-bottom: 1px solid var(--color-smoke-70, #dcdcde);
   margin-bottom: 36px;
+  padding-left: var(--ch3-gutter);
+  padding-right: var(--ch3-gutter);
 }
 
 .ch3-tab {
@@ -749,6 +768,8 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 /* Section styling */
 .ch3-section {
   margin-bottom: 56px;
+  padding-left: var(--ch3-gutter);
+  padding-right: var(--ch3-gutter);
 }
 
 .ch3-section-title {
@@ -789,6 +810,125 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+/* Hero Ask AI Input ------------------------------------------------------- */
+.ch3-hero-ask {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 600px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: background 0.12s, border-color 0.12s;
+  margin-top: 32px;
+}
+
+.ch3-hero-ask:hover,
+.ch3-hero-ask:focus-within {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.ch3-hero-ask-icon {
+  display: flex;
+  align-items: center;
+  color: var(--brand-500-new, #f04438);
+}
+
+.ch3-hero-ask-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ch3-hero-ask-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #fff;
+  font-family: var(--body-font-family);
+}
+
+.ch3-hero-ask-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Hero Ask Submit Button */
+.ch3-hero-ask-submit,
+button.ch3-hero-ask-submit,
+.ch3-hero-ask button.ch3-hero-ask-submit {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  background: var(--brand-600-new, #e24328) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  transition: background 0.12s !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.ch3-hero-ask-submit:hover,
+button.ch3-hero-ask-submit:hover {
+  background: var(--brand-700-new, #c9190b) !important;
+}
+
+.ch3-hero-ask-submit svg,
+button.ch3-hero-ask-submit svg,
+.ch3-hero-ask button.ch3-hero-ask-submit svg {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  display: block !important;
+  stroke: #fff !important;
+  fill: none !important;
+  flex-shrink: 0 !important;
+}
+
+/* Hero Ask Hints (suggestion chips) */
+.ch3-hero-ask-hints {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.ch3-hero-ask-hints-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.ch3-hero-ask-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  font-family: var(--body-font-family);
+}
+
+.ch3-hero-ask-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 /* Hero background decorations --------------------------------------------- */
@@ -1434,6 +1574,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
    ============================================================================= */
 
 .ch3-path-compare {
+  padding-top: 48px;
   margin-bottom: 64px;
 }
 
@@ -1683,10 +1824,7 @@ html[data-theme="dark"] .ch3-path-or {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
-  margin-bottom: 48px;
-  max-width: var(--ch3-max-width);
-  margin-left: auto;
-  margin-right: auto;
+  margin-bottom: 32px;
   padding: 0 var(--ch3-gutter);
 }
 

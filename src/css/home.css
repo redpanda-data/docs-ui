@@ -2,6 +2,13 @@ body.article.home {
   background-color: var(--home-background);
 }
 
+/* Layout: full-width content area for home page */
+/* Higher specificity selector to override main > .content (main.css:52-64) */
+main.article.home > .content {
+  padding: 0 !important;
+  max-width: none !important;
+}
+
 /* ============================================================================
    HOME PAGE HERO SECTION
    ============================================================================ */
@@ -16,7 +23,7 @@ body.article.home {
   overflow: hidden;
   background: #0b1430;
   color: #fff;
-  padding: 80px 8vw 72px;
+  padding: 80px 40px 72px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -68,8 +75,7 @@ body.article.home {
 .home-hero-inner {
   position: relative;
   z-index: 2;
-  max-width: 960px;
-  margin: 0 auto;
+  max-width: 1100px;
 }
 
 /* Eyebrow Label */
@@ -216,7 +222,6 @@ button.home-hero-ask-submit svg,
   position: relative;
   z-index: 2;
   max-width: 960px;
-  margin: 0 auto;
   text-align: left;
 }
 
@@ -295,8 +300,8 @@ button.home-hero-ask-submit svg,
    ============================================================================ */
 
 .home-intent {
-  padding: 64px 8vw 48px;
-  background: var(--body-background);
+  padding: 64px 40px 48px;
+  background: var(--home-background);
 }
 
 .home-intent-container {
@@ -496,7 +501,7 @@ html[data-theme="dark"] .home-intent-card--adp .home-intent-card-cta {
    ============================================================================ */
 
 .home-products {
-  padding: 80px 8vw 96px;
+  padding: 80px 40px 96px;
   background: var(--body-background);
 }
 
@@ -891,12 +896,11 @@ html[data-theme="dark"] .home-products-more {
   width: 100%;
 }
 
-/* Hero styling - contained within main content area when sidebar present */
+/* Hero styling - extend full width like data-platform */
 .article.home .home-hero {
   width: 100%;
-  margin-left: 0;
-  border-radius: 12px;
-  margin-bottom: 24px;
+  margin: 0 0 24px;
+  border-radius: 0;
 }
 
 .article.home footer.footer {
@@ -1796,7 +1800,7 @@ html[data-theme="dark"] .home .feature-box:hover {
    ============================================================================ */
 
 .home-paths {
-  padding: 64px 8vw;
+  padding: 64px 40px;
   background: var(--body-background);
 }
 
@@ -2215,7 +2219,7 @@ html[data-theme="dark"] .home-subproduct:hover .home-subproduct-cta {
    ============================================================================ */
 
 .home-nav-section {
-  padding: 64px 8vw;
+  padding: 64px 40px;
   background: var(--grey-50-new, #f9fafb);
   border-top: 1px solid var(--grey-200-new, #e5e7eb);
 }

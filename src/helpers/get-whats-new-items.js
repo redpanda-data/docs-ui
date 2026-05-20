@@ -26,15 +26,8 @@
 module.exports = function (options) {
   const { page } = options.data.root
   if (!page || !page.attributes) {
-    console.log('[DEBUG get-whats-new-items] No page or attributes')
     return { items: [] }
   }
-
-  console.log('[DEBUG get-whats-new-items] Page:', page.src?.relative, 'Component:', page.component.name)
-
-  // Debug: Check what whats-new attributes exist
-  const whatsNewAttrs = Object.keys(page.attributes).filter((k) => k.includes('whats-new'))
-  console.log('[DEBUG get-whats-new-items] Found whats-new attributes:', whatsNewAttrs)
 
   const items = []
   const maxItems = 10 // Support up to 10 items

@@ -31,11 +31,11 @@
   </div>
   <script>
     window.UI_INTEGRATION_ID = window.UI_INTEGRATION_ID || '13dd3c3c-52eb-4d92-9b61-383a946bccac';
+    {{!-- Use component-specific AI suggestions if defined, otherwise use defaults --}}
     window.AI_SUGGESTIONS = window.AI_SUGGESTIONS || [
-      "How do I build my first agent?",
-      "Set up MCP with Postgres",
-      "Rotate an API key safely",
-      "What's a token budget?"
+      {{#each (get-ai-suggestions)}}
+      "{{this}}"{{#unless @last}},{{/unless}}
+      {{/each}}
     ];
   </script>
   <script src="{{{uiRootPath}}}/js/AskAI.bundle.js"></script>
