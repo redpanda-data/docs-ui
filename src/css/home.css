@@ -75,7 +75,6 @@ main.article.home > .content {
 .home-hero-inner {
   position: relative;
   z-index: 2;
-  max-width: 1100px;
 }
 
 /* Eyebrow Label */
@@ -305,7 +304,6 @@ button.home-hero-ask-submit svg,
 }
 
 .home-intent-container {
-  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -506,7 +504,6 @@ html[data-theme="dark"] .home-intent-card--adp .home-intent-card-cta {
 }
 
 .home-products-container {
-  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -1805,7 +1802,6 @@ html[data-theme="dark"] .home .feature-box:hover {
 }
 
 .home-paths-container {
-  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -2230,7 +2226,6 @@ html[data-theme="dark"] .home-nav-section {
 }
 
 .home-nav-container {
-  max-width: 1200px;
   margin: 0 auto;
 }
 
