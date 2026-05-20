@@ -547,7 +547,7 @@ html[data-theme="dark"] .navbar.topbar .theme-image {
 }
 
 .tb-dropdown.tb-overflow-menu {
-  display: none !important;
+  display: none;
 }
 
 /* Mobile: hide individual items, show overflow menu */
@@ -557,7 +557,7 @@ html[data-theme="dark"] .navbar.topbar .theme-image {
   }
 
   .tb-overflow-menu {
-    display: block;
+    display: block !important;
   }
 
   /* Reduce gap in navbar-end for more space */
