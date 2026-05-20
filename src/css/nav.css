@@ -1354,6 +1354,14 @@ html[data-theme="light"] .nav-bucket-version-btn:hover {
     right: auto;
     max-width: calc(100vw - 40px);
   }
+
+  /* Fix explore panel version dropdown positioning on mobile */
+  .context .container.has-dropdown .versions,
+  .context .container.has-dropdown .components {
+    left: 0;
+    right: auto;
+    max-width: calc(100vw - var(--nav-side-padding) - var(--nav-side-padding) - 32px);
+  }
 }
 
 @keyframes bucket-version-menu-in {
