@@ -547,7 +547,7 @@
   {{/if}}
 
   {{!-- Labs Section --}}
-  {{#if page.attributes.labs-title}}
+  {{#if (and page.attributes.labs-title (or page.attributes.labs-1-title page.attributes.labs-2-title page.attributes.labs-3-title page.attributes.labs-4-title))}}
   <section class="ch3-section">
     <div class="ch3-labs-head">
       <h2 class="ch3-section-title">{{{page.attributes.labs-title}}}</h2>
