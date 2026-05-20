@@ -396,6 +396,16 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
   right: auto;
 }
 
+/* Mobile: Reset panel positioning to allow centering on small screens */
+@media (max-width: 640px) {
+  .component-indicator-sticky .sm-ver-panel {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+  }
+}
+
 /* Status badges (Beta, Limited Availability) in sticky header */
 .status-badge {
   display: inline-flex;
