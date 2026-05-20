@@ -116,3 +116,11 @@ a + .breadcrumbs {
     margin-left: 0;
   }
 }
+
+/* Mobile: Reset panel positioning to allow centering on small screens */
+@media (max-width: 640px) {
+  .breadcrumbs .sm-ver-panel {
+    right: auto;
+    left: 50%;
+  }
+}
