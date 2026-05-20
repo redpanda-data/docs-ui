@@ -34,7 +34,7 @@
     {{!-- Use component-specific AI suggestions if defined, otherwise use defaults --}}
     window.AI_SUGGESTIONS = window.AI_SUGGESTIONS || [
       {{#each (get-ai-suggestions)}}
-      "{{this}}"{{#unless @last}},{{/unless}}
+      "{{{this}}}"{{#unless @last}},{{/unless}}
       {{/each}}
     ];
   </script>

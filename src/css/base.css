@@ -55,7 +55,7 @@ dt,
 strong,
 th {
   font-family: var(--body-font-family-bold);
-  font-weight: lighter;
+  font-weight: var(--body-font-weight-bold);
 }
 
 sub,
