@@ -4,7 +4,7 @@
  * Test helper to check if home component exists and has navigation
  */
 module.exports = ({ data: { root } }) => {
-  const { site } = root
+  const { site, contentCatalog } = root
 
   if (!site || !site.components) {
     return 'No site or components'
@@ -17,18 +17,21 @@ module.exports = ({ data: { root } }) => {
   const homeComponent = components.find((c) => c.name === 'home')
 
   if (!homeComponent) {
-    return `Home component not found. Available: ${components.map((c) => c.name).join(', ')}`
+    return `Home not found in site.components. Available: ${components.map((c) => c.name).join(', ')}`
   }
+
+  // Also check contentCatalog
+  const catalogHome = contentCatalog ? contentCatalog.getComponent('home') : null
 
   const latestVersion = homeComponent.latestVersion || (homeComponent.versions && homeComponent.versions[0])
 
   if (!latestVersion) {
-    return 'Home component has no versions'
+    return 'Home has no versions'
   }
 
-  if (!latestVersion.navigation) {
-    return `Home component ${latestVersion.version} has NO navigation`
-  }
+  const metadata = latestVersion.asciidoc?.attributes?.['component-metadata']
+  const hasNav = !!latestVersion.navigation
+  const navCount = latestVersion.navigation ? latestVersion.navigation.length : 0
 
-  return `Home component ${latestVersion.version} HAS navigation with ${latestVersion.navigation.length} items`
+  return `Home: v${latestVersion.version}, metadata=${!!metadata}, nav=${hasNav} (${navCount} items), catalog=${!!catalogHome}`
 }
