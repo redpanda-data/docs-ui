@@ -591,20 +591,305 @@ html[data-theme="dark"] .home-product-cards--nested {
   border-left-color: var(--grey-700-new, #374151);
 }
 
-/* Product cards grid */
-.home-product-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding-bottom: 0;
-}
-
-/* Data Platform hierarchical layout */
-.home-products-data-platform {
+/* Main products grid - two columns for ADP and Data Platform */
+.home-products-main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  padding-bottom: 0;
+  gap: 20px;
+}
+
+/* Main product cards (ADP, Data Platform) */
+.home-product-main-card,
+a.home-product-main-card {
+  --product-color: #444ce7; /* fallback */
+
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 2px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 16px;
+  padding: 24px;
+  text-decoration: none !important;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+a.home-product-main-card:hover {
+  border-color: var(--product-color);
+  box-shadow: 0 8px 24px -8px color-mix(in sRGB, var(--product-color) 30%, transparent);
+  transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .home-product-main-card,
+html[data-theme="dark"] a.home-product-main-card {
+  background: var(--dark-blue-800-new, #161e2d);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] a.home-product-main-card:hover {
+  border-color: var(--product-color);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Main card header */
+.home-product-main-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.home-product-main-card-title,
+.doc .home-product-main-card-title,
+h3.home-product-main-card-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--grey-900-new, #111827) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.home-product-main-card-title a {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+html[data-theme="dark"] .home-product-main-card-title,
+html[data-theme="dark"] .doc h3.home-product-main-card-title {
+  color: #fff !important;
+}
+
+.home-product-main-card-link-icon {
+  display: flex;
+  align-items: center;
+  color: var(--product-color);
+  transition: transform 0.15s;
+}
+
+a.home-product-main-card:hover .home-product-main-card-link-icon,
+.home-product-main-card:hover .home-product-main-card-link-icon {
+  transform: translate(2px, -2px);
+}
+
+.home-product-main-card-desc,
+.doc .home-product-main-card-desc,
+p.home-product-main-card-desc {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  margin: 0 0 20px !important;
+  color: var(--grey-600-new, #4b5563) !important;
+}
+
+html[data-theme="dark"] .home-product-main-card-desc {
+  color: var(--grey-400-new, #9ca3af) !important;
+}
+
+/* Data Platform card with nested products */
+.home-product-main-card--with-children {
+  cursor: default;
+}
+
+.home-product-main-card--with-children:hover {
+  transform: none;
+}
+
+/* Nested cards container (Cloud, Self-Managed) */
+.home-product-nested-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Nested product cards */
+.home-product-nested-card,
+a.home-product-nested-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--grey-50-new, #f9fafb);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-left: 3px solid var(--product-color);
+  border-radius: 12px;
+  padding: 16px;
+  text-decoration: none !important;
+  color: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+}
+
+a.home-product-nested-card:hover {
+  border-color: var(--product-color);
+  box-shadow: 0 4px 12px color-mix(in sRGB, var(--product-color) 15%, transparent);
+  background: color-mix(in sRGB, var(--product-color) 4%, var(--grey-50-new));
+}
+
+html[data-theme="dark"] .home-product-nested-card,
+html[data-theme="dark"] a.home-product-nested-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+  border-left-color: var(--product-color);
+}
+
+html[data-theme="dark"] a.home-product-nested-card:hover {
+  background: color-mix(in sRGB, var(--product-color) 8%, transparent);
+  border-color: var(--product-color);
+}
+
+/* Nested card with sub-products */
+.home-product-nested-card--with-children {
+  cursor: default;
+}
+
+.home-product-nested-card--with-children:hover {
+  box-shadow: none;
+  background: var(--grey-50-new, #f9fafb);
+}
+
+html[data-theme="dark"] .home-product-nested-card--with-children:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Nested card header */
+.home-product-nested-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.home-product-nested-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--grey-900-new, #111827);
+  letter-spacing: -0.01em;
+}
+
+.home-product-nested-card-title a {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+html[data-theme="dark"] .home-product-nested-card-title {
+  color: #fff;
+}
+
+.home-product-nested-card-link-icon {
+  display: flex;
+  align-items: center;
+  color: var(--product-color);
+  transition: transform 0.15s;
+}
+
+a.home-product-nested-card:hover .home-product-nested-card-link-icon,
+.home-product-nested-card:hover .home-product-nested-card-link-icon a {
+  transform: translate(2px, -2px);
+}
+
+.home-product-nested-card-desc,
+.doc .home-product-nested-card-desc,
+p.home-product-nested-card-desc {
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  margin: 0 0 12px !important;
+  color: var(--grey-600-new, #4b5563) !important;
+}
+
+html[data-theme="dark"] .home-product-nested-card-desc {
+  color: var(--grey-400-new, #9ca3af) !important;
+}
+
+/* Sub-cards container (Streaming, Connect) */
+.home-product-sub-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 2px solid var(--grey-300-new, #d1d5db);
+}
+
+html[data-theme="dark"] .home-product-sub-cards {
+  border-left-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Sub-product cards */
+.home-product-sub-card,
+a.home-product-sub-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--body-background);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-left: 2px solid var(--product-color);
+  border-radius: 8px;
+  padding: 12px;
+  text-decoration: none !important;
+  color: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+a.home-product-sub-card:hover {
+  border-color: var(--product-color);
+  box-shadow: 0 2px 8px color-mix(in sRGB, var(--product-color) 15%, transparent);
+}
+
+html[data-theme="dark"] .home-product-sub-card,
+html[data-theme="dark"] a.home-product-sub-card {
+  background: var(--dark-blue-800-new, #161e2d);
+  border-color: rgba(255, 255, 255, 0.08);
+  border-left-color: var(--product-color);
+}
+
+html[data-theme="dark"] a.home-product-sub-card:hover {
+  border-color: var(--product-color);
+}
+
+/* Sub-card header */
+.home-product-sub-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.home-product-sub-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--grey-900-new, #111827);
+  letter-spacing: -0.01em;
+}
+
+html[data-theme="dark"] .home-product-sub-card-title {
+  color: #fff;
+}
+
+.home-product-sub-card-header svg {
+  margin-left: auto;
+  color: var(--product-color);
+  transition: transform 0.15s;
+}
+
+a.home-product-sub-card:hover .home-product-sub-card-header svg {
+  transform: translate(2px, -2px);
+}
+
+.home-product-sub-card-desc,
+.doc .home-product-sub-card-desc,
+p.home-product-sub-card-desc {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  color: var(--grey-500-new, #6b7280) !important;
+}
+
+html[data-theme="dark"] .home-product-sub-card-desc {
+  color: var(--grey-400-new, #9ca3af) !important;
+}
+
+/* Legacy styles - keep for backwards compatibility but hide */
+.home-product-cards {
+  display: none;
+}
+
+.home-products-data-platform {
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -2421,8 +2706,9 @@ html[data-theme="dark"] .home .loading {
 
 /* Responsive for intent and products sections */
 @media (max-width: 900px) {
-  .home-product-cards {
-    grid-template-columns: repeat(2, 1fr);
+  .home-products-main-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
@@ -2443,7 +2729,19 @@ html[data-theme="dark"] .home .loading {
     padding: 56px 24px 64px;
   }
 
-  .home-product-cards {
+  .home-products-main-grid {
     grid-template-columns: 1fr;
+  }
+
+  .home-product-main-card {
+    padding: 20px;
+  }
+
+  .home-product-nested-card {
+    padding: 14px;
+  }
+
+  .home-product-sub-card {
+    padding: 10px;
   }
 }

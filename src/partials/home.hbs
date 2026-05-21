@@ -101,87 +101,70 @@
   <div class="home-products-container">
     <h2 class="home-products-heading">{{page.attributes.products-heading}}</h2>
 
-    {{!-- Agentic Data Plane (hide section if component doesn't exist) --}}
-    {{#if (has-component site 'agentic-data-plane')}}
-    <h3 class="home-products-section-heading">{{page.attributes.products-adp-heading}}</h3>
-    <div class="home-product-cards">
-      {{!-- ADP --}}
-      <div class="home-product-card home-product-card--adp" style="--product-color: {{get-component-color site 'agentic-data-plane'}};">
-        <div class="home-product-card-content">
-          <div class="home-product-card-header">
-            <span class="home-product-card-title">{{page.attributes.product-adp-title}}</span>
-          </div>
-          <p class="home-product-card-desc">{{page.attributes.product-adp-desc}}</p>
-          <div class="home-product-card-links">
-            <a href="{{#if page.attributes.adp-quickstart}}{{{relativize (resolve-resource page.attributes.adp-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
-            <a href="{{#if page.attributes.adp-docs}}{{{relativize (resolve-resource page.attributes.adp-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
-          </div>
+    <div class="home-products-main-grid">
+      {{!-- Agentic Data Plane Card (hide if component doesn't exist) --}}
+      {{#if (has-component site 'agentic-data-plane')}}
+      <a href="{{{relativize '/agentic-data-plane/'}}}" class="home-product-main-card home-product-main-card--adp" style="--product-color: {{get-component-color site 'agentic-data-plane'}};">
+        <div class="home-product-main-card-header">
+          <h3 class="home-product-main-card-title">{{page.attributes.products-adp-heading}}</h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
         </div>
-      </div>
-    </div>
-    {{/if}}
+        <p class="home-product-main-card-desc">{{page.attributes.product-adp-desc}}</p>
+      </a>
+      {{/if}}
 
-    {{!-- Data Platform Products --}}
-    <h3 class="home-products-section-heading">{{page.attributes.products-dp-heading}}</h3>
-    <div class="home-products-data-platform">
-      {{!-- Cloud --}}
-      <div class="home-product-group">
-        <div class="home-product-card" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
-          <div class="home-product-card-content">
-            <div class="home-product-card-header">
-              <span class="home-product-card-title">{{page.attributes.product-cloud-title}}</span>
-            </div>
-            <p class="home-product-card-desc">{{page.attributes.product-cloud-desc}}</p>
-            <div class="home-product-card-links">
-              <a href="{{#if page.attributes.cloud-quickstart}}{{{relativize (resolve-resource page.attributes.cloud-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
-              <a href="{{#if page.attributes.cloud-docs}}{{{relativize (resolve-resource page.attributes.cloud-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {{!-- Self-Managed with nested Streaming and Connect --}}
-      <div class="home-product-group home-product-group--with-children">
-        <div class="home-product-card home-product-card--parent" style="--product-color: {{get-component-color site 'self-managed'}};">
-          <div class="home-product-card-content">
-            <div class="home-product-card-header">
-              <span class="home-product-card-title">{{page.attributes.product-self-managed-title}}</span>
-            </div>
-            <p class="home-product-card-desc">{{page.attributes.product-self-managed-desc}}</p>
-            <div class="home-product-card-links">
-              <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
-            </div>
-          </div>
+      {{!-- Data Platform Card with nested products --}}
+      <div class="home-product-main-card home-product-main-card--with-children" style="--product-color: {{get-component-color site 'data-platform'}};">
+        <div class="home-product-main-card-header">
+          <h3 class="home-product-main-card-title">
+            <a href="{{{relativize '/data-platform/'}}}">{{page.attributes.products-dp-heading}}</a>
+          </h3>
+          <a href="{{{relativize '/data-platform/'}}}" class="home-product-main-card-link-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+          </a>
         </div>
 
-        {{!-- Nested children cards --}}
-        <div class="home-product-children">
-          {{!-- Streaming --}}
-          <div class="home-product-card home-product-card--child" style="--product-color: {{get-component-color site 'streaming'}};">
-            <div class="home-product-card-content">
-              <div class="home-product-card-header">
-                <span class="home-product-card-title">{{page.attributes.product-streaming-title}}</span>
-                {{#with site.components.streaming.latest}}<span class="home-product-card-version">v{{version}}</span>{{/with}}
-              </div>
-              <p class="home-product-card-desc">{{page.attributes.product-streaming-desc}}</p>
-              <div class="home-product-card-links">
-                <a href="{{#if page.attributes.self-managed-quickstart}}{{{relativize (resolve-resource page.attributes.self-managed-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
-                <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
-              </div>
+        <div class="home-product-nested-cards">
+          {{!-- Cloud Card --}}
+          <a href="{{#if page.attributes.cloud-docs}}{{{relativize (resolve-resource page.attributes.cloud-docs)}}}{{else}}#{{/if}}" class="home-product-nested-card" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
+            <div class="home-product-nested-card-header">
+              <span class="home-product-nested-card-title">{{page.attributes.product-cloud-title}}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
             </div>
-          </div>
+            <p class="home-product-nested-card-desc">{{page.attributes.product-cloud-desc}}</p>
+          </a>
 
-          {{!-- Connect --}}
-          <div class="home-product-card home-product-card--child" style="--product-color: {{get-component-color site 'connect'}};">
-            <div class="home-product-card-content">
-              <div class="home-product-card-header">
-                <span class="home-product-card-title">{{page.attributes.product-connect-title}}</span>
-              </div>
-              <p class="home-product-card-desc">{{page.attributes.product-connect-desc}}</p>
-              <div class="home-product-card-links">
-                <a href="{{#if page.attributes.connect-quickstart}}{{{relativize (resolve-resource page.attributes.connect-quickstart)}}}{{else}}#{{/if}}">{{page.attributes.product-link-get-started}}</a>
-                <a href="{{#if page.attributes.connect-docs}}{{{relativize (resolve-resource page.attributes.connect-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-link-docs}}</a>
-              </div>
+          {{!-- Self-Managed Card with sub-products --}}
+          <div class="home-product-nested-card home-product-nested-card--with-children" style="--product-color: {{get-component-color site 'self-managed'}};">
+            <div class="home-product-nested-card-header">
+              <span class="home-product-nested-card-title">
+                <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}">{{page.attributes.product-self-managed-title}}</a>
+              </span>
+              <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}" class="home-product-nested-card-link-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+              </a>
+            </div>
+            <p class="home-product-nested-card-desc">{{page.attributes.product-self-managed-desc}}</p>
+
+            <div class="home-product-sub-cards">
+              {{!-- Streaming --}}
+              <a href="{{#if page.attributes.self-managed-docs}}{{{relativize (resolve-resource page.attributes.self-managed-docs)}}}{{else}}#{{/if}}" class="home-product-sub-card" style="--product-color: {{get-component-color site 'streaming'}};">
+                <div class="home-product-sub-card-header">
+                  <span class="home-product-sub-card-title">{{page.attributes.product-streaming-title}}</span>
+                  {{#with site.components.streaming.latest}}<span class="home-product-card-version">v{{version}}</span>{{/with}}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                </div>
+                <p class="home-product-sub-card-desc">{{page.attributes.product-streaming-desc}}</p>
+              </a>
+
+              {{!-- Connect --}}
+              <a href="{{#if page.attributes.connect-docs}}{{{relativize (resolve-resource page.attributes.connect-docs)}}}{{else}}#{{/if}}" class="home-product-sub-card" style="--product-color: {{get-component-color site 'connect'}};">
+                <div class="home-product-sub-card-header">
+                  <span class="home-product-sub-card-title">{{page.attributes.product-connect-title}}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                </div>
+                <p class="home-product-sub-card-desc">{{page.attributes.product-connect-desc}}</p>
+              </a>
             </div>
           </div>
         </div>
