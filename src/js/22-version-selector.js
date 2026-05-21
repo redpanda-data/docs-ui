@@ -63,10 +63,12 @@
 
   // Global handlers for closing dropdowns (outside the loop to avoid duplicates)
   // Close on outside click
-  document.addEventListener('mousedown', function (e) {
+  var closeDropdowns = function (e) {
     selectors.forEach(function (smVer) {
       var btn = smVer.querySelector('.sm-ver-pill')
-      if (!smVer.contains(e.target) && smVer.classList.contains('is-open')) {
+      var panel = smVer.querySelector('.sm-ver-panel')
+      // Close if click is outside panel and not on the button
+      if (panel && !panel.contains(e.target) && !btn.contains(e.target) && smVer.classList.contains('is-open')) {
         smVer.classList.remove('is-open')
         if (btn) {
           btn.classList.remove('is-open')
@@ -74,7 +76,10 @@
         }
       }
     })
-  })
+  }
+
+  document.addEventListener('mousedown', closeDropdowns)
+  document.addEventListener('touchstart', closeDropdowns)
 
   // Close on Escape
   document.addEventListener('keydown', function (e) {

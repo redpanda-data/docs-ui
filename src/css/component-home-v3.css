@@ -340,7 +340,7 @@ main.component-home > .component-content {
   width: 100%;
   padding: 10px 14px;
   border-radius: 8px;
-  text-decoration: none;
+  text-decoration: none !important;
   color: inherit;
   cursor: pointer;
   transition: background 0.1s;
@@ -477,7 +477,7 @@ main.component-home > .component-content {
   font-size: 11.5px;
   font-weight: 500;
   color: var(--color-jet-70, #525866);
-  text-decoration: none;
+  text-decoration: none !important;
   transition: background 0.1s, color 0.1s;
 }
 
