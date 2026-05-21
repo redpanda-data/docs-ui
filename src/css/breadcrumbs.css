@@ -122,5 +122,11 @@ a + .breadcrumbs {
   .breadcrumbs .sm-ver-panel {
     right: auto;
     left: 50%;
+    position: fixed;
+    top: 50%;
+  }
+
+  .breadcrumbs .sm-ver.is-open .sm-ver-panel {
+    transform: translate(-50%, -50%) scale(1);
   }
 }

@@ -398,11 +398,21 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
 
 /* Mobile: Reset panel positioning to allow centering on small screens */
 @media (max-width: 640px) {
+  /* Remove containment from article when version selector is open,
+     so position:fixed works relative to viewport */
+  .doc:has(.sm-ver.is-open) {
+    contain: none !important;
+  }
+
   .component-indicator-sticky .sm-ver-panel {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     right: auto !important;
+  }
+
+  .component-indicator-sticky .sm-ver.is-open .sm-ver-panel {
+    transform: translate(-50%, -50%) scale(1) !important;
   }
 }
 
