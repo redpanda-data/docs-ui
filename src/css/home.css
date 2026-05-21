@@ -299,7 +299,7 @@ button.home-hero-ask-submit svg,
    ============================================================================ */
 
 .home-intent {
-  padding: 64px 40px 48px;
+  padding: 64px 40px 56px;
   background: var(--home-background);
 }
 
@@ -416,7 +416,7 @@ html[data-theme="dark"] .home-intent-card-icon.home-intent-card-icon--brand {
 h3.home-intent-card-title,
 .doc h3.home-intent-card-title,
 .article.home .doc h3.home-intent-card-title {
-  font-size: 17px !important;
+  font-size: 19px !important;
   font-weight: 600 !important;
   margin: 0 0 6px !important;
   padding: 0 !important;
@@ -435,7 +435,7 @@ html[data-theme="dark"] .doc h3.home-intent-card-title {
 .doc .home-intent-card-desc,
 p.home-intent-card-desc,
 .doc p.home-intent-card-desc {
-  font-size: 14px !important;
+  font-size: 15px !important;
   line-height: 1.5 !important;
   margin: 0 0 10px !important;
   color: var(--grey-600-new, #4b5563) !important;
@@ -499,7 +499,7 @@ html[data-theme="dark"] .home-intent-card--adp .home-intent-card-cta {
    ============================================================================ */
 
 .home-products {
-  padding: 80px 40px 96px;
+  padding: 56px 40px 96px;
   background: var(--body-background);
 }
 
@@ -596,7 +596,7 @@ html[data-theme="dark"] .home-product-cards--nested {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding-bottom: 20px;
+  padding-bottom: 0;
 }
 
 /* Data Platform hierarchical layout */
@@ -604,7 +604,7 @@ html[data-theme="dark"] .home-product-cards--nested {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  padding-bottom: 20px;
+  padding-bottom: 0;
 }
 
 @media (max-width: 768px) {
@@ -727,7 +727,7 @@ html[data-theme="dark"] a.home-product-card:hover {
 }
 
 .home-product-card-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--grey-900-new, #111827);
   letter-spacing: -0.01em;
@@ -755,7 +755,7 @@ html[data-theme="dark"] .home-product-card-version {
 .doc .home-product-card-desc,
 p.home-product-card-desc,
 .doc p.home-product-card-desc {
-  font-size: 12px !important;
+  font-size: 13px !important;
   color: var(--grey-500-new, #6b7280) !important;
   margin: 0 !important;
   line-height: 1.4 !important;
@@ -774,7 +774,7 @@ html[data-theme="dark"] .doc p.home-product-card-desc {
 }
 
 .home-product-card-links a {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--product-color);
   text-decoration: none;
