@@ -104,13 +104,34 @@
     <div class="home-products-main-grid">
       {{!-- Agentic Data Plane Card (hide if component doesn't exist) --}}
       {{#if (has-component site 'agentic-data-plane')}}
-      <a href="{{{relativize '/agentic-data-plane/'}}}" class="home-product-main-card home-product-main-card--adp" style="--product-color: {{get-component-color site 'agentic-data-plane'}};">
+      <div class="home-product-main-card home-product-main-card--adp home-product-main-card--with-content" style="--product-color: {{get-component-color site 'agentic-data-plane'}};">
         <div class="home-product-main-card-header">
-          <h3 class="home-product-main-card-title">{{page.attributes.products-adp-heading}}</h3>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+          <h3 class="home-product-main-card-title">
+            <a href="{{{relativize '/agentic-data-plane/'}}}">{{page.attributes.products-adp-heading}}</a>
+          </h3>
+          <a href="{{{relativize '/agentic-data-plane/'}}}" class="home-product-main-card-link-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+          </a>
         </div>
         <p class="home-product-main-card-desc">{{page.attributes.product-adp-desc}}</p>
-      </a>
+
+        {{!-- ADP Visual --}}
+        <div class="home-product-main-card-visual">
+          <img src="../agentic-data-plane/shared/_images/cloud-mcp.gif" alt="Agentic Data Plane workflow" />
+        </div>
+
+        {{!-- Quick Links --}}
+        <div class="home-product-main-card-links">
+          <a href="{{#if page.attributes.adp-quickstart}}{{{relativize (resolve-resource page.attributes.adp-quickstart)}}}{{else}}#{{/if}}" class="home-product-main-card-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Get started</span>
+          </a>
+          <a href="{{#if page.attributes.adp-docs}}{{{relativize (resolve-resource page.attributes.adp-docs)}}}{{else}}#{{/if}}" class="home-product-main-card-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>Documentation</span>
+          </a>
+        </div>
+      </div>
       {{/if}}
 
       {{!-- Data Platform Card with nested products --}}
@@ -123,6 +144,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
           </a>
         </div>
+        <p class="home-product-main-card-desc">High-performance streaming data platform for mission-critical workloads.</p>
 
         <div class="home-product-nested-cards">
           {{!-- Cloud Card --}}

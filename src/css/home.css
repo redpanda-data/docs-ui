@@ -500,7 +500,7 @@ html[data-theme="dark"] .home-intent-card--adp .home-intent-card-cta {
 
 .home-products {
   padding: 56px 40px 96px;
-  background: var(--body-background);
+  background: var(--home-background);
 }
 
 .home-products-container {
@@ -677,12 +677,78 @@ a.home-product-main-card:hover .home-product-main-card-link-icon,
 p.home-product-main-card-desc {
   font-size: 14px !important;
   line-height: 1.5 !important;
-  margin: 0 0 20px !important;
+  margin: 0 0 16px !important;
   color: var(--grey-600-new, #4b5563) !important;
 }
 
 html[data-theme="dark"] .home-product-main-card-desc {
   color: var(--grey-400-new, #9ca3af) !important;
+}
+
+/* Main card visual (GIF/image) */
+.home-product-main-card-visual {
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--grey-50-new, #f9fafb);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+html[data-theme="dark"] .home-product-main-card-visual {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.home-product-main-card-visual img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Main card quick links */
+.home-product-main-card-links {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.home-product-main-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--grey-100-new, #f3f4f6);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--grey-900-new, #111827);
+  text-decoration: none !important;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+.home-product-main-card-link:hover {
+  background: #fff;
+  border-color: var(--product-color);
+  box-shadow: 0 2px 8px color-mix(in sRGB, var(--product-color) 15%, transparent);
+}
+
+html[data-theme="dark"] .home-product-main-card-link {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+html[data-theme="dark"] .home-product-main-card-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--product-color);
+}
+
+.home-product-main-card-link svg {
+  color: var(--product-color);
+  flex-shrink: 0;
 }
 
 /* Data Platform card with nested products */
