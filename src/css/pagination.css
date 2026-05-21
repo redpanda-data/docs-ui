@@ -25,13 +25,13 @@ nav.pagination span:hover {
 }
 
 nav.pagination .prev {
-  padding-left: 0;
+  padding-left: 16px;
   text-align: left;
 }
 
 nav.pagination .next {
   margin-left: 0;
-  padding-right: 0;
+  padding-right: 16px;
   text-align: right;
   align-items: flex-end;
 }
