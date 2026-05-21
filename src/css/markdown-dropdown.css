@@ -15,32 +15,26 @@
   padding: 4px;
 }
 
-/* Toggle Button - styled to match version selector pill */
+/* Toggle Button - styled to match version selector pill in eyebrow */
 .markdown-dropdown-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border: 1px solid var(--color-smoke-70, #dcdcde);
+  padding: 4px 10px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 99px;
-  background: var(--color-smoke-30, #f4f4f5);
-  color: var(--color-jet-80, #48484a);
-  font-size: 11px;
+  background: var(--grey-100-new, #f4f4f5);
+  color: var(--grey-900-new, #171717);
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-/* In sticky header context - ensure consistent sizing */
-.component-indicator-sticky .markdown-dropdown-toggle {
-  padding: 4px 10px;
-  font-size: 11px;
-}
-
 .markdown-dropdown-toggle:hover {
-  background: var(--color-smoke-50, #e8e8ea);
-  border-color: var(--color-smoke-90, #c3c4c6);
+  background: var(--grey-200-new, #e5e5e5);
+  border-color: var(--grey-300-new, #d4d4d4);
 }
 
 .markdown-dropdown-toggle:focus {
@@ -49,12 +43,17 @@
 }
 
 .markdown-dropdown-toggle[aria-expanded="true"] {
-  background: var(--color-smoke-50, #e8e8ea);
-  border-color: var(--color-smoke-90, #c3c4c6);
+  background: var(--grey-200-new, #e5e5e5);
+  border-color: var(--grey-300-new, #d4d4d4);
 }
 
 .markdown-icon {
   flex-shrink: 0;
+  color: var(--grey-500-new, #737373);
+}
+
+html[data-theme=dark] .markdown-icon {
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .markdown-text {
@@ -63,7 +62,7 @@
 
 .dropdown-caret {
   flex-shrink: 0;
-  opacity: 0.6;
+  color: var(--grey-500-new, #737373);
   transition: transform 0.2s ease;
 }
 
@@ -72,7 +71,7 @@
 }
 
 html[data-theme=dark] .dropdown-caret {
-  opacity: 0.5;
+  color: rgba(255, 255, 255, 0.65);
 }
 
 /* Dropdown Menu - styled to match version selector panel */
@@ -113,7 +112,8 @@ html[data-theme=dark] .dropdown-caret {
   border-radius: 8px;
   background: transparent;
   color: var(--color-jet-80, #48484a);
-  font-size: 14px;
+  font-size: calc(13 / var(--rem-base) * 1rem); /* Match version selector row font size */
+  font-weight: 500;
   font-family: inherit;
   text-align: left;
   cursor: pointer;
@@ -199,14 +199,14 @@ html[data-theme=dark] .dropdown-caret {
 
 /* Dark mode support - styled to match version selector */
 html[data-theme=dark] .markdown-dropdown-toggle {
+  background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: #e2e4e9;
+  color: #fff;
 }
 
 html[data-theme=dark] .markdown-dropdown-toggle:hover,
 html[data-theme=dark] .markdown-dropdown-toggle[aria-expanded="true"] {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.18);
 }
 

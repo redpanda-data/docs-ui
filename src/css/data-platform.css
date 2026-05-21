@@ -28,7 +28,7 @@ html[data-theme="dark"] .data-platform.article {
   overflow: hidden;
   background: linear-gradient(180deg, #0e1a33 0%, #1a2a52 100%);
   color: #fff;
-  padding: 72px 56px 64px;
+  padding: 40px 56px 32px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -83,7 +83,7 @@ html[data-theme="dark"] .data-platform.article {
   align-items: center;
   gap: 10px;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.1em;
@@ -109,21 +109,21 @@ html[data-theme="dark"] .data-platform.article {
 /* Use .dp-hero prefix for specificity over .doc h1 */
 .dp-hero .dp-hero-title {
   font-family: var(--inter-display, var(--sans-serif-font, 'Inter', sans-serif));
-  font-size: 52px;
+  font-size: calc(41 / var(--rem-base) * 1rem);
   font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  margin: 0 0 18px;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin: 0 0 16px;
   text-wrap: pretty;
   color: #fff;
 }
 
 .dp-hero-sub {
-  font-size: 18px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.78);
+  font-size: calc(17 / var(--rem-base) * 1rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
   max-width: 700px;
-  margin: 0 0 32px;
+  margin: 0 0 24px;
   text-wrap: pretty;
 }
 
@@ -133,7 +133,7 @@ html[data-theme="dark"] .data-platform.article {
   gap: 24px;
   max-width: 720px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
 .dp-hero-stats > div {
@@ -144,7 +144,7 @@ html[data-theme="dark"] .data-platform.article {
 
 .dp-hero-stats strong {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 22px;
+  font-size: calc(23 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.01em;
@@ -152,7 +152,7 @@ html[data-theme="dark"] .data-platform.article {
 }
 
 .dp-hero-stats span {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.35;
 }
@@ -162,7 +162,6 @@ html[data-theme="dark"] .data-platform.article {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
-  margin-bottom: 48px;
 }
 
 @media (min-width: 1024px) {
@@ -233,7 +232,7 @@ html[data-theme="dark"] .data-platform.article {
   background: transparent;
   border: none;
   outline: none;
-  font-size: 15px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: #fff;
   font-family: var(--body-font-family);
 }
@@ -292,7 +291,7 @@ button.dp-hero-ask-submit svg,
 }
 
 .dp-hero-ask-hints-label {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.5);
   font-weight: 500;
 }
@@ -302,7 +301,7 @@ button.dp-hero-ask-submit svg,
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
@@ -320,7 +319,7 @@ button.dp-hero-ask-submit svg,
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  font-size: 9px;
+  font-size: calc(10 / var(--rem-base) * 1rem);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -334,7 +333,7 @@ button.dp-hero-ask-submit svg,
 
 /* ---- Sections ---- */
 .dp-section {
-  padding: 56px 56px 0;
+  padding: 32px 56px 0; /* Tightened from 56px to 32px for closer spacing */
 }
 
 .dp-section:last-of-type {
@@ -348,7 +347,7 @@ button.dp-hero-ask-submit svg,
 
 .dp-section-title {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 26px;
+  font-size: calc(27 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -361,7 +360,7 @@ html[data-theme="dark"] .dp-section-title {
 }
 
 .dp-section-sub {
-  font-size: 15px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
   margin: 0;
   text-wrap: pretty;
@@ -440,7 +439,7 @@ html[data-theme="dark"] .dp-product.is-featured {
   width: 32px;
   height: 26px;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.05em;
@@ -470,7 +469,7 @@ html[data-theme="dark"] .dp-product.is-featured {
 
 .dp-product-name {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 18px;
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -483,7 +482,7 @@ html[data-theme="dark"] .dp-product-name {
 }
 
 .dp-product-tagline {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
   margin: 0;
   line-height: 1.4;
@@ -494,7 +493,7 @@ html[data-theme="dark"] .dp-product-tagline {
 }
 
 .dp-product-desc {
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   line-height: 1.55;
   color: var(--grey-600-new, #52525b);
   margin: 0 0 18px;
@@ -518,7 +517,7 @@ html[data-theme="dark"] .dp-product-desc {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--grey-800-new, #18181b);
 }
 
@@ -572,7 +571,7 @@ html[data-theme="dark"] .dp-product-stats {
 
 .dp-product-stats strong {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 16px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.1;
   color: var(--grey-800-new, #18181b);
@@ -632,12 +631,12 @@ html[data-theme="dark"] .dp-whats-new-section {
 }
 
 .dp-whats-new-section .dp-section-title {
-  font-size: 16px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
   margin-bottom: 4px;
 }
 
 .dp-whats-new-section .dp-section-sub {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
 }
 
 .dp-whats-new {
@@ -676,7 +675,7 @@ html[data-theme="dark"] .dp-new-item {
   align-items: center;
   justify-content: center;
   padding: 4px 10px;
-  font-size: 9px;
+  font-size: calc(10 / var(--rem-base) * 1rem);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -721,7 +720,7 @@ html[data-theme="dark"] .dp-new-desc {
   display: inline-flex;
   align-items: center;
   padding: 3px 8px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   background: rgba(16, 185, 129, 0.08);
@@ -761,15 +760,15 @@ html[data-theme="dark"] .dp-new-tag {
 
   .dp-new-badge {
     padding: 3px 8px;
-    font-size: 8px;
+    font-size: calc(10 / var(--rem-base) * 1rem);
   }
 
   .dp-new-title {
-    font-size: 14px;
+    font-size: calc(15 / var(--rem-base) * 1rem);
   }
 
   .dp-new-desc {
-    font-size: 12px;
+    font-size: calc(13 / var(--rem-base) * 1rem);
   }
 }
 
@@ -806,7 +805,7 @@ html[data-theme="dark"] .dp-decision-box {
 }
 
 .dp-decision-desc {
-  font-size: 15px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-700-new, #3f3f46);
   margin: 0;
@@ -829,7 +828,7 @@ html[data-theme="dark"] .dp-decision-desc {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-600-new, #52525b);
 }
@@ -855,7 +854,7 @@ html[data-theme="dark"] .dp-decision-features li {
   border-radius: 8px;
   text-decoration: none;
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--dp-accent);
   transition: all 0.15s ease;
@@ -885,7 +884,7 @@ html[data-theme="dark"] .dp-decision-cta {
   align-items: center;
   justify-content: center;
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-400-new, #a1a1aa);
   text-transform: lowercase;
@@ -943,7 +942,7 @@ html[data-theme="dark"] .dp-matrix-row {
 
 .dp-matrix-when-label {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.08em;
@@ -958,7 +957,7 @@ html[data-theme="dark"] .dp-matrix-when-label {
 }
 
 .dp-matrix-when p {
-  font-size: 15px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.45;
   margin: 0;
   color: var(--grey-800-new, #18181b);
@@ -1081,7 +1080,7 @@ html[data-theme="dark"] .dp-popular-card {
 
 .dp-popular-text h4 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.005em;
@@ -1189,7 +1188,7 @@ html[data-theme="dark"] .dp-concept h4 {
 }
 
 .dp-concept p {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-600-new, #52525b);
   margin: 0;
@@ -1224,7 +1223,7 @@ html[data-theme="dark"] .dp-help {
 
 .dp-help h3 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 18px;
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -1237,7 +1236,7 @@ html[data-theme="dark"] .dp-help h3 {
 }
 
 .dp-help p {
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
   margin: 0;
 }
@@ -1258,7 +1257,7 @@ html[data-theme="dark"] .dp-help p {
   gap: 8px;
   padding: 9px 16px;
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   background: var(--indigo-600, #4338ca);
@@ -1316,15 +1315,15 @@ html[data-theme="dark"] .dp-help-btn-secondary:hover {
 
 @media (max-width: 720px) {
   .dp-hero {
-    padding: 56px 24px 48px;
+    padding: 40px 24px 32px;
   }
 
   .dp-hero-title {
-    font-size: 36px;
+    font-size: calc(37 / var(--rem-base) * 1rem);
   }
 
   .dp-section {
-    padding: 40px 24px 0;
+    padding: 24px 24px 0; /* Tightened from 32px for mobile */
   }
 
   .dp-popular {

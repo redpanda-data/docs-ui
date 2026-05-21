@@ -292,55 +292,6 @@
     </div>
   </section>
 
-  {{!-- CORE CONCEPTS --}}
-  <section class="dp-section">
-    <div class="dp-section-head">
-      <h2 class="dp-section-title">Core concepts</h2>
-      <p class="dp-section-sub">The mental model that applies everywhere &mdash; Self-Managed, Cloud, and Connect.</p>
-    </div>
-    <div class="dp-concepts">
-      <a href="{{#if page.attributes.self-managed-producers}}{{{relativize (resolve-resource page.attributes.self-managed-producers)}}}{{else}}#{{/if}}" class="dp-concept">
-        <div class="dp-concept-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-          </svg>
-        </div>
-        <h4>Topics &amp; partitions</h4>
-        <p>How Redpanda lays out data on disk and parallelizes reads.</p>
-      </a>
-
-      <a href="{{#if page.attributes.self-managed-tiered-storage}}{{{relativize (resolve-resource page.attributes.self-managed-tiered-storage)}}}{{else}}#{{/if}}" class="dp-concept">
-        <div class="dp-concept-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2l9 4.9V17L12 22l-9-5V7L12 2z"/>
-          </svg>
-        </div>
-        <h4>Tiered storage</h4>
-        <p>Offload cold segments to S3-compatible storage automatically.</p>
-      </a>
-
-      <a href="{{#if page.attributes.self-managed-consumers}}{{{relativize (resolve-resource page.attributes.self-managed-consumers)}}}{{else}}#{{/if}}" class="dp-concept">
-        <div class="dp-concept-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </div>
-        <h4>Consumer groups</h4>
-        <p>Coordinated, fault-tolerant consumption across many workers.</p>
-      </a>
-
-      <a href="{{#if page.attributes.self-managed-schema-registry}}{{{relativize (resolve-resource page.attributes.self-managed-schema-registry)}}}{{else}}#{{/if}}" class="dp-concept">
-        <div class="dp-concept-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-        </div>
-        <h4>Schemas &amp; contracts</h4>
-        <p>Validate every message at the broker with Avro, Protobuf, or JSON Schema.</p>
-      </a>
-    </div>
-  </section>
-
   {{!-- HELP FOOTER --}}
   <div class="dp-help">
     <div>

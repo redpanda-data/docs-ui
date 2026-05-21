@@ -12,28 +12,7 @@
   align-items: flex-start;
 }
 
-.article .metadata.metadata--nav {
-  position: sticky;
-  top: 0;
-  padding: 0.5rem 0;
-  background-color: var(--body-background);
-  z-index: 10;
-  margin-top: 40px;
-  margin-bottom: 0;
-  min-height: 40px;
-  padding-bottom: 0;
-}
-
-.article .metadata.metadata--nav.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-.article .metadata.metadata--nav:not(.hidden) {
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
+/* TOC metadata removed - all metadata now in eyebrow */
 
 .article .metadata .context-switcher {
   position: relative;

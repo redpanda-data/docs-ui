@@ -51,7 +51,7 @@
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   transition: 'background 0.3s';
 }
 

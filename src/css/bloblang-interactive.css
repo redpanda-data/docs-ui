@@ -376,7 +376,7 @@ html[data-theme="dark"] .bloblang-doc-tooltip .doc-link:hover {
   max-height: 100px;
   border: 1px solid rgba(204, 204, 204, 0.3);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   background: var(--pre-background, #f6f8fa);
 }
 

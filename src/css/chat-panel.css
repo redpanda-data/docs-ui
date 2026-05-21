@@ -168,7 +168,7 @@
   border-radius: 12px;
   border-top-right-radius: 4px;
   padding: 10px 14px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.55;
   margin-bottom: 12px;
   margin-left: auto;
@@ -183,7 +183,7 @@
   border-radius: 12px;
   border-top-left-radius: 4px;
   padding: 12px 14px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.65;
   color: var(--body-font-color, var(--grey-900-new, #181818));
   max-width: 100%;
@@ -213,7 +213,7 @@
 #chat-panel-kapa-root .answer h2,
 #chat-panel-kapa-root .answer h3,
 #chat-panel-kapa-root .answer h4 {
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: var(--heading-font-weight, 600);
   font-family: var(--heading-font-family, var(--font-display, "Inter Display", "Inter", sans-serif));
   color: var(--heading-font-color, var(--grey-900-new, #181818));
@@ -322,7 +322,7 @@
   background: transparent;
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 6px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #4b5563);
   cursor: pointer;
   transition: all 0.12s ease;
@@ -415,7 +415,7 @@
   border: none;
   border-radius: 0;
   padding: 12px 14px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-900-new, #181818);
   background: #fff;
@@ -460,7 +460,7 @@
   background: #fff;
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 8px;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--grey-700-new, #374151);
   cursor: pointer;
@@ -508,7 +508,7 @@
   background: var(--grey-900-new, #181818);
   border: none;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #fff;
   cursor: pointer;
@@ -563,7 +563,7 @@
 }
 
 #chat-panel-kapa-root .welcome-title {
-  font-size: 22px;
+  font-size: calc(23 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-900-new, #181818);
   margin: 0 0 12px;
@@ -571,7 +571,7 @@
 }
 
 #chat-panel-kapa-root .welcome-description {
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--grey-500-new, #6b7280);
   line-height: 1.6;
   margin: 0 0 28px;
@@ -594,7 +594,7 @@
   background: #fff;
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 12px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--grey-700-new, #374151);
   text-align: left;
   cursor: pointer;
@@ -635,7 +635,7 @@
   border: none;
   background: transparent;
   padding: 8px 0;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--grey-900-new, #181818);
   outline: none;
   font-family: inherit;
@@ -1060,7 +1060,7 @@
   gap: 8px;
   padding: 10px 16px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   z-index: 200;

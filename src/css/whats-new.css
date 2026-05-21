@@ -24,7 +24,7 @@ html[data-theme="dark"] .whats-new-compact {
 
 .whats-new-title {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 20px;
+  font-size: calc(21 / var(--rem-base) * 1rem);
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.02em;
@@ -37,7 +37,7 @@ html[data-theme="dark"] .whats-new-title {
 }
 
 .whats-new-subtitle {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-600-new, #52525b);
   margin: 0;
@@ -88,7 +88,7 @@ html[data-theme="dark"] .whats-new-item:hover {
   align-items: center;
   justify-content: center;
   padding: 4px 10px;
-  font-size: 9px;
+  font-size: calc(10 / var(--rem-base) * 1rem);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -133,7 +133,7 @@ html[data-theme="dark"] .whats-new-item-desc {
 .whats-new-tag {
   display: inline-block;
   padding: 2px 8px;
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -174,15 +174,15 @@ html[data-theme="dark"] .whats-new-tag {
 
   .whats-new-badge {
     padding: 3px 8px;
-    font-size: 8px;
+    font-size: calc(10 / var(--rem-base) * 1rem);
   }
 
   .whats-new-item-title {
-    font-size: 14px;
+    font-size: calc(15 / var(--rem-base) * 1rem);
   }
 
   .whats-new-item-desc {
-    font-size: 12px;
+    font-size: calc(13 / var(--rem-base) * 1rem);
   }
 
   .whats-new-arrow {

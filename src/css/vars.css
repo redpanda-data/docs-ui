@@ -106,7 +106,7 @@ html[data-theme=dark] {
   --color-black: var(--slate-900);
   /* fonts */
   --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
-  --body-font-size: 15px; /* Prototype: 15px body text */
+  --body-font-size: calc(16 / var(--rem-base) * 1rem); /* Prototype: 15px body text */
   --body-font-size--desktop: var(--body-font-size);
   --secondary-font-size: calc(14 / var(--rem-base) * 1rem);
   --body-font-size--print: 0.9375em;
@@ -173,8 +173,8 @@ html[data-theme=dark] {
   --nav-width: 280px;
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);
-  --toc-width: 232px;
-  --toc-width--widescreen: calc(280 / var(--rem-base) * 1rem);
+  --toc-width: 260px; /* Increased from 232px for better readability */
+  --toc-width--widescreen: calc(320 / var(--rem-base) * 1rem); /* Increased from 280px */
   --doc-max-width: 920px;
   /* stacking */
   --z-index-page-version-menu: 2;

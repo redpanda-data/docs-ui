@@ -54,7 +54,7 @@
   </div>
 </section>
 
-{{!-- What Are You Here For Section --}}
+{{!-- What Are You Here For Section (Merged with Products) --}}
 <section class="home-intent">
   <div class="home-intent-container">
     <h2 class="home-intent-heading">{{page.attributes.intent-heading}}</h2>
@@ -62,71 +62,33 @@
     <div class="home-intent-grid">
       {{!-- Build Agentic Data Flows Card (hide if component doesn't exist) --}}
       {{#if (has-component site 'agentic-data-plane')}}
-      <a href="{{{relativize '/agentic-data-plane/'}}}" class="home-intent-card home-intent-card--adp" style="--adp-color: {{get-component-color site 'agentic-data-plane'}};">
-        <div class="home-intent-card-icon home-intent-card-icon--brand">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/>
-            <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
-          </svg>
+      <div class="home-intent-card home-intent-card--adp home-intent-card--expanded" style="--adp-color: {{get-component-color site 'agentic-data-plane'}};">
+        <div class="home-intent-card-header-row">
+          <div class="home-intent-card-icon home-intent-card-icon--brand">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/>
+              <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
+            </svg>
+          </div>
+          <div class="home-intent-card-content">
+            <h3 class="home-intent-card-title">{{page.attributes.intent-adp-title}}</h3>
+            <p class="home-intent-card-desc">{{page.attributes.intent-adp-desc}}</p>
+            <div class="home-intent-card-tags">{{page.attributes.intent-adp-tags}}</div>
+          </div>
         </div>
-        <div class="home-intent-card-content">
-          <h3 class="home-intent-card-title">{{page.attributes.intent-adp-title}}</h3>
-          <p class="home-intent-card-desc">{{page.attributes.intent-adp-desc}}</p>
-          <div class="home-intent-card-tags">{{page.attributes.intent-adp-tags}}</div>
-          <span class="home-intent-card-cta">{{page.attributes.intent-adp-cta}} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
-        </div>
-      </a>
-      {{/if}}
-
-      {{!-- Stream and Process Data Card --}}
-      <a href="{{{relativize '/data-platform/'}}}" class="home-intent-card">
-        <div class="home-intent-card-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
-        </div>
-        <div class="home-intent-card-content">
-          <h3 class="home-intent-card-title">{{page.attributes.intent-dp-title}}</h3>
-          <p class="home-intent-card-desc">{{page.attributes.intent-dp-desc}}</p>
-          <div class="home-intent-card-tags">{{page.attributes.intent-dp-tags}}</div>
-          <span class="home-intent-card-cta">{{page.attributes.intent-dp-cta}} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
-
-{{!-- Jump Straight to a Product Section --}}
-<section class="home-products">
-  <div class="home-products-container">
-    <h2 class="home-products-heading">{{page.attributes.products-heading}}</h2>
-
-    <div class="home-products-main-grid">
-      {{!-- Agentic Data Plane Card (hide if component doesn't exist) --}}
-      {{#if (has-component site 'agentic-data-plane')}}
-      <div class="home-product-main-card home-product-main-card--adp home-product-main-card--with-content" style="--product-color: {{get-component-color site 'agentic-data-plane'}};">
-        <div class="home-product-main-card-header">
-          <h3 class="home-product-main-card-title">
-            <a href="{{{relativize '/agentic-data-plane/'}}}">{{page.attributes.products-adp-heading}}</a>
-          </h3>
-          <a href="{{{relativize '/agentic-data-plane/'}}}" class="home-product-main-card-link-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </a>
-        </div>
-        <p class="home-product-main-card-desc">{{page.attributes.product-adp-desc}}</p>
 
         {{!-- ADP Visual --}}
-        <div class="home-product-main-card-visual">
+        <div class="home-intent-card-visual">
           <img src="./_images/adp-infographic.gif" alt="Agentic Data Plane infographic" />
         </div>
 
         {{!-- Quick Links --}}
-        <div class="home-product-main-card-links">
-          <a href="{{#if page.attributes.adp-quickstart}}{{{relativize (resolve-resource page.attributes.adp-quickstart)}}}{{else}}#{{/if}}" class="home-product-main-card-link">
+        <div class="home-intent-card-links">
+          <a href="{{#if page.attributes.adp-quickstart}}{{{relativize (resolve-resource page.attributes.adp-quickstart)}}}{{else}}#{{/if}}" class="home-intent-card-link">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             <span>Get started</span>
           </a>
-          <a href="{{#if page.attributes.adp-docs}}{{{relativize (resolve-resource page.attributes.adp-docs)}}}{{else}}#{{/if}}" class="home-product-main-card-link">
+          <a href="{{#if page.attributes.adp-docs}}{{{relativize (resolve-resource page.attributes.adp-docs)}}}{{else}}#{{/if}}" class="home-intent-card-link">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             <span>Documentation</span>
           </a>
@@ -134,19 +96,24 @@
       </div>
       {{/if}}
 
-      {{!-- Data Platform Card with nested products --}}
-      <div class="home-product-main-card home-product-main-card--with-children" style="--product-color: {{get-component-color site 'data-platform'}};">
-        <div class="home-product-main-card-header">
-          <h3 class="home-product-main-card-title">
-            <a href="{{{relativize '/data-platform/'}}}">{{page.attributes.products-dp-heading}}</a>
-          </h3>
-          <a href="{{{relativize '/data-platform/'}}}" class="home-product-main-card-link-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-          </a>
+      {{!-- Stream and Process Data Card with Products --}}
+      <div class="home-intent-card home-intent-card--expanded">
+        <div class="home-intent-card-header-row">
+          <div class="home-intent-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+          <div class="home-intent-card-content">
+            <h3 class="home-intent-card-title">{{page.attributes.intent-dp-title}}</h3>
+            <p class="home-intent-card-desc">{{page.attributes.intent-dp-desc}}</p>
+            <div class="home-intent-card-tags">{{page.attributes.intent-dp-tags}}</div>
+          </div>
         </div>
-        <p class="home-product-main-card-desc">High-performance streaming data platform for mission-critical workloads.</p>
 
-        <div class="home-product-nested-cards">
+        {{!-- Nested Product Cards --}}
+        <div class="home-intent-card-products">
+          <div class="home-intent-card-products-label">Data Platform</div>
           {{!-- Cloud Card --}}
           <a href="{{#if page.attributes.cloud-docs}}{{{relativize (resolve-resource page.attributes.cloud-docs)}}}{{else}}#{{/if}}" class="home-product-nested-card" style="--product-color: {{get-component-color site 'cloud-data-platform'}};">
             <div class="home-product-nested-card-header">

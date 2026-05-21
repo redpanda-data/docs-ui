@@ -89,7 +89,7 @@ html.is-clipped--navbar {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #606164);
   letter-spacing: -0.0125em;
   width: 100%;
@@ -161,7 +161,7 @@ html.is-clipped--navbar {
   background: var(--grey-100-new, #e5e6e8);
   border: none;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--grey-600-new, #606164);
   cursor: pointer;
@@ -232,7 +232,7 @@ html[data-theme="dark"] .bc-dropdown {
   border-radius: 6px;
   color: var(--grey-700-new, #3f3f46);
   text-decoration: none;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -631,7 +631,7 @@ html[data-theme="dark"] .tb-overflow-trigger:hover {
 
 .tb-overflow-label {
   padding: 6px 12px 4px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-500, #667085);
   text-transform: uppercase;
@@ -675,7 +675,7 @@ html[data-theme="dark"] .tb-overflow-divider {
     align-items: center;
     margin-left: 8px;
     color: var(--grey-600-new, #52525b);
-    font-size: 13px;
+    font-size: calc(14 / var(--rem-base) * 1rem);
     font-weight: 500;
     order: 1;
     flex: 1 1 auto;
@@ -935,7 +935,7 @@ html[data-theme="dark"] .theme-image {
   padding: 5px 11px 5px 9px;
   border: 1px solid transparent;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, transform 0.12s;
@@ -1027,7 +1027,7 @@ body:has(.chat-panel.is-open) .tb-ai-btn {
   display: inline-flex;
   align-items: center;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--grey-700, #475467);
   text-decoration: none;
@@ -1109,7 +1109,7 @@ html[data-theme="dark"] .tb-dropdown-menu {
 .tb-dropdown-item {
   display: block;
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--grey-700, #475467);
   text-decoration: none;
@@ -1141,20 +1141,20 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
 
   /* Compact version status badge */
   .topbar-crumbs .sm-ver-pill-status {
-    font-size: 10px;
+    font-size: calc(12 / var(--rem-base) * 1rem);
     padding: 2px 6px;
   }
 
   /* Smaller topbar links */
   .tb-link {
     padding: 4px 8px;
-    font-size: 12px;
+    font-size: calc(13 / var(--rem-base) * 1rem);
   }
 
   /* Smaller Ask AI button */
   .tb-ai-btn {
     padding: 4px 8px;
-    font-size: 12px;
+    font-size: calc(13 / var(--rem-base) * 1rem);
   }
 
   .tb-ai-btn svg {
@@ -1166,7 +1166,7 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
 @media screen and (max-width: 1023px) {
   .tb-link {
     padding: 6px 8px;
-    font-size: 12px;
+    font-size: calc(13 / var(--rem-base) * 1rem);
     min-height: 30px;
   }
 }

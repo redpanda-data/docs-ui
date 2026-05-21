@@ -151,7 +151,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-pill-label {
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.55);
   letter-spacing: 0.02em;
@@ -239,14 +239,14 @@ main.component-home > .component-content {
 }
 
 .sm-ver-panel-title > span:first-child {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #0f172a);
   letter-spacing: -0.005em;
 }
 
 .sm-ver-panel-meta {
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #6b7280);
   font-variant-numeric: tabular-nums;
 }
@@ -304,7 +304,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-group-label {
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -312,7 +312,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-group-count {
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--color-jet-50, #9ca3af);
   background: var(--color-smoke-30, #f5f5f5);
@@ -366,7 +366,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-row-v {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
@@ -378,7 +378,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-row-note {
-  font-size: 9px;
+  font-size: calc(10 / var(--rem-base) * 1rem);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -445,13 +445,13 @@ main.component-home > .component-content {
 }
 
 .sm-ver-row-date-l {
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 400;
   color: var(--color-jet-50, #9ca3af);
 }
 
 .sm-ver-row-date-v {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--color-jet, #374151);
 }
@@ -641,7 +641,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   }
 
   .sm-ver-row-status {
-    font-size: 9px;
+    font-size: calc(10 / var(--rem-base) * 1rem);
     padding: 3px 6px;
   }
 
@@ -668,7 +668,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   }
 
   .sm-ver-pill-status {
-    font-size: 9px;
+    font-size: calc(10 / var(--rem-base) * 1rem);
   }
 
   .sm-ver-tabs {
@@ -678,12 +678,12 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 
   .sm-ver-tab {
     padding: 5px 6px;
-    font-size: 10px;
+    font-size: calc(12 / var(--rem-base) * 1rem);
   }
 }
 
 .ch3-status-chip {
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 9999px;
@@ -699,7 +699,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 /* Use .ch3-hero prefix for specificity over .doc h1 */
 .ch3-hero .ch3-page-title {
   font-family: var(--font-display, "Inter Display", "Inter", sans-serif);
-  font-size: 40px;
+  font-size: calc(41 / var(--rem-base) * 1rem);
   line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -720,7 +720,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 
 /* Description text - lighter for readability on dark gradient */
 .ch3-page-lede {
-  font-size: 16px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.85);
   margin: 0;
@@ -738,7 +738,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 
 .ch3-tab {
   padding: 10px 16px 12px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--color-jet-70, #606164);
   cursor: pointer;
@@ -774,7 +774,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 
 .ch3-section-title {
   font-family: var(--font-display, "Inter Display", "Inter", sans-serif);
-  font-size: 20px;
+  font-size: calc(21 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--color-jet, #181818);
@@ -798,14 +798,14 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 }
 
 .ch3-hero-stat strong {
-  font-size: 24px;
+  font-size: calc(25 / var(--rem-base) * 1rem);
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.02em;
 }
 
 .ch3-hero-stat span {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
   text-transform: uppercase;
@@ -849,7 +849,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   background: transparent;
   border: none;
   outline: none;
-  font-size: 15px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: #fff;
   font-family: var(--body-font-family);
 }
@@ -908,7 +908,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-hero-ask-hints-label {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.5);
   font-weight: 500;
 }
@@ -918,7 +918,7 @@ button.ch3-hero-ask-submit svg,
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
@@ -998,7 +998,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-deploy-title {
-  font-size: 16px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0 0 6px;
@@ -1024,7 +1024,7 @@ button.ch3-hero-ask-submit svg,
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--component-600, var(--indigo-600-new, #4f46e5));
   white-space: nowrap;
@@ -1042,7 +1042,7 @@ button.ch3-hero-ask-submit svg,
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--color-jet-50, #9ca3af);
   font-variant-numeric: tabular-nums;
 }
@@ -1098,7 +1098,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-feature-title {
-  font-size: 16px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0;
@@ -1109,7 +1109,7 @@ button.ch3-hero-ask-submit svg,
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -1211,7 +1211,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-popular-text h4 {
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0 0 2px;
@@ -1254,7 +1254,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   border: 0;
   background: transparent;
   font: inherit;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--component-600, var(--indigo-600-new, #4f46e5));
   cursor: pointer;
@@ -1327,7 +1327,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-help h3 {
-  font-size: 16px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   margin: 0 0 4px;
   color: var(--color-jet, #181818);
@@ -1351,7 +1351,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   align-items: center;
   gap: 6px;
   font: inherit;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #fff;
   background: var(--component-600, var(--indigo-600-new, #4f46e5));
@@ -1514,11 +1514,11 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
   }
 
   .doc .ch3-page-title {
-    font-size: 28px;
+    font-size: calc(29 / var(--rem-base) * 1rem);
   }
 
   .ch3-page-lede {
-    font-size: 15px;
+    font-size: calc(16 / var(--rem-base) * 1rem);
   }
 
   .ch3-hero-stats {
@@ -1526,7 +1526,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
   }
 
   .ch3-hero-stat strong {
-    font-size: 20px;
+    font-size: calc(21 / var(--rem-base) * 1rem);
   }
 
   .ch3-tabs {
@@ -1632,7 +1632,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
 }
 
 .ch3-path-heading {
-  font-size: 20px;
+  font-size: calc(21 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-900-new, #111827);
   margin: 0 0 12px;
@@ -1644,7 +1644,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
 }
 
 .ch3-path-desc {
-  font-size: 15px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-600-new, #4b5563);
   margin: 0 0 20px;
@@ -1665,7 +1665,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-700-new, #374151);
   margin-bottom: 10px;
@@ -1697,7 +1697,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
   gap: 8px;
   padding: 12px 20px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   text-decoration: none;
   transition: all 0.15s ease;
@@ -1741,7 +1741,7 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
   border-radius: 50%;
   background: #fff;
   border: 2px solid var(--grey-200-new, #e5e7eb);
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-500-new, #6b7280);
   text-transform: lowercase;

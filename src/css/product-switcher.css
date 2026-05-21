@@ -41,7 +41,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: #fff;
   font-weight: 500;
   flex: 1;
@@ -57,7 +57,7 @@
 }
 
 .sb-product-parent-label {
-  font-size: 9px;
+  font-size: calc(10 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.6);
   letter-spacing: 0.03em;
@@ -66,14 +66,14 @@
 }
 
 .sb-product-child-label {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: #fff;
   line-height: 1.2;
 }
 
 .sb-product-section {
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #8098b3;
   letter-spacing: 0.02em;
@@ -87,7 +87,7 @@
 }
 
 .sb-product-title {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -196,7 +196,7 @@
 
 .sb-product-menu-head {
   padding: 8px 12px 6px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -271,7 +271,7 @@
   display: flex;
   align-items: baseline;
   gap: 4px 6px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #e8eef6;
   letter-spacing: -0.005em;
@@ -379,7 +379,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -451,7 +451,7 @@
 }
 
 .sb-product-opt.sb-product-child .sb-product-opt-desc {
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
 }
 
 /* Highlight current child */
@@ -488,7 +488,7 @@
 
 .sb-product-subgroup-label {
   padding: 6px 12px 4px;
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -523,7 +523,7 @@
 }
 
 .sb-product-opt.sb-product-grandchild .sb-product-opt-name {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
 }
 
 .sb-product-opt.sb-product-grandchild .sb-product-opt-desc {

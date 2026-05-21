@@ -92,7 +92,7 @@
 
 .toc h3 {
   color: var(--toc-heading-font-color);
-  font-size: 11px; /* Prototype: 11px */
+  font-size: calc(12 / var(--rem-base) * 1rem); /* Increased from 11 to 12 for better readability */
   font-family: var(--body-font-family-bold);
   font-weight: 600;
   text-transform: uppercase;
@@ -152,14 +152,6 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .toc h3 {
-    font-size: var(--secondary-font-size);
-  }
-
-  .toc ul {
-    font-size: var(--secondary-font-size);
-  }
-
   .toc .toc-menu {
     text-overflow: ellipsis;
     word-wrap: normal;
@@ -180,17 +172,17 @@
 
 .toc li[data-level="3"] a {
   padding-left: 32px; /* Prototype: additional indent */
-  font-size: 12.5px; /* Prototype: smaller for deeper levels */
+  font-size: calc(15 / var(--rem-base) * 1rem); /* Increased from 13 to 15 for better readability */
 }
 
 .toc li[data-level="4"] a {
   padding-left: 42px;
-  font-size: 12.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem); /* Increased from 13 to 15 for better readability */
 }
 
 .toc li[data-level="5"] a {
   padding-left: 52px;
-  font-size: 12.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem); /* Increased from 13 to 15 for better readability */
 }
 
 .toc a {
@@ -237,7 +229,7 @@
   position: sticky;
   top: 80px; /* Prototype: 80px */
   max-height: calc(100vh - 100px); /* Prototype formula */
-  font-size: 13px; /* Prototype: 13px */
+  font-size: calc(16 / var(--rem-base) * 1rem); /* Increased from 14 to 16 for better readability */
   font-weight: 400;
   color: var(--toc-font-color);
   max-width: var(--toc-width);
@@ -265,11 +257,11 @@
 /* Narrow desktop: reduce TOC width to fit content area */
 @media screen and (min-width: 1024px) and (max-width: 1349px) {
   .toc.sidebar {
-    --toc-width: 180px;
+    --toc-width: 220px; /* Increased from 180px for better readability */
 
-    max-width: 180px;
-    flex: 0 0 180px;
-    min-width: 160px;
+    max-width: 220px; /* Increased from 180px */
+    flex: 0 0 220px; /* Increased from 180px */
+    min-width: 200px; /* Increased from 160px */
   }
 }
 

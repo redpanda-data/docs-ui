@@ -37,7 +37,7 @@ nav.pagination .next {
 }
 
 nav.pagination span::before {
-  font-size: 11px; /* Prototype: 11px */
+  font-size: calc(12 / var(--rem-base) * 1rem); /* Prototype: 11px */
   color: var(--grey-500-new, var(--grey-500, #79797d)); /* Prototype: grey-500 */
   text-transform: uppercase;
   letter-spacing: 0.05em; /* Prototype: 0.05em */

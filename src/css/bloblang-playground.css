@@ -49,7 +49,7 @@
   height: 32px;
   padding: 0 12px;
   display: inline-flex;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   transition: all 0.2s ease;
   font-weight: 500;
   font-family: var(--body-font-family);
@@ -64,7 +64,7 @@
 .bloblang-playground .editor-header-content .custom-ai-help-button {
   height: 20px;
   padding: 0 8px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   gap: 4px;
 }
 
@@ -107,7 +107,7 @@
   padding: 0;
   background: transparent;
   border: none;
-  font-size: 20px;
+  font-size: calc(21 / var(--rem-base) * 1rem);
   color: #555555;
   cursor: pointer;
   transition: color 0.3s, transform 0.2s;
@@ -127,7 +127,7 @@
 
 .bloblang-playground #contact-email {
   padding: 8px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 6px;
   background: var(--body-background);
@@ -245,7 +245,7 @@ html[data-theme=dark] .bloblang-playground .choices__list--dropdown .choices__in
   gap: 15px;
   margin-bottom: 10px;
   align-items: center;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--body-font-color);
   opacity: 0.8;
 }
@@ -297,7 +297,7 @@ html[data-theme=dark] .bloblang-playground .execution-time-error {
   border-radius: 6px;
   color: var(--body-font-color);
   margin-top: 0;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   transition: border-color 0.15s ease;
 }
 
@@ -321,7 +321,7 @@ html[data-theme=dark] .bloblang-playground input#bloblang-email {
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   transition: all 0.15s ease;
   font-weight: 500;
   display: inline-flex;
@@ -345,7 +345,7 @@ html[data-theme=dark] .bloblang-playground button[type=submit]:not(.aa-SubmitBut
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   transition: all 0.15s ease;
   font-weight: 500;
   display: inline-block;
@@ -440,7 +440,7 @@ html[data-theme=dark] .bloblang-playground .editor-section-always-open {
 
   .bloblang-playground .flow-arrow-icon {
     color: var(--body-font-color, #6b7280);
-    font-size: 18px;
+    font-size: calc(19 / var(--rem-base) * 1rem);
     line-height: 1;
     opacity: 0.6;
   }
@@ -506,7 +506,7 @@ html[data-theme=dark] .bloblang-playground .editor-header {
 
 .bloblang-playground .editor-header h4 {
   margin: 0;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--body-font-color);
 }
@@ -557,7 +557,7 @@ html[data-theme=dark] .bloblang-playground .editor-header {
   background: var(--body-background);
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--body-font-color);
   width: 100%;
@@ -581,7 +581,7 @@ html[data-theme=dark] .bloblang-playground .advanced-options-toggle:hover {
 
 .bloblang-playground .advanced-options-toggle .toggle-icon {
   transition: transform 0.2s ease;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--body-font-color);
   opacity: 0.6;
 }
@@ -631,7 +631,7 @@ html[data-theme=dark] .bloblang-playground .editor-section-collapsible {
   background: var(--body-background);
   color: var(--body-font-color);
   font-weight: 600;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -654,7 +654,7 @@ html[data-theme=dark] .bloblang-playground .editor-section-collapsible {
 
 .bloblang-playground .editor-section-collapsible summary button {
   pointer-events: all;
-  font-size: 12px !important;
+  font-size: calc(13 / var(--rem-base) * 1rem) !important;
   font-weight: 500 !important;
   line-height: 1 !important;
   padding: 5px 12px !important;
@@ -685,7 +685,7 @@ html[data-theme=dark] .bloblang-playground .editor-section-collapsible {
 }
 
 .bloblang-playground .optional-badge {
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   background: var(--grey-100-new, #f3f4f6);
   color: var(--grey-600-new, #4b5563);
   padding: 2px 6px;
@@ -858,7 +858,7 @@ html[data-theme=dark] .bloblang-snippet .ace-editor {
   padding: 12px 16px;
   margin-bottom: 16px;
   position: relative;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.5;
 }
 
@@ -892,7 +892,7 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
   border: none;
   border-radius: 6px;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -911,7 +911,7 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
   right: 8px;
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: calc(21 / var(--rem-base) * 1rem);
   color: var(--body-font-color);
   opacity: 0.5;
   cursor: pointer;
@@ -928,7 +928,7 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
 
 /* Editor help icons */
 .bloblang-playground .editor-help-icon {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   opacity: 0.5;
   cursor: help;
   margin-left: 4px;
@@ -975,13 +975,13 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
   .bloblang-playground .editor-header > div[style*="display: flex"] button {
     flex: 1 1 calc(50% - 3px);
     min-width: 0;
-    font-size: 12px;
+    font-size: calc(13 / var(--rem-base) * 1rem);
     padding: 6px 8px;
   }
 
   /* Give error messages and Ask AI button full width */
   .bloblang-playground .editor-header h4 {
-    font-size: 13px;
+    font-size: calc(14 / var(--rem-base) * 1rem);
     line-height: 1.4;
     word-wrap: break-word;
   }
@@ -1026,7 +1026,7 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
   .bloblang-playground .button-group .button:not(#sample-dropdown) {
     flex: 1;
     min-width: 0;
-    font-size: 13px;
+    font-size: calc(14 / var(--rem-base) * 1rem);
     padding: 10px 8px;
   }
 
@@ -1071,7 +1071,7 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
   /* Make input format selector more touch-friendly */
   .bloblang-playground .input-format-selector {
     min-height: 36px;
-    font-size: 13px;
+    font-size: calc(14 / var(--rem-base) * 1rem);
     padding: 6px 10px;
   }
 }
@@ -1102,11 +1102,11 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
   .bloblang-playground .banner-container .close {
     top: 5px;
     right: 5px;
-    font-size: 18px;
+    font-size: calc(19 / var(--rem-base) * 1rem);
   }
 
   .bloblang-playground .button {
-    font-size: 13px;
+    font-size: calc(14 / var(--rem-base) * 1rem);
     padding: 10px 14px;
     min-height: 44px;
   }
@@ -1126,7 +1126,7 @@ html[data-theme=dark] .bloblang-playground .playground-tip {
   transform: translateX(400px);
   transition: all 0.3s ease;
   max-width: 400px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-left: 4px solid var(--component-color, #6366f1);
 }
@@ -1196,7 +1196,7 @@ html[data-theme=dark] .bloblang-playground .notification-info {
 
 /* Validation indicators */
 .bloblang-playground .validation-indicator {
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 500;
   padding: 4px 10px;
   border-radius: 6px;
@@ -1246,7 +1246,7 @@ html[data-theme=dark] .bloblang-playground .validation-info {
 
 /* Input format selector */
 .bloblang-playground .input-format-selector {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   padding: 4px 8px;
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 6px;
@@ -1280,7 +1280,7 @@ html[data-theme=dark] .bloblang-playground .input-format-selector:focus {
 
 /* Streamlined tooltips for playground */
 .bloblang-playground .tippy-box[data-theme~='redpanda-term'] {
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   padding: 6px 10px;
 }
 
@@ -1315,7 +1315,7 @@ html[data-theme=dark] .bloblang-playground .editor-success {
   padding: 5px 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   transition: all 0.15s ease;
   display: inline-flex;
@@ -1383,7 +1383,7 @@ html[data-theme=dark] .bloblang-playground .shortcuts-content {
   right: 15px;
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: calc(29 / var(--rem-base) * 1rem);
   cursor: pointer;
   color: var(--body-font-color);
   line-height: 1;
@@ -1424,7 +1424,7 @@ html[data-theme=dark] .bloblang-playground .shortcuts-list li {
   padding: 4px 8px;
   border-radius: 4px;
   font-family: var(--monospace-font-family);
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--body-font-color);
   border: 1px solid var(--grey-200-new, #e5e5e5);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
@@ -1449,7 +1449,7 @@ html[data-theme=dark] .bloblang-playground .shortcuts-divider {
 }
 
 .bloblang-playground .shortcuts-claude-title {
-  font-size: 16px;
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--body-font-color);
   margin: 0 0 8px 0;
@@ -1465,7 +1465,7 @@ html[data-theme=dark] .bloblang-playground .shortcuts-divider {
   color: var(--body-font-color);
   opacity: 0.8;
   margin: 0 0 12px 0;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
 }
 
 .bloblang-playground .shortcuts-claude-list {
@@ -1477,7 +1477,7 @@ html[data-theme=dark] .bloblang-playground .shortcuts-divider {
 .bloblang-playground .shortcuts-claude-list li {
   padding: 8px 0;
   color: var(--body-font-color);
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.5;
 }
 
@@ -1485,7 +1485,7 @@ html[data-theme=dark] .bloblang-playground .shortcuts-divider {
   font-family: var(--monospace-font-family);
   color: var(--component-color, #6366f1);
   font-weight: 600;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   background: rgba(99, 102, 241, 0.08);
   padding: 2px 6px;
   border-radius: 4px;
@@ -1501,7 +1501,7 @@ html[data-theme="dark"] .bloblang-playground .shortcuts-claude-list strong {
   align-items: center;
   color: var(--component-color, #6366f1);
   text-decoration: none;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   transition: all 0.15s ease;
 }
@@ -1559,7 +1559,7 @@ html[data-theme=dark] .bloblang-playground .share-modal-content {
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 6px;
   font-family: var(--monospace-font-family);
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   background: var(--pre-background);
   color: var(--code-font-color);
 }
@@ -1609,7 +1609,7 @@ html[data-theme=dark] .bloblang-playground .button-secondary:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 500;
   border-radius: 8px;
 }
@@ -1622,7 +1622,7 @@ html[data-theme=dark] .bloblang-playground .button-secondary:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
   padding: 4px 0 !important;
   font-family: var(--body-font-family) !important;
-  font-size: 13px !important;
+  font-size: calc(14 / var(--rem-base) * 1rem) !important;
   width: 360px !important;
   max-width: 360px !important;
 }
@@ -1680,7 +1680,7 @@ html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_l
 /* Meta labels (function, method, keyword, field) */
 .bloblang-playground .ace_editor.ace_autocomplete .ace_completion-meta {
   float: right !important;
-  font-size: 11px !important;
+  font-size: calc(12 / var(--rem-base) * 1rem) !important;
   font-weight: 600 !important;
   padding: 2px 8px !important;
   border-radius: 4px !important;
@@ -1718,7 +1718,7 @@ html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_l
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
   padding: 12px !important;
   font-family: var(--body-font-family) !important;
-  font-size: 13px !important;
+  font-size: calc(14 / var(--rem-base) * 1rem) !important;
   line-height: 1.5 !important;
   color: var(--body-font-color) !important;
   max-width: 400px !important;
@@ -1737,7 +1737,7 @@ html[data-theme="dark"] .bloblang-playground .ace_editor.ace_autocomplete .ace_d
 .bloblang-playground .ace_editor.ace_autocomplete .ace_doc-tooltip em {
   color: var(--grey-600-new, #4b5563) !important;
   font-style: normal !important;
-  font-size: 11px !important;
+  font-size: calc(12 / var(--rem-base) * 1rem) !important;
   font-weight: 600 !important;
 }
 

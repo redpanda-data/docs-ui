@@ -44,13 +44,23 @@ module.exports = (resource, { data, hash: context }) => {
   if (file) {
     result = file.pub.url
   } else {
-    // Log error for unresolved resource
-    console.error(`[resolve-resource] Unresolved resource: "${resource}" in context:`, {
-      component: context.component,
-      version: context.version,
-      module: context.module,
-      page: page.src?.relative || page.relativePath || 'unknown',
-    })
+    // Log error for unresolved resource using Antora's logger if available
+    const pagePath = page.src?.path || page.src?.relative || page.relativePath || 'unknown'
+    const pageComponent = page.component?.name || context.component
+    const pageVersion = page.version || context.version
+    const errorMsg = `Unresolved resource: "${resource}" in page "${pagePath}" (component: ${pageComponent}, version: ${pageVersion}, module: ${context.module})`
+    const errorDetails = {
+      file: page.src || { path: pagePath },
+      source: page.src?.origin || { component: pageComponent, version: pageVersion },
+    }
+
+    if (data.root.logger) {
+      // Use Antora's logger for structured output
+      data.root.logger.error(errorDetails, errorMsg)
+    } else {
+      // Fallback to console for preview builds
+      console.error(`[resolve-resource] ${errorMsg}`, errorDetails)
+    }
     result = resource
   }
 

@@ -139,7 +139,7 @@ html[data-theme="dark"] .component-indicator-sticky.is-stuck {
   background: var(--body-background);
   border-radius: 4px;
   color: var(--body-font-color);
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -182,14 +182,14 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-toggle:hov
 .component-indicator-sticky .byoc-label--inline,
 .component-indicator-sticky .cloud-label--inline {
   margin: 0;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
 }
 
 .component-indicator-sticky .byoc-label--inline > p,
 .component-indicator-sticky .cloud-label--inline > p {
   padding: 4px 10px;
   min-width: auto;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   border-radius: 6px;
 }
 
@@ -230,7 +230,7 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-menu {
   padding: 6px;
   text-decoration: none;
   font-weight: 500;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   border: none;
   background: none;
   width: 100%;
@@ -316,7 +316,7 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
 
 .component-indicator-sticky .sm-ver-pill {
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   background: var(--grey-100-new, #f4f4f5);
   border-color: var(--grey-200-new, #e5e5e5);
 }
@@ -423,7 +423,7 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
   gap: 5px;
   padding: 4px 10px;
   border-radius: 5px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -666,7 +666,7 @@ html[data-theme="dark"] .status-badge--cloud {
 }
 
 .doc pre {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   line-height: 1.65;
   margin: 0;
   padding: 16px 18px;
@@ -712,7 +712,7 @@ html[data-theme="dark"] .doc .listingblock pre.highlight {
    Only applies to the first paragraph in preamble or paragraphs with .lead class. */
 .doc .paragraph.lead > p,
 .doc #preamble > .sectionbody > .paragraph:first-child > p {
-  font-size: 17px;
+  font-size: calc(18 / var(--rem-base) * 1rem);
   line-height: 1.55;
   color: var(--grey-600-new, #4b5563);
 }
@@ -930,7 +930,7 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   gap: 12px; /* Prototype: 12px */
   padding: 14px 16px; /* Prototype: 14px 16px */
   border-radius: 10px; /* Prototype: 10px */
-  font-size: 14px; /* Prototype: 14px */
+  font-size: calc(15 / var(--rem-base) * 1rem); /* Prototype: 14px */
   line-height: 1.55; /* Prototype: 1.55 */
 }
 
@@ -1162,7 +1162,7 @@ html[data-theme="dark"] .listingblock:has(.title) {
   padding: 8px 14px;
   background: var(--grey-50-new, #f9fafb);
   border-bottom: 1px solid var(--grey-200-new, #e5e7eb);
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-style: normal;
   color: var(--grey-600-new, #4b5563);
 }
@@ -1769,7 +1769,7 @@ details[open] > summary {
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   transition: 'background 0.3s';
 }
 
@@ -1828,7 +1828,7 @@ a.button-arrow {
 
 .doc .choices__placeholder {
   opacity: 9;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
 }
 
 .doc .type-dropdown {
@@ -1903,7 +1903,7 @@ img.dark-mode-filter,
 .doc .terminal-icon::after {
   content: '>_';
   color: white;
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   position: absolute;
   left: 3px;
   bottom: 2px;
@@ -2053,7 +2053,7 @@ html[data-theme="dark"] .doc .listingblock > .content {
   right: 14px;
   color: var(--grey-500-new, #6b7280); /* Light mode */
   font-family: var(--body-font-family);
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   line-height: 1.5;
   white-space: nowrap;
   z-index: 1;
@@ -2074,7 +2074,7 @@ html[data-theme="dark"] .doc .source-toolbox {
 
 .doc .source-toolbox .source-lang {
   font-family: var(--body-font-family-mono, monospace);
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--grey-500-new, #6b7280); /* Light mode */
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -2112,7 +2112,7 @@ html[data-theme="dark"] .doc .source-toolbox .source-lang {
   color: var(--grey-600-new, #4b5563); /* Light mode text */
   outline: none;
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-family: var(--body-font-family);
   line-height: inherit;
   cursor: pointer;
@@ -2426,7 +2426,7 @@ html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
 
 .doc .card-grid .card h3,
 .doc .card-grid .card .title {
-  font-size: 18px;
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--heading-font-color);
   margin: 0 0 12px;
@@ -2434,14 +2434,14 @@ html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
 }
 
 .doc .card-grid .card p {
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #4b5563);
   line-height: 1.5;
   margin: 0 0 16px;
 }
 
 .doc .card-grid .card ul {
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #4b5563);
   margin: 0 0 16px;
   padding-left: 1.25rem;
@@ -2460,7 +2460,7 @@ html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
   background: var(--component-600, var(--indigo-600-new, #4f46e5));
   color: #fff;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   text-decoration: none;
   transition: opacity 0.15s;
@@ -2523,14 +2523,14 @@ html[data-theme="dark"] .doc .card-grid .card ul {
 
 .doc .link-cards .link-card h4,
 .doc .link-cards .link-card .title {
-  font-size: 15px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--heading-font-color);
   margin: 0 0 4px;
 }
 
 .doc .link-cards .link-card p {
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #4b5563);
   line-height: 1.4;
   margin: 0;
@@ -2571,7 +2571,7 @@ html[data-theme="dark"] .doc .link-cards .link-card p {
   background: var(--body-background);
   border: 1px solid var(--grey-300-new, #d1d5db);
   border-radius: 4px;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--body-font-color);
   cursor: pointer;
@@ -2642,7 +2642,7 @@ html[data-theme="dark"] .doc .link-cards .link-card p {
   align-items: center;
   gap: 10px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--body-font-color);
   text-decoration: none;
