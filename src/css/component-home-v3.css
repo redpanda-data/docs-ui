@@ -18,10 +18,11 @@
 }
 
 /* Full-width layout for component home pages */
-/* Higher specificity selector to override main > .content (main.css:52-64) */
+/* Higher specificity selector to override main > .content */
 main.component-home > .component-content {
   padding: 0;
   max-width: none;
+  gap: 0;
 
   --ch3-max-width: 1180px;
   --ch3-gutter: 40px;
@@ -1013,6 +1014,7 @@ button.ch3-hero-ask-submit svg,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-top: 20px;
 }
 
 .ch3-deploy-cta {
@@ -1834,4 +1836,72 @@ html[data-theme="dark"] .ch3-path-or {
   .ch3-whats-new-wrapper {
     margin-top: 32px;
   }
+}
+
+/* Cloud Landing: Component Cards & Badges --------------------------------- */
+
+.ch3-component-badges {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+.ch3-component-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.ch3-component-badge--new {
+  background: linear-gradient(135deg, #1f5bd6 0%, #1845a8 100%);
+  color: #fff;
+}
+
+.ch3-component-badge--byoc {
+  background: rgba(31, 91, 214, 0.12);
+  color: #1f5bd6;
+  border: 1px solid rgba(31, 91, 214, 0.3);
+}
+
+html[data-theme="dark"] .ch3-component-badge--byoc {
+  background: rgba(31, 91, 214, 0.2);
+  color: #68a3ff;
+  border: 1px solid rgba(31, 91, 214, 0.4);
+}
+
+.ch3-component-features {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ch3-component-features li {
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  padding-left: 20px;
+  position: relative;
+}
+
+.ch3-component-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--component-color, #1f5bd6);
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .ch3-component-features li {
+  color: var(--color-text-secondary);
 }

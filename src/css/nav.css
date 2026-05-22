@@ -151,7 +151,6 @@ button.sb-search:focus-visible {
   left: 0;
   bottom: 0;
   width: var(--sidebar-width, 260px);
-  font-size: var(--secondary-font-size);
   z-index: var(--z-index-nav);
   visibility: hidden;
 }
@@ -1302,7 +1301,7 @@ html[data-theme="light"] .nav-bucket-caret {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
   color: #a8b2c7;
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s;
@@ -1422,7 +1421,7 @@ html[data-theme="light"] .nav-bucket-version-opt.is-selected {
 
 /* EOL badge in version dropdown */
 .version-eol {
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: #f59e0b;
   margin-left: 4px;
@@ -1443,7 +1442,7 @@ html[data-theme="light"] .version-eol {
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   background: none;
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #8098b3;
   text-align: left;

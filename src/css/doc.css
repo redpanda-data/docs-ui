@@ -92,11 +92,27 @@ html {
   gap: 12px;
   position: sticky;
   top: var(--body-top, 100px);
-  z-index: 10;
+  z-index: 50;
   padding: 12px 0;
   margin: 0 0 12px;
   background: var(--body-background, #fff);
   overflow: visible;
+}
+
+/* Background cover prevents content from showing through when scrolling */
+.component-indicator-sticky::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: var(--body-background, #fff);
+  z-index: -1;
+}
+
+html[data-theme="dark"] .component-indicator-sticky::before {
+  background: var(--body-background);
 }
 
 .component-indicator-sticky.is-stuck {
@@ -106,6 +122,11 @@ html {
   margin-right: -24px;
   padding-left: 24px;
   padding-right: 24px;
+}
+
+.component-indicator-sticky.is-stuck::before {
+  left: -24px;
+  right: -24px;
 }
 
 html[data-theme="dark"] .component-indicator-sticky {

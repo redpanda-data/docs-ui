@@ -3,7 +3,7 @@
 
   Required page attributes:
     :page-role: component-home-v3
-    :page-hero-description: Component description text for hero section
+    :page-hero-description: Component description
 
   Optional page attributes:
     :page-hero-title: Override for h1 title
@@ -29,14 +29,12 @@
     :page-labs-1-link: https://...
     :page-labs-2-*, :page-labs-3-*, :page-labs-4-* (same format)
 --}}
-{{!-- Hero Section --}}
 <section class="ch3-hero"{{#with (get-header-data page)}}{{#if this.heroGradient}} style="background: {{{this.heroGradient}}};"{{/if}}{{/with}}>
   <div class="ch3-hero-bg" aria-hidden="true">
     <div class="ch3-hero-glow"></div>
     <div class="ch3-hero-grid"></div>
   </div>
   <div class="ch3-hero-inner">
-    {{!-- Status chip row --}}
     <div class="ch3-eyebrow-row">
       {{#with (get-header-data page)}}
       {{!-- Status chip: "SELF-MANAGED • v25.1 | GA" format --}}
@@ -47,14 +45,12 @@
       {{#if page.attributes.status-badge}}
       <span class="ch3-ga-badge">{{{page.attributes.status-badge}}}</span>
       {{/if}}
-      {{!-- Version selector pill --}}
       {{> version-selector}}
       {{#if page.attributes.beta}}
       <span class="ch3-status-chip beta">Beta</span>
       {{/if}}
     </div>
 
-    {{!-- Main title --}}
     <h1 class="ch3-page-title">
       {{#if page.attributes.hero-title}}
         {{{page.attributes.hero-title}}}
@@ -63,12 +59,10 @@
       {{/if}}
     </h1>
 
-    {{!-- Description --}}
     {{#if page.attributes.hero-description}}
     <p class="ch3-page-lede">{{{page.attributes.hero-description}}}</p>
     {{/if}}
 
-    {{!-- Stats bar (optional) --}}
     {{#if page.attributes.stats}}
     <div class="ch3-hero-stats">
       {{#each (split page.attributes.stats ';;')}}
@@ -82,7 +76,7 @@
     </div>
     {{/if}}
 
-    {{!-- Ask AI Input Form - Opens chat drawer on submit --}}
+    {{!-- Opens chat drawer on submit --}}
     <form class="ch3-hero-ask" id="ch3-ask-form">
       <span class="ch3-hero-ask-icon" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -105,7 +99,6 @@
       </button>
     </form>
 
-    {{!-- Suggestion Chips (optional) --}}
     {{#if page.attributes.hero-suggestion-1}}
     <div class="ch3-hero-ask-hints">
       <span class="ch3-hero-ask-hints-label">{{#if page.attributes.hero-suggestions-label}}{{page.attributes.hero-suggestions-label}}{{else}}Try asking:{{/if}}</span>
@@ -121,12 +114,10 @@
   </div>
 </section>
 
-{{!-- Path Comparison (Full Width) --}}
 {{#if page.attributes.path-title}}
   <section class="ch3-path-compare">
     <h2 class="ch3-section-title">{{{../page.attributes.path-title}}}</h2>
     <div class="ch3-path-grid">
-    {{!-- Self-hosted column --}}
     <div class="ch3-path-col ch3-path-self">
       <div class="ch3-path-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -146,12 +137,10 @@
       </a>
     </div>
 
-    {{!-- Center divider with "or" --}}
     <div class="ch3-path-divider">
       <div class="ch3-path-or">or</div>
     </div>
 
-    {{!-- Cloud/managed column --}}
     <div class="ch3-path-col ch3-path-cloud">
       <div class="ch3-path-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -174,16 +163,6 @@
 </section>
 {{/if}}
 
-{{!-- What's New (Dedicated Full-Width Row) --}}
-{{#with (get-whats-new-items)}}
-{{#if hasItems}}
-<div class="ch3-whats-new-wrapper">
-  {{> whats-new-section items=items}}
-</div>
-{{/if}}
-{{/with}}
-
-{{!-- Tab Navigation (optional) --}}
 {{#if page.attributes.tabs}}
 <nav class="ch3-tabs" aria-label="Page sections">
   {{#each (split page.attributes.tabs ';;')}}
@@ -192,14 +171,184 @@
 </nav>
 {{/if}}
 
-{{!-- Main content area --}}
 <div class="ch3-content">
-  {{!-- Deploy Section --}}
+  {{!-- Component cards section (e.g. Streaming, Connect, SQL) --}}
+  {{#if page.attributes.component-cards-title}}
+  <section class="ch3-section">
+    <h2 class="ch3-section-title">{{{page.attributes.component-cards-title}}}</h2>
+    <div class="ch3-deploy-grid">
+      {{#if page.attributes.component-1-name}}
+      <a class="ch3-deploy-card ch3-component-card" href="{{#if page.attributes.component-1-link}}{{{relativize (resolve-resource page.attributes.component-1-link)}}}{{/if}}"
+         style="--component-color: {{or (get-component-color site (get-component-from-resource page.attributes.component-1-link)) '#1f5bd6'}}">
+        <h3 class="ch3-deploy-title">
+          {{page.attributes.component-1-name}}
+          {{#if (or page.attributes.component-1-is-new (ne page.attributes.component-1-deployments 'all'))}}
+          <span class="ch3-component-badges">
+            {{#if page.attributes.component-1-is-new}}
+            <span class="ch3-component-badge ch3-component-badge--new">NEW</span>
+            {{/if}}
+            {{#if (eq page.attributes.component-1-deployments 'byoc')}}
+            <span class="ch3-component-badge ch3-component-badge--byoc">Cloud BYOC</span>
+            {{/if}}
+          </span>
+          {{/if}}
+        </h3>
+        {{#if page.attributes.component-1-desc}}
+        <p class="ch3-deploy-desc">{{page.attributes.component-1-desc}}</p>
+        {{/if}}
+        {{#if page.attributes.component-1-features}}
+        <ul class="ch3-component-features">
+          {{#each (split page.attributes.component-1-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">{{#if page.attributes.component-1-cta-text}}{{page.attributes.component-1-cta-text}}{{else}}Open docs{{/if}}</span>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.component-2-name}}
+      <a class="ch3-deploy-card ch3-component-card" href="{{#if page.attributes.component-2-link}}{{{relativize (resolve-resource page.attributes.component-2-link)}}}{{/if}}"
+         style="--component-color: {{or (get-component-color site (get-component-from-resource page.attributes.component-2-link)) '#1f5bd6'}}">
+        <h3 class="ch3-deploy-title">
+          {{page.attributes.component-2-name}}
+          {{#if (or page.attributes.component-2-is-new (ne page.attributes.component-2-deployments 'all'))}}
+          <span class="ch3-component-badges">
+            {{#if page.attributes.component-2-is-new}}
+            <span class="ch3-component-badge ch3-component-badge--new">NEW</span>
+            {{/if}}
+            {{#if (eq page.attributes.component-2-deployments 'byoc')}}
+            <span class="ch3-component-badge ch3-component-badge--byoc">Cloud BYOC</span>
+            {{/if}}
+          </span>
+          {{/if}}
+        </h3>
+        {{#if page.attributes.component-2-desc}}
+        <p class="ch3-deploy-desc">{{page.attributes.component-2-desc}}</p>
+        {{/if}}
+        {{#if page.attributes.component-2-features}}
+        <ul class="ch3-component-features">
+          {{#each (split page.attributes.component-2-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">{{#if page.attributes.component-2-cta-text}}{{page.attributes.component-2-cta-text}}{{else}}Open docs{{/if}}</span>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.component-3-name}}
+      <a class="ch3-deploy-card ch3-component-card" href="{{#if page.attributes.component-3-link}}{{{relativize (resolve-resource page.attributes.component-3-link)}}}{{/if}}"
+         style="--component-color: {{or (get-component-color site (get-component-from-resource page.attributes.component-3-link)) '#1f5bd6'}}">
+        <h3 class="ch3-deploy-title">
+          {{page.attributes.component-3-name}}
+          {{#if (or page.attributes.component-3-is-new (ne page.attributes.component-3-deployments 'all'))}}
+          <span class="ch3-component-badges">
+            {{#if page.attributes.component-3-is-new}}
+            <span class="ch3-component-badge ch3-component-badge--new">NEW</span>
+            {{/if}}
+            {{#if (eq page.attributes.component-3-deployments 'byoc')}}
+            <span class="ch3-component-badge ch3-component-badge--byoc">Cloud BYOC</span>
+            {{/if}}
+          </span>
+          {{/if}}
+        </h3>
+        {{#if page.attributes.component-3-desc}}
+        <p class="ch3-deploy-desc">{{page.attributes.component-3-desc}}</p>
+        {{/if}}
+        {{#if page.attributes.component-3-features}}
+        <ul class="ch3-component-features">
+          {{#each (split page.attributes.component-3-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">{{#if page.attributes.component-3-cta-text}}{{page.attributes.component-3-cta-text}}{{else}}Open docs{{/if}}</span>
+        </div>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Deployment cards section (e.g. Serverless, BYOC, Dedicated) --}}
+  {{#if page.attributes.deployment-cards-title}}
+  <section class="ch3-section">
+    <h2 class="ch3-section-title">{{{page.attributes.deployment-cards-title}}}</h2>
+    <div class="ch3-deploy-grid">
+      {{#if page.attributes.deployment-1-name}}
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deployment-1-link}}{{{relativize (resolve-resource page.attributes.deployment-1-link)}}}{{/if}}"
+         style="--component-color: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+        <h3 class="ch3-deploy-title">{{page.attributes.deployment-1-name}}</h3>
+        {{#if page.attributes.deployment-1-desc}}
+        <p class="ch3-deploy-desc">{{page.attributes.deployment-1-desc}}</p>
+        {{/if}}
+        {{#if page.attributes.deployment-1-features}}
+        <ul class="ch3-component-features">
+          {{#each (split page.attributes.deployment-1-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">{{#if page.attributes.deployment-1-cta-text}}{{page.attributes.deployment-1-cta-text}}{{else}}Learn more{{/if}}</span>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.deployment-2-name}}
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deployment-2-link}}{{{relativize (resolve-resource page.attributes.deployment-2-link)}}}{{/if}}"
+         style="--component-color: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+        <h3 class="ch3-deploy-title">{{page.attributes.deployment-2-name}}</h3>
+        {{#if page.attributes.deployment-2-desc}}
+        <p class="ch3-deploy-desc">{{page.attributes.deployment-2-desc}}</p>
+        {{/if}}
+        {{#if page.attributes.deployment-2-features}}
+        <ul class="ch3-component-features">
+          {{#each (split page.attributes.deployment-2-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">{{#if page.attributes.deployment-2-cta-text}}{{page.attributes.deployment-2-cta-text}}{{else}}Learn more{{/if}}</span>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.deployment-3-name}}
+      <a class="ch3-deploy-card" href="{{#if page.attributes.deployment-3-link}}{{{relativize (resolve-resource page.attributes.deployment-3-link)}}}{{/if}}"
+         style="--component-color: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+        <h3 class="ch3-deploy-title">{{page.attributes.deployment-3-name}}</h3>
+        {{#if page.attributes.deployment-3-desc}}
+        <p class="ch3-deploy-desc">{{page.attributes.deployment-3-desc}}</p>
+        {{/if}}
+        {{#if page.attributes.deployment-3-features}}
+        <ul class="ch3-component-features">
+          {{#each (split page.attributes.deployment-3-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="ch3-deploy-foot">
+          <span class="ch3-deploy-cta">{{#if page.attributes.deployment-3-cta-text}}{{page.attributes.deployment-3-cta-text}}{{else}}Learn more{{/if}}</span>
+        </div>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Deploy section (standard component selection) --}}
   {{#if page.attributes.deploy-title}}
   <section class="ch3-section">
     <h2 class="ch3-section-title">{{{page.attributes.deploy-title}}}</h2>
     <div class="ch3-deploy-grid">
-      {{!-- Deploy card 1 --}}
       {{#if page.attributes.deploy-1-title}}
       <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-1-link}}{{{relativize (resolve-resource page.attributes.deploy-1-link)}}}{{/if}}">
         <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-1-icon}}">
@@ -228,7 +377,6 @@
         </div>
       </a>
       {{/if}}
-      {{!-- Deploy card 2 --}}
       {{#if page.attributes.deploy-2-title}}
       <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-2-link}}{{{relativize (resolve-resource page.attributes.deploy-2-link)}}}{{/if}}">
         <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-2-icon}}">
@@ -257,7 +405,6 @@
         </div>
       </a>
       {{/if}}
-      {{!-- Deploy card 3 --}}
       {{#if page.attributes.deploy-3-title}}
       <a class="ch3-deploy-card" href="{{#if page.attributes.deploy-3-link}}{{{relativize (resolve-resource page.attributes.deploy-3-link)}}}{{/if}}">
         <div class="ch3-deploy-icon" data-icon="{{page.attributes.deploy-3-icon}}">
@@ -290,12 +437,10 @@
   </section>
   {{/if}}
 
-  {{!-- Features Section (with NEW badge support) --}}
   {{#if page.attributes.features-title}}
   <section class="ch3-section">
     <h2 class="ch3-section-title">{{{page.attributes.features-title}}}</h2>
     <div class="ch3-features-grid">
-      {{!-- Feature card 1 --}}
       {{#if page.attributes.features-1-title}}
       <a class="ch3-feature-card" href="{{#if page.attributes.features-1-link}}{{{relativize (resolve-resource page.attributes.features-1-link)}}}{{/if}}">
         <div class="ch3-feature-icon" data-icon="{{page.attributes.features-1-icon}}">
@@ -322,7 +467,6 @@
         </div>
       </a>
       {{/if}}
-      {{!-- Feature card 2 --}}
       {{#if page.attributes.features-2-title}}
       <a class="ch3-feature-card" href="{{#if page.attributes.features-2-link}}{{{relativize (resolve-resource page.attributes.features-2-link)}}}{{/if}}">
         <div class="ch3-feature-icon" data-icon="{{page.attributes.features-2-icon}}">
@@ -349,7 +493,6 @@
         </div>
       </a>
       {{/if}}
-      {{!-- Feature card 3 --}}
       {{#if page.attributes.features-3-title}}
       <a class="ch3-feature-card" href="{{#if page.attributes.features-3-link}}{{{relativize (resolve-resource page.attributes.features-3-link)}}}{{/if}}">
         <div class="ch3-feature-icon" data-icon="{{page.attributes.features-3-icon}}">
@@ -380,12 +523,10 @@
   </section>
   {{/if}}
 
-  {{!-- Popular Topics Section --}}
   {{#if page.attributes.popular-title}}
   <section class="ch3-section">
     <h2 class="ch3-section-title">{{{page.attributes.popular-title}}}</h2>
     <div class="ch3-popular-grid">
-      {{!-- Popular card 1 --}}
       {{#if page.attributes.popular-1-title}}
       <a class="ch3-popular-card" href="{{#if page.attributes.popular-1-link}}{{{relativize (resolve-resource page.attributes.popular-1-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-1-icon}}">
@@ -423,7 +564,6 @@
         </div>
       </a>
       {{/if}}
-      {{!-- Popular card 2 --}}
       {{#if page.attributes.popular-2-title}}
       <a class="ch3-popular-card" href="{{#if page.attributes.popular-2-link}}{{{relativize (resolve-resource page.attributes.popular-2-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-2-icon}}">
@@ -461,7 +601,6 @@
         </div>
       </a>
       {{/if}}
-      {{!-- Popular card 3 --}}
       {{#if page.attributes.popular-3-title}}
       <a class="ch3-popular-card" href="{{#if page.attributes.popular-3-link}}{{{relativize (resolve-resource page.attributes.popular-3-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-3-icon}}">
@@ -499,7 +638,6 @@
         </div>
       </a>
       {{/if}}
-      {{!-- Popular card 4 --}}
       {{#if page.attributes.popular-4-title}}
       <a class="ch3-popular-card" href="{{#if page.attributes.popular-4-link}}{{{relativize (resolve-resource page.attributes.popular-4-link)}}}{{/if}}">
         <div class="ch3-popular-icon" data-icon="{{page.attributes.popular-4-icon}}">
@@ -541,7 +679,6 @@
   </section>
   {{/if}}
 
-  {{!-- Labs Section --}}
   {{#if (and page.attributes.labs-title (or page.attributes.labs-1-title page.attributes.labs-2-title page.attributes.labs-3-title page.attributes.labs-4-title))}}
   <section class="ch3-section">
     <div class="ch3-labs-head">
@@ -579,10 +716,8 @@
   </section>
   {{/if}}
 
-  {{!-- Render any additional AsciiDoc content --}}
   {{{page.contents}}}
 
-  {{!-- Help Section --}}
   <section class="ch3-help">
     <div>
       <h3>Need a hand?</h3>
@@ -601,13 +736,11 @@
   </section>
 </div>
 
-{{!-- JavaScript for Ask AI Form --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var form = document.getElementById('ch3-ask-form');
     var input = document.getElementById('ch3-ask-input');
 
-    // Handle form submission - open chat drawer with query
     if (form && input) {
       form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -621,7 +754,6 @@
       });
     }
 
-    // Handle suggestion chip clicks
     var chips = document.querySelectorAll('.ch3-hero-ask-chip');
     chips.forEach(function(chip) {
       chip.addEventListener('click', function() {
@@ -634,5 +766,4 @@
   });
 </script>
 
-{{!-- Footer --}}
 {{> footer}}

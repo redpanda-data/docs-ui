@@ -1122,6 +1122,92 @@ html[data-theme="dark"] .dp-help-btn-secondary:hover {
   border-color: var(--grey-600-new, #52525b);
 }
 
+/* Cloud landing: component cards */
+.dp-component-cards-section {
+  margin-bottom: 64px;
+}
+
+.dp-component-cards-section .dp-products {
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .dp-component-cards-section .dp-products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .dp-component-cards-section .dp-products {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.dp-component-badges {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+.dp-component-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.dp-component-badge--new {
+  background: linear-gradient(135deg, #1f5bd6 0%, #1845a8 100%);
+  color: #fff;
+}
+
+.dp-component-badge--byoc {
+  background: rgba(31, 91, 214, 0.12);
+  color: #1f5bd6;
+  border: 1px solid rgba(31, 91, 214, 0.3);
+}
+
+html[data-theme="dark"] .dp-component-badge--byoc {
+  background: rgba(31, 91, 214, 0.2);
+  color: #68a3ff;
+  border: 1px solid rgba(31, 91, 214, 0.4);
+}
+
+/* Cloud landing: deployment options */
+.dp-deployment-section {
+  margin-bottom: 64px;
+}
+
+.dp-deployment-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .dp-deployment-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .dp-deployment-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.dp-deployment-card:hover {
+  transform: translateY(-4px);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 1100px) {
   .dp-products {
