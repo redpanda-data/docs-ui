@@ -9,13 +9,13 @@ define('ace/mode/coffee_highlight_rules', [
   function s () {
     var e = '[$A-Za-z_\\x7f-\\uffff][$\\w\\x7f-\\uffff]*'
     var t =
-        'this|throw|then|try|typeof|super|switch|return|break|by|continue|catch|class|in|instanceof|is|isnt|if|else|extends|for|own|finally|function|while|when|new|no|not|delete|debugger|do|loop|of|off|or|on|unless|until|and|yes|yield|export|import|default'
+      'this|throw|then|try|typeof|super|switch|return|break|by|continue|catch|class|in|instanceof|is|isnt|if|else|extends|for|own|finally|function|while|when|new|no|not|delete|debugger|do|loop|of|off|or|on|unless|until|and|yes|yield|export|import|default'
     var n = 'true|false|null|undefined|NaN|Infinity'
     var r = 'case|const|function|var|void|with|enum|implements|interface|let|package|private|protected|public|static'
     var i =
-        'Array|Boolean|Date|Function|Number|Object|RegExp|ReferenceError|String|Error|EvalError|InternalError|RangeError|ReferenceError|StopIteration|SyntaxError|TypeError|URIError|ArrayBuffer|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|Uint8Array|Uint8ClampedArray'
+      'Array|Boolean|Date|Function|Number|Object|RegExp|ReferenceError|String|Error|EvalError|InternalError|RangeError|ReferenceError|StopIteration|SyntaxError|TypeError|URIError|ArrayBuffer|Float32Array|Float64Array|Int16Array|Int32Array|Int8Array|Uint16Array|Uint32Array|Uint8Array|Uint8ClampedArray'
     var s =
-        'Math|JSON|isNaN|isFinite|parseInt|parseFloat|encodeURI|encodeURIComponent|decodeURI|decodeURIComponent|String|'
+      'Math|JSON|isNaN|isFinite|parseInt|parseFloat|encodeURI|encodeURIComponent|decodeURI|decodeURIComponent|String|'
     var o = 'window|arguments|prototype|document'
     var u = this.createKeywordMapper(
       {
@@ -218,8 +218,12 @@ define('ace/mode/folding/coffee', [
       var a = s.search(/\S/)
       if (i == -1) return (e.foldWidgets[n - 1] = u != -1 && u < a ? 'start' : ''), ''
       if (u == -1) {
-        if (i == a && r[i] == '#' && s[i] == '#') { return (e.foldWidgets[n - 1] = ''), (e.foldWidgets[n + 1] = ''), 'start' }
-      } else if (u == i && r[i] == '#' && o[i] == '#' && e.getLine(n - 2).search(/\S/) == -1) { return (e.foldWidgets[n - 1] = 'start'), (e.foldWidgets[n + 1] = ''), '' }
+        if (i == a && r[i] == '#' && s[i] == '#') {
+          return (e.foldWidgets[n - 1] = ''), (e.foldWidgets[n + 1] = ''), 'start'
+        }
+      } else if (u == i && r[i] == '#' && o[i] == '#' && e.getLine(n - 2).search(/\S/) == -1) {
+        return (e.foldWidgets[n - 1] = 'start'), (e.foldWidgets[n + 1] = ''), ''
+      }
       return (
         u != -1 && u < i ? (e.foldWidgets[n - 1] = 'start') : (e.foldWidgets[n - 1] = ''), i < a ? 'start' : ''
       )

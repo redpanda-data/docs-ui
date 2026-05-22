@@ -18,7 +18,8 @@ module.exports = function (component) {
   if (!version) return undefined
 
   // Try to get from version.asciidoc.attributes['component-metadata']
-  const headerData = version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
+  const headerData =
+    version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
 
   if (headerData) {
     return headerData

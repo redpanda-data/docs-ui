@@ -11,8 +11,6 @@
   position: relative;
   display: inline-block;
   margin-left: auto;
-  /* Ensure focus outline isn't clipped - use padding without negative margins */
-  padding: 4px;
 }
 
 /* Toggle Button - styled to match version selector pill in eyebrow */
@@ -21,12 +19,11 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   border: 1px solid var(--grey-200-new, #e5e5e5);
   border-radius: 99px;
   background: var(--grey-100-new, #f4f4f5);
   color: var(--grey-900-new, #171717);
-  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -112,7 +109,7 @@ html[data-theme=dark] .dropdown-caret {
   border-radius: 8px;
   background: transparent;
   color: var(--color-jet-80, #48484a);
-  font-size: calc(13 / var(--rem-base) * 1rem); /* Match version selector row font size */
+  font-size: calc(15 / var(--rem-base) * 1rem); /* Match version selector row font size */
   font-weight: 500;
   font-family: inherit;
   text-align: left;

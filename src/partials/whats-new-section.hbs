@@ -17,12 +17,12 @@ Attributes from page:
 {{#if items}}
   {{!-- Items passed in (aggregated mode) --}}
   {{#if (gt items.length 0)}}
-  <section class="whats-new-compact">
+  <section class="whats-new-compact" style="--whats-new-color: {{get-whats-new-color site ../page.attributes}};">
     <div class="whats-new-header">
       <h2 class="whats-new-title">What's new</h2>
       <p class="whats-new-subtitle">Latest features and capabilities</p>
     </div>
-    <div class="whats-new-items">
+    <div class="whats-new-items{{#if (gte items.length 5)}} whats-new-items--scrollable{{/if}}">
       {{#each items}}
       <a href="{{#if link}}{{{relativize (resolve-resource link)}}}{{else}}#{{/if}}" class="whats-new-item">
         <span class="whats-new-badge">NEW</span>
@@ -45,12 +45,12 @@ Attributes from page:
   {{!-- No items passed, read from current page --}}
   {{#with (get-whats-new-items)}}
     {{#if hasItems}}
-    <section class="whats-new-compact">
+    <section class="whats-new-compact" style="--whats-new-color: {{get-whats-new-color ../site ../../page.attributes}};">
       <div class="whats-new-header">
         <h2 class="whats-new-title">What's new</h2>
         <p class="whats-new-subtitle">Latest features and capabilities</p>
       </div>
-      <div class="whats-new-items">
+      <div class="whats-new-items{{#if (gte items.length 5)}} whats-new-items--scrollable{{/if}}">
         {{#each items}}
         <a href="{{#if link}}{{{relativize (resolve-resource link)}}}{{else}}#{{/if}}" class="whats-new-item">
           <span class="whats-new-badge">NEW</span>

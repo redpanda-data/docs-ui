@@ -105,10 +105,7 @@
 
         // Close on Escape
         document.addEventListener('keydown', function (e) {
-          if (
-            e.key === 'Escape' &&
-            compactToggle.getAttribute('aria-expanded') === 'true'
-          ) {
+          if (e.key === 'Escape' && compactToggle.getAttribute('aria-expanded') === 'true') {
             compactToggle.setAttribute('aria-expanded', 'false')
             compactMenu.classList.remove('show')
             compactToggle.focus()
@@ -123,8 +120,8 @@
     }
 
     // Create availability dropdown (check "Available in:" text)
-    const availabilityPara = Array.from(metadataContent.querySelectorAll('p')).find(
-      (p) => p.textContent.includes('Available in:')
+    const availabilityPara = Array.from(metadataContent.querySelectorAll('p')).find((p) =>
+      p.textContent.includes('Available in:')
     )
 
     if (availabilityPara) {
@@ -257,10 +254,7 @@
 
         // Close on Escape
         document.addEventListener('keydown', function (e) {
-          if (
-            e.key === 'Escape' &&
-            dropdownButton.getAttribute('aria-expanded') === 'true'
-          ) {
+          if (e.key === 'Escape' && dropdownButton.getAttribute('aria-expanded') === 'true') {
             dropdownButton.setAttribute('aria-expanded', 'false')
             dropdownMenu.classList.remove('show')
             dropdownButton.focus()

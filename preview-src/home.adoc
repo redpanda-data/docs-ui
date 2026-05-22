@@ -23,6 +23,8 @@
 :component-whats-new-1-link: cloud-data-platform:sql:index.adoc
 :component-whats-new-1-tag: Cloud BYOC
 // Home page links (matching data-platform structure)
+:adp-home: agentic-data-plane:ROOT:index.adoc
+:data-platform-home: data-platform:ROOT:index.adoc
 :cloud-home: cloud-data-platform:ROOT:index.adoc
 :self-managed-home: streaming:ROOT:index.adoc
 :self-managed-quickstart: streaming:get-started:quick-start.adoc

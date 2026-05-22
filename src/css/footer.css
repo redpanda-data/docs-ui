@@ -308,7 +308,7 @@ footer.footer {
 }
 
 .docs-footer-copy {
-  font-size: 12.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.45);
   letter-spacing: 0;
 }
@@ -322,7 +322,7 @@ footer.footer {
 }
 
 .docs-footer .docs-footer-link {
-  font-size: 12.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   transition: color 0.14s;

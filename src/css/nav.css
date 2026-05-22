@@ -19,7 +19,7 @@
 
 /* Sidebar Header */
 .sb-head {
-  padding: 18px var(--nav-side-padding) 14px; /* Prototype: 18px 18px 14px */
+  padding: 18px var(--nav-side-padding) 14px;
   flex-shrink: 0;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .sb-brand-sub {
-  font-size: 11.5px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--sidebar-fg-muted, #a8b2c7);
   letter-spacing: -0.005em;
   margin-top: 1px;
@@ -122,7 +122,7 @@ button.sb-search:focus-visible {
 
 .sb-search-kbd kbd {
   font-family: var(--font-sans, "Inter", sans-serif);
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 500;
   padding: 2px 5px;
   background: rgba(255, 255, 255, 0.1);
@@ -442,13 +442,13 @@ html.is-clipped--nav {
 .nav-menu h3.title {
   display: flex;
   align-items: center;
-  gap: 8px; /* Prototype: 8px gap */
-  padding: 8px 10px; /* Prototype: 8px 10px */
+  gap: 8px;
+  padding: 8px 10px;
   color: #a8b2c7; /* Prototype exact color */
-  font-size: calc(14 / var(--rem-base) * 1rem); /* Prototype: 13px */
-  font-weight: 500; /* Prototype: 500 */
+  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-weight: 500;
   font-family: var(--body-font-family);
-  border-radius: 5px; /* Prototype: 5px */
+  border-radius: 5px;
   margin: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -480,7 +480,7 @@ html[data-theme="light"] .nav-menu h3.title:hover {
 
 /* Nested nav-list has left border like prototype .sb-children */
 .nav-item > .nav-list {
-  padding-left: 10px; /* Prototype: 10px */
+  padding-left: 10px;
   border-left: 1px solid rgba(255, 255, 255, 0.06); /* Prototype exact */
   margin-left: 0;
 }
@@ -515,13 +515,13 @@ li.nav-item {
   min-height: 30px;
   justify-content: space-between;
   align-items: center;
-  gap: 6px; /* Prototype: 6px gap between icon/text/caret */
-  padding: 6px 10px; /* Prototype: 6px 10px */
-  border-radius: 5px; /* Prototype: 5px */
-  color: #8098b3; /* Prototype: exact color */
-  font-size: calc(14 / var(--rem-base) * 1rem); /* Prototype: 13px */
-  letter-spacing: -0.0125em; /* Prototype: exact tracking */
-  line-height: 1.35; /* Prototype: 1.35 */
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  color: #8098b3;
+  font-size: calc(15 / var(--rem-base) * 1rem);
+  letter-spacing: -0.0125em;
+  line-height: 1.35;
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
@@ -578,17 +578,17 @@ a.nav-text {
   outline: none;
   line-height: inherit;
   padding: 0;
-  width: 12px; /* Prototype: 12px */
-  height: 12px; /* Prototype: 12px */
+  width: 12px;
+  height: 12px;
   margin-left: auto;
   flex-shrink: 0;
-  color: #5972a6; /* Prototype: caret color */
+  color: #5972a6;
   transition: transform 0.15s ease; /* Prototype animation */
 }
 
 .nav-item-toggle > img {
   filter: var(--nav-toggle-filter);
-  width: 12px; /* Prototype: 12px */
+  width: 12px;
   height: 12px;
   opacity: 0.6;
 }
@@ -721,14 +721,14 @@ html[data-theme="light"] .nav-item-toggle {
 .nav-status-footer {
   position: sticky;
   bottom: 0;
-  padding: 10px 16px; /* Prototype: 10px 16px */
+  padding: 10px 16px;
   background: var(--sidebar-bg, #0f1727);
   border-top: 1px solid rgba(255, 255, 255, 0.06); /* Prototype exact */
   z-index: 10;
   flex-shrink: 0;
   margin-top: auto;
-  font-size: 11.5px; /* Prototype: 11.5px */
-  color: #5972a6; /* Prototype: muted color */
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: #5972a6;
 }
 
 .nav-status-link {
@@ -741,7 +741,7 @@ html[data-theme="light"] .nav-item-toggle {
   text-decoration: none;
   color: inherit;
   transition: background 0.12s;
-  font-size: 12.5px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
 }
 
 .nav-status-link:hover {
@@ -753,8 +753,8 @@ html[data-theme="light"] .nav-item-toggle {
 }
 
 .nav-status-dot {
-  width: 7px; /* Prototype: 7px */
-  height: 7px; /* Prototype: 7px */
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--green-500, #10b981); /* Default: operational */
   flex-shrink: 0;
@@ -822,12 +822,12 @@ html[data-theme="light"] .nav-item-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px; /* Prototype: 10px 16px */
+  padding: 10px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.06); /* Prototype exact */
   flex-shrink: 0;
-  gap: 8px; /* Prototype: 8px */
-  font-size: 11.5px; /* Prototype: 11.5px */
-  color: #5972a6; /* Prototype: muted color */
+  gap: 8px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: #5972a6;
   position: relative;
   z-index: 1; /* Keep below dropdown menus (z-index: 100) */
 }
@@ -883,8 +883,8 @@ html[data-theme="light"] .sb-theme-icon--sun {
 
 /* Light mode sidebar footer styles */
 html[data-theme="light"] .sb-footer {
-  border-top-color: var(--grey-100-new, var(--grey-100, #e9eaeb)); /* Prototype: grey-100 */
-  color: var(--grey-500-new, var(--grey-500, #79797d)); /* Prototype: grey-500 */
+  border-top-color: var(--grey-100-new, var(--grey-100, #e9eaeb));
+  color: var(--grey-500-new, var(--grey-500, #79797d));
 }
 
 html[data-theme="light"] .sb-theme-toggle,
@@ -1066,7 +1066,7 @@ html[data-theme="light"] .sb-version-wrap .sm-ver-pill:hover {
 }
 
 html[data-theme="light"] .nav-list {
-  color: var(--grey-600-new, var(--grey-600, #606164)); /* Prototype: grey-600 for items */
+  color: var(--grey-600-new, var(--grey-600, #606164));
 }
 
 html[data-theme="light"] .nav .item {
@@ -1197,7 +1197,7 @@ html[data-theme="light"] .nav-bucket-header.is-current {
 
 /* Bucket title */
 .nav-bucket-title {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: #e8eef6;
   letter-spacing: -0.01em;
@@ -1511,7 +1511,7 @@ html[data-theme="light"] .nav-bucket:has(.nav-bucket-children) > .nav-bucket-hea
 /* Top-level nav items (parent component's own nav before child buckets) */
 /* Style the nav items to match bucket content items */
 .nav-menu > .nav-list > .nav-item .item {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   padding: 6px 10px;
   min-height: 28px;
   color: #9daabe;
@@ -1584,7 +1584,7 @@ html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item.is-current-page
 
 /* Child bucket titles - slightly smaller font */
 .nav-bucket-children > .nav-bucket .nav-bucket-title {
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
 }
 
 /* Child bucket content - thinner border */

@@ -158,8 +158,12 @@ define('ace/mode/folding/coffee', [
       var a = s.search(/\S/)
       if (i == -1) return (e.foldWidgets[n - 1] = u != -1 && u < a ? 'start' : ''), ''
       if (u == -1) {
-        if (i == a && r[i] == '#' && s[i] == '#') { return (e.foldWidgets[n - 1] = ''), (e.foldWidgets[n + 1] = ''), 'start' }
-      } else if (u == i && r[i] == '#' && o[i] == '#' && e.getLine(n - 2).search(/\S/) == -1) { return (e.foldWidgets[n - 1] = 'start'), (e.foldWidgets[n + 1] = ''), '' }
+        if (i == a && r[i] == '#' && s[i] == '#') {
+          return (e.foldWidgets[n - 1] = ''), (e.foldWidgets[n + 1] = ''), 'start'
+        }
+      } else if (u == i && r[i] == '#' && o[i] == '#' && e.getLine(n - 2).search(/\S/) == -1) {
+        return (e.foldWidgets[n - 1] = 'start'), (e.foldWidgets[n + 1] = ''), ''
+      }
       return (
         u != -1 && u < i ? (e.foldWidgets[n - 1] = 'start') : (e.foldWidgets[n - 1] = ''), i < a ? 'start' : ''
       )
@@ -225,8 +229,12 @@ define('ace/mode/folding/yaml', [
       var f = r[i] === '-'
       if (i == -1) return (e.foldWidgets[n - 1] = u != -1 && u < a ? 'start' : ''), ''
       if (u == -1) {
-        if (i == a && r[i] == '#' && s[i] == '#') { return (e.foldWidgets[n - 1] = ''), (e.foldWidgets[n + 1] = ''), 'start' }
-      } else if (u == i && r[i] == '#' && o[i] == '#' && e.getLine(n - 2).search(/\S/) == -1) { return (e.foldWidgets[n - 1] = 'start'), (e.foldWidgets[n + 1] = ''), '' }
+        if (i == a && r[i] == '#' && s[i] == '#') {
+          return (e.foldWidgets[n - 1] = ''), (e.foldWidgets[n + 1] = ''), 'start'
+        }
+      } else if (u == i && r[i] == '#' && o[i] == '#' && e.getLine(n - 2).search(/\S/) == -1) {
+        return (e.foldWidgets[n - 1] = 'start'), (e.foldWidgets[n + 1] = ''), ''
+      }
       return (
         u != -1 && u < i
           ? (e.foldWidgets[n - 1] = 'start')

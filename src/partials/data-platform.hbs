@@ -66,17 +66,7 @@
     </div>
   </header>
 
-  {{!-- TWO-COLUMN LAYOUT: What's New + Choose Deployment --}}
-  {{#with (aggregate-whats-new site "cloud-data-platform" "streaming" "connect")}}
-  <div class="dp-hero-columns{{#if hasItems}} dp-hero-columns--with-whats-new{{/if}}">
-    {{!-- WHAT'S NEW (Aggregated from multiple components) --}}
-    {{#if hasItems}}
-    <div class="dp-whats-new-wrapper">
-      {{> whats-new-section items=items}}
-    </div>
-    {{/if}}
-
-  {{!-- TWO DEPLOYMENT OPTIONS --}}
+  {{!-- Choose Deployment (Full Width) --}}
   <section class="dp-section dp-choose-section">
     <div class="dp-section-head">
       <h2 class="dp-section-title">Choose how you'll run Redpanda</h2>
@@ -178,7 +168,14 @@
       </a>
     </div>
   </section>
-  </div>{{!-- End dp-hero-columns --}}
+
+  {{!-- What's New (Dedicated Full-Width Row) --}}
+  {{#with (aggregate-whats-new site "cloud-data-platform" "streaming" "connect")}}
+  {{#if hasItems}}
+  <div class="dp-whats-new-wrapper">
+    {{> whats-new-section items=items}}
+  </div>
+  {{/if}}
   {{/with}}
 
   {{!-- POPULAR ACROSS DP --}}

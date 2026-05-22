@@ -224,7 +224,6 @@ ace.define(
     }
 
     oop.inherits(Mode, TextMode)
-
     ;(function () {
       this.lineCommentStart = '#'
       this.$id = 'ace/mode/bloblang'

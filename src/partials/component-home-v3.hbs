@@ -121,19 +121,8 @@
   </div>
 </section>
 
-{{!-- What's New + Path Two-Column Layout --}}
-{{#with (get-whats-new-items)}}
-{{#if (or hasItems ../page.attributes.path-title)}}
-<div class="ch3-hero-columns{{#if hasItems}} ch3-hero-columns--with-whats-new{{/if}}">
-  {{!-- What's New Column --}}
-  {{#if hasItems}}
-  <div class="ch3-whats-new-wrapper">
-    {{> whats-new-section items=items}}
-  </div>
-  {{/if}}
-
-  {{!-- Path Comparison Column --}}
-  {{#if ../page.attributes.path-title}}
+{{!-- Path Comparison (Full Width) --}}
+{{#if page.attributes.path-title}}
   <section class="ch3-path-compare">
     <h2 class="ch3-section-title">{{{../page.attributes.path-title}}}</h2>
     <div class="ch3-path-grid">
@@ -183,7 +172,13 @@
     </div>
   </div>
 </section>
-  {{/if}}
+{{/if}}
+
+{{!-- What's New (Dedicated Full-Width Row) --}}
+{{#with (get-whats-new-items)}}
+{{#if hasItems}}
+<div class="ch3-whats-new-wrapper">
+  {{> whats-new-section items=items}}
 </div>
 {{/if}}
 {{/with}}

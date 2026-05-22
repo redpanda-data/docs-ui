@@ -54,7 +54,7 @@
 }
 
 .chat-head-name {
-  font-size: 13.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-900-new, var(--grey-900, #181818));
   letter-spacing: -0.0125em;
@@ -62,7 +62,7 @@
 }
 
 .chat-head-sub {
-  font-size: 11.5px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--grey-500-new, var(--grey-500, #6b7280));
   letter-spacing: -0.005em;
   margin-top: 2px;
@@ -106,7 +106,7 @@
 /* Footer disclaimer */
 .chat-foot {
   padding: 8px 14px 12px;
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--grey-500-new, var(--grey-500, #6b7280));
   text-align: center;
   letter-spacing: -0.005em;
@@ -682,7 +682,7 @@
 /* Disclaimer - always visible at bottom */
 #chat-panel-kapa-root .disclaimer {
   padding: 10px 14px 14px;
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--grey-500-new, #6b7280);
   text-align: center;
   line-height: 1.5;

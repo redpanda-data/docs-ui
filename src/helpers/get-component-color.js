@@ -41,7 +41,8 @@ module.exports = function (site, componentName) {
   if (!version) return undefined
 
   // Get component-metadata from version attributes
-  const headerData = version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
+  const headerData =
+    version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
 
   if (headerData && headerData.color) {
     return headerData.color

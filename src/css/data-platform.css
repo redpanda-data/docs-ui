@@ -97,7 +97,7 @@ html[data-theme="dark"] .data-platform.article {
   width: 28px;
   height: 22px;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -157,30 +157,21 @@ html[data-theme="dark"] .data-platform.article {
   line-height: 1.35;
 }
 
-/* ---- Two-column hero layout (What's New + Choose) ---- */
-.dp-hero-columns {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-}
-
-@media (min-width: 1024px) {
-  .dp-hero-columns--with-whats-new {
-    grid-template-columns: 1fr 30%;
-    gap: 28px;
-  }
-
-  .dp-hero-columns--with-whats-new .dp-whats-new-wrapper {
-    order: 2;
-  }
-
-  .dp-hero-columns--with-whats-new .dp-choose-section {
-    order: 1;
-  }
-}
-
+/* ---- Choose Deployment Section ---- */
 .dp-choose-section {
   margin-bottom: 0;
+}
+
+/* ---- What's New Section (Full-Width Row) ---- */
+.dp-whats-new-wrapper {
+  margin: 48px 0 0 0;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .dp-whats-new-wrapper {
+    margin-top: 32px;
+  }
 }
 
 /* Make choose section cards bigger (2 columns instead of 3) */
@@ -469,7 +460,7 @@ html[data-theme="dark"] .dp-product.is-featured {
 
 .dp-product-name {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(22 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -482,7 +473,7 @@ html[data-theme="dark"] .dp-product-name {
 }
 
 .dp-product-tagline {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
   margin: 0;
   line-height: 1.4;
@@ -493,7 +484,7 @@ html[data-theme="dark"] .dp-product-tagline {
 }
 
 .dp-product-desc {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   line-height: 1.55;
   color: var(--grey-600-new, #52525b);
   margin: 0 0 18px;
@@ -517,7 +508,7 @@ html[data-theme="dark"] .dp-product-desc {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--grey-800-new, #18181b);
 }
 
@@ -571,7 +562,7 @@ html[data-theme="dark"] .dp-product-stats {
 
 .dp-product-stats strong {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.1;
   color: var(--grey-800-new, #18181b);
@@ -583,7 +574,7 @@ html[data-theme="dark"] .dp-product-stats strong {
 }
 
 .dp-product-stats span {
-  font-size: 11.5px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
 }
 
@@ -597,7 +588,7 @@ html[data-theme="dark"] .dp-product-stats span {
   justify-content: space-between;
   gap: 8px;
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 13.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   color: var(--dp-accent);
@@ -607,169 +598,6 @@ html[data-theme="dark"] .dp-product-stats span {
 .dp-product:hover .dp-product-cta svg {
   transform: translateX(2px);
   transition: transform 0.15s;
-}
-
-/* ---- What's New section ---- */
-.dp-whats-new-section {
-  --whats-new-color: 16, 185, 129; /* Default: green */
-
-  background: linear-gradient(135deg, rgba(var(--whats-new-color), 0.03) 0%, rgba(var(--whats-new-color), 0.02) 100%);
-  border: 1px solid rgba(var(--whats-new-color), 0.12);
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 0;
-  height: fit-content;
-}
-
-html[data-theme="dark"] .dp-whats-new-section {
-  background: linear-gradient(135deg, rgba(var(--whats-new-color), 0.06) 0%, rgba(var(--whats-new-color), 0.03) 100%);
-  border-color: rgba(var(--whats-new-color), 0.18);
-}
-
-.dp-whats-new-section .dp-section-head {
-  margin-bottom: 14px;
-}
-
-.dp-whats-new-section .dp-section-title {
-  font-size: calc(17 / var(--rem-base) * 1rem);
-  margin-bottom: 4px;
-}
-
-.dp-whats-new-section .dp-section-sub {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-}
-
-.dp-whats-new {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.dp-new-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--grey-50-new, #fafafa);
-  border: 1px solid var(--grey-200-new, #e4e4e7);
-  border-radius: 10px;
-  padding: 12px 14px;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.18s ease;
-}
-
-html[data-theme="dark"] .dp-new-item {
-  background: var(--grey-900-new, #18181b);
-  border-color: var(--grey-800-new, #27272a);
-}
-
-.dp-new-item:hover {
-  border-color: #10b981;
-  transform: translateX(4px);
-  box-shadow: -4px 0 0 #10b981, 0 4px 12px rgba(16, 185, 129, 0.15);
-}
-
-.dp-new-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 10px;
-  font-size: calc(10 / var(--rem-base) * 1rem);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: rgb(var(--whats-new-color));
-  color: #fff;
-  border-radius: 5px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.dp-new-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.dp-new-title {
-  font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 14.5px;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  margin: 0 0 4px;
-  color: var(--grey-800-new, #18181b);
-}
-
-html[data-theme="dark"] .dp-new-title {
-  color: var(--grey-100-new, #f4f4f5);
-}
-
-.dp-new-desc {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--grey-600-new, #52525b);
-  margin: 0 0 6px;
-}
-
-html[data-theme="dark"] .dp-new-desc {
-  color: var(--grey-400-new, #a1a1aa);
-}
-
-.dp-new-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  background: rgba(16, 185, 129, 0.08);
-  color: #059669;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-html[data-theme="dark"] .dp-new-tag {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-}
-
-.dp-new-arrow {
-  flex-shrink: 0;
-  color: #10b981;
-  opacity: 0.7;
-  transition: all 0.18s ease;
-}
-
-.dp-new-item:hover .dp-new-arrow {
-  opacity: 1;
-  transform: translateX(2px);
-}
-
-/* Mobile adjustments for What's New */
-@media (max-width: 768px) {
-  .dp-whats-new-section {
-    padding: 20px 18px;
-  }
-
-  .dp-new-item {
-    flex-direction: row;
-    gap: 12px;
-    padding: 14px 16px;
-  }
-
-  .dp-new-badge {
-    padding: 3px 8px;
-    font-size: calc(10 / var(--rem-base) * 1rem);
-  }
-
-  .dp-new-title {
-    font-size: calc(15 / var(--rem-base) * 1rem);
-  }
-
-  .dp-new-desc {
-    font-size: calc(13 / var(--rem-base) * 1rem);
-  }
 }
 
 /* ---- Decision boxes with OR separator ---- */
@@ -1017,7 +845,7 @@ html[data-theme="dark"] .dp-matrix-when p {
 
 .dp-matrix-pick a {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 13.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   color: var(--dp-accent);
@@ -1080,7 +908,7 @@ html[data-theme="dark"] .dp-popular-card {
 
 .dp-popular-text h4 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.005em;
@@ -1100,7 +928,7 @@ html[data-theme="dark"] .dp-popular-text h4 {
 
 .dp-popular-tag {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 10.5px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.06em;
@@ -1116,7 +944,7 @@ html[data-theme="dark"] .dp-popular-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11.5px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
 }
 
@@ -1175,7 +1003,7 @@ html[data-theme="dark"] .dp-concept {
 
 .dp-concept h4 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: 14.5px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.005em;
@@ -1188,7 +1016,7 @@ html[data-theme="dark"] .dp-concept h4 {
 }
 
 .dp-concept p {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.5;
   color: var(--grey-600-new, #52525b);
   margin: 0;

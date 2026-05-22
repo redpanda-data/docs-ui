@@ -60,7 +60,9 @@
         if (Array.isArray(t)) return i(t)
       })(t) ||
       (function (t) {
-        if ((typeof Symbol !== 'undefined' && t[Symbol.iterator] != null) || t['@@iterator'] != null) { return Array.from(t) }
+        if ((typeof Symbol !== 'undefined' && t[Symbol.iterator] != null) || t['@@iterator'] != null) {
+          return Array.from(t)
+        }
       })(t) ||
       (function (t, e) {
         if (!t) return

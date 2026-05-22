@@ -56,7 +56,8 @@ module.exports = function (site, ...args) {
     const version = component.latestVersion || (component.versions && component.versions[0])
     if (!version) return undefined
 
-    const headerData = version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
+    const headerData =
+      version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
     return headerData && headerData.color ? headerData.color : undefined
   }
 

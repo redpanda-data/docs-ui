@@ -376,7 +376,7 @@ article.search .ais-Pagination-list {
 
 .aa-DetachedSearchButtonPlaceholder {
   color: var(--aa-text-color-rgb) !important;
-  font-size: 12.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
 }
 
 .aa-SubmitIcon {

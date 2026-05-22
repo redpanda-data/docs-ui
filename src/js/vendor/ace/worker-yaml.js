@@ -489,7 +489,7 @@ define('ace/anchor', [], function (e, t, n) {
         n ? (r = { row: e, column: t }) : (r = this.$clipPositionToDocument(e, t))
         if (this.row == r.row && this.column == r.column) return
         var i = { row: this.row, column: this.column }
-            ;(this.row = r.row), (this.column = r.column), this._signal('change', { old: i, value: r })
+          ;(this.row = r.row), (this.column = r.column), this._signal('change', { old: i, value: r })
       }),
       (e.prototype.detach = function () {
         this.document.off('change', this.$onChange)
@@ -501,8 +501,7 @@ define('ace/anchor', [], function (e, t, n) {
         var n = {}
         return (
           e >= this.document.getLength()
-            ? ((n.row = Math.max(0, this.document.getLength() - 1)),
-            (n.column = this.document.getLine(n.row).length))
+            ? ((n.row = Math.max(0, this.document.getLength() - 1)), (n.column = this.document.getLine(n.row).length))
             : e < 0
               ? ((n.row = 0), (n.column = 0))
               : ((n.row = e), (n.column = Math.min(this.document.getLine(n.row).length, Math.max(0, t)))),
@@ -544,7 +543,7 @@ define('ace/document', [], function (e, t, n) {
       }),
       (e.prototype.$detectNewLine = function (e) {
         var t = e.match(/^.*?(\r\n|\r|\n)/m)
-            ;(this.$autoNewLine = t ? t[1] : '\n'), this._signal('changeNewLineMode')
+          ;(this.$autoNewLine = t ? t[1] : '\n'), this._signal('changeNewLineMode')
       }),
       (e.prototype.getNewLineCharacter = function () {
         switch (this.$newLineMode) {
@@ -692,13 +691,13 @@ define('ace/document', [], function (e, t, n) {
       }),
       (e.prototype.removeNewLine = function (e) {
         e < this.getLength() - 1 &&
-              e >= 0 &&
-              this.applyDelta({
-                start: this.pos(e, this.getLine(e).length),
-                end: this.pos(e + 1, 0),
-                action: 'remove',
-                lines: ['', ''],
-              })
+            e >= 0 &&
+            this.applyDelta({
+              start: this.pos(e, this.getLine(e).length),
+              end: this.pos(e + 1, 0),
+              action: 'remove',
+              lines: ['', ''],
+            })
       }),
       (e.prototype.replace = function (e, t) {
         e instanceof o || (e = o.fromPoints(e.start, e.end))
@@ -723,9 +722,8 @@ define('ace/document', [], function (e, t, n) {
       }),
       (e.prototype.$safeApplyDelta = function (e) {
         var t = this.$lines.length
-            ;((e.action == 'remove' && e.start.row < t && e.end.row < t) ||
-              (e.action == 'insert' && e.start.row <= t)) &&
-              this.applyDelta(e)
+          ;((e.action == 'remove' && e.start.row < t && e.end.row < t) || (e.action == 'insert' && e.start.row <= t)) &&
+            this.applyDelta(e)
       }),
       (e.prototype.$splitAndapplyLargeDelta = function (e, t) {
         var n = e.lines
@@ -825,7 +823,9 @@ define('ace/lib/lang', [], function (e, t, n) {
   }),
   (t.copyArray = function (e) {
     var t = []
-    for (var n = 0, r = e.length; n < r; n++) { e[n] && typeof e[n] === 'object' ? (t[n] = this.copyObject(e[n])) : (t[n] = e[n]) }
+    for (var n = 0, r = e.length; n < r; n++) {
+      e[n] && typeof e[n] === 'object' ? (t[n] = this.copyObject(e[n])) : (t[n] = e[n])
+    }
     return t
   }),
   (t.deepCopy = e('./deep_copy').deepCopy),
@@ -1155,7 +1155,7 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
               if (t === null) return {}
               ;(n = {}), (r = Object.keys(t))
               for (i = 0, s = r.length; i < s; i += 1) {
-                (o = r[i]),
+                ;(o = r[i]),
                 (u = String(t[o])),
                 o.slice(0, 2) === '!!' && (o = 'tag:yaml.org,2002:' + o.slice(2)),
                 (f = e.compiledTypeMap.fallback[o]),
@@ -1202,7 +1202,7 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
               var u
               var a = e.length
               while (i < a) {
-                (s = e.indexOf('\n', i)),
+                ;(s = e.indexOf('\n', i)),
                 s === -1 ? ((u = e.slice(i)), (i = a)) : ((u = e.slice(i, s + 1)), (i = s + 1)),
                 u.length && u !== '\n' && (o += n),
                 (o += u)
@@ -1352,7 +1352,11 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
               var o = 0
               var u = 0
               var a = ''
-              while ((r = n.exec(e))) { (u = r.index), u - i > t && ((s = o > i ? o : u), (a += '\n' + e.slice(i, s)), (i = s + 1)), (o = u) }
+              while ((r = n.exec(e))) {
+                ;(u = r.index),
+                u - i > t && ((s = o > i ? o : u), (a += '\n' + e.slice(i, s)), (i = s + 1)),
+                (o = u)
+              }
               return (
                 (a += '\n'),
                 e.length - i > t && o > i ? (a += e.slice(i, o) + '\n' + e.slice(o + 1)) : (a += e.slice(i)),
@@ -1384,7 +1388,8 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
               var o
               for (s = 0, o = n.length; s < o; s += 1) {
                 ut(e, t, n[s], !1, !1) && (s !== 0 && (r += ',' + (e.condenseFlow ? '' : ' ')), (r += e.dump))
-              }(e.tag = i), (e.dump = '[' + r + ']')
+              }
+              ;(e.tag = i), (e.dump = '[' + r + ']')
             }
             function rt (e, t, n, r) {
               var i = ''
@@ -1460,7 +1465,9 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                     c = e.styleMap[l.tag] || l.defaultStyle
                     if (u.call(l.represent) === '[object Function]') r = l.represent(t, c)
                     else {
-                      if (!a.call(l.represent, c)) { throw new i('!<' + l.tag + '> tag resolver accepts not "' + c + '" style') }
+                      if (!a.call(l.represent, c)) {
+                        throw new i('!<' + l.tag + '> tag resolver accepts not "' + c + '" style')
+                      }
                       r = l.represent[c](t, c)
                     }
                     e.dump = r
@@ -1732,7 +1739,7 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                 u = e.input.slice(t, n)
                 if (r) {
                   for (i = 0, s = u.length; i < s; i += 1) {
-                    (o = u.charCodeAt(i)),
+                    ;(o = u.charCodeAt(i)),
                     o === 9 || (o >= 32 && o <= 1114111) || H(e, 'expected valid JSON character')
                   }
                 } else m.test(u) && H(e, 'the stream contains non-printable characters')
@@ -1827,7 +1834,9 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                     p === 37 ||
                     p === 64 ||
                     p === 96
-              ) { return !1 }
+              ) {
+                return !1
+              }
               if (p === 63 || p === 45) {
                 i = e.input.charCodeAt(e.position + 1)
                 if (x(i) || (n && T(i))) return !1
@@ -1892,9 +1901,10 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                   else if ((o = C(u)) > 0) {
                     ;(i = o), (s = 0)
                     for (; i > 0; i--) {
-                      (u = e.input.charCodeAt(++e.position)),
+                      ;(u = e.input.charCodeAt(++e.position)),
                       (o = N(u)) >= 0 ? (s = (s << 4) + o) : H(e, 'expected hexadecimal character')
-                    }(e.result += A(s)), e.position++
+                    }
+                    ;(e.result += A(s)), e.position++
                   } else H(e, 'unknown escape sequence')
                   n = r = e.position
                 } else {
@@ -1987,7 +1997,9 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
               ;(e.kind = 'scalar'), (e.result = '')
               while (h !== 0) {
                 h = e.input.charCodeAt(++e.position)
-                if (h === 43 || h === 45) { p === s ? (s = h === 43 ? v : d) : H(e, 'repeat of a chomping mode identifier') } else {
+                if (h === 43 || h === 45) {
+                  p === s ? (s = h === 43 ? v : d) : H(e, 'repeat of a chomping mode identifier')
+                } else {
                   if (!((c = k(h)) >= 0)) break
                   c === 0
                     ? H(e, 'bad explicit indentation width of a block scalar; it cannot be less than one')
@@ -2086,7 +2098,7 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                     y = e.input.charCodeAt(e.position)
                     while (S(y)) y = e.input.charCodeAt(++e.position)
                     if (y === 58) {
-                      (y = e.input.charCodeAt(++e.position)),
+                      ;(y = e.input.charCodeAt(++e.position)),
                       x(y) ||
                               H(
                                 e,
@@ -2166,7 +2178,8 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                           (r = !0),
                           (t = e.position + 1))),
                   (o = e.input.charCodeAt(++e.position))
-                }(s = e.input.slice(t, e.position)),
+                }
+                ;(s = e.input.slice(t, e.position)),
                 y.test(s) && H(e, 'tag suffix cannot contain flow indicator characters')
               }
               return (
@@ -2556,7 +2569,9 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                 !n.every(function (e) {
                   return e instanceof s
                 })
-              ) { throw new i('Specified list of YAML types (or a single Type object) contains a non-Type object.') }
+              ) {
+                throw new i('Specified list of YAML types (or a single Type object) contains a non-Type object.')
+              }
               return new a({ include: t, explicit: n })
             }),
             (t.exports = a)
@@ -2653,7 +2668,9 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
             function u (e, t) {
               ;(t = t || {}),
               Object.keys(t).forEach(function (t) {
-                if (i.indexOf(t) === -1) { throw new r('Unknown option "' + t + '" is met in definition of "' + e + '" YAML type.') }
+                if (i.indexOf(t) === -1) {
+                  throw new r('Unknown option "' + t + '" is met in definition of "' + e + '" YAML type.')
+                }
               }),
               (this.tag = e),
               (this.kind = t.kind || null),
@@ -2672,7 +2689,9 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
               (this.represent = t.represent || null),
               (this.defaultStyle = t.defaultStyle || null),
               (this.styleAliases = o(t.styleAliases || null))
-              if (s.indexOf(this.kind) === -1) { throw new r('Unknown kind "' + this.kind + '" is specified for "' + e + '" YAML type.') }
+              if (s.indexOf(this.kind) === -1) {
+                throw new r('Unknown kind "' + this.kind + '" is specified for "' + e + '" YAML type.')
+              }
             }
             var r = e('./exception')
             var i = [
@@ -3542,7 +3561,7 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
                 var u = o ? G(e.length, String) : []
                 var a = u.length
                 for (var f in e) {
-                  (t || ut.call(e, f)) &&
+                  ;(t || ut.call(e, f)) &&
                         (!o ||
                           !(
                             f == 'length' ||
@@ -3916,11 +3935,11 @@ define('ace/mode/yaml/yaml-lint', [], function (e, t, n) {
               var lt = ot.call(Object)
               var ct = RegExp(
                 '^' +
-                        ot
-                          .call(ut)
-                          .replace(j, '\\$&')
-                          .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') +
-                        '$'
+                      ot
+                        .call(ut)
+                        .replace(j, '\\$&')
+                        .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') +
+                      '$'
               )
               var ht = V ? z.Buffer : undefined
               var pt = z.Symbol

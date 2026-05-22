@@ -94,7 +94,7 @@ html {
   top: var(--body-top, 100px);
   z-index: 10;
   padding: 12px 0;
-  margin: -12px 0 12px;
+  margin: 0 0 12px;
   background: var(--body-background, #fff);
   overflow: visible;
 }
@@ -299,7 +299,7 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
   align-items: center;
   gap: 6px;
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 5px;
@@ -332,15 +332,10 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
 
 .component-indicator-sticky .sm-ver-pill-num {
   color: var(--grey-900-new, #171717);
-  font-weight: 600;
 }
 
 .component-indicator-sticky .sm-ver-pill-sep {
   display: none;
-}
-
-.component-indicator-sticky .sm-ver-pill-status {
-  font-weight: 600;
 }
 
 .component-indicator-sticky .sm-ver-pill-status[data-status="current"] {
@@ -708,11 +703,11 @@ html[data-theme="dark"] .doc .listingblock pre.highlight {
   margin: 0;
 }
 
-/* Lead/intro paragraph - larger font for opening text
+/* Lead/intro paragraph - larger font for opening tex
    Only applies to the first paragraph in preamble or paragraphs with .lead class. */
 .doc .paragraph.lead > p,
 .doc #preamble > .sectionbody > .paragraph:first-child > p {
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: calc(18.5 / var(--rem-base) * 1rem);
   line-height: 1.55;
   color: var(--grey-600-new, #4b5563);
 }
@@ -927,29 +922,29 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   position: relative;
   margin: 1.4rem 0 0;
   display: flex;
-  gap: 12px; /* Prototype: 12px */
-  padding: 14px 16px; /* Prototype: 14px 16px */
-  border-radius: 10px; /* Prototype: 10px */
-  font-size: calc(15 / var(--rem-base) * 1rem); /* Prototype: 14px */
-  line-height: 1.55; /* Prototype: 1.55 */
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
+  line-height: 1.55;
 }
 
 .admonitionblock.note {
-  background: var(--indigo-50-new, #eef2ff); /* Prototype: indigo-50 */
-  border: 1px solid var(--indigo-100-new, #e0e7ff); /* Prototype: indigo-100 */
-  color: var(--indigo-900-new, #312e81); /* Prototype: indigo-900 */
+  background: var(--indigo-50-new, #eef2ff);
+  border: 1px solid var(--indigo-100-new, #e0e7ff);
+  color: var(--indigo-900-new, #312e81);
 }
 
 .admonitionblock.warning {
-  background: #fff7ed; /* Prototype: exact */
-  border: 1px solid #fde2b5; /* Prototype: exact */
-  color: #7c2d12; /* Prototype: exact */
+  background: #fff7ed;
+  border: 1px solid #fde2b5;
+  color: #7c2d12;
 }
 
 .admonitionblock.tip {
-  background: #f2faf6; /* Prototype: exact */
-  border: 1px solid #cce9d9; /* Prototype: exact */
-  color: #14532d; /* Prototype: exact */
+  background: #f2faf6;
+  border: 1px solid #cce9d9;
+  color: #14532d;
 }
 
 .admonitionblock.caution {
@@ -1009,15 +1004,15 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
 }
 
 .admonitionblock.note .icon {
-  color: var(--indigo-600-new, #444ce7); /* Prototype: indigo-600 */
+  color: var(--indigo-600-new, #444ce7);
 }
 
 .admonitionblock.tip .icon {
-  color: var(--green-600, #059669); /* Prototype: green-600 */
+  color: var(--green-600, #059669);
 }
 
 .admonitionblock.warning .icon {
-  color: var(--orange-600, #ea580c); /* Prototype: orange-600 */
+  color: var(--orange-600, #ea580c);
 }
 
 /* Dark mode admonition styles */

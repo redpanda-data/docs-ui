@@ -82,7 +82,7 @@ main.component-home > .component-content {
   align-items: center;
   gap: 6px;
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 5px;
@@ -161,7 +161,7 @@ main.component-home > .component-content {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   color: #fff;
-  font-size: 12.5px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   letter-spacing: -0.005em;
 }
 
@@ -172,7 +172,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-pill-status {
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -264,7 +264,7 @@ main.component-home > .component-content {
 .sm-ver-tab {
   flex: 1;
   padding: 6px 8px;
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--color-jet-70, #6b7280);
   background: transparent;
@@ -312,12 +312,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-group-count {
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  color: var(--color-jet-50, #9ca3af);
-  background: var(--color-smoke-30, #f5f5f5);
-  padding: 2px 6px;
-  border-radius: 4px;
+  display: none; /* Hidden - counts not needed */
 }
 
 .sm-ver-rows {
@@ -390,7 +385,7 @@ main.component-home > .component-content {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 10.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -805,7 +800,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 }
 
 .ch3-hero-stat span {
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
   text-transform: uppercase;
@@ -998,7 +993,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-deploy-title {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0 0 6px;
@@ -1006,7 +1001,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-deploy-desc {
-  font-size: 13.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #606164);
   line-height: 1.5;
   margin: 0 0 18px;
@@ -1024,7 +1019,7 @@ button.ch3-hero-ask-submit svg,
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--component-600, var(--indigo-600-new, #4f46e5));
   white-space: nowrap;
@@ -1042,7 +1037,7 @@ button.ch3-hero-ask-submit svg,
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--color-jet-50, #9ca3af);
   font-variant-numeric: tabular-nums;
 }
@@ -1098,7 +1093,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-feature-title {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0;
@@ -1120,7 +1115,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-feature-desc {
-  font-size: 13.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #606164);
   line-height: 1.5;
   margin: 0;
@@ -1211,7 +1206,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-popular-text h4 {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0 0 2px;
@@ -1219,7 +1214,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-popular-text p {
-  font-size: 12.5px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #606164);
   line-height: 1.45;
   margin: 0;
@@ -1254,7 +1249,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   border: 0;
   background: transparent;
   font: inherit;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--component-600, var(--indigo-600-new, #4f46e5));
   cursor: pointer;
@@ -1292,7 +1287,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   padding: 13px 4px;
   text-decoration: none;
   color: var(--color-jet-80, #48484a);
-  font-size: 13.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   transition: color 0.12s, padding 0.12s;
 }
 
@@ -1327,7 +1322,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-help h3 {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   margin: 0 0 4px;
   color: var(--color-jet, #181818);
@@ -1335,7 +1330,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-help p {
-  font-size: 13.5px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #606164);
   margin: 0;
 }
@@ -1351,7 +1346,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   align-items: center;
   gap: 6px;
   font: inherit;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #fff;
   background: var(--component-600, var(--indigo-600-new, #4f46e5));
@@ -1828,40 +1823,15 @@ html[data-theme="dark"] .ch3-path-or {
   padding: 0 var(--ch3-gutter);
 }
 
-@media (min-width: 1024px) {
-  .ch3-hero-columns--with-whats-new {
-    grid-template-columns: 1fr 400px;
-    gap: 32px;
-  }
-
-  .ch3-hero-columns--with-whats-new .ch3-whats-new-wrapper {
-    order: 2;
-  }
-
-  .ch3-hero-columns--with-whats-new .ch3-path-compare {
-    order: 1;
-    margin-bottom: 0;
-  }
-}
-
-/* Remove margin from path-compare when in grid layout */
-.ch3-hero-columns .ch3-path-compare {
-  margin-bottom: 0;
-}
-
 /* What's New Section in Component Home V3 --------------------------------- */
 .ch3-whats-new-wrapper {
   max-width: none;
-  margin: 0;
+  margin: 48px 0 0 0; /* Full-width row with top spacing */
   padding: 0;
-}
-
-.ch3-hero-columns .ch3-whats-new-wrapper {
-  margin-bottom: 0;
 }
 
 @media (max-width: 768px) {
   .ch3-whats-new-wrapper {
-    margin-bottom: 32px;
+    margin-top: 32px;
   }
 }

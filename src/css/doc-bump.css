@@ -682,7 +682,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc details > summary::after {
   content: "";
-  background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
+  background: url(/_/img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
   width: 1em;
   height: 1.2em;
   position: absolute;

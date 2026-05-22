@@ -19,7 +19,9 @@ module.exports = function (site, attributes) {
   const hexToRgb = (hex) => {
     if (!hex) return '16, 185, 129' // Green fallback
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '16, 185, 129'
+    return result
+      ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+      : '16, 185, 129'
   }
 
   // Helper to extract component name from resource specifier
@@ -51,7 +53,8 @@ module.exports = function (site, attributes) {
     const version = component.latestVersion || (component.versions && component.versions[0])
     if (!version) return undefined
 
-    const headerData = version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
+    const headerData =
+      version.asciidoc && version.asciidoc.attributes && version.asciidoc.attributes['component-metadata']
     return headerData && headerData.color ? headerData.color : undefined
   }
 

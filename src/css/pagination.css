@@ -1,8 +1,8 @@
 nav.pagination {
-  margin-top: 48px; /* Prototype: 48px */
+  margin-top: 48px;
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Prototype: two columns */
-  gap: 14px; /* Prototype: 14px */
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
   border-top: none;
   padding: 0;
 }
@@ -10,18 +10,18 @@ nav.pagination {
 nav.pagination span {
   display: flex;
   flex-direction: column;
-  gap: 4px; /* Prototype: 4px */
-  background: #fff; /* Prototype: white background */
-  border: 1px solid var(--grey-100-new, var(--grey-100, #e9eaeb)); /* Prototype: grey-100 */
-  border-radius: 10px; /* Prototype: 10px */
-  padding: 14px 16px; /* Prototype: 14px 16px */
+  gap: 4px;
+  background: #fff;
+  border: 1px solid var(--grey-100-new, var(--grey-100, #e9eaeb));
+  border-radius: 10px;
+  padding: 14px 16px;
   cursor: pointer;
   transition: border-color 0.12s, box-shadow 0.12s;
 }
 
 nav.pagination span:hover {
-  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6)); /* Prototype: grey-200 */
-  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04); /* Prototype: subtle shadow */
+  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
 }
 
 nav.pagination .prev {
@@ -37,10 +37,10 @@ nav.pagination .next {
 }
 
 nav.pagination span::before {
-  font-size: calc(12 / var(--rem-base) * 1rem); /* Prototype: 11px */
-  color: var(--grey-500-new, var(--grey-500, #79797d)); /* Prototype: grey-500 */
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--grey-500-new, var(--grey-500, #79797d));
   text-transform: uppercase;
-  letter-spacing: 0.05em; /* Prototype: 0.05em */
+  letter-spacing: 0.05em;
   padding-bottom: 0;
 }
 
@@ -54,14 +54,14 @@ nav.pagination .next::before {
 
 nav.pagination a {
   font-family: var(--body-font-family);
-  font-size: 14.5px; /* Prototype: 14.5px */
-  font-weight: 500; /* Prototype: 500 */
-  color: var(--grey-900-new, var(--grey-900, #181818)); /* Prototype: grey-900 */
-  letter-spacing: -0.0125em; /* Prototype: tight tracking */
+  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--grey-900-new, var(--grey-900, #181818));
+  letter-spacing: -0.0125em;
   line-height: 1.3;
   position: relative;
   display: flex;
-  gap: 6px; /* Prototype: 6px */
+  gap: 6px;
   align-items: center;
   text-decoration: none;
 }

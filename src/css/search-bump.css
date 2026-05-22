@@ -124,7 +124,7 @@ article.search .badge-button#display-filters {
 
 article.search .badge-button#display-filters::after {
   content: '';
-  background: transparent url(../img/caret.svg) no-repeat center / 100%;
+  background: transparent url(/_/img/caret.svg) no-repeat center / 100%;
   border: none;
   filter: var(--nav-toggle-filter);
   transform: rotate(180deg);
@@ -390,7 +390,7 @@ article.search .ais-Pagination-list {
 
 .aa-DetachedSearchButtonPlaceholder {
   color: var(--aa-text-color-rgb) !important;
-  font-size: 12.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
 }
 
 .aa-SubmitIcon {

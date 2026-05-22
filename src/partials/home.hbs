@@ -62,7 +62,7 @@
     <div class="home-intent-grid">
       {{!-- Build Agentic Data Flows Card (hide if component doesn't exist) --}}
       {{#if (has-component site 'agentic-data-plane')}}
-      <div class="home-intent-card home-intent-card--adp home-intent-card--expanded" style="--adp-color: {{get-component-color site 'agentic-data-plane'}};">
+      <div class="home-intent-card home-intent-card--adp home-intent-card--expanded home-intent-card--clickable" style="--adp-color: {{get-component-color site 'agentic-data-plane'}};" data-href="{{#if page.attributes.adp-home}}{{{relativize (resolve-resource page.attributes.adp-home)}}}{{else}}#{{/if}}">
         <div class="home-intent-card-header-row">
           <div class="home-intent-card-icon home-intent-card-icon--brand">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -73,7 +73,6 @@
           <div class="home-intent-card-content">
             <h3 class="home-intent-card-title">{{page.attributes.intent-adp-title}}</h3>
             <p class="home-intent-card-desc">{{page.attributes.intent-adp-desc}}</p>
-            <div class="home-intent-card-tags">{{page.attributes.intent-adp-tags}}</div>
           </div>
         </div>
 
@@ -97,7 +96,7 @@
       {{/if}}
 
       {{!-- Stream and Process Data Card with Products --}}
-      <div class="home-intent-card home-intent-card--expanded">
+      <div class="home-intent-card home-intent-card--expanded home-intent-card--clickable" data-href="{{#if page.attributes.data-platform-home}}{{{relativize (resolve-resource page.attributes.data-platform-home)}}}{{else}}#{{/if}}">
         <div class="home-intent-card-header-row">
           <div class="home-intent-card-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -107,7 +106,6 @@
           <div class="home-intent-card-content">
             <h3 class="home-intent-card-title">{{page.attributes.intent-dp-title}}</h3>
             <p class="home-intent-card-desc">{{page.attributes.intent-dp-desc}}</p>
-            <div class="home-intent-card-tags">{{page.attributes.intent-dp-tags}}</div>
           </div>
         </div>
 

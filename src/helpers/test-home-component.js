@@ -33,5 +33,7 @@ module.exports = ({ data: { root } }) => {
   const hasNav = !!latestVersion.navigation
   const navCount = latestVersion.navigation ? latestVersion.navigation.length : 0
 
-  return `Home: v${latestVersion.version}, metadata=${!!metadata}, nav=${hasNav} (${navCount} items), catalog=${!!catalogHome}`
+  return `Home: v${
+    latestVersion.version
+  }, metadata=${!!metadata}, nav=${hasNav} (${navCount} items), catalog=${!!catalogHome}`
 }

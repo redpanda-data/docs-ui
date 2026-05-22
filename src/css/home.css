@@ -83,7 +83,7 @@ main.article.home > .content {
   align-items: center;
   gap: 10px;
   font-family: var(--monospace-font-family, monospace);
-  font-size: 11.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.7);
@@ -416,7 +416,7 @@ html[data-theme="dark"] .home-intent-card-icon.home-intent-card-icon--brand {
 h3.home-intent-card-title,
 .doc h3.home-intent-card-title,
 .article.home .doc h3.home-intent-card-title {
-  font-size: calc(20 / var(--rem-base) * 1rem) !important;
+  font-size: calc(23 / var(--rem-base) * 1rem) !important;
   font-weight: 600 !important;
   margin: 0 0 6px !important;
   padding: 0 !important;
@@ -435,7 +435,7 @@ html[data-theme="dark"] .doc h3.home-intent-card-title {
 .doc .home-intent-card-desc,
 p.home-intent-card-desc,
 .doc p.home-intent-card-desc {
-  font-size: calc(16 / var(--rem-base) * 1rem) !important;
+  font-size: calc(17 / var(--rem-base) * 1rem) !important;
   line-height: 1.5 !important;
   margin: 0 0 10px !important;
   color: var(--grey-600-new, #4b5563) !important;
@@ -446,24 +446,12 @@ html[data-theme="dark"] .doc p.home-intent-card-desc {
   color: var(--grey-400-new, #9ca3af) !important;
 }
 
-/* Tags/pills showing included products */
-.home-intent-card-tags {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new, #6b7280);
-  margin-bottom: 12px;
-  letter-spacing: -0.01em;
-}
-
-html[data-theme="dark"] .home-intent-card-tags {
-  color: var(--grey-400-new, #9ca3af);
-}
-
 /* CTA link */
 .home-intent-card-cta {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--indigo-600-new, #444ce7);
   transition: gap 0.15s, color 0.15s;
@@ -587,6 +575,11 @@ html[data-theme="dark"] .home-intent-card-link:hover {
 
 html[data-theme="dark"] .home-intent-card-link svg {
   color: var(--adp-color, var(--indigo-400-new, #818cf8));
+}
+
+/* Clickable intent cards - cursor set by JavaScript */
+.home-intent-card--clickable {
+  cursor: pointer;
 }
 
 /* Container for nested product cards in expanded intent cards */
@@ -940,7 +933,7 @@ html[data-theme="dark"] .home-product-nested-card--with-children:hover {
 }
 
 .home-product-nested-card-title {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-900-new, #111827);
   letter-spacing: -0.01em;
@@ -970,7 +963,7 @@ a.home-product-nested-card:hover .home-product-nested-card-link-icon,
 .home-product-nested-card-desc,
 .doc .home-product-nested-card-desc,
 p.home-product-nested-card-desc {
-  font-size: calc(14 / var(--rem-base) * 1rem) !important;
+  font-size: calc(16 / var(--rem-base) * 1rem) !important;
   line-height: 1.4 !important;
   margin: 0 0 12px !important;
   color: var(--grey-600-new, #4b5563) !important;
@@ -1033,7 +1026,7 @@ html[data-theme="dark"] a.home-product-sub-card:hover {
 }
 
 .home-product-sub-card-title {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-900-new, #111827);
   letter-spacing: -0.01em;
@@ -1056,7 +1049,7 @@ a.home-product-sub-card:hover .home-product-sub-card-header svg {
 .home-product-sub-card-desc,
 .doc .home-product-sub-card-desc,
 p.home-product-sub-card-desc {
-  font-size: calc(13 / var(--rem-base) * 1rem) !important;
+  font-size: calc(15 / var(--rem-base) * 1rem) !important;
   line-height: 1.4 !important;
   margin: 0 !important;
   color: var(--grey-500-new, #6b7280) !important;
@@ -1195,7 +1188,7 @@ html[data-theme="dark"] a.home-product-card:hover {
 }
 
 .home-product-card-title {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-900-new, #111827);
   letter-spacing: -0.01em;
@@ -1206,7 +1199,7 @@ html[data-theme="dark"] .home-product-card-title {
 }
 
 .home-product-card-version {
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--grey-500-new, #6b7280);
   background: var(--grey-100-new, #f3f4f6);
@@ -1223,7 +1216,7 @@ html[data-theme="dark"] .home-product-card-version {
 .doc .home-product-card-desc,
 p.home-product-card-desc,
 .doc p.home-product-card-desc {
-  font-size: calc(14 / var(--rem-base) * 1rem) !important;
+  font-size: calc(16 / var(--rem-base) * 1rem) !important;
   color: var(--grey-500-new, #6b7280) !important;
   margin: 0 !important;
   line-height: 1.4 !important;
@@ -1242,7 +1235,7 @@ html[data-theme="dark"] .doc p.home-product-card-desc {
 }
 
 .home-product-card-links a {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--product-color);
   text-decoration: none;
@@ -1880,8 +1873,8 @@ main.article.labs footer.footer .footer__social-link:hover {
 }
 
 .home svg.lucide {
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
 }
 
 .home .doc .suggestion-chips {
@@ -2592,7 +2585,7 @@ html[data-theme="dark"] a.home-subproduct:hover {
 /* Chip/badge (SM, CL, RC) */
 .home-subproduct-chip {
   font-family: var(--monospace-font-family, monospace);
-  font-size: 9.5px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 700;
   letter-spacing: 0.04em;
   padding: 3px 6px;
@@ -2616,7 +2609,7 @@ html[data-theme="dark"] a.home-subproduct:hover {
 /* Subproduct name */
 .home-subproduct-name {
   display: block;
-  font-size: 14.5px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--grey-900-new, #111827);
   letter-spacing: -0.0125em;
