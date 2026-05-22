@@ -382,6 +382,61 @@
 
   {{/if}}
 
+  {{!-- Decision matrix --}}
+  <section class="dp-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">Not sure which to pick?</h2>
+      <p class="dp-section-sub">A quick decision matrix &mdash; most teams land in one of these three rows.</p>
+    </div>
+    <div class="dp-matrix">
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
+          <p>need full control over networking, storage, and security posture</p>
+        </div>
+        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'self-managed') '#0f8b66'}}">
+          <span class="dp-product-chip dp-product-chip-sm">SM</span>
+          <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}">
+            Start with Self-Managed
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
+          <p>want streaming as a service with an SLA and zero ops</p>
+        </div>
+        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+          <span class="dp-product-chip dp-product-chip-cl">CL</span>
+          <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}">
+            Start with Cloud
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
+          <p>need to move data between systems with declarative pipelines</p>
+        </div>
+        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'connect') '#6e48e1'}}">
+          <span class="dp-product-chip dp-product-chip-rc">RC</span>
+          <a href="{{#if page.attributes.connect-home}}{{{relativize (resolve-resource page.attributes.connect-home)}}}{{else}}#{{/if}}">
+            Start with Connect
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="dp-section">
     <div class="dp-section-head">
       <h2 class="dp-section-title">Popular across Data Platform</h2>

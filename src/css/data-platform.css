@@ -1248,13 +1248,6 @@ html[data-theme="dark"] .dp-component-badge--byoc {
     grid-template-columns: 1fr;
   }
 
-  .dp-help {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-left: 24px;
-    margin-right: 24px;
-  }
-
   .dp-matrix-row {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1267,5 +1260,12 @@ html[data-theme="dark"] .dp-component-badge--byoc {
 
   .dp-matrix-when-label {
     width: auto;
+  }
+
+  .dp-help {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 24px;
+    margin-right: 24px;
   }
 }
