@@ -124,10 +124,11 @@
       return
     }
 
-    if (!deps.length)
-    // If there is no dependencies, we inject "require", "exports" and
-    // "module" as dependencies, to provide CommonJS compatibility.
-    { deps = ['require', 'exports', 'module'] }
+    if (!deps.length) {
+      // If there is no dependencies, we inject "require", "exports" and
+      // "module" as dependencies, to provide CommonJS compatibility.
+      deps = ['require', 'exports', 'module']
+    }
 
     var req = function (childId) {
       return window.require(id, childId)
@@ -255,16 +256,22 @@ ace.define('ace/apply_delta', [], function (require, exports, module) {
     )
   }
   function validateDelta (docLines, delta) {
-    if (delta.action != 'insert' && delta.action != 'remove') { throwDeltaError(delta, "delta.action must be 'insert' or 'remove'") }
+    if (delta.action != 'insert' && delta.action != 'remove') {
+      throwDeltaError(delta, "delta.action must be 'insert' or 'remove'")
+    }
     if (!(delta.lines instanceof Array)) throwDeltaError(delta, 'delta.lines must be an Array')
     if (!delta.start || !delta.end) throwDeltaError(delta, 'delta.start/end must be an present')
     var start = delta.start
     if (!positionInDocument(docLines, delta.start)) throwDeltaError(delta, 'delta.start must be contained in document')
     var end = delta.end
-    if (delta.action == 'remove' && !positionInDocument(docLines, end)) { throwDeltaError(delta, "delta.end must contained in document for 'remove' actions") }
+    if (delta.action == 'remove' && !positionInDocument(docLines, end)) {
+      throwDeltaError(delta, "delta.end must contained in document for 'remove' actions")
+    }
     var numRangeRows = end.row - start.row
     var numRangeLastLineChars = end.column - (numRangeRows == 0 ? start.column : 0)
-    if (numRangeRows != delta.lines.length - 1 || delta.lines[numRangeRows].length != numRangeLastLineChars) { throwDeltaError(delta, 'delta.range must match delta lines') }
+    if (numRangeRows != delta.lines.length - 1 || delta.lines[numRangeRows].length != numRangeLastLineChars) {
+      throwDeltaError(delta, 'delta.range must match delta lines')
+    }
   }
   exports.applyDelta = function (docLines, delta, doNotValidate) {
     var row = delta.start.row
@@ -1512,7 +1519,6 @@ ace.define('ace/mode/json_worker', [], function (require, exports, module) {
   })
 
   oop.inherits(JsonWorker, Mirror)
-
   ;(function () {
     this.onUpdate = function () {
       var value = this.doc.getValue()

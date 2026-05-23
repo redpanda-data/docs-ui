@@ -835,7 +835,9 @@ ace.define(
           this.editor.selection.fromOrientedRange(range)
         }
         this.editor.keyBinding.addKeyboardHandler(this.keyboardHandler)
-        if (this.selectedTabstop && this.selectedTabstop.choices) { this.editor.execCommand('startAutocomplete', { matches: this.selectedTabstop.choices }) }
+        if (this.selectedTabstop && this.selectedTabstop.choices) {
+          this.editor.execCommand('startAutocomplete', { matches: this.selectedTabstop.choices })
+        }
       }
       TabstopManager.prototype.addTabstops = function (tabstops, start, end) {
         var useLink = this.useLink || !this.editor.getOption('enableMultiselect')
@@ -1502,7 +1504,9 @@ ace.define('ace/autocomplete/util', ['require', 'exports', 'module'], function (
         if (completer.identifierRegexps) {
           completer.identifierRegexps.forEach(
             function (identifierRegex) {
-              if (!prefix && identifierRegex) { prefix = this.retrievePrecedingIdentifier(line, pos.column, identifierRegex) }
+              if (!prefix && identifierRegex) {
+                prefix = this.retrievePrecedingIdentifier(line, pos.column, identifierRegex)
+              }
             }.bind(this)
           )
         }
@@ -1594,7 +1598,9 @@ ace.define(
               (this.popup && this.popup.isOpen) ||
               !initialPosition ||
               this.editor.completers.length === 0
-            ) { return }
+            ) {
+              return
+            }
             this.completions = new FilteredList(Autocomplete.completionsForLoading)
             this.openPopup(this.editor, initialPosition.prefix, false)
             this.popup.renderer.setStyle('ace_loading', true)
@@ -1861,9 +1867,10 @@ ace.define(
       Autocomplete.prototype.insertMatch = function (data, options) {
         if (!data) data = this.popup.getData(this.popup.getRow())
         if (!data) return false
-        if (data.value === '')
-        // Explicitly given nothing to insert, e.g. "No suggestion state"
-        { return this.detach() }
+        if (data.value === '') {
+          // Explicitly given nothing to insert, e.g. "No suggestion state"
+          return this.detach()
+        }
         var completions = this.completions
         var result = this.getCompletionProvider().insertMatch(this.editor, data, completions.filterText, options)
         if (this.completions == completions) this.detach()
@@ -1901,7 +1908,9 @@ ace.define(
             this.completions.filtered.length == 1 &&
             this.completions.filtered[0].value == prefix &&
             !this.completions.filtered[0].snippet
-          ) { return this.detach() }
+          ) {
+            return this.detach()
+          }
           this.openPopup(this.editor, prefix, keepPopupPosition)
           return
         }
@@ -2453,7 +2462,9 @@ ace.define(
       getCompletions: function (editor, session, pos, prefix, callback) {
         var scopes = []
         var token = session.getTokenAt(pos.row, pos.column)
-        if (token && token.type.match(/(tag-name|tag-open|tag-whitespace|attribute-name|attribute-value)\.xml$/)) { scopes.push('html-tag') } else scopes = snippetManager.getActiveScopes(editor)
+        if (token && token.type.match(/(tag-name|tag-open|tag-whitespace|attribute-name|attribute-value)\.xml$/)) {
+          scopes.push('html-tag')
+        } else scopes = snippetManager.getActiveScopes(editor)
         var snippetMap = snippetManager.snippetMap
         var completions = []
         scopes.forEach(function (scope) {

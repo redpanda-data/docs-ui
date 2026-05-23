@@ -1190,7 +1190,9 @@ ace.define(
       return (options.$moduleUrls[name] = subst)
     }
     var loader = function (moduleName, cb) {
-      if (moduleName === 'ace/theme/textmate' || moduleName === './theme/textmate') { return cb(null, require('./theme/textmate')) }
+      if (moduleName === 'ace/theme/textmate' || moduleName === './theme/textmate') {
+        return cb(null, require('./theme/textmate'))
+      }
       if (customLoader) return customLoader(moduleName, cb)
       console.error('loader is not configured')
     }
@@ -2850,7 +2852,9 @@ ace.define('ace/mouse/default_handlers', ['require', 'exports', 'module', 'ace/l
     DefaultHandlers.prototype.focusWait = function () {
       var distance = calcDistance(this.mousedownEvent.x, this.mousedownEvent.y, this.x, this.y)
       var time = Date.now()
-      if (distance > DRAG_OFFSET || time - this.mousedownEvent.time > this.$focusTimeout) { this.startSelect(this.mousedownEvent.getDocumentPosition()) }
+      if (distance > DRAG_OFFSET || time - this.mousedownEvent.time > this.$focusTimeout) {
+        this.startSelect(this.mousedownEvent.getDocumentPosition())
+      }
     }
     DefaultHandlers.prototype.onDoubleClick = function (ev) {
       var pos = ev.getDocumentPosition()
@@ -2940,7 +2944,9 @@ ace.define('ace/mouse/default_handlers', ['require', 'exports', 'module', 'ace/l
   }
   function calcRangeOrientation (range, cursor) {
     if (range.start.row == range.end.row) var cmp = 2 * cursor.column - range.start.column - range.end.column
-    else if (range.start.row == range.end.row - 1 && !range.start.column && !range.end.column) { var cmp = cursor.column - 4 } else var cmp = 2 * cursor.row - range.start.row - range.end.row
+    else if (range.start.row == range.end.row - 1 && !range.start.column && !range.end.column) {
+      var cmp = cursor.column - 4
+    } else var cmp = 2 * cursor.row - range.start.row - range.end.row
     if (cmp < 0) return { cursor: range.start, anchor: range.end }
     else return { cursor: range.end, anchor: range.start }
   }
@@ -2978,7 +2984,9 @@ ace.define(
           return extendStatics(d, b)
         }
         return function (d, b) {
-          if (typeof b !== 'function' && b !== null) { throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null') }
+          if (typeof b !== 'function' && b !== null) {
+            throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null')
+          }
           extendStatics(d, b)
           function __ () {
             this.constructor = d
@@ -3111,7 +3119,9 @@ ace.define(
               e_2 = { error: e_2_1 }
             } finally {
               try {
-                if (visiblepopups_1_1 && !visiblepopups_1_1.done && (_b = visiblepopups_1.return)) { _b.call(visiblepopups_1) }
+                if (visiblepopups_1_1 && !visiblepopups_1_1.done && (_b = visiblepopups_1.return)) {
+                  _b.call(visiblepopups_1)
+                }
               } finally {
                 if (e_2) throw e_2.error
               }
@@ -3336,7 +3346,9 @@ ace.define(
           return extendStatics(d, b)
         }
         return function (d, b) {
-          if (typeof b !== 'function' && b !== null) { throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null') }
+          if (typeof b !== 'function' && b !== null) {
+            throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null')
+          }
           extendStatics(d, b)
           function __ () {
             this.constructor = d
@@ -3613,7 +3625,9 @@ ace.define(
           e_1 = { error: e_1_1 }
         } finally {
           try {
-            if (annotationTypes_1_1 && !annotationTypes_1_1.done && (_a = annotationTypes_1.return)) { _a.call(annotationTypes_1) }
+            if (annotationTypes_1_1 && !annotationTypes_1_1.done && (_a = annotationTypes_1.return)) {
+              _a.call(annotationTypes_1)
+            }
           } finally {
             if (e_1) throw e_1.error
           }
@@ -5464,7 +5478,11 @@ ace.define('ace/bidihandler', ['require', 'exports', 'module', 'ace/lib/bidiutil
     BidiHandler.prototype.setRtlDirection = function (editor, isRtlDir) {
       var cursor = editor.getCursorPosition()
       for (var row = editor.selection.getSelectionAnchor().row; row <= cursor.row; row++) {
-        if (!isRtlDir && editor.session.getLine(row).charAt(0) === editor.session.$bidiHandler.RLE) { editor.session.doc.removeInLine(row, 0, 1) } else if (isRtlDir && editor.session.getLine(row).charAt(0) !== editor.session.$bidiHandler.RLE) { editor.session.doc.insert({ column: 0, row: row }, editor.session.$bidiHandler.RLE) }
+        if (!isRtlDir && editor.session.getLine(row).charAt(0) === editor.session.$bidiHandler.RLE) {
+          editor.session.doc.removeInLine(row, 0, 1)
+        } else if (isRtlDir && editor.session.getLine(row).charAt(0) !== editor.session.$bidiHandler.RLE) {
+          editor.session.doc.insert({ column: 0, row: row }, editor.session.$bidiHandler.RLE)
+        }
       }
     }
     BidiHandler.prototype.getPosLeft = function (col) {
@@ -5478,7 +5496,9 @@ ace.define('ace/bidihandler', ['require', 'exports', 'module', 'ace/lib/bidiutil
       for (var i = 0; i < visualIdx; i++) {
         left += this.charWidths[levels[i]]
       }
-      if (!this.session.getOverwrite() && col > leftBoundary && levels[visualIdx] % 2 === 0) { left += this.charWidths[levels[visualIdx]] }
+      if (!this.session.getOverwrite() && col > leftBoundary && levels[visualIdx] % 2 === 0) {
+        left += this.charWidths[levels[visualIdx]]
+      }
       if (this.wrapIndent) left += this.isRtlDir ? -1 * this.wrapOffset : this.wrapOffset
       if (this.isRtlDir) left += this.rtlLineOffset
       return left
@@ -5643,7 +5663,9 @@ ace.define(
         this.$isEmpty = !Range.comparePoints(this.anchor, this.cursor)
         this.$silent = false
         if (this.$cursorChanged) this._emit('changeCursor')
-        if (this.$cursorChanged || this.$anchorChanged || wasEmpty != this.$isEmpty || wasMultiselect) { this._emit('changeSelection') }
+        if (this.$cursorChanged || this.$anchorChanged || wasEmpty != this.$isEmpty || wasMultiselect) {
+          this._emit('changeSelection')
+        }
       }
       Selection.prototype.$moveSelection = function (mover) {
         var lead = this.lead
@@ -5797,7 +5819,9 @@ ace.define(
         var firstColumnPosition = this.session.screenToDocumentPosition(screenRow, 0)
         var beforeCursor = this.session.getDisplayLine(row, null, firstColumnPosition.row, firstColumnPosition.column)
         var leadingSpace = beforeCursor.match(/^\s*/)
-        if (leadingSpace[0].length != column && !this.session.$useEmacsStyleLineStart) { firstColumnPosition.column += leadingSpace[0].length }
+        if (leadingSpace[0].length != column && !this.session.$useEmacsStyleLineStart) {
+          firstColumnPosition.column += leadingSpace[0].length
+        }
         this.moveCursorToPosition(firstColumnPosition)
       }
       Selection.prototype.moveCursorLineEnd = function () {
@@ -5934,7 +5958,9 @@ ace.define(
         var row = this.lead.row
         var column = this.lead.column
         var fold
-        if ((fold = this.session.getFoldAt(row, column, -1))) { return this.moveCursorTo(fold.start.row, fold.start.column) }
+        if ((fold = this.session.getFoldAt(row, column, -1))) {
+          return this.moveCursorTo(fold.start.row, fold.start.column)
+        }
         var line = this.session.getLine(row).substring(0, column)
         if (column === 0) {
           do {
@@ -6225,7 +6251,9 @@ ace.define('ace/tokenizer', ['require', 'exports', 'module', 'ace/lib/report_err
           }
           return m
         })
-        if (lastCapture.end != null && /^\)*$/.test(src.substr(lastCapture.end))) { src = src.substring(0, lastCapture.start) + src.substr(lastCapture.end) }
+        if (lastCapture.end != null && /^\)*$/.test(src.substr(lastCapture.end))) {
+          src = src.substring(0, lastCapture.start) + src.substr(lastCapture.end)
+        }
       }
       if (src.charAt(0) != '^') src = '^' + src
       if (src.charAt(src.length - 1) != '$') src += '$'
@@ -6668,7 +6696,9 @@ ace.define(
       var id = -1
       if (editor.multiSelect) {
         id = editor.selection.index
-        if (contextCache.rangeCount != editor.multiSelect.rangeCount) { contextCache = { rangeCount: editor.multiSelect.rangeCount } }
+        if (contextCache.rangeCount != editor.multiSelect.rangeCount) {
+          contextCache = { rangeCount: editor.multiSelect.rangeCount }
+        }
       }
       if (contextCache[id]) return (context = contextCache[id])
       context = contextCache[id] = {
@@ -6708,7 +6738,9 @@ ace.define(
                 return el.test(token.type)
               }) ||
               (/(string)\.quasi/.test(token.type) && token.value[cursor.column - token.start - 1] !== '$')
-            ) { return }
+            ) {
+              return
+            }
             CstyleBehaviour.recordAutoInsert(editor, session, '}')
             return {
               text: '{}',
@@ -8018,7 +8050,9 @@ ace.define(
           var commentWithSpace = lineCommentStart + ' '
           var comment = function (line, i) {
             if (!ignoreBlankLines || /\S/.test(line)) {
-              if (shouldInsertSpace(line, minIndent, minIndent)) { doc.insertInLine({ row: i, column: minIndent }, commentWithSpace) } else doc.insertInLine({ row: i, column: minIndent }, lineCommentStart)
+              if (shouldInsertSpace(line, minIndent, minIndent)) {
+                doc.insertInLine({ row: i, column: minIndent }, commentWithSpace)
+              } else doc.insertInLine({ row: i, column: minIndent }, lineCommentStart)
             }
           }
           var testRemove = function (line, i) {
@@ -8551,16 +8585,22 @@ ace.define('ace/apply_delta', ['require', 'exports', 'module'], function (requir
     )
   }
   function validateDelta (docLines, delta) {
-    if (delta.action != 'insert' && delta.action != 'remove') { throwDeltaError(delta, "delta.action must be 'insert' or 'remove'") }
+    if (delta.action != 'insert' && delta.action != 'remove') {
+      throwDeltaError(delta, "delta.action must be 'insert' or 'remove'")
+    }
     if (!(delta.lines instanceof Array)) throwDeltaError(delta, 'delta.lines must be an Array')
     if (!delta.start || !delta.end) throwDeltaError(delta, 'delta.start/end must be an present')
     var start = delta.start
     if (!positionInDocument(docLines, delta.start)) throwDeltaError(delta, 'delta.start must be contained in document')
     var end = delta.end
-    if (delta.action == 'remove' && !positionInDocument(docLines, end)) { throwDeltaError(delta, "delta.end must contained in document for 'remove' actions") }
+    if (delta.action == 'remove' && !positionInDocument(docLines, end)) {
+      throwDeltaError(delta, "delta.end must contained in document for 'remove' actions")
+    }
     var numRangeRows = end.row - start.row
     var numRangeLastLineChars = end.column - (numRangeRows == 0 ? start.column : 0)
-    if (numRangeRows != delta.lines.length - 1 || delta.lines[numRangeRows].length != numRangeLastLineChars) { throwDeltaError(delta, 'delta.range must match delta lines') }
+    if (numRangeRows != delta.lines.length - 1 || delta.lines[numRangeRows].length != numRangeLastLineChars) {
+      throwDeltaError(delta, 'delta.range must match delta lines')
+    }
   }
   exports.applyDelta = function (docLines, delta, doNotValidate) {
     var row = delta.start.row
@@ -10066,7 +10106,9 @@ ace.define('ace/edit_session/fold', ['require', 'exports', 'module', 'ace/range_
         return extendStatics(d, b)
       }
       return function (d, b) {
-        if (typeof b !== 'function' && b !== null) { throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null') }
+        if (typeof b !== 'function' && b !== null) {
+          throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null')
+        }
         extendStatics(d, b)
         function __ () {
           this.constructor = d
@@ -10243,7 +10285,9 @@ ace.define(
       this.getAllFolds = function () {
         var folds = []
         var foldLines = this.$foldData
-        for (var i = 0; i < foldLines.length; i++) { for (var j = 0; j < foldLines[i].folds.length; j++) folds.push(foldLines[i].folds[j]) }
+        for (var i = 0; i < foldLines.length; i++) {
+          for (var j = 0; j < foldLines[i].folds.length; j++) folds.push(foldLines[i].folds[j])
+        }
         return folds
       }
       this.getFoldStringAt = function (row, column, trim, foldLine) {
@@ -10311,9 +10355,10 @@ ace.define(
             }
             break
           } else if (end >= first) {
-            if (start >= first)
-            // fold inside range
-            { rowCount -= end - start } else rowCount -= end - first + 1
+            if (start >= first) {
+              // fold inside range
+              rowCount -= end - start
+            } else rowCount -= end - first + 1
           }
         }
         return rowCount
@@ -10661,7 +10706,9 @@ ace.define(
       }
       this.$foldStyle = 'markbegin'
       this.setFoldStyle = function (style) {
-        if (!this.$foldStyles[style]) { throw new Error('invalid fold style: ' + style + '[' + Object.keys(this.$foldStyles).join(', ') + ']') }
+        if (!this.$foldStyles[style]) {
+          throw new Error('invalid fold style: ' + style + '[' + Object.keys(this.$foldStyles).join(', ') + ']')
+        }
         if (this.$foldStyle == style) return
         this.$foldStyle = style
         if (style == 'manual') this.unfold()
@@ -11964,8 +12011,12 @@ ace.define(
           var rowDiff = fromRange.start.row - fromRange.end.row
           var collDiff = rowDiff ? -fromRange.end.column : fromRange.start.column - fromRange.end.column
           if (collDiff) {
-            if (toRange.start.row == fromRange.end.row && toRange.start.column > fromRange.end.column) { toRange.start.column += collDiff }
-            if (toRange.end.row == fromRange.end.row && toRange.end.column > fromRange.end.column) { toRange.end.column += collDiff }
+            if (toRange.start.row == fromRange.end.row && toRange.start.column > fromRange.end.column) {
+              toRange.start.column += collDiff
+            }
+            if (toRange.end.row == fromRange.end.row && toRange.end.column > fromRange.end.column) {
+              toRange.end.column += collDiff
+            }
           }
           if (rowDiff && toRange.start.row >= fromRange.end.row) {
             toRange.start.row += rowDiff
@@ -12531,14 +12582,18 @@ ace.define(
             }
           }
         }
-        if (offsetX !== undefined && this.$bidiHandler.isBidiRow(row + splitIndex, docRow, splitIndex)) { screenColumn = this.$bidiHandler.offsetToCol(offsetX) }
+        if (offsetX !== undefined && this.$bidiHandler.isBidiRow(row + splitIndex, docRow, splitIndex)) {
+          screenColumn = this.$bidiHandler.offsetToCol(offsetX)
+        }
         docColumn += this.$getStringScreenWidth(line, screenColumn - wrapIndent)[1]
         if (this.$useWrapMode && docColumn >= column) docColumn = column - 1
         if (foldLine) return foldLine.idxToPosition(docColumn)
         return { row: docRow, column: docColumn }
       }
       EditSession.prototype.documentToScreenPosition = function (docRow, docColumn) {
-        if (typeof docColumn === 'undefined') { var pos = this.$clipPositionToDocument(/**@type{Point}*/ (docRow).row, /**@type{Point}*/ (docRow).column) } else pos = this.$clipPositionToDocument(/**@type{number}*/ (docRow), docColumn)
+        if (typeof docColumn === 'undefined') {
+          var pos = this.$clipPositionToDocument(/**@type{Point}*/ (docRow).row, /**@type{Point}*/ (docRow).column)
+        } else pos = this.$clipPositionToDocument(/**@type{number}*/ (docRow), docColumn)
         docRow = pos.row
         docColumn = pos.column
         var screenRow = 0
@@ -12600,7 +12655,9 @@ ace.define(
             wrapIndent = screenRowOffset > 0 ? wrapRow.indent : 0
           }
         }
-        if (this.lineWidgets && this.lineWidgets[row] && this.lineWidgets[row].rowsAbove) { screenRow += this.lineWidgets[row].rowsAbove }
+        if (this.lineWidgets && this.lineWidgets[row] && this.lineWidgets[row].rowsAbove) {
+          screenRow += this.lineWidgets[row].rowsAbove
+        }
         return {
           row: screenRow,
           column: wrapIndent + this.$getStringScreenWidth(textLine)[0],
@@ -13047,7 +13104,9 @@ ace.define('ace/search', ['require', 'exports', 'module', 'ace/lib/lang', 'ace/l
           if (forEachInLine(row, start.column, callback)) return
           for (row--; row >= firstRow; row--) if (forEachInLine(row, Number.MAX_VALUE, callback)) return
           if (options.wrap == false) return
-          for (row = lastRow, firstRow = start.row; row >= firstRow; row--) { if (forEachInLine(row, Number.MAX_VALUE, callback)) return }
+          for (row = lastRow, firstRow = start.row; row >= firstRow; row--) {
+            if (forEachInLine(row, Number.MAX_VALUE, callback)) return
+          }
         }
       } else {
         var forEach = function (callback) {
@@ -13165,7 +13224,9 @@ ace.define('ace/keyboard/hash_handler', ['require', 'exports', 'module', 'ace/li
         return extendStatics(d, b)
       }
       return function (d, b) {
-        if (typeof b !== 'function' && b !== null) { throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null') }
+        if (typeof b !== 'function' && b !== null) {
+          throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null')
+        }
         extendStatics(d, b)
         function __ () {
           this.constructor = d
@@ -13216,7 +13277,9 @@ ace.define('ace/keyboard/hash_handler', ['require', 'exports', 'module', 'ace/li
         key = key[this.platform]
       }
       if (!key) return
-      if (typeof command === 'function') { return this.addCommand({ exec: command, bindKey: key, name: command.name || /**@type{string}*/ (key) }) }
+      if (typeof command === 'function') {
+        return this.addCommand({ exec: command, bindKey: key, name: command.name || /**@type{string}*/ (key) })
+      }
       key.split('|').forEach(function (keyPart) {
         var chain = ''
         if (keyPart.indexOf(' ') != -1) {
@@ -13339,7 +13402,9 @@ ace.define('ace/keyboard/hash_handler', ['require', 'exports', 'module', 'ace/li
     return MultiHashHandler
   })()
   function getPosition (command) {
-    return (typeof command === 'object' && command.bindKey && command.bindKey.position) || (command.isDefault ? -100 : 0)
+    return (
+      (typeof command === 'object' && command.bindKey && command.bindKey.position) || (command.isDefault ? -100 : 0)
+    )
   }
   var HashHandler = /** @class */ (function (_super) {
     __extends(HashHandler, _super)
@@ -13381,7 +13446,9 @@ ace.define(
           return extendStatics(d, b)
         }
         return function (d, b) {
-          if (typeof b !== 'function' && b !== null) { throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null') }
+          if (typeof b !== 'function' && b !== null) {
+            throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null')
+          }
           extendStatics(d, b)
           function __ () {
             this.constructor = d
@@ -15320,7 +15387,11 @@ ace.define(
             markerType = 'ace_error_bracket'
           }
           if (ranges.length == 2) {
-            if (Range.comparePoints(ranges[0].end, ranges[1].start) == 0) { ranges = [Range.fromPoints(ranges[0].start, ranges[1].end)] } else if (Range.comparePoints(ranges[0].start, ranges[1].end) == 0) { ranges = [Range.fromPoints(ranges[1].start, ranges[0].end)] }
+            if (Range.comparePoints(ranges[0].end, ranges[1].start) == 0) {
+              ranges = [Range.fromPoints(ranges[0].start, ranges[1].end)]
+            } else if (Range.comparePoints(ranges[0].start, ranges[1].end) == 0) {
+              ranges = [Range.fromPoints(ranges[1].start, ranges[0].end)]
+            }
           }
           session.$bracketHighlight = {
             ranges: ranges,
@@ -15385,8 +15456,12 @@ ace.define(
         var highlight
         if (this.$highlightActiveLine) {
           if (this.$selectionStyle != 'line' || !this.selection.isMultiLine()) highlight = this.getCursorPosition()
-          if (this.renderer.theme && this.renderer.theme.$selectionColorConflict && !this.selection.isEmpty()) { highlight = false }
-          if (this.renderer.$maxLines && this.session.getLength() === 1 && !(this.renderer.$minLines > 1)) { highlight = false }
+          if (this.renderer.theme && this.renderer.theme.$selectionColorConflict && !this.selection.isEmpty()) {
+            highlight = false
+          }
+          if (this.renderer.$maxLines && this.session.getLength() === 1 && !(this.renderer.$minLines > 1)) {
+            highlight = false
+          }
         }
         if (session.$highlightLineMarker && !highlight) {
           session.removeMarker(session.$highlightLineMarker.id)
@@ -16342,7 +16417,9 @@ ace.define(
               iterator.getCurrentTokenColumn() + i - 1
             )
             pos = range.start
-            if (expand || (pos.row === cursor.row && Math.abs(pos.column - cursor.column) < 2)) { range = this.session.getBracketRange(pos) }
+            if (expand || (pos.row === cursor.row && Math.abs(pos.column - cursor.column) < 2)) {
+              range = this.session.getBracketRange(pos)
+            }
           }
         } else if (matchType === 'tag') {
           if (!token || token.type.indexOf('tag-name') === -1) return
@@ -16360,7 +16437,12 @@ ace.define(
                 pos = range.start
               } else {
                 range = tagsRanges.openTag
-                if (tagsRanges.closeTag.start.row === cursor.row && tagsRanges.closeTag.start.column === cursor.column) { pos = range.end } else pos = range.start
+                if (
+                  tagsRanges.closeTag.start.row === cursor.row &&
+                  tagsRanges.closeTag.start.column === cursor.column
+                ) {
+                  pos = range.end
+                } else pos = range.start
               }
             }
           }
@@ -17201,7 +17283,9 @@ ace.define(
         var row = this.session.selection.cursor.row
         this.$cursorRow = row
         if (this.$cursorCell && this.$cursorCell.row == row) return
-        if (this.$cursorCell) { this.$cursorCell.element.className = this.$cursorCell.element.className.replace('ace_gutter-active-line ', '') }
+        if (this.$cursorCell) {
+          this.$cursorCell.element.className = this.$cursorCell.element.className.replace('ace_gutter-active-line ', '')
+        }
         var cells = this.$lines.cells
         this.$cursorCell = null
         for (var i = 0; i < cells.length; i++) {
@@ -17233,9 +17317,13 @@ ace.define(
         if (!oldConfig || oldLastRow < config.firstRow) return this.update(config)
         if (lastRow < oldConfig.firstRow) return this.update(config)
         if (oldConfig.firstRow < config.firstRow) {
-          for (var row = this.session.getFoldedRowCount(oldConfig.firstRow, config.firstRow - 1); row > 0; row--) { this.$lines.shift() }
+          for (var row = this.session.getFoldedRowCount(oldConfig.firstRow, config.firstRow - 1); row > 0; row--) {
+            this.$lines.shift()
+          }
         }
-        if (oldLastRow > lastRow) { for (var row = this.session.getFoldedRowCount(lastRow + 1, oldLastRow); row > 0; row--) this.$lines.pop() }
+        if (oldLastRow > lastRow) {
+          for (var row = this.session.getFoldedRowCount(lastRow + 1, oldLastRow); row > 0; row--) this.$lines.pop()
+        }
         if (config.firstRow < oldConfig.firstRow) {
           this.$lines.unshift(this.$renderLines(config, config.firstRow, oldConfig.firstRow - 1))
         }
@@ -17446,7 +17534,9 @@ ace.define(
         dom.setStyle(cell.element.style, 'height', this.$lines.computeLineHeight(row, config, session) + 'px')
         dom.setStyle(cell.element.style, 'top', this.$lines.computeLineTop(row, config, session) + 'px')
         cell.text = rowText
-        if (annotationNode.style.display === 'none' && foldWidget.style.display === 'none') { cell.element.setAttribute('aria-hidden', true) } else cell.element.setAttribute('aria-hidden', false)
+        if (annotationNode.style.display === 'none' && foldWidget.style.display === 'none') {
+          cell.element.setAttribute('aria-hidden', true)
+        } else cell.element.setAttribute('aria-hidden', false)
         return cell
       }
       Gutter.prototype.setHighlightGutterLine = function (highlightGutterLine) {
@@ -17691,7 +17781,9 @@ ace.define('ace/layer/marker', ['require', 'exports', 'module', 'ace/range', 'ac
       )
     }
     Marker.prototype.drawSingleLineMarker = function (stringBuilder, range, clazz, config, extraLength, extraStyle) {
-      if (this.session.$bidiHandler.isBidiRow(range.start.row)) { return this.drawBidiSingleLineMarker(stringBuilder, range, clazz, config, extraLength, extraStyle) }
+      if (this.session.$bidiHandler.isBidiRow(range.start.row)) {
+        return this.drawBidiSingleLineMarker(stringBuilder, range, clazz, config, extraLength, extraStyle)
+      }
       var height = config.lineHeight
       var width = (range.end.column + (extraLength || 0) - range.start.column) * config.characterWidth
       var top = this.$getTop(range.start.row, config)
@@ -17957,10 +18049,14 @@ ace.define(
         if (!oldConfig || oldConfig.lastRow < config.firstRow) return this.update(config)
         if (config.lastRow < oldConfig.firstRow) return this.update(config)
         if (oldConfig.firstRow < config.firstRow) {
-          for (var row = this.session.getFoldedRowCount(oldConfig.firstRow, config.firstRow - 1); row > 0; row--) { this.$lines.shift() }
+          for (var row = this.session.getFoldedRowCount(oldConfig.firstRow, config.firstRow - 1); row > 0; row--) {
+            this.$lines.shift()
+          }
         }
         if (oldConfig.lastRow > config.lastRow) {
-          for (var row = this.session.getFoldedRowCount(config.lastRow + 1, oldConfig.lastRow); row > 0; row--) { this.$lines.pop() }
+          for (var row = this.session.getFoldedRowCount(config.lastRow + 1, oldConfig.lastRow); row > 0; row--) {
+            this.$lines.pop()
+          }
         }
         if (config.firstRow < oldConfig.firstRow) {
           this.$lines.unshift(this.$renderLinesFragment(config, config.firstRow, oldConfig.firstRow - 1))
@@ -18164,7 +18260,9 @@ ace.define(
           var childNodes = cell.element.childNodes
           if (childNodes) {
             var node = childNodes[indentLevel - 1]
-            if (node && node.classList && node.classList.contains('ace_indent-guide')) { node.classList.add('ace_indent-guide-active') }
+            if (node && node.classList && node.classList.contains('ace_indent-guide')) {
+              node.classList.add('ace_indent-guide-active')
+            }
           }
         }
       }
@@ -18236,7 +18334,9 @@ ace.define(
             }
           }
         }
-        if (splits[splits.length - 1] > this.MAX_LINE_LENGTH) { this.$renderOverflowMessage(lineEl, screenColumn, null, '', true) }
+        if (splits[splits.length - 1] > this.MAX_LINE_LENGTH) {
+          this.$renderOverflowMessage(lineEl, screenColumn, null, '', true)
+        }
       }
       Text.prototype.$renderSimpleLine = function (parent, tokens) {
         var screenColumn = 0
@@ -18247,7 +18347,9 @@ ace.define(
             value = this.renderIndentGuide(parent, value)
             if (!value) continue
           }
-          if (screenColumn + value.length > this.MAX_LINE_LENGTH) { return this.$renderOverflowMessage(parent, screenColumn, token, value) }
+          if (screenColumn + value.length > this.MAX_LINE_LENGTH) {
+            return this.$renderOverflowMessage(parent, screenColumn, token, value)
+          }
           screenColumn = this.$renderToken(parent, screenColumn, token, value)
         }
       }
@@ -18580,7 +18682,9 @@ ace.define(
           return extendStatics(d, b)
         }
         return function (d, b) {
-          if (typeof b !== 'function' && b !== null) { throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null') }
+          if (typeof b !== 'function' && b !== null) {
+            throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null')
+          }
           extendStatics(d, b)
           function __ () {
             this.constructor = d
@@ -18728,7 +18832,9 @@ ace.define(
           return extendStatics(d, b)
         }
         return function (d, b) {
-          if (typeof b !== 'function' && b !== null) { throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null') }
+          if (typeof b !== 'function' && b !== null) {
+            throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null')
+          }
           extendStatics(d, b)
           function __ () {
             this.constructor = d
@@ -19455,7 +19561,9 @@ ace.define(
       VirtualRenderer.prototype.setSession = function (session) {
         if (this.session) this.session.doc.off('changeNewLineMode', this.onChangeNewLineMode)
         this.session = session
-        if (session && this.scrollMargin.top && session.getScrollTop() <= 0) { session.setScrollTop(-this.scrollMargin.top) }
+        if (session && this.scrollMargin.top && session.getScrollTop() <= 0) {
+          session.setScrollTop(-this.scrollMargin.top)
+        }
         this.$cursorLayer.setSession(session)
         this.$markerBack.setSession(session)
         this.$markerFront.setSession(session)
@@ -19578,7 +19686,9 @@ ace.define(
       }
       VirtualRenderer.prototype.onGutterResize = function (width) {
         var gutterWidth = this.$showGutter ? width : 0
-        if (gutterWidth != this.gutterWidth) { this.$changes |= this.$updateCachedSize(true, gutterWidth, this.$size.width, this.$size.height) }
+        if (gutterWidth != this.gutterWidth) {
+          this.$changes |= this.$updateCachedSize(true, gutterWidth, this.$size.width, this.$size.height)
+        }
         if (this.session.getUseWrapMode() && this.adjustWrapLimit()) {
           this.$loop.schedule(this.CHANGE_FULL)
         } else if (this.$size.$dirty) {
@@ -19681,7 +19791,9 @@ ace.define(
         }
         var pixelPos = this.$cursorLayer.$pixelPos
         if (!pixelPos) return
-        if (composition && composition.markerRange) { pixelPos = this.$cursorLayer.getPixelPosition(composition.markerRange.start, true) }
+        if (composition && composition.markerRange) {
+          pixelPos = this.$cursorLayer.getPixelPosition(composition.markerRange.start, true)
+        }
         var config = this.layerConfig
         var posTop = pixelPos.top
         var posLeft = pixelPos.left
@@ -19809,7 +19921,9 @@ ace.define(
           this.$textLayer.checkForSizeChanges()
         }
         this._signal('beforeRender', changes)
-        if (this.session && this.session.$bidiHandler) { this.session.$bidiHandler.updateCharacterWidths(this.$fontMetrics) }
+        if (this.session && this.session.$bidiHandler) {
+          this.session.$bidiHandler.updateCharacterWidths(this.$fontMetrics)
+        }
         var config = this.layerConfig
         if (
           changes & this.CHANGE_FULL ||
@@ -19885,7 +19999,9 @@ ace.define(
             this.$scrollDecorator.$updateDecorators(config)
           }
         } else if (changes & this.CHANGE_LINES) {
-          if (this.$updateLines() || (changes & this.CHANGE_GUTTER && this.$showGutter)) { this.$gutterLayer.update(config) }
+          if (this.$updateLines() || (changes & this.CHANGE_GUTTER && this.$showGutter)) {
+            this.$gutterLayer.update(config)
+          }
           if (this.$customScrollbar) {
             this.$scrollDecorator.$updateDecorators(config)
           }
@@ -20041,7 +20157,9 @@ ace.define(
       VirtualRenderer.prototype.$getLongestLine = function () {
         var charCount = this.session.getScreenWidth()
         if (this.showInvisibles && !this.session.$useWrapMode) charCount += 1
-        if (this.$textLayer && charCount > this.$textLayer.MAX_LINE_LENGTH) { charCount = this.$textLayer.MAX_LINE_LENGTH + 30 }
+        if (this.$textLayer && charCount > this.$textLayer.MAX_LINE_LENGTH) {
+          charCount = this.$textLayer.MAX_LINE_LENGTH + 30
+        }
         return Math.max(this.$size.scrollerWidth - 2 * this.$padding, Math.round(charCount * this.characterWidth))
       }
       VirtualRenderer.prototype.updateFrontMarkers = function () {
@@ -20095,7 +20213,9 @@ ace.define(
           if (newTop === 0) newTop = -this.scrollMargin.top
           this.session.setScrollTop(newTop)
         } else if (currentTop + this.$size.scrollerHeight - bottomMargin < newTop + this.lineHeight) {
-          if (offset && currentTop + this.$size.scrollerHeight - bottomMargin < newTop - this.lineHeight) { newTop += offset * this.$size.scrollerHeight }
+          if (offset && currentTop + this.$size.scrollerHeight - bottomMargin < newTop - this.lineHeight) {
+            newTop += offset * this.$size.scrollerHeight
+          }
           this.session.setScrollTop(newTop + this.lineHeight + bottomMargin - this.$size.scrollerHeight)
         }
         var currentLeft = this.scrollLeft
@@ -20221,13 +20341,17 @@ ace.define(
           deltaY > 0 &&
           this.session.getScrollTop() + this.$size.scrollerHeight - this.layerConfig.maxHeight <
             -1 + this.scrollMargin.bottom
-        ) { return true }
+        ) {
+          return true
+        }
         if (deltaX < 0 && this.session.getScrollLeft() >= 1 - this.scrollMargin.left) return true
         if (
           deltaX > 0 &&
           this.session.getScrollLeft() + this.$size.scrollerWidth - this.layerConfig.width <
             -1 + this.scrollMargin.right
-        ) { return true }
+        ) {
+          return true
+        }
       }
       VirtualRenderer.prototype.pixelToScreenCoordinates = function (x, y) {
         var canvasPos
@@ -20458,7 +20582,9 @@ ace.define(
         }
         function afterLoad (module) {
           if (_self.$themeId != theme) return cb && cb()
-          if (!module || !module.cssClass) { throw new Error("couldn't load module " + theme + " or it didn't call define") }
+          if (!module || !module.cssClass) {
+            throw new Error("couldn't load module " + theme + " or it didn't call define")
+          }
           if (module.$id) _self.$themeId = module.$id
           dom.importCssString(module.cssText, module.cssClass, _self.container)
           if (_self.theme) dom.removeCssClass(_self.container, _self.theme.cssClass)
@@ -20891,7 +21017,9 @@ ace.define(
 
       this.emit = function (event, data) {
         try {
-          if (data.data && data.data.err) { data.data.err = { message: data.data.err.message, stack: data.data.err.stack, code: data.data.err.code } }
+          if (data.data && data.data.err) {
+            data.data.err = { message: data.data.err.message, stack: data.data.err.stack, code: data.data.err.code }
+          }
           this.$worker && this.$worker.postMessage({ event: event, data: { data: data.data } })
         } catch (ex) {
           console.error(ex.stack)
@@ -21210,7 +21338,9 @@ ace.define(
         }
         editor.once('mouseup', function () {
           var tmpSel = selection.toOrientedRange()
-          if (oldRange && tmpSel.isEmpty() && isSamePoint(oldRange.cursor, tmpSel.cursor)) { selection.substractPoint(tmpSel.cursor) } else {
+          if (oldRange && tmpSel.isEmpty() && isSamePoint(oldRange.cursor, tmpSel.cursor)) {
+            selection.substractPoint(tmpSel.cursor)
+          } else {
             if (shift) {
               selection.substractPoint(range.cursor)
             } else if (range) {
@@ -21235,7 +21365,9 @@ ace.define(
           editor.renderer.scrollCursorIntoView()
           editor.removeSelectionMarkers(rectSel)
           rectSel = selection.rectangularRangeBlock(screenCursor, screenAnchor)
-          if (editor.$mouseHandler.$clickSelection && rectSel.length == 1 && rectSel[0].isEmpty()) { rectSel[0] = editor.$mouseHandler.$clickSelection.clone() }
+          if (editor.$mouseHandler.$clickSelection && rectSel.length == 1 && rectSel[0].isEmpty()) {
+            rectSel[0] = editor.$mouseHandler.$clickSelection.clone()
+          }
           rectSel.forEach(editor.addSelectionMarker, editor)
           editor.updateSelectionMarkers()
         }
@@ -21787,7 +21919,9 @@ ace.define(
           if (
             pos.row != anchor.row ||
             this.session.$clipPositionToDocument(pos.row, pos.column).column != anchor.column
-          ) { this.multiSelect.toSingleRange(this.multiSelect.toOrientedRange()) } else this.multiSelect.mergeOverlappingRanges()
+          ) {
+            this.multiSelect.toSingleRange(this.multiSelect.toOrientedRange())
+          } else this.multiSelect.mergeOverlappingRanges()
         }
       }
       this.findAll = function (needle, options, additive) {
@@ -22214,7 +22348,8 @@ ace.define('ace/ext/error_marker', ['require', 'exports', 'module', 'ace/lib/dom
     var gutterAnno
     if (annotations) {
       var annotation = annotations[0]
-      pos.column = (annotation.pos && typeof annotation.column !== 'number' ? annotation.pos.sc : annotation.column) || 0
+      pos.column =
+        (annotation.pos && typeof annotation.column !== 'number' ? annotation.pos.sc : annotation.column) || 0
       pos.row = annotation.row
       gutterAnno = editor.renderer.$gutterLayer.$annotations[pos.row]
     } else if (oldWidget) {
