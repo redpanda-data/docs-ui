@@ -13,7 +13,7 @@ const SUPPORTED_PREVIEW_TYPES = ['doc', 'api', 'api endpoint', 'api group'];
  */
 const INITIAL_TAG = `
 {{#if (eq page.component.name 'api')}}
-{{{site.components.streaming.title}}} v{{{site.components.streaming.latest.version}}}
+{{#with (or site.components.streaming site.components.ROOT)}}{{{this.title}}} v{{{this.latest.version}}}{{/with}}
 {{else if (and (is-prerelease page) page.displayVersion)}}
 {{{page.component.title}}} v{{{page.displayVersion}}}
 {{else if page.componentVersion.version}}
@@ -22,7 +22,7 @@ const INITIAL_TAG = `
 {{{page.component.title}}}
 {{/if}}`.trim();
 
-const LATEST_STREAMING = `{{{site.components.streaming.title}}} v{{{site.components.streaming.latest.version}}}`.trim();
+const LATEST_STREAMING = `{{#with (or site.components.streaming site.components.ROOT)}}{{{this.title}}} v{{{this.latest.version}}}{{/with}}`.trim();
 
 const PRERELEASE = `
 {{#if (and (is-prerelease page) page.displayVersion)}}

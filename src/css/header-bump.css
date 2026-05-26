@@ -17,7 +17,7 @@
   --body-top: calc(var(--navbar-height) + var(--announcement-bar-height));
   --body-top--desktop: calc(var(--navbar-height) + var(--announcement-bar-height--desktop));
   --body-font-color: #181818;
-  --secondary-font-size: calc(15.5 / 18 * 1rem);
+  --secondary-font-size: calc(14 / var(--rem-base) * 1rem);
   --doc-line-height: 1.6;
   --navbar-menu-background: #fff;
   --toolbar-muted-color: #696969;
@@ -29,7 +29,8 @@
   --body-font-family: "Inter", sans-serif;
   --text-color: rgb(24, 24, 24);
   --font-family: "Inter", sans-serif;
-  --code-font-family: "IBM Plex Mono", "Courier Prime", courier, monospace;
+  --monospace-font-family: "JetBrains Mono", ui-monospace, monospace;
+  --code-font-family: var(--monospace-font-family);
   --body-line-height: 1.15;
 }
 

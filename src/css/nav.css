@@ -518,7 +518,7 @@ li.nav-item {
   padding: 6px 10px;
   border-radius: 5px;
   color: #8098b3;
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   letter-spacing: -0.0125em;
   line-height: 1.35;
   cursor: pointer;
@@ -553,6 +553,8 @@ li.nav-item {
   flex: 1;
   margin: 0;
   flex-direction: column;
+  padding-left: 0;
+  border-left: none;
 }
 
 .nav-item:not(.is-active) > .nav-list {

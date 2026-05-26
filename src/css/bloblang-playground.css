@@ -49,7 +49,7 @@
   height: 32px;
   padding: 0 12px;
   display: inline-flex;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   transition: all 0.2s ease;
   font-weight: 500;
   font-family: var(--body-font-family);
@@ -64,7 +64,7 @@
 .bloblang-playground .editor-header-content .custom-ai-help-button {
   height: 20px;
   padding: 0 8px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   gap: 4px;
 }
 
@@ -843,6 +843,19 @@ html[data-theme=dark] .bloblang-snippet .ace-editor {
 
   .bloblang-playground .doc {
     margin-right: unset;
+    overflow: visible;
+  }
+
+  /* Ensure page title is visible on mobile */
+  .bloblang-playground .doc h1.page {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    font-size: calc(28 / var(--rem-base) * 1rem);
+    margin-bottom: 12px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .bloblang-snippet .row {
@@ -1224,7 +1237,7 @@ html[data-theme=dark] .bloblang-playground .validation-success {
   color: var(--color-primitives-global-red-red-700);
   background: var(--color-primitives-global-red-red-50);
   white-space: normal;
-  word-break: break-word;
+  overflow-wrap: break-word;
   flex: 1 1 auto;
   max-width: 100%;
 }

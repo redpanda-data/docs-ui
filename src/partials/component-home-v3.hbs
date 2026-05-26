@@ -29,7 +29,7 @@
     :page-labs-1-link: https://...
     :page-labs-2-*, :page-labs-3-*, :page-labs-4-* (same format)
 --}}
-<section class="ch3-hero"{{#with (get-header-data page)}}{{#if this.heroGradient}} style="background: {{{this.heroGradient}}};"{{/if}}{{/with}}>
+<section class="ch3-hero"{{#with (get-hero-gradient page)}} style="background: {{{this}}};"{{/with}}>
   <div class="ch3-hero-bg" aria-hidden="true">
     <div class="ch3-hero-glow"></div>
     <div class="ch3-hero-grid"></div>

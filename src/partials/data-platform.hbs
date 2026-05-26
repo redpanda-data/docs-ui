@@ -283,17 +283,17 @@
   <section class="dp-section dp-choose-section">
     <div class="dp-section-head">
       <h2 class="dp-section-title">Choose how you'll run Redpanda</h2>
-      <p class="dp-section-sub">Self-Managed or Cloud &mdash; same Kafka-compatible engine, different operations model. Both include Redpanda Connect for building data pipelines.</p>
+      <p class="dp-section-sub">Self-Managed or Cloud: same Kafka-compatible engine, different operations model. Both include Redpanda Connect for building data pipelines.</p>
     </div>
     <div class="dp-products">
       <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}" class="dp-product is-featured" style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
         <div class="dp-product-head">
           <div class="dp-product-titles">
-            <h3 class="dp-product-name">Cloud</h3>
-            <p class="dp-product-tagline">Streaming, fully managed.</p>
+            <h3 class="dp-product-name">{{#if page.attributes.cloud-title}}{{page.attributes.cloud-title}}{{else}}Cloud{{/if}}</h3>
+            <p class="dp-product-tagline">{{#if page.attributes.cloud-tagline}}{{page.attributes.cloud-tagline}}{{else}}Streaming, fully managed.{{/if}}</p>
           </div>
         </div>
-        <p class="dp-product-desc">Spin up a cluster in minutes. We handle upgrades, scaling, and failover &mdash; you bring the data. Available as Dedicated, Serverless, or Bring Your Own Cloud.</p>
+        <p class="dp-product-desc">{{#if page.attributes.cloud-description}}{{page.attributes.cloud-description}}{{else}}Spin up a cluster in seconds. We handle upgrades, scaling, and failover — you bring the data. Available as Serverless, Dedicated, or Bring Your Own Cloud (BYOC).{{/if}}</p>
         <ul class="dp-product-bullets">
           <li>
             <span class="dp-product-bullet-icon">
@@ -339,7 +339,7 @@
             <p class="dp-product-tagline">Run Redpanda on your own infrastructure.</p>
           </div>
         </div>
-        <p class="dp-product-desc">Bare metal, VMs, or Kubernetes. Full control over networking, storage, and upgrades &mdash; with the same single binary used in Cloud.</p>
+        <p class="dp-product-desc">Bare metal, VMs, or Kubernetes. Full control over networking, storage, and upgrades, with the same single binary used in Cloud.</p>
         <ul class="dp-product-bullets">
           <li>
             <span class="dp-product-bullet-icon">
@@ -367,8 +367,8 @@
           </li>
         </ul>
         <div class="dp-product-stats">
-          <div><strong>K8s</strong><span>Operator + Helm</span></div>
-          {{#with site.components.redpanda.latest}}<div><strong>v{{version}}</strong><span>Latest release</span></div>{{/with}}
+          <div><strong>Kubernetes</strong><span>Operator + Helm</span></div>
+          {{#with (or site.components.streaming site.components.redpanda)}}{{#with this.latest}}<div><strong>v{{version}}</strong><span>Latest release</span></div>{{/with}}{{/with}}
         </div>
         <div class="dp-product-cta">
           <span>Open Self-Managed docs</span>
@@ -386,7 +386,7 @@
   <section class="dp-section">
     <div class="dp-section-head">
       <h2 class="dp-section-title">Not sure which to pick?</h2>
-      <p class="dp-section-sub">A quick decision matrix &mdash; most teams land in one of these three rows.</p>
+      <p class="dp-section-sub">A quick decision matrix.</p>
     </div>
     <div class="dp-matrix">
       <div class="dp-matrix-row">
@@ -395,7 +395,14 @@
           <p>need full control over networking, storage, and security posture</p>
         </div>
         <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'self-managed') '#0f8b66'}}">
-          <span class="dp-product-chip dp-product-chip-sm">SM</span>
+          <span class="dp-product-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+          </span>
           <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}">
             Start with Self-Managed
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -410,7 +417,11 @@
           <p>want streaming as a service with an SLA and zero ops</p>
         </div>
         <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
-          <span class="dp-product-chip dp-product-chip-cl">CL</span>
+          <span class="dp-product-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+          </span>
           <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}">
             Start with Cloud
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -419,133 +430,145 @@
           </a>
         </div>
       </div>
-      <div class="dp-matrix-row">
-        <div class="dp-matrix-when">
-          <div class="dp-matrix-when-label">If you</div>
-          <p>need to move data between systems with declarative pipelines</p>
-        </div>
-        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'connect') '#6e48e1'}}">
-          <span class="dp-product-chip dp-product-chip-rc">RC</span>
-          <a href="{{#if page.attributes.connect-home}}{{{relativize (resolve-resource page.attributes.connect-home)}}}{{else}}#{{/if}}">
-            Start with Connect
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </a>
-        </div>
-      </div>
     </div>
   </section>
 
+  {{!-- Popular section - data-driven from page-popular-N-* attributes --}}
+  {{#if page.attributes.popular-1-title}}
   <section class="dp-section">
     <div class="dp-section-head">
-      <h2 class="dp-section-title">Popular across Data Platform</h2>
-      <p class="dp-section-sub">The guides teams open most when they're getting started.</p>
+      <h2 class="dp-section-title">{{#if page.attributes.popular-heading}}{{page.attributes.popular-heading}}{{else}}Popular across Data Platform{{/if}}</h2>
+      <p class="dp-section-sub">{{#if page.attributes.popular-subtitle}}{{page.attributes.popular-subtitle}}{{else}}The guides teams open most when they're getting started.{{/if}}</p>
     </div>
     <div class="dp-popular">
-      <a href="{{#if page.attributes.self-managed-quickstart}}{{{relativize (resolve-resource page.attributes.self-managed-quickstart)}}}{{else}}#{{/if}}" class="dp-popular-card">
+      {{#if page.attributes.popular-1-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-1-link)}}}" class="dp-popular-card">
         <div class="dp-popular-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>Deploy a Kafka-compatible cluster</h4>
+          <h4>{{page.attributes.popular-1-title}}</h4>
+          {{#if page.attributes.popular-1-tag}}
           <div class="dp-popular-meta">
-            <span class="dp-popular-tag">Self-Managed</span>
+            <span class="dp-popular-tag">{{page.attributes.popular-1-tag}}</span>
           </div>
+          {{/if}}
         </div>
         <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </a>
+      {{/if}}
 
-      <a href="{{#if page.attributes.self-managed-tiered-storage}}{{{relativize (resolve-resource page.attributes.self-managed-tiered-storage)}}}{{else}}#{{/if}}" class="dp-popular-card">
+      {{#if page.attributes.popular-2-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-2-link)}}}" class="dp-popular-card">
         <div class="dp-popular-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>Tiered storage on S3</h4>
+          <h4>{{page.attributes.popular-2-title}}</h4>
+          {{#if page.attributes.popular-2-tag}}
           <div class="dp-popular-meta">
-            <span class="dp-popular-tag">Self-Managed</span>
+            <span class="dp-popular-tag">{{page.attributes.popular-2-tag}}</span>
           </div>
+          {{/if}}
         </div>
         <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </a>
+      {{/if}}
 
-      <a href="{{#if page.attributes.cloud-byoc}}{{{relativize (resolve-resource page.attributes.cloud-byoc)}}}{{else}}#{{/if}}" class="dp-popular-card">
+      {{#if page.attributes.popular-3-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-3-link)}}}" class="dp-popular-card">
         <div class="dp-popular-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>Create your first BYOC cluster</h4>
+          <h4>{{page.attributes.popular-3-title}}</h4>
+          {{#if page.attributes.popular-3-tag}}
           <div class="dp-popular-meta">
-            <span class="dp-popular-tag">Cloud</span>
+            <span class="dp-popular-tag">{{page.attributes.popular-3-tag}}</span>
           </div>
+          {{/if}}
         </div>
         <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </a>
+      {{/if}}
 
-      <a href="{{#if page.attributes.connect-quickstart}}{{{relativize (resolve-resource page.attributes.connect-quickstart)}}}{{else}}#{{/if}}" class="dp-popular-card">
+      {{#if page.attributes.popular-4-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-4-link)}}}" class="dp-popular-card">
         <div class="dp-popular-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v6m0 8v6M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66l4.24-4.24"/>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>Connect Postgres CDC to Snowflake</h4>
+          <h4>{{page.attributes.popular-4-title}}</h4>
+          {{#if page.attributes.popular-4-tag}}
           <div class="dp-popular-meta">
-            <span class="dp-popular-tag">Connect</span>
+            <span class="dp-popular-tag">{{page.attributes.popular-4-tag}}</span>
           </div>
+          {{/if}}
         </div>
         <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </a>
+      {{/if}}
 
-      <a href="{{#if page.attributes.self-managed-migrate}}{{{relativize (resolve-resource page.attributes.self-managed-migrate)}}}{{else}}#{{/if}}" class="dp-popular-card">
+      {{#if page.attributes.popular-5-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-5-link)}}}" class="dp-popular-card">
         <div class="dp-popular-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>Migrate from Apache Kafka</h4>
+          <h4>{{page.attributes.popular-5-title}}</h4>
+          {{#if page.attributes.popular-5-tag}}
           <div class="dp-popular-meta">
-            <span class="dp-popular-tag">All</span>
+            <span class="dp-popular-tag">{{page.attributes.popular-5-tag}}</span>
           </div>
+          {{/if}}
         </div>
         <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </a>
+      {{/if}}
 
-      <a href="{{#if page.attributes.self-managed-schema-registry}}{{{relativize (resolve-resource page.attributes.self-managed-schema-registry)}}}{{else}}#{{/if}}" class="dp-popular-card">
+      {{#if page.attributes.popular-6-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-6-link)}}}" class="dp-popular-card">
         <div class="dp-popular-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>Schema Registry &amp; validation</h4>
+          <h4>{{page.attributes.popular-6-title}}</h4>
+          {{#if page.attributes.popular-6-tag}}
           <div class="dp-popular-meta">
-            <span class="dp-popular-tag">All</span>
+            <span class="dp-popular-tag">{{page.attributes.popular-6-tag}}</span>
           </div>
+          {{/if}}
         </div>
         <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
       </a>
+      {{/if}}
     </div>
   </section>
+  {{/if}}
 
   <div class="dp-help">
     <div>

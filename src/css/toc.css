@@ -233,7 +233,7 @@
   color: var(--toc-font-color);
   max-width: var(--toc-width);
   flex: 0 0 var(--toc-width);
-  word-wrap: break-word;
+  overflow-wrap: break-word;
   /* Reserve space for TOC to prevent CLS when JavaScript populates it */
   min-width: var(--toc-width);
   /* Override sidebar background - TOC should be transparent */

@@ -1274,7 +1274,8 @@ const bloblangCompleter = {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+// Wait for both DOM and Ace to be ready before initializing
+function initPlayground() {
   metadataDetails = document.getElementById("metadata-details");
   inputAIButton = document.getElementById("input-ai-help");
   mappingAIButton = document.getElementById("mapping-ai-help");
@@ -1823,6 +1824,17 @@ document.addEventListener("DOMContentLoaded", () => {
     playgroundTip.style.display = 'none';
     sessionStorage.setItem('playgroundTipDismissed', 'true');
   });
+}
+
+// Wait for both DOM and Ace to be ready
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.aceLoaded || typeof ace !== 'undefined') {
+    // Ace already loaded
+    initPlayground();
+  } else {
+    // Wait for Ace to load
+    document.addEventListener('aceReady', initPlayground, { once: true });
+  }
 });
 
 // Function to get input and mapping values

@@ -235,9 +235,9 @@
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          navMetadataContainer.classList.add("hidden");
+          navMetadataContainer?.classList.add("hidden");
         } else {
-          navMetadataContainer.classList.remove("hidden");
+          navMetadataContainer?.classList.remove("hidden");
         }
       });
     }, {

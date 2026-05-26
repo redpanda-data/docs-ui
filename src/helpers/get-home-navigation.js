@@ -2,7 +2,8 @@
 
 /**
  * Gets navigation for the home page.
- * Tries ADP component first, then falls back to self-managed (redpanda).
+ * Tries ADP component first (agentic-data-plane or redpanda-adp),
+ * then falls back to self-managed (streaming or redpanda).
  *
  * @param {Object} site - The site object containing components
  * @param {Object} page - The current page object
@@ -18,8 +19,8 @@ module.exports = (site, page) => {
     ? site.components
     : Array.from(site.components.values ? site.components.values() : [])
 
-  // Try ADP component first (redpanda-adp)
-  const adpComponent = components.find((c) => c.name === 'redpanda-adp')
+  // Try ADP component first (new name: agentic-data-plane, old name: redpanda-adp)
+  const adpComponent = components.find((c) => c.name === 'agentic-data-plane' || c.name === 'redpanda-adp')
   if (adpComponent) {
     // Get the latest version's navigation (Antora uses latestVersion)
     const latestVersion = adpComponent.latestVersion || (adpComponent.versions && adpComponent.versions[0])
@@ -28,8 +29,8 @@ module.exports = (site, page) => {
     }
   }
 
-  // Fallback to self-managed (redpanda)
-  const rootComponent = components.find((c) => c.name === 'redpanda')
+  // Fallback to self-managed (new name: streaming, old name: redpanda)
+  const rootComponent = components.find((c) => c.name === 'streaming' || c.name === 'redpanda')
   if (rootComponent) {
     const latestVersion = rootComponent.latestVersion || (rootComponent.versions && rootComponent.versions[0])
     if (latestVersion && latestVersion.navigation) {

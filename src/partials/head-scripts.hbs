@@ -199,11 +199,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   ];
 
   function loadScript(index) {
-    if (index >= scripts.length) return;
+    if (index >= scripts.length) {
+      // All scripts loaded - dispatch event to notify waiting code
+      window.aceLoaded = true;
+      document.dispatchEvent(new CustomEvent('aceReady'));
+      return;
+    }
     var script = document.createElement('script');
     script.src = scripts[index];
     script.onload = function() {
       loadScript(index + 1);
+    };
+    script.onerror = function() {
+      console.error('Failed to load Ace script:', scripts[index]);
+      loadScript(index + 1); // Try to continue loading other scripts
     };
     document.head.appendChild(script);
   }

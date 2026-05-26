@@ -119,7 +119,7 @@ html[data-theme="dark"] .data-platform.article {
 }
 
 .dp-hero-sub {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.85);
   max-width: 700px;
@@ -133,7 +133,7 @@ html[data-theme="dark"] .data-platform.article {
   gap: 24px;
   max-width: 720px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
+  padding-top: 30px;
 }
 
 .dp-hero-stats > div {
@@ -152,7 +152,7 @@ html[data-theme="dark"] .data-platform.article {
 }
 
 .dp-hero-stats span {
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.35;
 }
@@ -338,7 +338,7 @@ button.dp-hero-ask-submit svg,
 
 .dp-section-title {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(27 / var(--rem-base) * 1rem);
+  font-size: calc(30 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -351,7 +351,7 @@ html[data-theme="dark"] .dp-section-title {
 }
 
 .dp-section-sub {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
   margin: 0;
   text-wrap: pretty;
@@ -460,7 +460,7 @@ html[data-theme="dark"] .dp-product.is-featured {
 
 .dp-product-name {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(22 / var(--rem-base) * 1rem);
+  font-size: calc(24 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -473,7 +473,7 @@ html[data-theme="dark"] .dp-product-name {
 }
 
 .dp-product-tagline {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
   margin: 0;
   line-height: 1.4;
@@ -484,7 +484,7 @@ html[data-theme="dark"] .dp-product-tagline {
 }
 
 .dp-product-desc {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   line-height: 1.55;
   color: var(--grey-600-new, #52525b);
   margin: 0 0 18px;
@@ -508,7 +508,7 @@ html[data-theme="dark"] .dp-product-desc {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--grey-800-new, #18181b);
 }
 
@@ -562,7 +562,7 @@ html[data-theme="dark"] .dp-product-stats {
 
 .dp-product-stats strong {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(21 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.1;
   color: var(--grey-800-new, #18181b);
@@ -574,7 +574,7 @@ html[data-theme="dark"] .dp-product-stats strong {
 }
 
 .dp-product-stats span {
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
 }
 
@@ -588,7 +588,7 @@ html[data-theme="dark"] .dp-product-stats span {
   justify-content: space-between;
   gap: 8px;
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   color: var(--dp-accent);
@@ -785,7 +785,7 @@ html[data-theme="dark"] .dp-matrix-when-label {
 }
 
 .dp-matrix-when p {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   line-height: 1.45;
   margin: 0;
   color: var(--grey-800-new, #18181b);
@@ -845,7 +845,7 @@ html[data-theme="dark"] .dp-matrix-when p {
 
 .dp-matrix-pick a {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   color: var(--dp-accent);
@@ -908,7 +908,7 @@ html[data-theme="dark"] .dp-popular-card {
 
 .dp-popular-text h4 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.005em;
@@ -928,7 +928,7 @@ html[data-theme="dark"] .dp-popular-text h4 {
 
 .dp-popular-tag {
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.06em;
@@ -1051,7 +1051,7 @@ html[data-theme="dark"] .dp-help {
 
 .dp-help h3 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(21 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -1064,7 +1064,7 @@ html[data-theme="dark"] .dp-help h3 {
 }
 
 .dp-help p {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--grey-600-new, #52525b);
   margin: 0;
 }
@@ -1083,9 +1083,9 @@ html[data-theme="dark"] .dp-help p {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 16px;
+  padding: 10px 18px;
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 600;
   line-height: 1;
   background: var(--indigo-600, #4338ca);

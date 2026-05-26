@@ -83,7 +83,7 @@ main.component-home > .component-content {
   align-items: center;
   gap: 6px;
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 5px;
@@ -152,7 +152,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-pill-label {
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.55);
   letter-spacing: 0.02em;
@@ -240,7 +240,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-panel-title > span:first-child {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #0f172a);
   letter-spacing: -0.005em;
@@ -265,7 +265,7 @@ main.component-home > .component-content {
 .sm-ver-tab {
   flex: 1;
   padding: 6px 8px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--color-jet-70, #6b7280);
   background: transparent;
@@ -447,7 +447,7 @@ main.component-home > .component-content {
 }
 
 .sm-ver-row-date-v {
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--color-jet, #374151);
 }
@@ -679,7 +679,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 }
 
 .ch3-status-chip {
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 9999px;
@@ -770,7 +770,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 
 .ch3-section-title {
   font-family: var(--font-display, "Inter Display", "Inter", sans-serif);
-  font-size: calc(21 / var(--rem-base) * 1rem);
+  font-size: calc(27 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--color-jet, #181818);
@@ -994,7 +994,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-deploy-title {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(21 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0 0 6px;
@@ -1002,7 +1002,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-deploy-desc {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #606164);
   line-height: 1.5;
   margin: 0 0 18px;
@@ -1021,7 +1021,7 @@ button.ch3-hero-ask-submit svg,
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: var(--component-600, var(--indigo-600-new, #4f46e5));
   white-space: nowrap;
@@ -1095,7 +1095,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-feature-title {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(21 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0;
@@ -1117,7 +1117,7 @@ button.ch3-hero-ask-submit svg,
 }
 
 .ch3-feature-desc {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #606164);
   line-height: 1.5;
   margin: 0;
@@ -1208,7 +1208,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-popular-text h4 {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
   margin: 0 0 2px;
@@ -1216,7 +1216,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 }
 
 .ch3-popular-text p {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--color-jet-70, #606164);
   line-height: 1.45;
   margin: 0;
@@ -1887,7 +1887,7 @@ html[data-theme="dark"] .ch3-component-badge--byoc {
 }
 
 .ch3-component-features li {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.6;
   color: var(--color-text-secondary);
   padding-left: 20px;

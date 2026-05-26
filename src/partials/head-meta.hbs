@@ -6,7 +6,7 @@
 {{!-- AI-friendly indexing directives for production pages --}}
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 {{/if}}
-{{#with site.components.ROOT}}
+{{#with (or site.components.streaming site.components.ROOT)}}
 <meta name="latest-redpanda-version" content="{{this.latest.version}}">
 {{/with}}
 <meta itemprop="datePublished" content="{{iso-date}}">
