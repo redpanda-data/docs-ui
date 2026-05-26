@@ -775,6 +775,11 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
   gap: 4px;
 }
 
+/* Mobile overflow menu - hidden by default on desktop */
+.tb-dropdown.tb-overflow-menu {
+  display: none;
+}
+
 @media screen and (max-width: 1023px) {
   .tb-link {
     padding: 6px 8px;
@@ -784,5 +789,16 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
 
   .tb-desktop-items {
     display: none;
+  }
+}
+
+/* Mobile: show overflow menu instead of desktop items */
+@media screen and (max-width: 480px) {
+  .tb-overflow-menu {
+    display: block !important;
+  }
+
+  .navbar-end {
+    gap: 4px;
   }
 }
