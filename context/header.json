@@ -6,13 +6,13 @@
     },
     "homeUrl": "/",
     "components": {
-      "redpanda-labs": {
+      "labs": {
         "latest": {
           "title": "Labs",
-          "url": "/redpanda-labs/",
+          "url": "/labs/",
           "asciidoc": {
             "attributes": {
-              "page-header-data": {
+              "component-metadata": {
                 "order": 4
               }
             }
@@ -25,38 +25,39 @@
           "url": "/api/"
         }
       },
-      "redpanda-cloud": {
+      "cloud-data-platform": {
         "latest": {
           "title": "Cloud",
-          "url": "/redpanda-cloud/home/",
+          "url": "/cloud-data-platform/home/",
           "asciidoc": {
             "attributes": {
-              "page-header-data": {
-                "order": 1              }
+              "component-metadata": {
+                "order": 1
+              }
             }
           }
         }
       },
-      "redpanda-connect": {
+      "connect": {
         "latest": {
           "title": "Connect",
-          "url": "/redpanda-connect/home/",
+          "url": "/connect/home/",
           "asciidoc": {
             "attributes": {
-              "page-header-data": {
+              "component-metadata": {
                 "order": 3
               }
             }
           }
         }
       },
-      "ROOT": {
+      "streaming": {
         "latest": {
-          "title": "Self-Managed",
+          "title": "Streaming",
           "url": "/current/home/",
           "asciidoc": {
             "attributes": {
-              "page-header-data": {
+              "component-metadata": {
                 "order": 2
               }
             }
@@ -72,8 +73,8 @@
       "latest": {
         "asciidoc": {
           "attributes": {
-            "page-header-data": {
-              "color": "#d73d23"
+            "component-metadata": {
+              "color": "#4338ca"
             }
           }
         }
@@ -82,4 +83,3 @@
   },
   "uiRootPath": "/_"
 }
-

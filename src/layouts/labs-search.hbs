@@ -52,7 +52,7 @@
       </main>
     </div>
     <script>
-    if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
+    if (typeof window.algoliasearch != "undefined" && typeof window.instantsearch != "undefined") {
       const { algoliasearch, instantsearch } = window;
 
       const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');

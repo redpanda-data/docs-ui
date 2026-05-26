@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Redpanda Documentation'}}
+{{> head-component-color}}
+  </head>
+  <body class="article component-home-v3" data-component="{{page.component.name}}" data-component-color="{{get-header-color page}}">
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article component-home">
+  {{> toolbar}}
+  <div class="content component-content">
+{{> component-home-v3}}
+  </div>
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

@@ -12,28 +12,7 @@
   align-items: flex-start;
 }
 
-.article .metadata.metadata--nav {
-  position: sticky;
-  top: 0;
-  padding: 0.5rem 0;
-  background-color: var(--body-background);
-  z-index: 10;
-  margin-top: 40px;
-  margin-bottom: 0;
-  min-height: 40px;
-  padding-bottom: 0;
-}
-
-.article .metadata.metadata--nav.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-.article .metadata.metadata--nav:not(.hidden) {
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
+/* TOC metadata removed - all metadata now in eyebrow */
 
 .article .metadata .context-switcher {
   position: relative;
@@ -275,6 +254,112 @@
   border-radius: 10px;
   color: var(--limited-availability-label-color);
   background-color: var(--limited-availability-label-background);
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+/* BYOC Badge */
+.badge--byoc {
+  color: var(--byoc-label-background);
+  font-weight: bold;
+  background-color: var(--byoc-highlight-background-color);
+}
+
+.badge--large.badge--byoc {
+  background-color: var(--byoc-label-background);
+  color: var(--byoc-label-color);
+}
+
+.byoc-label {
+  display: inline-flex;
+  margin: 0;
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.byoc-label > p {
+  flex: 0 1 auto;
+  border-radius: 10px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--byoc-label-color);
+  background-color: var(--byoc-label-background);
+  padding: 3px;
+  min-width: 100px;
+  margin: 0;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-byoc-container {
+  display: inline-flex;
+}
+
+.nav-byoc-label {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-weight: bold;
+  min-width: 100px;
+  padding: 3px;
+  border-radius: 10px;
+  color: var(--byoc-label-color);
+  background-color: var(--byoc-label-background);
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+/* Cloud Badge */
+.badge--cloud {
+  color: var(--cloud-label-background);
+  font-weight: bold;
+  background-color: var(--cloud-highlight-background-color);
+}
+
+.badge--large.badge--cloud {
+  background-color: var(--cloud-label-background);
+  color: var(--cloud-label-color);
+}
+
+.cloud-label {
+  display: inline-flex;
+  margin: 0;
+  font-size: calc(18 / var(--rem-base) * 1rem);
+}
+
+.cloud-label > p {
+  flex: 0 1 auto;
+  border-radius: 10px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--cloud-label-color);
+  background-color: var(--cloud-label-background);
+  padding: 3px;
+  min-width: 100px;
+  margin: 0;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-cloud-container {
+  display: inline-flex;
+}
+
+.nav-cloud-label {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-weight: bold;
+  min-width: 100px;
+  padding: 3px;
+  border-radius: 10px;
+  color: var(--cloud-label-color);
+  background-color: var(--cloud-label-background);
   cursor: help;
   display: inline-flex;
   align-items: center;

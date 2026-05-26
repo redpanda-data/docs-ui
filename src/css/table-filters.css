@@ -42,7 +42,7 @@
   min-width: 120px;
   max-width: 180px;
   padding: 0.5rem 0.75rem;
-  font-size: 13px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
   min-height: 36px;
 }
 
@@ -73,7 +73,7 @@
   padding: 0.75rem 1rem;
   border: 2px solid #e1e5e9;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 400;
   color: #202124;
   background: white;
@@ -105,7 +105,7 @@
   display: block;
   font-weight: 600;
   color: #202124;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   margin: 0;
 }
 
@@ -129,7 +129,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #202124;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -217,7 +217,7 @@
   top: -2px;
   left: 2px;
   color: white;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: bold;
 }
 
@@ -230,7 +230,7 @@
 .doc .dropdown-checkbox-option span {
   font-weight: 400;
   color: #202124;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   cursor: pointer;
   user-select: none;
 }
@@ -249,7 +249,7 @@
   border: 2px solid #e1e5e9;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #202124;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -283,7 +283,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   color: #202124;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -336,7 +336,7 @@
   text-decoration: none;
   border-bottom: 1px solid #f1f3f4;
   transition: background-color 0.15s ease;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
 }
 
 .doc .dropdown-option:hover,
@@ -361,7 +361,7 @@
 .doc .dropdown-arrow {
   transition: transform 0.2s ease;
   color: #5f6368;
-  font-size: 12px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
   flex-shrink: 0;
 }
 

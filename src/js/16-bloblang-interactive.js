@@ -8,13 +8,13 @@
  * - Quick actions (copy, share, format)
  */
 
-(function() {
-  'use strict';
+;(function() {
+  'use strict'
 
   // State
-  let bloblangDocs = null;
-  let docsLoading = false;
-  let docsLoadQueue = [];
+  let bloblangDocs = null
+  let docsLoading = false
+  let docsLoadQueue = []
 
   /**
    * Parse a Bloblang snippet into mapping, input, and metadata sections.
@@ -22,94 +22,97 @@
    * # Out: lines are ignored.
    */
   function parseBloblangSnippet(rawSnippet) {
-    const mappingLines = [];
-    const inputLines = [];
-    const metaLines = [];
+    const mappingLines = []
+    const inputLines = []
+    const metaLines = []
 
-    let inSeen = false;
-    let metaSeen = false;
-    let ignoreAll = false;
-    let skip = false;
-    let currentSection = 'mapping';
+    let inSeen = false
+    let metaSeen = false
+    let ignoreAll = false
+    let skip = false
+    let currentSection = 'mapping'
 
-    const lines = rawSnippet.split('\n');
+    const lines = rawSnippet.split('\n')
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmed = line.trim();
+      const line = lines[i]
+      const trimmed = line.trim()
 
-      if (ignoreAll) continue;
+      if (ignoreAll) continue
 
       // Check for # Skip: directive (disables Try It button)
       if (trimmed.startsWith('# Skip:')) {
-        const value = trimmed.slice('# Skip:'.length).trim().toLowerCase();
+        const value = trimmed
+          .slice('# Skip:'.length)
+          .trim()
+          .toLowerCase()
         if (value === 'true' || value === '1' || value === 'yes') {
-          skip = true;
+          skip = true
         }
-        continue;
+        continue
       }
 
       // Ignore # Out: and # Output: lines
-      if (trimmed.startsWith('# Out:') || trimmed.startsWith('# Output:')) continue;
+      if (trimmed.startsWith('# Out:') || trimmed.startsWith('# Output:')) continue
 
       // Check for # In: or # Input: directive
       if (trimmed.startsWith('# In:') || trimmed.startsWith('# Input:')) {
         if (!inSeen) {
-          inSeen = true;
-          currentSection = 'in';
+          inSeen = true
+          currentSection = 'in'
           // Extract content after the directive (handle both # In: and # Input:)
-          const colonIndex = trimmed.indexOf(':');
-          const afterDirective = trimmed.slice(colonIndex + 1).trim();
-          if (afterDirective) inputLines.push(afterDirective);
+          const colonIndex = trimmed.indexOf(':')
+          const afterDirective = trimmed.slice(colonIndex + 1).trim()
+          if (afterDirective) inputLines.push(afterDirective)
         } else {
-          ignoreAll = true;
+          ignoreAll = true
         }
-        continue;
+        continue
       }
 
       // Check for # Meta: directive
       if (trimmed.startsWith('# Meta:')) {
         if (!metaSeen) {
-          metaSeen = true;
-          currentSection = 'meta';
-          const afterMeta = trimmed.slice('# Meta:'.length).trim();
-          if (afterMeta) metaLines.push(afterMeta);
+          metaSeen = true
+          currentSection = 'meta'
+          const afterMeta = trimmed.slice('# Meta:'.length).trim()
+          if (afterMeta) metaLines.push(afterMeta)
         } else {
-          ignoreAll = true;
+          ignoreAll = true
         }
-        continue;
+        continue
       }
 
       switch (currentSection) {
         case 'mapping':
-          mappingLines.push(line);
-          break;
+          mappingLines.push(line)
+          break
         case 'in':
           // Support multi-line commented input (# prefix on each line)
           if (trimmed.startsWith('#')) {
             // Strip the # and any leading whitespace
-            const content = trimmed.slice(1).trim();
-            if (content) inputLines.push(content);
+            const content = trimmed.slice(1).trim()
+            if (content) inputLines.push(content)
           } else if (trimmed === '') {
             // Allow empty lines within the block
-            continue;
+            continue
           } else {
             // Non-comment line - we've exited the input section
-            currentSection = 'mapping';
-            mappingLines.push(line);
+            currentSection = 'mapping'
+            mappingLines.push(line)
           }
-          break;
+          break
         case 'meta':
           // Support multi-line commented metadata (# prefix on each line)
           if (trimmed.startsWith('#')) {
-            const content = trimmed.slice(1).trim();
-            if (content) metaLines.push(content);
+            const content = trimmed.slice(1).trim()
+            if (content) metaLines.push(content)
           } else if (trimmed === '') {
-            continue;
+            continue
           } else {
-            currentSection = 'mapping';
-            mappingLines.push(line);
+            currentSection = 'mapping'
+            mappingLines.push(line)
           }
-          break;
+          break
       }
     }
 
@@ -117,8 +120,8 @@
       mapping: mappingLines.join('\n').trim(),
       input: inputLines.join('\n').trim(),
       meta: metaLines.join('\n').trim(),
-      skip: skip
-    };
+      skip: skip,
+    }
   }
 
   /**
@@ -126,18 +129,18 @@
    */
   async function tryFetchConnectJSON(version) {
     try {
-      const url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
-      const response = await fetch(url);
+      const url = `/connect/components/_attachments/connect-${version}.json`
+      const response = await fetch(url)
 
       if (!response.ok) {
-        return null;
+        return null
       }
 
-      const data = await response.json();
-      return data;
+      const data = await response.json()
+      return data
     } catch (e) {
       // Silent fail - expected when trying fallback versions
-      return null;
+      return null
     }
   }
 
@@ -147,21 +150,22 @@
   function transformConnectData(data) {
     const docs = {
       functions: {},
-      methods: {}
-    };
+      methods: {},
+    }
 
     // Transform Bloblang functions
     if (Array.isArray(data['bloblang-functions'])) {
-      data['bloblang-functions'].forEach(fn => {
-        const params = fn.params && fn.params.named ? fn.params.named.map(p => ({
-          name: p.name,
-          type: p.type || 'any',
-          description: p.description || ''
-        })) : [];
+      data['bloblang-functions'].forEach((fn) => {
+        const params =
+          fn.params && fn.params.named
+            ? fn.params.named.map((p) => ({
+                name: p.name,
+                type: p.type || 'any',
+                description: p.description || '',
+              }))
+            : []
 
-        const paramSignature = params.length > 0
-          ? params.map(p => p.name).join(', ')
-          : '';
+        const paramSignature = params.length > 0 ? params.map((p) => p.name).join(', ') : ''
 
         docs.functions[fn.name] = {
           signature: `${fn.name}(${paramSignature})`,
@@ -169,31 +173,34 @@
           parameters: params,
           returns: 'any',
           category: fn.category || 'general',
-          url: `https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#${fn.name.toLowerCase().replace(/_/g, '-')}`
-        };
+          url: `https://docs.redpanda.com/connect/guides/bloblang/functions/#${fn.name
+            .toLowerCase()
+            .replace(/_/g, '-')}`,
+        }
 
         // Add example if available
         if (fn.examples && fn.examples.length > 0) {
-          const example = fn.examples[0];
+          const example = fn.examples[0]
           if (example.mapping) {
-            docs.functions[fn.name].example = example.mapping;
+            docs.functions[fn.name].example = example.mapping
           }
         }
-      });
+      })
     }
 
     // Transform Bloblang methods
     if (Array.isArray(data['bloblang-methods'])) {
-      data['bloblang-methods'].forEach(method => {
-        const params = method.params && method.params.named ? method.params.named.map(p => ({
-          name: p.name,
-          type: p.type || 'any',
-          description: p.description || ''
-        })) : [];
+      data['bloblang-methods'].forEach((method) => {
+        const params =
+          method.params && method.params.named
+            ? method.params.named.map((p) => ({
+                name: p.name,
+                type: p.type || 'any',
+                description: p.description || '',
+              }))
+            : []
 
-        const paramSignature = params.length > 0
-          ? params.map(p => p.name).join(', ')
-          : '';
+        const paramSignature = params.length > 0 ? params.map((p) => p.name).join(', ') : ''
 
         docs.methods[method.name] = {
           signature: `${method.name}(${paramSignature})`,
@@ -201,20 +208,22 @@
           parameters: params,
           returns: 'any',
           category: method.categories && method.categories.length > 0 ? method.categories[0].Category : 'general',
-          url: `https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#${method.name.toLowerCase().replace(/_/g, '-')}`
-        };
+          url: `https://docs.redpanda.com/connect/guides/bloblang/methods/#${method.name
+            .toLowerCase()
+            .replace(/_/g, '-')}`,
+        }
 
         // Add example if available
         if (method.examples && method.examples.length > 0) {
-          const example = method.examples[0];
+          const example = method.examples[0]
           if (example.mapping) {
-            docs.methods[method.name].example = example.mapping;
+            docs.methods[method.name].example = example.mapping
           }
         }
-      });
+      })
     }
 
-    return docs;
+    return docs
   }
 
   /**
@@ -222,16 +231,16 @@
    * Caches in localStorage for 1 hour to avoid repeated fetches
    */
   async function getConnectVersion() {
-    var CACHE_KEY = 'bloblang-connect-version';
-    var CACHE_TTL = 60 * 60 * 1000; // 1 hour
+    var CACHE_KEY = 'bloblang-connect-version'
+    var CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
     // Check cache first
     try {
-      var cached = localStorage.getItem(CACHE_KEY);
+      var cached = localStorage.getItem(CACHE_KEY)
       if (cached) {
-        var parsed = JSON.parse(cached);
+        var parsed = JSON.parse(cached)
         if (Date.now() - parsed.timestamp < CACHE_TTL) {
-          return parsed.version;
+          return parsed.version
         }
       }
     } catch (e) {
@@ -240,29 +249,32 @@
 
     // Fetch from antora.yml (no rate limits, CDN-served)
     try {
-      var resp = await fetch('https://raw.githubusercontent.com/redpanda-data/rp-connect-docs/main/antora.yml');
+      var resp = await fetch('https://raw.githubusercontent.com/redpanda-data/rp-connect-docs/main/antora.yml')
       if (resp.ok) {
-        var yaml = await resp.text();
-        var match = yaml.match(/latest-connect-version:\s*['"]?(\d+\.\d+\.\d+)/);
+        var yaml = await resp.text()
+        var match = yaml.match(/latest-connect-version:\s*['"]?(\d+\.\d+\.\d+)/)
         if (match) {
-          var version = match[1];
+          var version = match[1]
           // Cache the result
           try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({
-              version: version,
-              timestamp: Date.now()
-            }));
+            localStorage.setItem(
+              CACHE_KEY,
+              JSON.stringify({
+                version: version,
+                timestamp: Date.now(),
+              })
+            )
           } catch (e) {
             // localStorage not available
           }
-          return version;
+          return version
         }
       }
     } catch (e) {
       // Silent fail - will use fallback versions
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -270,74 +282,74 @@
    */
   async function loadBloblangDocs() {
     if (bloblangDocs) {
-      return bloblangDocs;
+      return bloblangDocs
     }
 
     if (docsLoading) {
       return new Promise((resolve) => {
-        docsLoadQueue.push(resolve);
-      });
+        docsLoadQueue.push(resolve)
+      })
     }
 
-    docsLoading = true;
+    docsLoading = true
 
     try {
-      var data = null;
-      var isDocsUiPreview = window.location.hostname.includes('docs-ui.netlify.app');
+      var data = null
+      var isDocsUiPreview = window.location.hostname.includes('docs-ui.netlify.app')
 
       // Skip remote fetches on docs-ui preview site - JSON files don't exist there
       if (!isDocsUiPreview) {
         // Try to get latest version from cached antora.yml
-        var latestVersion = await getConnectVersion();
+        var latestVersion = await getConnectVersion()
         if (latestVersion) {
-          data = await tryFetchConnectJSON(latestVersion);
+          data = await tryFetchConnectJSON(latestVersion)
         }
 
         // Fallback: try known recent versions
         if (!data) {
-          var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
+          var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0']
           for (var i = 0; i < fallbackVersions.length; i++) {
-            data = await tryFetchConnectJSON(fallbackVersions[i]);
-            if (data) break;
+            data = await tryFetchConnectJSON(fallbackVersions[i])
+            if (data) break
           }
         }
       }
 
       // Transform data to our format
       if (data) {
-        bloblangDocs = transformConnectData(data);
+        bloblangDocs = transformConnectData(data)
       } else {
         // Fallback to static file if available (or primary source on localhost)
         try {
-          var response = await fetch(uiRootPath + '/bloblang-docs.json');
-          bloblangDocs = await response.json();
+          var response = await fetch(uiRootPath + '/bloblang-docs.json')
+          bloblangDocs = await response.json()
         } catch (err) {
           // No documentation available - tooltips will be disabled
-          bloblangDocs = { functions: {}, methods: {} };
+          bloblangDocs = { functions: {}, methods: {} }
         }
       }
 
-      docsLoading = false;
+      docsLoading = false
 
       // Resolve all queued promises
       for (const resolve of docsLoadQueue) {
-        resolve(bloblangDocs);
+        resolve(bloblangDocs)
       }
-      docsLoadQueue = [];
+      docsLoadQueue = []
 
-      return bloblangDocs;
+      return bloblangDocs
     } catch (error) {
       // Unexpected error - tooltips will be disabled
-      docsLoading = false;
-      bloblangDocs = { functions: {}, methods: {} };
+      docsLoading = false
+      bloblangDocs = { functions: {}, methods: {} }
 
       // Resolve all queued promises with fallback
       for (const resolve of docsLoadQueue) {
-        resolve(bloblangDocs);
+        resolve(bloblangDocs)
       }
-      docsLoadQueue = [];
+      docsLoadQueue = []
 
-      return bloblangDocs;
+      return bloblangDocs
     }
   }
 
@@ -349,72 +361,76 @@
       <div class="bloblang-doc-tooltip">
         <div class="doc-signature"><code>${escapeHtml(doc.signature)}</code></div>
         <div class="doc-description">${formatDescription(doc.description)}</div>
-    `;
+    `
 
     if (doc.parameters && doc.parameters.length > 0) {
-      html += '<div class="doc-parameters"><strong>Parameters:</strong><ul>';
-      doc.parameters.forEach(param => {
-        html += `<li><code>${escapeHtml(param.name)}</code> (${escapeHtml(param.type)}): ${formatDescription(param.description)}</li>`;
-      });
-      html += '</ul></div>';
+      html += '<div class="doc-parameters"><strong>Parameters:</strong><ul>'
+      doc.parameters.forEach((param) => {
+        html += `<li><code>${escapeHtml(param.name)}</code> (${escapeHtml(param.type)}): ${formatDescription(
+          param.description
+        )}</li>`
+      })
+      html += '</ul></div>'
     }
 
     if (doc.returns) {
-      html += `<div class="doc-returns"><strong>Returns:</strong> <code>${escapeHtml(doc.returns)}</code></div>`;
+      html += `<div class="doc-returns"><strong>Returns:</strong> <code>${escapeHtml(doc.returns)}</code></div>`
     }
 
     if (doc.example) {
-      html += `<div class="doc-example"><pre><code>${escapeHtml(doc.example)}</code></pre></div>`;
+      html += `<div class="doc-example"><pre><code>${escapeHtml(doc.example)}</code></pre></div>`
     }
 
     if (doc.url) {
-      html += `<a href="${escapeHtml(doc.url)}" target="_blank" rel="noopener" class="doc-link">View full documentation →</a>`;
+      html += `<a href="${escapeHtml(
+        doc.url
+      )}" target="_blank" rel="noopener" class="doc-link">View full documentation →</a>`
     }
 
-    html += '</div>';
-    return html;
+    html += '</div>'
+    return html
   }
 
   /**
    * Escape HTML to prevent XSS
    */
   function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
   }
 
   /**
    * Format description text - escape HTML but convert backticks to <code> tags
    */
   function formatDescription(text) {
-    if (!text) return '';
+    if (!text) return ''
     // First escape HTML
-    const escaped = escapeHtml(text);
+    const escaped = escapeHtml(text)
     // Then convert backtick-wrapped text to <code> tags
-    return escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+    return escaped.replace(/`([^`]+)`/g, '<code>$1</code>')
   }
 
   /**
    * Check if device is touch-based
    */
   function isTouchDevice() {
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0
   }
 
   /**
    * Add tooltips to Bloblang tokens
    */
   function addDocumentationTooltips(codeBlock) {
-    const isTouch = isTouchDevice();
+    const isTouch = isTouchDevice()
 
     if (!window.tippy) {
-      console.warn('Tippy.js not loaded, skipping Bloblang tooltips');
-      return;
+      console.warn('Tippy.js not loaded, skipping Bloblang tooltips')
+      return
     }
 
-    loadBloblangDocs().then(docs => {
-      if (!docs) return;
+    loadBloblangDocs().then((docs) => {
+      if (!docs) return
 
       // Tippy configuration - different trigger for touch vs mouse
       const getTippyConfig = (doc) => ({
@@ -431,129 +447,131 @@
         hideOnClick: isTouch ? 'toggle' : true,
         onShow(instance) {
           // Hide other tooltips
-          document.querySelectorAll('.tippy-box').forEach(box => {
+          document.querySelectorAll('.tippy-box').forEach((box) => {
             if (box !== instance.popper) {
-              box._tippy && box._tippy.hide();
+              box._tippy && box._tippy.hide()
             }
-          });
-        }
-      });
+          })
+        },
+      })
 
       // Add tooltips to functions
-      codeBlock.querySelectorAll('.token.function').forEach(el => {
-        const functionName = el.textContent.trim();
-        const doc = docs.functions[functionName];
+      codeBlock.querySelectorAll('.token.function').forEach((el) => {
+        const functionName = el.textContent.trim()
+        const doc = docs.functions[functionName]
 
         if (doc) {
-          el.classList.add('has-documentation');
-          el.style.cursor = 'help';
-          el.setAttribute('tabindex', '0');
-          el.setAttribute('role', 'button');
-          el.setAttribute('aria-label', `${functionName} function documentation`);
+          el.classList.add('has-documentation')
+          el.style.cursor = 'help'
+          el.setAttribute('tabindex', '0')
+          el.setAttribute('role', 'button')
+          el.setAttribute('aria-label', `${functionName} function documentation`)
           if (isTouch) {
-            el.setAttribute('aria-haspopup', 'dialog');
+            el.setAttribute('aria-haspopup', 'dialog')
           }
 
-          tippy(el, getTippyConfig(doc));
+          tippy(el, getTippyConfig(doc))
         }
-      });
+      })
 
       // Add tooltips to methods
-      codeBlock.querySelectorAll('.token.method').forEach(el => {
-        const methodText = el.textContent.trim();
-        const methodName = methodText.replace(/^\./, '').replace(/\(\)$/, '');
-        const doc = docs.methods[methodName];
+      codeBlock.querySelectorAll('.token.method').forEach((el) => {
+        const methodText = el.textContent.trim()
+        const methodName = methodText.replace(/^\./, '').replace(/\(\)$/, '')
+        const doc = docs.methods[methodName]
 
         if (doc) {
-          el.classList.add('has-documentation');
-          el.style.cursor = 'help';
-          el.setAttribute('tabindex', '0');
-          el.setAttribute('role', 'button');
-          el.setAttribute('aria-label', `${methodName} method documentation`);
+          el.classList.add('has-documentation')
+          el.style.cursor = 'help'
+          el.setAttribute('tabindex', '0')
+          el.setAttribute('role', 'button')
+          el.setAttribute('aria-label', `${methodName} method documentation`)
           if (isTouch) {
-            el.setAttribute('aria-haspopup', 'dialog');
+            el.setAttribute('aria-haspopup', 'dialog')
           }
 
-          tippy(el, getTippyConfig(doc));
+          tippy(el, getTippyConfig(doc))
         }
-      });
+      })
 
       // Add keyboard accessibility
-      codeBlock.querySelectorAll('.has-documentation').forEach(el => {
+      codeBlock.querySelectorAll('.has-documentation').forEach((el) => {
         el.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            el._tippy && el._tippy.show();
+            e.preventDefault()
+            el._tippy && el._tippy.show()
           } else if (e.key === 'Escape') {
-            el._tippy && el._tippy.hide();
+            el._tippy && el._tippy.hide()
           }
-        });
-      });
-    });
+        })
+      })
+    })
   }
 
   /**
    * Add "Try It" button to code block
    */
   function addTryItButton(listingBlock, code) {
-    const toolbox = listingBlock.querySelector('.source-toolbox');
-    if (!toolbox) return;
+    const toolbox = listingBlock.querySelector('.source-toolbox')
+    if (!toolbox) return
 
     // Check if already has button
-    if (toolbox.querySelector('.try-bloblang-button')) return;
+    if (toolbox.querySelector('.try-bloblang-button')) return
 
     // Parse the code block to extract mapping, input, and metadata from comments
-    const parsed = parseBloblangSnippet(code);
+    const parsed = parseBloblangSnippet(code)
 
     // Skip if # Skip: true directive is present
-    if (parsed.skip) return;
+    if (parsed.skip) return
 
     // Helper to get attribute from listingblock, pre, or code element
     const getDataAttr = (name) => {
-      const pre = listingBlock.querySelector('pre');
-      const codeEl = listingBlock.querySelector('code');
-      return listingBlock.getAttribute(name) ||
-             (pre && pre.getAttribute(name)) ||
-             (codeEl && codeEl.getAttribute(name));
-    };
+      const pre = listingBlock.querySelector('pre')
+      const codeEl = listingBlock.querySelector('code')
+      return listingBlock.getAttribute(name) || (pre && pre.getAttribute(name)) || (codeEl && codeEl.getAttribute(name))
+    }
 
     // Use parsed values, with fallbacks from data attributes or defaults
-    const mapping = parsed.mapping || code;
-    const inputData = parsed.input || getDataAttr('data-bloblang-input') || '{}';
-    const metadata = parsed.meta || getDataAttr('data-bloblang-metadata') || '{}';
+    const mapping = parsed.mapping || code
+    const inputData = parsed.input || getDataAttr('data-bloblang-input') || '{}'
+    const metadata = parsed.meta || getDataAttr('data-bloblang-metadata') || '{}'
 
-    const button = document.createElement('button');
-    button.className = 'try-bloblang-button';
-    button.textContent = 'Try It';
-    button.setAttribute('aria-label', 'Try this Bloblang mapping');
+    const button = document.createElement('button')
+    button.className = 'try-bloblang-button'
+    button.textContent = 'Try It'
+    button.setAttribute('aria-label', 'Try this Bloblang mapping')
 
     button.addEventListener('click', () => {
-      openBloblangPlayground(mapping, inputData, metadata);
-    });
+      openBloblangPlayground(mapping, inputData, metadata)
+    })
 
     // Preload WASM and scripts on hover for faster "Try It" experience
-    button.addEventListener('mouseenter', () => {
-      loadRequiredScripts().then(() => loadBloblangWasm());
-    }, { once: true });
+    button.addEventListener(
+      'mouseenter',
+      () => {
+        loadRequiredScripts().then(() => loadBloblangWasm())
+      },
+      { once: true }
+    )
 
     // Add to toolbox
-    toolbox.appendChild(button);
+    toolbox.appendChild(button)
 
     // Initialize tooltip if tippy is available (skip on touch devices)
     if (window.tippy && !isTouchDevice()) {
-      button.setAttribute('data-tippy-content', 'Execute this mapping in a mini-playground');
+      button.setAttribute('data-tippy-content', 'Execute this mapping in a mini-playground')
       tippy(button, {
-        delay: [200, 0]
-      });
+        delay: [200, 0],
+      })
     }
   }
 
   // WASM and script loading state
-  let wasmLoading = false;
-  let wasmLoaded = false;
-  let wasmLoadPromise = null;
-  let scriptsLoaded = false;
-  let scriptsLoadPromise = null;
+  let wasmLoading = false
+  let wasmLoaded = false
+  let wasmLoadPromise = null
+  let scriptsLoaded = false
+  let scriptsLoadPromise = null
 
   /**
    * Dynamically load a script
@@ -562,16 +580,16 @@
     return new Promise((resolve, reject) => {
       // Check if already loaded
       if (document.querySelector(`script[src="${src}"]`)) {
-        resolve();
-        return;
+        resolve()
+        return
       }
 
-      const script = document.createElement('script');
-      script.src = src;
-      script.onload = resolve;
-      script.onerror = () => reject(new Error(`Failed to load ${src}`));
-      document.head.appendChild(script);
-    });
+      const script = document.createElement('script')
+      script.src = src
+      script.onload = resolve
+      script.onerror = () => reject(new Error(`Failed to load ${src}`))
+      document.head.appendChild(script)
+    })
   }
 
   /**
@@ -579,36 +597,38 @@
    */
   function loadRequiredScripts() {
     if (scriptsLoaded) {
-      return Promise.resolve();
+      return Promise.resolve()
     }
 
     if (scriptsLoadPromise) {
-      return scriptsLoadPromise;
+      return scriptsLoadPromise
     }
 
-    const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
+    const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_'
 
     scriptsLoadPromise = Promise.all([
       // Load wasm_exec.js if Go is not defined
       typeof Go === 'undefined' ? loadScript(rootPath + '/js/vendor/wasm_exec.js') : Promise.resolve(),
       // Load Ace if not defined
-      typeof ace === 'undefined' ? loadScript(rootPath + '/js/vendor/ace/ace.js') : Promise.resolve()
-    ]).then(() => {
-      // Load Ace dependencies after ace.js
-      const acePromises = [];
-      if (typeof ace !== 'undefined') {
-        acePromises.push(
-          loadScript(rootPath + '/js/vendor/ace/theme-github.js'),
-          loadScript(rootPath + '/js/vendor/ace/mode-json.js'),
-          loadScript(rootPath + '/js/vendor/ace/mode-bloblang.js')
-        );
-      }
-      return Promise.all(acePromises);
-    }).then(() => {
-      scriptsLoaded = true;
-    });
+      typeof ace === 'undefined' ? loadScript(rootPath + '/js/vendor/ace/ace.js') : Promise.resolve(),
+    ])
+      .then(() => {
+        // Load Ace dependencies after ace.js
+        const acePromises = []
+        if (typeof ace !== 'undefined') {
+          acePromises.push(
+            loadScript(rootPath + '/js/vendor/ace/theme-github.js'),
+            loadScript(rootPath + '/js/vendor/ace/mode-json.js'),
+            loadScript(rootPath + '/js/vendor/ace/mode-bloblang.js')
+          )
+        }
+        return Promise.all(acePromises)
+      })
+      .then(() => {
+        scriptsLoaded = true
+      })
 
-    return scriptsLoadPromise;
+    return scriptsLoadPromise
   }
 
   /**
@@ -616,59 +636,74 @@
    */
   function loadBloblangWasm() {
     if (wasmLoaded && window.blobl) {
-      return Promise.resolve();
+      return Promise.resolve()
     }
 
     if (wasmLoading && wasmLoadPromise) {
-      return wasmLoadPromise;
+      return wasmLoadPromise
     }
 
-    wasmLoading = true;
+    wasmLoading = true
 
     // WASM path varies by build type:
     // - Production/Netlify: /blobl.wasm (site root)
     // - UI Preview (local dev): /_/blobl.wasm
     // Use isUiPreview variable set in head-scripts.hbs to determine correct path
-    const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
-    const siteRoot = typeof siteRootPath !== 'undefined' ? siteRootPath : '';
-    const isPreview = typeof isUiPreview !== 'undefined' ? isUiPreview : false;
+    const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_'
+    const siteRoot = typeof siteRootPath !== 'undefined' ? siteRootPath : ''
+    const isPreview = typeof isUiPreview !== 'undefined' ? isUiPreview : false
 
     // Select the correct path based on environment - no fallback to avoid 404s
-    const wasmPath = isPreview ? rootPath + '/blobl.wasm' : siteRoot + '/blobl.wasm';
+    const wasmPath = isPreview ? rootPath + '/blobl.wasm' : siteRoot + '/blobl.wasm'
 
     wasmLoadPromise = new Promise((resolve, reject) => {
       loadRequiredScripts()
         .then(() => {
           if (typeof Go === 'undefined') {
-            reject(new Error('Go WASM runtime not available'));
-            return;
+            // Reset state before rejecting to allow retry
+            wasmLoading = false
+            wasmLoadPromise = null
+            wasmLoaded = false
+            reject(new Error('Go WASM runtime not available'))
+            return
           }
 
-          const go = new Go();
+          const go = new Go()
           fetch(wasmPath)
             .then((response) => {
               if (!response.ok) {
-                throw new Error('WASM file not found at ' + wasmPath);
+                throw new Error('WASM file not found at ' + wasmPath)
               }
-              const responseClone = response.clone();
-              return WebAssembly.instantiateStreaming(response, go.importObject)
-                .catch(async () => {
-                  const bytes = await responseClone.arrayBuffer();
-                  return WebAssembly.instantiate(bytes, go.importObject);
-                });
+              const responseClone = response.clone()
+              return WebAssembly.instantiateStreaming(response, go.importObject).catch(async () => {
+                const bytes = await responseClone.arrayBuffer()
+                return WebAssembly.instantiate(bytes, go.importObject)
+              })
             })
             .then((result) => {
-              go.run(result.instance);
-              wasmLoaded = true;
-              wasmLoading = false;
-              resolve();
+              go.run(result.instance)
+              wasmLoaded = true
+              wasmLoading = false
+              resolve()
             })
-            .catch(reject);
+            .catch((error) => {
+              // Reset state before rejecting to allow retry
+              wasmLoading = false
+              wasmLoadPromise = null
+              wasmLoaded = false
+              reject(error)
+            })
         })
-        .catch(reject);
-    });
+        .catch((error) => {
+          // Reset state before rejecting to allow retry
+          wasmLoading = false
+          wasmLoadPromise = null
+          wasmLoaded = false
+          reject(error)
+        })
+    })
 
-    return wasmLoadPromise;
+    return wasmLoadPromise
   }
 
   /**
@@ -676,22 +711,22 @@
    */
   function initAceEditor(elementId, mode, readOnly, initialValue, options = {}) {
     if (typeof ace === 'undefined') {
-      return null;
+      return null
     }
 
-    const editor = ace.edit(elementId);
+    const editor = ace.edit(elementId)
 
     // Set theme - use github if available, otherwise use a built-in light theme
     try {
-      editor.setTheme('ace/theme/github');
+      editor.setTheme('ace/theme/github')
     } catch (e) {
       // Fallback - textmate is a built-in light theme
-      console.warn('GitHub theme not available, using default');
+      console.warn('GitHub theme not available, using default')
     }
 
-    editor.session.setMode(mode);
-    editor.setReadOnly(readOnly);
-    editor.setValue(initialValue || '', -1);
+    editor.session.setMode(mode)
+    editor.setReadOnly(readOnly)
+    editor.setValue(initialValue || '', -1)
 
     // Build editor options - if maxLines is null, don't set it (use CSS height instead)
     const editorOptions = {
@@ -702,24 +737,24 @@
       tabSize: 2,
       useSoftTabs: true,
       wrap: true,
-      minLines: options.minLines || 4,
-      useWorker: false  // Disable workers to avoid 404s for missing worker files
-    };
+      minLines: options.minLines || 5,
+      useWorker: false, // Disable workers to avoid 404s for missing worker files
+    }
 
     // Only set maxLines if not explicitly null (null = use CSS height with scrollbar)
     if (options.maxLines !== null) {
-      editorOptions.maxLines = options.maxLines !== undefined ? options.maxLines : 15;
+      editorOptions.maxLines = options.maxLines !== undefined ? options.maxLines : 15
     }
 
-    editor.setOptions(editorOptions);
+    editor.setOptions(editorOptions)
 
     // Force light background via CSS as fallback
-    const container = document.getElementById(elementId);
+    const container = document.getElementById(elementId)
     if (container) {
-      container.style.backgroundColor = '#fff';
+      container.style.backgroundColor = '#fff'
     }
 
-    return editor;
+    return editor
   }
 
   /**
@@ -727,32 +762,32 @@
    * Matches the encoding used by the main playground.
    */
   function encodeBase64(str) {
-    const utf8Bytes = new TextEncoder().encode(str);
-    let binaryStr = '';
+    const utf8Bytes = new TextEncoder().encode(str)
+    let binaryStr = ''
     for (let i = 0; i < utf8Bytes.length; i++) {
-      binaryStr += String.fromCharCode(utf8Bytes[i]);
+      binaryStr += String.fromCharCode(utf8Bytes[i])
     }
-    return window.btoa(binaryStr);
+    return window.btoa(binaryStr)
   }
 
   /**
    * Build the full playground URL with encoded parameters
    */
   function buildPlaygroundUrl(input, mapping, meta) {
-    const baseUrl = '/redpanda-connect/guides/bloblang/playground/';
-    const params = new URLSearchParams();
+    const baseUrl = '/connect/guides/bloblang/playground/'
+    const params = new URLSearchParams()
 
     if (input) {
-      params.set('input', encodeBase64(input));
+      params.set('input', encodeBase64(input))
     }
     if (mapping) {
-      params.set('map', encodeBase64(mapping));
+      params.set('map', encodeBase64(mapping))
     }
     // Always include meta to prevent main playground from showing "Loading..."
-    params.set('meta', encodeBase64(meta || '{}'));
+    params.set('meta', encodeBase64(meta || '{}'))
 
-    const queryString = params.toString();
-    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    const queryString = params.toString()
+    return queryString ? `${baseUrl}?${queryString}` : baseUrl
   }
 
   /**
@@ -760,14 +795,14 @@
    */
   function openBloblangPlayground(mapping, inputData, metadata) {
     // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'bloblang-playground-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'playground-title');
+    const overlay = document.createElement('div')
+    overlay.className = 'bloblang-playground-overlay'
+    overlay.setAttribute('role', 'dialog')
+    overlay.setAttribute('aria-modal', 'true')
+    overlay.setAttribute('aria-labelledby', 'playground-title')
 
     // Build initial playground URL with current data
-    const initialPlaygroundUrl = buildPlaygroundUrl(inputData || '{}', mapping, metadata || '{}');
+    const initialPlaygroundUrl = buildPlaygroundUrl(inputData || '{}', mapping, metadata || '{}')
 
     overlay.innerHTML = `
       <div class="bloblang-mini-playground" role="dialog" aria-modal="true" aria-labelledby="playground-title">
@@ -799,253 +834,264 @@
           </div>
         </div>
       </div>
-    `;
+    `
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(overlay)
 
     // Get elements
-    const modal = overlay.querySelector('.bloblang-mini-playground');
-    const closeBtn = overlay.querySelector('.mini-playground-close');
-    const runBtn = overlay.querySelector('.mini-playground-run');
-    const copyBtn = overlay.querySelector('.mini-playground-copy-output');
-    const statusEl = overlay.querySelector('.mini-playground-status');
+    const modal = overlay.querySelector('.bloblang-mini-playground')
+    const closeBtn = overlay.querySelector('.mini-playground-close')
+    const runBtn = overlay.querySelector('.mini-playground-run')
+    const copyBtn = overlay.querySelector('.mini-playground-copy-output')
+    const statusEl = overlay.querySelector('.mini-playground-status')
 
     // Focus trap for accessibility
     function setupFocusTrap() {
-      const focusableSelector = 'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+      const focusableSelector =
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
       modal.addEventListener('keydown', (e) => {
-        if (e.key !== 'Tab') return;
+        if (e.key !== 'Tab') return
 
-        const focusableElements = Array.from(modal.querySelectorAll(focusableSelector));
-        if (focusableElements.length === 0) return;
+        const focusableElements = Array.from(modal.querySelectorAll(focusableSelector))
+        if (focusableElements.length === 0) return
 
-        const firstEl = focusableElements[0];
-        const lastEl = focusableElements[focusableElements.length - 1];
+        const firstEl = focusableElements[0]
+        const lastEl = focusableElements[focusableElements.length - 1]
 
         if (e.shiftKey && document.activeElement === firstEl) {
-          e.preventDefault();
-          lastEl.focus();
+          e.preventDefault()
+          lastEl.focus()
         } else if (!e.shiftKey && document.activeElement === lastEl) {
-          e.preventDefault();
-          firstEl.focus();
+          e.preventDefault()
+          firstEl.focus()
         }
-      });
+      })
 
       // Focus first focusable element (close button)
-      closeBtn.focus();
+      closeBtn.focus()
     }
 
-    setupFocusTrap();
+    setupFocusTrap()
 
     // Editor references (will be set after scripts load)
-    let inputEditor = null;
-    let mappingEditor = null;
-    let outputEditor = null;
+    let inputEditor = null
+    let mappingEditor = null
+    let outputEditor = null
+
+    // Store metadata for reuse in runMapping and full playground link
+    const playgroundMetadata = metadata || '{}'
 
     // Show loading status
-    showStatus('Loading editor...', 'info');
+    showStatus('Loading editor...', 'info')
 
     // Load required scripts first, then initialize editors and WASM
     loadRequiredScripts()
       .then(() => {
         // Initialize Ace editors after scripts are loaded
         // Disable maxLines auto-sizing so CSS controls height and Ace scrollbar works
-        inputEditor = initAceEditor('mini-playground-input', 'ace/mode/json', false, inputData || '{}', { maxLines: null });
-        mappingEditor = initAceEditor('mini-playground-mapping', 'ace/mode/bloblang', false, mapping, { maxLines: null });
-        outputEditor = initAceEditor('mini-playground-output', 'ace/mode/json', true, '', { maxLines: null });
+        inputEditor = initAceEditor('mini-playground-input', 'ace/mode/json', false, inputData || '{}', {
+          maxLines: null,
+        })
+        mappingEditor = initAceEditor('mini-playground-mapping', 'ace/mode/bloblang', false, mapping, {
+          maxLines: null,
+        })
+        outputEditor = initAceEditor('mini-playground-output', 'ace/mode/json', true, '', { maxLines: null })
 
         // Force resize after initialization to ensure scrollbars work
-        if (inputEditor) inputEditor.resize(true);
-        if (mappingEditor) mappingEditor.resize(true);
-        if (outputEditor) outputEditor.resize(true);
+        if (inputEditor) inputEditor.resize(true)
+        if (mappingEditor) mappingEditor.resize(true)
+        if (outputEditor) outputEditor.resize(true)
 
         // Add keyboard shortcut for running
         if (mappingEditor) {
           mappingEditor.commands.addCommand({
             name: 'runMapping',
             bindKey: { win: 'Ctrl-Enter', mac: 'Cmd-Enter' },
-            exec: runMapping
-          });
+            exec: runMapping,
+          })
         }
         if (inputEditor) {
           inputEditor.commands.addCommand({
             name: 'runMapping',
             bindKey: { win: 'Ctrl-Enter', mac: 'Cmd-Enter' },
-            exec: runMapping
-          });
-          inputEditor.focus();
+            exec: runMapping,
+          })
+          inputEditor.focus()
         }
 
-        showStatus('Loading...', 'info');
+        showStatus('Loading...', 'info')
 
         // Now load WASM
-        return loadBloblangWasm();
+        return loadBloblangWasm()
       })
       .then(() => {
-        showStatus('Ready', 'ready');
-        runBtn.disabled = false;
+        showStatus('Ready', 'ready')
+        runBtn.disabled = false
         // Focus mapping editor
         if (mappingEditor) {
-          mappingEditor.focus();
+          mappingEditor.focus()
         }
       })
       .catch((err) => {
-        showStatus('Failed to load: ' + err.message, 'error');
-        console.error('Mini-playground load error:', err);
-      });
+        showStatus('Failed to load: ' + err.message, 'error')
+        console.error('Mini-playground load error:', err)
+      })
 
     // Close handlers
     function closePlayground() {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleEscape)
       // Destroy Ace editors
-      if (inputEditor) inputEditor.destroy();
-      if (mappingEditor) mappingEditor.destroy();
-      if (outputEditor) outputEditor.destroy();
-      overlay.remove();
+      if (inputEditor) inputEditor.destroy()
+      if (mappingEditor) mappingEditor.destroy()
+      if (outputEditor) outputEditor.destroy()
+      overlay.remove()
     }
 
     function handleEscape(e) {
       if (e.key === 'Escape') {
-        closePlayground();
+        closePlayground()
       }
     }
 
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closePlayground();
-    });
-    closeBtn.addEventListener('click', closePlayground);
-    document.addEventListener('keydown', handleEscape);
+      if (e.target === overlay) closePlayground()
+    })
+    closeBtn.addEventListener('click', closePlayground)
+    document.addEventListener('keydown', handleEscape)
 
     // Run mapping
     function runMapping() {
-      const currentMapping = mappingEditor ? mappingEditor.getValue() : '';
-      const currentInput = inputEditor ? inputEditor.getValue() : '{}';
+      const currentMapping = mappingEditor ? mappingEditor.getValue() : ''
+      const currentInput = inputEditor ? inputEditor.getValue() : '{}'
 
       if (!currentMapping.trim()) {
-        showStatus('Please enter a mapping', 'error');
-        return;
+        showStatus('Please enter a mapping', 'error')
+        return
       }
 
       if (!window.blobl) {
-        showStatus('WASM not loaded yet', 'error');
-        return;
+        showStatus('WASM not loaded yet', 'error')
+        return
       }
 
       try {
-        showStatus('Running...', 'info');
-        const result = window.blobl(currentMapping, currentInput, '{}');
+        showStatus('Running...', 'info')
+        const result = window.blobl(currentMapping, currentInput, playgroundMetadata)
 
         if (typeof result === 'string' && result.startsWith('Error:')) {
-          showStatus(result, 'error');
+          showStatus(result, 'error')
           if (outputEditor) {
-            outputEditor.setValue('', -1);
-            outputEditor.scrollToRow(0);
+            outputEditor.setValue('', -1)
+            outputEditor.scrollToRow(0)
           }
         } else {
           // Format JSON if possible
-          let formattedResult = result;
+          let formattedResult = result
           try {
-            const parsed = JSON.parse(result);
+            const parsed = JSON.parse(result)
             // Extract .msg field like main playground does
-            const message = parsed.msg !== undefined ? parsed.msg : parsed;
-            formattedResult = JSON.stringify(message, null, 2);
+            const message = parsed.msg !== undefined ? parsed.msg : parsed
+            formattedResult = JSON.stringify(message, null, 2)
           } catch {
             // Not JSON, use as-is
           }
           if (outputEditor) {
-            outputEditor.setValue(formattedResult, -1);
+            outputEditor.setValue(formattedResult, -1)
             // Resize to recalculate scrollbar after content change
-            outputEditor.resize(true);
+            outputEditor.resize(true)
             // Explicitly scroll to top to fix Firefox rendering issue
-            outputEditor.scrollToRow(0);
+            outputEditor.scrollToRow(0)
           }
-          showStatus('Success!', 'success');
+          showStatus('Success!', 'success')
         }
       } catch (error) {
-        showStatus('Error: ' + error.message, 'error');
+        showStatus('Error: ' + error.message, 'error')
         if (outputEditor) {
-          outputEditor.setValue('', -1);
-          outputEditor.scrollToRow(0);
+          outputEditor.setValue('', -1)
+          outputEditor.scrollToRow(0)
         }
       }
     }
 
     function showStatus(message, type) {
-      statusEl.textContent = message;
-      statusEl.className = 'mini-playground-status mini-playground-status-' + type;
+      statusEl.textContent = message
+      statusEl.className = 'mini-playground-status mini-playground-status-' + type
 
       // Use assertive announcements for errors, polite for other messages
       if (type === 'error') {
-        statusEl.setAttribute('role', 'alert');
-        statusEl.setAttribute('aria-live', 'assertive');
+        statusEl.setAttribute('role', 'alert')
+        statusEl.setAttribute('aria-live', 'assertive')
       } else {
-        statusEl.setAttribute('role', 'status');
-        statusEl.setAttribute('aria-live', 'polite');
+        statusEl.setAttribute('role', 'status')
+        statusEl.setAttribute('aria-live', 'polite')
       }
 
       if (type === 'success') {
         setTimeout(() => {
           if (statusEl.textContent === message) {
-            statusEl.textContent = 'Ready';
-            statusEl.className = 'mini-playground-status mini-playground-status-ready';
+            statusEl.textContent = 'Ready'
+            statusEl.className = 'mini-playground-status mini-playground-status-ready'
           }
-        }, 2000);
+        }, 2000)
       }
     }
 
     // Copy output
     function copyOutput() {
-      const output = outputEditor ? outputEditor.getValue() : '';
+      const output = outputEditor ? outputEditor.getValue() : ''
       if (!output) {
-        showStatus('No output to copy', 'error');
-        return;
+        showStatus('No output to copy', 'error')
+        return
       }
 
       // Try modern clipboard API first, fall back to execCommand
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(output).then(() => {
-          showStatus('Copied!', 'success');
-        }).catch(() => {
-          fallbackCopy(output);
-        });
+        navigator.clipboard
+          .writeText(output)
+          .then(() => {
+            showStatus('Copied!', 'success')
+          })
+          .catch(() => {
+            fallbackCopy(output)
+          })
       } else {
-        fallbackCopy(output);
+        fallbackCopy(output)
       }
     }
 
     // Fallback copy method for older browsers or non-HTTPS
     function fallbackCopy(text) {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
       try {
-        document.execCommand('copy');
-        showStatus('Copied!', 'success');
+        document.execCommand('copy')
+        showStatus('Copied!', 'success')
       } catch (e) {
-        showStatus('Failed to copy', 'error');
+        showStatus('Failed to copy', 'error')
       }
-      document.body.removeChild(textarea);
+      document.body.removeChild(textarea)
     }
 
     // Event listeners
-    runBtn.addEventListener('click', runMapping);
-    copyBtn.addEventListener('click', copyOutput);
+    runBtn.addEventListener('click', runMapping)
+    copyBtn.addEventListener('click', copyOutput)
 
     // Update playground link with current editor state when clicked
-    const playgroundLink = overlay.querySelector('.mini-playground-link');
+    const playgroundLink = overlay.querySelector('.mini-playground-link')
     if (playgroundLink) {
       playgroundLink.addEventListener('click', (e) => {
         // Get current editor values
-        const currentInput = inputEditor ? inputEditor.getValue() : '{}';
-        const currentMapping = mappingEditor ? mappingEditor.getValue() : '';
-        // Build URL with encoded parameters
-        const url = buildPlaygroundUrl(currentInput, currentMapping, '{}');
-        playgroundLink.href = url;
-      });
+        const currentInput = inputEditor ? inputEditor.getValue() : '{}'
+        const currentMapping = mappingEditor ? mappingEditor.getValue() : ''
+        // Build URL with encoded parameters (use stored metadata)
+        const url = buildPlaygroundUrl(currentInput, currentMapping, playgroundMetadata)
+        playgroundLink.href = url
+      })
     }
   }
 
@@ -1054,28 +1100,26 @@
    */
   function initializeBloblang() {
     // Find all Bloblang code blocks
-    const bloblangBlocks = document.querySelectorAll(
-      'pre > code.language-bloblang, pre > code.language-blobl'
-    );
+    const bloblangBlocks = document.querySelectorAll('pre > code.language-bloblang, pre > code.language-blobl')
 
-    bloblangBlocks.forEach(codeBlock => {
-      const listingBlock = codeBlock.closest('.listingblock');
-      if (!listingBlock) return;
+    bloblangBlocks.forEach((codeBlock) => {
+      const listingBlock = codeBlock.closest('.listingblock')
+      if (!listingBlock) return
 
       // Add documentation tooltips
-      addDocumentationTooltips(codeBlock);
+      addDocumentationTooltips(codeBlock)
 
       // Add Try It button
-      const code = codeBlock.textContent;
-      addTryItButton(listingBlock, code);
-    });
+      const code = codeBlock.textContent
+      addTryItButton(listingBlock, code)
+    })
   }
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeBloblang);
+    document.addEventListener('DOMContentLoaded', initializeBloblang)
   } else {
-    initializeBloblang();
+    initializeBloblang()
   }
 
   // Also initialize after Prism highlighting completes
@@ -1083,18 +1127,18 @@
     Prism.hooks.add('complete', (env) => {
       if (env.language === 'bloblang' || env.language === 'blobl') {
         setTimeout(() => {
-          const codeBlock = env.element;
-          const listingBlock = codeBlock.closest('.listingblock');
+          const codeBlock = env.element
+          const listingBlock = codeBlock.closest('.listingblock')
           if (listingBlock) {
-            addDocumentationTooltips(codeBlock);
-            const code = codeBlock.textContent;
-            addTryItButton(listingBlock, code);
+            addDocumentationTooltips(codeBlock)
+            const code = codeBlock.textContent
+            addTryItButton(listingBlock, code)
           }
-        }, 100);
+        }, 100)
       }
-    });
+    })
   }
 
   // Export for use by other modules (e.g., 17-bloblang-yaml.js)
-  window.addBloblangTooltips = addDocumentationTooltips;
-})();
+  window.addBloblangTooltips = addDocumentationTooltips
+})()

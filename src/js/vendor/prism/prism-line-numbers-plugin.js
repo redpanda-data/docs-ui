@@ -1,256 +1,256 @@
 /* eslint-disable */
 
+;(function() {
+  if (typeof Prism === 'undefined' || typeof document === 'undefined') {
+    return
+  }
 
-;(function () {
-	if (typeof Prism === 'undefined' || typeof document === 'undefined') {
-		return;
-	}
+  /**
+   * Plugin name which is used as a class name for <pre> which is activating the plugin
+   *
+   * @type {string}
+   */
+  var PLUGIN_NAME = 'line-numbers'
 
-	/**
-	 * Plugin name which is used as a class name for <pre> which is activating the plugin
-	 *
-	 * @type {string}
-	 */
-	var PLUGIN_NAME = 'line-numbers';
+  /**
+   * Regular expression used for determining line breaks
+   *
+   * @type {RegExp}
+   */
+  var NEW_LINE_EXP = /\n(?!$)/g
 
-	/**
-	 * Regular expression used for determining line breaks
-	 *
-	 * @type {RegExp}
-	 */
-	var NEW_LINE_EXP = /\n(?!$)/g;
+  /**
+   * Global exports
+   */
+  var config = (Prism.plugins.lineNumbers = {
+    /**
+     * Get node for provided line number
+     *
+     * @param {Element} element pre element
+     * @param {number} number line number
+     * @returns {Element|undefined}
+     */
+    getLine: function(element, number) {
+      if (element.tagName !== 'PRE' || !element.classList.contains(PLUGIN_NAME)) {
+        return
+      }
 
+      var lineNumberRows = element.querySelector('.line-numbers-rows')
+      if (!lineNumberRows) {
+        return
+      }
+      var lineNumberStart = parseInt(element.getAttribute('data-start'), 10) || 1
+      var lineNumberEnd = lineNumberStart + (lineNumberRows.children.length - 1)
 
-	/**
-	 * Global exports
-	 */
-	var config = Prism.plugins.lineNumbers = {
-		/**
-		 * Get node for provided line number
-		 *
-		 * @param {Element} element pre element
-		 * @param {number} number line number
-		 * @returns {Element|undefined}
-		 */
-		getLine: function (element, number) {
-			if (element.tagName !== 'PRE' || !element.classList.contains(PLUGIN_NAME)) {
-				return;
-			}
+      if (number < lineNumberStart) {
+        number = lineNumberStart
+      }
+      if (number > lineNumberEnd) {
+        number = lineNumberEnd
+      }
 
-			var lineNumberRows = element.querySelector('.line-numbers-rows');
-			if (!lineNumberRows) {
-				return;
-			}
-			var lineNumberStart = parseInt(element.getAttribute('data-start'), 10) || 1;
-			var lineNumberEnd = lineNumberStart + (lineNumberRows.children.length - 1);
+      var lineIndex = number - lineNumberStart
 
-			if (number < lineNumberStart) {
-				number = lineNumberStart;
-			}
-			if (number > lineNumberEnd) {
-				number = lineNumberEnd;
-			}
+      return lineNumberRows.children[lineIndex]
+    },
 
-			var lineIndex = number - lineNumberStart;
+    /**
+     * Resizes the line numbers of the given element.
+     *
+     * This function will not add line numbers. It will only resize existing ones.
+     *
+     * @param {HTMLElement} element A `<pre>` element with line numbers.
+     * @returns {void}
+     */
+    resize: function(element) {
+      resizeElements([element])
+    },
 
-			return lineNumberRows.children[lineIndex];
-		},
+    /**
+     * Whether the plugin can assume that the units font sizes and margins are not depended on the size of
+     * the current viewport.
+     *
+     * Setting this to `true` will allow the plugin to do certain optimizations for better performance.
+     *
+     * Set this to `false` if you use any of the following CSS units: `vh`, `vw`, `vmin`, `vmax`.
+     *
+     * @type {boolean}
+     */
+    assumeViewportIndependence: true,
+  })
 
-		/**
-		 * Resizes the line numbers of the given element.
-		 *
-		 * This function will not add line numbers. It will only resize existing ones.
-		 *
-		 * @param {HTMLElement} element A `<pre>` element with line numbers.
-		 * @returns {void}
-		 */
-		resize: function (element) {
-			resizeElements([element]);
-		},
+  /**
+   * Resizes the given elements.
+   *
+   * @param {HTMLElement[]} elements
+   */
+  function resizeElements(elements) {
+    elements = elements.filter(function(e) {
+      var codeStyles = getStyles(e)
+      var whiteSpace = codeStyles['white-space']
+      return whiteSpace === 'pre-wrap' || whiteSpace === 'pre-line'
+    })
 
-		/**
-		 * Whether the plugin can assume that the units font sizes and margins are not depended on the size of
-		 * the current viewport.
-		 *
-		 * Setting this to `true` will allow the plugin to do certain optimizations for better performance.
-		 *
-		 * Set this to `false` if you use any of the following CSS units: `vh`, `vw`, `vmin`, `vmax`.
-		 *
-		 * @type {boolean}
-		 */
-		assumeViewportIndependence: true
-	};
+    if (elements.length == 0) {
+      return
+    }
 
-	/**
-	 * Resizes the given elements.
-	 *
-	 * @param {HTMLElement[]} elements
-	 */
-	function resizeElements(elements) {
-		elements = elements.filter(function (e) {
-			var codeStyles = getStyles(e);
-			var whiteSpace = codeStyles['white-space'];
-			return whiteSpace === 'pre-wrap' || whiteSpace === 'pre-line';
-		});
+    var infos = elements
+      .map(function(element) {
+        var codeElement = element.querySelector('code')
+        var lineNumbersWrapper = element.querySelector('.line-numbers-rows')
+        if (!codeElement || !lineNumbersWrapper) {
+          return undefined
+        }
 
-		if (elements.length == 0) {
-			return;
-		}
+        /** @type {HTMLElement} */
+        var lineNumberSizer = element.querySelector('.line-numbers-sizer')
+        var codeLines = codeElement.textContent.split(NEW_LINE_EXP)
 
-		var infos = elements.map(function (element) {
-			var codeElement = element.querySelector('code');
-			var lineNumbersWrapper = element.querySelector('.line-numbers-rows');
-			if (!codeElement || !lineNumbersWrapper) {
-				return undefined;
-			}
+        if (!lineNumberSizer) {
+          lineNumberSizer = document.createElement('span')
+          lineNumberSizer.className = 'line-numbers-sizer'
 
-			/** @type {HTMLElement} */
-			var lineNumberSizer = element.querySelector('.line-numbers-sizer');
-			var codeLines = codeElement.textContent.split(NEW_LINE_EXP);
+          codeElement.appendChild(lineNumberSizer)
+        }
 
-			if (!lineNumberSizer) {
-				lineNumberSizer = document.createElement('span');
-				lineNumberSizer.className = 'line-numbers-sizer';
+        lineNumberSizer.innerHTML = '0'
+        lineNumberSizer.style.display = 'block'
 
-				codeElement.appendChild(lineNumberSizer);
-			}
+        var oneLinerHeight = lineNumberSizer.getBoundingClientRect().height
+        lineNumberSizer.innerHTML = ''
 
-			lineNumberSizer.innerHTML = '0';
-			lineNumberSizer.style.display = 'block';
+        return {
+          element: element,
+          lines: codeLines,
+          lineHeights: [],
+          oneLinerHeight: oneLinerHeight,
+          sizer: lineNumberSizer,
+        }
+      })
+      .filter(Boolean)
 
-			var oneLinerHeight = lineNumberSizer.getBoundingClientRect().height;
-			lineNumberSizer.innerHTML = '';
+    infos.forEach(function(info) {
+      var lineNumberSizer = info.sizer
+      var lines = info.lines
+      var lineHeights = info.lineHeights
+      var oneLinerHeight = info.oneLinerHeight
 
-			return {
-				element: element,
-				lines: codeLines,
-				lineHeights: [],
-				oneLinerHeight: oneLinerHeight,
-				sizer: lineNumberSizer,
-			};
-		}).filter(Boolean);
+      lineHeights[lines.length - 1] = undefined
+      lines.forEach(function(line, index) {
+        if (line && line.length > 1) {
+          var e = lineNumberSizer.appendChild(document.createElement('span'))
+          e.style.display = 'block'
+          e.textContent = line
+        } else {
+          lineHeights[index] = oneLinerHeight
+        }
+      })
+    })
 
-		infos.forEach(function (info) {
-			var lineNumberSizer = info.sizer;
-			var lines = info.lines;
-			var lineHeights = info.lineHeights;
-			var oneLinerHeight = info.oneLinerHeight;
+    infos.forEach(function(info) {
+      var lineNumberSizer = info.sizer
+      var lineHeights = info.lineHeights
 
-			lineHeights[lines.length - 1] = undefined;
-			lines.forEach(function (line, index) {
-				if (line && line.length > 1) {
-					var e = lineNumberSizer.appendChild(document.createElement('span'));
-					e.style.display = 'block';
-					e.textContent = line;
-				} else {
-					lineHeights[index] = oneLinerHeight;
-				}
-			});
-		});
+      var childIndex = 0
+      for (var i = 0; i < lineHeights.length; i++) {
+        if (lineHeights[i] === undefined) {
+          lineHeights[i] = lineNumberSizer.children[childIndex++].getBoundingClientRect().height
+          if (!lineHeights[i]) {
+            lineHeights[i] = 24.96875 // Default in cases where it's 0 and line numbers appear squished together in the top left corner.
+          }
+        }
+      }
+    })
 
-		infos.forEach(function (info) {
-			var lineNumberSizer = info.sizer;
-			var lineHeights = info.lineHeights;
+    infos.forEach(function(info) {
+      var lineNumberSizer = info.sizer
+      var wrapper = info.element.querySelector('.line-numbers-rows')
 
-			var childIndex = 0;
-			for (var i = 0; i < lineHeights.length; i++) {
-				if (lineHeights[i] === undefined) {
-					lineHeights[i] = lineNumberSizer.children[childIndex++].getBoundingClientRect().height;
-					if (!lineHeights[i]) {
-						lineHeights[i] = 24.96875 // Default in cases where it's 0 and line numbers appear squished together in the top left corner.
-					}
-				}
-			}
-		});
+      lineNumberSizer.style.display = 'none'
+      lineNumberSizer.innerHTML = ''
 
-		infos.forEach(function (info) {
-			var lineNumberSizer = info.sizer;
-			var wrapper = info.element.querySelector('.line-numbers-rows');
+      info.lineHeights.forEach(function(height, lineNumber) {
+        wrapper.children[lineNumber].style.height = height + 'px'
+      })
+    })
+  }
 
-			lineNumberSizer.style.display = 'none';
-			lineNumberSizer.innerHTML = '';
+  /**
+   * Returns style declarations for the element
+   *
+   * @param {Element} element
+   */
+  function getStyles(element) {
+    if (!element) {
+      return null
+    }
 
-			info.lineHeights.forEach(function (height, lineNumber) {
-				wrapper.children[lineNumber].style.height = height + 'px';
-			});
-		});
-	}
+    return window.getComputedStyle ? getComputedStyle(element) : element.currentStyle || null
+  }
 
-	/**
-	 * Returns style declarations for the element
-	 *
-	 * @param {Element} element
-	 */
-	function getStyles(element) {
-		if (!element) {
-			return null;
-		}
+  var lastWidth = undefined
+  window.addEventListener('resize', function() {
+    if (config.assumeViewportIndependence && lastWidth === window.innerWidth) {
+      return
+    }
+    lastWidth = window.innerWidth
 
-		return window.getComputedStyle ? getComputedStyle(element) : (element.currentStyle || null);
-	}
+    resizeElements(Array.prototype.slice.call(document.querySelectorAll('pre.' + PLUGIN_NAME)))
+  })
 
-	var lastWidth = undefined;
-	window.addEventListener('resize', function () {
-		if (config.assumeViewportIndependence && lastWidth === window.innerWidth) {
-			return;
-		}
-		lastWidth = window.innerWidth;
+  Prism.hooks.add('complete', function(env) {
+    if (!env.code) {
+      return
+    }
 
-		resizeElements(Array.prototype.slice.call(document.querySelectorAll('pre.' + PLUGIN_NAME)));
-	});
+    var code = /** @type {Element} */ (env.element)
+    var pre = /** @type {HTMLElement} */ (code.parentNode)
 
-	Prism.hooks.add('complete', function (env) {
-		if (!env.code) {
-			return;
-		}
+    // works only for <code> wrapped inside <pre> (not inline)
+    if (!pre || !/pre/i.test(pre.nodeName)) {
+      return
+    }
 
-		var code = /** @type {Element} */ (env.element);
-		var pre = /** @type {HTMLElement} */ (code.parentNode);
+    // Abort if line numbers already exists
+    if (code.querySelector('.line-numbers-rows')) {
+      return
+    }
 
-		// works only for <code> wrapped inside <pre> (not inline)
-		if (!pre || !/pre/i.test(pre.nodeName)) {
-			return;
-		}
+    // only add line numbers if <code> or one of its ancestors has the `line-numbers` class
+    if (!Prism.util.isActive(code, PLUGIN_NAME)) {
+      return
+    }
 
-		// Abort if line numbers already exists
-		if (code.querySelector('.line-numbers-rows')) {
-			return;
-		}
+    // Remove the class 'line-numbers' from the <code>
+    code.classList.remove(PLUGIN_NAME)
+    // Add the class 'line-numbers' to the <pre>
+    pre.classList.add(PLUGIN_NAME)
 
-		// only add line numbers if <code> or one of its ancestors has the `line-numbers` class
-		if (!Prism.util.isActive(code, PLUGIN_NAME)) {
-			return;
-		}
+    var match = env.code.match(NEW_LINE_EXP)
+    var linesNum = match ? match.length + 1 : 1
+    var lineNumbersWrapper
 
-		// Remove the class 'line-numbers' from the <code>
-		code.classList.remove(PLUGIN_NAME);
-		// Add the class 'line-numbers' to the <pre>
-		pre.classList.add(PLUGIN_NAME);
+    var lines = new Array(linesNum + 1).join('<span></span>')
 
-		var match = env.code.match(NEW_LINE_EXP);
-		var linesNum = match ? match.length + 1 : 1;
-		var lineNumbersWrapper;
+    lineNumbersWrapper = document.createElement('span')
+    lineNumbersWrapper.setAttribute('aria-hidden', 'true')
+    lineNumbersWrapper.className = 'line-numbers-rows'
+    lineNumbersWrapper.innerHTML = lines
 
-		var lines = new Array(linesNum + 1).join('<span></span>');
+    if (pre.hasAttribute('data-start')) {
+      pre.style.counterReset = 'linenumber ' + (parseInt(pre.getAttribute('data-start'), 10) - 1)
+    }
 
-		lineNumbersWrapper = document.createElement('span');
-		lineNumbersWrapper.setAttribute('aria-hidden', 'true');
-		lineNumbersWrapper.className = 'line-numbers-rows';
-		lineNumbersWrapper.innerHTML = lines;
+    env.element.appendChild(lineNumbersWrapper)
 
-		if (pre.hasAttribute('data-start')) {
-			pre.style.counterReset = 'linenumber ' + (parseInt(pre.getAttribute('data-start'), 10) - 1);
-		}
+    resizeElements([pre])
 
-		env.element.appendChild(lineNumbersWrapper);
+    Prism.hooks.run('line-numbers', env)
+  })
 
-		resizeElements([pre]);
-
-		Prism.hooks.run('line-numbers', env);
-	});
-
-	Prism.hooks.add('line-numbers', function (env) {
-		env.plugins = env.plugins || {};
-		env.plugins.lineNumbers = true;
-	});
-}());
+  Prism.hooks.add('line-numbers', function(env) {
+    env.plugins = env.plugins || {}
+    env.plugins.lineNumbers = true
+  })
+})()

@@ -1,8 +1,4 @@
 <style>
-  .announcement-bar {
-    display: none;
-    height: 0;
-  }
   .bloblang-playground .banner-container {
     display: none;
   }
@@ -14,29 +10,46 @@
       const banner = document.getElementById(bannerId);
       if (!banner) return;
 
-      const storageKey = `${sessionKey}-${announcementType}`; // Use the announcement type to differentiate between different banners
+      const storageKey = `${sessionKey}-${announcementType}`;
       const hasSeenBanner = window.sessionStorage.getItem(storageKey) || false;
+
       if (hasSeenBanner) {
-        if (announcementType !== 'bloblang') {
-          document.documentElement.style.setProperty('--announcement-bar-height', '0px');
-          document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
-        }
+        // Already dismissed - remove immediately without animation
         banner.remove();
-      } else {
-          if (announcementType !== 'bloblang') {
-            document.documentElement.style.setProperty('--announcement-bar-height', '50px');
-            document.documentElement.style.setProperty('--announcement-bar-height--desktop', '30px');
-          }
-        banner.style.display = 'flex';
-        const closeButton = banner.querySelector('.close');
-        if (closeButton) {
-          closeButton.addEventListener('click', function () {
+        return;
+      }
+
+      // Show banner with smooth animation
+      if (announcementType !== 'bloblang') {
+        // Set CSS variables for other elements that need to account for banner height
+        // Mobile uses 60px to match CSS max-height, desktop uses 36px
+        const height = window.innerWidth >= 1024 ? '36px' : '60px';
+        document.documentElement.style.setProperty('--announcement-bar-height', height);
+        document.documentElement.style.setProperty('--announcement-bar-height--desktop', '36px');
+      }
+
+      // Trigger animation after a brief delay to ensure styles are applied
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          banner.classList.add('is-active');
+        });
+      });
+
+      const closeButton = banner.querySelector('.close');
+      if (closeButton) {
+        closeButton.addEventListener('click', function () {
+          // Animate out
+          banner.classList.remove('is-active');
+
+          // Remove from DOM after animation completes
+          setTimeout(function() {
             document.documentElement.style.setProperty('--announcement-bar-height', '0px');
             document.documentElement.style.setProperty('--announcement-bar-height--desktop', '0px');
             banner.remove();
-            window.sessionStorage.setItem(storageKey, 'true');
-          });
-        }
+          }, 300);
+
+          window.sessionStorage.setItem(storageKey, 'true');
+        });
       }
     }
 
@@ -44,7 +57,11 @@
     const initialTheme = localStorage.getItem('theme') ||
       (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
+    // Always set data-theme attribute on html element (body set after DOMContentLoaded)
     document.documentElement.setAttribute('data-theme', initialTheme);
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark-theme');
+    }
     // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
     window.addEventListener('DOMContentLoaded', function() {
       const switchButton = document.getElementById('switch-theme');
@@ -74,22 +91,45 @@
     });
   function setTheme(theme) {
     const switchButton = document.getElementById('switch-theme');
-    const img = switchButton.querySelector('img:first-child');
+    const sidebarToggle = document.getElementById('sidebar-theme-toggle');
+    const img = switchButton ? switchButton.querySelector('img:first-child') : null;
+    const sidebar = document.querySelector('.sidebar');
 
     if (theme === 'dark') {
-      img.src = img.src.replace('view-sun', 'view-moon');
-      img.classList.add('moon');
+      // Update header toggle icon - show sun in dark mode (to switch TO light)
+      if (img) {
+        img.src = img.src.replace('view-moon', 'view-sun');
+        img.classList.remove('moon');
+      }
       document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark-theme');
       document.body.setAttribute('data-theme', 'dark');
+      if (sidebar) sidebar.setAttribute('data-theme', 'dark');
     } else {
-      img.src = img.src.replace('view-moon', 'view-sun');
-      img.classList.remove('moon');
-      document.documentElement.removeAttribute('data-theme');
+      // Update header toggle icon - show moon in light mode (to switch TO dark)
+      if (img) {
+        img.src = img.src.replace('view-sun', 'view-moon');
+        img.classList.add('moon');
+      }
+      document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('dark-theme');
-      document.body.removeAttribute('data-theme');
+      document.body.setAttribute('data-theme', 'light');
+      if (sidebar) sidebar.setAttribute('data-theme', 'light');
     }
   }
+
+  // Connect sidebar theme toggle to main theme switcher
+  window.addEventListener('DOMContentLoaded', function() {
+    const sidebarThemeToggle = document.getElementById('sidebar-theme-toggle');
+    if (sidebarThemeToggle) {
+      sidebarThemeToggle.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        setTheme(newTheme);
+      });
+    }
+  });
 })();
 </script>
 <!-- Load these styles before those in site.css to avoid flashing -->
@@ -145,12 +185,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   var isUiPreview={{#if (eq site.title 'UI Preview')}}true{{else}}false{{/if}}
 </script>
 {{#if (or (eq page.attributes.role 'bloblang-playground')(eq page.attributes.role 'bloblang-snippets') (eq page.attributes.role 'enable-ace-editor'))}}
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/ace.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/theme-github.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-json.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/mode-bloblang.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/worker-json.js"></script>
-<script defer src="{{{uiRootPath}}}/js/vendor/ace/ext-language_tools.js"></script>
+<script>
+// Load ACE editor and its modules sequentially to avoid race conditions
+(function() {
+  var aceBase = "{{{uiRootPath}}}/js/vendor/ace/";
+  var scripts = [
+    aceBase + "ace.js",
+    aceBase + "theme-github.js",
+    aceBase + "mode-json.js",
+    aceBase + "mode-bloblang.js",
+    aceBase + "worker-json.js",
+    aceBase + "ext-language_tools.js"
+  ];
+
+  function loadScript(index) {
+    if (index >= scripts.length) {
+      // All scripts loaded - dispatch event to notify waiting code
+      window.aceLoaded = true;
+      document.dispatchEvent(new CustomEvent('aceReady'));
+      return;
+    }
+    var script = document.createElement('script');
+    script.src = scripts[index];
+    script.onload = function() {
+      loadScript(index + 1);
+    };
+    script.onerror = function() {
+      console.error('Failed to load Ace script:', scripts[index]);
+      loadScript(index + 1); // Try to continue loading other scripts
+    };
+    document.head.appendChild(script);
+  }
+
+  loadScript(0);
+})();
+</script>
 <script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
 {{/if}}
 {{#if (ne page.attributes.role 'home')}}
@@ -159,7 +228,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 (function() {
   var kapaLoaded = false;
   var pendingOpen = false;
-  function loadKapa(shouldOpen) {
+
+  // Expose loadKapa globally for chat panel integration
+  window.loadKapa = function loadKapa(shouldOpen) {
     if (shouldOpen) pendingOpen = true;
     if (kapaLoaded) {
       // Already loaded, open if Kapa is ready
@@ -176,9 +247,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     script.setAttribute('data-project-name', 'Redpanda');
     script.setAttribute('data-project-color', '#E14225');
     script.setAttribute('data-modal-override-open-class', 'custom-class-kapa');
-    script.setAttribute('data-modal-open-on-command-k', 'true');
+    script.setAttribute('data-modal-open-on-command-k', 'false');
     script.setAttribute('data-button-hide', 'true');
-    script.setAttribute('data-modal-size', '800px');
+    script.setAttribute('data-modal-target', '#chat-kapa-mount');
+    script.setAttribute('data-modal-size', '100%');
     script.setAttribute('data-project-logo', 'https://avatars.githubusercontent.com/u/49406389?s=200&v=4');
     script.setAttribute('data-user-analytics-fingerprint-enabled', 'true');
     script.setAttribute('data-user-analytics-store-ip', 'true');
@@ -200,24 +272,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }
     };
     document.head.appendChild(script);
-  }
-  // Load Kapa on Cmd/Ctrl+K or when clicking AI-related elements
-  document.addEventListener('keydown', function(e) {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      loadKapa(true);
-    }
-  });
-  // Load and open on interaction with AI buttons
+  };
+
+  // Note: Cmd+K is now handled by chat-panel.js drawer (when chat panel exists)
+  // Load and open on interaction with AI button triggers
   document.addEventListener('click', function(e) {
-    if (e.target.closest('.custom-class-kapa, .ask-ai-button, [data-kapa-trigger]')) {
-      loadKapa(true);
+    // In standalone widget (no chat panel), open-chat buttons directly open Kapa
+    if (e.target.closest('[data-action="open-chat"]') && !document.querySelector('[data-chat-panel]')) {
+      window.loadKapa(true);
+      return;
+    }
+    // Legacy Kapa triggers
+    if (e.target.closest('.custom-class-kapa, [data-kapa-trigger]')) {
+      window.loadKapa(true);
     }
   });
+
   // Fallback: Load (but don't open) after 5 seconds of idle time
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(function() { setTimeout(function() { loadKapa(false); }, 5000); });
+    requestIdleCallback(function() { setTimeout(function() { window.loadKapa(false); }, 5000); });
   } else {
-    setTimeout(function() { loadKapa(false); }, 5000);
+    setTimeout(function() { window.loadKapa(false); }, 5000);
   }
 })();
 </script>

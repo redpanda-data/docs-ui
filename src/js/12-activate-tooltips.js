@@ -1,5 +1,5 @@
 /* global tippy */
-(function () {
+;(function () {
   'use strict'
 
   document.addEventListener('DOMContentLoaded', function () {

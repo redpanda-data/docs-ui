@@ -2,7 +2,7 @@
 
 module.exports = (attributes, content, { data: { root } }) => {
   const { contentCatalog } = root
-  if (attributes['component-name'] === 'redpanda-labs') return content
+  if (attributes['component-name'] === 'labs') return content
   if (attributes['exclude-related-labs'] === 'true') return content
   if (!contentCatalog) return content
 
@@ -13,7 +13,8 @@ module.exports = (attributes, content, { data: { root } }) => {
 
   // Append "Suggested labs" heading if there are matching labs
   let contentString = content.toString('utf8')
-  contentString += '<div class="sect1">\n<h2 id="suggested-labs">Suggested labs</h2>\n<div class="sectionbody">\n<div class="ulist">\n<ul>'
+  contentString +=
+    '<div class="sect1">\n<h2 id="suggested-labs">Suggested labs</h2>\n<div class="sectionbody">\n<div class="ulist">\n<ul>'
 
   relatedLabs.forEach((lab, index) => {
     if (index > 10) return
@@ -26,7 +27,7 @@ module.exports = (attributes, content, { data: { root } }) => {
   if (relatedLabs.length > 5) {
     contentString += '<div class="badge-button" id="see-more-btn">See more</div>'
   }
-  contentString += '<div class="badge-button"><a href="/redpanda-labs" class="search-all-labs-btn">Search all labs</a></div>'
+  contentString += '<div class="badge-button"><a href="/labs" class="search-all-labs-btn">Search all labs</a></div>'
   contentString += `
       </div>
     </div>

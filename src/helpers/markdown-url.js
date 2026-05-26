@@ -8,9 +8,18 @@
 module.exports = ({ data: { root } }) => {
   const { contentCatalog, page } = root
 
+  // In preview mode (no contentCatalog), return placeholder URL for testing
+  if (!contentCatalog) {
+    // Return a test URL based on current page URL if available
+    if (page?.url) {
+      return page.url.replace(/\.html$/, '.md')
+    }
+    return '/preview-test.md'
+  }
+
   // Safety checks for 404 pages and pages without components
   // Note: page.version can be null for unversioned components (cloud, connect, labs)
-  if (!contentCatalog || !page || !page.component || page.version === undefined) {
+  if (!page || !page.component || page.version === undefined) {
     return null
   }
 

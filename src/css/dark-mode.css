@@ -129,3 +129,8 @@ html[data-theme=dark] {
   --highlight-container-background: #262626;
   --color-aliases-static-palette-text-secondary: var(--color-primitives-global-grey-grey-200);
 }
+
+/* TOC hover color override for dark mode */
+html[data-theme=dark] .toc a:hover {
+  color: var(--color-white);
+}

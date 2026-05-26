@@ -1,0 +1,99 @@
+/* Version Selector Dropdown */
+;(function () {
+  'use strict'
+
+  // Find all version selectors on the page
+  var selectors = document.querySelectorAll('[data-version-selector]')
+  if (!selectors.length) return
+
+  selectors.forEach(function (smVer) {
+    var btn = smVer.querySelector('.sm-ver-pill')
+    var tabs = smVer.querySelectorAll('.sm-ver-tab')
+    var groups = smVer.querySelectorAll('.sm-ver-group')
+
+    if (!btn) return
+
+    // Update group counts
+    function updateCounts () {
+      groups.forEach(function (group) {
+        var rows = group.querySelectorAll('.sm-ver-row')
+        var countEl = group.querySelector('.sm-ver-group-count')
+        if (countEl) countEl.textContent = rows.length
+        // Hide empty groups
+        group.classList.toggle('is-hidden', rows.length === 0)
+      })
+    }
+    updateCounts()
+
+    // Tab filtering
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function (e) {
+        e.preventDefault()
+        var filter = tab.dataset.filter
+
+        // Update active tab
+        tabs.forEach(function (t) {
+          t.classList.remove('is-active')
+          t.setAttribute('aria-selected', 'false')
+        })
+        tab.classList.add('is-active')
+        tab.setAttribute('aria-selected', 'true')
+
+        // Filter groups
+        groups.forEach(function (group) {
+          var groupStatus = group.dataset.group
+          var rows = group.querySelectorAll('.sm-ver-row')
+          if (filter === 'all') {
+            group.classList.toggle('is-hidden', rows.length === 0)
+          } else {
+            group.classList.toggle('is-hidden', groupStatus !== filter)
+          }
+        })
+      })
+    })
+
+    // Toggle dropdown
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation()
+      smVer.classList.toggle('is-open')
+      btn.classList.toggle('is-open')
+      btn.setAttribute('aria-expanded', smVer.classList.contains('is-open'))
+    })
+  })
+
+  // Global handlers for closing dropdowns (outside the loop to avoid duplicates)
+  // Close on outside click
+  var closeDropdowns = function (e) {
+    selectors.forEach(function (smVer) {
+      var btn = smVer.querySelector('.sm-ver-pill')
+      var panel = smVer.querySelector('.sm-ver-panel')
+      // Close if click is outside panel and not on the button
+      if (panel && !panel.contains(e.target) && !btn.contains(e.target) && smVer.classList.contains('is-open')) {
+        smVer.classList.remove('is-open')
+        if (btn) {
+          btn.classList.remove('is-open')
+          btn.setAttribute('aria-expanded', 'false')
+        }
+      }
+    })
+  }
+
+  document.addEventListener('mousedown', closeDropdowns)
+  document.addEventListener('touchstart', closeDropdowns)
+
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      selectors.forEach(function (smVer) {
+        var btn = smVer.querySelector('.sm-ver-pill')
+        if (smVer.classList.contains('is-open')) {
+          smVer.classList.remove('is-open')
+          if (btn) {
+            btn.classList.remove('is-open')
+            btn.setAttribute('aria-expanded', 'false')
+          }
+        }
+      })
+    }
+  })
+})()

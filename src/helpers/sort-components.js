@@ -13,7 +13,7 @@ module.exports = (collection) => {
       it.latest &&
       it.latest.asciidoc &&
       it.latest.asciidoc.attributes &&
-      it.latest.asciidoc.attributes['page-header-data']
+      it.latest.asciidoc.attributes['component-metadata']
     if (headerAttributes && headerAttributes.order !== undefined) {
       accum.push({
         title: it.latest.title,

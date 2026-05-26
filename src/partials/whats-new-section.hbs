@@ -1,0 +1,73 @@
+{{!--
+Reusable What's New Section Partial
+
+Usage for component pages (reads from current page):
+  {{> whats-new-section}}
+
+Usage for aggregated items (like data-platform):
+  {{#with (aggregate-whats-new site "cloud-data-platform" "streaming" "connect")}}
+    {{> whats-new-section items=items}}
+  {{/with}}
+
+Attributes from page:
+- whats-new-1-title, whats-new-1-desc, whats-new-1-link, whats-new-1-tag
+- whats-new-2-title, ... (up to 10)
+--}}
+
+{{#if items}}
+  {{!-- Items passed in (aggregated mode) --}}
+  {{#if (gt items.length 0)}}
+  <section class="whats-new-compact" style="--whats-new-color: {{get-whats-new-color site ../page.attributes}};">
+    <div class="whats-new-header">
+      <h2 class="whats-new-title">What's new</h2>
+      <p class="whats-new-subtitle">Latest features and capabilities</p>
+    </div>
+    <div class="whats-new-items{{#if (gte items.length 5)}} whats-new-items--scrollable{{/if}}">
+      {{#each items}}
+      <a href="{{#if link}}{{{relativize (resolve-resource link)}}}{{else}}#{{/if}}" class="whats-new-item">
+        <span class="whats-new-badge">NEW</span>
+        <div class="whats-new-content">
+          <h4 class="whats-new-item-title">{{title}}</h4>
+          <p class="whats-new-item-desc">{{desc}}</p>
+          {{#if tag}}
+          <span class="whats-new-tag">{{tag}}</span>
+          {{/if}}
+        </div>
+        <svg class="whats-new-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+{{else}}
+  {{!-- No items passed, read from current page --}}
+  {{#with (get-whats-new-items)}}
+    {{#if hasItems}}
+    <section class="whats-new-compact" style="--whats-new-color: {{get-whats-new-color ../site ../../page.attributes}};">
+      <div class="whats-new-header">
+        <h2 class="whats-new-title">What's new</h2>
+        <p class="whats-new-subtitle">Latest features and capabilities</p>
+      </div>
+      <div class="whats-new-items{{#if (gte items.length 5)}} whats-new-items--scrollable{{/if}}">
+        {{#each items}}
+        <a href="{{#if link}}{{{relativize (resolve-resource link)}}}{{else}}#{{/if}}" class="whats-new-item">
+          <span class="whats-new-badge">NEW</span>
+          <div class="whats-new-content">
+            <h4 class="whats-new-item-title">{{title}}</h4>
+            <p class="whats-new-item-desc">{{desc}}</p>
+            {{#if tag}}
+            <span class="whats-new-tag">{{tag}}</span>
+            {{/if}}
+          </div>
+          <svg class="whats-new-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+        {{/each}}
+      </div>
+    </section>
+    {{/if}}
+  {{/with}}
+{{/if}}

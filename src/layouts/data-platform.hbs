@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Redpanda Data Platform'}}
+{{> head-component-color}}
+  </head>
+  <body class="article data-platform" data-component="{{page.component.name}}" data-component-color="{{get-header-color page}}">
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article data-platform">
+  {{> toolbar}}
+  <div class="content dp-content">
+{{> data-platform}}
+  </div>
+{{> footer}}
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

@@ -203,7 +203,7 @@ html[data-theme=dark] {
 }
 */
 
-.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;
@@ -682,7 +682,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc details > summary::after {
   content: "";
-  background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
+  background: url(/_/img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
   width: 1em;
   height: 1.2em;
   position: absolute;
@@ -903,7 +903,7 @@ html[data-theme=dark] {
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   transition: 'background 0.3s';
 }
 
@@ -919,7 +919,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc .choices__placeholder {
   opacity: 9;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
 }
 
 .aa-DetachedOverlay .doc .type-dropdown {
@@ -938,7 +938,7 @@ html[data-theme=dark] {
   align-items: center; /* Align vertically */
   margin-bottom: 15px; /* Add space between the filters and the table */
   margin-top: 15px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
 }
 
 @media (max-width: 768px) {
@@ -1001,7 +1001,7 @@ html[data-theme=dark] {
 .aa-DetachedOverlay .doc .terminal-icon::after {
   content: '>_';
   color: white;
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   position: absolute;
   left: 3px;
   bottom: 2px;

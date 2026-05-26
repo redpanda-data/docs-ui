@@ -12,7 +12,15 @@
 ;(function () {
   'use strict'
 
-  document.addEventListener('DOMContentLoaded', init)
+  // Run init when DOM is ready - handle both cases:
+  // 1. If DOM is still loading, wait for DOMContentLoaded
+  // 2. If DOM is already ready (interactive or complete), run immediately
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init)
+  } else {
+    // DOM already ready, run immediately
+    setTimeout(init, 0)
+  }
 
   function init () {
     const dropdowns = document.querySelectorAll('.markdown-dropdown')
@@ -126,7 +134,8 @@
    */
   function handleCopy (markdownUrl, button) {
     // Fetch markdown content and copy to clipboard
-    window.fetch(markdownUrl)
+    window
+      .fetch(markdownUrl)
       .then(function (response) {
         if (!response.ok) throw new Error('Failed to fetch')
         return response.text()
@@ -157,20 +166,25 @@
    * Handle Ask AI about this doc
    */
   function handleAskAI () {
-    var kapa = window.Kapa
+    // Find and click the "Ask AI" button in the top nav to open the chat drawer
+    var askAiBtn = document.querySelector('[data-action="open-chat"]')
 
-    if (kapa) {
-      // Get page title for context
-      var pageTitle = document.querySelector('h1.page')?.textContent || 'this page'
-      var aiPromptText = 'I have a question about the documentation page: ' + pageTitle
+    if (askAiBtn) {
+      askAiBtn.click()
 
-      kapa.open({
-        mode: 'ai',
-        query: aiPromptText,
-        submit: false,
-      })
+      // Optional: Pre-fill the chat input with context about the page
+      // Wait a moment for the drawer to open, then set the input value
+      setTimeout(function () {
+        var pageTitle = document.querySelector('h1.page')?.textContent || 'this page'
+        var chatInput = document.querySelector('#chat-panel-input')
+
+        if (chatInput) {
+          chatInput.value = 'I have a question about the documentation page: ' + pageTitle
+          chatInput.focus()
+        }
+      }, 100)
     } else {
-      console.warn('Kapa AI is not available.')
+      console.warn('Ask AI drawer is not available.')
     }
   }
 

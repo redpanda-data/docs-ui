@@ -104,12 +104,18 @@
 
     dropdownContainers.forEach((container) => {
       container.addEventListener('click', () => {
-        container.classList.toggle('is-active')
+        var isActive = container.classList.toggle('is-active')
+        // Update aria-expanded on the button trigger for accessibility
+        var trigger = container.querySelector('.version-selector-trigger')
+        if (trigger) trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false')
       })
     })
     document.documentElement.addEventListener('click', function () {
       dropdownContainers.forEach((container) => {
         container.classList.remove('is-active')
+        // Reset aria-expanded when closing dropdowns
+        var trigger = container.querySelector('.version-selector-trigger')
+        if (trigger) trigger.setAttribute('aria-expanded', 'false')
       })
     })
   }
@@ -181,7 +187,11 @@
     var rect = this.getBoundingClientRect()
     var menuPanelRect = menuPanel.getBoundingClientRect()
     var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
-    if (event.target.classList.contains('nav-link') || event.target.classList.contains('nav-text') || (event.target.classList.contains('item') && !event.target.classList.contains('dropdown'))) {
+    if (
+      event.target.classList.contains('nav-link') ||
+      event.target.classList.contains('nav-text') ||
+      (event.target.classList.contains('item') && !event.target.classList.contains('dropdown'))
+    ) {
       // Follow the link
       var a = event.target.closest('a')
       if (!a) {
@@ -201,13 +211,20 @@
   }
 
   function showNav (e, collapse) {
-    if (navToggle.classList.contains('is-active')) return hideNav(e)
+    if (navToggle && navToggle.classList.contains('is-active')) return hideNav(e)
     trapEvent(e)
     var html = document.documentElement
+    var body = document.querySelector('.body')
     if (!collapse) {
       html.classList.add('is-clipped--nav')
-      navToggle.classList.add('is-active')
+      if (navToggle) navToggle.classList.add('is-active')
       navContainer.classList.add('is-active')
+      // Fix: remove hidden class and reset styles if set by collapse
+      navContainer.classList.remove('hidden')
+      if (navExpand) navExpand.classList.add('hidden')
+      if (toolbar) toolbar.style.paddingLeft = ''
+      if (body) body.style.marginLeft = ''
+      if (main) main.style.width = ''
       // Note - Dan removed the height calculations - this should all be handled by css or we have overrides that work against us
       // var bounds = nav.getBoundingClientRect()
       // var expectedHeight = window.innerHeight - Math.round(bounds.top)
@@ -217,6 +234,7 @@
       navContainer.classList.remove('hidden')
       navExpand.classList.add('hidden')
       if (toolbar) toolbar.style.paddingLeft = 'unset'
+      if (body) body.style.marginLeft = ''
       main.style.width = 'unset'
     }
   }
@@ -224,17 +242,23 @@
   function hideNav (e, collapse) {
     trapEvent(e)
     var html = document.documentElement
+    var body = document.querySelector('.body')
     if (!collapse) {
       html.classList.remove('is-clipped--nav')
-      navToggle.classList.remove('is-active')
+      if (navToggle) navToggle.classList.remove('is-active')
       navContainer.classList.remove('is-active')
       nav.style.height = ''
       html.removeEventListener('click', hideNav)
     } else {
       navContainer.classList.add('hidden')
+      navContainer.classList.remove('is-active')
+      // Also reset navToggle so hamburger can reopen the nav
+      if (navToggle) navToggle.classList.remove('is-active')
       navExpand.classList.remove('hidden')
       if (toolbar) toolbar.style.paddingLeft = '10px'
+      if (body) body.style.marginLeft = '0'
       main.style.width = '100%'
+      html.classList.remove('is-clipped--nav')
     }
   }
 

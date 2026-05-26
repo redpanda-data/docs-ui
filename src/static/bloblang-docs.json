@@ -6,7 +6,7 @@
       "returns": "string",
       "example": "root.id = uuid_v4()\n# Result: \"f47ac10b-58cc-4372-a567-0e02b2c3d479\"",
       "category": "uuid",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#uuid_v4"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#uuid_v4"
     },
     "now": {
       "signature": "now()",
@@ -14,7 +14,7 @@
       "returns": "number",
       "example": "root.timestamp = now()\n# Result: 1675123456",
       "category": "time",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#now"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#now"
     },
     "timestamp_unix": {
       "signature": "timestamp_unix()",
@@ -22,7 +22,7 @@
       "returns": "number",
       "example": "root.ts = timestamp_unix()",
       "category": "time",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#timestamp_unix"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#timestamp_unix"
     },
     "env": {
       "signature": "env(name: string)",
@@ -33,7 +33,7 @@
       ],
       "example": "root.api_key = env(\"API_KEY\")",
       "category": "environment",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#env"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#env"
     },
     "deleted": {
       "signature": "deleted()",
@@ -41,7 +41,7 @@
       "returns": "null",
       "example": "root.password = deleted()\n# Removes the password field",
       "category": "manipulation",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#deleted"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#deleted"
     },
     "content": {
       "signature": "content()",
@@ -49,7 +49,7 @@
       "returns": "bytes",
       "example": "root.raw = content().string()",
       "category": "message",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#content"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#content"
     },
     "json": {
       "signature": "json()",
@@ -57,7 +57,7 @@
       "returns": "any",
       "example": "root = json()",
       "category": "message",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#json"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#json"
     },
     "metadata": {
       "signature": "metadata(key?: string)",
@@ -68,7 +68,7 @@
       ],
       "example": "root.topic = metadata(\"kafka_topic\")\nroot.all_meta = metadata()",
       "category": "metadata",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#metadata"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#metadata"
     },
     "throw": {
       "signature": "throw(message: string)",
@@ -79,7 +79,7 @@
       ],
       "example": "root.value = if this.age < 0 { throw(\"Invalid age\") }",
       "category": "error",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#throw"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#throw"
     },
     "random_int": {
       "signature": "random_int(min?: number, max?: number)",
@@ -91,7 +91,7 @@
       ],
       "example": "root.dice = random_int(1, 6)",
       "category": "generation",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#random_int"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/functions/#random_int"
     }
   },
   "methods": {
@@ -101,7 +101,7 @@
       "returns": "string",
       "example": "root.name = this.name.uppercase()\n# \"john\" → \"JOHN\"",
       "category": "string",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#uppercase"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#uppercase"
     },
     "lowercase": {
       "signature": ".lowercase()",
@@ -109,7 +109,7 @@
       "returns": "string",
       "example": "root.email = this.email.lowercase()\n# \"USER@EXAMPLE.COM\" → \"user@example.com\"",
       "category": "string",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#lowercase"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#lowercase"
     },
     "trim": {
       "signature": ".trim()",
@@ -117,7 +117,7 @@
       "returns": "string",
       "example": "root.name = this.name.trim()\n# \"  Alice  \" → \"Alice\"",
       "category": "string",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#trim"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#trim"
     },
     "split": {
       "signature": ".split(delimiter: string)",
@@ -128,7 +128,7 @@
       ],
       "example": "root.parts = this.email.split(\"@\")\n# \"user@example.com\" → [\"user\", \"example.com\"]",
       "category": "string",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#split"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#split"
     },
     "replace_all": {
       "signature": ".replace_all(old: string, new: string)",
@@ -140,7 +140,7 @@
       ],
       "example": "root.text = this.text.replace_all(\"foo\", \"bar\")\n# \"foo is foo\" → \"bar is bar\"",
       "category": "string",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#replace_all"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#replace_all"
     },
     "contains": {
       "signature": ".contains(substring: string)",
@@ -151,7 +151,7 @@
       ],
       "example": "root.has_error = this.message.contains(\"error\")",
       "category": "string",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#contains"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#contains"
     },
     "map_each": {
       "signature": ".map_each(mapping: query)",
@@ -162,7 +162,7 @@
       ],
       "example": "root.names = this.users.map_each(user -> user.name.uppercase())\n# Transforms each user to uppercase name",
       "category": "array",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#map_each"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#map_each"
     },
     "filter": {
       "signature": ".filter(predicate: query)",
@@ -173,7 +173,7 @@
       ],
       "example": "root.adults = this.users.filter(user -> user.age >= 18)",
       "category": "array",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#filter"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#filter"
     },
     "length": {
       "signature": ".length()",
@@ -181,7 +181,7 @@
       "returns": "number",
       "example": "root.count = this.items.length()\nroot.name_len = this.name.length()",
       "category": "general",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#length"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#length"
     },
     "parse_json": {
       "signature": ".parse_json()",
@@ -189,7 +189,7 @@
       "returns": "any",
       "example": "root.data = this.json_string.parse_json()\n# \"{\\\"foo\\\":\\\"bar\\\"}\" → {\"foo\": \"bar\"}",
       "category": "parsing",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#parse_json"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#parse_json"
     },
     "format_json": {
       "signature": ".format_json(indent?: string)",
@@ -200,7 +200,7 @@
       ],
       "example": "root.json = this.data.format_json(\"  \")",
       "category": "serialization",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#format_json"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#format_json"
     },
     "catch": {
       "signature": ".catch(fallback: any)",
@@ -211,7 +211,7 @@
       ],
       "example": "root.safe = this.risky.parse_json().catch(null)\n# Returns null if parse fails",
       "category": "error",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#catch"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#catch"
     },
     "string": {
       "signature": ".string()",
@@ -219,7 +219,7 @@
       "returns": "string",
       "example": "root.count_str = this.count.string()\n# 42 → \"42\"",
       "category": "type",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#string"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#string"
     },
     "number": {
       "signature": ".number()",
@@ -227,7 +227,7 @@
       "returns": "number",
       "example": "root.age = this.age_str.number()\n# \"25\" → 25",
       "category": "type",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#number"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#number"
     },
     "flatten": {
       "signature": ".flatten()",
@@ -235,7 +235,7 @@
       "returns": "array",
       "example": "root.flat = this.nested.flatten()\n# [[1,2],[3,4]] → [1,2,3,4]",
       "category": "array",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#flatten"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#flatten"
     },
     "unique": {
       "signature": ".unique()",
@@ -243,7 +243,7 @@
       "returns": "array",
       "example": "root.tags = this.tags.unique()\n# [\"a\",\"b\",\"a\",\"c\"] → [\"a\",\"b\",\"c\"]",
       "category": "array",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#unique"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#unique"
     },
     "sort": {
       "signature": ".sort()",
@@ -251,7 +251,7 @@
       "returns": "array",
       "example": "root.sorted = this.numbers.sort()\n# [3,1,2] → [1,2,3]",
       "category": "array",
-      "url": "https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#sort"
+      "url": "https://docs.redpanda.com/connect/guides/bloblang/methods/#sort"
     }
   },
   "keywords": {

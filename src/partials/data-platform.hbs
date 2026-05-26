@@ -1,0 +1,613 @@
+{{!-- Data Platform Landing Page
+     This serves as the umbrella landing for Self-managed, Cloud, and Connect docs.
+     --}}
+<div class="dp-page">
+  <header class="dp-hero">
+    <div class="dp-hero-bg" aria-hidden="true">
+      <div class="dp-hero-glow dp-hero-glow-1"></div>
+      <div class="dp-hero-glow dp-hero-glow-2"></div>
+      <div class="dp-hero-grid"></div>
+    </div>
+    <div class="dp-hero-inner">
+      <div class="dp-hero-eyebrow">
+        <span>REDPANDA DATA PLATFORM</span>
+      </div>
+      <h1 class="dp-hero-title">
+        The streaming foundation<br>
+        for everything you build.
+      </h1>
+      <p class="dp-hero-sub">
+        Run Redpanda on your infrastructure or let us manage it in the cloud.
+        Then connect it to everything else with declarative pipelines.
+      </p>
+
+      {{!-- Opens chat drawer on submit --}}
+      <form class="dp-hero-ask" id="dp-ask-form">
+        <span class="dp-hero-ask-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/>
+            <path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>
+          </svg>
+        </span>
+        <input
+          type="text"
+          class="dp-hero-ask-input"
+          id="dp-ask-input"
+          placeholder="{{#if page.attributes.hero-ask-placeholder}}{{page.attributes.hero-ask-placeholder}}{{else}}Ask AI about Redpanda...{{/if}}"
+          autocomplete="off"
+        >
+        <button type="submit" class="dp-hero-ask-submit" aria-label="Ask">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </form>
+
+      {{#if page.attributes.hero-suggestion-1}}
+      <div class="dp-hero-ask-hints">
+        <span class="dp-hero-ask-hints-label">{{#if page.attributes.hero-suggestions-label}}{{page.attributes.hero-suggestions-label}}{{else}}Try asking:{{/if}}</span>
+        <button type="button" class="dp-hero-ask-chip" data-suggestion="{{page.attributes.hero-suggestion-1}}">{{page.attributes.hero-suggestion-1}}</button>
+        {{#if page.attributes.hero-suggestion-2}}
+        <button type="button" class="dp-hero-ask-chip" data-suggestion="{{page.attributes.hero-suggestion-2}}">{{page.attributes.hero-suggestion-2}}</button>
+        {{/if}}
+        {{#if page.attributes.hero-suggestion-3}}
+        <button type="button" class="dp-hero-ask-chip" data-suggestion="{{page.attributes.hero-suggestion-3}}">{{page.attributes.hero-suggestion-3}}</button>
+        {{/if}}
+      </div>
+      {{/if}}
+
+      <div class="dp-hero-stats">
+        <div><strong>10x</strong><span>faster than Kafka, same wire</span></div>
+        <div><strong>{{page.attributes.hero-stat2-number}}</strong><span>connectors</span></div>
+      </div>
+    </div>
+  </header>
+
+  {{!-- Cloud landing: component cards --}}
+  {{#if page.attributes.page-cloud-landing}}
+  <section class="dp-section dp-component-cards-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">{{#if page.attributes.component-cards-title}}{{page.attributes.component-cards-title}}{{else}}Choose your component{{/if}}</h2>
+    </div>
+    <div class="dp-products">
+
+      {{#if page.attributes.component-1-name}}
+      <a href="{{{relativize (resolve-resource page.attributes.component-1-link)}}}"
+         class="dp-product"
+         style="--dp-accent: {{or (get-component-color site (get-component-from-resource page.attributes.component-1-link)) '#1f5bd6'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">
+              {{page.attributes.component-1-name}}
+              {{#if (or page.attributes.component-1-is-new (ne page.attributes.component-1-deployments 'all'))}}
+              <span class="dp-component-badges">
+                {{#if page.attributes.component-1-is-new}}
+                <span class="dp-component-badge dp-component-badge--new">NEW</span>
+                {{/if}}
+                {{#if (eq page.attributes.component-1-deployments 'byoc')}}
+                <span class="dp-component-badge dp-component-badge--byoc">Cloud BYOC</span>
+                {{/if}}
+              </span>
+              {{/if}}
+            </h3>
+            <p class="dp-product-tagline">{{page.attributes.component-1-desc}}</p>
+          </div>
+        </div>
+        {{#if page.attributes.component-1-features}}
+        <ul class="dp-product-features">
+          {{#each (split page.attributes.component-1-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="dp-product-cta">
+          <span>{{#if page.attributes.component-1-cta-text}}{{page.attributes.component-1-cta-text}}{{else}}Open docs{{/if}}</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.component-2-name}}
+      <a href="{{{relativize (resolve-resource page.attributes.component-2-link)}}}"
+         class="dp-product"
+         style="--dp-accent: {{or (get-component-color site (get-component-from-resource page.attributes.component-2-link)) '#1f5bd6'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">
+              {{page.attributes.component-2-name}}
+              {{#if (or page.attributes.component-2-is-new (ne page.attributes.component-2-deployments 'all'))}}
+              <span class="dp-component-badges">
+                {{#if page.attributes.component-2-is-new}}
+                <span class="dp-component-badge dp-component-badge--new">NEW</span>
+                {{/if}}
+                {{#if (eq page.attributes.component-2-deployments 'byoc')}}
+                <span class="dp-component-badge dp-component-badge--byoc">Cloud BYOC</span>
+                {{/if}}
+              </span>
+              {{/if}}
+            </h3>
+            <p class="dp-product-tagline">{{page.attributes.component-2-desc}}</p>
+          </div>
+        </div>
+        {{#if page.attributes.component-2-features}}
+        <ul class="dp-product-features">
+          {{#each (split page.attributes.component-2-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="dp-product-cta">
+          <span>{{#if page.attributes.component-2-cta-text}}{{page.attributes.component-2-cta-text}}{{else}}Open docs{{/if}}</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.component-3-name}}
+      <a href="{{{relativize (resolve-resource page.attributes.component-3-link)}}}"
+         class="dp-product"
+         style="--dp-accent: {{or (get-component-color site (get-component-from-resource page.attributes.component-3-link)) '#1f5bd6'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">
+              {{page.attributes.component-3-name}}
+              {{#if (or page.attributes.component-3-is-new (ne page.attributes.component-3-deployments 'all'))}}
+              <span class="dp-component-badges">
+                {{#if page.attributes.component-3-is-new}}
+                <span class="dp-component-badge dp-component-badge--new">NEW</span>
+                {{/if}}
+                {{#if (eq page.attributes.component-3-deployments 'byoc')}}
+                <span class="dp-component-badge dp-component-badge--byoc">Cloud BYOC</span>
+                {{/if}}
+              </span>
+              {{/if}}
+            </h3>
+            <p class="dp-product-tagline">{{page.attributes.component-3-desc}}</p>
+          </div>
+        </div>
+        {{#if page.attributes.component-3-features}}
+        <ul class="dp-product-features">
+          {{#each (split page.attributes.component-3-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="dp-product-cta">
+          <span>{{#if page.attributes.component-3-cta-text}}{{page.attributes.component-3-cta-text}}{{else}}Open docs{{/if}}</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      {{/if}}
+
+    </div>
+  </section>
+
+  {{!-- Cloud landing: deployment options --}}
+  <section class="dp-section dp-deployment-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">{{#if page.attributes.deployment-cards-title}}{{page.attributes.deployment-cards-title}}{{else}}Choose your deployment{{/if}}</h2>
+    </div>
+    <div class="dp-deployment-cards">
+
+      {{#if page.attributes.deployment-1-name}}
+      <a href="{{{relativize (resolve-resource page.attributes.deployment-1-link)}}}"
+         class="dp-product dp-deployment-card"
+         style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">{{page.attributes.deployment-1-name}}</h3>
+            <p class="dp-product-tagline">{{page.attributes.deployment-1-desc}}</p>
+          </div>
+        </div>
+        {{#if page.attributes.deployment-1-features}}
+        <ul class="dp-product-features">
+          {{#each (split page.attributes.deployment-1-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="dp-product-cta">
+          <span>{{#if page.attributes.deployment-1-cta-text}}{{page.attributes.deployment-1-cta-text}}{{else}}Learn more{{/if}}</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.deployment-2-name}}
+      <a href="{{{relativize (resolve-resource page.attributes.deployment-2-link)}}}"
+         class="dp-product dp-deployment-card"
+         style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">{{page.attributes.deployment-2-name}}</h3>
+            <p class="dp-product-tagline">{{page.attributes.deployment-2-desc}}</p>
+          </div>
+        </div>
+        {{#if page.attributes.deployment-2-features}}
+        <ul class="dp-product-features">
+          {{#each (split page.attributes.deployment-2-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="dp-product-cta">
+          <span>{{#if page.attributes.deployment-2-cta-text}}{{page.attributes.deployment-2-cta-text}}{{else}}Learn more{{/if}}</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.deployment-3-name}}
+      <a href="{{{relativize (resolve-resource page.attributes.deployment-3-link)}}}"
+         class="dp-product dp-deployment-card"
+         style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">{{page.attributes.deployment-3-name}}</h3>
+            <p class="dp-product-tagline">{{page.attributes.deployment-3-desc}}</p>
+          </div>
+        </div>
+        {{#if page.attributes.deployment-3-features}}
+        <ul class="dp-product-features">
+          {{#each (split page.attributes.deployment-3-features ';;')}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+        <div class="dp-product-cta">
+          <span>{{#if page.attributes.deployment-3-cta-text}}{{page.attributes.deployment-3-cta-text}}{{else}}Learn more{{/if}}</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      {{/if}}
+
+    </div>
+  </section>
+
+  {{else}}
+
+  {{!-- Umbrella page: Cloud/Self-Managed choice --}}
+  <section class="dp-section dp-choose-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">Choose how you'll run Redpanda</h2>
+      <p class="dp-section-sub">Self-Managed or Cloud: same Kafka-compatible engine, different operations model. Both include Redpanda Connect for building data pipelines.</p>
+    </div>
+    <div class="dp-products">
+      <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}" class="dp-product is-featured" style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">{{#if page.attributes.cloud-title}}{{page.attributes.cloud-title}}{{else}}Cloud{{/if}}</h3>
+            <p class="dp-product-tagline">{{#if page.attributes.cloud-tagline}}{{page.attributes.cloud-tagline}}{{else}}Streaming, fully managed.{{/if}}</p>
+          </div>
+        </div>
+        <p class="dp-product-desc">{{#if page.attributes.cloud-description}}{{page.attributes.cloud-description}}{{else}}Spin up a cluster in seconds. We handle upgrades, scaling, and failover — you bring the data. Available as Serverless, Dedicated, or Bring Your Own Cloud (BYOC).{{/if}}</p>
+        <ul class="dp-product-bullets">
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+              </svg>
+            </span>
+            <span>Provisioned in 90 seconds</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+              </svg>
+            </span>
+            <span>AWS, GCP, Azure</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </span>
+            <span>24/7 SRE on call</span>
+          </li>
+        </ul>
+        <div class="dp-product-stats">
+          <div><strong>99.99%</strong><span>SLA on Dedicated</span></div>
+          <div><strong>BYOC</strong><span>Run in your VPC</span></div>
+        </div>
+        <div class="dp-product-cta">
+          <span>Open Cloud docs</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </a>
+
+      <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}" class="dp-product" style="--dp-accent: {{or (get-component-color site 'self-managed') '#0f8b66'}}">
+        <div class="dp-product-head">
+          <div class="dp-product-titles">
+            <h3 class="dp-product-name">Self-Managed</h3>
+            <p class="dp-product-tagline">Run Redpanda on your own infrastructure.</p>
+          </div>
+        </div>
+        <p class="dp-product-desc">Bare metal, VMs, or Kubernetes. Full control over networking, storage, and upgrades, with the same single binary used in Cloud.</p>
+        <ul class="dp-product-bullets">
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l9 4.9V17L12 22l-9-5V7L12 2z"/>
+              </svg>
+            </span>
+            <span>Single binary, no JVM</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <span>Air-gapped &amp; FedRAMP-ready</span>
+          </li>
+          <li>
+            <span class="dp-product-bullet-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </span>
+            <span>Tune every knob</span>
+          </li>
+        </ul>
+        <div class="dp-product-stats">
+          <div><strong>Kubernetes</strong><span>Operator + Helm</span></div>
+          {{#with (or site.components.streaming site.components.redpanda)}}{{#with this.latest}}<div><strong>v{{version}}</strong><span>Latest release</span></div>{{/with}}{{/with}}
+        </div>
+        <div class="dp-product-cta">
+          <span>Open Self-Managed docs</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  {{/if}}
+
+  {{!-- Decision matrix --}}
+  <section class="dp-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">Not sure which to pick?</h2>
+      <p class="dp-section-sub">A quick decision matrix.</p>
+    </div>
+    <div class="dp-matrix">
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
+          <p>need full control over networking, storage, and security posture</p>
+        </div>
+        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'self-managed') '#0f8b66'}}">
+          <span class="dp-product-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+          </span>
+          <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}">
+            Start with Self-Managed
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
+          <p>want streaming as a service with an SLA and zero ops</p>
+        </div>
+        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+          <span class="dp-product-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+          </span>
+          <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}">
+            Start with Cloud
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {{!-- Popular section - data-driven from page-popular-N-* attributes --}}
+  {{#if page.attributes.popular-1-title}}
+  <section class="dp-section">
+    <div class="dp-section-head">
+      <h2 class="dp-section-title">{{#if page.attributes.popular-heading}}{{page.attributes.popular-heading}}{{else}}Popular across Data Platform{{/if}}</h2>
+      <p class="dp-section-sub">{{#if page.attributes.popular-subtitle}}{{page.attributes.popular-subtitle}}{{else}}The guides teams open most when they're getting started.{{/if}}</p>
+    </div>
+    <div class="dp-popular">
+      {{#if page.attributes.popular-1-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-1-link)}}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>{{page.attributes.popular-1-title}}</h4>
+          {{#if page.attributes.popular-1-tag}}
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">{{page.attributes.popular-1-tag}}</span>
+          </div>
+          {{/if}}
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.popular-2-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-2-link)}}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>{{page.attributes.popular-2-title}}</h4>
+          {{#if page.attributes.popular-2-tag}}
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">{{page.attributes.popular-2-tag}}</span>
+          </div>
+          {{/if}}
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.popular-3-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-3-link)}}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>{{page.attributes.popular-3-title}}</h4>
+          {{#if page.attributes.popular-3-tag}}
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">{{page.attributes.popular-3-tag}}</span>
+          </div>
+          {{/if}}
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.popular-4-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-4-link)}}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>{{page.attributes.popular-4-title}}</h4>
+          {{#if page.attributes.popular-4-tag}}
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">{{page.attributes.popular-4-tag}}</span>
+          </div>
+          {{/if}}
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.popular-5-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-5-link)}}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>{{page.attributes.popular-5-title}}</h4>
+          {{#if page.attributes.popular-5-tag}}
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">{{page.attributes.popular-5-tag}}</span>
+          </div>
+          {{/if}}
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+      {{/if}}
+
+      {{#if page.attributes.popular-6-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.popular-6-link)}}}" class="dp-popular-card">
+        <div class="dp-popular-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div class="dp-popular-text">
+          <h4>{{page.attributes.popular-6-title}}</h4>
+          {{#if page.attributes.popular-6-tag}}
+          <div class="dp-popular-meta">
+            <span class="dp-popular-tag">{{page.attributes.popular-6-tag}}</span>
+          </div>
+          {{/if}}
+        </div>
+        <svg class="dp-popular-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  <div class="dp-help">
+    <div>
+      <h3>Need help choosing?</h3>
+      <p>Our team can walk you through the options and help you get started.</p>
+    </div>
+    <div class="dp-help-actions">
+      <a href="https://redpanda.com/contact" class="dp-help-btn">Talk to sales</a>
+      <a href="https://redpanda.com/slack" class="dp-help-btn dp-help-btn-secondary">Join Slack</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('dp-ask-form');
+    var input = document.getElementById('dp-ask-input');
+
+    if (form && input) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var query = input.value.trim();
+        if (typeof window.openChatWithQuery === 'function') {
+          window.openChatWithQuery(query, true);
+        } else if (typeof window.openChatPanel === 'function') {
+          window.openChatPanel();
+        }
+        input.value = '';
+      });
+    }
+
+    var chips = document.querySelectorAll('.dp-hero-ask-chip');
+    chips.forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var suggestion = chip.dataset.suggestion;
+        if (typeof window.openChatWithQuery === 'function') {
+          window.openChatWithQuery(suggestion, true);
+        }
+      });
+    });
+  });
+</script>

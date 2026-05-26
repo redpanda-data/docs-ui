@@ -43,7 +43,7 @@
     </div>
     {{> footer}}
     <script>
-      if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
+      if (typeof window.algoliasearch != "undefined" && typeof window.instantsearch != "undefined") {
         const { algoliasearch, instantsearch } = window;
         const { searchBox } = instantsearch.widgets;
 
