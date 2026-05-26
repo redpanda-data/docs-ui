@@ -871,7 +871,7 @@ html[data-theme=dark] .bloblang-snippet .ace-editor {
   padding: 12px 16px;
   margin-bottom: 16px;
   position: relative;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   line-height: 1.5;
 }
 
@@ -1209,7 +1209,7 @@ html[data-theme=dark] .bloblang-playground .notification-info {
 
 /* Validation indicators */
 .bloblang-playground .validation-indicator {
-  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 500;
   padding: 4px 10px;
   border-radius: 6px;
