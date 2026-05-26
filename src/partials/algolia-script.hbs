@@ -467,8 +467,8 @@ function initAlgolia() {
             aria-label=${`Ask AI about "${currentQuery}"`}
             class="ask-ai"
             onClick=${() => {
-              if (window.Kapa?.open) {
-                window.Kapa.open({ query: currentQuery });
+              if (typeof window.openChatWithQuery === 'function') {
+                window.openChatWithQuery(currentQuery, true);
                 autocompleteInstance.setIsOpen(false);
               }
             }}
