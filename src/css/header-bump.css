@@ -802,3 +802,71 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
     gap: 4px;
   }
 }
+
+/* =============================================================================
+   SIDEBAR-STYLE BRAND (for standalone widget)
+   ============================================================================= */
+
+.sb-head {
+  display: flex;
+  align-items: center;
+  height: var(--navbar-height);
+  padding-left: 8px;
+}
+
+.sb-head-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sb-head-link:hover {
+  text-decoration: none;
+}
+
+.sb-logomark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sb-logomark img {
+  display: block;
+}
+
+.sb-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.sb-brand-title {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--text-color);
+  letter-spacing: -0.01em;
+}
+
+.sb-brand-sub {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--grey-500, #71717a);
+  letter-spacing: 0;
+}
+
+html[data-theme="dark"] .sb-brand-title {
+  color: #fff;
+}
+
+html[data-theme="dark"] .sb-brand-sub {
+  color: var(--grey-400, #a1a1aa);
+}
+
+@media screen and (max-width: 480px) {
+  .sb-brand {
+    display: none;
+  }
+}
