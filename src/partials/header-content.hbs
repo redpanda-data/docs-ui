@@ -11,10 +11,12 @@
       <span class="platform-indicator-mobile">{{page.component.title}}</span>
     </div>
 
-    {{!-- Desktop: Breadcrumbs --}}
+    {{!-- Desktop: Breadcrumbs (not shown in standalone widget) --}}
+    {{#unless isStandaloneWidget}}
     <div class="topbar-crumbs">
       {{> breadcrumbs}}
     </div>
+    {{/unless}}
 
     {{!-- Right side: Actions (always visible, no burger menu) --}}
     <div id="topbar-nav" class="navbar-menu">
