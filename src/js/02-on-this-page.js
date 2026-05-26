@@ -53,6 +53,7 @@
 
   var lastActiveFragment
   var links = {}
+  var skipScrollUpdate = false
   var list = headings.reduce(function (accum, heading) {
     var link = document.createElement('a')
     link.textContent = heading.textContent
@@ -63,6 +64,29 @@
     accum.appendChild(listItem)
     return accum
   }, document.createElement('ul'))
+
+  // Add click handlers to TOC links to immediately highlight clicked item
+  Object.keys(links).forEach(function (fragment) {
+    links[fragment].addEventListener('click', function () {
+      // Immediately update active state on click
+      if (lastActiveFragment && lastActiveFragment !== fragment) {
+        if (Array.isArray(lastActiveFragment)) {
+          lastActiveFragment.forEach(function (f) {
+            links[f].classList.remove('is-active')
+          })
+        } else {
+          links[lastActiveFragment].classList.remove('is-active')
+        }
+      }
+      links[fragment].classList.add('is-active')
+      lastActiveFragment = fragment
+      // Skip scroll-based updates briefly to prevent flicker during scroll animation
+      skipScrollUpdate = true
+      setTimeout(function () {
+        skipScrollUpdate = false
+      }, 100)
+    })
+  })
 
   var menu = sidebar.querySelector('.toc-menu')
   if (!menu) (menu = document.createElement('div')).className = 'toc-menu'
@@ -112,6 +136,25 @@
         // Note - Dan removed preventDefault as it was hijacking default browser behavior, and not appending the url with the correct # needed to navigate correctly
         // Hide the dropdown menu after click
         tocMenu.classList.toggle('hidden')
+        // Update sidebar TOC active state immediately
+        var fragment = link.getAttribute('href')
+        if (fragment && links[fragment]) {
+          if (lastActiveFragment && lastActiveFragment !== fragment) {
+            if (Array.isArray(lastActiveFragment)) {
+              lastActiveFragment.forEach(function (f) {
+                links[f].classList.remove('is-active')
+              })
+            } else {
+              links[lastActiveFragment].classList.remove('is-active')
+            }
+          }
+          links[fragment].classList.add('is-active')
+          lastActiveFragment = fragment
+          skipScrollUpdate = true
+          setTimeout(function () {
+            skipScrollUpdate = false
+          }, 100)
+        }
       })
     })
   }
@@ -138,6 +181,7 @@
   }
 
   function onScroll () {
+    if (skipScrollUpdate) return
     var scrolledBy = window.scrollY
     var buffer = getNumericStyleVal(document.documentElement, 'fontSize') * 1.15
     // Account for sticky header height - use scroll-padding-top or fall back to article offset
