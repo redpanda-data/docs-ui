@@ -546,6 +546,7 @@ html[data-theme="dark"] .theme-image {
    ============================================================================= */
 
 .tb-ai-btn,
+.tb-search-btn,
 .tb-btn {
   display: inline-flex;
   align-items: center;
@@ -588,6 +589,31 @@ html[data-theme="dark"] .tb-ai-btn:hover {
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
 }
 
+/* Search button - Light mode (default) */
+.tb-search-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.tb-search-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Search button - Dark mode */
+html[data-theme="dark"] .tb-search-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme="dark"] .tb-search-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
 /* Utility button (.tb-btn) - Light mode */
 .tb-btn {
   background: transparent;
@@ -614,6 +640,7 @@ html[data-theme="dark"] .tb-btn:hover {
 }
 
 .tb-ai-btn svg,
+.tb-search-btn svg,
 .tb-btn svg {
   width: 16px;
   height: 16px;
@@ -622,11 +649,13 @@ html[data-theme="dark"] .tb-btn:hover {
 
 @media screen and (max-width: 1024px) {
   .tb-ai-btn span,
+  .tb-search-btn span,
   .tb-btn {
     display: none;
   }
 
-  .tb-ai-btn {
+  .tb-ai-btn,
+  .tb-search-btn {
     padding: 8px;
     width: 36px;
     height: 36px;
