@@ -26,12 +26,7 @@
     {{> version-selector}}
     {{!-- Status badges: Beta, Limited Availability --}}
     {{#if page.attributes.beta}}
-    <span class="status-badge status-badge--beta" {{#if page.attributes.beta-text}}data-tippy-content="{{page.attributes.beta-text}}"{{/if}}>
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-      </svg>
-      Beta
-    </span>
+    <span class="status-badge status-badge--beta" {{#if page.attributes.beta-text}}data-tippy-content="{{page.attributes.beta-text}}"{{/if}}>Beta</span>
     {{/if}}
     {{#if page.attributes.limited-availability}}
     <span class="status-badge status-badge--la" {{#if page.attributes.limited-availability-text}}data-tippy-content="{{page.attributes.limited-availability-text}}"{{/if}}>
