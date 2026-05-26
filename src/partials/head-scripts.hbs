@@ -274,9 +274,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     document.head.appendChild(script);
   };
 
-  // Note: Cmd+K is now handled by chat-panel.js drawer
-  // Load and open on interaction with legacy AI button triggers
+  // Note: Cmd+K is now handled by chat-panel.js drawer (when chat panel exists)
+  // Load and open on interaction with AI button triggers
   document.addEventListener('click', function(e) {
+    // In standalone widget (no chat panel), open-chat buttons directly open Kapa
+    if (e.target.closest('[data-action="open-chat"]') && !document.querySelector('[data-chat-panel]')) {
+      window.loadKapa(true);
+      return;
+    }
+    // Legacy Kapa triggers
     if (e.target.closest('.custom-class-kapa, [data-kapa-trigger]')) {
       window.loadKapa(true);
     }
