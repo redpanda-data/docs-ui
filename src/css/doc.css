@@ -1765,7 +1765,7 @@ details[open] > summary {
 .back-to-top {
   /* Use fixed positioning to prevent layout shift when shown/hidden */
   position: fixed;
-  bottom: 100px;
+  bottom: 24px;
   right: 24px;
   z-index: 100;
   display: flex;

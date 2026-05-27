@@ -7,6 +7,8 @@ footer.footer {
   font-family: var(--body-font-family);
   /* Sticky footer: push to bottom when content is short */
   margin-top: auto;
+  /* Reserve minimum space to reduce CLS during render */
+  min-height: 200px;
 }
 
 .padding-global {
