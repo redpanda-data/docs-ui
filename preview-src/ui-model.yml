@@ -388,4 +388,14 @@ page:
       - content: Limited Availability Test
         url: /streaming/24.3/limited-availability-test.html
         urlType: internal
+    - content: Dev Tools
+      url: '#'
+      urlType: internal
+      items:
+      - content: Widget Test (Bump.sh)
+        url: /_/widget-test.html
+        urlType: internal
+      - content: Sticky Footer Test
+        url: /streaming/24.3/sticky-footer-test.html
+        urlType: internal
 

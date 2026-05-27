@@ -1,9 +1,12 @@
 main > .content {
   min-height: 0;
+  /* Sticky footer: content grows to push footer to bottom */
+  flex: 1 0 auto;
 }
 
 main.article {
-  min-height: calc(100vh - var(--body-top) - 60px);
+  /* Use 100vh minus header height for proper sticky footer */
+  min-height: calc(100vh - var(--body-top));
   display: flex;
   flex-direction: column;
 }
@@ -59,8 +62,6 @@ body.status-404 main > .content {
     width: 100%;
     margin: 0 auto;
     padding: 40px 48px 120px; /* Prototype exact padding */
-    /* Prevent CLS by isolating content layout */
-    contain: layout;
   }
 
   aside.toc.embedded {

@@ -5,10 +5,10 @@ footer.footer {
   border-top: 1px solid var(--nav-border-color);
   color: var(--body-font-color);
   font-family: var(--body-font-family);
-  /* Reserve space to prevent CLS */
-  min-height: 300px;
-  /* Isolate rendering */
-  contain: layout style;
+  /* Sticky footer: push to bottom when content is short */
+  margin-top: auto;
+  /* Reserve minimum space to reduce CLS during render */
+  min-height: 200px;
 }
 
 .padding-global {
@@ -229,7 +229,10 @@ footer.footer {
   background: #0b1430;
   color: rgba(255, 255, 255, 0.6);
   padding: 56px 48px 40px;
-  margin-top: 64px;
+  /* Sticky footer: auto margin pushes to bottom when content is short */
+  margin-top: auto;
+  /* Prevent footer from shrinking in flex container */
+  flex-shrink: 0;
   position: relative;
 }
 
