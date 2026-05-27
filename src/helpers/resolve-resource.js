@@ -56,6 +56,16 @@ module.exports = (resource, { data, hash: context }) => {
     return resource
   }
 
+  // Handle special keyword "current" - not a valid resource ID
+  // This is sometimes incorrectly used to mean "current page" or "current version"
+  if (resource === 'current') {
+    // Return current page URL if available, otherwise placeholder
+    if (page && page.url) {
+      return page.url
+    }
+    return '#'
+  }
+
   const { contentCatalog } = data.root || {}
 
   // For preview builds where contentCatalog.resolveResource might not exist
