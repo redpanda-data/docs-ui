@@ -158,7 +158,7 @@
       logs.length = 0;
       log('Starting widget load...');
 
-      // Load head scripts first (contains Kapa init, theme handling, etc.)
+      // Load head scripts first (contains theme handling, etc.)
       await loadWidget('/_/assets/widgets/head-bump.html', 'embed-head');
 
       // Then load visible widgets
@@ -173,9 +173,30 @@
         log('Chat panel widget not found (expected if not yet created)');
       }
 
+      // Initialize theme toggle after header is loaded
+      // (DOMContentLoaded already fired, so we need to manually initialize)
+      initThemeToggle();
+
       log('Widget loading complete!');
       log('');
       log('Test the buttons above to verify functionality.');
+    }
+
+    // Initialize theme toggle (called after header loads since DOMContentLoaded already fired)
+    function initThemeToggle() {
+      const switchButton = document.getElementById('switch-theme');
+      if (switchButton && typeof setTheme === 'function') {
+        const currentTheme = localStorage.getItem('theme') ||
+          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        setTheme(currentTheme);
+        switchButton.addEventListener('click', function() {
+          const theme = document.documentElement.getAttribute('data-theme');
+          const newTheme = theme === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', newTheme);
+          setTheme(newTheme);
+        });
+        log('Theme toggle initialized');
+      }
     }
 
     // Test functions
