@@ -197,12 +197,14 @@ const previewServeTask = createTask({
 
     // Widget-specific watch - recompile widgets when bump-related files change
     // This includes partials, CSS, and context files used by widgets
+    // Note: Watch source CSS (src/css/*-bump.css), NOT output (src/static/assets/widgets/css/*-bump.css)
+    // to avoid recursive rebuilds when compile-partial.js copies CSS to output dir
     const widgetSources = [
       `${srcDir}/partials/*-bump.hbs`,
       `${srcDir}/partials/header-content.hbs`,
       `${srcDir}/partials/footer*.hbs`,
       `${srcDir}/partials/head-*.hbs`,
-      `${srcDir}/static/assets/widgets/css/*-bump.css`,
+      `${srcDir}/css/*-bump.css`,
       'context/*.json',
     ]
     watch(widgetSources, series(compileWidgetsTask, buildTask))
