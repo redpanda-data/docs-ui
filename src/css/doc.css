@@ -1763,10 +1763,20 @@ details[open] > summary {
 }
 
 .back-to-top {
+  /* Use fixed positioning to prevent layout shift when shown/hidden */
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 150px;
+  background: var(--body-background);
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .doc .button-bar {
