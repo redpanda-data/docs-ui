@@ -118,6 +118,9 @@
     }
   }
 
+  // Expose setTheme globally for external scripts (e.g., widget test page)
+  window.setTheme = setTheme;
+
   // Connect sidebar theme toggle to main theme switcher
   window.addEventListener('DOMContentLoaded', function() {
     const sidebarThemeToggle = document.getElementById('sidebar-theme-toggle');
