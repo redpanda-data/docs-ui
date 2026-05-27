@@ -431,13 +431,6 @@ html.is-clipped--nav {
   contain: layout style;
 }
 
-/* When nav-panel-explore doesn't exist, nav-menu is first child and needs more top padding on mobile */
-@media screen and (max-width: 1023px) {
-  .nav-panel-menu:first-child .nav-menu {
-    padding-top: calc(var(--toolbar-top-padding) + 16px);
-  }
-}
-
 .nav-menu h3.title {
   display: flex;
   align-items: center;
