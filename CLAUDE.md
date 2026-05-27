@@ -23,7 +23,29 @@ This is the UI bundle project for the Redpanda documentation site. It produces a
 ### Building Components
 - `gulp build:wasm` - Build WebAssembly files from Go source (blobl-editor and console-config-migrator)
 - `gulp bundle:react` - Bundle React components using esbuild
-- `node compile-partial.js <name> <context>` - Compile specific Handlebars partials (header, footer, head-bump)
+- `gulp compile:widgets` - Compile standalone widget partials (header, footer, chat-panel-bump, head-bump)
+- `node compile-partial.js <name> <context>` - Compile specific Handlebars partials manually
+
+### Widget Testing (Bump.sh Standalone Widgets)
+Standalone widgets are HTML snippets injected into Bump.sh API documentation pages via a Netlify edge function.
+
+**Test locally:**
+1. Run `gulp preview` - automatically compiles widgets and watches for changes
+2. Open http://localhost:5252/_/widget-test.html to preview widgets in a Bump.sh-like environment
+3. Changes to bump-related files (`*-bump.hbs`, `*-bump.css`, `context/*.json`) trigger automatic widget recompilation
+
+**Widget files:**
+- Source partials: `src/partials/*-bump.hbs`, `src/partials/header-content.hbs`, `src/partials/footer*.hbs`
+- Widget CSS: `src/static/assets/widgets/css/*-bump.css`
+- Compiled widgets: `src/static/assets/widgets/*.html`
+- Context files: `context/*.json`
+- Test page: `src/static/widget-test.html`
+
+**Current widgets:**
+- `header.html` - Top navigation bar with branding and Ask AI button
+- `footer.html` - Site footer with links and social media
+- `head-bump.html` - Head scripts (analytics, theme, Kapa) and CSS links
+- `chat-panel-bump.html` - Ask AI chat drawer with inline JS
 
 ### Testing
 - `gulp test:build` - Build WASM and run Bloblang playground tests
