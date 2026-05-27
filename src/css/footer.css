@@ -227,7 +227,8 @@ footer.footer {
   background: #0b1430;
   color: rgba(255, 255, 255, 0.6);
   padding: 56px 48px 40px;
-  margin-top: 64px;
+  /* Sticky footer: auto margin pushes to bottom when content is short */
+  margin-top: auto;
   position: relative;
 }
 
