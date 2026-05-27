@@ -40,6 +40,16 @@ html[data-theme=dark] .header {
 
 html[data-theme=dark] {
   --text-color: white;
+  --navbar-background: #0f172a;
+  --navbar-font-color: rgba(255, 255, 255, 0.85);
+  --navbar-menu-font-color: rgba(255, 255, 255, 0.85);
+}
+
+/* Dark mode navbar styling */
+html[data-theme="dark"] .navbar {
+  background: #0f172a;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .header {
@@ -532,8 +542,8 @@ html[data-theme=dark] {
 }
 
 html[data-theme="dark"] .theme-image {
-  /* Dark mode - light icon */
-  filter: brightness(0) saturate(100%) invert(80%) sepia(10%) saturate(200%) hue-rotate(180deg);
+  /* Dark mode - bright white icon for visibility */
+  filter: brightness(0) saturate(100%) invert(95%) sepia(5%) saturate(100%) hue-rotate(180deg);
 }
 
 @media screen and (max-width: 1023.5px) {
@@ -633,11 +643,11 @@ html[data-theme="dark"] .tb-search-btn:hover {
 
 /* Utility button - Dark mode */
 html[data-theme="dark"] .tb-btn {
-  color: var(--grey-400-new, #919295);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 html[data-theme="dark"] .tb-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
 
@@ -685,11 +695,11 @@ html[data-theme="dark"] .tb-btn:hover {
 }
 
 html[data-theme="dark"] .tb-link {
-  color: var(--grey-300, #d0d5dd);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 html[data-theme="dark"] .tb-link:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
 
@@ -762,11 +772,20 @@ html[data-theme="dark"] .tb-dropdown-menu {
 }
 
 html[data-theme="dark"] .tb-dropdown-item {
-  color: var(--grey-300, #d0d5dd);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 html[data-theme="dark"] .tb-dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Dropdown trigger text in dark mode */
+html[data-theme="dark"] .tb-dropdown-trigger {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html[data-theme="dark"] .tb-dropdown-trigger:hover {
   color: #fff;
 }
 
