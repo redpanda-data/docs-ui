@@ -37,8 +37,16 @@
       'How do I create a topic?',
       'Explain consumer groups'
     ];
+    // Load AskAI bundle: use relative URL for testing (netlify/localhost), absolute for production
+    (function() {
+      var host = window.location.hostname;
+      var isTestEnv = host.includes('netlify.app') || host === 'localhost' || host === '127.0.0.1';
+      var bundleUrl = isTestEnv ? '/_/js/AskAI.bundle.js' : 'https://docs.redpanda.com/_/js/AskAI.bundle.js';
+      var script = document.createElement('script');
+      script.src = bundleUrl;
+      document.head.appendChild(script);
+    })();
   </script>
-  <script src="/_/js/AskAI.bundle.js"></script>
 
   {{!-- Footer disclaimer --}}
   <div class="chat-foot" data-chat-foot>AI answers may be imprecise. Always verify in the docs.</div>
