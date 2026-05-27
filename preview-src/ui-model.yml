@@ -395,7 +395,4 @@ page:
       - content: Widget Test (Bump.sh)
         url: /_/widget-test.html
         urlType: internal
-      - content: Sticky Footer Test
-        url: /streaming/24.3/sticky-footer-test.html
-        urlType: internal
 
