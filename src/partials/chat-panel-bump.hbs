@@ -31,6 +31,7 @@
 
   {{!-- Configuration and React bundle --}}
   <script>
+    // Kapa integration ID - intentionally public (client-side widget identifier)
     window.UI_INTEGRATION_ID = '13dd3c3c-52eb-4d92-9b61-383a946bccac';
     window.AI_SUGGESTIONS = [
       'What is Redpanda?',
@@ -38,10 +39,12 @@
       'Explain consumer groups'
     ];
     // Load AskAI bundle: use relative URL for testing (netlify/localhost), absolute for production
+    // Production URL can be overridden via window.ASKAI_BUNDLE_URL before this script runs
     (function() {
       var host = window.location.hostname;
       var isTestEnv = host.includes('netlify.app') || host === 'localhost' || host === '127.0.0.1';
-      var bundleUrl = isTestEnv ? '/_/js/AskAI.bundle.js' : 'https://docs.redpanda.com/_/js/AskAI.bundle.js';
+      var defaultProdUrl = 'https://docs.redpanda.com/_/js/AskAI.bundle.js';
+      var bundleUrl = isTestEnv ? '/_/js/AskAI.bundle.js' : (window.ASKAI_BUNDLE_URL || defaultProdUrl);
       var script = document.createElement('script');
       script.src = bundleUrl;
       document.head.appendChild(script);
