@@ -5,7 +5,8 @@ main > .content {
 }
 
 main.article {
-  min-height: calc(100vh - var(--body-top) - 60px);
+  /* Use 100vh minus header height for proper sticky footer */
+  min-height: calc(100vh - var(--body-top));
   display: flex;
   flex-direction: column;
 }

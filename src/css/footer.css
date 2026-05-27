@@ -229,6 +229,8 @@ footer.footer {
   padding: 56px 48px 40px;
   /* Sticky footer: auto margin pushes to bottom when content is short */
   margin-top: auto;
+  /* Prevent footer from shrinking in flex container */
+  flex-shrink: 0;
   position: relative;
 }
 
