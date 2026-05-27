@@ -1,5 +1,7 @@
 main > .content {
   min-height: 0;
+  /* Sticky footer: content grows to push footer to bottom */
+  flex: 1 0 auto;
 }
 
 main.article {
