@@ -58,8 +58,12 @@ html.is-clipped--navbar {
   }
 }
 
-/* Mobile: show brand with logo */
+/* Mobile: show brand with logo, align nav items to right */
 @media screen and (max-width: 1023px) {
+  .navbar.topbar {
+    justify-content: space-between;
+  }
+
   .topbar-crumbs {
     display: none;
   }

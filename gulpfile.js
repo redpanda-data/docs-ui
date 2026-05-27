@@ -37,6 +37,7 @@ function compileWidgets (cb) {
     { name: 'header', context: 'context/header.json' },
     { name: 'footer', context: 'context/footer.json', scripts: ['05-mobile-navbar.js'] },
     { name: 'head-bump', context: 'context/head.json' },
+    { name: 'chat-panel-bump', context: 'context/chat-panel.json' },
   ]
 
   try {
@@ -176,17 +177,38 @@ const buildPreviewPagesTask = createTask({
   call: task.buildPreviewPages(srcDir, previewSrcDir, previewDestDir, livereload),
 })
 
+const compileWidgetsTask = createTask({
+  name: 'compile:widgets',
+  desc: 'Compile standalone widget partials (header, footer, chat-panel, etc.)',
+  call: compileWidgets,
+})
+
 const previewBuildTask = createTask({
   name: 'preview:build',
   desc: 'Process and stage the UI assets and generate pages for the preview',
-  call: series(buildWasmTask, bundleReactTask, buildTask, buildPreviewPagesTask),
+  call: series(buildWasmTask, bundleReactTask, compileWidgetsTask, buildTask, buildPreviewPagesTask),
 })
 
 const previewServeTask = createTask({
   name: 'preview:serve',
-  call: task.serve(previewDestDir, serverConfig, () =>
+  call: task.serve(previewDestDir, serverConfig, () => {
+    // Main UI watch - excludes static files (widgets are handled separately)
     watch([`${srcDir}/**/*`, `${previewSrcDir}/**/*`, `!${srcDir}/static/**`], previewBuildTask)
-  ),
+
+    // Widget-specific watch - recompile widgets when bump-related files change
+    // This includes partials, CSS, and context files used by widgets
+    // Note: Watch source CSS (src/css/*-bump.css), NOT output (src/static/assets/widgets/css/*-bump.css)
+    // to avoid recursive rebuilds when compile-partial.js copies CSS to output dir
+    const widgetSources = [
+      `${srcDir}/partials/*-bump.hbs`,
+      `${srcDir}/partials/header-content.hbs`,
+      `${srcDir}/partials/footer*.hbs`,
+      `${srcDir}/partials/head-*.hbs`,
+      `${srcDir}/css/*-bump.css`,
+      'context/*.json',
+    ]
+    watch(widgetSources, series(compileWidgetsTask, buildTask))
+  }),
 })
 
 const previewTask = createTask({
@@ -232,6 +254,7 @@ module.exports = exportTasks(
   generateBloblangGrammarTask,
   buildWasmTask,
   bundleReactTask,
+  compileWidgetsTask,
   buildTask,
   bundlePackTask,
   previewTask,

@@ -5,6 +5,7 @@
 blobl.wasm
 src/static/*
 !src/static/bloblang-docs.json
+!src/static/widget-test.html
 test-results.*
 test-results-*.*
 .playwright-mcp/

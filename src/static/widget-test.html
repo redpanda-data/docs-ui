@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Test - Bump.sh Simulation</title>
+
+  <!-- Load widget CSS (same order as Bump pages) -->
+  <!-- Widget CSS files are served from /_/assets/widgets/css/ in preview -->
+  <link rel="stylesheet" href="/_/assets/widgets/css/typeface-inter-bump.css">
+  <link rel="stylesheet" href="/_/assets/widgets/css/typeface-ibmplexmono-bump.css">
+  <link rel="stylesheet" href="/_/assets/widgets/css/header-bump.css">
+  <link rel="stylesheet" href="/_/assets/widgets/css/breadcrumbs-bump.css">
+  <link rel="stylesheet" href="/_/assets/widgets/css/doc-bump.css">
+  <link rel="stylesheet" href="/_/assets/widgets/css/footer-bump.css">
+  <link rel="stylesheet" href="/_/assets/widgets/css/search-bump.css">
+  <link rel="stylesheet" href="/_/assets/widgets/css/chat-panel-bump.css">
+
+  <style>
+    /* Minimal Bump.sh page simulation styles */
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fff;
+    }
+    html[data-theme="dark"] body {
+      background: #1a1a2e;
+      color: #e5e5e5;
+    }
+    .bump-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 40px 40px;
+      min-height: 70vh;
+    }
+    .bump-content h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .bump-content p {
+      color: #666;
+      line-height: 1.6;
+    }
+    html[data-theme="dark"] .bump-content p {
+      color: #a0a0a0;
+    }
+    .test-buttons {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .test-btn {
+      padding: 10px 20px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .test-btn:hover {
+      background: #e5e5e5;
+    }
+    html[data-theme="dark"] .test-btn {
+      background: #2a2a3e;
+      border-color: #444;
+      color: #e5e5e5;
+    }
+    html[data-theme="dark"] .test-btn:hover {
+      background: #3a3a4e;
+    }
+    .status {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f0f9ff;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    html[data-theme="dark"] .status {
+      background: #1e293b;
+    }
+  </style>
+</head>
+<body>
+  <!-- Simulate Bump.sh embed points -->
+  <div id="embed-head"></div>
+
+  <!-- Bump.sh embed point for header -->
+  <div id="embed-top-body"></div>
+
+  <!-- Simulated Bump.sh API documentation content -->
+  <main class="bump-content">
+    <h1>Widget Test Page</h1>
+    <p>This page simulates how widgets appear on Bump.sh API documentation pages.
+       The widgets are loaded via fetch() to mimic how the Netlify edge function injects them.</p>
+
+    <div class="test-buttons">
+      <button class="test-btn" onclick="testAskAI()">Test Ask AI Button</button>
+      <button class="test-btn" onclick="testSearch()">Test Search Button</button>
+      <button class="test-btn" onclick="testThemeToggle()">Test Theme Toggle</button>
+      <button class="test-btn" onclick="testCmdK()">Test Cmd+K</button>
+      <button class="test-btn" onclick="reloadWidgets()">Reload All Widgets</button>
+    </div>
+
+    <div class="status" id="status">
+      Loading widgets...
+    </div>
+  </main>
+
+  <!-- Bump.sh embed point for footer and chat panel -->
+  <div id="embed-bottom-body"></div>
+
+  <script>
+    const status = document.getElementById('status');
+    const logs = [];
+
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      logs.push(`[${time}] ${msg}`);
+      status.innerHTML = logs.slice(-10).join('<br>');
+      console.log(msg);
+    }
+
+    // Load widget HTML via fetch (simulating edge function behavior)
+    async function loadWidget(url, targetId, position = 'beforeend') {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const html = await res.text();
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.insertAdjacentHTML(position, html);
+          log(`Loaded: ${url.split('/').pop()}`);
+
+          // Execute any inline scripts in the loaded HTML
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          temp.querySelectorAll('script').forEach(script => {
+            const newScript = document.createElement('script');
+            if (script.src) {
+              newScript.src = script.src;
+            } else {
+              newScript.textContent = script.textContent;
+            }
+            document.body.appendChild(newScript);
+          });
+        }
+        return true;
+      } catch (err) {
+        log(`Failed to load ${url}: ${err.message}`);
+        return false;
+      }
+    }
+
+    // Load all widgets
+    async function loadAllWidgets() {
+      logs.length = 0;
+      log('Starting widget load...');
+
+      // Load head scripts first (contains theme handling, etc.)
+      await loadWidget('/_/assets/widgets/head-bump.html', 'embed-head');
+
+      // Then load visible widgets
+      await Promise.all([
+        loadWidget('/_/assets/widgets/header.html', 'embed-top-body'),
+        loadWidget('/_/assets/widgets/footer.html', 'embed-bottom-body'),
+      ]);
+
+      // Load chat panel if it exists
+      const chatLoaded = await loadWidget('/_/assets/widgets/chat-panel-bump.html', 'embed-bottom-body');
+      if (!chatLoaded) {
+        log('Chat panel widget not found (expected if not yet created)');
+      }
+
+      // Initialize theme toggle after header is loaded
+      // (DOMContentLoaded already fired, so we need to manually initialize)
+      initThemeToggle();
+
+      log('Widget loading complete!');
+      log('');
+      log('Test the buttons above to verify functionality.');
+    }
+
+    // Initialize theme toggle (called after header loads since DOMContentLoaded already fired)
+    function initThemeToggle() {
+      const switchButton = document.getElementById('switch-theme');
+      if (switchButton && typeof setTheme === 'function') {
+        const currentTheme = localStorage.getItem('theme') ||
+          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        setTheme(currentTheme);
+        switchButton.addEventListener('click', function() {
+          const theme = document.documentElement.getAttribute('data-theme');
+          const newTheme = theme === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', newTheme);
+          setTheme(newTheme);
+        });
+        log('Theme toggle initialized');
+      }
+    }
+
+    // Test functions
+    function testAskAI() {
+      const btn = document.querySelector('[data-action="open-chat"]');
+      if (btn) {
+        log('Clicking Ask AI button...');
+        btn.click();
+      } else {
+        log('Ask AI button not found!');
+      }
+    }
+
+    function testSearch() {
+      const btn = document.querySelector('[data-action="open-search"]');
+      if (btn) {
+        log('Clicking Search button...');
+        btn.click();
+      } else {
+        log('Search button not found!');
+      }
+    }
+
+    function testThemeToggle() {
+      const btn = document.getElementById('switch-theme');
+      if (btn) {
+        log('Clicking theme toggle...');
+        btn.click();
+        log(`Theme is now: ${document.documentElement.getAttribute('data-theme')}`);
+      } else {
+        log('Theme toggle not found!');
+      }
+    }
+
+    function testCmdK() {
+      log('Simulating Cmd+K...');
+      document.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'k',
+        metaKey: true,
+        bubbles: true
+      }));
+    }
+
+    function reloadWidgets() {
+      // Clear existing widgets
+      document.getElementById('embed-head').innerHTML = '';
+      document.getElementById('embed-top-body').innerHTML = '';
+      document.getElementById('embed-bottom-body').innerHTML = '';
+      loadAllWidgets();
+    }
+
+    // Initial load
+    loadAllWidgets();
+  </script>
+</body>
+</html>
