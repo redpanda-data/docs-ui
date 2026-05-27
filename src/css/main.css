@@ -61,8 +61,6 @@ body.status-404 main > .content {
     width: 100%;
     margin: 0 auto;
     padding: 40px 48px 120px; /* Prototype exact padding */
-    /* Prevent CLS by isolating content layout */
-    contain: layout;
   }
 
   aside.toc.embedded {
