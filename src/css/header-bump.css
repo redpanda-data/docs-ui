@@ -45,9 +45,9 @@ html[data-theme=dark] {
   --navbar-menu-font-color: rgba(255, 255, 255, 0.85);
 }
 
-/* Dark mode navbar styling */
+/* Dark mode navbar styling - !important overrides inline style from edge function */
 html[data-theme="dark"] .navbar {
-  background: #0f172a;
+  background: #0f172a !important;
   border-bottom-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
