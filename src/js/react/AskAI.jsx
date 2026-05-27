@@ -56,12 +56,21 @@ function App() {
   )
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function mount() {
   // Mount to exactly one root to prevent duplicate App instances
   const homeEl = document.getElementById('kapa-chat-root')
   const panelEl = document.getElementById('chat-panel-kapa-root')
   const mountEl = homeEl || panelEl
-  if (mountEl) {
+  if (mountEl && !mountEl.dataset.mounted) {
+    mountEl.dataset.mounted = 'true'
     createRoot(mountEl).render(<App />)
   }
-})
+}
+
+// Handle both normal page load and late loading (e.g., widgets loaded via fetch)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mount)
+} else {
+  // DOM already loaded, mount immediately
+  mount()
+}
