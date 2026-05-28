@@ -76,6 +76,30 @@
       "is_enterprise": false,
       "visibility": "user",
       "minimum": 0
+    },
+    "redpanda.storage.mode": {
+      "name": "redpanda.storage.mode",
+      "type": "string",
+      "default": "tiered",
+      "description": "Controls how data is stored for topics. Valid values are `local` (data stored only on local disk) and `tiered` (data can be offloaded to object storage).",
+      "config_scope": "topic",
+      "needs_restart": false,
+      "cloud_supported": true,
+      "is_deprecated": false,
+      "is_enterprise": false,
+      "visibility": "user"
+    },
+    "redpanda.remote.read": {
+      "name": "redpanda.remote.read",
+      "type": "boolean",
+      "default": true,
+      "description": "Enables reading data from object storage when Tiered Storage is enabled.",
+      "config_scope": "topic",
+      "needs_restart": false,
+      "cloud_supported": true,
+      "is_deprecated": false,
+      "is_enterprise": false,
+      "visibility": "user"
     }
   }
 }

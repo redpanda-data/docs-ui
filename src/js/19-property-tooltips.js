@@ -279,7 +279,9 @@
     // Link to full documentation (use current page version)
     var scope = prop.configScope || 'cluster'
     var version = getDocVersion()
-    var docUrl = '/' + version + '/reference/properties/' + scope + '-properties/#' + prop.name.replace(/_/g, '-')
+    // Slugify: replace underscores and dots with hyphens to match AsciiDoc anchor conventions
+    var anchor = prop.name.replace(/[._]/g, '-')
+    var docUrl = '/' + version + '/reference/properties/' + scope + '-properties/#' + anchor
     parts.push('<a href="' + escapeHtml(docUrl) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
     return '<div class="property-doc-tooltip">' + parts.join('') + '</div>'

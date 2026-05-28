@@ -18,6 +18,15 @@ Topic-level configuration properties:
 * `retention_bytes` - Controls maximum partition size before deletion
 * This is a topic-scoped property that can override cluster defaults
 
+== Dotted Property Names (Topic-scoped)
+
+These properties use dot notation and test the anchor slugification fix:
+
+* `redpanda.storage.mode` - Controls storage mode (local vs tiered)
+* `redpanda.remote.read` - Enables remote reads from object storage
+
+The "View full documentation" link for `redpanda.storage.mode` should generate an anchor like `#redpanda-storage-mode` (dots replaced with hyphens), not `#redpanda.storage.mode`.
+
 == Enterprise and Self-Hosted Properties
 
 Some properties are enterprise-only:
