@@ -45,6 +45,12 @@ html.is-clipped--navbar {
     left: var(--sidebar-width, 260px);
     padding: 0 32px;
     top: var(--announcement-bar-height--desktop);
+    transition: left 0.2s ease;
+  }
+
+  /* When nav is collapsed, header starts at left edge */
+  body:has(.nav-container.hidden) .navbar.topbar {
+    left: 0;
   }
 
   /* Home page: hide breadcrumbs (landing page doesn't need them) */
