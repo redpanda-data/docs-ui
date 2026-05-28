@@ -1,12 +1,9 @@
 main > .content {
   min-height: 0;
-  /* Sticky footer: content grows to push footer to bottom */
-  flex: 1 0 auto;
 }
 
 main.article {
-  /* Use 100vh minus header height for proper sticky footer */
-  min-height: calc(100vh - var(--body-top));
+  min-height: calc(100vh - var(--body-top) - 60px);
   display: flex;
   flex-direction: column;
 }
@@ -62,6 +59,8 @@ body.status-404 main > .content {
     width: 100%;
     margin: 0 auto;
     padding: 40px 48px 120px; /* Prototype exact padding */
+    /* Prevent CLS by isolating content layout */
+    contain: layout;
   }
 
   aside.toc.embedded {
@@ -70,6 +69,11 @@ body.status-404 main > .content {
 
   aside.toc.sidebar {
     order: 1;
+  }
+
+  /* When nav is collapsed, allow content to use more space */
+  body:has(.nav-container.hidden) main > .content {
+    max-width: 1480px;
   }
 }
 
