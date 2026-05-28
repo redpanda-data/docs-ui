@@ -392,6 +392,25 @@
       <div class="dp-matrix-row">
         <div class="dp-matrix-when">
           <div class="dp-matrix-when-label">If you</div>
+          <p>want streaming as a service with an SLA and zero ops</p>
+        </div>
+        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
+          <span class="dp-product-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+          </span>
+          <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}">
+            Start with Cloud
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="dp-matrix-row">
+        <div class="dp-matrix-when">
+          <div class="dp-matrix-when-label">If you</div>
           <p>need full control over networking, storage, and security posture</p>
         </div>
         <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'self-managed') '#0f8b66'}}">
@@ -405,25 +424,6 @@
           </span>
           <a href="{{#if page.attributes.self-managed-home}}{{{relativize (resolve-resource page.attributes.self-managed-home)}}}{{else}}#{{/if}}">
             Start with Self-Managed
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-      <div class="dp-matrix-row">
-        <div class="dp-matrix-when">
-          <div class="dp-matrix-when-label">If you</div>
-          <p>want streaming as a service with an SLA and zero ops</p>
-        </div>
-        <div class="dp-matrix-pick" style="--dp-accent: {{or (get-component-color site 'cloud-data-platform') '#1f5bd6'}}">
-          <span class="dp-product-chip">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-            </svg>
-          </span>
-          <a href="{{#if page.attributes.cloud-home}}{{{relativize (resolve-resource page.attributes.cloud-home)}}}{{else}}#{{/if}}">
-            Start with Cloud
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"/>
             </svg>
