@@ -279,8 +279,10 @@
     // Link to full documentation (use current page version)
     var scope = prop.configScope || 'cluster'
     var version = getDocVersion()
-    // Slugify: replace underscores and dots with hyphens to match AsciiDoc anchor conventions
-    var anchor = prop.name.replace(/[._]/g, '-')
+    // AsciiDoc auto-ID generation: dots are removed, underscores become hyphens
+    // e.g., "redpanda.storage.mode" -> "redpandastoragemode"
+    // e.g., "log_retention_ms" -> "log-retention-ms"
+    var anchor = prop.name.replace(/\./g, '').replace(/_/g, '-')
     var docUrl = '/' + version + '/reference/properties/' + scope + '-properties/#' + anchor
     parts.push('<a href="' + escapeHtml(docUrl) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
