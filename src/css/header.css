@@ -1063,6 +1063,7 @@ html[data-theme="dark"] .tb-link:hover {
 /* Log into Cloud link styling */
 .tb-link-cloud svg {
   flex-shrink: 0;
+  margin-left: 5px;
 }
 
 /* Top nav dropdown (Ask a Human) */
