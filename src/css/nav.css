@@ -841,6 +841,14 @@ html[data-theme="light"] .nav-item-toggle {
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
+/* Prevent SVG icons from shrinking to 0 in flex container */
+.sb-theme-toggle svg,
+.sb-collapse-toggle svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
 .sb-theme-toggle:hover,
 .sb-collapse-toggle:hover {
   background: rgba(255, 255, 255, 0.05);
