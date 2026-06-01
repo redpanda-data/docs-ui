@@ -1764,8 +1764,9 @@ details[open] > summary {
 
 .back-to-top {
   /* Use fixed positioning to prevent layout shift when shown/hidden */
+  /* Position above pagination buttons to avoid overlap */
   position: fixed;
-  bottom: 24px;
+  bottom: 140px;
   right: 24px;
   z-index: 100;
   display: flex;
