@@ -766,10 +766,7 @@ function initAlgolia() {
               return html`
                 <div>No results for ${state.query}</div>
                 <p>
-                  Believe this query should return results?
-                  <a target="_blank" rel="noopener noreferrer" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}">
-                    Let us know
-                  </a>.
+                  Believe this query should return results? <a target="_blank" rel="noopener noreferrer" href="https://github.com/redpanda-data/documentation/issues/new?title=No%20search%20results%20for%20${state.query}">Let us know</a>.
                 </p>`;
             },
             header({ items, html }) {
