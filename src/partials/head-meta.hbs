@@ -9,4 +9,36 @@
 {{#with (or site.components.streaming site.components.ROOT)}}
 <meta name="latest-redpanda-version" content="{{this.latest.version}}">
 {{/with}}
+{{!-- Properties JSON: use page's version for streaming component, site latest for others --}}
+{{!-- available-properties-tag is set by set-latest-version extension to the highest version with JSON in catalog --}}
+{{#if page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
+{{!-- Streaming component page: use available version if set, otherwise latest --}}
+{{#with (or page.componentVersion.asciidoc.attributes.available-properties-tag page.componentVersion.asciidoc.attributes.latest-redpanda-tag)}}
+<meta name="latest-redpanda-tag" content="{{this}}">
+<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' version=@root.page.version fallback=(concat 'https://docs.redpanda.com/streaming/' @root.page.version '/reference/_attachments/redpanda-properties-' this '.json')}}">
+{{/with}}
+{{else}}
+{{!-- Non-streaming component (cloud, connect): use streaming's latest --}}
+{{#with (or site.components.streaming site.components.ROOT)}}
+{{#if this.latest.asciidoc.attributes.latest-redpanda-tag}}
+{{#with (or this.latest.asciidoc.attributes.available-properties-tag this.latest.asciidoc.attributes.latest-redpanda-tag)}}
+<meta name="latest-redpanda-tag" content="{{this}}">
+{{!-- Use streaming component's latest version for the fallback URL --}}
+<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' fallback=(concat 'https://docs.redpanda.com/streaming/' (or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) '/reference/_attachments/redpanda-properties-' this '.json')}}">
+{{/with}}
+{{/if}}
+{{/with}}
+{{/if}}
+{{!-- Redpanda Connect JSON for Bloblang tooltips --}}
+{{!-- available-connect-version is set by set-latest-version extension to the highest version with JSON in catalog --}}
+{{#with (or site.components.connect site.components.redpanda-connect)}}
+{{#if this.latest.asciidoc.attributes.latest-connect-version}}
+{{#with (or this.latest.asciidoc.attributes.available-connect-version this.latest.asciidoc.attributes.latest-connect-version)}}
+<meta name="connect-json-url" content="{{resolve-resource (concat 'attachment$connect-' this '.json') component='connect' module='components' fallback=(concat 'https://docs.redpanda.com/connect/components/_attachments/connect-' this '.json')}}">
+{{/with}}
+{{/if}}
+{{/with}}
+{{#if page.attributes.disable-property-tooltips}}
+<meta name="disable-property-tooltips" content="true">
+{{/if}}
 <meta itemprop="datePublished" content="{{iso-date}}">

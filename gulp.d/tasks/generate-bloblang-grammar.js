@@ -6,7 +6,7 @@ const log = require('fancy-log')
 const https = require('https')
 
 const ANTORA_YML_URL = 'https://raw.githubusercontent.com/redpanda-data/rp-connect-docs/main/antora.yml'
-const CONNECT_JSON_BASE = 'https://docs.redpanda.com/redpanda-connect/components/_attachments'
+const CONNECT_JSON_BASE = 'https://docs.redpanda.com/connect/components/_attachments'
 const FALLBACK_VERSIONS = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0']
 
 function fetchText (url) {
