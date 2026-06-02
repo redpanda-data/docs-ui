@@ -51,6 +51,22 @@
   color: #fff;
 }
 
+/* Scale SVG icons proportionally for smaller dropdown chips */
+.sb-product-opt .sb-product-chip svg {
+  width: 6px;
+  height: 6px;
+}
+
+.sb-product-opt.sb-product-child .sb-product-chip svg {
+  width: 5px;
+  height: 5px;
+}
+
+.sb-product-opt.sb-product-grandchild .sb-product-chip svg {
+  width: 4px;
+  height: 4px;
+}
+
 .sb-product-name {
   display: flex;
   flex-direction: column;
