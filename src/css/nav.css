@@ -179,6 +179,11 @@ html .nav-container.is-active {
   border-top: 1px solid var(--nav-border-color);
 }
 
+/* Sidebar footer collapse button - always visible (overrides .nav-collapse display:none) */
+.sb-footer .sb-collapse-toggle.nav-collapse {
+  display: flex;
+}
+
 .nav-collapse:hover {
   opacity: 1;
 }
@@ -227,11 +232,6 @@ html .nav-container.is-active {
 
   .nav-collapse {
     display: none;
-  }
-
-  /* Override for sidebar footer collapse button - keep it visible */
-  .sb-footer .sb-collapse-toggle {
-    display: inline-grid;
   }
 }
 
