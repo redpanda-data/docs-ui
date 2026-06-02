@@ -1,0 +1,142 @@
+{
+  "bloblang-functions": [
+    {
+      "name": "now",
+      "description": "Returns the current timestamp as a string.",
+      "category": "general",
+      "examples": [
+        {
+          "mapping": "root.created_at = now()"
+        }
+      ]
+    },
+    {
+      "name": "uuid_v4",
+      "description": "Generates a new RFC-4122 UUID v4 string.",
+      "category": "general",
+      "examples": [
+        {
+          "mapping": "root.id = uuid_v4()"
+        }
+      ]
+    },
+    {
+      "name": "env",
+      "description": "Returns the value of an environment variable.",
+      "category": "environment",
+      "params": {
+        "named": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "The name of the environment variable."
+          }
+        ]
+      },
+      "examples": [
+        {
+          "mapping": "root.api_key = env(\"API_KEY\")"
+        }
+      ]
+    },
+    {
+      "name": "throw",
+      "description": "Throws an error with a given message.",
+      "category": "general",
+      "params": {
+        "named": [
+          {
+            "name": "message",
+            "type": "string",
+            "description": "The error message to throw."
+          }
+        ]
+      },
+      "examples": [
+        {
+          "mapping": "root = if this.value < 0 { throw(\"negative value\") }"
+        }
+      ]
+    }
+  ],
+  "bloblang-methods": [
+    {
+      "name": "string",
+      "description": "Marshal a value into a string.",
+      "categories": [{"Category": "coercion"}],
+      "examples": [
+        {
+          "mapping": "root.str = this.number.string()"
+        }
+      ]
+    },
+    {
+      "name": "number",
+      "description": "Attempt to parse a value into a number.",
+      "categories": [{"Category": "coercion"}],
+      "examples": [
+        {
+          "mapping": "root.num = this.str.number()"
+        }
+      ]
+    },
+    {
+      "name": "uppercase",
+      "description": "Convert a string to uppercase.",
+      "categories": [{"Category": "strings"}],
+      "examples": [
+        {
+          "mapping": "root.upper = this.name.uppercase()"
+        }
+      ]
+    },
+    {
+      "name": "lowercase",
+      "description": "Convert a string to lowercase.",
+      "categories": [{"Category": "strings"}],
+      "examples": [
+        {
+          "mapping": "root.lower = this.name.lowercase()"
+        }
+      ]
+    },
+    {
+      "name": "contains",
+      "description": "Checks whether a string contains a substring.",
+      "categories": [{"Category": "strings"}],
+      "params": {
+        "named": [
+          {
+            "name": "value",
+            "type": "string",
+            "description": "The substring to search for."
+          }
+        ]
+      },
+      "examples": [
+        {
+          "mapping": "root.has_foo = this.text.contains(\"foo\")"
+        }
+      ]
+    },
+    {
+      "name": "map_each",
+      "description": "Apply a mapping to each element of an array.",
+      "categories": [{"Category": "object & array"}],
+      "params": {
+        "named": [
+          {
+            "name": "mapping",
+            "type": "query",
+            "description": "The mapping to apply."
+          }
+        ]
+      },
+      "examples": [
+        {
+          "mapping": "root.doubled = this.numbers.map_each(num -> num * 2)"
+        }
+      ]
+    }
+  ]
+}

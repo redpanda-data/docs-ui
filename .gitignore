@@ -6,6 +6,8 @@ blobl.wasm
 src/static/*
 !src/static/bloblang-docs.json
 !src/static/widget-test.html
+!src/static/redpanda-properties.json
+!src/static/connect.json
 test-results.*
 test-results-*.*
 .playwright-mcp/
