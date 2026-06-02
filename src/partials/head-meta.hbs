@@ -23,8 +23,8 @@
 {{#if this.latest.asciidoc.attributes.latest-redpanda-tag}}
 {{#with (or this.latest.asciidoc.attributes.available-properties-tag this.latest.asciidoc.attributes.latest-redpanda-tag)}}
 <meta name="latest-redpanda-tag" content="{{this}}">
-{{!-- Use streaming component's latest version for the fallback URL --}}
-<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' fallback=(concat 'https://docs.redpanda.com/streaming/' (or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) '/reference/_attachments/redpanda-properties-' this '.json')}}">
+{{!-- Use streaming component's latest version for resolution and fallback URL --}}
+<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' version=(or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) fallback=(concat 'https://docs.redpanda.com/streaming/' (or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) '/reference/_attachments/redpanda-properties-' this '.json')}}">
 {{/with}}
 {{/if}}
 {{/with}}
@@ -34,7 +34,8 @@
 {{#with (or site.components.connect site.components.redpanda-connect)}}
 {{#if this.latest.asciidoc.attributes.latest-connect-version}}
 {{#with (or this.latest.asciidoc.attributes.available-connect-version this.latest.asciidoc.attributes.latest-connect-version)}}
-<meta name="connect-json-url" content="{{resolve-resource (concat 'attachment$connect-' this '.json') component='connect' module='components' fallback=(concat 'https://docs.redpanda.com/connect/components/_attachments/connect-' this '.json')}}">
+{{!-- Use connect component's latest version for resolution --}}
+<meta name="connect-json-url" content="{{resolve-resource (concat 'attachment$connect-' this '.json') component='connect' module='components' version=(or @root.site.components.connect.latest.version @root.site.components.redpanda-connect.latest.version) fallback=(concat 'https://docs.redpanda.com/connect/components/_attachments/connect-' this '.json')}}">
 {{/with}}
 {{/if}}
 {{/with}}
