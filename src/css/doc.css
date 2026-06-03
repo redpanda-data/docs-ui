@@ -1766,7 +1766,7 @@ details[open] > summary {
   /* Use fixed positioning to prevent layout shift when shown/hidden */
   /* Position above pagination buttons to avoid overlap */
   position: fixed;
-  bottom: 140px;
+  bottom: 100px; /* Increased to avoid overlapping pagination Next button */
   right: 24px;
   z-index: 100;
   display: flex;
@@ -1777,6 +1777,14 @@ details[open] > summary {
   border-radius: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* On mobile, position back-to-top even higher to clear pagination */
+@media screen and (max-width: 768px) {
+  .back-to-top {
+    bottom: 120px;
+    right: 16px;
+  }
 }
 
 .doc .button-bar {

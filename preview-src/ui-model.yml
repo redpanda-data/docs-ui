@@ -5,12 +5,13 @@ site:
   homeUrl: &home_url /streaming/24.3/index.html
   components:
   # Agentic Data Plane component
-  - name: agentic-data-plane
+  - &adp_component
+    name: agentic-data-plane
     title: Agentic Data Plane
-    url: '#'
+    url: /agentic-data-plane/1.0/index.html
     versions:
     - &latest_version_adp
-      url: '#'
+      url: /agentic-data-plane/1.0/index.html
       version: '1.0'
       displayVersion: '1.0'
       asciidoc:
@@ -21,6 +22,40 @@ site:
             color: '#7C3AED'
             order: 1
     latestVersion: *latest_version_adp
+  # Data Platform umbrella component
+  - name: data-platform
+    title: Data Platform
+    url: '#'
+    versions:
+    - &latest_version_dp
+      url: '#'
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Data Platform
+            description: The streaming foundation for everything you build.
+            color: '#5239CC'
+            order: 2
+    latestVersion: *latest_version_dp
+  # Self-Managed component - parent for Streaming and Connect
+  - name: self-managed
+    title: Self-Managed
+    url: '#'
+    versions:
+    - &latest_version_sm
+      url: '#'
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Self-Managed
+            description: Run Redpanda on your own infrastructure.
+            color: '#9F1239'
+            order: 1
+    latestVersion: *latest_version_sm
   # Streaming component - under Data Platform (formerly Self-Managed/ROOT)
   - &component
     name: streaming
@@ -106,8 +141,8 @@ page:
   url: *home_url
   home: true
   title: Brand&#8217;s Hardware &amp; Software Requirements
-  component: *component
-  componentVersion: *component_version
+  component: *adp_component
+  componentVersion: *latest_version_adp
   version: '24.3'
   displayVersion: '24.3'
   module: ROOT
