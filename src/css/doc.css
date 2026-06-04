@@ -946,7 +946,7 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   gap: 12px;
   padding: 14px 16px;
   border-radius: 10px;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(17.5 / var(--rem-base) * 1rem);
   line-height: 1.55;
 }
 
