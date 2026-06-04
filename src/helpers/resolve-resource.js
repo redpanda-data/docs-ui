@@ -41,6 +41,7 @@ function logUnresolved (resource, reason, page, context, logger) {
 
 module.exports = (resource, { data, hash: context }) => {
   const { page, logger } = data.root || {}
+  const fallbackUrl = context?.fallback
 
   // Log and return undefined if resource is not provided
   if (!resource || typeof resource !== 'string') {
@@ -48,7 +49,7 @@ module.exports = (resource, { data, hash: context }) => {
     if (page && resource === undefined) {
       logUnresolved('undefined', 'attribute not defined (check page attributes)', page, context, logger)
     }
-    return undefined
+    return fallbackUrl || undefined
   }
 
   // External URLs pass through
@@ -129,8 +130,11 @@ module.exports = (resource, { data, hash: context }) => {
 
   if (file) {
     result = file.pub.url
+  } else if (fallbackUrl) {
+    // Use fallback URL when resource not in content catalog
+    result = fallbackUrl
   } else {
-    // Log warning for unresolved resource
+    // Log warning for unresolved resource (only if no fallback provided)
     logUnresolved(resolvedResource, 'target not found in content catalog', page, context, logger)
     result = resource
   }
