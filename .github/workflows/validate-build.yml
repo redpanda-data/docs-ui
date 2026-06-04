@@ -16,6 +16,7 @@ jobs:
           cache-dependency-path: blobl-editor/wasm/go.sum
       - name: Lint Go code
         uses: golangci/golangci-lint-action@v8
+        timeout-minutes: 10
         with:
           working-directory: "./blobl-editor/wasm"
         env:
@@ -39,6 +40,7 @@ jobs:
             generated-${{ hashFiles('blobl-editor/wasm/go.sum') }}-
             generated-
       - name: Bundle UI
+        timeout-minutes: 15
         run: |
           npm ci
           gulp bundle

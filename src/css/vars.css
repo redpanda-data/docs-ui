@@ -263,7 +263,7 @@ html:not([data-theme=dark]) {
   --nav-muted-color: var(--color-gray-70);
   --nav-panel-divider-color: var(--color-smoke-90);
   --nav-secondary-background: var(--color-smoke-70);
-  --nav-toggle-filter: '';
+  --nav-toggle-filter: brightness(0.4) saturate(0);
   --color-aliases-static-palette-text-secondary: var(--color-primitives-global-grey-grey-700);
   /* toolbar */
   --toolbar-background: var(--body-background);

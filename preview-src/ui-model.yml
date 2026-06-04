@@ -68,6 +68,7 @@ site:
       displayVersion: '6.0'
       asciidoc:
         attributes:
+          latest-redpanda-tag: 'v25.1.1'
           component-metadata:
             title: Streaming
             parent-component: self-managed
@@ -82,6 +83,7 @@ site:
       displayVersion: '24.3'
       asciidoc:
         attributes:
+          latest-redpanda-tag: 'v24.3.1'
           component-metadata:
             title: Streaming
             parent-component: self-managed
@@ -126,6 +128,7 @@ site:
       displayVersion: '4.0'
       asciidoc:
         attributes:
+          latest-connect-version: '4.43.0'
           component-metadata:
             title: Connect
             parent-component: self-managed
@@ -200,6 +203,9 @@ page:
         urlType: internal
       - content: Bloblang Playground
         url: /streaming/24.3/playground.html
+        urlType: internal
+      - content: Property Tooltips
+        url: /xyz/24.3/property-tooltips-test.html
         urlType: internal
       - content: Home page
         url: /streaming/24.3/home.html
