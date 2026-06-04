@@ -2,6 +2,4 @@ static_files:
 - blobl.wasm
 - console-config-migrator.wasm
 - ask-ai.html
-- redpanda-properties.json
-- connect.json
 - assets/**
