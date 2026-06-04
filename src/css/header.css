@@ -685,7 +685,7 @@ html[data-theme="dark"] .tb-overflow-divider {
     align-items: center;
     margin-left: 8px;
     color: var(--grey-600-new, #52525b);
-    font-size: calc(18 / var(--rem-base) * 1rem);
+    font-size: calc(15 / var(--rem-base) * 1rem);
     font-weight: 500;
     order: 1;
     flex: 1 1 auto;
@@ -1063,6 +1063,7 @@ html[data-theme="dark"] .tb-link:hover {
 /* Log into Cloud link styling */
 .tb-link-cloud svg {
   flex-shrink: 0;
+  margin-left: 5px;
 }
 
 /* Top nav dropdown (Ask a Human) */

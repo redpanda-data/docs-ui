@@ -179,6 +179,11 @@ html .nav-container.is-active {
   border-top: 1px solid var(--nav-border-color);
 }
 
+/* Sidebar footer collapse button - always visible (overrides .nav-collapse display:none) */
+.sb-footer .sb-collapse-toggle.nav-collapse {
+  display: flex;
+}
+
 .nav-collapse:hover {
   opacity: 1;
 }
@@ -227,11 +232,6 @@ html .nav-container.is-active {
 
   .nav-collapse {
     display: none;
-  }
-
-  /* Override for sidebar footer collapse button - keep it visible */
-  .sb-footer .sb-collapse-toggle {
-    display: inline-grid;
   }
 }
 
@@ -839,6 +839,14 @@ html[data-theme="light"] .nav-item-toggle {
   color: var(--sidebar-fg-muted, #a8b2c7);
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+/* Prevent SVG icons from shrinking to 0 in flex container */
+.sb-theme-toggle svg,
+.sb-collapse-toggle svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .sb-theme-toggle:hover,

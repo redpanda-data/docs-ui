@@ -59,6 +59,7 @@ jobs:
         cd blobl-editor/wasm && go mod download
     - name: Lint Go code
       uses: golangci/golangci-lint-action@v8
+      timeout-minutes: 10
       with:
         working-directory: blobl-editor/wasm
       env:
