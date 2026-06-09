@@ -79,7 +79,7 @@ html {
 }
 
 .doc h1 {
-  font-size: calc(34 / var(--rem-base) * 1rem);
+  font-size: calc(36 / var(--rem-base) * 1rem);
   margin-bottom: 0;
   margin-top: 0;
   letter-spacing: -0.025em;
@@ -548,12 +548,12 @@ html[data-theme="dark"] .status-badge--cloud {
 }
 
 .doc h5:not(.discrete) {
-  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
 .doc h6:not(.discrete) {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   font-weight: var(--alt-heading-font-weight);
 }
 
@@ -682,7 +682,7 @@ html[data-theme="dark"] .status-badge--cloud {
 }
 
 .doc pre {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   line-height: 1.65;
   margin: 0;
   padding: 16px 18px;
@@ -805,7 +805,7 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
 }
 
 .doc table.tableblock {
-  font-size: calc(17 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
 }
 
 .tablecontainer {

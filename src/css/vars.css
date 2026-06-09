@@ -106,11 +106,11 @@ html[data-theme=dark] {
   --color-black: var(--slate-900);
   /* fonts */
   --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
-  --body-font-size: calc(17.5 / var(--rem-base) * 1rem);
+  --body-font-size: calc(18 / var(--rem-base) * 1rem);
   --body-font-size--desktop: var(--body-font-size);
   --secondary-font-size: calc(14 / var(--rem-base) * 1rem);
   --body-font-size--print: 0.9375em;
-  --body-line-height: 1.15;
+  --body-line-height: 1.5;
   --body-font-family: var(--font-sans, "Inter", sans-serif);
   --body-font-weight-bold: 600;
   --body-font-family-bold: var(--font-sans, "Inter", sans-serif);
@@ -118,7 +118,7 @@ html[data-theme=dark] {
   --monospace-font-weight-bold: 500;
   --alt-heading-font-weight: bold;
   /* nav */
-  --nav-line-height: 1.3;
+  --nav-line-height: 1.4;
   /* admonitions */
   --admonition-border-left-width: 5px;
   --admonition-border-radius: 10px;

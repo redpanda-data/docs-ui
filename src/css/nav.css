@@ -54,7 +54,7 @@
 }
 
 .sb-brand-title {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(20 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: #fff;
   letter-spacing: -0.01em;
@@ -62,10 +62,10 @@
 }
 
 .sb-brand-sub {
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--sidebar-fg-muted, #a8b2c7);
   letter-spacing: -0.005em;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* Sidebar Search Bar */
@@ -511,7 +511,7 @@ li.nav-item {
   padding: 6px 10px;
   border-radius: 5px;
   color: #8098b3;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   letter-spacing: -0.0125em;
   line-height: 1.35;
   cursor: pointer;
