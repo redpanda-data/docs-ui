@@ -106,7 +106,7 @@ html[data-theme=dark] {
   --color-black: var(--slate-900);
   /* fonts */
   --rem-base: 18; /* used to compute rem value from desired pixel value (e.g., calc(18 / var(--rem-base) * 1rem) = 18px) */
-  --body-font-size: calc(18 / var(--rem-base) * 1rem);
+  --body-font-size: calc(17.5 / var(--rem-base) * 1rem);
   --body-font-size--desktop: var(--body-font-size);
   --secondary-font-size: calc(14 / var(--rem-base) * 1rem);
   --body-font-size--print: 0.9375em;
