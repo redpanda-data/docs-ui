@@ -111,7 +111,7 @@ const normalizeLabel = (s) => (s || '').trim().replace(/\s+/g, ' ').toLowerCase(
  * Global toggle used by checkbox UI in our custom facet dropdown.
  * We expose this on `window` so event handlers defined in template strings
  * (which may be re-created on each render) always call a stable function.
- * See the “Why we attach to window” section below.
+ * See the "Why we attach to window" section below.
  */
 let __algoliaTagsPlugin = null;
 window.__algoliaToggleFilter = function(label, checked) {
@@ -119,10 +119,17 @@ window.__algoliaToggleFilter = function(label, checked) {
   const prev = __algoliaTagsPlugin.data.tags || [];
   const isSame = (t) => normalizeLabel(t.label) === normalizeLabel(label);
   const exists = prev.some(isSame);
+  let tagsChanged = false;
   if (checked && !exists) {
     __algoliaTagsPlugin.data.setTags([...prev, { label, facet: '_tags' }]);
+    tagsChanged = true;
   } else if (!checked && exists) {
     __algoliaTagsPlugin.data.setTags(prev.filter(t => !isSame(t)));
+    tagsChanged = true;
+  }
+  // Trigger a refresh to re-run the query with updated tag filters
+  if (tagsChanged && window.__algoliaAutocompleteInstance) {
+    window.__algoliaAutocompleteInstance.refresh();
   }
 };
 
@@ -432,7 +439,7 @@ function initAlgolia() {
               checkboxItems.length
                 ? html`<li style="display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-top:1px solid rgba(0,0,0,0.08);margin-top:6px;">
                     <button style="color:var(--body-font-color);" type="button"
-                      onPointerDown=${e => { e.preventDefault(); e.stopPropagation(); selectedTagObjs.length && __algoliaTagsPlugin.data.setTags([]); }}
+                      onPointerDown=${e => { e.preventDefault(); e.stopPropagation(); if (selectedTagObjs.length) { __algoliaTagsPlugin.data.setTags([]); window.__algoliaAutocompleteInstance?.refresh(); } }}
                     >Clear all</button>
                     <button style="color:var(--body-font-color);" type="button"
                       onPointerDown=${e => { e.preventDefault(); e.stopPropagation(); setDropdownOpen(false); }}
