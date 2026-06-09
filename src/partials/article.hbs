@@ -26,7 +26,7 @@
     {{> version-selector}}
     {{!-- Status badges: Beta, Limited Availability --}}
     {{#if page.attributes.beta}}
-    <span class="status-badge status-badge--beta" {{#if page.attributes.beta-text}}data-tippy-content="{{page.attributes.beta-text}}"{{/if}}>beta</span>
+    <span class="status-badge status-badge--beta" data-tippy-content="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}This feature is in beta and may change.{{/if}}">beta</span>
     {{/if}}
     {{#if page.attributes.limited-availability}}
     <span class="status-badge status-badge--la" {{#if page.attributes.limited-availability-text}}data-tippy-content="{{page.attributes.limited-availability-text}}"{{/if}}>
@@ -123,7 +123,7 @@
     const betaBadge = stickyHeader?.querySelector(".status-badge--beta");
     const navBetaBadge = navMetadataContainer?.querySelector(".nav-beta-label");
 
-    if (betaBadge && betaBadge.dataset.tippyContent) {
+    if (betaBadge) {
       tippy(betaBadge, {
         content: betaBadge.dataset.tippyContent,
         animation: "scale",
