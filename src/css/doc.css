@@ -443,7 +443,11 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  cursor: default;
+}
+
+/* Show help cursor when badge has tooltip */
+.status-badge[data-tippy-content] {
+  cursor: help;
 }
 
 .status-badge svg {
