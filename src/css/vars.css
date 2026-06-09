@@ -477,7 +477,7 @@ html:not([data-theme=dark]) {
   /* Sidebar theme variables */
   --sidebar-bg: #0f1727; /* Exact prototype color - slightly deeper than dark-blue-800 */
   --sidebar-fg: #c6cedc; /* Exact prototype color */
-  --sidebar-fg-muted: var(--dark-blue-300-new);
+  --sidebar-fg-muted: var(--dark-blue-200-new);
   --sidebar-accent: rgba(255, 255, 255, 0.08);
   --sidebar-border: rgba(255, 255, 255, 0.04); /* Exact prototype border */
   --sidebar-item-hover-bg: rgba(255, 255, 255, 0.05);
