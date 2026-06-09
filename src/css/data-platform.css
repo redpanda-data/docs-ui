@@ -78,6 +78,30 @@ html[data-theme="dark"] .data-platform.article {
   -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
 }
 
+/* Light mode: lighten hero via overlay while preserving component color */
+html:not([data-theme=dark]) .dp-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Dark mode: deeper hero gradient */
+html[data-theme=dark] .dp-hero {
+  background: linear-gradient(180deg, #0a0f18 0%, #0f1727 100%);
+}
+
+/* Light mode: increase glow visibility on lighter hero */
+html:not([data-theme=dark]) .dp-hero-glow {
+  opacity: 0.7;
+}
+
+html:not([data-theme=dark]) .dp-hero-glow-2 {
+  opacity: 0.5;
+}
+
 .dp-hero-inner {
   position: relative;
   max-width: 1100px;
@@ -215,7 +239,7 @@ html[data-theme="dark"] .data-platform.article {
 .dp-hero-ask-icon {
   display: flex;
   align-items: center;
-  color: var(--brand-500-new, #f04438);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .dp-hero-ask-icon svg {
@@ -237,7 +261,7 @@ html[data-theme="dark"] .data-platform.article {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Hero Ask Submit Button */
+/* Hero Ask Submit Button - Glass morphism style */
 .dp-hero-ask-submit,
 button.dp-hero-ask-submit,
 .dp-hero-ask button.dp-hero-ask-submit {
@@ -248,12 +272,12 @@ button.dp-hero-ask-submit,
   height: 32px !important;
   min-width: 32px !important;
   max-width: 32px !important;
-  background: var(--brand-600-new, #e24328) !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 8px !important;
   color: #fff !important;
   cursor: pointer !important;
-  transition: background 0.12s !important;
+  transition: background 0.12s, border-color 0.12s !important;
   padding: 0 !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
@@ -261,7 +285,8 @@ button.dp-hero-ask-submit,
 
 .dp-hero-ask-submit:hover,
 button.dp-hero-ask-submit:hover {
-  background: var(--brand-700-new, #c9190b) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .dp-hero-ask-submit svg,

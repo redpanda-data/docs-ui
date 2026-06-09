@@ -1,0 +1,50 @@
+= Redpanda Connect
+:page-layout: component-home-v3
+:page-role: component-home-v3
+:page-hero-color: #A21CAF
+:hero-description: Stream processing and data integration with 200+ connectors. Build real-time pipelines without writing code.
+:hero-ask-placeholder: Ask AI about Redpanda Connect...
+:stats: 200+;;Connectors|and counting;;Bloblang;;Powerful|transformations;;Sub-ms;;Processing|latency
+:page-ai-suggestions: ["How do I build a Kafka to S3 pipeline?", "What is Bloblang?", "How do I transform JSON data?"]
+
+:deploy-title: Get started with Connect
+:deploy-1-title: Quick Start
+:deploy-1-desc: Install Redpanda Connect and run your first pipeline in minutes.
+:deploy-1-link: #
+:deploy-1-time: 5 min
+:deploy-1-icon: terminal
+
+:deploy-2-title: Connectors
+:deploy-2-desc: Explore 200+ input and output connectors for any data source.
+:deploy-2-link: #
+:deploy-2-time: Browse
+:deploy-2-icon: plug-connected
+
+:deploy-3-title: Bloblang
+:deploy-3-desc: Learn the powerful mapping language for data transformations.
+:deploy-3-link: #
+:deploy-3-time: 15 min
+:deploy-3-icon: code
+
+:popular-title: Popular topics
+:popular-1-title: Kafka Migration
+:popular-1-desc: Seamlessly migrate from Kafka Connect to Redpanda Connect.
+:popular-1-link: #
+:popular-1-icon: flow
+
+:popular-2-title: Processors
+:popular-2-desc: Transform, filter, and enrich data in-flight.
+:popular-2-link: #
+:popular-2-icon: layers
+
+:popular-3-title: Error Handling
+:popular-3-desc: Build resilient pipelines with dead letter queues.
+:popular-3-link: #
+:popular-3-icon: activity
+
+:popular-4-title: Testing
+:popular-4-desc: Unit test your pipelines before deployment.
+:popular-4-link: #
+:popular-4-icon: sparkles
+
+This is a test page for the component-home-v3 layout with Connect component colors.

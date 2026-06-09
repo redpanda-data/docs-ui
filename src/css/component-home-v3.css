@@ -67,6 +67,24 @@ main.component-home > .component-content {
   flex-shrink: 0;
 }
 
+/* Light mode: lighten hero via overlay while preserving component color */
+html:not([data-theme=dark]) .ch3-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+/* Dark mode: deeper gradient overlay for more contrast */
+html[data-theme=dark] .ch3-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
 .ch3-hero-inner {
   position: relative;
   z-index: 1;
@@ -837,7 +855,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 .ch3-hero-ask-icon {
   display: flex;
   align-items: center;
-  color: var(--brand-500-new, #f04438);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .ch3-hero-ask-icon svg {
@@ -859,7 +877,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Hero Ask Submit Button */
+/* Hero Ask Submit Button - Glass morphism style */
 .ch3-hero-ask-submit,
 button.ch3-hero-ask-submit,
 .ch3-hero-ask button.ch3-hero-ask-submit {
@@ -870,12 +888,12 @@ button.ch3-hero-ask-submit,
   height: 32px !important;
   min-width: 32px !important;
   max-width: 32px !important;
-  background: var(--brand-600-new, #e24328) !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 8px !important;
   color: #fff !important;
   cursor: pointer !important;
-  transition: background 0.12s !important;
+  transition: background 0.12s, border-color 0.12s !important;
   padding: 0 !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
@@ -883,7 +901,8 @@ button.ch3-hero-ask-submit,
 
 .ch3-hero-ask-submit:hover,
 button.ch3-hero-ask-submit:hover {
-  background: var(--brand-700-new, #c9190b) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .ch3-hero-ask-submit svg,
@@ -950,6 +969,11 @@ button.ch3-hero-ask-submit svg,
   height: 200%;
   background: radial-gradient(closest-side, var(--component-600, rgba(79, 70, 229, 0.2)), transparent 70%);
   opacity: 0.5;
+}
+
+/* Light mode: increase glow visibility on lighter hero */
+html:not([data-theme=dark]) .ch3-hero-glow {
+  opacity: 0.65;
 }
 
 .ch3-hero-grid {

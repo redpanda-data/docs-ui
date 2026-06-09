@@ -1,0 +1,50 @@
+= Redpanda Cloud
+:page-layout: component-home-v3
+:page-role: component-home-v3
+:page-hero-color: #1D4ED8
+:hero-description: Fully managed Redpanda clusters in AWS, GCP, or Azure. Focus on building applications, not managing infrastructure.
+:hero-ask-placeholder: Ask AI about Redpanda Cloud...
+:stats: 99.99%;;Availability|SLA;;3;;Cloud|providers;;SOC 2;;Type II|certified
+:page-ai-suggestions: ["How do I create a cluster?", "What regions are available?", "How does pricing work?"]
+
+:deploy-title: Start with Cloud
+:deploy-1-title: Create Cluster
+:deploy-1-desc: Spin up a production-ready Redpanda cluster in minutes.
+:deploy-1-link: #
+:deploy-1-time: 5 min
+:deploy-1-icon: cloud
+
+:deploy-2-title: Connect Apps
+:deploy-2-desc: Connect your applications using standard Kafka clients.
+:deploy-2-link: #
+:deploy-2-time: 10 min
+:deploy-2-icon: plug-connected
+
+:deploy-3-title: Manage Access
+:deploy-3-desc: Set up authentication and role-based access control.
+:deploy-3-link: #
+:deploy-3-time: 15 min
+:deploy-3-icon: shield
+
+:popular-title: Popular topics
+:popular-1-title: Pricing
+:popular-1-desc: Understand usage-based pricing and estimate costs.
+:popular-1-link: #
+:popular-1-icon: chart
+
+:popular-2-title: Regions
+:popular-2-desc: Available regions across AWS, GCP, and Azure.
+:popular-2-link: #
+:popular-2-icon: globe
+
+:popular-3-title: Security
+:popular-3-desc: Enterprise security features and compliance certifications.
+:popular-3-link: #
+:popular-3-icon: lock
+
+:popular-4-title: Migration
+:popular-4-desc: Migrate from self-managed or other platforms to Cloud.
+:popular-4-link: #
+:popular-4-icon: flow
+
+This is a test page for the component-home-v3 layout with Cloud component colors.

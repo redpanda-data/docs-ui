@@ -73,7 +73,7 @@ site:
             title: Streaming
             parent-component: self-managed
             description: Run Redpanda on your own infrastructure.
-            color: '#6366f1'
+            color: '#4D7C0F'
             icon: activity
             order: 1
     - &component_version
@@ -88,7 +88,7 @@ site:
             title: Streaming
             parent-component: self-managed
             description: Run Redpanda on your own infrastructure.
-            color: '#6366f1'
+            color: '#4D7C0F'
             icon: activity
             order: 1
           toc-tools-title: Connect Tools
@@ -101,12 +101,13 @@ site:
       displayVersion: '5.0'
     latestVersion: *latest_version_xyz
   # Cloud component - under Data Platform
-  - name: cloud-data-platform
+  - &cloud_component
+    name: cloud-data-platform
     title: Cloud
-    url: '#'
+    url: /cloud/1.0/index.html
     versions:
     - &latest_version_cloud
-      url: '#'
+      url: /cloud/1.0/index.html
       version: '1.0'
       displayVersion: '1.0'
       asciidoc:
@@ -114,16 +115,18 @@ site:
           component-metadata:
             title: Cloud
             description: Fully managed Redpanda clusters.
-            color: '#0891B2'
+            color: '#1D4ED8'
+            icon: cloud
             order: 2
     latestVersion: *latest_version_cloud
   # Connect component - under Data Platform (formerly redpanda-connect)
-  - name: connect
+  - &connect_component
+    name: connect
     title: Connect
-    url: '#'
+    url: /connect/4.0/index.html
     versions:
     - &latest_version_connect
-      url: '#'
+      url: /connect/4.0/index.html
       version: '4.0'
       displayVersion: '4.0'
       asciidoc:
@@ -133,16 +136,35 @@ site:
             title: Connect
             parent-component: self-managed
             description: Stream processing and integration connectors.
-            color: '#059669'
+            color: '#A21CAF'
             icon: plug-connected
             order: 2
     latestVersion: *latest_version_connect
+  # Labs component
+  - &labs_component
+    name: labs
+    title: Labs
+    url: /labs/1.0/index.html
+    versions:
+    - &latest_version_labs
+      url: /labs/1.0/index.html
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Labs
+            description: Experimental features and community projects.
+            color: '#227093'
+            icon: flask
+            order: 10
+    latestVersion: *latest_version_labs
 page:
   url: *home_url
   home: true
   title: Brand&#8217;s Hardware &amp; Software Requirements
-  component: *adp_component
-  componentVersion: *latest_version_adp
+  component: *component
+  componentVersion: *latest_version_xyz
   version: '24.3'
   displayVersion: '24.3'
   module: ROOT
@@ -205,7 +227,7 @@ page:
         url: /streaming/24.3/playground.html
         urlType: internal
       - content: Property Tooltips
-        url: /xyz/24.3/property-tooltips-test.html
+        url: /streaming/24.3/property-tooltips-test.html
         urlType: internal
       - content: Home page
         url: /streaming/24.3/home.html
@@ -436,4 +458,23 @@ page:
       - content: Widget Test (Bump.sh)
         url: /_/widget-test.html
         urlType: internal
+      - content: Landing Pages
+        url: '#'
+        urlType: internal
+        items:
+        - content: Streaming (Landing)
+          url: /component-home-test.html
+          urlType: internal
+        - content: Connect (Landing)
+          url: /connect-test.html
+          urlType: internal
+        - content: Cloud (Landing)
+          url: /cloud-test.html
+          urlType: internal
+        - content: Labs (Landing)
+          url: /labs-test.html
+          urlType: internal
+        - content: Data Platform (Landing)
+          url: /data-platform-test.html
+          urlType: internal
 
