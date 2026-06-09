@@ -716,6 +716,103 @@
   </section>
   {{/if}}
 
+  {{!-- Pathway cards section (e.g., "Pick where to start") --}}
+  {{#if page.attributes.pathways-title}}
+  <section class="ch3-pathways">
+    <h2 class="ch3-pathways-title">{{{page.attributes.pathways-title}}}</h2>
+    <div class="ch3-pathways-grid">
+      {{#if page.attributes.pathway-1-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.pathway-1-link)}}}" class="ch3-pathway-card">
+        <div class="ch3-pathway-header">
+          <div class="ch3-pathway-icon">
+            {{#if (eq page.attributes.pathway-1-icon 'sparkles')}}
+            <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
+            {{else if (eq page.attributes.pathway-1-icon 'connect')}}
+            <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            {{else}}
+            <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
+            {{/if}}
+          </div>
+          <h3 class="ch3-pathway-title">{{{page.attributes.pathway-1-title}}}</h3>
+        </div>
+        <p class="ch3-pathway-desc">{{{page.attributes.pathway-1-desc}}}</p>
+        <span class="ch3-pathway-cta">{{{page.attributes.pathway-1-cta}}} <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+      {{/if}}
+      {{#if page.attributes.pathway-2-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.pathway-2-link)}}}" class="ch3-pathway-card">
+        <div class="ch3-pathway-header">
+          <div class="ch3-pathway-icon">
+            {{#if (eq page.attributes.pathway-2-icon 'sparkles')}}
+            <svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
+            {{else if (eq page.attributes.pathway-2-icon 'connect')}}
+            <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            {{else}}
+            <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            {{/if}}
+          </div>
+          <h3 class="ch3-pathway-title">{{{page.attributes.pathway-2-title}}}</h3>
+        </div>
+        <p class="ch3-pathway-desc">{{{page.attributes.pathway-2-desc}}}</p>
+        <span class="ch3-pathway-cta">{{{page.attributes.pathway-2-cta}}} <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Concepts grid section (e.g., "Get your bearings") --}}
+  {{#if page.attributes.concepts-title}}
+  <section class="ch3-concepts">
+    <h2 class="ch3-concepts-title">{{{page.attributes.concepts-title}}}</h2>
+    <div class="ch3-concepts-grid">
+      {{#if page.attributes.concept-1-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.concept-1-link)}}}" class="ch3-concept-card">
+        <h3>{{{page.attributes.concept-1-title}}}</h3>
+        <p>{{{page.attributes.concept-1-desc}}}</p>
+      </a>
+      {{/if}}
+      {{#if page.attributes.concept-2-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.concept-2-link)}}}" class="ch3-concept-card">
+        <h3>{{{page.attributes.concept-2-title}}}</h3>
+        <p>{{{page.attributes.concept-2-desc}}}</p>
+      </a>
+      {{/if}}
+      {{#if page.attributes.concept-3-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.concept-3-link)}}}" class="ch3-concept-card">
+        <h3>{{{page.attributes.concept-3-title}}}</h3>
+        <p>{{{page.attributes.concept-3-desc}}}</p>
+      </a>
+      {{/if}}
+      {{#if page.attributes.concept-4-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.concept-4-link)}}}" class="ch3-concept-card">
+        <h3>{{{page.attributes.concept-4-title}}}</h3>
+        <p>{{{page.attributes.concept-4-desc}}}</p>
+      </a>
+      {{/if}}
+      {{#if page.attributes.concept-5-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.concept-5-link)}}}" class="ch3-concept-card">
+        <h3>{{{page.attributes.concept-5-title}}}</h3>
+        <p>{{{page.attributes.concept-5-desc}}}</p>
+      </a>
+      {{/if}}
+      {{#if page.attributes.concept-6-title}}
+      <a href="{{{relativize (resolve-resource page.attributes.concept-6-link)}}}" class="ch3-concept-card">
+        <h3>{{{page.attributes.concept-6-title}}}</h3>
+        <p>{{{page.attributes.concept-6-desc}}}</p>
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{!-- Footer note callout --}}
+  {{#if page.attributes.footer-note}}
+  <div class="ch3-footer-note">
+    <p>{{{page.attributes.footer-note}}}</p>
+  </div>
+  {{/if}}
+
   {{{page.contents}}}
 
   <section class="ch3-help">

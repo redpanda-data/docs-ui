@@ -1934,3 +1934,259 @@ html[data-theme="dark"] .ch3-component-badge--byoc {
 html[data-theme="dark"] .ch3-component-features li {
   color: var(--color-text-secondary);
 }
+
+/* =============================================================================
+   PATHWAY CARDS — "Pick where to start" section
+   Used for landing pages with two main paths (e.g., ADP build vs bring your own)
+   ============================================================================= */
+
+.ch3-pathways {
+  max-width: var(--ch3-max-width, 1180px);
+  margin: 0 auto;
+  padding: 48px var(--ch3-gutter, 40px) 32px;
+}
+
+.ch3-pathways-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0 0 24px;
+}
+
+html[data-theme="dark"] .ch3-pathways-title {
+  color: #fff;
+}
+
+.ch3-pathways-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .ch3-pathways-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ch3-pathway-card {
+  display: block;
+  background: var(--panel-background, #fff);
+  border: 1px solid var(--panel-border-color, #e5e7eb);
+  border-radius: 12px;
+  padding: 28px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ch3-pathway-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-color: var(--component-color, #C1331A);
+  transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .ch3-pathway-card {
+  background: #1e2432;
+  border-color: #2d3548;
+}
+
+html[data-theme="dark"] .ch3-pathway-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.ch3-pathway-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ch3-pathway-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: var(--component-color, #C1331A);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ch3-pathway-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2;
+}
+
+.ch3-pathway-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0;
+  line-height: 1.3;
+}
+
+html[data-theme="dark"] .ch3-pathway-title {
+  color: #fff;
+}
+
+.ch3-pathway-desc {
+  font-size: 0.9375rem;
+  color: var(--body-font-color, #4b5563);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+html[data-theme="dark"] .ch3-pathway-desc {
+  color: #9ca3af;
+}
+
+.ch3-pathway-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 18px;
+  background: var(--component-color, #C1331A);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.ch3-pathway-cta:hover {
+  background: color-mix(in srgb, var(--component-color, #C1331A) 85%, black);
+  transform: translateY(-1px);
+  color: #fff;
+}
+
+.ch3-pathway-cta svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* =============================================================================
+   CONCEPTS GRID — "Get your bearings" section
+   Used for landing pages with multiple concept/overview cards
+   ============================================================================= */
+
+.ch3-concepts {
+  max-width: var(--ch3-max-width, 1180px);
+  margin: 0 auto;
+  padding: 32px var(--ch3-gutter, 40px) 48px;
+}
+
+.ch3-concepts-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0 0 24px;
+}
+
+html[data-theme="dark"] .ch3-concepts-title {
+  color: #fff;
+}
+
+.ch3-concepts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.ch3-concept-card {
+  display: block;
+  background: var(--panel-background, #fff);
+  border: 1px solid var(--panel-border-color, #e5e7eb);
+  border-radius: 10px;
+  padding: 20px;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+html[data-theme="dark"] .ch3-concept-card {
+  background: #1e2432;
+  border-color: #2d3548;
+}
+
+.ch3-concept-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-color: var(--component-color, #C1331A);
+  transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .ch3-concept-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.ch3-concept-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0 0 6px;
+}
+
+html[data-theme="dark"] .ch3-concept-card h3 {
+  color: #fff;
+}
+
+.ch3-concept-card h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ch3-concept-card h3 a:hover {
+  color: var(--component-color, #C1331A);
+}
+
+.ch3-concept-card p {
+  font-size: 0.875rem;
+  color: var(--body-font-color, #6b7280);
+  margin: 0;
+  line-height: 1.5;
+}
+
+html[data-theme="dark"] .ch3-concept-card p {
+  color: #9ca3af;
+}
+
+/* =============================================================================
+   FOOTER NOTE — Callout at bottom of landing page
+   ============================================================================= */
+
+.ch3-footer-note {
+  max-width: var(--ch3-max-width, 1180px);
+  margin: 0 auto;
+  padding: 0 var(--ch3-gutter, 40px) 48px;
+}
+
+.ch3-footer-note p {
+  font-size: 0.9375rem;
+  color: var(--body-font-color, #6b7280);
+  background: var(--note-background, #f3f4f6);
+  border-left: 3px solid var(--component-color, #C1331A);
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+  margin: 0;
+}
+
+html[data-theme="dark"] .ch3-footer-note p {
+  background: #1e2432;
+  color: #9ca3af;
+}
+
+.ch3-footer-note a {
+  color: var(--component-color, #C1331A);
+  text-decoration: none;
+}
+
+.ch3-footer-note a:hover {
+  text-decoration: underline;
+}
