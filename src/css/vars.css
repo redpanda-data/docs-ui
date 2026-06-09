@@ -150,7 +150,7 @@ html[data-theme=dark] {
   --caption-font-style: normal;
   --caption-font-weight: var(--body-font-weight-bold);
   /* toc */
-  --toc-line-height: 1.2;
+  --toc-line-height: 1.4;
   /* footer */
   --footer-line-height: var(--doc-line-height);
   /* dimensions and positioning */
