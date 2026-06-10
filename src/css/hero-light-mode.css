@@ -3,10 +3,20 @@
    Shared styles for all hero sections in light mode (component-home-v3, data-platform, etc.)
    ============================================================================= */
 
-/* Light mode: white gradient background */
-html:not([data-theme="dark"]) .ch3-hero,
+/* Light mode: component-tinted gradient background */
+html:not([data-theme="dark"]) .ch3-hero {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--component-color, #4f46e5) 3%, #ffffff) 0%,
+    color-mix(in srgb, var(--component-color, #4f46e5) 6%, #f5f7fb) 100%
+  ) !important;
+  color: #141a36 !important;
+  border-bottom: 1px solid rgba(20, 26, 54, 0.07) !important;
+}
+
+/* Data Platform uses indigo tint */
 html:not([data-theme="dark"]) .dp-hero {
-  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%) !important;
+  background: linear-gradient(180deg, #f8f9ff 0%, #f0f2ff 100%) !important;
   color: #141a36 !important;
   border-bottom: 1px solid rgba(20, 26, 54, 0.07) !important;
 }

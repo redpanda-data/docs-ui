@@ -19,12 +19,26 @@
   max-width: none;
 }
 
+/* Add left padding to content to clear nav on desktop */
+@media screen and (min-width: 1024px) {
+  .data-platform .dp-content {
+    padding-left: calc(var(--sidebar-width, 260px) + 16px);
+  }
+}
+
 .data-platform.article {
   background: var(--grey-50-new, #fafafa);
 }
 
 html[data-theme="dark"] .data-platform.article {
   background: var(--grey-950-new, #09090b);
+}
+
+/* Remove body margin for full-width landing page */
+@media screen and (min-width: 1024px) {
+  body.data-platform .body {
+    margin-left: 0;
+  }
 }
 
 /* ---- Hero Section ---- */
@@ -35,6 +49,13 @@ html[data-theme="dark"] .data-platform.article {
   color: #fff;
   padding: 40px 56px 32px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Pad hero content to clear the nav on desktop */
+@media screen and (min-width: 1024px) {
+  .dp-hero {
+    padding-left: calc(var(--sidebar-width, 260px) + 56px);
+  }
 }
 
 .dp-hero-bg {
