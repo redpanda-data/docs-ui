@@ -89,6 +89,7 @@ html[data-theme=dark] .ch3-hero::after {
   position: relative;
   z-index: 1;
   max-width: 1100px;
+  margin: 0 auto;
   overflow: visible;
 }
 
@@ -1404,144 +1405,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   opacity: 1;
 }
 
-/* =============================================================================
-   LIGHT MODE HERO STYLES
-   Design team spec: soft light surface with dark ink, faint brand glows
-   ============================================================================= */
-
-/* Light mode: completely redesigned hero with white gradient background */
-html:not([data-theme="dark"]) .ch3-hero {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F5F7FB 100%);
-  border-bottom: 1px solid rgba(20, 26, 54, 0.07);
-}
-
-/* Remove the overlay approach in light mode */
-html:not([data-theme="dark"]) .ch3-hero::after {
-  display: none;
-}
-
-/* Light mode text colors - dark ink palette */
-html:not([data-theme="dark"]) .ch3-page-title {
-  color: #141A36;
-}
-
-html:not([data-theme="dark"]) .ch3-page-lede {
-  color: rgba(20, 26, 54, 0.66);
-}
-
-/* Light mode eyebrow/chip - subtle dark background */
-html:not([data-theme="dark"]) .ch3-product-chip {
-  background: var(--component-color, rgba(79, 70, 229, 0.9));
-  color: #fff;
-}
-
-/* Light mode version pill */
-html:not([data-theme="dark"]) .sm-ver-pill {
-  background: rgba(20, 26, 54, 0.04);
-  border-color: rgba(20, 26, 54, 0.1);
-  color: #141A36;
-}
-
-html:not([data-theme="dark"]) .sm-ver-pill:hover {
-  background: rgba(20, 26, 54, 0.07);
-  border-color: rgba(20, 26, 54, 0.15);
-}
-
-html:not([data-theme="dark"]) .sm-ver-pill.is-open {
-  background: rgba(20, 26, 54, 0.08);
-  border-color: rgba(20, 26, 54, 0.2);
-}
-
-html:not([data-theme="dark"]) .sm-ver-pill-label {
-  color: rgba(20, 26, 54, 0.55);
-}
-
-html:not([data-theme="dark"]) .sm-ver-pill-num {
-  color: #141A36;
-}
-
-html:not([data-theme="dark"]) .sm-ver-pill-sep {
-  background: rgba(20, 26, 54, 0.12);
-}
-
-/* Light mode stats */
-html:not([data-theme="dark"]) .ch3-hero-stats {
-  border-top-color: rgba(20, 26, 54, 0.12);
-}
-
-html:not([data-theme="dark"]) .ch3-hero-stat strong {
-  color: #141A36;
-}
-
-html:not([data-theme="dark"]) .ch3-hero-stat span {
-  color: rgba(20, 26, 54, 0.52);
-}
-
-/* Light mode Ask AI input */
-html:not([data-theme="dark"]) .ch3-hero-ask {
-  background: rgba(20, 26, 54, 0.03);
-  border-color: rgba(20, 26, 54, 0.1);
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask:hover,
-html:not([data-theme="dark"]) .ch3-hero-ask:focus-within {
-  background: rgba(20, 26, 54, 0.05);
-  border-color: rgba(20, 26, 54, 0.15);
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask-icon {
-  color: rgba(20, 26, 54, 0.5);
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask-input {
-  color: #141A36;
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask-input::placeholder {
-  color: rgba(20, 26, 54, 0.45);
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask-submit,
-html:not([data-theme="dark"]) button.ch3-hero-ask-submit {
-  background: rgba(20, 26, 54, 0.06) !important;
-  border-color: rgba(20, 26, 54, 0.1) !important;
-  color: rgba(20, 26, 54, 0.6) !important;
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask-submit:hover,
-html:not([data-theme="dark"]) button.ch3-hero-ask-submit:hover {
-  background: rgba(20, 26, 54, 0.1) !important;
-  border-color: rgba(20, 26, 54, 0.15) !important;
-}
-
-/* Light mode Ask AI hints */
-html:not([data-theme="dark"]) .ch3-hero-ask-hints-label {
-  color: rgba(20, 26, 54, 0.45);
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask-chip {
-  background: rgba(20, 26, 54, 0.04);
-  border-color: rgba(20, 26, 54, 0.08);
-  color: rgba(20, 26, 54, 0.7);
-}
-
-html:not([data-theme="dark"]) .ch3-hero-ask-chip:hover {
-  background: rgba(20, 26, 54, 0.07);
-  border-color: rgba(20, 26, 54, 0.12);
-  color: #141A36;
-}
-
-/* Light mode glows - very subtle brand tint */
-html:not([data-theme="dark"]) .ch3-hero-glow {
-  opacity: 0.4;
-}
-
-/* Light mode grid - dark lines on light background */
-html:not([data-theme="dark"]) .ch3-hero-grid {
-  background-image:
-    linear-gradient(rgba(20, 26, 54, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(20, 26, 54, 0.05) 1px, transparent 1px);
-}
+/* Light mode hero styles are now in hero-light-mode.css for consistency across all hero types */
 
 /* Dark mode support ------------------------------------------------------- */
 html[data-theme="dark"] .ch3-hero {
@@ -1585,6 +1449,7 @@ html[data-theme="dark"] .ch3-deploy-card:hover {
 
 html[data-theme="dark"] .ch3-deploy-icon {
   background: var(--component-bg-tint, rgba(79, 70, 229, 0.15));
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
 html[data-theme="dark"] .ch3-deploy-title {
@@ -1597,6 +1462,10 @@ html[data-theme="dark"] .ch3-deploy-desc {
 
 html[data-theme="dark"] .ch3-deploy-time {
   color: #6b7a8f;
+}
+
+html[data-theme="dark"] .ch3-deploy-cta {
+  color: var(--component-400, var(--indigo-400-new, #a5b4fc));
 }
 
 /* Dark mode - Popular cards */
@@ -1612,6 +1481,7 @@ html[data-theme="dark"] .ch3-popular-card:hover {
 
 html[data-theme="dark"] .ch3-popular-icon {
   background: var(--component-bg-tint, rgba(79, 70, 229, 0.15));
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
 html[data-theme="dark"] .ch3-popular-text h4 {
@@ -1624,6 +1494,10 @@ html[data-theme="dark"] .ch3-popular-text p {
 
 html[data-theme="dark"] .ch3-popular-arrow {
   color: #6b7a8f;
+}
+
+html[data-theme="dark"] .ch3-popular-card:hover .ch3-popular-arrow {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
 /* Dark mode - Labs */
@@ -1641,6 +1515,18 @@ html[data-theme="dark"] .ch3-labs-list a {
 
 html[data-theme="dark"] .ch3-labs-list a svg {
   color: #6b7a8f;
+}
+
+html[data-theme="dark"] .ch3-labs-all {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
+}
+
+html[data-theme="dark"] .ch3-labs-list a:hover {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
+}
+
+html[data-theme="dark"] .ch3-labs-list a:hover svg {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
 /* Dark mode - Help */
@@ -2120,8 +2006,8 @@ html[data-theme="dark"] .ch3-pathways-title {
 }
 
 .ch3-pathway-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  border-color: var(--component-color, #C1331A);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: var(--component-color, #c1331a);
   transform: translateY(-2px);
 }
 
@@ -2131,7 +2017,7 @@ html[data-theme="dark"] .ch3-pathway-card {
 }
 
 html[data-theme="dark"] .ch3-pathway-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .ch3-pathway-header {
@@ -2145,7 +2031,7 @@ html[data-theme="dark"] .ch3-pathway-card:hover {
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  background: var(--component-color, #C1331A);
+  background: var(--component-color, #c1331a);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -2189,7 +2075,7 @@ html[data-theme="dark"] .ch3-pathway-desc {
   gap: 8px;
   margin-top: 8px;
   padding: 10px 18px;
-  background: var(--component-color, #C1331A);
+  background: var(--component-color, #c1331a);
   color: #fff;
   font-size: 0.9375rem;
   font-weight: 500;
@@ -2199,7 +2085,7 @@ html[data-theme="dark"] .ch3-pathway-desc {
 }
 
 .ch3-pathway-cta:hover {
-  background: color-mix(in srgb, var(--component-color, #C1331A) 85%, black);
+  background: color-mix(in srgb, var(--component-color, #c1331a) 85%, black);
   transform: translateY(-1px);
   color: #fff;
 }
@@ -2256,13 +2142,13 @@ html[data-theme="dark"] .ch3-concept-card {
 }
 
 .ch3-concept-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border-color: var(--component-color, #C1331A);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--component-color, #c1331a);
   transform: translateY(-2px);
 }
 
 html[data-theme="dark"] .ch3-concept-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .ch3-concept-card h3 {
@@ -2282,7 +2168,7 @@ html[data-theme="dark"] .ch3-concept-card h3 {
 }
 
 .ch3-concept-card h3 a:hover {
-  color: var(--component-color, #C1331A);
+  color: var(--component-color, #c1331a);
 }
 
 .ch3-concept-card p {
@@ -2310,7 +2196,7 @@ html[data-theme="dark"] .ch3-concept-card p {
   font-size: 0.9375rem;
   color: var(--body-font-color, #6b7280);
   background: var(--note-background, #f3f4f6);
-  border-left: 3px solid var(--component-color, #C1331A);
+  border-left: 3px solid var(--component-color, #c1331a);
   padding: 16px 20px;
   border-radius: 0 8px 8px 0;
   margin: 0;
@@ -2322,8 +2208,12 @@ html[data-theme="dark"] .ch3-footer-note p {
 }
 
 .ch3-footer-note a {
-  color: var(--component-color, #C1331A);
+  color: var(--component-color, #c1331a);
   text-decoration: none;
+}
+
+html[data-theme="dark"] .ch3-footer-note a {
+  color: #fff;
 }
 
 .ch3-footer-note a:hover {

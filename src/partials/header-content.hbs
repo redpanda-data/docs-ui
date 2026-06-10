@@ -55,19 +55,6 @@
 
         {{!-- Desktop: Individual nav items --}}
         <div class="tb-desktop-items">
-          {{!-- Ask a Human dropdown --}}
-          <div class="tb-dropdown">
-            <button class="tb-link tb-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
-              Ask a Human
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style="margin-left: 4px;">
-                <path d="M6 8L2 4h8z"/>
-              </svg>
-            </button>
-            <div class="tb-dropdown-menu" role="menu">
-              <a class="tb-dropdown-item" href="https://support.redpanda.com/hc/en-us" target="_blank" rel="noopener noreferrer">Support</a>
-              <a class="tb-dropdown-item" href="https://redpanda.com/slack" target="_blank" rel="noopener noreferrer">Community</a>
-            </div>
-          </div>
           {{!-- Log into Cloud - only show for cloud-data-platform and data-platform components --}}
           {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
           <a class="tb-link tb-link-cloud" href="https://cloud.redpanda.com" target="_blank" rel="noopener noreferrer">
@@ -92,12 +79,6 @@
             </svg>
           </button>
           <div class="tb-dropdown-menu tb-overflow-dropdown" role="menu">
-            <div class="tb-overflow-section">
-              <div class="tb-overflow-label">Get Help</div>
-              <a class="tb-dropdown-item" href="https://support.redpanda.com/hc/en-us" target="_blank" rel="noopener noreferrer">Support</a>
-              <a class="tb-dropdown-item" href="https://redpanda.com/slack" target="_blank" rel="noopener noreferrer">Community</a>
-            </div>
-            <div class="tb-overflow-divider"></div>
             <a class="tb-dropdown-item" href="/labs">Labs</a>
             {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
             <a class="tb-dropdown-item" href="https://cloud.redpanda.com" target="_blank" rel="noopener noreferrer">Log into Cloud</a>

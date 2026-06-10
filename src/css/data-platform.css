@@ -78,33 +78,17 @@ html[data-theme="dark"] .data-platform.article {
   -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
 }
 
-/* Light mode: lighten hero via overlay while preserving component color */
-html:not([data-theme=dark]) .dp-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  z-index: 0;
-}
-
 /* Dark mode: deeper hero gradient */
 html[data-theme=dark] .dp-hero {
   background: linear-gradient(180deg, #0a0f18 0%, #0f1727 100%);
 }
 
-/* Light mode: increase glow visibility on lighter hero */
-html:not([data-theme=dark]) .dp-hero-glow {
-  opacity: 0.7;
-}
-
-html:not([data-theme=dark]) .dp-hero-glow-2 {
-  opacity: 0.5;
-}
+/* Light mode hero styles are in hero-light-mode.css for consistency across all heroes */
 
 .dp-hero-inner {
   position: relative;
   max-width: 1100px;
+  margin: 0 auto;
 }
 
 .dp-hero-eyebrow {
@@ -151,7 +135,6 @@ html:not([data-theme=dark]) .dp-hero-glow-2 {
   font-size: calc(19 / var(--rem-base) * 1rem);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.85);
-  max-width: 700px;
   margin: 0 0 24px;
   text-wrap: pretty;
 }
@@ -160,7 +143,6 @@ html:not([data-theme=dark]) .dp-hero-glow-2 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
-  max-width: 720px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 30px;
 }
@@ -625,6 +607,15 @@ html[data-theme="dark"] .dp-product-stats span {
   margin-top: auto;
 }
 
+/* Dark mode: use white for better readability on dark backgrounds */
+html[data-theme="dark"] .dp-product-cta {
+  color: #fff;
+}
+
+html[data-theme="dark"] .dp-product-cta svg {
+  stroke: #fff;
+}
+
 .dp-product:hover .dp-product-cta svg {
   transform: translateX(2px);
   transition: transform 0.15s;
@@ -883,6 +874,15 @@ html[data-theme="dark"] .dp-matrix-when p {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Dark mode: use white for better readability */
+html[data-theme="dark"] .dp-matrix-pick a {
+  color: #fff;
+}
+
+html[data-theme="dark"] .dp-matrix-pick a svg {
+  stroke: #fff;
 }
 
 /* ---- Popular cards ---- */

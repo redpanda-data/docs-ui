@@ -807,9 +807,9 @@
   {{/if}}
 
   {{!-- Footer note callout --}}
-  {{#if page.attributes.footer-note}}
+  {{#if page.attributes.footer-note-link}}
   <div class="ch3-footer-note">
-    <p>{{{page.attributes.footer-note}}}</p>
+    <p><strong>{{page.attributes.footer-note-intro}}</strong> {{page.attributes.footer-note-text}} <a href="{{{relativize (resolve-resource page.attributes.footer-note-link)}}}">{{page.attributes.footer-note-link-text}}</a>{{#if page.attributes.footer-note-suffix}} {{page.attributes.footer-note-suffix}}{{/if}}</p>
   </div>
   {{/if}}
 
