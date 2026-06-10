@@ -89,6 +89,7 @@ html[data-theme=dark] .ch3-hero::after {
   position: relative;
   z-index: 1;
   max-width: 1100px;
+  margin-left: 40px;
   overflow: visible;
   display: flex;
   flex-direction: column;
@@ -1580,6 +1581,10 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
     margin-left: 0;
     margin-right: 0;
     width: 100%;
+  }
+
+  .ch3-hero-inner {
+    margin-left: 0;
   }
 
   .doc .ch3-page-title {
