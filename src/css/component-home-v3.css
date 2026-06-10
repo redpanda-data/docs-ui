@@ -218,10 +218,27 @@ html[data-theme=dark] .ch3-hero::after {
   color: #fcd34d;
 }
 
+/* Light mode: darker colors for visibility on light backgrounds */
+html:not([data-theme=dark]) .sm-ver-pill-status[data-status="current"] {
+  color: #059669;
+}
+
+html:not([data-theme=dark]) .sm-ver-pill-status[data-status="supported"] {
+  color: #059669;
+}
+
+html:not([data-theme=dark]) .sm-ver-pill-status[data-status="eol"] {
+  color: #d97706;
+}
+
 .sm-ver-pill-caret {
   color: rgba(255, 255, 255, 0.65);
   transition: transform 180ms ease;
   margin-left: -1px;
+}
+
+html:not([data-theme=dark]) .sm-ver-pill-caret {
+  color: var(--grey-500-new, #737373);
 }
 
 .sm-ver.is-open .sm-ver-pill-caret {
