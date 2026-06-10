@@ -948,9 +948,10 @@ body[data-component="streaming"] {
   --component-500: #65a30d;
   --component-600: #4d7c0f;
   --component-700: #3f6212;
-  --component-bg-tint: rgba(77, 124, 15, 0.06);
-  --component-bg-tint-hover: rgba(77, 124, 15, 0.1);
-  --component-bg-tint-active: rgba(77, 124, 15, 0.14);
+  /* Neutral hover states for nav tree */
+  --component-bg-tint: rgba(0, 0, 0, 0.04);
+  --component-bg-tint-hover: rgba(0, 0, 0, 0.06);
+  --component-bg-tint-active: rgba(0, 0, 0, 0.08);
   --topbar-bg: color-mix(in srgb, #4d7c0f 8%, white);
   --topbar-border: rgba(77, 124, 15, 0.15);
 }
@@ -963,9 +964,10 @@ body[data-component="connect"] {
   --component-500: #c026d3;
   --component-600: #a21caf;
   --component-700: #86198f;
-  --component-bg-tint: rgba(162, 28, 175, 0.06);
-  --component-bg-tint-hover: rgba(162, 28, 175, 0.1);
-  --component-bg-tint-active: rgba(162, 28, 175, 0.14);
+  /* Neutral hover states for nav tree */
+  --component-bg-tint: rgba(0, 0, 0, 0.04);
+  --component-bg-tint-hover: rgba(0, 0, 0, 0.06);
+  --component-bg-tint-active: rgba(0, 0, 0, 0.08);
   --topbar-bg: color-mix(in srgb, #a21caf 8%, white);
   --topbar-border: rgba(162, 28, 175, 0.15);
 }
