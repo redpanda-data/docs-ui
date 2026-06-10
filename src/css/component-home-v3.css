@@ -1985,7 +1985,6 @@ html[data-theme="dark"] .ch3-component-features li {
 
 .ch3-pathways {
   max-width: var(--ch3-max-width, 1180px);
-  margin: 0 auto;
   padding: 48px var(--ch3-gutter, 40px) 32px;
 }
 
@@ -2013,7 +2012,8 @@ html[data-theme="dark"] .ch3-pathways-title {
 }
 
 .ch3-pathway-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   background: var(--panel-background, #fff);
   border: 1px solid var(--panel-border-color, #e5e7eb);
   border-radius: 12px;
@@ -2047,21 +2047,29 @@ html[data-theme="dark"] .ch3-pathway-card:hover {
 
 .ch3-pathway-icon {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  background: var(--component-color, #c1331a);
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  background: color-mix(in srgb, var(--component-color, #c1331a) 12%, transparent);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .ch3-pathway-icon svg {
-  width: 20px;
-  height: 20px;
-  stroke: #fff;
+  width: 18px;
+  height: 18px;
+  stroke: var(--component-color, #c1331a);
   fill: none;
   stroke-width: 2;
+}
+
+html[data-theme="dark"] .ch3-pathway-icon {
+  background: color-mix(in srgb, var(--component-color, #c1331a) 20%, transparent);
+}
+
+html[data-theme="dark"] .ch3-pathway-icon svg {
+  stroke: var(--component-400, #f87171);
 }
 
 .ch3-pathway-title {
@@ -2090,22 +2098,22 @@ html[data-theme="dark"] .ch3-pathway-desc {
 .ch3-pathway-cta {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 10px 18px;
-  background: var(--component-color, #c1331a);
-  color: #fff;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--component-color, #c1331a);
   font-size: 0.9375rem;
   font-weight: 500;
   text-decoration: none;
-  border-radius: 8px;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: gap 0.15s ease;
 }
 
 .ch3-pathway-cta:hover {
-  background: color-mix(in srgb, var(--component-color, #c1331a) 85%, black);
-  transform: translateY(-1px);
-  color: #fff;
+  gap: 10px;
+}
+
+html[data-theme="dark"] .ch3-pathway-cta {
+  color: var(--component-400, #f87171);
 }
 
 .ch3-pathway-cta svg {
@@ -2123,7 +2131,6 @@ html[data-theme="dark"] .ch3-pathway-desc {
 
 .ch3-concepts {
   max-width: var(--ch3-max-width, 1180px);
-  margin: 0 auto;
   padding: 32px var(--ch3-gutter, 40px) 48px;
 }
 
@@ -2206,7 +2213,6 @@ html[data-theme="dark"] .ch3-concept-card p {
 
 .ch3-footer-note {
   max-width: var(--ch3-max-width, 1180px);
-  margin: 0 auto;
   padding: 0 var(--ch3-gutter, 40px) 48px;
 }
 
