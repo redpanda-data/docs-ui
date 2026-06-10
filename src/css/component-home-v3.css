@@ -1362,7 +1362,6 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 .ch3-help {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
   padding: 24px 28px;
