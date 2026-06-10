@@ -1256,7 +1256,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   min-width: 0;
 }
 
-.ch3-popular-text h4 {
+.ch3-popular-text h3 {
   font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
@@ -1502,7 +1502,7 @@ html[data-theme="dark"] .ch3-popular-icon {
   color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
-html[data-theme="dark"] .ch3-popular-text h4 {
+html[data-theme="dark"] .ch3-popular-text h3 {
   color: #fff;
 }
 

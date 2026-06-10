@@ -936,7 +936,7 @@ html[data-theme="dark"] .dp-popular-card {
   min-width: 0;
 }
 
-.dp-popular-text h4 {
+.dp-popular-text h3 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
   font-size: calc(18 / var(--rem-base) * 1rem);
   font-weight: 600;
@@ -946,7 +946,7 @@ html[data-theme="dark"] .dp-popular-card {
   color: var(--grey-800-new, #18181b);
 }
 
-html[data-theme="dark"] .dp-popular-text h4 {
+html[data-theme="dark"] .dp-popular-text h3 {
   color: var(--grey-100-new, #f4f4f5);
 }
 
