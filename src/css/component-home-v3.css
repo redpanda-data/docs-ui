@@ -89,7 +89,6 @@ html[data-theme=dark] .ch3-hero::after {
   position: relative;
   z-index: 1;
   max-width: 1100px;
-  margin: 0 auto;
   overflow: visible;
   display: flex;
   flex-direction: column;
