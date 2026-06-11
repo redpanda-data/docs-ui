@@ -519,12 +519,12 @@ li.nav-item {
 }
 
 .nav-list > li > .item:hover {
-  background: var(--component-bg-tint, rgba(255, 255, 255, 0.04));
+  background: rgba(255, 255, 255, 0.05);
   color: #dbe2ee;
 }
 
 .nav-list > li > .is-current-page {
-  background: var(--component-bg-tint-hover, rgba(255, 255, 255, 0.08));
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
   font-weight: 500;
 }
@@ -1081,8 +1081,8 @@ html[data-theme="light"] .nav-list > li > .item:hover {
 }
 
 html[data-theme="light"] .nav-list > li > .is-current-page {
-  background: var(--component-bg-tint-hover, var(--indigo-50-new, #eef2ff));
-  color: var(--component-color, var(--indigo-600-new, #444ce7));
+  background: var(--indigo-100-new, #e0eaff);
+  color: var(--indigo-600-new, #444ce7);
   font-weight: 500;
 }
 
@@ -1522,12 +1522,12 @@ html[data-theme="light"] .nav-bucket:has(.nav-bucket-children) > .nav-bucket-hea
 }
 
 .nav-menu > .nav-list > .nav-item .item:hover {
-  background: rgba(122, 145, 176, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   color: #e2e8f0;
 }
 
 .nav-menu > .nav-list > .nav-item .item.is-current-page {
-  background: rgba(122, 145, 176, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   font-weight: 500;
 }
