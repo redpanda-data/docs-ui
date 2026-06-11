@@ -4,15 +4,23 @@
    ============================================================================= */
 
 /* Light mode: component-tinted gradient background */
+/* Fallback for browsers without color-mix support */
 html:not([data-theme="dark"]) .ch3-hero {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--component-color, #4f46e5) 3%, #ffffff) 0%,
-      color-mix(in srgb, var(--component-color, #4f46e5) 6%, #f5f7fb) 100%
-    ) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%) !important;
   color: #141a36 !important;
   border-bottom: 1px solid rgba(20, 26, 54, 0.07) !important;
+}
+
+/* Modern browsers with color-mix support get component-tinted backgrounds */
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  html:not([data-theme="dark"]) .ch3-hero {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--component-color, #4f46e5) 3%, #ffffff) 0%,
+        color-mix(in srgb, var(--component-color, #4f46e5) 6%, #f5f7fb) 100%
+      ) !important;
+  }
 }
 
 /* Data Platform uses indigo tint */
