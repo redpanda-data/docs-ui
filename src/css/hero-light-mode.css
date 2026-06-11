@@ -196,3 +196,63 @@ html:not([data-theme="dark"]) .dp-hero-ask-chip:hover {
   background: rgba(20, 26, 54, 0.1);
   color: #141a36;
 }
+
+/* ============================================================================
+   HOME PAGE HERO - LIGHT MODE
+   ============================================================================ */
+
+/* Light mode: neutral gradient background */
+html:not([data-theme="dark"]) .home-hero {
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%) !important;
+  color: #141a36 !important;
+  border-bottom: 1px solid rgba(20, 26, 54, 0.07) !important;
+}
+
+/* Light mode grid lines */
+html:not([data-theme="dark"]) .home-hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(20, 26, 54, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(20, 26, 54, 0.06) 1px, transparent 1px) !important;
+}
+
+/* Light mode glows - subtle tints */
+html:not([data-theme="dark"]) .home-hero-glow-1 {
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%) !important;
+  opacity: 0.5 !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-glow-2 {
+  background: radial-gradient(circle, rgba(31, 91, 214, 0.12) 0%, transparent 70%) !important;
+  opacity: 0.4 !important;
+}
+
+/* Light mode text colors */
+html:not([data-theme="dark"]) .home-hero-title {
+  color: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-sub {
+  color: rgba(20, 26, 54, 0.7) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-eyebrow {
+  color: rgba(20, 26, 54, 0.6) !important;
+}
+
+/* Light mode Ask AI button */
+html:not([data-theme="dark"]) .home-hero-ask {
+  background: #fff;
+  border: 1px solid rgba(20, 26, 54, 0.15);
+  box-shadow: 0 2px 8px rgba(20, 26, 54, 0.08), 0 0 0 1px rgba(20, 26, 54, 0.04);
+}
+
+html:not([data-theme="dark"]) .home-hero-ask:hover,
+html:not([data-theme="dark"]) .home-hero-ask:focus-within {
+  background: #fff;
+  border-color: rgba(20, 26, 54, 0.25);
+  box-shadow: 0 4px 12px rgba(20, 26, 54, 0.12), 0 0 0 1px rgba(20, 26, 54, 0.06);
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-icon {
+  color: rgba(20, 26, 54, 0.5);
+}
