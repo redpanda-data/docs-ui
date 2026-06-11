@@ -8,6 +8,15 @@
   body:has(.component-home) .body {
     margin-left: 0;
   }
+
+  /* When nav is collapsed, reduce hero/content padding */
+  body:has(.nav-container.hidden) .ch3-hero {
+    padding-left: var(--ch3-gutter, 40px);
+  }
+
+  body:has(.nav-container.hidden) .ch3-content {
+    padding-left: 16px;
+  }
 }
 
 /* Mobile nav toggle: invert to white on dark hero background */

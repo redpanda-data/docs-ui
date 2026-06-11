@@ -39,6 +39,15 @@ html[data-theme="dark"] .data-platform.article {
   body.data-platform .body {
     margin-left: 0;
   }
+
+  /* When nav is collapsed, reduce hero/content padding */
+  body.data-platform:has(.nav-container.hidden) .dp-hero {
+    padding-left: 56px;
+  }
+
+  body.data-platform:has(.nav-container.hidden) .dp-content {
+    padding-left: 16px;
+  }
 }
 
 /* ---- Hero Section ---- */
