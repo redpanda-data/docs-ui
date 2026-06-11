@@ -547,6 +547,7 @@ li.nav-item {
   margin: 0;
   flex-direction: column;
   padding-left: 0;
+  gap: 2px;
   border-left: none;
 }
 
