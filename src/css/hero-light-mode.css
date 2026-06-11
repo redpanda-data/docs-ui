@@ -227,11 +227,12 @@ html:not([data-theme="dark"]) .home-hero-glow-2 {
 }
 
 /* Light mode text colors */
-html:not([data-theme="dark"]) .home-hero-title {
+html:not([data-theme="dark"]) .article.home .home-hero-title,
+html:not([data-theme="dark"]) .article.home h1.home-hero-title {
   color: #141a36 !important;
 }
 
-html:not([data-theme="dark"]) .home-hero-sub {
+html:not([data-theme="dark"]) .article.home .home-hero-sub {
   color: rgba(20, 26, 54, 0.7) !important;
 }
 

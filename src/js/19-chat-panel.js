@@ -99,10 +99,12 @@
   }
 
   // Restore panel state from localStorage on page load
+  // Only restore on desktop to avoid drawer filling mobile screen
   function restoreState () {
     try {
       var savedState = localStorage.getItem(STORAGE_KEY)
-      if (savedState === 'true') {
+      var isMobile = window.innerWidth <= 768
+      if (savedState === 'true' && !isMobile) {
         openPanel()
       }
     } catch (e) {

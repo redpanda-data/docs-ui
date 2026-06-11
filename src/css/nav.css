@@ -511,7 +511,7 @@ li.nav-item {
   padding: 6px 10px;
   border-radius: 5px;
   color: #b0c0d4;
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   letter-spacing: -0.0125em;
   line-height: 1.35;
   cursor: pointer;
