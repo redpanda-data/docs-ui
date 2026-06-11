@@ -1076,7 +1076,7 @@ html[data-theme="light"] .nav .item {
 }
 
 html[data-theme="light"] .nav-list > li > .item:hover {
-  background: var(--component-bg-tint, var(--grey-50-new, #f5f5f5));
+  background: var(--indigo-50-new, #eef4ff);
   color: var(--grey-900-new, var(--grey-900, #181818));
 }
 

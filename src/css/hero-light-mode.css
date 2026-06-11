@@ -235,24 +235,58 @@ html:not([data-theme="dark"]) .home-hero-sub {
   color: rgba(20, 26, 54, 0.7) !important;
 }
 
+/* Light mode eyebrow pill */
 html:not([data-theme="dark"]) .home-hero-eyebrow {
-  color: rgba(20, 26, 54, 0.6) !important;
+  color: rgba(20, 26, 54, 0.7) !important;
+  background: rgba(20, 26, 54, 0.06) !important;
+  border: 1px solid rgba(20, 26, 54, 0.12) !important;
 }
 
-/* Light mode Ask AI button */
+/* Light mode dot */
+html:not([data-theme="dark"]) .home-hero-dot {
+  background: var(--brand-600-new, #e24328) !important;
+  box-shadow: 0 0 0 3px rgba(226, 67, 40, 0.15) !important;
+}
+
+/* Light mode Ask AI form */
 html:not([data-theme="dark"]) .home-hero-ask {
-  background: #fff;
-  border: 1px solid rgba(20, 26, 54, 0.15);
-  box-shadow: 0 2px 8px rgba(20, 26, 54, 0.08), 0 0 0 1px rgba(20, 26, 54, 0.04);
+  background: #fff !important;
+  border: 1px solid rgba(20, 26, 54, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(20, 26, 54, 0.08), 0 0 0 1px rgba(20, 26, 54, 0.04) !important;
 }
 
 html:not([data-theme="dark"]) .home-hero-ask:hover,
 html:not([data-theme="dark"]) .home-hero-ask:focus-within {
-  background: #fff;
-  border-color: rgba(20, 26, 54, 0.25);
-  box-shadow: 0 4px 12px rgba(20, 26, 54, 0.12), 0 0 0 1px rgba(20, 26, 54, 0.06);
+  background: #fff !important;
+  border-color: rgba(20, 26, 54, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(20, 26, 54, 0.12), 0 0 0 1px rgba(20, 26, 54, 0.06) !important;
 }
 
 html:not([data-theme="dark"]) .home-hero-ask-icon {
-  color: rgba(20, 26, 54, 0.5);
+  color: var(--brand-600-new, #e24328) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-input {
+  color: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-input::placeholder {
+  color: rgba(20, 26, 54, 0.45) !important;
+}
+
+/* Light mode submit button */
+html:not([data-theme="dark"]) .home-hero-ask-submit,
+html:not([data-theme="dark"]) button.home-hero-ask-submit,
+html:not([data-theme="dark"]) .home-hero-ask button.home-hero-ask-submit {
+  background: var(--brand-600-new, #e24328) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-submit:hover,
+html:not([data-theme="dark"]) button.home-hero-ask-submit:hover {
+  background: var(--brand-700-new, #c1331a) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-submit svg,
+html:not([data-theme="dark"]) button.home-hero-ask-submit svg {
+  stroke: #fff !important;
 }
