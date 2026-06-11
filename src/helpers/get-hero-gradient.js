@@ -8,11 +8,30 @@
  * - Top: darker shade (mixed with black)
  * - Bottom: slightly lighter shade
  *
+ * Priority:
+ * 1. page.attributes['hero-gradient'] - explicit gradient override
+ * 2. page.attributes['hero-color'] - page-level color override (useful for preview testing)
+ * 3. component-metadata.heroGradient - component-level explicit gradient
+ * 4. component-metadata.color - component base color
+ *
  * @param {object} page - The page object from Antora
  * @returns {string|undefined} CSS linear-gradient value or undefined
  */
 module.exports = function (page) {
   if (!page) return undefined
+
+  // Check for page-level gradient override first
+  if (page.attributes && page.attributes['hero-gradient']) {
+    return page.attributes['hero-gradient']
+  }
+
+  // Check for page-level color override (useful for preview testing different components)
+  if (page.attributes && page.attributes['hero-color']) {
+    const baseColor = page.attributes['hero-color']
+    const darkColor = darkenHex(baseColor, 0.6)
+    const lightColor = darkenHex(baseColor, 0.3)
+    return `linear-gradient(180deg, ${darkColor} 0%, ${lightColor} 100%)`
+  }
 
   // Get component-metadata
   const headerData =

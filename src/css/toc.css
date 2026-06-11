@@ -92,7 +92,7 @@
 
 .toc h3 {
   color: var(--toc-heading-font-color);
-  font-size: calc(12 / var(--rem-base) * 1rem); /* Increased from 11 to 12 for better readability */
+  font-size: calc(13 / var(--rem-base) * 1rem); /* Increased from 12 to 13 for better visibility */
   font-family: var(--body-font-family-bold);
   font-weight: 600;
   text-transform: uppercase;
@@ -171,17 +171,17 @@
 
 .toc li[data-level="3"] a {
   padding-left: 32px;
-  font-size: calc(15 / var(--rem-base) * 1rem); /* Increased from 13 to 15 for better readability */
+  font-size: calc(14 / var(--rem-base) * 1rem); /* Reduced from 15 to 14 for visual hierarchy */
 }
 
 .toc li[data-level="4"] a {
   padding-left: 42px;
-  font-size: calc(15 / var(--rem-base) * 1rem); /* Increased from 13 to 15 for better readability */
+  font-size: calc(14 / var(--rem-base) * 1rem); /* Reduced from 15 to 14 for visual hierarchy */
 }
 
 .toc li[data-level="5"] a {
   padding-left: 52px;
-  font-size: calc(15 / var(--rem-base) * 1rem); /* Increased from 13 to 15 for better readability */
+  font-size: calc(14 / var(--rem-base) * 1rem); /* Reduced from 15 to 14 for visual hierarchy */
 }
 
 .toc a {

@@ -54,7 +54,7 @@
 }
 
 .sb-brand-title {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(20 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: #fff;
   letter-spacing: -0.01em;
@@ -62,10 +62,10 @@
 }
 
 .sb-brand-sub {
-  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--sidebar-fg-muted, #a8b2c7);
   letter-spacing: -0.005em;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* Sidebar Search Bar */
@@ -94,7 +94,7 @@ button.sb-search:focus-visible {
   border-radius: 8px; /* Prototype uses 8px */
   cursor: pointer;
   font-size: calc(14 / var(--rem-base) * 1rem);
-  color: #8098b3; /* Prototype search text color */
+  color: #b0c0d4; /* Prototype search text color */
   transition: background 0.12s, border-color 0.12s;
   flex-shrink: 0;
 }
@@ -436,7 +436,7 @@ html.is-clipped--nav {
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  color: #a8b2c7; /* Prototype exact color */
+  color: #c6cedc; /* Prototype exact color */
   font-size: calc(16 / var(--rem-base) * 1rem);
   font-weight: 500;
   font-family: var(--body-font-family);
@@ -510,8 +510,8 @@ li.nav-item {
   gap: 6px;
   padding: 6px 10px;
   border-radius: 5px;
-  color: #8098b3;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  color: #b0c0d4;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   letter-spacing: -0.0125em;
   line-height: 1.35;
   cursor: pointer;
@@ -699,7 +699,7 @@ html[data-theme="light"] .nav-item-toggle {
 
 .nav-link.cloud-byoc::after {
   content: 'SELF-MANAGED';
-  color: #a8b2c7;
+  color: #c6cedc;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -790,7 +790,7 @@ html[data-theme="light"] .nav-item-toggle {
 
 .nav-status-text {
   flex: 1;
-  color: #aab8ca;
+  color: #c6cedc;
   font-weight: 500;
   letter-spacing: -0.005em;
 }
@@ -962,7 +962,7 @@ html[data-theme="light"] .sb-collapse-toggle:hover {
 html[data-theme="dark"] .nav-expand {
   background: #1a2332;
   border-color: rgba(255, 255, 255, 0.1);
-  color: #a8b2c7;
+  color: #c6cedc;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
@@ -1303,7 +1303,7 @@ html[data-theme="light"] .nav-bucket-caret {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
-  color: #a8b2c7;
+  color: #c6cedc;
   font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
   cursor: pointer;
@@ -1447,7 +1447,7 @@ html[data-theme="light"] .version-eol {
   background: none;
   font-size: calc(13 / var(--rem-base) * 1rem);
   font-weight: 500;
-  color: #8098b3;
+  color: #b0c0d4;
   text-align: left;
   cursor: pointer;
   transition: color 0.12s;
@@ -1516,14 +1516,14 @@ html[data-theme="light"] .nav-bucket:has(.nav-bucket-children) > .nav-bucket-hea
   font-size: calc(16 / var(--rem-base) * 1rem);
   padding: 6px 10px;
   min-height: 28px;
-  color: #9daabe;
+  color: #c0ccd9;
   border-radius: 6px;
   transition: background 0.12s, color 0.12s;
 }
 
 .nav-menu > .nav-list > .nav-item .item:hover {
   background: rgba(122, 145, 176, 0.08);
-  color: #c6d4e6;
+  color: #e2e8f0;
 }
 
 .nav-menu > .nav-list > .nav-item .item.is-current-page {

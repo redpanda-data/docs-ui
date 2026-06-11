@@ -3,6 +3,22 @@
    Matches "docs design (2)" with hero, tabs, and "Choose your path" cards
    ============================================================================= */
 
+/* Remove body margin for full-width landing page */
+@media screen and (min-width: 1024px) {
+  body:has(.component-home) .body {
+    margin-left: 0;
+  }
+
+  /* When nav is collapsed, reduce hero/content padding */
+  body:has(.nav-container.hidden) .ch3-hero {
+    padding-left: var(--ch3-gutter, 40px);
+  }
+
+  body:has(.nav-container.hidden) .ch3-content {
+    padding-left: 16px;
+  }
+}
+
 /* Mobile nav toggle: invert to white on dark hero background */
 .component-home .nav-toggle {
   filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(248deg) brightness(105%) contrast(101%);
@@ -67,11 +83,39 @@ main.component-home > .component-content {
   flex-shrink: 0;
 }
 
+/* Pad hero content to clear the nav on desktop */
+@media screen and (min-width: 1024px) {
+  .ch3-hero {
+    padding-left: calc(var(--sidebar-width, 260px) + var(--ch3-gutter, 40px));
+  }
+}
+
+/* Light mode: lighten hero via overlay while preserving component color */
+html:not([data-theme=dark]) .ch3-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+/* Dark mode: deeper gradient overlay for more contrast */
+html[data-theme=dark] .ch3-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
 .ch3-hero-inner {
   position: relative;
   z-index: 1;
   max-width: 1100px;
   overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 /* Eyebrow row with product badge and version */
@@ -196,10 +240,27 @@ main.component-home > .component-content {
   color: #fcd34d;
 }
 
+/* Light mode: darker colors for visibility on light backgrounds */
+html:not([data-theme=dark]) .sm-ver-pill-status[data-status="current"] {
+  color: #059669;
+}
+
+html:not([data-theme=dark]) .sm-ver-pill-status[data-status="supported"] {
+  color: #059669;
+}
+
+html:not([data-theme=dark]) .sm-ver-pill-status[data-status="eol"] {
+  color: #d97706;
+}
+
 .sm-ver-pill-caret {
   color: rgba(255, 255, 255, 0.65);
   transition: transform 180ms ease;
   margin-left: -1px;
+}
+
+html:not([data-theme=dark]) .sm-ver-pill-caret {
+  color: var(--grey-500-new, #737373);
 }
 
 .sm-ver.is-open .sm-ver-pill-caret {
@@ -210,8 +271,8 @@ main.component-home > .component-content {
 .sm-ver-panel {
   position: absolute;
   top: calc(100% + 10px);
-  right: 0;
-  z-index: 100;
+  left: 0;
+  z-index: 200;
   width: 560px;
   max-width: calc(100vw - 48px);
   background: #fff;
@@ -766,6 +827,13 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   padding: 0;
 }
 
+/* Add left padding to content to clear nav on desktop */
+@media screen and (min-width: 1024px) {
+  .ch3-content {
+    padding-left: calc(var(--sidebar-width, 260px) + 16px);
+  }
+}
+
 /* Section styling */
 .ch3-section {
   margin-bottom: 56px;
@@ -818,8 +886,8 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  max-width: 600px;
+  width: 600px;
+  max-width: 100%;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -837,7 +905,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
 .ch3-hero-ask-icon {
   display: flex;
   align-items: center;
-  color: var(--brand-500-new, #f04438);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .ch3-hero-ask-icon svg {
@@ -859,7 +927,7 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Hero Ask Submit Button */
+/* Hero Ask Submit Button - Glass morphism style */
 .ch3-hero-ask-submit,
 button.ch3-hero-ask-submit,
 .ch3-hero-ask button.ch3-hero-ask-submit {
@@ -870,12 +938,12 @@ button.ch3-hero-ask-submit,
   height: 32px !important;
   min-width: 32px !important;
   max-width: 32px !important;
-  background: var(--brand-600-new, #e24328) !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 8px !important;
   color: #fff !important;
   cursor: pointer !important;
-  transition: background 0.12s !important;
+  transition: background 0.12s, border-color 0.12s !important;
   padding: 0 !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
@@ -883,7 +951,8 @@ button.ch3-hero-ask-submit,
 
 .ch3-hero-ask-submit:hover,
 button.ch3-hero-ask-submit:hover {
-  background: var(--brand-700-new, #c9190b) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .ch3-hero-ask-submit svg,
@@ -950,6 +1019,11 @@ button.ch3-hero-ask-submit svg,
   height: 200%;
   background: radial-gradient(closest-side, var(--component-600, rgba(79, 70, 229, 0.2)), transparent 70%);
   opacity: 0.5;
+}
+
+/* Light mode: increase glow visibility on lighter hero */
+html:not([data-theme=dark]) .ch3-hero-glow {
+  opacity: 0.65;
 }
 
 .ch3-hero-grid {
@@ -1212,7 +1286,7 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   min-width: 0;
 }
 
-.ch3-popular-text h4 {
+.ch3-popular-text h3 {
   font-size: calc(19 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--color-jet, #181818);
@@ -1318,7 +1392,6 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
 .ch3-help {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
   padding: 24px 28px;
@@ -1380,6 +1453,8 @@ html[data-theme="dark"] .ch3-feature-card:hover .ch3-feature-arrow {
   opacity: 1;
 }
 
+/* Light mode hero styles are now in hero-light-mode.css for consistency across all hero types */
+
 /* Dark mode support ------------------------------------------------------- */
 html[data-theme="dark"] .ch3-hero {
   background: linear-gradient(180deg, #0a0f18 0%, #0f1727 100%);
@@ -1422,6 +1497,7 @@ html[data-theme="dark"] .ch3-deploy-card:hover {
 
 html[data-theme="dark"] .ch3-deploy-icon {
   background: var(--component-bg-tint, rgba(79, 70, 229, 0.15));
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
 html[data-theme="dark"] .ch3-deploy-title {
@@ -1434,6 +1510,10 @@ html[data-theme="dark"] .ch3-deploy-desc {
 
 html[data-theme="dark"] .ch3-deploy-time {
   color: #6b7a8f;
+}
+
+html[data-theme="dark"] .ch3-deploy-cta {
+  color: var(--component-400, var(--indigo-400-new, #a5b4fc));
 }
 
 /* Dark mode - Popular cards */
@@ -1449,9 +1529,10 @@ html[data-theme="dark"] .ch3-popular-card:hover {
 
 html[data-theme="dark"] .ch3-popular-icon {
   background: var(--component-bg-tint, rgba(79, 70, 229, 0.15));
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
-html[data-theme="dark"] .ch3-popular-text h4 {
+html[data-theme="dark"] .ch3-popular-text h3 {
   color: #fff;
 }
 
@@ -1461,6 +1542,10 @@ html[data-theme="dark"] .ch3-popular-text p {
 
 html[data-theme="dark"] .ch3-popular-arrow {
   color: #6b7a8f;
+}
+
+html[data-theme="dark"] .ch3-popular-card:hover .ch3-popular-arrow {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
 /* Dark mode - Labs */
@@ -1478,6 +1563,18 @@ html[data-theme="dark"] .ch3-labs-list a {
 
 html[data-theme="dark"] .ch3-labs-list a svg {
   color: #6b7a8f;
+}
+
+html[data-theme="dark"] .ch3-labs-all {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
+}
+
+html[data-theme="dark"] .ch3-labs-list a:hover {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
+}
+
+html[data-theme="dark"] .ch3-labs-list a:hover svg {
+  color: var(--component-400, var(--indigo-400-new, #818cf8));
 }
 
 /* Dark mode - Help */
@@ -1909,4 +2006,270 @@ html[data-theme="dark"] .ch3-component-badge--byoc {
 
 html[data-theme="dark"] .ch3-component-features li {
   color: var(--color-text-secondary);
+}
+
+/* =============================================================================
+   PATHWAY CARDS — "Pick where to start" section
+   Used for landing pages with two main paths (e.g., ADP build vs bring your own)
+   ============================================================================= */
+
+.ch3-pathways {
+  max-width: var(--ch3-max-width, 1180px);
+  padding: 48px var(--ch3-gutter, 40px) 32px;
+}
+
+.ch3-pathways-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0 0 24px;
+}
+
+html[data-theme="dark"] .ch3-pathways-title {
+  color: #fff;
+}
+
+.ch3-pathways-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .ch3-pathways-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ch3-pathway-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-background, #fff);
+  border: 1px solid var(--panel-border-color, #e5e7eb);
+  border-radius: 12px;
+  padding: 28px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ch3-pathway-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: var(--component-color, #c1331a);
+  transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .ch3-pathway-card {
+  background: #1e2432;
+  border-color: #2d3548;
+}
+
+html[data-theme="dark"] .ch3-pathway-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.ch3-pathway-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ch3-pathway-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: color-mix(in srgb, var(--component-color, #c1331a) 12%, transparent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ch3-pathway-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--component-color, #c1331a);
+  fill: none;
+  stroke-width: 2;
+}
+
+html[data-theme="dark"] .ch3-pathway-icon {
+  background: color-mix(in srgb, var(--component-color, #c1331a) 20%, transparent);
+}
+
+html[data-theme="dark"] .ch3-pathway-icon svg {
+  stroke: var(--component-400, #f87171);
+}
+
+.ch3-pathway-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0;
+  line-height: 1.3;
+}
+
+html[data-theme="dark"] .ch3-pathway-title {
+  color: #fff;
+}
+
+.ch3-pathway-desc {
+  font-size: 0.9375rem;
+  color: var(--body-font-color, #4b5563);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+html[data-theme="dark"] .ch3-pathway-desc {
+  color: #9ca3af;
+}
+
+.ch3-pathway-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--component-color, #c1331a);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: gap 0.15s ease;
+}
+
+.ch3-pathway-cta:hover {
+  gap: 10px;
+}
+
+html[data-theme="dark"] .ch3-pathway-cta {
+  color: var(--component-400, #f87171);
+}
+
+.ch3-pathway-cta svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* =============================================================================
+   CONCEPTS GRID — "Get your bearings" section
+   Used for landing pages with multiple concept/overview cards
+   ============================================================================= */
+
+.ch3-concepts {
+  max-width: var(--ch3-max-width, 1180px);
+  padding: 32px var(--ch3-gutter, 40px) 48px;
+}
+
+.ch3-concepts-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0 0 24px;
+}
+
+html[data-theme="dark"] .ch3-concepts-title {
+  color: #fff;
+}
+
+.ch3-concepts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.ch3-concept-card {
+  display: block;
+  background: var(--panel-background, #fff);
+  border: 1px solid var(--panel-border-color, #e5e7eb);
+  border-radius: 10px;
+  padding: 20px;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+html[data-theme="dark"] .ch3-concept-card {
+  background: #1e2432;
+  border-color: #2d3548;
+}
+
+.ch3-concept-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--component-color, #c1331a);
+  transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .ch3-concept-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.ch3-concept-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--body-font-color, #1a1a1a);
+  margin: 0 0 6px;
+}
+
+html[data-theme="dark"] .ch3-concept-card h3 {
+  color: #fff;
+}
+
+.ch3-concept-card h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ch3-concept-card h3 a:hover {
+  color: var(--component-color, #c1331a);
+}
+
+.ch3-concept-card p {
+  font-size: 0.875rem;
+  color: var(--body-font-color, #6b7280);
+  margin: 0;
+  line-height: 1.5;
+}
+
+html[data-theme="dark"] .ch3-concept-card p {
+  color: #9ca3af;
+}
+
+/* =============================================================================
+   FOOTER NOTE — Callout at bottom of landing page
+   ============================================================================= */
+
+.ch3-footer-note {
+  max-width: var(--ch3-max-width, 1180px);
+  padding: 0 var(--ch3-gutter, 40px) 48px;
+}
+
+.ch3-footer-note p {
+  font-size: 0.9375rem;
+  color: var(--body-font-color, #6b7280);
+  background: var(--note-background, #f3f4f6);
+  border-left: 3px solid var(--component-color, #c1331a);
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+  margin: 0;
+}
+
+html[data-theme="dark"] .ch3-footer-note p {
+  background: #1e2432;
+  color: #9ca3af;
+}
+
+.ch3-footer-note a {
+  color: var(--component-color, #c1331a);
+  text-decoration: none;
+}
+
+html[data-theme="dark"] .ch3-footer-note a {
+  color: #fff;
+}
+
+.ch3-footer-note a:hover {
+  text-decoration: underline;
 }

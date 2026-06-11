@@ -19,12 +19,35 @@
   max-width: none;
 }
 
+/* Add left padding to content to clear nav on desktop */
+@media screen and (min-width: 1024px) {
+  .data-platform .dp-content {
+    padding-left: calc(var(--sidebar-width, 260px) + 16px);
+  }
+}
+
 .data-platform.article {
   background: var(--grey-50-new, #fafafa);
 }
 
 html[data-theme="dark"] .data-platform.article {
   background: var(--grey-950-new, #09090b);
+}
+
+/* Remove body margin for full-width landing page */
+@media screen and (min-width: 1024px) {
+  body.data-platform .body {
+    margin-left: 0;
+  }
+
+  /* When nav is collapsed, reduce hero/content padding */
+  body.data-platform:has(.nav-container.hidden) .dp-hero {
+    padding-left: 56px;
+  }
+
+  body.data-platform:has(.nav-container.hidden) .dp-content {
+    padding-left: 16px;
+  }
 }
 
 /* ---- Hero Section ---- */
@@ -35,6 +58,13 @@ html[data-theme="dark"] .data-platform.article {
   color: #fff;
   padding: 40px 56px 32px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Pad hero content to clear the nav on desktop */
+@media screen and (min-width: 1024px) {
+  .dp-hero {
+    padding-left: calc(var(--sidebar-width, 260px) + 56px);
+  }
 }
 
 .dp-hero-bg {
@@ -78,9 +108,19 @@ html[data-theme="dark"] .data-platform.article {
   -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
 }
 
+/* Dark mode: deeper hero gradient */
+html[data-theme=dark] .dp-hero {
+  background: linear-gradient(180deg, #0a0f18 0%, #0f1727 100%);
+}
+
+/* Light mode hero styles are in hero-light-mode.css for consistency across all heroes */
+
 .dp-hero-inner {
   position: relative;
   max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .dp-hero-eyebrow {
@@ -124,42 +164,38 @@ html[data-theme="dark"] .data-platform.article {
 }
 
 .dp-hero-sub {
-  font-size: calc(19 / var(--rem-base) * 1rem);
+  font-size: calc(17 / var(--rem-base) * 1rem);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.85);
-  max-width: 700px;
-  margin: 0 0 24px;
+  margin: 0;
   text-wrap: pretty;
 }
 
 .dp-hero-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  max-width: 720px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin-top: 28px;
+  padding-top: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 30px;
 }
 
 .dp-hero-stats > div {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .dp-hero-stats strong {
-  font-family: var(--sans-serif-font, 'Inter', sans-serif);
-  font-size: calc(23 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  font-size: calc(25 / var(--rem-base) * 1rem);
+  font-weight: 700;
   color: #fff;
+  letter-spacing: -0.02em;
 }
 
 .dp-hero-stats span {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(14 / var(--rem-base) * 1rem);
   color: rgba(255, 255, 255, 0.6);
-  line-height: 1.35;
 }
 
 /* ---- Choose Deployment Section ---- */
@@ -196,8 +232,8 @@ html[data-theme="dark"] .data-platform.article {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  max-width: 600px;
+  width: 600px;
+  max-width: 100%;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -215,7 +251,7 @@ html[data-theme="dark"] .data-platform.article {
 .dp-hero-ask-icon {
   display: flex;
   align-items: center;
-  color: var(--brand-500-new, #f04438);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .dp-hero-ask-icon svg {
@@ -237,7 +273,7 @@ html[data-theme="dark"] .data-platform.article {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Hero Ask Submit Button */
+/* Hero Ask Submit Button - Glass morphism style */
 .dp-hero-ask-submit,
 button.dp-hero-ask-submit,
 .dp-hero-ask button.dp-hero-ask-submit {
@@ -248,12 +284,12 @@ button.dp-hero-ask-submit,
   height: 32px !important;
   min-width: 32px !important;
   max-width: 32px !important;
-  background: var(--brand-600-new, #e24328) !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 8px !important;
   color: #fff !important;
   cursor: pointer !important;
-  transition: background 0.12s !important;
+  transition: background 0.12s, border-color 0.12s !important;
   padding: 0 !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
@@ -261,7 +297,8 @@ button.dp-hero-ask-submit,
 
 .dp-hero-ask-submit:hover,
 button.dp-hero-ask-submit:hover {
-  background: var(--brand-700-new, #c9190b) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .dp-hero-ask-submit svg,
@@ -600,6 +637,15 @@ html[data-theme="dark"] .dp-product-stats span {
   margin-top: auto;
 }
 
+/* Dark mode: use white for better readability on dark backgrounds */
+html[data-theme="dark"] .dp-product-cta {
+  color: #fff;
+}
+
+html[data-theme="dark"] .dp-product-cta svg {
+  stroke: #fff;
+}
+
 .dp-product:hover .dp-product-cta svg {
   transform: translateX(2px);
   transition: transform 0.15s;
@@ -860,6 +906,15 @@ html[data-theme="dark"] .dp-matrix-when p {
   gap: 6px;
 }
 
+/* Dark mode: use white for better readability */
+html[data-theme="dark"] .dp-matrix-pick a {
+  color: #fff;
+}
+
+html[data-theme="dark"] .dp-matrix-pick a svg {
+  stroke: #fff;
+}
+
 /* ---- Popular cards ---- */
 .dp-popular {
   display: grid;
@@ -911,7 +966,7 @@ html[data-theme="dark"] .dp-popular-card {
   min-width: 0;
 }
 
-.dp-popular-text h4 {
+.dp-popular-text h3 {
   font-family: var(--sans-serif-font, 'Inter', sans-serif);
   font-size: calc(18 / var(--rem-base) * 1rem);
   font-weight: 600;
@@ -921,7 +976,7 @@ html[data-theme="dark"] .dp-popular-card {
   color: var(--grey-800-new, #18181b);
 }
 
-html[data-theme="dark"] .dp-popular-text h4 {
+html[data-theme="dark"] .dp-popular-text h3 {
   color: var(--grey-100-new, #f4f4f5);
 }
 
@@ -1224,10 +1279,6 @@ html[data-theme="dark"] .dp-component-badge--byoc {
   }
 
   .dp-concepts {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .dp-hero-stats {
     grid-template-columns: 1fr 1fr;
   }
 }

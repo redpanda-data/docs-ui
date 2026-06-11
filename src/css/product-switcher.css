@@ -72,7 +72,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: #e8eef6;
   font-weight: 500;
   flex: 1;

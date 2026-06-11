@@ -1,0 +1,198 @@
+/* =============================================================================
+   LIGHT MODE HERO STYLES
+   Shared styles for all hero sections in light mode (component-home-v3, data-platform, etc.)
+   ============================================================================= */
+
+/* Light mode: component-tinted gradient background */
+/* Fallback for browsers without color-mix support */
+html:not([data-theme="dark"]) .ch3-hero {
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%) !important;
+  color: #141a36 !important;
+  border-bottom: 1px solid rgba(20, 26, 54, 0.07) !important;
+}
+
+/* Modern browsers with color-mix support get component-tinted backgrounds */
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  html:not([data-theme="dark"]) .ch3-hero {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--component-color, #4f46e5) 3%, #ffffff) 0%,
+        color-mix(in srgb, var(--component-color, #4f46e5) 6%, #f5f7fb) 100%
+      ) !important;
+  }
+}
+
+/* Data Platform uses indigo tint */
+html:not([data-theme="dark"]) .dp-hero {
+  background: linear-gradient(180deg, #f8f9ff 0%, #f0f2ff 100%) !important;
+  color: #141a36 !important;
+  border-bottom: 1px solid rgba(20, 26, 54, 0.07) !important;
+}
+
+/* Remove any overlay pseudo-elements in light mode */
+html:not([data-theme="dark"]) .ch3-hero::after,
+html:not([data-theme="dark"]) .dp-hero::before {
+  display: none !important;
+}
+
+/* Light mode glows - use component color for brand tint */
+html:not([data-theme="dark"]) .ch3-hero-glow {
+  background: radial-gradient(circle, color-mix(in srgb, var(--component-color, #4f46e5) 25%, transparent) 0%, transparent 70%) !important;
+  opacity: 0.8 !important;
+}
+
+/* Data Platform uses indigo glows */
+html:not([data-theme="dark"]) .dp-hero-glow-1 {
+  background: radial-gradient(circle, rgba(75, 68, 255, 0.25) 0%, transparent 70%) !important;
+  opacity: 0.7 !important;
+}
+
+html:not([data-theme="dark"]) .dp-hero-glow-2 {
+  background: radial-gradient(circle, rgba(31, 91, 214, 0.2) 0%, transparent 70%) !important;
+  opacity: 0.6 !important;
+}
+
+/* Light mode grid lines - dark on light */
+html:not([data-theme="dark"]) .ch3-hero-grid,
+html:not([data-theme="dark"]) .dp-hero-grid {
+  background-image:
+    linear-gradient(rgba(20, 26, 54, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 26, 54, 0.06) 1px, transparent 1px) !important;
+}
+
+/* Light mode title - dark ink */
+html:not([data-theme="dark"]) .ch3-page-title,
+html:not([data-theme="dark"]) .ch3-hero[style*="background"] .ch3-page-title,
+html:not([data-theme="dark"]) .dp-hero .dp-hero-title {
+  color: #141a36 !important;
+}
+
+/* Light mode subtitle/lede - medium dark */
+html:not([data-theme="dark"]) .ch3-page-lede,
+html:not([data-theme="dark"]) .ch3-hero[style*="background"] .ch3-page-lede,
+html:not([data-theme="dark"]) .dp-hero-sub {
+  color: rgba(20, 26, 54, 0.7) !important;
+}
+
+/* Light mode eyebrow text */
+html:not([data-theme="dark"]) .dp-hero-eyebrow {
+  color: rgba(20, 26, 54, 0.6) !important;
+}
+
+/* Light mode product chip - keep brand color with white text */
+html:not([data-theme="dark"]) .ch3-product-chip {
+  background: var(--component-color, rgba(79, 70, 229, 0.9));
+  color: #fff;
+}
+
+/* Light mode version pill */
+html:not([data-theme="dark"]) .ch3-sm-ver-pill,
+html:not([data-theme="dark"]) .sm-ver-pill {
+  background: rgba(20, 26, 54, 0.06);
+  border-color: rgba(20, 26, 54, 0.12);
+}
+
+html:not([data-theme="dark"]) .sm-ver-pill:hover {
+  background: rgba(20, 26, 54, 0.1);
+}
+
+html:not([data-theme="dark"]) .sm-ver-pill-label,
+html:not([data-theme="dark"]) .sm-ver-pill-num {
+  color: #141a36;
+}
+
+html:not([data-theme="dark"]) .sm-ver-pill-sep {
+  color: rgba(20, 26, 54, 0.3);
+}
+
+/* Light mode stats - border and text */
+html:not([data-theme="dark"]) .ch3-hero-stats,
+html:not([data-theme="dark"]) .dp-hero-stats {
+  border-top-color: rgba(20, 26, 54, 0.12) !important;
+}
+
+html:not([data-theme="dark"]) .ch3-hero-stat strong,
+html:not([data-theme="dark"]) .dp-hero-stats strong {
+  color: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .ch3-hero-stat span,
+html:not([data-theme="dark"]) .dp-hero-stats span {
+  color: rgba(20, 26, 54, 0.58) !important;
+}
+
+/* Light mode Ask AI input - more prominent */
+html:not([data-theme="dark"]) .ch3-hero-ask,
+html:not([data-theme="dark"]) .dp-hero-ask {
+  background: #fff;
+  border: 1px solid rgba(20, 26, 54, 0.15);
+  box-shadow: 0 2px 8px rgba(20, 26, 54, 0.08), 0 0 0 1px rgba(20, 26, 54, 0.04);
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask:hover,
+html:not([data-theme="dark"]) .ch3-hero-ask:focus-within,
+html:not([data-theme="dark"]) .dp-hero-ask:hover,
+html:not([data-theme="dark"]) .dp-hero-ask:focus-within {
+  background: #fff;
+  border-color: rgba(20, 26, 54, 0.25);
+  box-shadow: 0 4px 12px rgba(20, 26, 54, 0.12), 0 0 0 1px rgba(20, 26, 54, 0.06);
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-icon,
+html:not([data-theme="dark"]) .dp-hero-ask-icon {
+  color: rgba(20, 26, 54, 0.5);
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-input,
+html:not([data-theme="dark"]) .dp-hero-ask-input {
+  color: #141a36;
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-input::placeholder,
+html:not([data-theme="dark"]) .dp-hero-ask-input::placeholder {
+  color: rgba(20, 26, 54, 0.45);
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-submit,
+html:not([data-theme="dark"]) button.ch3-hero-ask-submit,
+html:not([data-theme="dark"]) .ch3-hero-ask button.ch3-hero-ask-submit,
+html:not([data-theme="dark"]) .dp-hero-ask-submit,
+html:not([data-theme="dark"]) button.dp-hero-ask-submit {
+  background: rgba(20, 26, 54, 0.1) !important;
+  border: 1px solid rgba(20, 26, 54, 0.2) !important;
+  color: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-submit:hover,
+html:not([data-theme="dark"]) button.ch3-hero-ask-submit:hover,
+html:not([data-theme="dark"]) .dp-hero-ask-submit:hover,
+html:not([data-theme="dark"]) button.dp-hero-ask-submit:hover {
+  background: rgba(20, 26, 54, 0.15) !important;
+  border-color: rgba(20, 26, 54, 0.25) !important;
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-submit svg,
+html:not([data-theme="dark"]) button.ch3-hero-ask-submit svg,
+html:not([data-theme="dark"]) .ch3-hero-ask button.ch3-hero-ask-submit svg,
+html:not([data-theme="dark"]) .dp-hero-ask-submit svg,
+html:not([data-theme="dark"]) button.dp-hero-ask-submit svg {
+  stroke: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-hints-label,
+html:not([data-theme="dark"]) .dp-hero-ask-hints-label {
+  color: rgba(20, 26, 54, 0.5);
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-chip,
+html:not([data-theme="dark"]) .dp-hero-ask-chip {
+  background: rgba(20, 26, 54, 0.06);
+  color: rgba(20, 26, 54, 0.75);
+}
+
+html:not([data-theme="dark"]) .ch3-hero-ask-chip:hover,
+html:not([data-theme="dark"]) .dp-hero-ask-chip:hover {
+  background: rgba(20, 26, 54, 0.1);
+  color: #141a36;
+}

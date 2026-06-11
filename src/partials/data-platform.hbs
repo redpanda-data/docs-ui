@@ -12,14 +12,16 @@
       <div class="dp-hero-eyebrow">
         <span>REDPANDA DATA PLATFORM</span>
       </div>
-      <h1 class="dp-hero-title">
-        The streaming foundation<br>
-        for everything you build.
-      </h1>
+      <h1 class="dp-hero-title">The streaming foundation for everything you build.</h1>
       <p class="dp-hero-sub">
         Run Redpanda on your infrastructure or let us manage it in the cloud.
         Then connect it to everything else with declarative pipelines.
       </p>
+
+      <div class="dp-hero-stats">
+        <div><strong>10x</strong><span>faster than Kafka, same wire</span></div>
+        <div><strong>{{page.attributes.hero-stat2-number}}</strong><span>connectors</span></div>
+      </div>
 
       {{!-- Opens chat drawer on submit --}}
       <form class="dp-hero-ask" id="dp-ask-form">
@@ -56,11 +58,6 @@
         {{/if}}
       </div>
       {{/if}}
-
-      <div class="dp-hero-stats">
-        <div><strong>10x</strong><span>faster than Kafka, same wire</span></div>
-        <div><strong>{{page.attributes.hero-stat2-number}}</strong><span>connectors</span></div>
-      </div>
     </div>
   </header>
 
@@ -449,7 +446,7 @@
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>{{page.attributes.popular-1-title}}</h4>
+          <h3>{{page.attributes.popular-1-title}}</h3>
           {{#if page.attributes.popular-1-tag}}
           <div class="dp-popular-meta">
             <span class="dp-popular-tag">{{page.attributes.popular-1-tag}}</span>
@@ -470,7 +467,7 @@
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>{{page.attributes.popular-2-title}}</h4>
+          <h3>{{page.attributes.popular-2-title}}</h3>
           {{#if page.attributes.popular-2-tag}}
           <div class="dp-popular-meta">
             <span class="dp-popular-tag">{{page.attributes.popular-2-tag}}</span>
@@ -491,7 +488,7 @@
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>{{page.attributes.popular-3-title}}</h4>
+          <h3>{{page.attributes.popular-3-title}}</h3>
           {{#if page.attributes.popular-3-tag}}
           <div class="dp-popular-meta">
             <span class="dp-popular-tag">{{page.attributes.popular-3-tag}}</span>
@@ -512,7 +509,7 @@
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>{{page.attributes.popular-4-title}}</h4>
+          <h3>{{page.attributes.popular-4-title}}</h3>
           {{#if page.attributes.popular-4-tag}}
           <div class="dp-popular-meta">
             <span class="dp-popular-tag">{{page.attributes.popular-4-tag}}</span>
@@ -533,7 +530,7 @@
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>{{page.attributes.popular-5-title}}</h4>
+          <h3>{{page.attributes.popular-5-title}}</h3>
           {{#if page.attributes.popular-5-tag}}
           <div class="dp-popular-meta">
             <span class="dp-popular-tag">{{page.attributes.popular-5-tag}}</span>
@@ -554,7 +551,7 @@
           </svg>
         </div>
         <div class="dp-popular-text">
-          <h4>{{page.attributes.popular-6-title}}</h4>
+          <h3>{{page.attributes.popular-6-title}}</h3>
           {{#if page.attributes.popular-6-tag}}
           <div class="dp-popular-meta">
             <span class="dp-popular-tag">{{page.attributes.popular-6-tag}}</span>
