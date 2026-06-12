@@ -100,10 +100,11 @@
 
   // Restore panel state from localStorage on page load
   // Only restore on desktop to avoid drawer filling mobile screen
+  // 520px matches the CSS breakpoint where chat-panel becomes full-width
   function restoreState () {
     try {
       var savedState = localStorage.getItem(STORAGE_KEY)
-      var isMobile = window.innerWidth <= 768
+      var isMobile = window.innerWidth <= 520
       if (savedState === 'true' && !isMobile) {
         openPanel()
       }
