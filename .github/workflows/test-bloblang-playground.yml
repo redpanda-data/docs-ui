@@ -39,7 +39,15 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18.x'
-        cache: 'npm'
+    - name: Cache node_modules
+      id: cache-node-modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+    - name: Install npm dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: npm ci
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
@@ -53,10 +61,8 @@ jobs:
         key: ${{ runner.os }}-go-1.25.x-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-1.25.x-
-    - name: Install dependencies
-      run: |
-        npm ci
-        cd blobl-editor/wasm && go mod download
+    - name: Download Go modules
+      run: cd blobl-editor/wasm && go mod download
     - name: Lint Go code
       uses: golangci/golangci-lint-action@v8
       timeout-minutes: 10
