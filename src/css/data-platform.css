@@ -40,11 +40,7 @@ html[data-theme="dark"] .data-platform.article {
     margin-left: 0;
   }
 
-  /* When nav is collapsed, reduce hero/content padding */
-  body.data-platform:has(.nav-container.hidden) .dp-hero {
-    padding-left: 56px;
-  }
-
+  /* When nav is collapsed, reduce content padding */
   body.data-platform:has(.nav-container.hidden) .dp-content {
     padding-left: 16px;
   }
@@ -58,13 +54,6 @@ html[data-theme="dark"] .data-platform.article {
   color: #fff;
   padding: 40px 56px 32px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Pad hero content to clear the nav on desktop */
-@media screen and (min-width: 1024px) {
-  .dp-hero {
-    padding-left: calc(var(--sidebar-width, 260px) + 56px);
-  }
 }
 
 .dp-hero-bg {

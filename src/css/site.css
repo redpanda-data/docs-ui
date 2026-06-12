@@ -15,7 +15,6 @@
 @import "component-home-v2.css";
 @import "component-home-v3.css";
 @import "data-platform.css";
-@import "hero-light-mode.css";
 @import "whats-new.css";
 @import "nav.css";
 @import "main.css";
@@ -56,3 +55,4 @@
 @import "chat-panel.css";
 @import "product-switcher.css";
 @import "labs-home.css";
+@import "hero-light-mode.css";

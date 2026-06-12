@@ -196,3 +196,98 @@ html:not([data-theme="dark"]) .dp-hero-ask-chip:hover {
   background: rgba(20, 26, 54, 0.1);
   color: #141a36;
 }
+
+/* ============================================================================
+   HOME PAGE HERO - LIGHT MODE
+   ============================================================================ */
+
+/* Light mode: neutral gradient background */
+html:not([data-theme="dark"]) .home-hero {
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%) !important;
+  color: #141a36 !important;
+  border-bottom: 1px solid rgba(20, 26, 54, 0.07) !important;
+}
+
+/* Light mode grid lines */
+html:not([data-theme="dark"]) .home-hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(20, 26, 54, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(20, 26, 54, 0.06) 1px, transparent 1px) !important;
+}
+
+/* Light mode glows - subtle tints */
+html:not([data-theme="dark"]) .home-hero-glow-1 {
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%) !important;
+  opacity: 0.5 !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-glow-2 {
+  background: radial-gradient(circle, rgba(31, 91, 214, 0.12) 0%, transparent 70%) !important;
+  opacity: 0.4 !important;
+}
+
+/* Light mode text colors */
+html:not([data-theme="dark"]) .article.home .home-hero-title,
+html:not([data-theme="dark"]) .article.home h1.home-hero-title {
+  color: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .article.home .home-hero-sub {
+  color: rgba(20, 26, 54, 0.7) !important;
+}
+
+/* Light mode eyebrow pill */
+html:not([data-theme="dark"]) .home-hero-eyebrow {
+  color: rgba(20, 26, 54, 0.7) !important;
+  background: rgba(20, 26, 54, 0.06) !important;
+  border: 1px solid rgba(20, 26, 54, 0.12) !important;
+}
+
+/* Light mode dot */
+html:not([data-theme="dark"]) .home-hero-dot {
+  background: var(--brand-600-new, #e24328) !important;
+  box-shadow: 0 0 0 3px rgba(226, 67, 40, 0.15) !important;
+}
+
+/* Light mode Ask AI form */
+html:not([data-theme="dark"]) .home-hero-ask {
+  background: #fff !important;
+  border: 1px solid rgba(20, 26, 54, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(20, 26, 54, 0.08), 0 0 0 1px rgba(20, 26, 54, 0.04) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask:hover,
+html:not([data-theme="dark"]) .home-hero-ask:focus-within {
+  background: #fff !important;
+  border-color: rgba(20, 26, 54, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(20, 26, 54, 0.12), 0 0 0 1px rgba(20, 26, 54, 0.06) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-icon {
+  color: var(--brand-600-new, #e24328) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-input {
+  color: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-input::placeholder {
+  color: rgba(20, 26, 54, 0.45) !important;
+}
+
+/* Light mode submit button */
+html:not([data-theme="dark"]) .home-hero-ask-submit,
+html:not([data-theme="dark"]) button.home-hero-ask-submit,
+html:not([data-theme="dark"]) .home-hero-ask button.home-hero-ask-submit {
+  background: var(--brand-600-new, #e24328) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-submit:hover,
+html:not([data-theme="dark"]) button.home-hero-ask-submit:hover {
+  background: var(--brand-700-new, #c1331a) !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-ask-submit svg,
+html:not([data-theme="dark"]) button.home-hero-ask-submit svg {
+  stroke: #fff !important;
+}

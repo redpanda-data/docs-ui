@@ -118,8 +118,15 @@ h1.home-hero-title {
   line-height: 1.1 !important;
   margin: 0 0 22px !important;
   text-wrap: pretty;
-  color: #fff !important;
   font-family: var(--body-font-family);
+}
+
+/* Hero Title - Dark Mode Color */
+html[data-theme="dark"] .home-hero-title,
+html[data-theme="dark"] .doc .home-hero-title,
+html[data-theme="dark"] .article.home .home-hero-title,
+html[data-theme="dark"] h1.home-hero-title {
+  color: #fff !important;
 }
 
 /* Hero Subtitle */
@@ -128,11 +135,17 @@ h1.home-hero-title {
 .article.home .home-hero-sub {
   font-size: clamp(16px, 1.4vw, 19px) !important;
   line-height: 1.55 !important;
-  color: #a8b2c7 !important;
   max-width: 680px;
   margin: 0 0 36px !important;
   letter-spacing: -0.005em;
   text-wrap: pretty;
+}
+
+/* Hero Subtitle - Dark Mode Color */
+html[data-theme="dark"] .home-hero-sub,
+html[data-theme="dark"] .doc .home-hero-sub,
+html[data-theme="dark"] .article.home .home-hero-sub {
+  color: #a8b2c7 !important;
 }
 
 /* Hero Ask Input */
@@ -249,23 +262,30 @@ button.home-hero-ask-submit svg,
 
 .home-hero-ask-hints-label {
   font-size: calc(14 / var(--rem-base) * 1rem);
-  color: rgba(255, 255, 255, 0.5);
   font-weight: 500;
 }
 
 .home-hero-chip {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 8px 14px;
   font-size: calc(14 / var(--rem-base) * 1rem);
-  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
   font-family: var(--body-font-family);
 }
 
-.home-hero-chip:hover {
+/* Dark mode colors */
+html[data-theme="dark"] .home-hero-ask-hints-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+html[data-theme="dark"] .home-hero-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+html[data-theme="dark"] .home-hero-chip:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
   color: #fff;
@@ -2925,4 +2945,38 @@ html[data-theme="dark"] .home .loading {
   .home-product-sub-card {
     padding: 10px;
   }
+}
+
+/* =============================================================================
+   HOME PAGE HERO - LIGHT MODE OVERRIDES
+   ============================================================================= */
+
+html:not([data-theme="dark"]) .home-hero-title,
+html:not([data-theme="dark"]) .doc .home-hero-title,
+html:not([data-theme="dark"]) .article.home .home-hero-title,
+html:not([data-theme="dark"]) h1.home-hero-title {
+  color: #141a36 !important;
+}
+
+html:not([data-theme="dark"]) .home-hero-sub,
+html:not([data-theme="dark"]) .doc .home-hero-sub,
+html:not([data-theme="dark"]) .article.home .home-hero-sub {
+  color: rgba(20, 26, 54, 0.7) !important;
+}
+
+/* Light mode "Try:" hints section */
+html:not([data-theme="dark"]) .home-hero-ask-hints-label {
+  color: rgba(20, 26, 54, 0.5);
+}
+
+html:not([data-theme="dark"]) .home-hero-chip {
+  background: rgba(20, 26, 54, 0.06);
+  border: 1px solid rgba(20, 26, 54, 0.12);
+  color: rgba(20, 26, 54, 0.75);
+}
+
+html:not([data-theme="dark"]) .home-hero-chip:hover {
+  background: rgba(20, 26, 54, 0.1);
+  border-color: rgba(20, 26, 54, 0.2);
+  color: #141a36;
 }

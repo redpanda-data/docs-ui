@@ -260,6 +260,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     script.setAttribute('data-mcp-enabled', 'true');
     script.setAttribute('data-mcp-server-url', 'https://docs.redpanda.com/mcp');
     script.setAttribute('data-modal-disclaimer', 'This is a custom LLM for Redpanda with access to all developer docs, API specs, support FAQs, YouTube tutorials, and resolved GitHub discussions. Review the [Redpanda privacy policy](https://www.redpanda.com/legal/privacy-policy) to understand how your data is used.');
+    // Theme sync - automatically follows site dark mode
+    script.setAttribute('data-color-scheme-selector', "html[data-theme='dark']");
+    // Light mode palette
+    script.setAttribute('data-surface-color', '#ffffff');
+    script.setAttribute('data-surface-elevated-color', '#f5f5f5');
+    script.setAttribute('data-surface-hover-color', '#ebebeb');
+    script.setAttribute('data-text-color', '#181818');
+    script.setAttribute('data-text-muted-color', '#79797d');
+    script.setAttribute('data-border-color', '#dcdcde');
+    script.setAttribute('data-anchor-color', '#444ce7');
+    // Dark mode palette
+    script.setAttribute('data-surface-color-dark', '#161e2d');
+    script.setAttribute('data-surface-elevated-color-dark', '#232f3e');
+    script.setAttribute('data-surface-hover-color-dark', '#2d3a53');
+    script.setAttribute('data-text-color-dark', '#e8eef6');
+    script.setAttribute('data-text-muted-color-dark', '#7c8ca8');
+    script.setAttribute('data-border-color-dark', 'rgba(255,255,255,0.08)');
+    script.setAttribute('data-project-color-dark', '#8098f9');
+    script.setAttribute('data-anchor-color-dark', '#8098f9');
+    // Typography
+    script.setAttribute('data-font-family', '"Inter", ui-sans-serif, system-ui, sans-serif');
     script.onload = function() {
       // Wait for Kapa to initialize, then open if pending
       if (pendingOpen) {
