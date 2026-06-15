@@ -268,7 +268,7 @@
   }
 
   function scrollItemToMidpoint (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   function find (from, selector) {

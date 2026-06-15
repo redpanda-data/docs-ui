@@ -62,7 +62,7 @@
 }
 
 .sb-brand-sub {
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--sidebar-fg-muted, #a8b2c7);
   letter-spacing: -0.005em;
   margin-top: 2px;
@@ -93,7 +93,7 @@ button.sb-search:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.06); /* Prototype exact */
   border-radius: 8px; /* Prototype uses 8px */
   cursor: pointer;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: #b0c0d4; /* Prototype search text color */
   transition: background 0.12s, border-color 0.12s;
   flex-shrink: 0;
@@ -110,7 +110,7 @@ button.sb-search:focus-visible {
 
 .sb-search-text {
   flex: 1;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   color: var(--sidebar-fg-muted, #a8b2c7);
   letter-spacing: -0.005em;
 }
@@ -392,7 +392,7 @@ html .nav-container.is-active {
   border-radius: 8px;
   transition: background 0.12s;
   display: block;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   letter-spacing: -0.005em;
 }
@@ -437,7 +437,7 @@ html.is-clipped--nav {
   gap: 8px;
   padding: 8px 10px;
   color: #c6cedc; /* Prototype exact color */
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   font-weight: 500;
   font-family: var(--body-font-family);
   border-radius: 5px;
@@ -511,7 +511,7 @@ li.nav-item {
   padding: 6px 10px;
   border-radius: 5px;
   color: #b0c0d4;
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   letter-spacing: -0.0125em;
   line-height: 1.35;
   cursor: pointer;
@@ -667,19 +667,17 @@ html[data-theme="light"] .nav-item-toggle {
 }
 
 .nav-link.cloud-beta::after {
-  height: 20px;
-  display: block;
-  background-repeat: no-repeat;
-  background-size: contain;
+  display: inline;
   content: '(beta)';
+  margin-left: 4px;
+  white-space: nowrap;
 }
 
 .nav-link.cloud-limited-availability::after {
-  height: 20px;
-  display: block;
-  background-repeat: no-repeat;
-  background-size: contain;
+  display: inline;
   content: '(Limited)';
+  margin-left: 4px;
+  white-space: nowrap;
 }
 
 .nav-link.cloud-byoc::after,
@@ -736,7 +734,7 @@ html[data-theme="light"] .nav-item-toggle {
   text-decoration: none;
   color: inherit;
   transition: background 0.12s;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
 }
 
 .nav-status-link:hover {
@@ -1514,7 +1512,7 @@ html[data-theme="light"] .nav-bucket:has(.nav-bucket-children) > .nav-bucket-hea
 /* Top-level nav items (parent component's own nav before child buckets) */
 /* Style the nav items to match bucket content items */
 .nav-menu > .nav-list > .nav-item .item {
-  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-size: calc(15 / var(--rem-base) * 1rem);
   padding: 6px 10px;
   min-height: 28px;
   color: #c0ccd9;
@@ -1538,13 +1536,13 @@ html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item {
 }
 
 html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item:hover {
-  background: var(--grey-100-new, #f0f0f0);
+  background: var(--indigo-50-new, #eef4ff);
   color: var(--grey-900-new, #1a1b1d);
 }
 
 html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item.is-current-page {
-  background: var(--grey-200-new, #e0e1e2);
-  color: var(--grey-900-new, #1a1b1d);
+  background: var(--indigo-100-new, #e0eaff);
+  color: var(--indigo-600-new, #444ce7);
   font-weight: 500;
 }
 
