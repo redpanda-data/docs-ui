@@ -133,6 +133,21 @@ window.__algoliaToggleFilter = function(label, checked) {
   }
 };
 
+/**
+ * Global toggle for "exact match" search. When on, the docs query is sent as a
+ * quoted phrase (advancedSyntax) with typo tolerance and optional words disabled,
+ * so results must contain the exact terms, in order. Exposed on `window` so the
+ * checkbox handler in the render template (re-created each render) calls a stable
+ * function. Same rationale as window.__algoliaToggleFilter above.
+ */
+window.__algoliaExactMatch = false;
+window.__algoliaToggleExactMatch = function(checked) {
+  window.__algoliaExactMatch = !!checked;
+  if (window.__algoliaAutocompleteInstance) {
+    window.__algoliaAutocompleteInstance.refresh();
+  }
+};
+
 /** Stable refs + listeners for outside-click / Esc handling on the dropdown. */
 const __dropdownRefs = { menu: null, toggle: null };
 let __dropdownOutsideHandler = null;
@@ -508,10 +523,26 @@ function initAlgolia() {
           </a>`
         : '';
 
+      // "Exact match" toggle: forces a quoted-phrase, no-typo query (see getItems).
+      const exactToggle = html`
+        <label
+          class="aa-ExactToggle"
+          title="Match the exact phrase, with no typo tolerance"
+          style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;white-space:nowrap;"
+        >
+          <input
+            type="checkbox"
+            checked=${!!window.__algoliaExactMatch}
+            onChange=${e => window.__algoliaToggleExactMatch(e.target.checked)}
+          />
+          <span>Exact match</span>
+        </label>`;
+
       // Layout: header (filters/AI), results list, right-side preview, footer tips.
       render(
         html`<div class="aa-Header">
           ${dropdown}
+          ${exactToggle}
           ${askAIButton}
         </div>
         <div class="aa-Grid">
@@ -709,6 +740,16 @@ function initAlgolia() {
         {
           sourceId: 'docs',
           getItems() {
+            // When "Exact match" is on, require every term, exact spelling, and no
+            // optional-word fallback. NOTE: we deliberately do NOT wrap the query in
+            // quotes for a phrase match — the index's searchable attributes use
+            // unordered(...), which disables phrase/proximity matching, so a quoted
+            // phrase returns nothing. Strict params give reliable exact-term matching.
+            // See window.__algoliaToggleExactMatch.
+            const exactMatch = !!window.__algoliaExactMatch;
+            const exactParams = exactMatch
+              ? { typoTolerance: false, removeWordsIfNoResults: 'none', optionalWords: [] }
+              : {};
             // getAlgoliaResults: https://www.algolia.com/doc/ui-libraries/autocomplete/api-reference/sources/#param-getalgoliaresults
             return getAlgoliaResults({
               searchClient,
@@ -722,6 +763,7 @@ function initAlgolia() {
                     attributesToSnippet: ['*:25'],  // https://www.algolia.com/doc/api-reference/api-parameters/attributesToSnippet/
                     snippetEllipsisText: '…',       // https://www.algolia.com/doc/api-reference/api-parameters/snippetEllipsisText/
                     tagFilters: mapToAlgoliaFilters(tagsByFacet), // https://www.algolia.com/doc/api-reference/api-parameters/tagFilters/
+                    ...exactParams,
                   },
                 },
               ],
