@@ -134,11 +134,12 @@ window.__algoliaToggleFilter = function(label, checked) {
 };
 
 /**
- * Global toggle for "exact match" search. When on, the docs query is sent as a
- * quoted phrase (advancedSyntax) with typo tolerance and optional words disabled,
- * so results must contain the exact terms, in order. Exposed on `window` so the
- * checkbox handler in the render template (re-created each render) calls a stable
- * function. Same rationale as window.__algoliaToggleFilter above.
+ * Global toggle for "exact match" search. When on, docs queries use strict params
+ * (no typo tolerance, no optional words, no remove-words fallback), requiring exact
+ * term spelling while preserving the original user query text — not a quoted phrase
+ * match (see getItems for why phrase matching can't work here). Exposed on `window`
+ * so the checkbox handler in the render template (re-created each render) calls a
+ * stable function. Same rationale as window.__algoliaToggleFilter above.
  */
 window.__algoliaExactMatch = false;
 window.__algoliaToggleExactMatch = function(checked) {
@@ -527,11 +528,11 @@ function initAlgolia() {
           </a>`
         : '';
 
-      // "Exact match" toggle: forces a quoted-phrase, no-typo query (see getItems).
+      // "Exact match" toggle: forces a strict, no-typo, no-fallback query (see getItems).
       const exactToggle = html`
         <label
           class="aa-ExactToggle"
-          title="Match the exact phrase, with no typo tolerance"
+          title="Require exact term spelling; disables typo tolerance and optional-word fallback"
           style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;white-space:nowrap;"
         >
           <input
