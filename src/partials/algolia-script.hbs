@@ -288,14 +288,18 @@ function initAlgolia() {
                    prevFilters.every((p, i) => p?.label === currFilters[i]?.label);
 
       if (!same || tagsChanged) {
-        setContext({ ...state.context, filtersSourceItems: currFilters });
+        // setContext merges into the LIVE context. Never spread ...state.context:
+        // onStateChange can run with a stale state snapshot (e.g. a late async search
+        // response), and spreading it would overwrite current tagsPlugin.tags with old
+        // values — the cause of the filter dropdown "resetting" to a previous count.
+        setContext({ filtersSourceItems: currFilters });
       }
 
       // 4) Attach/detach global listeners only while the dropdown is open.
       const wasOpen = !!(prevState?.context?.dropdownOpen);
       const isOpen  = !!(state?.context?.dropdownOpen);
       if (isOpen && !wasOpen) {
-        const close = () => setContext({ ...state.context, dropdownOpen: false });
+        const close = () => setContext({ dropdownOpen: false });
         __dropdownOutsideHandler = (e) => {
           const menu = __dropdownRefs.menu;
           const toggle = __dropdownRefs.toggle;
@@ -321,11 +325,11 @@ function initAlgolia() {
 
       // 5) Update or seed preview when query/tags change or first load.
       if ((nextQ && nextQ !== prevQ) || tagsChanged) {
-        setContext({ ...state.context, preview: firstHit });
+        setContext({ preview: firstHit });
         return;
       }
       if (!state.context.preview && firstHit) {
-        setContext({ ...state.context, preview: firstHit });
+        setContext({ preview: firstHit });
       }
     },
 
@@ -393,7 +397,7 @@ function initAlgolia() {
 
       // Toggle dropdown through Autocomplete context (so onStateChange runs).
       const setDropdownOpen = (open) => {
-        window.__algoliaAutocompleteInstance.setContext({ ...state.context, dropdownOpen: open });
+        window.__algoliaAutocompleteInstance.setContext({ dropdownOpen: open });
       };
 
       // The dropdown UI itself (button + menu)
