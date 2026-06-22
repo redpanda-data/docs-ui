@@ -19,6 +19,12 @@
       steps:
         - uses: actions/checkout@v4
 
+        - name: Set up Go
+          uses: actions/setup-go@v5
+          with:
+            go-version: stable
+            cache-dependency-path: blobl-editor/wasm/go.sum
+
         - uses: actions/setup-node@v4
           with:
             node-version: 18
@@ -34,7 +40,17 @@
           if: steps.cache-node-modules.outputs.cache-hit != 'true'
           run: npm ci
 
+        - name: Cache generated files
+          uses: actions/cache@v4
+          with:
+            path: src/static/blobl.wasm
+            key: generated-${{ hashFiles('blobl-editor/wasm/go.sum') }}-${{ hashFiles('package-lock.json') }}
+            restore-keys: |
+              generated-${{ hashFiles('blobl-editor/wasm/go.sum') }}-
+              generated-
+
         - run: gulp bundle
+          timeout-minutes: 10
 
         - name: Create GitHub Release (prerelease aware)
           env:
