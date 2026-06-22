@@ -15,6 +15,9 @@
         {{/with}}
         <div class="container">
           <div class="searchbox" id="searchbox"></div>
+          <label class="exact-match-toggle" for="exact-match" title="Require exact term spelling; disables typo tolerance and optional-word fallback">
+            <input type="checkbox" id="exact-match"> Exact match
+          </label>
           <div class="search-content">
             <div class="badge-button" id="display-filters">Filters </div>
             <div class="filters" id="filters">
@@ -47,7 +50,32 @@
         const { algoliasearch, instantsearch } = window;
         const { searchBox } = instantsearch.widgets;
 
-        const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
+        // "Exact match" toggle state. When on, we require every term, exact spelling,
+        // and no optional-word fallback. We do this in a search-client wrapper so the
+        // search box keeps showing exactly what the user typed. NOTE: we deliberately
+        // do NOT wrap the query in quotes for a phrase match — the index's searchable
+        // attributes use unordered(...), which disables phrase/proximity matching, so
+        // a quoted phrase returns nothing; strict params give reliable exact matching.
+        let exactMatch = false;
+
+        const baseClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
+        const searchClient = {
+          ...baseClient,
+          search(requests) {
+            if (exactMatch) {
+              requests = requests.map((request) => {
+                const params = { ...(request.params || {}) };
+                if (params.query) {
+                  params.typoTolerance = false;
+                  params.removeWordsIfNoResults = 'none';
+                  params.optionalWords = [];
+                }
+                return { ...request, params };
+              });
+            }
+            return baseClient.search(requests);
+          },
+        };
         const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
 
         const search = instantsearch({
@@ -197,6 +225,15 @@
         ]);
 
         search.start();
+
+        // Wire the "Exact match" checkbox: flip the flag and re-run the search.
+        const exactMatchCheckbox = document.getElementById('exact-match');
+        if (exactMatchCheckbox) {
+          exactMatchCheckbox.addEventListener('change', (e) => {
+            exactMatch = e.target.checked;
+            if (search.helper) search.helper.search();
+          });
+        }
       }
 
       document.addEventListener('DOMContentLoaded', function(event) {

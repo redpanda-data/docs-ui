@@ -133,6 +133,22 @@ window.__algoliaToggleFilter = function(label, checked) {
   }
 };
 
+/**
+ * Global toggle for "exact match" search. When on, docs queries use strict params
+ * (no typo tolerance, no optional words, no remove-words fallback), requiring exact
+ * term spelling while preserving the original user query text — not a quoted phrase
+ * match (see getItems for why phrase matching can't work here). Exposed on `window`
+ * so the checkbox handler in the render template (re-created each render) calls a
+ * stable function. Same rationale as window.__algoliaToggleFilter above.
+ */
+window.__algoliaExactMatch = false;
+window.__algoliaToggleExactMatch = function(checked) {
+  window.__algoliaExactMatch = !!checked;
+  if (window.__algoliaAutocompleteInstance) {
+    window.__algoliaAutocompleteInstance.refresh();
+  }
+};
+
 /** Stable refs + listeners for outside-click / Esc handling on the dropdown. */
 const __dropdownRefs = { menu: null, toggle: null };
 let __dropdownOutsideHandler = null;
@@ -273,14 +289,18 @@ function initAlgolia() {
                    prevFilters.every((p, i) => p?.label === currFilters[i]?.label);
 
       if (!same || tagsChanged) {
-        setContext({ ...state.context, filtersSourceItems: currFilters });
+        // setContext merges into the LIVE context. Never spread ...state.context:
+        // onStateChange can run with a stale state snapshot (e.g. a late async search
+        // response), and spreading it would overwrite current tagsPlugin.tags with old
+        // values — the cause of the filter dropdown "resetting" to a previous count.
+        setContext({ filtersSourceItems: currFilters });
       }
 
       // 4) Attach/detach global listeners only while the dropdown is open.
       const wasOpen = !!(prevState?.context?.dropdownOpen);
       const isOpen  = !!(state?.context?.dropdownOpen);
       if (isOpen && !wasOpen) {
-        const close = () => setContext({ ...state.context, dropdownOpen: false });
+        const close = () => setContext({ dropdownOpen: false });
         __dropdownOutsideHandler = (e) => {
           const menu = __dropdownRefs.menu;
           const toggle = __dropdownRefs.toggle;
@@ -306,11 +326,11 @@ function initAlgolia() {
 
       // 5) Update or seed preview when query/tags change or first load.
       if ((nextQ && nextQ !== prevQ) || tagsChanged) {
-        setContext({ ...state.context, preview: firstHit });
+        setContext({ preview: firstHit });
         return;
       }
       if (!state.context.preview && firstHit) {
-        setContext({ ...state.context, preview: firstHit });
+        setContext({ preview: firstHit });
       }
     },
 
@@ -378,7 +398,7 @@ function initAlgolia() {
 
       // Toggle dropdown through Autocomplete context (so onStateChange runs).
       const setDropdownOpen = (open) => {
-        window.__algoliaAutocompleteInstance.setContext({ ...state.context, dropdownOpen: open });
+        window.__algoliaAutocompleteInstance.setContext({ dropdownOpen: open });
       };
 
       // The dropdown UI itself (button + menu)
@@ -508,10 +528,26 @@ function initAlgolia() {
           </a>`
         : '';
 
+      // "Exact match" toggle: forces a strict, no-typo, no-fallback query (see getItems).
+      const exactToggle = html`
+        <label
+          class="aa-ExactToggle"
+          title="Require exact term spelling; disables typo tolerance and optional-word fallback"
+          style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;white-space:nowrap;"
+        >
+          <input
+            type="checkbox"
+            checked=${!!window.__algoliaExactMatch}
+            onChange=${e => window.__algoliaToggleExactMatch(e.target.checked)}
+          />
+          <span>Exact match</span>
+        </label>`;
+
       // Layout: header (filters/AI), results list, right-side preview, footer tips.
       render(
         html`<div class="aa-Header">
           ${dropdown}
+          ${exactToggle}
           ${askAIButton}
         </div>
         <div class="aa-Grid">
@@ -709,6 +745,16 @@ function initAlgolia() {
         {
           sourceId: 'docs',
           getItems() {
+            // When "Exact match" is on, require every term, exact spelling, and no
+            // optional-word fallback. NOTE: we deliberately do NOT wrap the query in
+            // quotes for a phrase match — the index's searchable attributes use
+            // unordered(...), which disables phrase/proximity matching, so a quoted
+            // phrase returns nothing. Strict params give reliable exact-term matching.
+            // See window.__algoliaToggleExactMatch.
+            const exactMatch = !!window.__algoliaExactMatch;
+            const exactParams = exactMatch
+              ? { typoTolerance: false, removeWordsIfNoResults: 'none', optionalWords: [] }
+              : {};
             // getAlgoliaResults: https://www.algolia.com/doc/ui-libraries/autocomplete/api-reference/sources/#param-getalgoliaresults
             return getAlgoliaResults({
               searchClient,
@@ -722,6 +768,7 @@ function initAlgolia() {
                     attributesToSnippet: ['*:25'],  // https://www.algolia.com/doc/api-reference/api-parameters/attributesToSnippet/
                     snippetEllipsisText: '…',       // https://www.algolia.com/doc/api-reference/api-parameters/snippetEllipsisText/
                     tagFilters: mapToAlgoliaFilters(tagsByFacet), // https://www.algolia.com/doc/api-reference/api-parameters/tagFilters/
+                    ...exactParams,
                   },
                 },
               ],
