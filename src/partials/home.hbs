@@ -78,7 +78,17 @@
 
         {{!-- ADP Visual --}}
         <div class="home-intent-card-visual">
-          <img src="./_images/adp-infographic.gif" alt="Agentic Data Plane infographic" />
+          <video
+            class="home-intent-card-video"
+            width="960" height="320"
+            autoplay loop muted playsinline
+            preload="metadata"
+            poster="./_images/adp-infographic-poster.jpg"
+            aria-label="Agentic Data Plane infographic"
+          >
+            <source src="./_images/adp-infographic.webm" type="video/webm" />
+            <source src="./_images/adp-infographic.mp4" type="video/mp4" />
+          </video>
         </div>
 
         {{!-- Quick Links --}}

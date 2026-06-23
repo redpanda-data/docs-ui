@@ -3,11 +3,6 @@
    Styling for the Labs landing page with hero, filters, and card grid
    ============================================================================= */
 
-/* Mobile nav toggle: invert to white on dark hero background */
-.labs-wrap .nav-toggle {
-  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(248deg) brightness(105%) contrast(101%);
-}
-
 /* Labs page wrapper */
 .labs-wrap {
   background: var(--body-background);
