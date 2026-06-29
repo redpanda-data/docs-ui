@@ -8,6 +8,7 @@
   jobs:
     build:
       runs-on: ubuntu-22.04
+      timeout-minutes: 20
       permissions:
         contents: write
 
@@ -40,17 +41,7 @@
           if: steps.cache-node-modules.outputs.cache-hit != 'true'
           run: npm ci
 
-        - name: Cache generated files
-          uses: actions/cache@v4
-          with:
-            path: src/static/blobl.wasm
-            key: generated-${{ hashFiles('blobl-editor/wasm/go.sum') }}-${{ hashFiles('package-lock.json') }}
-            restore-keys: |
-              generated-${{ hashFiles('blobl-editor/wasm/go.sum') }}-
-              generated-
-
         - run: gulp bundle
-          timeout-minutes: 10
 
         - name: Create GitHub Release (prerelease aware)
           env:
