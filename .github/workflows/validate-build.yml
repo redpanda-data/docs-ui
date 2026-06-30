@@ -1,8 +1,13 @@
 ---
-# This workflow makes sure that the UI builds without errors
+# This workflow makes sure that the UI builds without errors.
+# The push:[main] trigger also warms the branch-scoped node_modules cache on
+# every merge, so tag-triggered publish-release runs can restore it (caches are
+# only restorable from the same ref or the default branch).
 name: validate-build
 on:
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
 jobs:
   build:
