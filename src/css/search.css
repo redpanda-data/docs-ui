@@ -263,6 +263,7 @@ article.search .ais-Heading > a {
 .aa-Header {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   padding: 12px;
@@ -652,6 +653,14 @@ li.aa-Item:not([id*=filters]) {
 @media screen and (max-width: 1024px) {
   article.search .badge-button#display-filters {
     display: flex;
+  }
+
+  article.search .ais-InstantSearch .container {
+    flex-wrap: wrap;
+  }
+
+  article.search .searchbox {
+    flex: 1 1 100%;
   }
 
   article.search .ais-Hits {

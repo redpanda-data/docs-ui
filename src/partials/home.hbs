@@ -78,7 +78,17 @@
 
         {{!-- ADP Visual --}}
         <div class="home-intent-card-visual">
-          <img src="./_images/adp-infographic.gif" alt="Agentic Data Plane infographic" />
+          <video
+            class="home-intent-card-video"
+            width="960" height="320"
+            loop muted playsinline
+            preload="metadata"
+            poster="./_images/adp-infographic-poster.jpg"
+            aria-label="Agentic Data Plane infographic"
+          >
+            <source src="./_images/adp-infographic.webm" type="video/webm" />
+            <source src="./_images/adp-infographic.mp4" type="video/mp4" />
+          </video>
         </div>
 
         {{!-- Quick Links --}}
@@ -188,6 +198,22 @@
           // window.openChatPanel();
         }
       });
+    }
+
+    // Autoplay the ADP infographic only when the user hasn't asked to reduce
+    // motion (WCAG 2.2.2); reduced-motion users keep the static poster frame.
+    var adpVideo = document.querySelector('.home-intent-card-video');
+    if (adpVideo) {
+      var motionOk = window.matchMedia('(prefers-reduced-motion: no-preference)');
+      var syncMotion = function() {
+        if (motionOk.matches) {
+          adpVideo.play().catch(function() {});
+        } else {
+          adpVideo.pause();
+        }
+      };
+      syncMotion();
+      motionOk.addEventListener('change', syncMotion);
     }
 
     // Handle suggestion chip clicks
