@@ -15,6 +15,20 @@
       </div>
     </div>
     <div class="chat-head-actions">
+      <button class="chat-head-btn" data-chat-action="expand" aria-label="Toggle full screen" title="Full screen">
+        <svg class="chat-icon-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+        <svg class="chat-icon-collapse" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 14 10 14 10 20"></polyline>
+          <polyline points="20 10 14 10 14 4"></polyline>
+          <line x1="14" y1="10" x2="21" y2="3"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
       <button class="chat-head-btn" data-chat-action="close" aria-label="Close chat" title="Close">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -31,20 +45,29 @@
 
   {{!-- Configuration and React bundle --}}
   <script>
-    // Kapa integration ID - intentionally public (client-side widget identifier)
-    window.UI_INTEGRATION_ID = '13dd3c3c-52eb-4d92-9b61-383a946bccac';
+    // Kapa identifiers - intentionally public (client-side widget identifiers)
+    window.UI_INTEGRATION_ID = '36b37003-41d8-4952-857e-344fbb3dc392';
+    window.KAPA_PROJECT_ID = window.KAPA_PROJECT_ID || '97f44223-f930-4fb9-ae1e-ecd436a4d85c';
+    // Session tokens come from the docs-site backend (netlify/functions/kapa-session.mjs).
+    // Bump pages are served same-origin at docs.redpanda.com/api/*, so the relative
+    // default works there; override for hosts that aren't behind the docs domain.
+    window.KAPA_SESSION_ENDPOINT = window.KAPA_SESSION_ENDPOINT || '/kapa/session';
     window.AI_SUGGESTIONS = [
       'What is Redpanda?',
       'How do I create a topic?',
       'Explain consumer groups'
     ];
-    // Load AskAI bundle: use relative URL for testing (netlify/localhost), absolute for production
+    // Load AskAI bundle + its CSS: use relative URL for testing (netlify/localhost), absolute for production
     // Production URL can be overridden via window.ASKAI_BUNDLE_URL before this script runs
     (function() {
       var host = window.location.hostname;
       var isTestEnv = host.includes('netlify.app') || host === 'localhost' || host === '127.0.0.1';
       var defaultProdUrl = 'https://docs.redpanda.com/_/js/AskAI.bundle.js';
       var bundleUrl = isTestEnv ? '/_/js/AskAI.bundle.js' : (window.ASKAI_BUNDLE_URL || defaultProdUrl);
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = bundleUrl.replace(/\.js$/, '.css');
+      document.head.appendChild(link);
       var script = document.createElement('script');
       script.src = bundleUrl;
       document.head.appendChild(script);
@@ -64,12 +87,23 @@
   if (!chatPanel) return;
 
   var STORAGE_KEY = 'redpanda-chat-panel-open';
+  var FULLSCREEN_KEY = 'redpanda-chat-panel-fullscreen';
   var isOpen = false;
 
   // Close button handler
   chatPanel.querySelectorAll('[data-chat-action="close"]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       closePanel();
+    });
+  });
+
+  // Full-screen toggle handler
+  chatPanel.querySelectorAll('[data-chat-action="expand"]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var fullscreen = chatPanel.classList.toggle('is-fullscreen');
+      try {
+        localStorage.setItem(FULLSCREEN_KEY, String(fullscreen));
+      } catch (e) {}
     });
   });
 
@@ -138,6 +172,9 @@
 
   // Restore state on load
   try {
+    if (localStorage.getItem(FULLSCREEN_KEY) === 'true') {
+      chatPanel.classList.add('is-fullscreen');
+    }
     if (localStorage.getItem(STORAGE_KEY) === 'true') {
       openPanel();
     }

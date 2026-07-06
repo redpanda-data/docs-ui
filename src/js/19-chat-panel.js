@@ -8,8 +8,9 @@
 
   if (!chatPanel) return
 
-  // Storage key for persisting panel state
+  // Storage keys for persisting panel state
   var STORAGE_KEY = 'redpanda-chat-panel-open'
+  var FULLSCREEN_KEY = 'redpanda-chat-panel-fullscreen'
 
   // State
   var isOpen = false
@@ -18,6 +19,17 @@
   chatPanel.querySelectorAll('[data-chat-action="close"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       closePanel()
+    })
+  })
+
+  chatPanel.querySelectorAll('[data-chat-action="expand"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var fullscreen = chatPanel.classList.toggle('is-fullscreen')
+      try {
+        localStorage.setItem(FULLSCREEN_KEY, String(fullscreen))
+      } catch (e) {
+        // localStorage not available, ignore
+      }
     })
   })
 
@@ -105,6 +117,9 @@
     try {
       var savedState = localStorage.getItem(STORAGE_KEY)
       var isMobile = window.innerWidth <= 520
+      if (localStorage.getItem(FULLSCREEN_KEY) === 'true') {
+        chatPanel.classList.add('is-fullscreen')
+      }
       if (savedState === 'true' && !isMobile) {
         openPanel()
       }

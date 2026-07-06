@@ -94,8 +94,7 @@
 /* Scrollable content area */
 .chat-scroll {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   padding: 0;
   min-height: 0; /* Critical for flex children to respect parent constraints */
   position: relative;
@@ -124,7 +123,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 0;
   font-family: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
 }
 
@@ -132,17 +130,17 @@
 #chat-panel-kapa-root .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Conversation area - scrollable */
 #chat-panel-kapa-root .conversation-area {
   flex: 1;
-  overflow-y: auto;
-  padding: 16px 18px 180px;
   min-height: 0;
+  overflow-y: auto;
   overscroll-behavior: contain;
+  padding: 16px 18px 24px;
 }
 
 #chat-panel-kapa-root .conversation {
@@ -305,8 +303,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
-  padding-top: 8px;
+  margin: 8px 0 12px;
+  min-height: 0;
+  padding: 8px 0 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
 #chat-panel-kapa-root .action-buttons {
@@ -339,40 +342,6 @@
 }
 
 /* Feedback buttons (thumbs up/down) */
-#chat-panel-kapa-root .feedback-container {
-  display: flex;
-  gap: 2px;
-}
-
-#chat-panel-kapa-root .feedback-group {
-  display: flex;
-  gap: 2px;
-}
-
-#chat-panel-kapa-root .feedback-button {
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: transparent;
-  border: 1px solid var(--grey-200-new, #e5e5e5);
-  border-radius: 6px;
-  color: var(--grey-500-new, #6b7280);
-  cursor: pointer;
-  transition: all 0.12s ease;
-}
-
-#chat-panel-kapa-root .feedback-button:hover {
-  background: var(--grey-50-new, #f9fafb);
-  border-color: var(--grey-300-new, #d1d5db);
-  color: var(--grey-700-new, #374151);
-}
-
-#chat-panel-kapa-root .feedback-icon {
-  width: 14px;
-  height: 14px;
-}
 
 /* Footer wrapper - fixed at bottom */
 #chat-panel-kapa-root .chat-footer-wrapper {
@@ -382,14 +351,19 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  /* Explicit: page-level styles must not leak into the panel */
+  position: static;
+  z-index: auto;
+  max-width: none;
+  width: auto;
 }
 
 #chat-panel-kapa-root .chat-footer-wrapper.fixed-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   border-top: 1px solid var(--grey-100-new, #e5e5e5);
+  position: static;
+  bottom: auto;
+  padding: 0;
+  background: #fff;
 }
 
 #chat-panel-kapa-root .chat-footer-wrapper form {
@@ -543,11 +517,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 60px 24px 24px;
+  justify-content: flex-start;
+  padding: 40px 24px 24px;
   text-align: center;
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
 }
 
 #chat-panel-kapa-root .welcome-icon {
@@ -617,7 +592,7 @@
 
 #chat-panel-kapa-root .chat-input-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   background: #fff;
   border: 2px solid var(--grey-200-new, #e5e5e5);
@@ -699,7 +674,8 @@
 
 /* Disclaimer - always visible at bottom */
 #chat-panel-kapa-root .disclaimer {
-  padding: 10px 14px 14px;
+  margin: 0;
+  padding: 8px 14px 10px;
   font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--grey-500-new, #6b7280);
   text-align: center;
@@ -1064,17 +1040,6 @@ html[data-theme="dark"] #chat-panel-kapa-root .action-button:hover {
   color: #aab8ca !important;
 }
 
-html[data-theme="dark"] #chat-panel-kapa-root .feedback-button {
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  color: #7c8ca8 !important;
-}
-
-html[data-theme="dark"] #chat-panel-kapa-root .feedback-button:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: #aab8ca !important;
-}
-
 /* =============================================================================
    TOAST NOTIFICATIONS
    Floating toast for copy/feedback confirmations
@@ -1173,4 +1138,231 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-toast-error {
   color: #fecaca !important;
   border-color: #ef4444 !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* ——— Conversation history (Kapa Agent SDK) ——— */
+#chat-panel-kapa-root .chat-history-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0 0;
+}
+
+#chat-panel-kapa-root .chat-history-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 8px 18px;
+  border: 1px solid var(--kapa-border, #dcdcde);
+  border-radius: 8px;
+  background: var(--kapa-surface, #fff);
+}
+
+/* ——— Per-answer sources ——— */
+#chat-panel-kapa-root .answer-sources {
+  margin-top: 8px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+}
+
+#chat-panel-kapa-root .answer-sources-label {
+  display: block;
+  font-weight: 600;
+  color: var(--kapa-text-muted, #4b5563);
+  margin-bottom: 2px;
+}
+
+#chat-panel-kapa-root .answer-sources ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+#chat-panel-kapa-root .answer-sources li {
+  margin: 2px 0;
+}
+
+#chat-panel-kapa-root .answer-sources a {
+  color: var(--kapa-accent, #444ce7);
+  text-decoration: none;
+}
+
+#chat-panel-kapa-root .answer-sources a:hover {
+  text-decoration: underline;
+}
+
+/* ——— Error answers ——— */
+#chat-panel-kapa-root .qa-pair-error .answer {
+  color: #ef4444;
+}
+
+/* ——— Full-screen mode ——— */
+.chat-panel .chat-icon-collapse {
+  display: none;
+}
+
+.chat-panel.is-fullscreen .chat-icon-expand {
+  display: none;
+}
+
+.chat-panel.is-fullscreen .chat-icon-collapse {
+  display: block;
+}
+
+.chat-panel.is-fullscreen {
+  width: 100%;
+  border-left: none;
+  box-shadow: none;
+}
+
+/* Keep a readable centered column when the panel spans the viewport */
+.chat-panel.is-fullscreen #chat-panel-kapa-root .conversation,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .welcome-screen,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .chat-history-toggle-row,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .chat-history-view,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .chat-input-form,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .disclaimer {
+  width: 100%;
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* The drawer is already full-width on small screens */
+@media (max-width: 520px) {
+  .chat-panel [data-chat-action="expand"] {
+    display: none;
+  }
+}
+
+/* ——— Multiline input (Enter submits, Shift+Enter adds a line) ——— */
+#chat-panel-kapa-root .chat-input-wrapper textarea.chat-input {
+  resize: none;
+  min-height: 0;
+  max-height: 132px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+#chat-panel-kapa-root .chat-input-wrapper .submit-button {
+  flex-shrink: 0;
+}
+
+/* ——— Agent tool call cards (SDK-rendered) ——— */
+#chat-panel-kapa-root .tool-calls {
+  margin: 8px 0;
+}
+
+/* ——— Sign-in gate (agent tier is signed-in only) ——— */
+#chat-panel-kapa-root .signin-screen {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 48px 24px 24px;
+  text-align: center;
+}
+
+#chat-panel-kapa-root .signin-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 28px;
+  background: var(--kapa-accent, #444ce7);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  text-decoration: none;
+}
+
+#chat-panel-kapa-root .signin-button:hover {
+  background: var(--kapa-accent-hover, #3538cd);
+  text-decoration: none;
+}
+
+#chat-panel-kapa-root .signin-quick-ask {
+  margin-top: 14px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  color: var(--kapa-text-muted, #79797d);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#chat-panel-kapa-root .signin-quick-ask:hover {
+  color: var(--kapa-text, #181818);
+}
+
+#chat-panel-kapa-root .signin-coming-soon {
+  margin: 16px 0 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--kapa-text-muted, #79797d);
+}
+
+#chat-panel-kapa-root button.signin-button {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dark-theme #chat-panel-kapa-root .signin-button {
+  color: #0f1729;
+}
+
+#chat-panel-kapa-root .signin-features {
+  margin: 4px auto 20px;
+  padding: 0 0 0 20px;
+  max-width: 320px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  line-height: 1.45;
+  color: var(--kapa-text, #181818);
+}
+
+/* ——— Scroll-to-input button (panel-scoped; home.css only styles it under .home) ——— */
+#chat-panel-kapa-root .scroll-down-button {
+  position: absolute;
+  top: -3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--kapa-surface, #fff);
+  color: var(--kapa-text, #181818);
+  border: 1px solid var(--kapa-border, #e5e5e5);
+  border-radius: 50%;
+  padding: 8px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+}
+
+#chat-panel-kapa-root .scroll-down-button:hover {
+  background: var(--kapa-surface-hover, #ebebeb);
+}
+
+#chat-panel-kapa-root .scroll-down-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+html[data-theme="dark"] #chat-panel-kapa-root .action-button,
+html[data-theme="dark"] #chat-panel-kapa-root .chat-history-toggle {
+  color: var(--kapa-text-subtle, #aab8ca);
+  background: var(--kapa-surface-elevated, #232f3e);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+html[data-theme="dark"] #chat-panel-kapa-root .action-button:hover,
+html[data-theme="dark"] #chat-panel-kapa-root .chat-history-toggle:hover {
+  color: var(--kapa-text, #e8eef6);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: var(--kapa-surface-hover, #2d3a53);
 }
