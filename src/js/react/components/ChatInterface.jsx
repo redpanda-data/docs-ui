@@ -3,15 +3,29 @@ import { useAgentChat, AgentThreadHistory, ToolCallCard, ToolCallGroup } from '@
 import {
   ArrowRight,
   ArrowDown,
+  ArrowUpRight,
   RefreshCcw,
   ClipboardCopy,
   CircleStop,
   History,
   Sparkles,
+  Play,
+  MessageSquare,
+  Users,
   X,
 } from 'lucide-react'
 import { safeHeap } from '../heap.js'
 import { Answer, Toast } from './chatShared.jsx'
+
+// Example actions for the signed-in agent tier — advertise what the tools do.
+// Bloblang leads: it auto-runs (no approval gate) and visibly *does* something,
+// so it's the strongest first impression of an agent vs. a plain chat box.
+const AGENT_EXAMPLES = [
+  { Icon: Play, text: 'Write and test a Bloblang mapping that flattens nested JSON' },
+  { Icon: ArrowUpRight, text: 'Take me to the Redpanda quickstart' },
+  { Icon: MessageSquare, text: 'Send the docs team feedback about this page' },
+  { Icon: Users, text: 'Ask the community how others handle consumer rebalancing' },
+]
 import { agentTools } from '../agentTools.js'
 
 // Resumed threads come back without displayName on tool calls (the SDK only
@@ -626,22 +640,22 @@ export default function ChatInterface() {
             </div>
             <h2 className="welcome-title">How can I help?</h2>
             <p className="welcome-description">
-              I can answer questions about Redpanda docs, write quickstarts, and help you troubleshoot.
+              Ask a question, or try one of these — I can search the docs, write
+              and run Bloblang, open the right page, and more.
             </p>
-            {suggestions.length > 0 && (
-              <div className="suggestion-cards">
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="suggestion-card"
-                    onClick={() => doQuery(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="suggestion-cards">
+              {AGENT_EXAMPLES.map(({ Icon, text }, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="suggestion-card suggestion-card-action"
+                  onClick={() => doQuery(text)}
+                >
+                  <Icon className="suggestion-card-icon" size={16} />
+                  <span>{text}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

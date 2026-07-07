@@ -1258,3 +1258,21 @@
 @media (prefers-reduced-motion: reduce) {
   #chat-panel-kapa-root .chat-tier-loading { animation: none; }
 }
+
+/* ——— Agent example-action cards (signed-in welcome screen) ——— */
+#chat-panel-kapa-root .suggestion-card-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+#chat-panel-kapa-root .suggestion-card-action .suggestion-card-icon {
+  flex-shrink: 0;
+  color: var(--kapa-accent, #444ce7);
+}
+
+#chat-panel-kapa-root .suggestion-card-action span {
+  flex: 1;
+  min-width: 0;
+}
