@@ -172,8 +172,23 @@ function useSiteColorScheme () {
   return scheme
 }
 
+// The signed-in user's verified email, learned once the session probe resolves.
+// Passed to AgentProvider so Kapa attributes conversations to the user in its
+// dashboard (Kapa is an approved processor for this). The SDK reads `user`
+// reactively via updateOptions, so setting it after mount is fine.
+function useKapaUser () {
+  const [user, setUser] = useState(() => window.__KAPA_USER || null)
+  useEffect(() => {
+    const handle = (e) => setUser(e.detail?.user || null)
+    window.addEventListener('kapa-session', handle)
+    return () => window.removeEventListener('kapa-session', handle)
+  }, [])
+  return user
+}
+
 function App () {
   const colorScheme = useSiteColorScheme()
+  const kapaUser = useKapaUser()
 
   return (
     <AgentProvider
@@ -183,6 +198,7 @@ function App () {
       getSessionToken={getSessionToken}
       tools={agentTools}
       customInstructions={CUSTOM_INSTRUCTIONS}
+      user={kapaUser?.email ? { email: kapaUser.email } : undefined}
       enableHistory
       onEvent={handleAgentEvent}
       theme={{ accentColor: '#444ce7', colorScheme }}
