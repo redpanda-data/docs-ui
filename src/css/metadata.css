@@ -169,14 +169,14 @@
 
 /* Preview */
 .badge--preview {
-  color: #1f2937;
+  color: var(--preview-label-background);
   font-weight: bold;
   background-color: var(--link-highlight-background-color);
 }
 
 .badge--large.badge--preview {
-  background-color: #1f2937;
-  color: #f9fafb;
+  background-color: var(--preview-label-background);
+  color: var(--preview-label-color);
 }
 
 .beta-label {
