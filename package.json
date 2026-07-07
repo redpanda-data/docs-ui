@@ -83,6 +83,7 @@
     "serve:playground": "npx serve ."
   },
   "dependencies": {
-    "@kapaai/agent-react": "^1.0.0"
+    "@kapaai/agent-react": "^1.0.0",
+    "@kapaai/react-sdk": "^0.9.10"
   }
 }

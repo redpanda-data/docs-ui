@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AgentProvider } from '@kapaai/agent-react'
+import { KapaProvider } from '@kapaai/react-sdk'
 import ChatInterface from './components/ChatInterface.jsx'
+import ChatSdkInterface from './components/ChatSdkInterface.jsx'
 import { agentTools } from './agentTools.js'
 import { safeHeap } from './heap.js'
 
@@ -69,7 +71,13 @@ function probeSession () {
       // Login state changed since the cache was written — fall through
     } catch (err) { /* fall through to a fresh probe */ }
   }
-  getSessionToken().catch(() => {})
+  // Establish the tier. getSessionToken announces true (200) or false (clean
+  // 401). Any other failure — missing backend, network error, 5xx — should
+  // still land the user on the anonymous Chat SDK tier rather than hang the
+  // drawer on the loading state.
+  getSessionToken().catch(() => {
+    if (window.__KAPA_AUTHENTICATED === undefined) announceSession(false, null, null)
+  })
 }
 
 // Custom instructions are injected into the agent's system prompt server-side
@@ -172,39 +180,68 @@ function useSiteColorScheme () {
   return scheme
 }
 
-// The signed-in user's verified email, learned once the session probe resolves.
-// Passed to AgentProvider so Kapa attributes conversations to the user in its
-// dashboard (Kapa is an approved processor for this). The SDK reads `user`
-// reactively via updateOptions, so setting it after mount is fine.
-function useKapaUser () {
-  const [user, setUser] = useState(() => window.__KAPA_USER || null)
+// Session state drives which SDK/drawer we mount:
+//   authenticated === null  → still probing (brief loading state)
+//   authenticated === false → anonymous: Chat SDK drawer (no agent quota)
+//   authenticated === true  → Agent SDK drawer (tools, history, email)
+// The kapa-session event (from getSessionToken/probeSession) carries the flag,
+// the user, and the login URL. window.__KAPA_* mirror it for late mounts.
+function useSession () {
+  const [session, setSession] = useState(() => ({
+    authenticated: window.__KAPA_AUTHENTICATED === undefined ? null : Boolean(window.__KAPA_AUTHENTICATED),
+    user: window.__KAPA_USER || null,
+    loginUrl: window.__KAPA_LOGIN_URL || null,
+  }))
   useEffect(() => {
-    const handle = (e) => setUser(e.detail?.user || null)
+    const handle = (e) => setSession({
+      authenticated: Boolean(e.detail?.authenticated),
+      user: e.detail?.user || null,
+      loginUrl: e.detail?.loginUrl || null,
+    })
     window.addEventListener('kapa-session', handle)
     return () => window.removeEventListener('kapa-session', handle)
   }, [])
-  return user
+  return session
 }
 
 function App () {
   const colorScheme = useSiteColorScheme()
-  const kapaUser = useKapaUser()
+  const { authenticated, user, loginUrl } = useSession()
 
+  // Signed-in: full Agent SDK experience (tools, history, email attribution)
+  if (authenticated === true) {
+    return (
+      <AgentProvider
+        projectId={window.KAPA_PROJECT_ID}
+        integrationId={window.UI_INTEGRATION_ID}
+        model="kapa-agent-1.0"
+        getSessionToken={getSessionToken}
+        tools={agentTools}
+        customInstructions={CUSTOM_INSTRUCTIONS}
+        user={user?.email ? { email: user.email } : undefined}
+        enableHistory
+        onEvent={handleAgentEvent}
+        theme={{ accentColor: '#444ce7', colorScheme }}
+      >
+        <ChatInterface />
+      </AgentProvider>
+    )
+  }
+
+  // Anonymous: same drawer, Chat SDK (no session backend, no agent quota)
+  if (authenticated === false) {
+    return (
+      <KapaProvider integrationId={window.KAPA_CHAT_INTEGRATION_ID}>
+        <ChatSdkInterface loginUrl={loginUrl} />
+      </KapaProvider>
+    )
+  }
+
+  // Probing — brief; avoids flashing the wrong tier
   return (
-    <AgentProvider
-      projectId={window.KAPA_PROJECT_ID}
-      integrationId={window.UI_INTEGRATION_ID}
-      model="kapa-agent-1.0"
-      getSessionToken={getSessionToken}
-      tools={agentTools}
-      customInstructions={CUSTOM_INSTRUCTIONS}
-      user={kapaUser?.email ? { email: kapaUser.email } : undefined}
-      enableHistory
-      onEvent={handleAgentEvent}
-      theme={{ accentColor: '#444ce7', colorScheme }}
-    >
-      <ChatInterface />
-    </AgentProvider>
+    <div className="chat-container">
+      <div className="welcome-screen"><div className="chat-tier-loading" aria-hidden="true" /></div>
+    </div>
   )
 }
 

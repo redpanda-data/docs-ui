@@ -1366,3 +1366,56 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-history-toggle:hover {
   border-color: rgba(255, 255, 255, 0.4);
   background: var(--kapa-surface-hover, #2d3a53);
 }
+
+/* ——— Anonymous-tier upsell banner ——— */
+#chat-panel-kapa-root .chat-upsell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 18px 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--kapa-surface-elevated, #f5f5f5);
+  border: 1px solid var(--kapa-border, #e5e5e5);
+  color: var(--kapa-text, #181818);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+#chat-panel-kapa-root .chat-upsell:hover {
+  border-color: var(--kapa-accent, #444ce7);
+  text-decoration: none;
+}
+
+#chat-panel-kapa-root .chat-upsell svg:first-child {
+  color: var(--kapa-accent, #444ce7);
+  flex-shrink: 0;
+}
+
+#chat-panel-kapa-root .chat-upsell span {
+  flex: 1;
+  min-width: 0;
+}
+
+#chat-panel-kapa-root .chat-upsell svg:last-child {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* ——— Tier probe loading dot ——— */
+#chat-panel-kapa-root .chat-tier-loading {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--kapa-border, #e5e5e5);
+  border-top-color: var(--kapa-accent, #444ce7);
+  border-radius: 50%;
+  animation: chat-tier-spin 0.7s linear infinite;
+}
+
+@keyframes chat-tier-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  #chat-panel-kapa-root .chat-tier-loading { animation: none; }
+}
