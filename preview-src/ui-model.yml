@@ -232,6 +232,12 @@ page:
       - content: Home page
         url: /streaming/24.3/home.html
         urlType: internal
+      - content: Limited Availability Test
+        url: /limited-availability-test.html
+        urlType: internal
+      - content: Preview Status Test
+        url: /preview-status-test.html
+        urlType: internal
     - content: Get Started
       url: '#'
       urlType: internal
@@ -447,12 +453,6 @@ page:
         urlType: internal
       - content: Data Loss Prevention
         url: '#'
-        urlType: internal
-      - content: Limited Availability Test
-        url: /streaming/24.3/limited-availability-test.html
-        urlType: internal
-      - content: Preview Status Test
-        url: /preview-status-test.html
         urlType: internal
     - content: Dev Tools
       url: '#'
