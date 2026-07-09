@@ -122,16 +122,44 @@
               <button class="tb-signin-modal-x" data-signin-modal-close type="button" aria-label="Close">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
-              <h2 class="tb-signin-modal-title" id="tb-signin-modal-title">Sign in to Redpanda docs</h2>
-              <p class="tb-signin-modal-sub">Free with your Redpanda Cloud account. Unlock the AI agent that can:</p>
+              <span class="tb-signin-modal-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+                Free with Redpanda Cloud
+              </span>
+              <h2 class="tb-signin-modal-title" id="tb-signin-modal-title">Sign in to unlock the docs AI agent</h2>
+              <p class="tb-signin-modal-sub">Your personal assistant for Redpanda docs. Sign in and it can:</p>
               <ul class="tb-signin-modal-features">
-                <li>Save and revisit your conversations across devices</li>
-                <li>Search the docs and open the right page for you</li>
-                <li>Write and verify Bloblang mappings before you run them</li>
-                <li>Send feedback straight to the docs team</li>
+                <li class="tb-signin-modal-feature">
+                  <span class="tb-signin-modal-ficon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span>
+                  <span class="tb-signin-modal-ftext">
+                    <span class="tb-signin-modal-flabel">Pick up where you left off</span>
+                    <span class="tb-signin-modal-fdesc">Every conversation is saved and synced across your devices.</span>
+                  </span>
+                </li>
+                <li class="tb-signin-modal-feature">
+                  <span class="tb-signin-modal-ficon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg></span>
+                  <span class="tb-signin-modal-ftext">
+                    <span class="tb-signin-modal-flabel">Find answers, not just pages</span>
+                    <span class="tb-signin-modal-fdesc">It searches the docs and opens the exact page you need.</span>
+                  </span>
+                </li>
+                <li class="tb-signin-modal-feature">
+                  <span class="tb-signin-modal-ficon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 1 2 2 2 2 0 0 1-2 2v5a2 2 0 0 1-2 2h-1"/></svg></span>
+                  <span class="tb-signin-modal-ftext">
+                    <span class="tb-signin-modal-flabel">Write Bloblang with confidence</span>
+                    <span class="tb-signin-modal-fdesc">Draft mappings and verify they work before you run them.</span>
+                  </span>
+                </li>
+                <li class="tb-signin-modal-feature">
+                  <span class="tb-signin-modal-ficon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                  <span class="tb-signin-modal-ftext">
+                    <span class="tb-signin-modal-flabel">Help shape the docs</span>
+                    <span class="tb-signin-modal-fdesc">Send feedback to the docs team without leaving the page.</span>
+                  </span>
+                </li>
               </ul>
-              <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login">Continue with Redpanda Cloud</a>
-              <p class="tb-signin-modal-foot">No account? <a href="https://cloud.redpanda.com/sign-up" target="_blank" rel="noopener noreferrer">Create a free account</a></p>
+              <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login">Continue</a>
+              <p class="tb-signin-modal-foot">No account yet? <a href="https://cloud.redpanda.com/sign-up" target="_blank" rel="noopener noreferrer">Create a free account</a></p>
             </div>
           </div>
           <div class="tb-dropdown tb-account-menu" data-account-menu hidden>

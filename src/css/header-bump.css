@@ -1011,6 +1011,24 @@ html[data-theme="dark"] .tb-signin-modal-card {
 .tb-signin-modal-x:hover { background: rgba(0, 0, 0, 0.06); }
 html[data-theme="dark"] .tb-signin-modal-x:hover { background: rgba(255, 255, 255, 0.08); }
 
+.tb-signin-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--indigo-100, #eef0fe);
+  color: var(--indigo-600, #444ce7);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .tb-signin-modal-badge {
+  background: rgba(128, 152, 249, 0.14);
+  color: #9fb0fb;
+}
+
 .tb-signin-modal-title {
   margin: 0 0 6px;
   font-size: calc(20 / var(--rem-base) * 1rem);
@@ -1019,7 +1037,7 @@ html[data-theme="dark"] .tb-signin-modal-x:hover { background: rgba(255, 255, 25
 
 .tb-signin-modal-sub {
   margin: 0 0 16px;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: calc(16 / var(--rem-base) * 1rem);
   color: var(--grey-600, #475467);
 }
 
@@ -1027,13 +1045,63 @@ html[data-theme="dark"] .tb-signin-modal-sub { color: var(--grey-300, #d0d5dd); 
 
 .tb-signin-modal-features {
   margin: 0 0 22px;
-  padding-left: 20px;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: calc(14 / var(--rem-base) * 1rem);
-  line-height: 1.45;
+  gap: 14px;
 }
+
+.tb-signin-modal-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.tb-signin-modal-ficon {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--indigo-100, #eef0fe);
+  color: var(--indigo-600, #444ce7);
+}
+
+.tb-signin-modal-ficon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.tb-signin-modal-ftext {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tb-signin-modal-flabel {
+  font-size: calc(14.5 / var(--rem-base) * 1rem);
+  font-weight: 650;
+  line-height: 1.3;
+  color: var(--grey-900, #101323);
+}
+
+.tb-signin-modal-fdesc {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  line-height: 1.4;
+  color: var(--grey-600, #475467);
+}
+
+html[data-theme="dark"] .tb-signin-modal-ficon {
+  background: rgba(128, 152, 249, 0.14);
+  color: #9fb0fb;
+}
+
+html[data-theme="dark"] .tb-signin-modal-flabel { color: var(--grey-100, #f2f4f7); }
+html[data-theme="dark"] .tb-signin-modal-fdesc { color: var(--grey-300, #d0d5dd); }
 
 .tb-signin-modal-cta {
   display: block;

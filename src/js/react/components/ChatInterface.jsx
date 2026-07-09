@@ -9,6 +9,8 @@ import {
   CircleStop,
   History,
   Sparkles,
+  Compass,
+  Braces,
   Play,
   MessageSquare,
   Users,
@@ -594,18 +596,43 @@ export default function ChatInterface() {
             questions go to the stock Kapa widget instead */}
         {authenticated === false && (
           <div className="signin-screen">
-            <div className="welcome-icon">
-              <Sparkles size={28} />
-            </div>
-            <h2 className="welcome-title">Sign in to Redpanda docs</h2>
+            <span className="signin-badge">
+              <Sparkles size={14} />
+              Free with Redpanda Cloud
+            </span>
+            <h2 className="welcome-title">Sign in to unlock the docs AI agent</h2>
             <p className="welcome-description">
-              Free with your Redpanda Cloud account. Unlock the AI agent that can:
+              Your personal assistant for Redpanda docs. Sign in and it can:
             </p>
             <ul className="signin-features">
-              <li>Save and revisit your conversations across devices</li>
-              <li>Search the docs and open the right page for you</li>
-              <li>Write and verify Bloblang mappings before you run them</li>
-              <li>Send feedback straight to the docs team</li>
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><History size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Pick up where you left off</span>
+                  <span className="signin-feature-desc">Every conversation is saved and synced across your devices.</span>
+                </span>
+              </li>
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><Compass size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Find answers, not just pages</span>
+                  <span className="signin-feature-desc">It searches the docs and opens the exact page you need.</span>
+                </span>
+              </li>
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><Braces size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Write Bloblang with confidence</span>
+                  <span className="signin-feature-desc">Draft mappings and verify they work before you run them.</span>
+                </span>
+              </li>
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><MessageSquare size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Help shape the docs</span>
+                  <span className="signin-feature-desc">Send feedback to the docs team without leaving the page.</span>
+                </span>
+              </li>
             </ul>
             {loginUrl ? (
               <>
