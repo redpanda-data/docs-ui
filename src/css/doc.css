@@ -372,7 +372,7 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
 }
 
 .component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
-  color: #7c3aed;
+  color: #444ce7;
 }
 
 .component-indicator-sticky .sm-ver-pill-caret {
@@ -407,7 +407,7 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-sta
 }
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
-  color: #c4b5fd;
+  color: #9184f1;
 }
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
