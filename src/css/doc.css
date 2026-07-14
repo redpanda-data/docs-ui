@@ -371,6 +371,10 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
   color: #d97706;
 }
 
+.component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
+  color: #7c3aed;
+}
+
 .component-indicator-sticky .sm-ver-pill-caret {
   color: var(--grey-500-new, #737373);
 }
@@ -400,6 +404,10 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-sta
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="eol"] {
   color: #fcd34d;
+}
+
+html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
+  color: #c4b5fd;
 }
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
@@ -699,10 +707,10 @@ html[data-theme="dark"] .status-badge--cloud {
 
 .doc pre {
   font-size: calc(15 / var(--rem-base) * 1rem);
-  line-height: 1.65;
+  line-height: 1.5;
   margin: 0;
   padding: 16px 18px;
-  padding-top: 40px; /* Extra space for toolbar */
+  border: none; /* Frame is drawn by .listingblock > .content */
   color: var(--grey-800-new, #1f2937); /* Light mode: dark text */
   overflow-x: auto;
 }
@@ -729,11 +737,10 @@ html[data-theme="dark"] .doc .listingblock pre.highlight {
 
 .doc pre > code,
 .doc details .listingblock .content pre > code {
-  padding-bottom: 1rem;
   border: none;
   white-space: pre-wrap;
   font-weight: lighter;
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
 .doc blockquote {
@@ -2039,7 +2046,7 @@ pre code[class*=language-] {
 }
 
 pre.code-first-child {
-  padding-bottom: 0 !important;
+  padding-bottom: 16px !important; /* Match .doc pre top padding for symmetric spacing */
 }
 
 html[data-theme=dark] code[class*=language-],
@@ -2100,17 +2107,24 @@ html[data-theme="dark"] .doc .listingblock > .content {
   visibility: hidden;
   position: absolute;
   top: 8px;
-  right: 14px;
+  right: 10px;
   color: var(--grey-500-new, #6b7280); /* Light mode */
   font-family: var(--body-font-family);
   font-size: calc(12 / var(--rem-base) * 1rem);
   line-height: 1.5;
   white-space: nowrap;
   z-index: 1;
+  /* Toolbox floats over the code on hover - backdrop keeps it legible */
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--grey-50-new, #f9fafb);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 
 html[data-theme="dark"] .doc .source-toolbox {
   color: #a8b2c7;
+  background: #182236;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .doc .listingblock:hover .source-toolbox {
