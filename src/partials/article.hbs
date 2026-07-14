@@ -24,9 +24,12 @@
     </div>
     {{/with}}
     {{> version-selector}}
-    {{!-- Status badges: Beta, Limited Availability --}}
+    {{!-- Status badges: Beta, Preview, Limited Availability --}}
     {{#if page.attributes.beta}}
     <span class="status-badge status-badge--beta" data-tippy-content="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}This feature is in beta and may change.{{/if}}">beta</span>
+    {{/if}}
+    {{#if page.attributes.preview}}
+    <span class="status-badge status-badge--preview" data-tippy-content="{{#if page.attributes.preview-text}}{{page.attributes.preview-text}}{{else}}This feature is in preview and may change.{{/if}}">Preview</span>
     {{/if}}
     {{#if page.attributes.limited-availability}}
     <span class="status-badge status-badge--la" {{#if page.attributes.limited-availability-text}}data-tippy-content="{{page.attributes.limited-availability-text}}"{{/if}}>
@@ -113,7 +116,7 @@
   {{!-- Metadata now shown in sticky bar above --}}
 </div>
 {{/unless}}
-{{#if (or page.attributes.beta page.attributes.limited-availability page.attributes.byoc page.attributes.cloud-only page.attributes.context-switcher)}}
+{{#if (or page.attributes.beta page.attributes.preview page.attributes.limited-availability page.attributes.byoc page.attributes.cloud-only page.attributes.context-switcher)}}
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const stickyHeader = document.querySelector(".component-indicator-sticky");
@@ -126,6 +129,18 @@
     if (betaBadge) {
       tippy(betaBadge, {
         content: betaBadge.dataset.tippyContent,
+        animation: "scale",
+        theme: "redpanda-term",
+        touch: "hold",
+        interactive: true,
+        allowHTML: true,
+        appendTo: () => document.body,
+      });
+    }
+    const previewBadge = stickyHeader?.querySelector(".status-badge--preview");
+    if (previewBadge) {
+      tippy(previewBadge, {
+        content: previewBadge.dataset.tippyContent,
         animation: "scale",
         theme: "redpanda-term",
         touch: "hold",

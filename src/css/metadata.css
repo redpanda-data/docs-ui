@@ -167,6 +167,18 @@
   color: var(--beta-label-color);
 }
 
+/* Preview */
+.badge--preview {
+  color: var(--preview-label-background);
+  font-weight: bold;
+  background-color: var(--link-highlight-background-color);
+}
+
+.badge--large.badge--preview {
+  background-color: var(--preview-label-background);
+  color: var(--preview-label-color);
+}
+
 .beta-label {
   display: inline-flex;
   margin: 0;

@@ -673,6 +673,13 @@ html[data-theme="light"] .nav-item-toggle {
   white-space: nowrap;
 }
 
+.nav-link.cloud-preview::after {
+  display: inline;
+  content: '(Preview)';
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
 .nav-link.cloud-limited-availability::after {
   display: inline;
   content: '(Limited)';

@@ -127,6 +127,8 @@ html[data-theme=dark] {
   --beta-label-color: #fff;
   --beta-label-background: var(--link-highlight-color);
   --beta-label-border: var(--slate-800);
+  --preview-label-background: #1f2937;
+  --preview-label-color: #f9fafb;
   --limited-availability-label-color: #fff;
   --limited-availability-label-background: var(--default-header-color);
   --limited-availability-label-border: var(--amber-800);
@@ -196,6 +198,9 @@ html[data-theme=dark] {
   --byoc-label-color: #101828;
   --byoc-label-background: #4da8da;
   --byoc-highlight-background-color: rgba(77, 168, 218, 0.15);
+  /* Preview badge - dark mode */
+  --preview-label-background: #cbd5e1;
+  --preview-label-color: #1f2937;
   /* Cloud badge - brighter purple for dark mode visibility with dark text for contrast */
   --cloud-label-color: #101828;
   --cloud-label-background: #9d97ff;

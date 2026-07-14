@@ -846,6 +846,13 @@ html[data-theme=dark] .bloblang-snippet .ace-editor {
     overflow: visible;
   }
 
+  /* The sticky product indicator (position: sticky, z-index: 50, opaque
+     background) otherwise overlaps and hides the page title on narrow screens.
+     Keep it in normal flow here so the title sits cleanly below it. */
+  .bloblang-playground .component-indicator-sticky {
+    position: static;
+  }
+
   /* Ensure page title is visible on mobile */
   .bloblang-playground .doc h1.page {
     display: block !important;
