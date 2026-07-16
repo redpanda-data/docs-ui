@@ -13,4 +13,4 @@ This page demonstrates the **Preview** status badge.
 
 Hover the Preview pill. Default text:
 
-_"This feature is in preview and may change."_
+_"This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process."_
