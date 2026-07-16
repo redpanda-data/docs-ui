@@ -953,6 +953,15 @@ html[data-theme="dark"] .tb-account-email {
   display: none !important;
 }
 
+/* The container itself starts hidden and is revealed by 26-docs-account.js only
+   after it wires the sign-in click handler. Without this, .tb-account's display
+   rule overrides the `hidden` attribute, so the "Sign in" link is clickable
+   before JS attaches — an early click then navigates straight to /login and the
+   feature modal never opens. */
+.tb-account[hidden] {
+  display: none !important;
+}
+
 [data-cloud-link][hidden] {
   display: none !important;
 }
