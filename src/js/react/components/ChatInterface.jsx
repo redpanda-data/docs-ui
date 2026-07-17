@@ -24,7 +24,7 @@ import { Answer, Toast } from './chatShared.jsx'
 // so it's the strongest first impression of an agent vs. a plain chat box.
 const AGENT_EXAMPLES = [
   { Icon: Play, text: 'Write and test a Bloblang mapping that flattens nested JSON' },
-  { Icon: ArrowUpRight, text: 'Take me to the Redpanda quickstart' },
+  { Icon: ArrowUpRight, text: 'Take me to the right quickstart for my setup' },
   { Icon: MessageSquare, text: 'Send the docs team feedback about this page' },
   { Icon: Users, text: 'Ask the community how others handle consumer rebalancing' },
 ]
@@ -667,8 +667,8 @@ export default function ChatInterface() {
             </div>
             <h2 className="welcome-title">How can I help?</h2>
             <p className="welcome-description">
-              Ask a question, or try one of these — I can search the docs, write
-              and run Bloblang, open the right page, and more.
+              Ask a question, or try one of these. The agent can search the docs,
+              write and run Bloblang, navigate you to the right doc, and more.
             </p>
             <div className="suggestion-cards">
               {AGENT_EXAMPLES.map(({ Icon, text }, i) => (

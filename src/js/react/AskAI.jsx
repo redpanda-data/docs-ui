@@ -86,27 +86,38 @@ function probeSession () {
 // context, tool strategy, and preventing bad patterns. GROW THIS EMPIRICALLY —
 // add a line each time the agent is observed doing the wrong thing.
 const CUSTOM_INSTRUCTIONS = `## Domain context
-- Answers often depend on which Redpanda deployment the user is on:
-  - Self-Managed — docs live under "Streaming", versioned (e.g. 25.2, 24.3).
-  - Redpanda Cloud — cluster types: BYOC, Dedicated, or Serverless.
-  - Agentic Data Plane (ADP) — runs on a cloud platform (e.g. AWS).
+- Answers often depend on which Redpanda product the user is on:
+  - Redpanda Cloud: managed. Cluster types BYOC, Dedicated, or Serverless.
+  - Self-Managed: the user runs it. Two areas, Streaming (core Redpanda,
+    versioned, e.g. 25.2 or 24.3) and Connect (Redpanda Connect data pipelines).
+  - Agentic Data Plane (ADP): a separate product that runs on a cloud platform
+    (e.g. AWS).
 - Bloblang is Redpanda Connect's mapping language. The run_bloblang tool runs a
   mapping against sample input using the real interpreter and returns the output
   or the exact error.
 
 ## Clarifying the user's context
-- When a question is deployment-specific and the user hasn't said, first ask
-  just one simple question: are they on Redpanda Cloud or Self-Managed?
-- Then ask a follow-up ONLY when the answer actually depends on it; otherwise
-  proceed with a sensible default:
-  - Self-Managed → assume the latest Streaming version unless the answer
-    differs by version, in which case ask which Streaming version (e.g. 25.2).
-  - Cloud → assume the general case unless the answer differs by cluster type,
-    in which case ask which: BYOC, Dedicated, or Serverless.
-- Ask at most one follow-up. Skip all of this when they've already stated their
-  deployment, or when the answer is the same across deployments.
-- Agentic Data Plane (ADP) is a separate product; if the question is about ADP
-  and the platform matters, ask which (e.g. AWS).
+- FIRST infer the product from context yourself before asking: the page the user
+  is currently viewing (see "Current page" below) and the conversation so far.
+  Only ask when context does not make it clear.
+- If you cannot tell from context, ask ONE simple question: which product,
+  Redpanda Cloud, Self-Managed, or Agentic Data Plane (ADP)? If Self-Managed, is
+  it Streaming or Connect?
+- Ask a follow-up ONLY when the answer actually depends on it:
+  - Cloud: assume the general case unless it differs by cluster type, then ask
+    which (BYOC, Dedicated, or Serverless).
+  - Self-Managed Streaming: assume the latest version unless it differs by
+    version, then ask which (e.g. 25.2).
+  - ADP: ask the platform (e.g. AWS) only when it matters.
+- Ask at most one clarifying question. Skip all of this when context or the user
+  already makes the product clear, or when the answer is the same across products.
+
+## Writing style
+- Follow Redpanda docs style. No em dashes. Avoid "please" and "once" (use
+  "after" or "when"). Keep confirmations neutral and concise rather than
+  first-person (e.g. "Sent your feedback to the docs team." not "I'll pass that
+  along for you."). This applies to every response, including feedback
+  confirmations.
 
 ## Tool strategy
 - Bloblang: only use functions and methods that appear in the docs you
@@ -125,6 +136,22 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
   deployment is unknown — ask the clarifying question first.
 - Never include passwords, tokens, or other personal data in a feedback summary.
 - Do not repeat sources or restate numbers you have already shown.`
+
+// The docs page the widget is open on, appended to the agent instructions so it
+// can infer the user's product (Cloud / Self-Managed / ADP) from context before
+// asking. Antora sets <body data-component> to the docs component.
+function currentPageContext () {
+  try {
+    const path = window.location.pathname
+    const component = (document.body && document.body.getAttribute('data-component')) || null
+    return '\n\n## Current page\n' +
+      `- The user has the docs open at: ${path}` +
+      (component ? ` (docs component: ${component})` : '') + '\n' +
+      '- Use this together with the conversation so far to infer their product before asking.'
+  } catch (e) {
+    return ''
+  }
+}
 
 function handleAgentEvent (event) {
   switch (event.type) {
@@ -217,7 +244,7 @@ function App () {
         model="kapa-agent-1.0"
         getSessionToken={getSessionToken}
         tools={agentTools}
-        customInstructions={CUSTOM_INSTRUCTIONS}
+        customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext()}
         user={user?.email ? { email: user.email } : undefined}
         enableHistory
         onEvent={handleAgentEvent}
