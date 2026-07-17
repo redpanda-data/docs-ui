@@ -51,6 +51,14 @@
       el.addEventListener('click', closeModal)
     })
   }
+  if (modalCta) {
+    // /login can cold-start (~6s). Show progress and block re-clicks so it
+    // doesn't feel stuck or fire duplicate sign-in navigations.
+    modalCta.addEventListener('click', function () {
+      modalCta.classList.add('is-loading')
+      modalCta.textContent = 'Signing in…'
+    })
+  }
   signinLink.addEventListener('click', function (e) {
     if (!modal) return // no modal markup — let the link navigate to /login
     e.preventDefault()

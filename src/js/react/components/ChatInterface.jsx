@@ -201,6 +201,7 @@ export default function ChatInterface() {
   )
   // Where "Sign in" goes — supplied by the session endpoint once docs login exists
   const [loginUrl, setLoginUrl]             = useState(() => window.__KAPA_LOGIN_URL || null)
+  const [signingIn, setSigningIn]           = useState(false)
   const [showHistory, setShowHistory]       = useState(false)
   const textareaRef = useRef(null)
   const conversationAreaRef = useRef(null)
@@ -637,10 +638,12 @@ export default function ChatInterface() {
             {loginUrl ? (
               <>
                 <a
-                  className="signin-button"
+                  className={`signin-button${signingIn ? ' is-signing-in' : ''}`}
+                  aria-disabled={signingIn}
                   href={`${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+                  onClick={() => setSigningIn(true)}
                 >
-                  Sign in
+                  {signingIn ? 'Signing in…' : 'Sign in'}
                 </a>
                 <button type="button" className="signin-quick-ask" onClick={openQuickAsk}>
                   Or ask a quick question without signing in

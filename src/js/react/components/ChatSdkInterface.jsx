@@ -30,6 +30,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
   const [toast, setToast] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1150)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
   const inputRef = useRef(null)
 
   const showToast = (msg, type = 'success') => setToast({ message: msg, type })
@@ -139,13 +140,16 @@ export default function ChatSdkInterface ({ loginUrl }) {
       <div className="chat-container">
         {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
 
-        {/* Slim upsell — chat works without signing in; this sells the agent tier */}
+        {/* Slim upsell — chat works without signing in; this sells the agent tier.
+            /login can cold-start (~6s); show progress + block re-clicks on tap. */}
         <a
-          className="chat-upsell"
+          className={`chat-upsell${signingIn ? ' is-signing-in' : ''}`}
+          aria-disabled={signingIn}
           href={loginUrl ? `${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}` : '/login'}
+          onClick={() => setSigningIn(true)}
         >
           <Sparkles size={14} />
-          <span>Sign in to save your conversations and unlock the AI agent</span>
+          <span>{signingIn ? 'Signing you in…' : 'Sign in to save your conversations and unlock the AI agent'}</span>
           <ArrowRight size={14} />
         </a>
 

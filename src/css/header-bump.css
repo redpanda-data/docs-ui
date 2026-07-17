@@ -1130,6 +1130,12 @@ html[data-theme="dark"] .tb-signin-modal-fdesc { color: var(--grey-300, #d0d5dd)
   text-decoration: none;
 }
 
+/* While /login loads (it can cold-start): dim + block re-clicks. */
+.tb-signin-modal-cta.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
 .tb-signin-modal-foot {
   margin: 14px 0 0;
   text-align: center;

@@ -1460,6 +1460,13 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-history-toggle:hover {
   text-decoration: none;
 }
 
+/* While /login loads (it can cold-start): dim + block re-clicks. */
+#chat-panel-kapa-root .chat-upsell.is-signing-in,
+#chat-panel-kapa-root .signin-button.is-signing-in {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
 #chat-panel-kapa-root .chat-upsell svg:first-child {
   color: var(--kapa-accent, #444ce7);
   flex-shrink: 0;
