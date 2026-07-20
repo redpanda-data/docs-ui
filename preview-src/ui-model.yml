@@ -99,6 +99,7 @@ site:
     - url: '#'
       version: '5.0'
       displayVersion: '5.0'
+    latest: *latest_version_xyz
     latestVersion: *latest_version_xyz
   # Cloud component - under Data Platform
   - &cloud_component
@@ -197,6 +198,10 @@ page:
     url: /streaming/24.3/index.html
     urlType: internal
   versions:
+  - version: '7.0'
+    displayVersion: '7.0 Beta'
+    prerelease: true
+    url: '#'
   - version: '6.0'
     displayVersion: '6.0'
     url: '#'

@@ -223,11 +223,10 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc pre > code,
 .aa-DetachedOverlay .doc details .listingblock .content pre > code {
-  padding-bottom: 1rem;
   border: none;
   white-space: pre-wrap;
   font-weight: lighter;
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
 .aa-DetachedOverlay .doc blockquote {
@@ -1076,6 +1075,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc .source-toolbox {
   display: flex;
+  align-items: center;
   visibility: hidden;
   position: absolute;
   top: 0.25rem;
@@ -1086,6 +1086,16 @@ html[data-theme=dark] {
   line-height: 1.5;
   white-space: nowrap;
   z-index: 1;
+  /* Toolbox floats over the code on hover - backdrop keeps it legible */
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--grey-50-new, #f9fafb);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="dark"] .aa-DetachedOverlay .doc .source-toolbox {
+  background: #182236;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .aa-DetachedOverlay .doc .listingblock:hover .source-toolbox {
