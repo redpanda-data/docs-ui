@@ -99,6 +99,7 @@ site:
     - url: '#'
       version: '5.0'
       displayVersion: '5.0'
+    latest: *latest_version_xyz
     latestVersion: *latest_version_xyz
   # Cloud component - under Data Platform
   - &cloud_component
