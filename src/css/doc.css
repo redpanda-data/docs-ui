@@ -89,7 +89,8 @@ html {
 .component-indicator-sticky {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   position: sticky;
   top: var(--body-top, 100px);
   z-index: 50;
@@ -301,6 +302,12 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
     justify-content: flex-start;
   }
 
+  /* Metadata is left-aligned on mobile, so anchor dropdown menus left to keep them on screen */
+  .component-indicator-sticky .context-dropdown-menu {
+    right: auto;
+    left: 0;
+  }
+
   html[data-theme="dark"] .component-indicator-sticky .metadata-inline {
     border-top-color: rgba(255, 255, 255, 0.06);
   }
@@ -510,6 +517,66 @@ html[data-theme="dark"] .status-badge--cloud {
   background: rgba(14, 165, 233, 0.15);
   color: #7dd3fc;
   border-color: rgba(14, 165, 233, 0.3);
+}
+
+/* Availability badges: links to the other platform's version of this page */
+a.status-badge--cloud-link,
+a.status-badge--self-managed-link {
+  text-decoration: none;
+}
+
+.status-badge--cloud-link {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+}
+
+.status-badge--cloud-link:hover {
+  background: #bae6fd;
+  color: #075985;
+}
+
+.status-badge--self-managed-link {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.status-badge--self-managed-link:hover {
+  background: #bbf7d0;
+  color: #166534;
+}
+
+.status-badge--self-managed-only {
+  background: var(--grey-100-new, #f3f4f6);
+  color: #4b5563;
+  border: 1px solid var(--grey-200-new, #e5e5e5);
+}
+
+html[data-theme="dark"] .status-badge--cloud-link {
+  background: rgba(14, 165, 233, 0.15);
+  color: #7dd3fc;
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+html[data-theme="dark"] .status-badge--cloud-link:hover {
+  background: rgba(14, 165, 233, 0.25);
+}
+
+html[data-theme="dark"] .status-badge--self-managed-link {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+html[data-theme="dark"] .status-badge--self-managed-link:hover {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+html[data-theme="dark"] .status-badge--self-managed-only {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.25);
 }
 
 @media screen and (min-width: 600px) {
