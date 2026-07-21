@@ -57,6 +57,12 @@ module.exports = (resource, { data, hash: context }) => {
     return resource
   }
 
+  // Root-relative URLs pass through (e.g. pub.url values set by extensions such as
+  // the component_type_dropdown macro's page-context-switcher attribute)
+  if (resource.startsWith('/')) {
+    return resource
+  }
+
   // Handle special keyword "current" - not a valid resource ID
   // This is sometimes incorrectly used to mean "current page" or "current version"
   if (resource === 'current') {
