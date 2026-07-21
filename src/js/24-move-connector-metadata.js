@@ -18,6 +18,10 @@
     const metadataInline = document.createElement('div')
     metadataInline.className = 'metadata-inline'
 
+    // Elements whose content now lives in the sticky bar, to hide in place.
+    // Anything else in the metadata block (e.g. license requirements) must stay visible.
+    const movedElements = []
+
     // Move the Type dropdown if it exists
     const typeDropdownWrapper = metadataContent.querySelector('.dropdown-wrapper')
     if (typeDropdownWrapper) {
@@ -116,6 +120,7 @@
         contextDropdown.appendChild(compactMenu)
         contextSwitcher.appendChild(contextDropdown)
         metadataInline.appendChild(contextSwitcher)
+        movedElements.push(typeDropdownWrapper)
       }
     }
 
@@ -264,6 +269,7 @@
         availabilityDropdown.appendChild(dropdownButton)
         availabilityDropdown.appendChild(dropdownMenu)
         metadataInline.appendChild(availabilityDropdown)
+        movedElements.push(availabilityPara)
       }
     }
 
@@ -277,8 +283,19 @@
         stickyBar.appendChild(metadataInline)
       }
 
-      // Hide the original metadata block
-      metadataBlock.style.display = 'none'
+      // Hide only the elements now represented in the sticky bar
+      movedElements.forEach((el) => {
+        el.style.display = 'none'
+      })
+
+      // Hide the whole block only if nothing meaningful remains
+      // (license requirements and other notices must stay visible)
+      const hasRemainingContent = Array.from(metadataContent.children).some(
+        (el) => el.style.display !== 'none' && el.textContent.trim() !== ''
+      )
+      if (!hasRemainingContent) {
+        metadataBlock.style.display = 'none'
+      }
     }
   }
 
