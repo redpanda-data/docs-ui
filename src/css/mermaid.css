@@ -4,6 +4,12 @@
   text-align: center;
 }
 
+/* Mermaid SVGs have no internal bottom padding, so the figure caption
+   needs more separation than a regular image caption. */
+.doc .imageblock .mermaid + .title {
+  margin-top: 1.25rem;
+}
+
 .mermaid > svg {
   background-color: var(--body-background) !important;
   max-width: 100%;
