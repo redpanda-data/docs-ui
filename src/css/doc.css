@@ -2830,3 +2830,56 @@ html[data-theme="dark"] .availability-selector-menu {
 html[data-theme="dark"] .availability-selector-item:hover {
   background: rgba(255, 255, 255, 0.06);
 }
+
+/* Inline badges from the badge macro (badge::[label=...]).
+   Distinct from .status-badge, the page-level beta pill. */
+.doc .badge {
+  display: inline-block;
+  padding: 0 0.4em;
+  border-radius: 9999px;
+  font-size: 0.75em;
+  font-weight: 600;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.doc .badge--beta {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.doc .badge--deprecated {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.doc .badge--enterprise {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+}
+
+.doc .badge--large {
+  font-size: 0.9em;
+  padding: 0.15em 0.6em;
+}
+
+html[data-theme="dark"] .doc .badge--beta {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fcd34d;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+html[data-theme="dark"] .doc .badge--deprecated {
+  background: rgba(248, 113, 113, 0.15);
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+html[data-theme="dark"] .doc .badge--enterprise {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c4b5fd;
+  border-color: rgba(167, 139, 250, 0.3);
+}
