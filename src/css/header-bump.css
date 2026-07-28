@@ -1136,11 +1136,29 @@ html[data-theme="dark"] .tb-signin-modal-fdesc { color: var(--grey-300, #d0d5dd)
   pointer-events: none;
 }
 
+/* Same for Sign out — the dropdown stays open during the /logout navigation. */
+.tb-account-dropdown .tb-dropdown-item.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
 .tb-signin-modal-foot {
   margin: 14px 0 0;
   text-align: center;
   font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--grey-500, #667085);
+}
+
+.tb-signin-modal-note {
+  margin: 12px 0 0;
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--grey-500, #667085);
+}
+
+.tb-signin-modal-note a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .tb-signin-modal-foot a {
@@ -1154,6 +1172,8 @@ html[data-theme="dark"] .tb-signin-modal-fdesc { color: var(--grey-300, #d0d5dd)
 }
 
 html[data-theme="dark"] .tb-signin-modal-foot { color: var(--grey-400, #98a2b3); }
+
+html[data-theme="dark"] .tb-signin-modal-note { color: var(--grey-400, #98a2b3); }
 
 html[data-theme="dark"] .tb-signin-modal-foot a { color: #8098f9; }
 

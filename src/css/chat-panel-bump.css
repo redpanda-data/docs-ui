@@ -1302,6 +1302,20 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-toast-error {
   color: var(--kapa-text-muted, #79797d);
 }
 
+/* Privacy disclosure — showing it here lets /login skip the server
+   interstitial (disclosed=1). Keep in sync with the header modal note. */
+#chat-panel-kapa-root .signin-privacy-note {
+  margin: 18px 0 0;
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--kapa-text-muted, #79797d);
+}
+
+#chat-panel-kapa-root .signin-privacy-note a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 #chat-panel-kapa-root button.signin-button {
   border: none;
   cursor: pointer;

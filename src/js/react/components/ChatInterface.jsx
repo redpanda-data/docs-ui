@@ -637,10 +637,13 @@ export default function ChatInterface() {
             </ul>
             {loginUrl ? (
               <>
+                {/* disclosed=1: the privacy note below covers the disclosure the
+                    server interstitial exists for, so /login skips straight to
+                    Auth0 (see docs-site docs-login.mjs) */}
                 <a
                   className={`signin-button${signingIn ? ' is-signing-in' : ''}`}
                   aria-disabled={signingIn}
-                  href={`${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+                  href={`${loginUrl}${loginUrl.includes('?') ? '&' : '?'}disclosed=1&return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
                   onClick={() => setSigningIn(true)}
                 >
                   {signingIn ? 'Signing in…' : 'Sign in'}
@@ -648,6 +651,13 @@ export default function ChatInterface() {
                 <button type="button" className="signin-quick-ask" onClick={openQuickAsk}>
                   Or ask a quick question without signing in
                 </button>
+                {/* Keep in sync with the header modal note and docs-site
+                    loginInterstitialHtml (lib/oauth/pages.mjs) */}
+                <p className="signin-privacy-note">
+                  When you sign in, we collect your verified work email to track documentation usage and attribute it to
+                  your organization, and we share it with service providers that help us run and analyze the service.
+                  See our <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> for details.
+                </p>
               </>
             ) : (
               <>

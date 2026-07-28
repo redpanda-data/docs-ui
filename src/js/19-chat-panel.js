@@ -70,11 +70,19 @@
   }
 
   // Functions
-  function openPanel () {
+  function openPanel (restored) {
     isOpen = true
     chatPanel.classList.add('is-open')
     chatPanel.setAttribute('aria-hidden', 'false')
     if (main) main.classList.add('chat-push')
+
+    // Signed-out panels show a sign-in prompt — pre-warm the login backend
+    // (handled by 26-docs-account.js) so a sign-in click lands warm. Only on
+    // explicit opens: the page-load restore path would otherwise fire warm-up
+    // requests on every pageview for users who keep the panel open.
+    if (!restored && !/(?:^|;\s*)rp_docs_auth=1(?:;|$)/.test(document.cookie)) {
+      window.dispatchEvent(new window.CustomEvent('docs-account:warm'))
+    }
 
     // Hide all Ask AI buttons if they exist
     var askAiBtns = document.querySelectorAll('[data-action="open-chat"]')
@@ -121,7 +129,7 @@
         chatPanel.classList.add('is-fullscreen')
       }
       if (savedState === 'true' && !isMobile) {
-        openPanel()
+        openPanel(true)
       }
     } catch (e) {
       // localStorage not available, ignore

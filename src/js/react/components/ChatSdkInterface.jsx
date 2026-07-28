@@ -141,12 +141,22 @@ export default function ChatSdkInterface ({ loginUrl }) {
         {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
 
         {/* Slim upsell — chat works without signing in; this sells the agent tier.
+            Prefer the header's sign-in modal (feature pitch + privacy note, and
+            opening it pre-warms the login functions); without it, navigate to
+            /login directly, which shows the server interstitial instead.
             /login can cold-start (~6s); show progress + block re-clicks on tap. */}
         <a
           className={`chat-upsell${signingIn ? ' is-signing-in' : ''}`}
           aria-disabled={signingIn}
           href={loginUrl ? `${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}` : '/login'}
-          onClick={() => setSigningIn(true)}
+          onClick={(e) => {
+            if (document.querySelector('[data-signin-modal]')) {
+              e.preventDefault()
+              window.dispatchEvent(new CustomEvent('docs-account:open-signin'))
+              return
+            }
+            setSigningIn(true)
+          }}
         >
           <Sparkles size={14} />
           <span>{signingIn ? 'Signing you in…' : 'Sign in to save your conversations and unlock the AI agent'}</span>
