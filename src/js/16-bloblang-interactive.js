@@ -73,6 +73,42 @@
   }
 
   /**
+   * Track Connect JSON URLs that recently returned an error response, so a
+   * URL that is known to 404 (for example, a version whose JSON was never
+   * generated) is not re-requested on every page view.
+   */
+  const FETCH_FAILURE_KEY = 'connect-json-fetch-failures';
+  const FETCH_FAILURE_TTL = 60 * 60 * 1000; // 1 hour
+
+  function readFetchFailures() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(FETCH_FAILURE_KEY) || '{}');
+      const now = Date.now();
+      const fresh = {};
+      Object.keys(parsed).forEach((url) => {
+        if (now - parsed[url] < FETCH_FAILURE_TTL) fresh[url] = parsed[url];
+      });
+      return fresh;
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function hasRecentFetchFailure(url) {
+    return url in readFetchFailures();
+  }
+
+  function markFetchFailure(url) {
+    try {
+      const failures = readFetchFailures();
+      failures[url] = Date.now();
+      localStorage.setItem(FETCH_FAILURE_KEY, JSON.stringify(failures));
+    } catch (e) {
+      // localStorage not available
+    }
+  }
+
+  /**
    * Parse a Bloblang snippet into mapping, input, and metadata sections.
    * Looks for # In: and # Meta: comment directives.
    * # Out: lines are ignored.
@@ -196,11 +232,18 @@
         if (!url) {
           url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
         }
+
+        if (hasRecentFetchFailure(url)) {
+          return null;
+        }
       }
 
       const response = await fetch(url);
 
       if (!response.ok) {
+        if (!isPreviewMode()) {
+          markFetchFailure(url);
+        }
         return null;
       }
 

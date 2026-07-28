@@ -92,6 +92,7 @@
 
     var CACHE_KEY = 'redpanda-properties-cache'
     var CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
+    var FAILURE_CACHE_TTL = 60 * 60 * 1000 // 1 hour: retry failed fetches sooner so a fix deploy is picked up
     // Use latest-redpanda-tag meta tag for cache versioning
     var cacheVersion = getLatestRedpandaTag() || 'unknown'
 
@@ -101,8 +102,11 @@
         var cached = localStorage.getItem(CACHE_KEY)
         if (cached) {
           var parsed = JSON.parse(cached)
-          if (parsed.version === cacheVersion && Date.now() - parsed.timestamp < CACHE_TTL) {
-            propertiesData = parsed.data
+          var age = Date.now() - parsed.timestamp
+          if (parsed.version === cacheVersion && (parsed.failed ? age < FAILURE_CACHE_TTL : age < CACHE_TTL)) {
+            // failed entries resolve to an empty lookup so a URL known to 404
+            // is not re-requested on every page view
+            propertiesData = parsed.failed ? {} : parsed.data
             propertiesLoading = false
             propertiesLoadQueue.forEach(function (resolve) {
               resolve(propertiesData)
@@ -182,6 +186,20 @@
         }
 
         console.warn('Property tooltips: Failed to load properties data:', error)
+        if (!isPreviewMode()) {
+          try {
+            localStorage.setItem(
+              CACHE_KEY,
+              JSON.stringify({
+                version: cacheVersion,
+                timestamp: Date.now(),
+                failed: true,
+              })
+            )
+          } catch (cacheError) {
+            // localStorage full or unavailable
+          }
+        }
         propertiesLoading = false
         propertiesData = {}
         propertiesLoadQueue.forEach(function (resolve) {
