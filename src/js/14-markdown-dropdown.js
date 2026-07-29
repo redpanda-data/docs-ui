@@ -9,6 +9,8 @@
  * - Click outside to close
  */
 
+const { buildAgentHandoffPrompt } = window.RedpandaDocsAgentHandoff
+
 ;(function () {
   'use strict'
 
@@ -60,6 +62,14 @@
           setTimeout(function () {
             setOpen(false)
           }, 2500)
+        } else if (action === 'copy-agent') {
+          handleCopyAgent(markdownUrl, item).then(function (didCopy) {
+            if (didCopy) {
+              setTimeout(function () {
+                setOpen(false)
+              }, 2500)
+            }
+          })
         } else if (action === 'view') {
           handleView(markdownUrl)
           setOpen(false)
@@ -152,6 +162,58 @@
           button.classList.remove('clicked')
         },
         function () {} // Empty error handler (matches existing pattern)
+      )
+  }
+
+  function flashCopyStatus (button, message) {
+    const status = button.querySelector('[data-agent-handoff-status]')
+    if (status) status.textContent = message
+
+    button.classList.add('clicked')
+    // Force reflow so the animation can restart.
+    button.offsetHeight // eslint-disable-line no-unused-expressions
+    button.classList.remove('clicked')
+  }
+
+  /**
+   * Copy a complete agent handoff with the current documentation section inline.
+   */
+  function handleCopyAgent (markdownUrl, button) {
+    return window
+      .fetch(markdownUrl)
+      .then(function (response) {
+        if (!response.ok) throw new Error(`Failed to fetch documentation (${response.status})`)
+        return response.text()
+      })
+      .then(function (markdown) {
+        const pageUrl = window.location.href
+        const absoluteMarkdownUrl = new URL(markdownUrl, window.location.origin).href
+        const pageTitle = document.querySelector('h1.page')?.textContent?.trim() || document.title
+        const sectionAnchor = window.location.hash
+        const sectionId = sectionAnchor.replace(/^#/, '')
+        const sectionTitle = document.getElementById(sectionId)?.textContent?.trim() || ''
+        const prompt = buildAgentHandoffPrompt({
+          docsOrigin: window.location.origin,
+          markdown,
+          markdownUrl: absoluteMarkdownUrl,
+          pageTitle,
+          pageUrl,
+          sectionAnchor,
+          sectionTitle,
+        })
+
+        return window.navigator.clipboard.writeText(prompt)
+      })
+      .then(
+        function () {
+          flashCopyStatus(button, 'Copied!')
+          return true
+        },
+        function (error) {
+          console.error('Could not copy agent handoff:', error)
+          flashCopyStatus(button, 'Could not copy. Try again.')
+          return false
+        }
       )
   }
 
