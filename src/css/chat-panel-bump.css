@@ -1189,8 +1189,13 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-toast-error {
 }
 
 /* ——— Error answers ——— */
+/* #ef4444 failed WCAG AA as text in both themes; darker red in light, lighter in dark. */
 #chat-panel-kapa-root .qa-pair-error .answer {
-  color: #ef4444;
+  color: #d92d20;
+}
+
+.dark-theme #chat-panel-kapa-root .qa-pair-error .answer {
+  color: #f87171;
 }
 
 /* ——— Full-screen mode ——— */

@@ -46,20 +46,61 @@
     return encodeURIComponent(window.location.pathname + window.location.search)
   }
 
-  // Feature modal shown before sending the user to /login
+  // Feature modal shown before sending the user to /login.
+  // It is an aria-modal dialog, so manage focus: move focus in on open, trap
+  // Tab within it, and restore focus to the opener on close (WCAG 2.4.3).
+  var lastFocused = null
+  var modalCard = modal && modal.querySelector('.tb-signin-modal-card')
+
+  function modalFocusables () {
+    if (!modal) return []
+    return Array.prototype.slice
+      .call(modal.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+      .filter(function (el) { return el.offsetParent !== null }) // visible only
+  }
+
   function openModal () {
     if (!modal) return
     warm()
+    lastFocused = document.activeElement
     modal.hidden = false
     document.addEventListener('keydown', onModalKey)
+    // Move focus into the dialog: the card itself (so the label is announced),
+    // falling back to its first focusable control.
+    if (modalCard) {
+      modalCard.setAttribute('tabindex', '-1')
+      modalCard.focus()
+    } else {
+      var f = modalFocusables()
+      if (f.length) f[0].focus()
+    }
   }
   function closeModal () {
     if (!modal) return
     modal.hidden = true
     document.removeEventListener('keydown', onModalKey)
+    // Restore focus to whatever opened the modal (the Sign in trigger).
+    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus()
+    lastFocused = null
   }
   function onModalKey (e) {
-    if (e.key === 'Escape') closeModal()
+    if (e.key === 'Escape') { closeModal(); return }
+    if (e.key !== 'Tab') return
+    // Trap Tab within the dialog so focus can't reach the page behind it.
+    var f = modalFocusables()
+    if (!f.length) return
+    var first = f[0]
+    var last = f[f.length - 1]
+    var active = document.activeElement
+    if (e.shiftKey) {
+      if (active === first || active === modalCard || !modal.contains(active)) {
+        e.preventDefault()
+        last.focus()
+      }
+    } else if (active === last || !modal.contains(active)) {
+      e.preventDefault()
+      first.focus()
+    }
   }
   if (modal) {
     // The navbar is its own low stacking context (z-index 5) and the Ask AI
