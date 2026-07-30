@@ -18,14 +18,18 @@ import {
 import { safeHeap } from '../heap.js'
 import { Answer, Toast } from './chatShared.jsx'
 
-// Example actions for the signed-in agent tier — advertise what the tools do.
-// Bloblang leads: it auto-runs (no approval gate) and visibly *does* something,
-// so it's the strongest first impression of an agent vs. a plain chat box.
-const AGENT_EXAMPLES = [
-  { Icon: Play, text: 'Write and test a Bloblang mapping that flattens nested JSON' },
-  { Icon: ArrowUpRight, text: 'Take me to the right quickstart for my setup' },
-  { Icon: MessageSquare, text: 'Send the docs team feedback about this page' },
+// Example prompts for the signed-in agent welcome screen come from
+// window.AGENT_SUGGESTIONS (set per component by the get-agent-suggestions
+// helper in chat-panel.hbs) so they showcase the agent's tools in the context
+// of the product being read. This JS default is only a fallback if the global
+// is missing (e.g. an older host page).
+const AGENT_EXAMPLES_FALLBACK = [
+  'Write and test a Bloblang mapping that flattens nested JSON',
+  "What's the default value of log_segment_size?",
+  'Take me to the right quickstart for my setup',
 ]
+// Icons are cosmetic and cycle across whatever prompts are shown.
+const CARD_ICONS = [Play, Compass, ArrowUpRight, Braces]
 import { agentTools } from '../agentTools.js'
 
 // Resumed threads come back without displayName on tool calls (the SDK only
@@ -191,6 +195,7 @@ export default function ChatInterface() {
   const [dots, setDots]                     = useState('')
   const [showScrollDown, setShowScrollDown] = useState(false)
   const [suggestions, setSuggestions]       = useState([])
+  const [agentExamples, setAgentExamples]   = useState(AGENT_EXAMPLES_FALLBACK)
   const [hasInteracted, setHasInteracted]   = useState(false)
   const [toast, setToast]                   = useState(null)
   // null = session state unknown (probe in flight), false = anonymous, true = signed in
@@ -237,6 +242,16 @@ export default function ChatInterface() {
     } else {
       console.error('window.AI_SUGGESTIONS must be an array', s);
     }
+  }, []);
+
+  // Signed-in welcome prompts come from window.AGENT_SUGGESTIONS (per-component,
+  // tool-showcasing). Fall back to the JS default if the global is absent.
+  useEffect(() => {
+    let s = window.AGENT_SUGGESTIONS;
+    if (typeof s === 'string') {
+      try { s = JSON.parse(s) } catch (e) { console.warn('Could not parse AGENT_SUGGESTIONS JSON', e) }
+    }
+    if (Array.isArray(s) && s.length > 0) setAgentExamples(s);
   }, []);
 
   // The session endpoint reports whether the visitor is signed in; the flag
@@ -697,17 +712,20 @@ export default function ChatInterface() {
               write and run Bloblang, navigate you to the right doc, and more.
             </p>
             <div className="suggestion-cards">
-              {AGENT_EXAMPLES.map(({ Icon, text }, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className="suggestion-card suggestion-card-action"
-                  onClick={() => doQuery(text)}
-                >
-                  <Icon className="suggestion-card-icon" size={16} />
-                  <span>{text}</span>
-                </button>
-              ))}
+              {agentExamples.map((text, i) => {
+                const Icon = CARD_ICONS[i % CARD_ICONS.length]
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className="suggestion-card suggestion-card-action"
+                    onClick={() => doQuery(text)}
+                  >
+                    <Icon className="suggestion-card-icon" size={16} />
+                    <span>{text}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}

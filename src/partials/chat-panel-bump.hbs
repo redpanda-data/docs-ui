@@ -59,6 +59,13 @@
       'How do I create a topic?',
       'Explain consumer groups'
     ];
+    // Signed-in agent tier: tool-showcasing prompts (static here — the standalone
+    // Bump widget has no Antora component context for get-agent-suggestions).
+    window.AGENT_SUGGESTIONS = [
+      'Write and test a Bloblang mapping that flattens nested JSON',
+      "What's the default value of log_segment_size?",
+      'Take me to the right quickstart for my setup'
+    ];
     // Load AskAI bundle + its CSS: use relative URL for testing (netlify/localhost), absolute for production
     // Production URL can be overridden via window.ASKAI_BUNDLE_URL before this script runs
     (function() {

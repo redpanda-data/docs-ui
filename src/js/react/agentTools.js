@@ -467,36 +467,6 @@ const openConsole = {
   },
 }
 
-// ——— Copy to clipboard (local; no navigation, no approval) ————————————————
-const copyToClipboard = {
-  name: 'copy_to_clipboard',
-  displayName: 'Copy to clipboard',
-  description:
-    'Copy a command or code snippet to the user’s clipboard. Use right after presenting ' +
-    'a command the user is expected to run. Pass the exact text to copy.',
-  needsApproval: false,
-  parameters: {
-    type: 'object',
-    properties: {
-      text: { type: 'string', description: 'The exact text to copy.' },
-      label: { type: 'string', description: 'Optional short label for what was copied, e.g. "rpk command".' },
-    },
-    required: ['text'],
-  },
-  execute: async ({ text, label }) => {
-    const value = String(text || '')
-    if (!value) return { copied: false, error: 'Nothing to copy.' }
-    try {
-      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard API unavailable')
-      await navigator.clipboard.writeText(value)
-      return { copied: true, label: label || null }
-    } catch (err) {
-      // Degrade: hand the text back so the agent can show it for manual copy
-      return { copied: false, text: value, error: err.message }
-    }
-  },
-}
-
 export const agentTools = [
   navigateToPage,
   switchProduct,
@@ -506,5 +476,4 @@ export const agentTools = [
   lookupConfigProperty,
   getLatestVersion,
   openConsole,
-  copyToClipboard,
 ]

@@ -88,8 +88,12 @@ function probeSession () {
 const CUSTOM_INSTRUCTIONS = `## Domain context
 - Answers often depend on which Redpanda product the user is on:
   - Redpanda Cloud: managed. Cluster types BYOC, Dedicated, or Serverless.
-  - Self-Managed: the user runs it. Two areas, Streaming (core Redpanda,
-    versioned, e.g. 25.2 or 24.3) and Connect (Redpanda Connect data pipelines).
+  - Self-Managed: the user runs it. Streaming is core Redpanda, versioned
+    (e.g. 25.2 or 24.3).
+  - Redpanda Connect (data pipelines, Bloblang mappings) runs BOTH ways: managed
+    on Redpanda Cloud and self-hosted on Self-Managed. The setup and available
+    features differ between the two, so treat "where they run Connect" as its own
+    dimension, not a sub-area of Self-Managed.
   - Agentic Data Plane (ADP): a separate product that runs on a cloud platform
     (e.g. AWS).
 - Bloblang is Redpanda Connect's mapping language. The run_bloblang tool runs a
@@ -101,13 +105,16 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
   is currently viewing (see "Current page" below) and the conversation so far.
   Only ask when context does not make it clear.
 - If you cannot tell from context, ask ONE simple question: which product,
-  Redpanda Cloud, Self-Managed, or Agentic Data Plane (ADP)? If Self-Managed, is
-  it Streaming or Connect?
+  Redpanda Cloud, Self-Managed, or Agentic Data Plane (ADP)?
 - Ask a follow-up ONLY when the answer actually depends on it:
   - Cloud: assume the general case unless it differs by cluster type, then ask
     which (BYOC, Dedicated, or Serverless).
   - Self-Managed Streaming: assume the latest version unless it differs by
     version, then ask which (e.g. 25.2).
+  - Redpanda Connect: it runs on both Redpanda Cloud and Self-Managed and the
+    steps often differ (managed pipelines vs a self-hosted binary or config), so
+    for a Connect question ask whether they run Connect on Redpanda Cloud or
+    Self-Managed before giving deployment-specific steps.
   - ADP: ask the platform (e.g. AWS) only when it matters.
 - Ask at most one clarifying question. Skip all of this when context or the user
   already makes the product clear, or when the answer is the same across products.
