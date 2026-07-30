@@ -317,10 +317,184 @@ const submitDocsFeedback = {
   },
 }
 
+// ——— Config property lookup (grounded in the shipped reference) ———————————
+// redpanda-properties.json ships in the UI bundle (the same file the property
+// tooltips read). Cache the fetch so repeated lookups in a session are free.
+let propertiesPromise = null
+function loadProperties () {
+  if (propertiesPromise) return propertiesPromise
+  // redpanda-properties.json is a UI static_file, so (like blobl.wasm) Antora
+  // emits it to the SITE root in a normal build and to the UI root in the
+  // docs-ui preview. Mirror the WASM loader's resolution.
+  const rootPath = typeof window.uiRootPath !== 'undefined' ? window.uiRootPath : '/_'
+  const siteRoot = typeof window.siteRootPath !== 'undefined' ? window.siteRootPath : ''
+  const isPreview = typeof window.isUiPreview !== 'undefined' ? window.isUiPreview : false
+  const url = isPreview ? `${rootPath}/redpanda-properties.json` : `${siteRoot}/redpanda-properties.json`
+  propertiesPromise = fetch(url)
+    .then((r) => { if (!r.ok) throw new Error(`properties reference not found (${r.status})`); return r.json() })
+    .then((data) => data.properties || {})
+    .catch((err) => { propertiesPromise = null; throw err }) // allow retry
+  return propertiesPromise
+}
+
+const lookupConfigProperty = {
+  name: 'lookup_config_property',
+  displayName: 'Look up a config property',
+  description:
+    'Look up a Redpanda configuration property in the docs reference and return its type, ' +
+    'default, scope (cluster/broker/topic), whether it needs a restart, whether it is ' +
+    'supported on Redpanda Cloud, and its description. Use this to answer questions about a ' +
+    'specific property with grounded values instead of guessing. If the property is not in ' +
+    'the reference, say so and fall back to searching the docs.',
+  needsApproval: false, // read-only, no navigation
+  parameters: {
+    type: 'object',
+    properties: {
+      property: { type: 'string', description: 'The exact property name, for example log_segment_size.' },
+    },
+    required: ['property'],
+  },
+  execute: async ({ property }) => {
+    const name = String(property || '').trim()
+    if (!name) return { found: false, error: 'No property name provided.' }
+    let properties
+    try {
+      properties = await loadProperties()
+    } catch (err) {
+      return { found: false, property: name, error: `Could not load the property reference: ${err.message}` }
+    }
+    const rec = properties[name]
+    if (!rec) {
+      return { found: false, property: name, note: 'Not in the property reference — fall back to searching the docs.' }
+    }
+    return {
+      found: true,
+      name: rec.name,
+      type: rec.type,
+      default: rec.default,
+      description: rec.description,
+      scope: rec.config_scope,
+      needsRestart: rec.needs_restart,
+      cloudSupported: rec.cloud_supported,
+      enterprise: rec.is_enterprise,
+      deprecated: rec.is_deprecated,
+      minimum: rec.minimum,
+      maximum: rec.maximum,
+    }
+  },
+}
+
+// ——— Latest version (from the page meta + current doc context) ————————————
+const getLatestVersion = {
+  name: 'get_latest_version',
+  displayName: 'Get the latest version',
+  description:
+    'Return the latest released Redpanda version (published on the docs site) and the ' +
+    'product and version of the page the user is currently viewing. Use for "what is the ' +
+    'latest version" and to pick the right version before giving version-specific steps.',
+  needsApproval: false,
+  parameters: { type: 'object', properties: {}, required: [] },
+  execute: async () => {
+    const meta = document.querySelector('meta[name="latest-redpanda-version"]')
+    const latest = meta && meta.content ? meta.content : null
+    const component =
+      document.body.getAttribute('data-component') ||
+      document.querySelector('[data-component]')?.getAttribute('data-component') ||
+      null
+    const version = document.querySelector('[data-version]')?.getAttribute('data-version') || null
+    return {
+      latestRedpandaVersion: latest,
+      currentPage: { product: component, version },
+      note: latest ? undefined : 'Latest Redpanda version is not published on this page.',
+    }
+  },
+}
+
+// ——— Open Redpanda Cloud (curated, id-independent destinations) ———————————
+// The docs agent has no access to the user's org/cluster IDs, so only general,
+// id-independent pages belong here. Edit this single map to add/adjust routes;
+// deep paths beyond the base should be verified against the Cloud app first.
+const CLOUD_BASE = 'https://cloud.redpanda.com'
+const CLOUD_ROUTES = {
+  home: CLOUD_BASE,
+  clusters: `${CLOUD_BASE}/clusters`,
+  create_cluster: `${CLOUD_BASE}/clusters/create`,
+  sign_up: `${CLOUD_BASE}/sign-up`,
+}
+
+const openConsole = {
+  name: 'open_console',
+  displayName: 'Open Redpanda Cloud',
+  description:
+    'Open a page in the Redpanda Cloud console in a new tab. Supported destinations: ' +
+    Object.keys(CLOUD_ROUTES).join(', ') + '. Cannot open a specific cluster, topic, or ' +
+    'other resource (no access to the user’s IDs) — open the general area and tell the ' +
+    'user what to do next. Requires the user to approve before the tab opens.',
+  needsApproval: true, // navigates the user into another app
+  parameters: {
+    type: 'object',
+    properties: {
+      destination: {
+        type: 'string',
+        enum: Object.keys(CLOUD_ROUTES),
+        description: 'Which Cloud page to open.',
+      },
+    },
+    required: ['destination'],
+  },
+  execute: async ({ destination }) => {
+    const url = CLOUD_ROUTES[destination]
+    if (!url) {
+      return { opened: false, error: `Unknown destination "${destination}". Valid: ${Object.keys(CLOUD_ROUTES).join(', ')}.` }
+    }
+    const opened = openTab(url)
+    return {
+      opened,
+      url,
+      destination,
+      note: opened ? 'Opened in a new tab.' : 'Popup blocked — give the user the link.',
+    }
+  },
+}
+
+// ——— Copy to clipboard (local; no navigation, no approval) ————————————————
+const copyToClipboard = {
+  name: 'copy_to_clipboard',
+  displayName: 'Copy to clipboard',
+  description:
+    'Copy a command or code snippet to the user’s clipboard. Use right after presenting ' +
+    'a command the user is expected to run. Pass the exact text to copy.',
+  needsApproval: false,
+  parameters: {
+    type: 'object',
+    properties: {
+      text: { type: 'string', description: 'The exact text to copy.' },
+      label: { type: 'string', description: 'Optional short label for what was copied, e.g. "rpk command".' },
+    },
+    required: ['text'],
+  },
+  execute: async ({ text, label }) => {
+    const value = String(text || '')
+    if (!value) return { copied: false, error: 'Nothing to copy.' }
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard API unavailable')
+      await navigator.clipboard.writeText(value)
+      return { copied: true, label: label || null }
+    } catch (err) {
+      // Degrade: hand the text back so the agent can show it for manual copy
+      return { copied: false, text: value, error: err.message }
+    }
+  },
+}
+
 export const agentTools = [
   navigateToPage,
   switchProduct,
   runBloblang,
   openBloblangPlayground,
   submitDocsFeedback,
+  lookupConfigProperty,
+  getLatestVersion,
+  openConsole,
+  copyToClipboard,
 ]
