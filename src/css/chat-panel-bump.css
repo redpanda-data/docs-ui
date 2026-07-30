@@ -1144,6 +1144,7 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-toast-error {
 #chat-panel-kapa-root .chat-history-toggle-row {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   padding: 8px 0 0;
 }
 

@@ -13,7 +13,6 @@ import {
   Braces,
   Play,
   MessageSquare,
-  Users,
   X,
 } from 'lucide-react'
 import { safeHeap } from '../heap.js'
@@ -26,7 +25,6 @@ const AGENT_EXAMPLES = [
   { Icon: Play, text: 'Write and test a Bloblang mapping that flattens nested JSON' },
   { Icon: ArrowUpRight, text: 'Take me to the right quickstart for my setup' },
   { Icon: MessageSquare, text: 'Send the docs team feedback about this page' },
-  { Icon: Users, text: 'Ask the community how others handle consumer rebalancing' },
 ]
 import { agentTools } from '../agentTools.js'
 
@@ -474,6 +472,9 @@ export default function ChatInterface() {
   }
 
   const showHistoryButton = authenticated && !historyDisabled
+  // Offer "New chat" once there's a conversation to reset (not on the empty
+  // welcome screen, and not while browsing history).
+  const showNewChat = authenticated === true && hasInteracted && !showHistory
 
   // ——— RENDERING FUNCTIONS ————————————————————————————————————————————————
 
@@ -573,18 +574,30 @@ export default function ChatInterface() {
           />
         )}
 
-        {/* Conversation history (signed-in users only) */}
-        {showHistoryButton && (
+        {/* Top toolbar: start a new chat + browse conversation history */}
+        {(showNewChat || showHistoryButton) && (
           <div className="chat-history-toggle-row">
-            <button
-              type="button"
-              className="action-button chat-history-toggle"
-              onClick={() => setShowHistory((open) => !open)}
-              aria-label={showHistory ? 'Close conversation history' : 'Show conversation history'}
-            >
-              {showHistory ? <X /> : <History />}
-              {showHistory ? 'Close' : 'History'}
-            </button>
+            {showNewChat && (
+              <button
+                type="button"
+                className="action-button chat-history-toggle chat-new-chat"
+                onClick={handleReset}
+                aria-label="Start a new chat"
+              >
+                <MessageSquare /> New chat
+              </button>
+            )}
+            {showHistoryButton && (
+              <button
+                type="button"
+                className="action-button chat-history-toggle"
+                onClick={() => setShowHistory((open) => !open)}
+                aria-label={showHistory ? 'Close conversation history' : 'Show conversation history'}
+              >
+                {showHistory ? <X /> : <History />}
+                {showHistory ? 'Close' : 'History'}
+              </button>
+            )}
           </div>
         )}
         {showHistory && (

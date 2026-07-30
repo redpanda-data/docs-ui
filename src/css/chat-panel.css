@@ -983,6 +983,7 @@
 #chat-panel-kapa-root .chat-history-toggle-row {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   padding: 8px 0 0;
 }
 

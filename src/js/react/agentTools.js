@@ -317,43 +317,10 @@ const submitDocsFeedback = {
   },
 }
 
-const askCommunity = {
-  name: 'ask_community',
-  displayName: 'Ask the Redpanda community',
-  description:
-    'Open the Redpanda community Slack in a new tab so the user can ask other engineers. ' +
-    'Use when a question needs human help, opinions, or is beyond the documentation. ' +
-    'Pass a suggested message the user could post.',
-  needsApproval: true,
-  parameters: {
-    type: 'object',
-    properties: {
-      suggested_message: {
-        type: 'string',
-        description: 'A short message the user could post in the community Slack.',
-      },
-    },
-    required: [],
-  },
-  execute: async ({ suggested_message: suggestedMessage }) => {
-    const url = 'https://redpanda.com/slack'
-    const opened = openTab(url)
-    return {
-      opened,
-      url,
-      suggestedMessage: suggestedMessage || null,
-      note: opened
-        ? 'Slack invite opened in a new tab. Show the user the suggested message to post.'
-        : 'Popup blocked — give the user the link and the suggested message.',
-    }
-  },
-}
-
 export const agentTools = [
   navigateToPage,
   switchProduct,
   runBloblang,
   openBloblangPlayground,
   submitDocsFeedback,
-  askCommunity,
 ]
