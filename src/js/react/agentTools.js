@@ -226,7 +226,7 @@ const openBloblangPlayground = {
   description:
     'Open the interactive Bloblang playground in a new tab, preloaded with a mapping (and optionally sample input JSON) ' +
     'so the user can run and edit it. Only open mappings you have already verified with the run_bloblang tool.',
-  needsApproval: true,
+  needsApproval: false, // opens a new tab; degrades to a link if the popup is blocked
   parameters: {
     type: 'object',
     properties: {
@@ -439,8 +439,8 @@ const openConsole = {
     'Open a page in the Redpanda Cloud console in a new tab. Supported destinations: ' +
     Object.keys(CLOUD_ROUTES).join(', ') + '. Cannot open a specific cluster, topic, or ' +
     'other resource (no access to the user’s IDs) — open the general area and tell the ' +
-    'user what to do next. Requires the user to approve before the tab opens.',
-  needsApproval: true, // navigates the user into another app
+    'user what to do next.',
+  needsApproval: false, // opens a new tab; degrades to a link if the popup is blocked
   parameters: {
     type: 'object',
     properties: {
