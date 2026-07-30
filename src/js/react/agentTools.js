@@ -144,7 +144,7 @@ const navigateToPage = {
     'Navigate the user to a Redpanda documentation page in the current tab, for example a page you just cited. ' +
     'Only use docs.redpanda.com URLs or absolute paths on the docs site. ' +
     'Use this when the user asks to go to, open, or be shown a page.',
-  needsApproval: true,
+  needsApproval: false, // same-tab, same-site navigation — reversible, no gate
   parameters: {
     type: 'object',
     properties: {
@@ -170,9 +170,10 @@ const switchProduct = {
   displayName: 'Switch product',
   description:
     'Switch the docs site to a different Redpanda product (for example the Data Platform or Agentic Data Plane) ' +
-    'using the site product switcher. Call with the product name the user asked about. ' +
-    'If the result lists available products, retry with one of those exact ids.',
-  needsApproval: true,
+    'using the sidebar product switcher. Call with the product name the user asked about. ' +
+    'If the result lists available products, retry with one of those exact labels. If the switcher is ' +
+    'unavailable on the current page (some landing pages omit it), fall back to navigate_to_page.',
+  needsApproval: false, // same-tab, same-site navigation — reversible, no gate
   parameters: {
     type: 'object',
     properties: {
@@ -184,29 +185,38 @@ const switchProduct = {
     required: ['product'],
   },
   execute: async ({ product }) => {
-    const options = Array.from(document.querySelectorAll('[data-product-menu] [data-product-id]')).map((btn) => ({
-      id: btn.getAttribute('data-product-id'),
-      label: btn.textContent.trim(),
-      url: btn.getAttribute('data-product-url'),
-      current: btn.classList.contains('is-current'),
-    }))
-    if (options.length === 0) {
-      return { error: 'unavailable', message: 'No product switcher on this page.' }
+    // The sidebar switcher renders options as .sb-product-opt with a
+    // data-product-url (see partials/product-switcher.hbs + 20-product-switcher.js).
+    // It is NOT present on every page — product landing/home pages omit it.
+    const els = Array.from(document.querySelectorAll('[data-product-switcher] .sb-product-opt'))
+    if (els.length === 0) {
+      return {
+        error: 'unavailable',
+        message: 'The product switcher is not on this page (some landing pages omit it). ' +
+          'Use navigate_to_page to open the target product’s docs directly instead.',
+      }
     }
-    const wanted = String(product || '').toLowerCase()
-    const match = options.find(
-      (o) => o.id.toLowerCase() === wanted ||
-        o.id.toLowerCase().includes(wanted) ||
-        o.label.toLowerCase().includes(wanted)
-    )
+    const options = els
+      .map((el) => ({
+        label: (el.querySelector('.sb-product-opt-name') || el).textContent.trim(),
+        url: el.getAttribute('data-product-url'),
+        current: el.classList.contains('is-current'),
+      }))
+      .filter((o) => o.url)
+    const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    const wanted = norm(product)
+    const match = options.find((o) => {
+      const label = norm(o.label)
+      return label === wanted || label.includes(wanted) || wanted.includes(label) || norm(o.url).includes(wanted)
+    })
     if (!match) {
-      return { error: 'not_found', available: options.map((o) => ({ id: o.id, label: o.label })) }
+      return { error: 'not_found', available: options.map((o) => o.label) }
     }
     if (match.current) {
-      return { alreadyCurrent: true, product: match.id }
+      return { alreadyCurrent: true, product: match.label }
     }
     window.location.assign(match.url)
-    return { switched: true, product: match.id, url: match.url }
+    return { switched: true, product: match.label, url: match.url }
   },
 }
 
