@@ -354,8 +354,10 @@ const lookupConfigProperty = {
     'Look up a Redpanda configuration property in the docs reference and return its type, ' +
     'default, scope (cluster/broker/topic), whether it needs a restart, whether it is ' +
     'supported on Redpanda Cloud, and its description. Use this to answer questions about a ' +
-    'specific property with grounded values instead of guessing. If the property is not in ' +
-    'the reference, say so and fall back to searching the docs.',
+    'specific property with grounded values instead of guessing. The reference is for ' +
+    'Self-Managed Redpanda; do NOT use it to answer Redpanda Cloud configuration questions ' +
+    '(Cloud abstracts most of these). If the property is not in the reference, say so and ' +
+    'fall back to searching the docs.',
   needsApproval: false, // read-only, no navigation
   parameters: {
     type: 'object',

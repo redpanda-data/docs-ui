@@ -24,9 +24,10 @@ module.exports = function (options) {
   const { page } = options.data.root
 
   // Tool-showcasing defaults per component. Keyed by component name so each
-  // product leads with the tools that matter there. Property names used here
-  // (e.g. log_segment_size) exist in redpanda-properties.json so the
-  // lookup_config_property tool returns real data.
+  // product leads with the tools that matter there. Config-property prompts
+  // (log_segment_size) appear ONLY under Self-Managed/Streaming: the property
+  // reference (redpanda-properties.json) is Self-Managed, so a "default value"
+  // prompt would be misleading on Cloud, which abstracts that config away.
   const byComponent = {
     'agentic-data-plane': [
       'Take me to the Agentic Data Plane quickstart',
@@ -35,11 +36,11 @@ module.exports = function (options) {
     ],
     'cloud-data-platform': [
       'Open the page in Redpanda Cloud where I create a cluster',
-      "What's the default value of log_segment_size?",
+      "What's the latest Redpanda version?",
       'Take me to the Cloud getting-started guide',
     ],
     'data-platform': [
-      "What's the default value of log_segment_size, and does it need a restart?",
+      "What's the latest Redpanda version?",
       'Take me to the right quickstart for my setup',
       'Open Redpanda Cloud',
     ],
@@ -62,7 +63,7 @@ module.exports = function (options) {
 
   const generic = [
     'Write and test a Bloblang mapping that flattens nested JSON',
-    "What's the default value of log_segment_size?",
+    "What's the latest Redpanda version?",
     'Take me to the right quickstart for my setup',
   ]
 
