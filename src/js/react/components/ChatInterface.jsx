@@ -3,7 +3,6 @@ import { useAgentChat, AgentThreadHistory, ToolCallCard, ToolCallGroup } from '@
 import {
   ArrowRight,
   ArrowDown,
-  ArrowUpRight,
   RefreshCcw,
   ClipboardCopy,
   CircleStop,
@@ -11,7 +10,6 @@ import {
   Sparkles,
   Compass,
   Braces,
-  Play,
   MessageSquare,
   X,
 } from 'lucide-react'
@@ -25,11 +23,9 @@ import { Answer, Toast } from './chatShared.jsx'
 // is missing (e.g. an older host page).
 const AGENT_EXAMPLES_FALLBACK = [
   'Write and test a Bloblang mapping that flattens nested JSON',
-  "What's the default value of log_segment_size?",
+  "What's the latest Redpanda Streaming version?",
   'Take me to the right quickstart for my setup',
 ]
-// Icons are cosmetic and cycle across whatever prompts are shown.
-const CARD_ICONS = [Play, Compass, ArrowUpRight, Braces]
 import { agentTools } from '../agentTools.js'
 
 // Resumed threads come back without displayName on tool calls (the SDK only
@@ -708,25 +704,46 @@ export default function ChatInterface() {
             </div>
             <h2 className="welcome-title">How can I help?</h2>
             <p className="welcome-description">
-              Ask a question, or try one of these. The agent can search the docs,
-              write and run Bloblang, navigate you to the right doc, and more.
+              Ask a question, or let the agent take an action for you.
             </p>
+            {/* Original question prompts (per component) lead. */}
             <div className="suggestion-cards">
-              {agentExamples.map((text, i) => {
-                const Icon = CARD_ICONS[i % CARD_ICONS.length]
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    className="suggestion-card suggestion-card-action"
-                    onClick={() => doQuery(text)}
-                  >
-                    <Icon className="suggestion-card-icon" size={16} />
-                    <span>{text}</span>
-                  </button>
-                )
-              })}
+              {(suggestions.length ? suggestions : agentExamples).slice(0, 4).map((text, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="suggestion-card suggestion-card-action"
+                  onClick={() => doQuery(text)}
+                >
+                  <Compass className="suggestion-card-icon" size={16} />
+                  <span>{text}</span>
+                </button>
+              ))}
             </div>
+            {/* A small, distinct row of agent actions — surfaced, not overwhelming. */}
+            {suggestions.length > 0 && agentExamples.length > 0 && (
+              <>
+                <p
+                  className="agent-actions-label"
+                  style={{ margin: '16px 0 8px', fontSize: '12.5px', fontWeight: 600, color: 'var(--kapa-text-muted)' }}
+                >
+                  Or get the agent to help:
+                </p>
+                <div className="suggestion-cards">
+                  {agentExamples.slice(0, 2).map((text, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="suggestion-card suggestion-card-action"
+                      onClick={() => doQuery(text)}
+                    >
+                      <Sparkles className="suggestion-card-icon" size={16} />
+                      <span>{text}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 

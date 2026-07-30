@@ -401,9 +401,11 @@ const getLatestVersion = {
   name: 'get_latest_version',
   displayName: 'Get the latest version',
   description:
-    'Return the latest released Redpanda version (published on the docs site) and the ' +
-    'product and version of the page the user is currently viewing. Use for "what is the ' +
-    'latest version" and to pick the right version before giving version-specific steps.',
+    'Return the latest released Redpanda Streaming version (the core streaming product, ' +
+    'published on the docs site) and the product and version of the page the user is ' +
+    'currently viewing. Use for "what is the latest Redpanda Streaming version" and to pick ' +
+    'the right version before giving version-specific steps. Note this is the Streaming ' +
+    'version, not Redpanda Connect, Cloud, or Agentic Data Plane, which version separately.',
   needsApproval: false,
   parameters: { type: 'object', properties: {}, required: [] },
   execute: async () => {
@@ -415,7 +417,7 @@ const getLatestVersion = {
       null
     const version = document.querySelector('[data-version]')?.getAttribute('data-version') || null
     return {
-      latestRedpandaVersion: latest,
+      latestRedpandaStreamingVersion: latest,
       currentPage: { product: component, version },
       note: latest ? undefined : 'Latest Redpanda version is not published on this page.',
     }

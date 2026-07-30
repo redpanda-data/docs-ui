@@ -31,16 +31,16 @@ module.exports = function (options) {
   const byComponent = {
     'agentic-data-plane': [
       'Take me to the Agentic Data Plane quickstart',
-      "What's the latest Redpanda version?",
+      "What's the latest Redpanda Streaming version?",
       'Write and test a Bloblang mapping for my data',
     ],
     'cloud-data-platform': [
       'Open the page in Redpanda Cloud where I create a cluster',
-      "What's the latest Redpanda version?",
+      "What's the latest Redpanda Streaming version?",
       'Take me to the Cloud getting-started guide',
     ],
     'data-platform': [
-      "What's the latest Redpanda version?",
+      "What's the latest Redpanda Streaming version?",
       'Take me to the right quickstart for my setup',
       'Open Redpanda Cloud',
     ],
@@ -63,7 +63,7 @@ module.exports = function (options) {
 
   const generic = [
     'Write and test a Bloblang mapping that flattens nested JSON',
-    "What's the latest Redpanda version?",
+    "What's the latest Redpanda Streaming version?",
     'Take me to the right quickstart for my setup',
   ]
 
