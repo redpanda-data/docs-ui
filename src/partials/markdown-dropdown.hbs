@@ -33,6 +33,7 @@
       <span class="markdown-copy-toast">Copied!</span>
     </button>
 
+    {{#if (has-agent-handoff)}}
     <button
       class="markdown-dropdown-item"
       data-action="copy-agent"
@@ -50,6 +51,7 @@
         role="status"
       ></span>
     </button>
+    {{/if}}
 
     <button
       class="markdown-dropdown-item"

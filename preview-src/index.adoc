@@ -6,6 +6,7 @@
 :!table-caption:
 :page-pagination:
 :page-has-markdown:
+:page-agent-handoff:
 
 {description}
 
