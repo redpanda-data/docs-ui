@@ -6,9 +6,13 @@
  * always return a plain object the model can narrate (include `url` fields so
  * the agent can render a link when a popup is blocked).
  *
- * Tools that move the user (navigation, product switch) or contact the docs
- * team require explicit approval — the chat UI renders approve/reject buttons
- * via the SDK's ToolCallCard.
+ * Approval posture: only `submit_docs_feedback` is approval-gated (the chat
+ * UI renders approve/reject buttons via the SDK's ToolCallCard), because it
+ * is the one tool with a side effect beyond the user's own browsing — it
+ * sends content to the docs team. Navigation and product-switch tools are
+ * deliberately ungated: same-site and reversible. New-tab tools degrade to a
+ * plain link when the popup is blocked. Each tool records its reasoning on
+ * its own `needsApproval` line.
  */
 
 const DOCS_ORIGIN = 'https://docs.redpanda.com'
