@@ -1,0 +1,16 @@
+= Agent Handoff UI Mode Test
+:page-layout: default
+:idprefix:
+:idseparator: -
+:page-has-markdown:
+:page-agent-handoff: ui
+
+Test page for the UI-flavored agent handoff prompt. Use the "Page options" dropdown and click "Copy agent handoff", then paste the clipboard contents somewhere to confirm the UI instruction set (not the project instruction set) is used.
+
+== Create a topic
+
+Open the console, go to *Topics*, and click *Create topic*.
+
+== Delete a topic
+
+Open the console, go to *Topics*, select the topic, and click *Delete*.

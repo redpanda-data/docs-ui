@@ -159,6 +159,34 @@ Run the chart test.
   )
 })
 
+test('buildAgentHandoffPrompt uses the UI instruction set for pages opted into "ui" mode', () => {
+  const prompt = buildAgentHandoffPrompt({
+    docsOrigin: 'https://docs.redpanda.com',
+    markdown: '# Manage topics\n\nCreate and delete topics from the console.',
+    markdownUrl: 'https://docs.redpanda.com/streaming/current/console/manage-topics.md',
+    mode: 'ui',
+    pageTitle: 'Manage topics',
+    pageUrl: 'https://docs.redpanda.com/streaming/current/console/manage-topics/',
+  })
+
+  assert.match(prompt, /Complete this documented task in the current console, cluster, or account\./)
+  assert.match(prompt, /1\. Confirm the current console, cluster, or account matches this documentation/)
+  assert.doesNotMatch(prompt, /Read the current project's agent and contributor instructions/)
+})
+
+test('buildAgentHandoffPrompt falls back to the project instruction set for an unrecognized mode', () => {
+  const prompt = buildAgentHandoffPrompt({
+    docsOrigin: 'https://docs.redpanda.com',
+    markdown: '# Configure a provider',
+    markdownUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider.md',
+    mode: 'not-a-real-mode',
+    pageTitle: 'Configure a provider',
+    pageUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider/',
+  })
+
+  assert.match(prompt, /Work in the current project\./)
+})
+
 test('buildAgentHandoffPrompt derives the component export without parsing footer copy', () => {
   const prompt = buildAgentHandoffPrompt({
     componentName: 'agentic-data-plane',
