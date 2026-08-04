@@ -201,6 +201,22 @@ test('buildAgentHandoffPrompt falls back to the project instruction set for an u
   assert.match(prompt, /Work in the current project\./)
 })
 
+test('buildAgentHandoffPrompt falls back to project mode for inherited Object.prototype keys', () => {
+  for (const mode of ['constructor', 'toString', 'hasOwnProperty', '__proto__']) {
+    const prompt = buildAgentHandoffPrompt({
+      docsOrigin: 'https://docs.redpanda.com',
+      markdown: '# Configure a provider',
+      markdownUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider.md',
+      mode,
+      pageTitle: 'Configure a provider',
+      pageUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider/',
+    })
+
+    assert.match(prompt, /^# Apply this Redpanda documentation/, `mode "${mode}" should fall back to project`)
+    assert.match(prompt, /Work in the current project\./, `mode "${mode}" should fall back to project`)
+  }
+})
+
 test('buildAgentHandoffPrompt derives the component export without parsing footer copy', () => {
   const prompt = buildAgentHandoffPrompt({
     componentName: 'agentic-data-plane',

@@ -128,9 +128,10 @@
       componentExport ? `- Component documentation export: ${componentExport}` : null,
       `- Documentation MCP server: ${new URL('/mcp', docsOrigin).href}`,
     ].filter(Boolean)
-    const title = PROMPT_TITLES[mode] || PROMPT_TITLES.project
-    const intro = PROMPT_INTROS[mode] || PROMPT_INTROS.project
-    const instructions = INSTRUCTION_SETS[mode] || INSTRUCTION_SETS.project
+    const selectedMode = Object.prototype.hasOwnProperty.call(INSTRUCTION_SETS, mode) ? mode : 'project'
+    const title = PROMPT_TITLES[selectedMode]
+    const intro = PROMPT_INTROS[selectedMode]
+    const instructions = INSTRUCTION_SETS[selectedMode]
 
     return `# ${title}
 
