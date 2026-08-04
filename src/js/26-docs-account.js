@@ -222,31 +222,55 @@
     try { params = new URLSearchParams(window.location.search) } catch (e) { return }
     var code = params.get('login_error')
     if (!code) return
+
+    // We're on a failed-login page. Point the sign-in retry at a fresh Auth0
+    // login (reauth=1 -> docs-login.mjs adds prompt=login) so the FIRST retry
+    // click reaches the login screen instead of silently re-using the SSO
+    // session that just failed. Belt-and-suspenders with the reauth cookie.
+    ;[signinLink, modalCta].forEach(function (el) {
+      if (el && el.getAttribute('href')) {
+        var href = el.getAttribute('href')
+        el.setAttribute('href', href + (href.indexOf('?') === -1 ? '?' : '&') + 'reauth=1')
+      }
+    })
+
     var MESSAGES = {
       upstream_failed: 'Sorry, sign-in couldn’t be completed. Please try again.',
       work_email_required: 'Please sign in with your work Redpanda Cloud account.',
       state_mismatch: 'Your sign-in link expired. Please try again.',
     }
-    var bar = document.createElement('div')
-    bar.setAttribute('role', 'alert')
-    bar.style.cssText = [
-      'position:fixed;top:0;left:0;right:0;z-index:1000',
-      'display:flex;align-items:center;justify-content:center;gap:12px',
-      'padding:10px 16px;background:#fdecea;color:#611a15',
-      'border-bottom:1px solid #f5c6cb',
-      'font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+    var toast = document.createElement('div')
+    toast.setAttribute('role', 'alert')
+    toast.style.cssText = [
+      'position:fixed;right:16px;bottom:16px;z-index:1000;max-width:340px',
+      'display:flex;align-items:flex-start;gap:10px',
+      'padding:12px 14px;border-radius:8px;border-left:3px solid #f87171',
+      'background:#26262b;color:#f5f5f7',
+      'box-shadow:0 6px 24px rgba(0,0,0,0.28)',
+      'font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+      'opacity:0;transition:opacity .2s ease',
     ].join(';')
     var text = document.createElement('span')
+    text.style.flex = '1'
     text.textContent = MESSAGES[code] || 'Sorry, sign-in couldn’t be completed. Please try again.'
     var close = document.createElement('button')
     close.type = 'button'
     close.setAttribute('aria-label', 'Dismiss')
     close.textContent = '×'
-    close.style.cssText = 'background:none;border:0;font-size:18px;line-height:1;cursor:pointer;color:inherit'
-    close.addEventListener('click', function () { bar.remove() })
-    bar.appendChild(text)
-    bar.appendChild(close)
-    document.body.appendChild(bar)
+    close.style.cssText = [
+      'background:none;border:0;padding:0',
+      'font-size:18px;line-height:1;cursor:pointer;color:inherit;opacity:.7',
+    ].join(';')
+    var remove = function () {
+      toast.style.opacity = '0'
+      setTimeout(function () { toast.remove() }, 200)
+    }
+    close.addEventListener('click', remove)
+    toast.appendChild(text)
+    toast.appendChild(close)
+    document.body.appendChild(toast)
+    setTimeout(function () { toast.style.opacity = '1' }, 10) // fade in
+    setTimeout(remove, 6000) // auto-dismiss
 
     params.delete('login_error')
     var qs = params.toString()
