@@ -214,6 +214,48 @@
 
   render()
 
+  // Surface a login failure bounced back by the OAuth callback (docs-login.mjs /
+  // mcp-oauth.mjs redirect to ?login_error=<code>), then strip the param so a
+  // refresh or a re-click of sign-in doesn't repeat the message.
+  function showLoginError () {
+    var params
+    try { params = new URLSearchParams(window.location.search) } catch (e) { return }
+    var code = params.get('login_error')
+    if (!code) return
+    var MESSAGES = {
+      upstream_failed: 'Sorry, sign-in couldn’t be completed. Please try again.',
+      work_email_required: 'Please sign in with your work Redpanda Cloud account.',
+      state_mismatch: 'Your sign-in link expired. Please try again.',
+    }
+    var bar = document.createElement('div')
+    bar.setAttribute('role', 'alert')
+    bar.style.cssText = [
+      'position:fixed;top:0;left:0;right:0;z-index:1000',
+      'display:flex;align-items:center;justify-content:center;gap:12px',
+      'padding:10px 16px;background:#fdecea;color:#611a15',
+      'border-bottom:1px solid #f5c6cb',
+      'font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+    ].join(';')
+    var text = document.createElement('span')
+    text.textContent = MESSAGES[code] || 'Sorry, sign-in couldn’t be completed. Please try again.'
+    var close = document.createElement('button')
+    close.type = 'button'
+    close.setAttribute('aria-label', 'Dismiss')
+    close.textContent = '×'
+    close.style.cssText = 'background:none;border:0;font-size:18px;line-height:1;cursor:pointer;color:inherit'
+    close.addEventListener('click', function () { bar.remove() })
+    bar.appendChild(text)
+    bar.appendChild(close)
+    document.body.appendChild(bar)
+
+    params.delete('login_error')
+    var qs = params.toString()
+    try {
+      window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash)
+    } catch (e) { /* ignore */ }
+  }
+  showLoginError()
+
   // The Ask AI panel's session probe may learn the identity first — reuse it
   window.addEventListener('kapa-session', function (e) {
     if (e.detail && e.detail.authenticated && e.detail.user) {
