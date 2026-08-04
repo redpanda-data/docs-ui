@@ -19,9 +19,13 @@ const renderDropdown = handlebars.compile(partial)
 test('renders the agent handoff action only for pages that opt in', () => {
   const disabled = renderDropdown({ page: { attributes: {} } })
   const enabled = renderDropdown({
-    page: { attributes: { 'agent-handoff': '' } },
+    page: {
+      attributes: { 'agent-handoff': '' },
+      component: { name: 'agentic-data-plane' },
+    },
   })
 
   assert.doesNotMatch(disabled, /data-action="copy-agent"/)
   assert.match(enabled, /data-action="copy-agent"/)
+  assert.match(enabled, /data-component-name="agentic-data-plane"/)
 })

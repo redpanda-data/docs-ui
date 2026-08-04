@@ -9,8 +9,6 @@
  * - Click outside to close
  */
 
-const { buildAgentHandoffPrompt } = window.RedpandaDocsAgentHandoff
-
 ;(function () {
   'use strict'
 
@@ -36,6 +34,7 @@ const { buildAgentHandoffPrompt } = window.RedpandaDocsAgentHandoff
     const menu = dropdown.querySelector('.markdown-dropdown-menu')
     const items = dropdown.querySelectorAll('.markdown-dropdown-item')
     const markdownUrl = dropdown.dataset.markdownUrl
+    const componentName = dropdown.dataset.componentName
 
     if (!toggle || !menu || !markdownUrl) {
       return
@@ -63,7 +62,7 @@ const { buildAgentHandoffPrompt } = window.RedpandaDocsAgentHandoff
             setOpen(false)
           }, 2500)
         } else if (action === 'copy-agent') {
-          handleCopyAgent(markdownUrl, item).then(function (didCopy) {
+          handleCopyAgent(markdownUrl, componentName, item).then(function (didCopy) {
             if (didCopy) {
               setTimeout(function () {
                 setOpen(false)
@@ -178,7 +177,14 @@ const { buildAgentHandoffPrompt } = window.RedpandaDocsAgentHandoff
   /**
    * Copy a complete agent handoff with the current documentation section inline.
    */
-  function handleCopyAgent (markdownUrl, button) {
+  function handleCopyAgent (markdownUrl, componentName, button) {
+    const buildAgentHandoffPrompt = window.RedpandaDocsAgentHandoff?.buildAgentHandoffPrompt
+    if (typeof buildAgentHandoffPrompt !== 'function') {
+      console.error('Could not copy agent handoff: prompt builder is unavailable.')
+      flashCopyStatus(button, 'Could not copy. Try again.')
+      return Promise.resolve(false)
+    }
+
     return window
       .fetch(markdownUrl)
       .then(function (response) {
@@ -193,6 +199,7 @@ const { buildAgentHandoffPrompt } = window.RedpandaDocsAgentHandoff
         const sectionId = sectionAnchor.replace(/^#/, '')
         const sectionTitle = document.getElementById(sectionId)?.textContent?.trim() || ''
         const prompt = buildAgentHandoffPrompt({
+          componentName,
           docsOrigin: window.location.origin,
           markdown,
           markdownUrl: absoluteMarkdownUrl,

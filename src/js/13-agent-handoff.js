@@ -8,45 +8,65 @@
   }
 })(typeof window === 'undefined' ? this : window, function () {
   const headingPattern = /^(#{1,6})[ \t]+(.+?)\s*$/
-  const componentExportPattern =
-    /Component-specific:[^\n]*\]\((https?:\/\/[^)\s]+-full\.txt)\)/
+  const fencePattern = /^[ \t]*(`{3,}|~{3,})/
 
-  function normalizedAnchor (sectionAnchor) {
+  function normalizedAnchors (sectionAnchor) {
     const rawAnchor = sectionAnchor.replace(/^#/, '')
+    let decodedAnchor
 
     try {
-      return decodeURIComponent(rawAnchor)
+      decodedAnchor = decodeURIComponent(rawAnchor)
     } catch (error) {
-      return rawAnchor
+      decodedAnchor = rawAnchor
     }
+
+    const generatedMarkdownAnchor = decodedAnchor.replace(/^_/, '').replace(/_/g, '-')
+    return generatedMarkdownAnchor === decodedAnchor
+      ? [decodedAnchor]
+      : [decodedAnchor, generatedMarkdownAnchor]
   }
 
   function extractMarkdownSection (markdown, sectionAnchor) {
     const fullPage = markdown.trim()
     if (!sectionAnchor) return fullPage
 
-    const anchorMarker = `(#${normalizedAnchor(sectionAnchor)})`
+    const anchorMarkers = normalizedAnchors(sectionAnchor).map((anchor) => `(#${anchor})`)
     const lines = fullPage.split('\n')
-    const startIndex = lines.findIndex((line) => headingPattern.test(line) && line.includes(anchorMarker))
+    const headingLines = computeHeadingLines(lines)
+    const startIndex = lines.findIndex(
+      (line, index) => headingLines[index] && anchorMarkers.some((marker) => line.includes(marker))
+    )
     if (startIndex === -1) return fullPage
 
     const sectionLevel = lines[startIndex].match(headingPattern)[1].length
     const endIndex = lines.findIndex((line, index) => {
       if (index <= startIndex) return false
 
-      const heading = line.match(headingPattern)
-      return heading && heading[1].length <= sectionLevel
+      if (!headingLines[index]) return false
+      return line.match(headingPattern)[1].length <= sectionLevel
     })
 
     return lines.slice(startIndex, endIndex === -1 ? undefined : endIndex).join('\n').trim()
   }
 
-  function componentExportUrl (markdown) {
-    const match = markdown.match(componentExportPattern)
-    return match && match[1]
+  function computeHeadingLines (lines) {
+    let fenceMarker = ''
+
+    return lines.map((line) => {
+      const fence = line.match(fencePattern)
+      if (fence) {
+        const marker = fence[1][0]
+        if (!fenceMarker) fenceMarker = marker
+        else if (marker === fenceMarker) fenceMarker = ''
+        return false
+      }
+
+      return !fenceMarker && headingPattern.test(line)
+    })
   }
 
   function buildAgentHandoffPrompt ({
+    componentName = '',
     docsOrigin,
     markdown,
     markdownUrl,
@@ -56,7 +76,9 @@
     sectionTitle = '',
   }) {
     const context = extractMarkdownSection(markdown, sectionAnchor)
-    const componentExport = componentExportUrl(markdown)
+    const componentExport = componentName
+      ? new URL(`/${encodeURIComponent(componentName)}-full.txt`, docsOrigin).href
+      : null
     const scope = [
       `- Documentation page: ${pageTitle}`,
       sectionTitle ? `- Current section: ${sectionTitle}` : null,

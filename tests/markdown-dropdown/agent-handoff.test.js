@@ -1,5 +1,8 @@
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 const test = require('node:test')
+const vm = require('node:vm')
 
 const {
   buildAgentHandoffPrompt,
@@ -41,9 +44,65 @@ Run the chart test.`
   )
 })
 
+test('extractMarkdownSection maps generated AsciiDoc IDs to Markdown anchors', () => {
+  const generatedAnchorMarkdown = `# Run Claude Code and Codex
+
+## [](#run-codex)Run Codex
+
+Run Codex through AI Gateway.
+
+## [](#make-it-a-shortcut)Make it a shortcut`
+
+  assert.equal(
+    extractMarkdownSection(generatedAnchorMarkdown, '#_run_codex'),
+    `## [](#run-codex)Run Codex
+
+Run Codex through AI Gateway.`
+  )
+})
+
 test('extractMarkdownSection falls back to the full page without a matching anchor', () => {
   assert.equal(extractMarkdownSection(markdown, '#missing'), markdown)
   assert.equal(extractMarkdownSection(markdown, ''), markdown)
+})
+
+test('extractMarkdownSection ignores heading-like lines inside fenced code blocks', () => {
+  const fencedMarkdown = `# Draw charts
+
+\`\`\`text
+## [](#migrate-chart-js-prompt)Not the section heading
+\`\`\`
+
+## [](#migrate-chart-js-prompt)Migrate from Chart.js
+
+Keep bar and line charts.
+
+\`\`\`yaml
+# This comment is not a heading
+type: bar
+\`\`\`
+
+### [](#verification)Verify the migration
+
+Run the chart test.
+
+## [](#troubleshooting)Troubleshooting`
+
+  assert.equal(
+    extractMarkdownSection(fencedMarkdown, '#migrate-chart-js-prompt'),
+    `## [](#migrate-chart-js-prompt)Migrate from Chart.js
+
+Keep bar and line charts.
+
+\`\`\`yaml
+# This comment is not a heading
+type: bar
+\`\`\`
+
+### [](#verification)Verify the migration
+
+Run the chart test.`
+  )
 })
 
 test('buildAgentHandoffPrompt copies actionable context and canonical sources', () => {
@@ -100,10 +159,11 @@ Run the chart test.
   )
 })
 
-test('buildAgentHandoffPrompt includes the component export advertised by the page', () => {
+test('buildAgentHandoffPrompt derives the component export without parsing footer copy', () => {
   const prompt = buildAgentHandoffPrompt({
+    componentName: 'agentic-data-plane',
     docsOrigin: 'https://docs.redpanda.com',
-    markdown: `> Component-specific: [agentic-data-plane-full.txt](https://docs.redpanda.com/agentic-data-plane-full.txt)
+    markdown: `> Browse the complete documentation index in llms.txt.
 
 # Configure a provider`,
     markdownUrl:
@@ -117,4 +177,26 @@ test('buildAgentHandoffPrompt includes the component export advertised by the pa
     prompt,
     /- Component documentation export: https:\/\/docs\.redpanda\.com\/agentic-data-plane-full\.txt/
   )
+})
+
+test('markdown dropdown loads when the optional agent handoff module is unavailable', () => {
+  const dropdownScript = fs.readFileSync(
+    path.join(__dirname, '../../src/js/14-markdown-dropdown.js'),
+    'utf8'
+  )
+  const documentListeners = new Map()
+
+  assert.doesNotThrow(() => {
+    vm.runInNewContext(dropdownScript, {
+      console,
+      document: {
+        addEventListener: (event, listener) => documentListeners.set(event, listener),
+        readyState: 'loading',
+      },
+      setTimeout,
+      URL,
+      window: {},
+    })
+  })
+  assert.equal(typeof documentListeners.get('DOMContentLoaded'), 'function')
 })

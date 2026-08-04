@@ -1,5 +1,9 @@
 {{#if (has-markdown)}}
-<div class="markdown-dropdown" data-markdown-url="{{markdown-url}}">
+<div
+  class="markdown-dropdown"
+  data-component-name="{{page.component.name}}"
+  data-markdown-url="{{markdown-url}}"
+>
   <button
     class="markdown-dropdown-toggle"
     aria-haspopup="true"
