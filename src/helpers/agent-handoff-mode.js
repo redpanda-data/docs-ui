@@ -5,5 +5,5 @@
  */
 
 module.exports = ({ data: { root } }) => {
-  return root.page?.attributes?.['agent-handoff'] || 'project'
+  return String(root.page?.attributes?.['agent-handoff'] || '').trim().toLowerCase() || 'project'
 }

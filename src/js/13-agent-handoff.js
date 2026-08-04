@@ -65,6 +65,11 @@
     })
   }
 
+  const PROMPT_TITLES = {
+    project: 'Apply this Redpanda documentation',
+    ui: 'Complete this Redpanda task',
+  }
+
   const PROMPT_INTROS = {
     project:
       'Work in the current project. Determine whether this guidance applies, then make the smallest safe update ' +
@@ -85,12 +90,15 @@
       '6. Summarize the changes, verification, remaining manual steps, and any missing or conflicting documentation.',
     ],
     ui: [
-      '1. Confirm the current console, cluster, or account matches this documentation before acting. Note any version or plan differences you see.',
-      '2. Follow the documented steps in order. Do not invent menu items, field names, or button labels — verify each one against what is on screen.',
-      '3. If a step does not match the current UI, stop and explain the discrepancy instead of guessing a workaround.',
-      '4. Before creating, deleting, or modifying a live resource (clusters, topics, users, ACLs, billing), show the plan and get my confirmation. Never expose credentials or secrets.',
-      '5. After each configuration or destructive step, verify the result in the UI rather than assuming it succeeded.',
-      '6. Summarize what changed, what still needs manual confirmation, and any place the UI differed from this documentation.',
+      '1. If you cannot see the interface (no browser or computer-use access), do not guess or claim to have completed ' +
+        'these steps. Produce a step-by-step checklist for me to execute instead, and stop.',
+      '2. Confirm the current console, cluster, or account matches this documentation before acting. Note any version or plan differences you see.',
+      '3. Follow the documented steps in order. Do not invent menu items, field names, or button labels — verify each one against what is on screen.',
+      '4. If a step does not match the current UI, stop and explain the discrepancy instead of guessing a workaround.',
+      '5. Before creating, deleting, or modifying any resource this documentation describes, show the plan and get my ' +
+        'confirmation. Never expose credentials or secrets.',
+      '6. After each configuration or destructive step, verify the result in the UI rather than assuming it succeeded.',
+      '7. Summarize what changed, what still needs manual confirmation, and any place the UI differed from this documentation.',
     ],
   }
 
@@ -120,10 +128,11 @@
       componentExport ? `- Component documentation export: ${componentExport}` : null,
       `- Documentation MCP server: ${new URL('/mcp', docsOrigin).href}`,
     ].filter(Boolean)
+    const title = PROMPT_TITLES[mode] || PROMPT_TITLES.project
     const intro = PROMPT_INTROS[mode] || PROMPT_INTROS.project
     const instructions = INSTRUCTION_SETS[mode] || INSTRUCTION_SETS.project
 
-    return `# Apply this Redpanda documentation
+    return `# ${title}
 
 ${intro}
 

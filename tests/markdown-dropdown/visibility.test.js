@@ -49,3 +49,19 @@ test('defaults the agent handoff mode to "project" and carries an explicit "ui" 
   assert.match(defaulted, /data-agent-handoff-mode="project"/)
   assert.match(uiMode, /data-agent-handoff-mode="ui"/)
 })
+
+test('omits the mode attribute entirely on pages that never opted into agent handoff', () => {
+  const disabled = renderDropdown({ page: { attributes: {} } })
+
+  assert.doesNotMatch(disabled, /data-agent-handoff-mode/)
+})
+
+test('agent-handoff-mode normalizes case and whitespace, defaulting to "project"', () => {
+  const helperArgs = (value) => ({ data: { root: { page: { attributes: { 'agent-handoff': value } } } } })
+
+  assert.equal(agentHandoffMode({ data: { root: { page: { attributes: {} } } } }), 'project')
+  assert.equal(agentHandoffMode(helperArgs('')), 'project')
+  assert.equal(agentHandoffMode(helperArgs('UI')), 'ui')
+  assert.equal(agentHandoffMode(helperArgs(' Ui ')), 'ui')
+  assert.equal(agentHandoffMode(helperArgs('console')), 'console')
+})
