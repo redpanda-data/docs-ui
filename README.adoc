@@ -8,7 +8,6 @@
 :url-redpanda: https://redpanda.com
 :url-antora: https://antora.org/
 :hide-uri-scheme:
-:url-contributing: {url-site}/blob/main/meta-docs/CONTRIBUTING.adoc
 :url-netlify: https://netlify.com
 :url-netlify-docs: https://docs.netlify.com
 :url-antora-docs: https://docs.antora.org
