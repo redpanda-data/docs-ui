@@ -242,7 +242,12 @@ function App () {
   const colorScheme = useSiteColorScheme()
   const { authenticated, user, loginUrl } = useSession()
 
-  // Signed-in: full Agent SDK experience (tools, history, email attribution)
+  // Signed-in: full Agent SDK experience (tools, history, email attribution).
+  // NOTE on identity: the `user={{ email }}` prop below is EMAIL ATTRIBUTION — it's
+  // what appears in the Kapa dashboard and what sales searches by. It's separate
+  // from the conversation-history key, which the server mints as an opaque hashed
+  // external_owner_id (docs-site lib/kapa-owner.mjs) and never carries the email.
+  // So the email is searchable while the history key stays opaque.
   if (authenticated === true) {
     return (
       <AgentProvider
