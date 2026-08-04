@@ -1,5 +1,9 @@
 {{#if (has-markdown)}}
-<div class="markdown-dropdown" data-markdown-url="{{markdown-url}}">
+<div
+  class="markdown-dropdown"
+  data-component-name="{{page.component.name}}"
+  data-markdown-url="{{markdown-url}}"
+>
   <button
     class="markdown-dropdown-toggle"
     aria-haspopup="true"
@@ -32,6 +36,26 @@
       <span>Copy as Markdown</span>
       <span class="markdown-copy-toast">Copied!</span>
     </button>
+
+    {{#if (has-agent-handoff)}}
+    <button
+      class="markdown-dropdown-item"
+      data-action="copy-agent"
+      role="menuitem"
+      type="button"
+    >
+      <svg aria-hidden="true" width="16" height="16" fill="none" viewBox="0 0 16 16">
+        <path d="M2.5 3.5h11v9h-11z" stroke="currentColor"/>
+        <path d="m5 6 2 2-2 2M8.5 10h2.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Copy agent handoff</span>
+      <span
+        class="markdown-copy-toast"
+        data-agent-handoff-status
+        role="status"
+      ></span>
+    </button>
+    {{/if}}
 
     <button
       class="markdown-dropdown-item"
