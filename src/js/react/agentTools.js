@@ -40,7 +40,18 @@ function resolveDocsUrl (url) {
 
 // Open in a new tab; a blocked popup returns null so callers can degrade to a link
 function openTab (url) {
-  const win = window.open(url, '_blank', 'noopener')
+  // NOTE: window.open() returns null whenever the 'noopener' feature is set
+  // (per spec + all browsers), so we can't use its return to detect a blocked
+  // popup — doing so reported "blocked" on every successful open. Open without
+  // 'noopener' and sever opener manually so a genuine null (real popup block)
+  // is the only false, and the caller's degrade-to-a-link path is accurate.
+  let win
+  try {
+    win = window.open(url, '_blank')
+    if (win) win.opener = null
+  } catch {
+    return false
+  }
   return Boolean(win)
 }
 

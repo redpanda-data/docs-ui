@@ -35,7 +35,18 @@ function announceSession (authenticated, user, loginUrl) {
 
 async function getSessionToken () {
   const endpoint = window.KAPA_SESSION_ENDPOINT || '/kapa/session'
-  const res = await fetch(endpoint, { method: 'POST', credentials: 'include' })
+  // Client-side timeout: a hung connection (LB/proxy accepts TCP but never
+  // responds) would otherwise neither resolve nor reject, leaving the drawer
+  // stuck on the loading spinner forever. On abort we throw, so probeSession's
+  // .catch degrades to the anonymous tier — matching the network-error fallback.
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), Number(window.KAPA_SESSION_TIMEOUT_MS || 8000))
+  let res
+  try {
+    res = await fetch(endpoint, { method: 'POST', credentials: 'include', signal: ctrl.signal })
+  } finally {
+    clearTimeout(timer)
+  }
   if (res.status === 401) {
     const data = await res.json().catch(() => ({}))
     announceSession(false, null, data.login_url)
