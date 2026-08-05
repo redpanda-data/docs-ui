@@ -161,9 +161,16 @@
 
   function render () {
     var signedIn = hasAuthHint()
-    signinLink.hidden = signedIn
+    // Auth availability: the Ask AI panel's session probe sets
+    // window.__KAPA_LOGIN_URL (from /kapa/session's 401 login_url) when the auth
+    // backend is present; being signed in implies it exists. Gate the sign-in
+    // entry on this so, if this UI ever ships ahead of the backend, we don't show
+    // a sign-in link that 404s — the account UI stays hidden until auth is known
+    // available. Re-runs on the kapa-session event once the probe resolves.
+    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL
+    signinLink.hidden = signedIn || !authAvailable
     menu.hidden = !signedIn
-    container.hidden = false
+    container.hidden = !authAvailable
     signinLink.href = '/login?return_to=' + returnTo()
     signoutLink.href = '/logout?return_to=' + returnTo()
     // disclosed=1: the modal shows the privacy/data-collection note itself, so
@@ -280,8 +287,11 @@
   }
   showLoginError()
 
-  // The Ask AI panel's session probe may learn the identity first — reuse it
+  // The Ask AI panel's session probe may learn auth availability + identity
+  // first — reuse it. Re-render so the sign-in entry appears once the probe
+  // confirms the backend is present (window.__KAPA_LOGIN_URL now set).
   window.addEventListener('kapa-session', function (e) {
+    render()
     if (e.detail && e.detail.authenticated && e.detail.user) {
       showUser(e.detail.user)
       try {

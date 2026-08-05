@@ -144,11 +144,15 @@ export default function ChatSdkInterface ({ loginUrl }) {
             Prefer the header's sign-in modal (feature pitch + privacy note, and
             opening it pre-warms the login functions); without it, navigate to
             /login directly, which shows the server interstitial instead.
-            /login can cold-start (~6s); show progress + block re-clicks on tap. */}
+            /login can cold-start (~6s); show progress + block re-clicks on tap.
+            GATED on loginUrl: only shown when the auth backend is present (a 401
+            from /kapa/session carried a login_url). Without it — e.g. this UI
+            merged ahead of the backend — there's no sign-in entry to 404 on. */}
+        {loginUrl && (
         <a
           className={`chat-upsell${signingIn ? ' is-signing-in' : ''}`}
           aria-disabled={signingIn}
-          href={loginUrl ? `${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}` : '/login'}
+          href={`${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
           onClick={(e) => {
             if (document.querySelector('[data-signin-modal]')) {
               e.preventDefault()
@@ -162,6 +166,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
           <span>{signingIn ? 'Signing you in…' : 'Sign in to save your conversations and unlock the AI agent'}</span>
           <ArrowRight size={14} />
         </a>
+        )}
 
         {!hasInteracted && (
           <div className="welcome-screen">
