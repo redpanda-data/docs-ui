@@ -65,11 +65,49 @@
     })
   }
 
+  const PROMPT_TITLES = {
+    project: 'Apply this Redpanda documentation',
+    ui: 'Complete this Redpanda task',
+  }
+
+  const PROMPT_INTROS = {
+    project:
+      'Work in the current project. Determine whether this guidance applies, then make the smallest safe update ' +
+      'that keeps the project aligned with the current Redpanda pattern.',
+    ui:
+      'Complete this documented task in the current console, cluster, or account. Determine whether the UI still ' +
+      'matches this documentation, then complete the task precisely.',
+  }
+
+  const INSTRUCTION_SETS = {
+    project: [
+      "1. Read the current project's agent and contributor instructions before changing anything.",
+      '2. Inspect the project and identify where this documentation applies. Do not invent Redpanda commands, fields, or behavior.',
+      '3. If applicable, implement the smallest reversible change and preserve unrelated behavior. If not applicable, explain why and stop.',
+      '4. You may edit and test local files. Before destructive operations, external mutations, or changes to a live ' +
+        'Redpanda environment, show the plan or diff and get my confirmation. Never expose credentials or secrets.',
+      "5. Run the project's relevant checks and any documented Redpanda validation or diff command.",
+      '6. Summarize the changes, verification, remaining manual steps, and any missing or conflicting documentation.',
+    ],
+    ui: [
+      '1. If you cannot see the interface (no browser or computer-use access), do not guess or claim to have completed ' +
+        'these steps. Produce a step-by-step checklist for me to execute instead, and stop.',
+      '2. Confirm the current console, cluster, or account matches this documentation before acting. Note any version or plan differences you see.',
+      '3. Follow the documented steps in order. Do not invent menu items, field names, or button labels — verify each one against what is on screen.',
+      '4. If a step does not match the current UI, stop and explain the discrepancy instead of guessing a workaround.',
+      '5. Before creating, deleting, or modifying any resource this documentation describes, show the plan and get my ' +
+        'confirmation. Never expose credentials or secrets.',
+      '6. After each configuration or destructive step, verify the result in the UI rather than assuming it succeeded.',
+      '7. Summarize what changed, what still needs manual confirmation, and any place the UI differed from this documentation.',
+    ],
+  }
+
   function buildAgentHandoffPrompt ({
     componentName = '',
     docsOrigin,
     markdown,
     markdownUrl,
+    mode = 'project',
     pageTitle,
     pageUrl,
     sectionAnchor = '',
@@ -90,19 +128,14 @@
       componentExport ? `- Component documentation export: ${componentExport}` : null,
       `- Documentation MCP server: ${new URL('/mcp', docsOrigin).href}`,
     ].filter(Boolean)
-    const instructions = [
-      "1. Read the current project's agent and contributor instructions before changing anything.",
-      '2. Inspect the project and identify where this documentation applies. Do not invent Redpanda commands, fields, or behavior.',
-      '3. If applicable, implement the smallest reversible change and preserve unrelated behavior. If not applicable, explain why and stop.',
-      '4. You may edit and test local files. Before destructive operations, external mutations, or changes to a live ' +
-        'Redpanda environment, show the plan or diff and get my confirmation. Never expose credentials or secrets.',
-      "5. Run the project's relevant checks and any documented Redpanda validation or diff command.",
-      '6. Summarize the changes, verification, remaining manual steps, and any missing or conflicting documentation.',
-    ]
+    const selectedMode = Object.prototype.hasOwnProperty.call(INSTRUCTION_SETS, mode) ? mode : 'project'
+    const title = PROMPT_TITLES[selectedMode]
+    const intro = PROMPT_INTROS[selectedMode]
+    const instructions = INSTRUCTION_SETS[selectedMode]
 
-    return `# Apply this Redpanda documentation
+    return `# ${title}
 
-Work in the current project. Determine whether this guidance applies, then make the smallest safe update that keeps the project aligned with the current Redpanda pattern.
+${intro}
 
 ## Scope
 

@@ -1,6 +1,7 @@
 {{#if (has-markdown)}}
 <div
   class="markdown-dropdown"
+  {{#if (has-agent-handoff)}}data-agent-handoff-mode="{{agent-handoff-mode}}"{{/if}}
   data-component-name="{{page.component.name}}"
   data-markdown-url="{{markdown-url}}"
 >

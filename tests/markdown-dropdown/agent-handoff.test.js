@@ -105,22 +105,21 @@ Run the chart test.`
   )
 })
 
-test('buildAgentHandoffPrompt copies actionable context and canonical sources', () => {
-  const prompt = buildAgentHandoffPrompt({
-    docsOrigin: 'https://docs.redpanda.com',
-    markdown,
-    markdownUrl:
-      'https://docs.redpanda.com/agentic-data-plane/connect/draw-charts.md',
-    pageTitle: 'Draw charts',
-    pageUrl:
-      'https://docs.redpanda.com/agentic-data-plane/connect/draw-charts/#migrate-chart-js-prompt',
-    sectionAnchor: '#migrate-chart-js-prompt',
-    sectionTitle: 'Migrate from Chart.js',
-  })
+const draftChartsHandoffArgs = {
+  docsOrigin: 'https://docs.redpanda.com',
+  markdown,
+  markdownUrl:
+    'https://docs.redpanda.com/agentic-data-plane/connect/draw-charts.md',
+  pageTitle: 'Draw charts',
+  pageUrl:
+    'https://docs.redpanda.com/agentic-data-plane/connect/draw-charts/#migrate-chart-js-prompt',
+  sectionAnchor: '#migrate-chart-js-prompt',
+  sectionTitle: 'Migrate from Chart.js',
+}
 
-  assert.equal(
-    prompt,
-    `# Apply this Redpanda documentation
+// This is the exact prompt every page using the project mode already produces (pinned since #408).
+// Keep this test passing byte-for-byte if the intro/title/instruction refactor changes shape.
+const draftChartsProjectPrompt = `# Apply this Redpanda documentation
 
 Work in the current project. Determine whether this guidance applies, then make the smallest safe update that keeps the project aligned with the current Redpanda pattern.
 
@@ -156,7 +155,66 @@ Keep bar and line charts.
 
 Run the chart test.
 --- END CURRENT DOCUMENTATION ---`
+
+test('buildAgentHandoffPrompt copies actionable context and canonical sources', () => {
+  assert.equal(buildAgentHandoffPrompt(draftChartsHandoffArgs), draftChartsProjectPrompt)
+})
+
+test('buildAgentHandoffPrompt produces the exact same prompt whether mode is omitted or explicitly "project"', () => {
+  assert.equal(
+    buildAgentHandoffPrompt({ ...draftChartsHandoffArgs, mode: 'project' }),
+    draftChartsProjectPrompt
   )
+})
+
+test('buildAgentHandoffPrompt uses the UI instruction set for pages opted into "ui" mode', () => {
+  const prompt = buildAgentHandoffPrompt({
+    docsOrigin: 'https://docs.redpanda.com',
+    markdown: '# Manage topics\n\nCreate and delete topics from the console.',
+    markdownUrl: 'https://docs.redpanda.com/streaming/current/console/manage-topics.md',
+    mode: 'ui',
+    pageTitle: 'Manage topics',
+    pageUrl: 'https://docs.redpanda.com/streaming/current/console/manage-topics/',
+  })
+
+  assert.match(prompt, /^# Complete this Redpanda task/)
+  assert.match(prompt, /Complete this documented task in the current console, cluster, or account\./)
+  assert.match(prompt, /1\. If you cannot see the interface \(no browser or computer-use access\)/)
+  assert.match(prompt, /2\. Confirm the current console, cluster, or account matches this documentation/)
+  assert.match(prompt, /Before creating, deleting, or modifying any resource this documentation describes/)
+  assert.doesNotMatch(prompt, /clusters, topics, users, ACLs, billing/)
+  assert.doesNotMatch(prompt, /Apply this Redpanda documentation/)
+  assert.doesNotMatch(prompt, /Read the current project's agent and contributor instructions/)
+})
+
+test('buildAgentHandoffPrompt falls back to the project instruction set for an unrecognized mode', () => {
+  const prompt = buildAgentHandoffPrompt({
+    docsOrigin: 'https://docs.redpanda.com',
+    markdown: '# Configure a provider',
+    markdownUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider.md',
+    mode: 'not-a-real-mode',
+    pageTitle: 'Configure a provider',
+    pageUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider/',
+  })
+
+  assert.match(prompt, /^# Apply this Redpanda documentation/)
+  assert.match(prompt, /Work in the current project\./)
+})
+
+test('buildAgentHandoffPrompt falls back to project mode for inherited Object.prototype keys', () => {
+  for (const mode of ['constructor', 'toString', 'hasOwnProperty', '__proto__']) {
+    const prompt = buildAgentHandoffPrompt({
+      docsOrigin: 'https://docs.redpanda.com',
+      markdown: '# Configure a provider',
+      markdownUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider.md',
+      mode,
+      pageTitle: 'Configure a provider',
+      pageUrl: 'https://docs.redpanda.com/agentic-data-plane/gateway/configure-provider/',
+    })
+
+    assert.match(prompt, /^# Apply this Redpanda documentation/, `mode "${mode}" should fall back to project`)
+    assert.match(prompt, /Work in the current project\./, `mode "${mode}" should fall back to project`)
+  }
 })
 
 test('buildAgentHandoffPrompt derives the component export without parsing footer copy', () => {

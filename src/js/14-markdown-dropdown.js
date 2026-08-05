@@ -35,6 +35,7 @@
     const items = dropdown.querySelectorAll('.markdown-dropdown-item')
     const markdownUrl = dropdown.dataset.markdownUrl
     const componentName = dropdown.dataset.componentName
+    const agentHandoffMode = dropdown.dataset.agentHandoffMode
 
     if (!toggle || !menu || !markdownUrl) {
       return
@@ -62,7 +63,7 @@
             setOpen(false)
           }, 2500)
         } else if (action === 'copy-agent') {
-          handleCopyAgent(markdownUrl, componentName, item).then(function (didCopy) {
+          handleCopyAgent(markdownUrl, componentName, agentHandoffMode, item).then(function (didCopy) {
             if (didCopy) {
               setTimeout(function () {
                 setOpen(false)
@@ -177,7 +178,7 @@
   /**
    * Copy a complete agent handoff with the current documentation section inline.
    */
-  function handleCopyAgent (markdownUrl, componentName, button) {
+  function handleCopyAgent (markdownUrl, componentName, mode, button) {
     const buildAgentHandoffPrompt = window.RedpandaDocsAgentHandoff?.buildAgentHandoffPrompt
     if (typeof buildAgentHandoffPrompt !== 'function') {
       console.error('Could not copy agent handoff: prompt builder is unavailable.')
@@ -203,6 +204,7 @@
           docsOrigin: window.location.origin,
           markdown,
           markdownUrl: absoluteMarkdownUrl,
+          mode,
           pageTitle,
           pageUrl,
           sectionAnchor,
