@@ -198,7 +198,15 @@
 
     showUser(null)
     fetch('/auth/me', { credentials: 'include' })
-      .then(function (res) { return res.ok ? res.json() : null })
+      .then(function (res) {
+        // 401 is authoritative: the session is gone (expired, or the __Host-
+        // session-cookie rename orphaned the old cookie) while the JS-readable
+        // hint survived. Clear the stale hint + cache and re-render signed-out so
+        // we don't show a fake 'Signed in' over a dead session. (Network errors
+        // fall through and keep the optimistic state.)
+        if (res.status === 401) { clearStaleAuth(); return null }
+        return res.ok ? res.json() : null
+      })
       .then(function (me) {
         if (!me) return
         showUser(me)
@@ -207,6 +215,17 @@
         } catch (e) { /* private browsing */ }
       })
       .catch(function () { /* header still shows generic signed-in state */ })
+  }
+
+  // Clear the JS-readable hint + cached identity when an authoritative source
+  // says we're not signed in, then re-render to the signed-out state.
+  function clearStaleAuth () {
+    try {
+      document.cookie = 'rp_docs_auth=; Path=/; Max-Age=0; Secure; SameSite=Lax'
+      sessionStorage.removeItem(CACHE_KEY)
+      sessionStorage.removeItem(CACHE_KEY + '-hint')
+    } catch (e) { /* ignore */ }
+    render()
   }
 
   // Drop the cached identity whenever the login state flips (login/logout)
@@ -295,8 +314,14 @@
   // first — reuse it. Re-render so the sign-in entry appears once the probe
   // confirms the backend is present (window.__KAPA_LOGIN_URL now set).
   window.addEventListener('kapa-session', function (e) {
+    var authed = !!(e.detail && e.detail.authenticated)
+    // An authoritative 401 carries a login_url (getSessionToken); a bare
+    // authenticated:false with no loginUrl is a network error / absent backend and
+    // must NOT clear the hint. If the probe authoritatively says not-signed-in but
+    // the hint survived, it's a stale/orphaned session -> clear it.
+    if (!authed && e.detail && e.detail.loginUrl && hasAuthHint()) { clearStaleAuth(); return }
     render()
-    if (e.detail && e.detail.authenticated && e.detail.user) {
+    if (authed && e.detail && e.detail.user) {
       showUser(e.detail.user)
       try {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify({ email: e.detail.user.email || null }))
