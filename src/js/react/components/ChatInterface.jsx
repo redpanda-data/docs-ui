@@ -21,6 +21,10 @@ import { Answer, Toast } from './chatShared.jsx'
 // helper in chat-panel.hbs) so they showcase the agent's tools in the context
 // of the product being read. This JS default is only a fallback if the global
 // is missing (e.g. an older host page).
+// sessionStorage key for the active conversation, so navigating between docs
+// pages (full reloads) resumes the same thread instead of starting fresh.
+const ACTIVE_THREAD_KEY = 'kapa-active-thread'
+
 const AGENT_EXAMPLES_FALLBACK = [
   'Write and test a Bloblang mapping that flattens nested JSON',
   "What's the latest Redpanda Streaming version?",
@@ -283,19 +287,42 @@ export default function ChatInterface() {
     sendMessage,
     stopGeneration,
     resetConversation,
+    resumeThread,
     approveToolCall,
     rejectToolCall,
     historyDisabled,
   } = useAgentChat()
 
   // Expose the live thread ID so the feedback tool can reference the
-  // conversation without pasting its contents into the form
+  // conversation without pasting its contents into the form. Also persist it
+  // per browser session so navigating between docs pages — which are full page
+  // reloads on this static (Antora) site — reopens the SAME conversation
+  // instead of starting a fresh one. sessionStorage is per-tab by design: a new
+  // tab still starts clean, and "New chat" clears it (see handleReset).
   useEffect(() => {
     window.__KAPA_THREAD_ID = threadId
+    if (threadId) {
+      try { sessionStorage.setItem(ACTIVE_THREAD_KEY, threadId) } catch { /* storage unavailable */ }
+    }
     return () => {
       delete window.__KAPA_THREAD_ID
     }
   }, [threadId])
+
+  // On mount, reopen the last conversation from this session (if any) so the
+  // drawer resumes where you left off after navigating. Runs once; a
+  // missing/deleted thread just clears the stale pointer so we don't retry.
+  const didResumeRef = useRef(false)
+  useEffect(() => {
+    if (didResumeRef.current || authenticated !== true || typeof resumeThread !== 'function') return
+    let stored = null
+    try { stored = sessionStorage.getItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ }
+    if (!stored || stored === threadId) return
+    didResumeRef.current = true
+    resumeThread(stored)
+      .then(() => setHasInteracted(true))
+      .catch(() => { try { sessionStorage.removeItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ } })
+  }, [authenticated, resumeThread, threadId])
 
   // A resumed or in-flight conversation should show the conversation view
   useEffect(() => {
@@ -456,6 +483,9 @@ export default function ChatInterface() {
 
   const handleReset = () => {
     resetConversation()
+    // Starting a new chat drops the resume pointer, so navigating away doesn't
+    // reopen the conversation we just left.
+    try { sessionStorage.removeItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ }
     setMessage('')
     setHasInteracted(false)
     setShowScrollDown(false)
