@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Component } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AgentProvider } from '@kapaai/agent-react'
 import { KapaProvider } from '@kapaai/react-sdk'
@@ -249,6 +249,27 @@ function useSession () {
   return session
 }
 
+// Top-level boundary ABOVE the Kapa SDK providers: the per-interface boundaries
+// live inside ChatInterface/ChatSdkInterface and can't catch a render-phase throw
+// from AgentProvider/KapaProvider or the useAgentChat/useChat hooks. Without this,
+// such a throw unmounts the whole drawer root. Contained to the drawer either way
+// (separate React root), but this degrades to a message instead of a blank panel.
+class ErrorBoundary extends Component {
+  constructor (props) { super(props); this.state = { hasError: false } }
+  static getDerivedStateFromError () { return { hasError: true } }
+  componentDidCatch (err, info) { console.error('AskAI render error:', err, info) }
+  render () {
+    if (this.state.hasError) {
+      return (
+        <div className="chat-container">
+          <div className="error-boundary">Ask AI is temporarily unavailable. Please refresh the page.</div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function App () {
   const colorScheme = useSiteColorScheme()
   const { authenticated, user, loginUrl } = useSession()
@@ -303,7 +324,7 @@ function mount () {
   if (mountEl && !mountEl.dataset.mounted) {
     mountEl.dataset.mounted = 'true'
     probeSession()
-    createRoot(mountEl).render(<App />)
+    createRoot(mountEl).render(<ErrorBoundary><App /></ErrorBoundary>)
   }
 }
 
