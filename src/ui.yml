@@ -1,6 +1,8 @@
 static_files:
 - blobl.wasm
 - console-config-migrator.wasm
+- iceberg-engine.wasm
+- iceberg-engine.js
 - ask-ai.html
 - redpanda-properties.json
 - assets/**

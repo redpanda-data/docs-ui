@@ -1,0 +1,183 @@
+/*
+ * Iceberg Mode Explorer — interactive docs tool.
+ * Built on the site's semantic theme tokens (vars.css / dark-mode.css) so it
+ * follows the docs light/dark theme automatically. Rendered by
+ * src/js/27-iceberg-explorer.js into the `[iceberg-explorer]` block mount point.
+ */
+
+.iceberg-explorer {
+  --ice-accent: var(--product-color, #e2401b);
+  --ice-muted: var(--color-gray-70, #6b7280);
+  --ice-border: var(--panel-border-color, #d0d3d9);
+  --ice-panel: var(--panel-background, #f7f8fa);
+  --ice-pre: var(--pre-background, #f0f1f4);
+  --ice-code: var(--code-font-color, var(--body-font-color));
+  --ice-green: #1a7f5a;
+  --ice-blue: #2563c9;
+  --ice-yellow: #9a6b00;
+  --ice-purple: #7c3aed;
+  --ice-cyan: #0e7490;
+  font-size: var(--secondary-font-size, 0.9rem);
+  margin: 1.25rem 0;
+}
+[data-theme="dark"] .iceberg-explorer {
+  --ice-green: #4ade80;
+  --ice-blue: #60a5fa;
+  --ice-yellow: #facc15;
+  --ice-purple: #c084fc;
+  --ice-cyan: #22d3ee;
+}
+
+.iceberg-explorer .ice-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .iceberg-explorer .ice-grid { grid-template-columns: 1fr; }
+}
+
+.iceberg-explorer .ice-card {
+  background: var(--ice-panel);
+  border: 1px solid var(--ice-border);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+.iceberg-explorer .ice-card h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ice-muted);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--ice-border);
+}
+
+.iceberg-explorer .ice-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ice-cyan);
+  margin-bottom: 0.4rem;
+}
+
+.iceberg-explorer .ice-radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+}
+.iceberg-explorer .ice-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--ice-border);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.iceberg-explorer .ice-radio:hover { border-color: var(--ice-accent); }
+.iceberg-explorer .ice-radio input { accent-color: var(--ice-accent); margin: 0; }
+
+.iceberg-explorer .ice-textrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.iceberg-explorer .ice-textrow label {
+  font-size: 0.75rem;
+  color: var(--ice-muted);
+  min-width: 88px;
+  text-align: right;
+}
+.iceberg-explorer .ice-textrow input {
+  flex: 1;
+  background: var(--ice-pre);
+  border: 1px solid var(--ice-border);
+  border-radius: 5px;
+  padding: 0.3rem 0.5rem;
+  color: var(--body-font-color);
+  font-family: var(--code-font-family, monospace);
+  font-size: 0.78rem;
+}
+.iceberg-explorer .ice-textrow input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.iceberg-explorer .ice-configbar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: var(--ice-panel);
+  border: 1px solid var(--ice-border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+.iceberg-explorer .ice-configlabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ice-muted);
+  white-space: nowrap;
+}
+.iceberg-explorer .ice-configstr {
+  flex: 1;
+  font-family: var(--code-font-family, monospace);
+  font-size: 0.9rem;
+  color: var(--ice-green);
+  word-break: break-all;
+  background: none;
+  padding: 0;
+}
+.iceberg-explorer .ice-copy {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--ice-border);
+  color: var(--ice-muted);
+  border-radius: 6px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.iceberg-explorer .ice-copy:hover { border-color: var(--ice-accent); color: var(--ice-accent); }
+.iceberg-explorer .ice-copy.ice-copied { border-color: var(--ice-green); color: var(--ice-green); }
+
+.iceberg-explorer .ice-tree {
+  font-family: var(--code-font-family, monospace);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+  background: none;
+  color: var(--ice-code);
+}
+.iceberg-explorer .ice-tree .field-name { color: var(--ice-blue); }
+.iceberg-explorer .ice-tree .field-type { color: var(--ice-green); }
+.iceberg-explorer .ice-tree .field-req { color: var(--ice-muted); font-size: 0.72rem; }
+.iceberg-explorer .ice-tree .struct-brace { color: var(--ice-muted); }
+.iceberg-explorer .ice-tree .comment { color: var(--ice-muted); font-style: italic; }
+.iceberg-explorer .ice-tree .field-val-str { color: var(--ice-green); }
+.iceberg-explorer .ice-tree .field-val-num { color: var(--ice-yellow); }
+.iceberg-explorer .ice-tree .field-val-bin { color: var(--ice-purple); }
+
+.iceberg-explorer .ice-tag {
+  display: inline-block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+.iceberg-explorer .ice-tag.ice-new { background: rgba(124, 58, 237, 0.15); color: var(--ice-purple); }
+.iceberg-explorer .ice-tag.ice-legacy { background: rgba(154, 107, 0, 0.15); color: var(--ice-yellow); }
+.iceberg-explorer .ice-tag.ice-engine-real { background: rgba(26, 127, 90, 0.15); color: var(--ice-green); text-transform: none; letter-spacing: 0; }
+.iceberg-explorer .ice-tag.ice-engine-preview { background: rgba(107, 114, 128, 0.15); color: var(--ice-muted); text-transform: none; letter-spacing: 0; }

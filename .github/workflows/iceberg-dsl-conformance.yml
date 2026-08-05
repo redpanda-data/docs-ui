@@ -1,0 +1,65 @@
+name: Iceberg DSL conformance
+
+# Verifies the Iceberg Mode Explorer's config-string builder (pure JS in
+# src/js/27-iceberg-explorer.js) still matches Redpanda's authoritative DSL
+# serialization, whose expectations live in
+# src/v/model/tests/iceberg_mode_test.cc in the redpanda repo.
+#
+# The unit test (tests/iceberg-dsl/conformance-test.js) always runs. On a
+# schedule / manual dispatch it also fetches the current C++ test file from a
+# chosen redpanda ref and greps for the expected format strings, so upstream
+# DSL changes surface as a failing check even before anyone updates the JS.
+
+on:
+  pull_request:
+    paths:
+      - 'src/js/27-iceberg-explorer.js'
+      - 'tests/iceberg-dsl/**'
+  workflow_dispatch:
+    inputs:
+      redpanda_ref:
+        description: 'redpanda ref to diff the DSL vectors against'
+        required: false
+        default: 'dev'
+  schedule:
+    - cron: '0 6 * * 1' # weekly: catch upstream DSL drift
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run DSL conformance vectors
+        run: npm run test:iceberg-dsl
+
+      - name: Cross-check vectors against upstream iceberg_mode_test.cc
+        if: github.event_name != 'pull_request'
+        env:
+          REF: ${{ github.event.inputs.redpanda_ref || 'dev' }}
+        run: |
+          set -euo pipefail
+          url="https://raw.githubusercontent.com/redpanda-data/redpanda/$REF/src/v/model/tests/iceberg_mode_test.cc"
+          curl -fsSL "$url" -o upstream_iceberg_mode_test.cc
+          # Merge C++ adjacent string-literal concatenation ("a" "b" -> "ab"),
+          # including across line breaks, so long expected strings that the test
+          # file wraps still match.
+          norm="$(tr -d '\n' < upstream_iceberg_mode_test.cc | sed 's/"[[:space:]]*"//g')"
+          # Every expected string in our conformance vectors must still appear
+          # verbatim in the upstream C++ format tests.
+          missing=0
+          while IFS= read -r expected; do
+            [ -z "$expected" ] && continue
+            if ! printf '%s' "$norm" | grep -qF -- "$expected"; then
+              echo "::warning::Expected DSL string not found upstream ($REF): $expected"
+              missing=$((missing+1))
+            fi
+          done < <(grep -oE "expect: '[^']+'" tests/iceberg-dsl/conformance-test.js | sed "s/expect: '//; s/'$//")
+          if [ "$missing" -gt 0 ]; then
+            echo "$missing expected DSL string(s) no longer present upstream — the DSL may have changed; re-sync tests/iceberg-dsl vectors and update buildConfigString."
+            exit 1
+          fi
+          echo "All DSL vectors still present in upstream iceberg_mode_test.cc @ $REF"
