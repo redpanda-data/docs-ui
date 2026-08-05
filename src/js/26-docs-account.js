@@ -245,6 +245,10 @@
       upstream_failed: 'Sorry, sign-in couldn’t be completed. Please try again.',
       work_email_required: 'Please sign in with your work Redpanda Cloud account.',
       state_mismatch: 'Your sign-in link expired. Please try again.',
+      // Auth0 access_denied: the account isn't a member of a required Redpanda
+      // Cloud organization (or declined consent). Retrying the same account won't
+      // help, so say why instead of a generic "try again" loop.
+      access_denied: 'Your account doesn’t have access to the docs AI. It must belong to a Redpanda Cloud organization.',
     }
     var toast = document.createElement('div')
     toast.setAttribute('role', 'alert')

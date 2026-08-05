@@ -31,7 +31,9 @@ export function Toast ({ message, type = 'success', onDismiss }) {
 
   const isError = type === 'error'
   return (
-    <div className={`chat-toast ${isError ? 'chat-toast-error' : 'chat-toast-success'}`}>
+    // Announced to assistive tech: the toast is the sole feedback for chat
+    // actions/failures. Errors are assertive (interrupt), success is polite.
+    <div role={isError ? 'alert' : 'status'} aria-live={isError ? 'assertive' : 'polite'} className={`chat-toast ${isError ? 'chat-toast-error' : 'chat-toast-success'}`}>
       <span className="chat-toast-icon">
         {isError ? <AlertCircle size={16} /> : <Check size={16} />}
       </span>

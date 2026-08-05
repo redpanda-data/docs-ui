@@ -799,7 +799,7 @@ export default function ChatInterface() {
                   {toolCallBlocks.map((block, bi) => (
                     <div key={bi} className="tool-calls">
                       <ToolCallGroup>
-                        {block.toolCalls.map((tc) => (
+                        {(block.toolCalls || []).map((tc) => (
                           <ToolCallCard
                             key={tc.id}
                             toolCall={{ ...tc, displayName: tc.displayName || TOOL_DISPLAY_NAMES[tc.name] }}
