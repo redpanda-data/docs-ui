@@ -90,6 +90,14 @@
       btn.style.display = 'none'
     })
 
+    // Move focus into the panel so keyboard/AT users land inside it on open
+    // (pairs with the focus-restore on close). The close control is part of the
+    // static panel chrome, present before the React drawer mounts.
+    if (!restored) {
+      var closeBtn = chatPanel.querySelector('[data-chat-action="close"]')
+      if (closeBtn && typeof closeBtn.focus === 'function') { try { closeBtn.focus() } catch (e) { /* ignore */ } }
+    }
+
     // Persist state to localStorage
     try {
       localStorage.setItem(STORAGE_KEY, 'true')
@@ -101,7 +109,6 @@
   function closePanel () {
     isOpen = false
     chatPanel.classList.remove('is-open')
-    chatPanel.setAttribute('aria-hidden', 'true')
     if (main) main.classList.remove('chat-push')
 
     // Show all Ask AI buttons if they exist
@@ -109,6 +116,13 @@
     askAiBtns.forEach(function (btn) {
       btn.style.display = ''
     })
+
+    // Move focus to the (now-visible) opener BEFORE hiding the panel, so a
+    // keyboard/AT user who activated the in-panel Close control isn't stranded
+    // inside an aria-hidden subtree (WCAG 2.4.3 / 4.1.2). Then hide the panel.
+    var opener = document.querySelector('[data-action="open-chat"]')
+    if (opener && typeof opener.focus === 'function') { try { opener.focus() } catch (e) { /* ignore */ } }
+    chatPanel.setAttribute('aria-hidden', 'true')
 
     // Remove from localStorage (panel explicitly closed)
     try {
