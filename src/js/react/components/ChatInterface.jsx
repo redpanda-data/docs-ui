@@ -197,6 +197,13 @@ export default function ChatInterface() {
   const [suggestions, setSuggestions]       = useState([])
   const [agentExamples, setAgentExamples]   = useState(AGENT_EXAMPLES_FALLBACK)
   const [hasInteracted, setHasInteracted]   = useState(false)
+  // Read the stored thread pointer SYNCHRONOUSLY on first render so a navigating
+  // user who has a conversation to resume sees a loading state instead of a flash
+  // of the welcome screen / default questions before resumeThread() resolves.
+  // Cleared once the resume settles (success, failure, or nothing to resume).
+  const [resuming, setResuming]             = useState(() => {
+    try { return !!sessionStorage.getItem(ACTIVE_THREAD_KEY) } catch { return false }
+  })
   const [toast, setToast]                   = useState(null)
   // null = session state unknown (probe in flight), false = anonymous, true = signed in
   const [authenticated, setAuthenticated]   = useState(() =>
@@ -314,14 +321,20 @@ export default function ChatInterface() {
   // missing/deleted thread just clears the stale pointer so we don't retry.
   const didResumeRef = useRef(false)
   useEffect(() => {
-    if (didResumeRef.current || authenticated !== true || typeof resumeThread !== 'function') return
+    if (didResumeRef.current || authenticated !== true || typeof resumeThread !== 'function') {
+      // Still probing (authenticated !== true) keeps the loading state up. But if
+      // we're signed in and the SDK has no resumeThread, don't strand the skeleton.
+      if (authenticated === true && typeof resumeThread !== 'function') setResuming(false)
+      return
+    }
     let stored = null
     try { stored = sessionStorage.getItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ }
-    if (!stored || stored === threadId) return
+    if (!stored || stored === threadId) { setResuming(false); return }
     didResumeRef.current = true
     resumeThread(stored)
       .then(() => setHasInteracted(true))
       .catch(() => { try { sessionStorage.removeItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ } })
+      .finally(() => setResuming(false))
   }, [authenticated, resumeThread, threadId])
 
   // A resumed or in-flight conversation should show the conversation view
@@ -726,8 +739,21 @@ export default function ChatInterface() {
           </div>
         )}
 
-        {/* Welcome screen - shown before interaction */}
-        {authenticated === true && !hasInteracted && !showHistory && (
+        {/* Resuming a prior conversation from this session: show a loading state
+            (reuses the tier-probe spinner + reduced-motion handling) instead of
+            flashing the welcome screen / default questions before the thread
+            history arrives. */}
+        {authenticated === true && !hasInteracted && !showHistory && resuming && (
+          <div className="welcome-screen">
+            <div className="chat-tier-loading" aria-hidden="true" />
+            <p className="welcome-description" role="status" style={{ marginTop: '16px' }}>
+              Restoring your conversation…
+            </p>
+          </div>
+        )}
+
+        {/* Welcome screen - shown before interaction (not while resuming) */}
+        {authenticated === true && !hasInteracted && !showHistory && !resuming && (
           <div className="welcome-screen">
             <div className="welcome-icon">
               <Sparkles size={28} />
