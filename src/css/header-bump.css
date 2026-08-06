@@ -989,6 +989,11 @@ html[data-theme="dark"] .tb-account-email {
   position: relative;
   width: 100%;
   max-width: 440px;
+  /* Cap to the viewport (the .tb-signin-modal padding is 20px each side) and
+     scroll internally so the CTA / close stay reachable on short or landscape
+     screens where the title + feature list + footer would otherwise overflow. */
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   background: #fff;
   color: #181818;
   border-radius: 14px;

@@ -352,8 +352,10 @@
   flex-direction: column;
   flex-shrink: 0;
   /* Explicit: page-level styles for the legacy home-page chat (home.css
-     .chat-footer-wrapper rules) must not leak into the panel */
-  position: static;
+     .chat-footer-wrapper rules) must not leak into the panel. relative (not
+     static) so the absolute .scroll-down-button is contained here rather than
+     falling back to .chat-scroll and being clipped by its overflow:hidden. */
+  position: relative;
   z-index: auto;
   max-width: none;
   width: auto;
@@ -361,7 +363,7 @@
 
 #chat-panel-kapa-root .chat-footer-wrapper.fixed-bottom {
   border-top: 1px solid var(--kapa-border, #e5e5e5);
-  position: static;
+  position: relative;
   bottom: auto;
   padding: 0;
   background: var(--kapa-surface, #fff);

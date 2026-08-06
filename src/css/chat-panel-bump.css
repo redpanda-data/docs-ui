@@ -351,8 +351,10 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  /* Explicit: page-level styles must not leak into the panel */
-  position: static;
+  /* Explicit: page-level styles must not leak into the panel. relative (not
+     static) so the absolute .scroll-down-button is contained here rather than
+     falling back to .chat-scroll and being clipped by its overflow:hidden. */
+  position: relative;
   z-index: auto;
   max-width: none;
   width: auto;
@@ -360,7 +362,7 @@
 
 #chat-panel-kapa-root .chat-footer-wrapper.fixed-bottom {
   border-top: 1px solid var(--grey-100-new, #e5e5e5);
-  position: static;
+  position: relative;
   bottom: auto;
   padding: 0;
   background: #fff;
