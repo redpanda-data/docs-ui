@@ -1,0 +1,44 @@
+= Enterprise Macro Test
+:page-layout: default
+
+Test page for the `enterprise` inline macro from docs-extensions-and-macros (DOC-887). The markup below replicates the macro's exact rendered output so the `enterprise-feature` class can be styled in this UI bundle.
+
+== Default output
+
+The macro `enterprise:Continuous Data Balancing[]` renders:
+
+++++
+<p>This cluster uses <span class="enterprise-feature" title="Continuous Data Balancing requires an Enterprise Edition license."><a href="#" class="xref page">Continuous Data Balancing</a></span> to spread partitions evenly.</p>
+++++
+
+== With a feature xref
+
+The macro `enterprise:Tiered Storage[xref=manage:tiered-storage.adoc]` renders:
+
+++++
+<p>Enable <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="#" class="xref page">Tiered Storage</a></span> to offload data to object storage.</p>
+++++
+
+== Without a link
+
+With the `enterprise-links` attribute set to `false`:
+
+++++
+<p>Configure <span class="enterprise-feature" title="Audit Logging requires an Enterprise Edition license.">Audit Logging</span> on a SASL listener.</p>
+++++
+
+== Data-attribute tooltip variant
+
+With `enterprise-tooltip` set to `true`, the tooltip renders as `data-enterprise-tooltip` for UI-driven tooltips instead of the native `title`:
+
+++++
+<p>Set up <span class="enterprise-feature" data-enterprise-tooltip="Iceberg Topics requires an Enterprise Edition license."><a href="#" class="xref page">Iceberg Topics</a></span> for your lakehouse.</p>
+++++
+
+== Styling notes
+
+Suggested treatment for `.enterprise-feature`, consistent with the ticket's goal that readers learn the visual representation of an enterprise feature:
+
+* A subtle distinguishing mark, such as a small lock or star glyph before the term, or a dotted underline in the brand accent color.
+* Hover styling for the `data-enterprise-tooltip` variant, mirroring the glossary term tooltip behavior.
+* No treatment should reduce the readability of the link text itself.
