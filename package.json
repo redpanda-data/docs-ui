@@ -23,7 +23,6 @@
     "@docsearch/js": "^3.3.3",
     "@fontsource/roboto": "~4.5",
     "@fontsource/roboto-mono": "~4.5",
-    "@kapaai/react-sdk": "^0.9.0",
     "autoprefixer": "~9.7",
     "babelify": "^10.0.0",
     "browser-pack-flat": "~3.4",
@@ -37,6 +36,7 @@
     "eslint-plugin-node": "~11.1",
     "eslint-plugin-promise": "~4.2",
     "eslint-plugin-standard": "~4.0",
+    "express": "^4.18.0",
     "fancy-log": "~1.3",
     "fs-extra": "~8.1",
     "gulp": "~4.0",
@@ -63,7 +63,6 @@
     "postcss-url": "~8.0",
     "prettier-eslint": "~9.0",
     "puppeteer": "^21.0.0",
-    "express": "^4.18.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "require-directory": "~2.1",
@@ -83,5 +82,9 @@
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
     "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
     "serve:playground": "npx serve ."
+  },
+  "dependencies": {
+    "@kapaai/agent-react": "^1.0.0",
+    "@kapaai/react-sdk": "^0.9.10"
   }
 }
