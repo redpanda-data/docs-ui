@@ -8,6 +8,14 @@
 
   if (!chatPanel) return
 
+  // The panel is closed at load. `aria-hidden`+`transform:translateX(100%)` hide
+  // it visually and from AT, but its controls (Close/Full-screen and, once React
+  // mounts, the textarea/Submit/sign-in) stay in the keyboard tab order off-screen
+  // — a keyboard user Tabs into invisible controls on every docs page (WCAG
+  // 2.4.3/4.1.2). `inert` removes the whole subtree from focus AND the a11y tree;
+  // openPanel/closePanel toggle it in lockstep with `is-open`.
+  if ('inert' in chatPanel) chatPanel.inert = true
+
   // Storage keys for persisting panel state
   var STORAGE_KEY = 'redpanda-chat-panel-open'
   var FULLSCREEN_KEY = 'redpanda-chat-panel-fullscreen'
@@ -61,12 +69,21 @@
   // Used by playground error buttons and code block Ask AI buttons
   window.openChatWithQuery = function (query, autoSubmit) {
     openPanel()
-    // Wait for panel animation and React to be ready, then submit query
-    setTimeout(function () {
+    // submitChatQuery is registered only once a chat interface component mounts.
+    // During the initial session probe App renders a spinner and mounts neither
+    // interface, so a fixed 100ms timer can fire before it exists and silently
+    // drop the query. Poll on a short interval up to a bounded deadline instead.
+    var waited = 0
+    var step = 100
+    var deadline = 8000 // matches the session-probe abort budget
+    var timer = setInterval(function () {
       if (typeof window.submitChatQuery === 'function') {
+        clearInterval(timer)
         window.submitChatQuery(query, autoSubmit !== false)
+      } else if ((waited += step) >= deadline) {
+        clearInterval(timer)
       }
-    }, 100)
+    }, step)
   }
 
   // Functions
@@ -74,6 +91,7 @@
     isOpen = true
     chatPanel.classList.add('is-open')
     chatPanel.setAttribute('aria-hidden', 'false')
+    if ('inert' in chatPanel) chatPanel.inert = false
     if (main) main.classList.add('chat-push')
 
     // Signed-out panels show a sign-in prompt — pre-warm the login backend
@@ -123,6 +141,10 @@
     var opener = document.querySelector('[data-action="open-chat"]')
     if (opener && typeof opener.focus === 'function') { try { opener.focus() } catch (e) { /* ignore */ } }
     chatPanel.setAttribute('aria-hidden', 'true')
+    // Focus is now on the opener (outside the panel), so making the subtree inert
+    // won't strand the active element. Pulls all panel controls back out of the
+    // tab order until the next open.
+    if ('inert' in chatPanel) chatPanel.inert = true
 
     // Remove from localStorage (panel explicitly closed)
     try {

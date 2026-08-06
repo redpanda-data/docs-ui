@@ -16,20 +16,30 @@ import { safeHeap } from './heap.js'
  * and mirrored on window.__KAPA_AUTHENTICATED / window.__KAPA_USER so
  * components mounting after the broadcast (and the feedback tool) can read it.
  */
-function announceSession (authenticated, user, loginUrl) {
+// authoritative: true when the session state comes from a definitive backend
+// answer (a 200, or a clean 401 that carries — or deliberately omits — a
+// login_url). false when we're ASSUMING signed-out after a transient/opaque
+// probe failure. Consumers that take destructive action on "signed out" (e.g.
+// the header clearing a stale auth hint) must act only on authoritative signals,
+// so a network blip can't flip a genuinely-signed-in user to signed-out.
+function announceSession (authenticated, user, loginUrl, authoritative = true) {
   window.__KAPA_AUTHENTICATED = authenticated
   window.__KAPA_USER = user || null
   window.__KAPA_LOGIN_URL = loginUrl || null
   window.dispatchEvent(
     new CustomEvent('kapa-session', {
-      detail: { authenticated, user: user || null, loginUrl: loginUrl || null },
+      detail: { authenticated, user: user || null, loginUrl: loginUrl || null, authoritative },
     })
   )
   try {
-    sessionStorage.setItem(
-      'kapa-session-state',
-      JSON.stringify({ authenticated, user: user || null, loginUrl: loginUrl || null })
-    )
+    // Persist only authoritative states. A cached transient-assumption must not
+    // replay as if it were a definitive answer on the next pageview.
+    if (authoritative) {
+      sessionStorage.setItem(
+        'kapa-session-state',
+        JSON.stringify({ authenticated, user: user || null, loginUrl: loginUrl || null })
+      )
+    }
   } catch (err) { /* private browsing */ }
 }
 
@@ -82,12 +92,20 @@ function probeSession () {
       // Login state changed since the cache was written — fall through
     } catch (err) { /* fall through to a fresh probe */ }
   }
-  // Establish the tier. getSessionToken announces true (200) or false (clean
-  // 401). Any other failure — missing backend, network error, 5xx — should
-  // still land the user on the anonymous Chat SDK tier rather than hang the
-  // drawer on the loading state.
+  // Establish the tier. getSessionToken announces on a 200 (authenticated) or a
+  // clean 401 (signed-out; carries the real login_url, or null when auth is
+  // deliberately turned off / "coming soon"). Any OTHER failure — network error,
+  // 5xx, abort — lands here having announced nothing (__KAPA_AUTHENTICATED still
+  // undefined). That is a transient blip, NOT the coming-soon signal: the auth
+  // backend ships in the same deploy as this bundle, so a truly "absent" backend
+  // isn't a real production state. Degrade to the anonymous Chat SDK tier, but
+  // keep the sign-in affordance visible pointing at the default /login rather
+  // than hiding it as if auth were off — only an authoritative 401 with
+  // login_url===null should hide sign-in. Self-heals on the next probe.
   getSessionToken().catch(() => {
-    if (window.__KAPA_AUTHENTICATED === undefined) announceSession(false, null, null)
+    if (window.__KAPA_AUTHENTICATED === undefined) {
+      announceSession(false, null, window.KAPA_LOGIN_URL || '/login', false)
+    }
   })
 }
 

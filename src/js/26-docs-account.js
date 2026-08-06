@@ -315,11 +315,12 @@
   // confirms the backend is present (window.__KAPA_LOGIN_URL now set).
   window.addEventListener('kapa-session', function (e) {
     var authed = !!(e.detail && e.detail.authenticated)
-    // An authoritative 401 carries a login_url (getSessionToken); a bare
-    // authenticated:false with no loginUrl is a network error / absent backend and
-    // must NOT clear the hint. If the probe authoritatively says not-signed-in but
-    // the hint survived, it's a stale/orphaned session -> clear it.
-    if (!authed && e.detail && e.detail.loginUrl && hasAuthHint()) { clearStaleAuth(); return }
+    // Clear a stale auth hint ONLY on an authoritative not-signed-in answer (a
+    // clean 401 from getSessionToken, detail.authoritative===true). A transient/
+    // opaque probe failure now also carries a loginUrl (so sign-in stays visible)
+    // but sets authoritative:false — we must NOT clear the hint on a blip, or a
+    // genuinely-signed-in user gets flipped to signed-out by one network hiccup.
+    if (!authed && e.detail && e.detail.authoritative && e.detail.loginUrl && hasAuthHint()) { clearStaleAuth(); return }
     render()
     if (authed && e.detail && e.detail.user) {
       showUser(e.detail.user)
