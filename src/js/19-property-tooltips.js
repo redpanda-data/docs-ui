@@ -91,7 +91,14 @@
     }
 
     var CACHE_KEY = 'redpanda-properties-cache'
+    // Missing-resource marker lives under its own key so it can never
+    // overwrite a valid cached dataset, and it is only written for HTTP
+    // 404/410 (the resource does not exist). Transient failures (5xx,
+    // offline, parse errors) are not cached at all: the next page view
+    // simply retries.
+    var MISSING_CACHE_KEY = 'redpanda-properties-missing'
     var CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
+    var MISSING_CACHE_TTL = 60 * 60 * 1000 // 1 hour: re-check missing resources so a fix deploy is picked up
     // Use latest-redpanda-tag meta tag for cache versioning
     var cacheVersion = getLatestRedpandaTag() || 'unknown'
 
@@ -111,6 +118,21 @@
             return Promise.resolve(propertiesData)
           }
         }
+        var missing = localStorage.getItem(MISSING_CACHE_KEY)
+        if (missing) {
+          var missingParsed = JSON.parse(missing)
+          if (missingParsed.version === cacheVersion && Date.now() - missingParsed.timestamp < MISSING_CACHE_TTL) {
+            // The resource is known not to exist for this version: resolve to
+            // an empty lookup instead of re-requesting a 404 on every page view
+            propertiesData = {}
+            propertiesLoading = false
+            propertiesLoadQueue.forEach(function (resolve) {
+              resolve(propertiesData)
+            })
+            propertiesLoadQueue = []
+            return Promise.resolve(propertiesData)
+          }
+        }
       } catch (e) {
         // Ignore cache errors
       }
@@ -119,7 +141,9 @@
     return fetch(url)
       .then(function (response) {
         if (!response.ok) {
-          throw new Error('HTTP ' + response.status)
+          var httpError = new Error('HTTP ' + response.status)
+          httpError.status = response.status
+          throw httpError
         }
         return response.json()
       })
@@ -137,6 +161,7 @@
                 data: propertiesData,
               })
             )
+            localStorage.removeItem(MISSING_CACHE_KEY)
           } catch (e) {
             // localStorage full or unavailable
           }
@@ -182,6 +207,19 @@
         }
 
         console.warn('Property tooltips: Failed to load properties data:', error)
+        if (!isPreviewMode() && (error.status === 404 || error.status === 410)) {
+          try {
+            localStorage.setItem(
+              MISSING_CACHE_KEY,
+              JSON.stringify({
+                version: cacheVersion,
+                timestamp: Date.now(),
+              })
+            )
+          } catch (cacheError) {
+            // localStorage full or unavailable
+          }
+        }
         propertiesLoading = false
         propertiesData = {}
         propertiesLoadQueue.forEach(function (resolve) {
