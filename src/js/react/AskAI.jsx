@@ -104,7 +104,7 @@ function probeSession () {
   // login_url===null should hide sign-in. Self-heals on the next probe.
   getSessionToken().catch(() => {
     if (window.__KAPA_AUTHENTICATED === undefined) {
-      announceSession(false, null, window.KAPA_LOGIN_URL || '/login', false)
+      announceSession(false, null, window.__KAPA_LOGIN_URL || '/login', false)
     }
   })
 }
