@@ -37,8 +37,8 @@ With `enterprise-tooltip` set to `true`, the tooltip renders as `data-enterprise
 
 == Styling notes
 
-Suggested treatment for `.enterprise-feature`, consistent with the ticket's goal that readers learn the visual representation of an enterprise feature:
+The implemented treatment for `.enterprise-feature`:
 
-* A subtle distinguishing mark, such as a small lock or star glyph before the term, or a dotted underline in the brand accent color.
-* Hover styling for the `data-enterprise-tooltip` variant, mirroring the glossary term tooltip behavior.
-* No treatment should reduce the readability of the link text itself.
+* A dotted underline in `--link-highlight-color`, matching the glossary term affordance, applied to the inner link or to the span when links are disabled.
+* A small lock glyph after the term, rendered as an SVG mask filled with `--link-highlight-color`, so dark mode adapts automatically.
+* The `data-enterprise-tooltip` variant is activated as a tippy tooltip by `12-activate-tooltips.js`, mirroring the site's other tooltips. The default `title` variant keeps the native browser tooltip.

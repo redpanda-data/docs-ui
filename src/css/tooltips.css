@@ -10,6 +10,30 @@ a.glossary-term {
   text-decoration: none !important;
 }
 
+/* Enterprise feature terms, emitted by the enterprise inline macro
+   (docs-extensions-and-macros). A dotted underline matches the glossary
+   affordance, and a small lock glyph marks the term as license-gated.
+   Both use --link-highlight-color, so dark mode adapts automatically. */
+.enterprise-feature > a {
+  border-bottom: 2px dotted var(--link-highlight-color);
+  text-decoration: none !important;
+}
+
+.enterprise-feature:not(:has(> a)) {
+  border-bottom: 2px dotted var(--link-highlight-color);
+}
+
+.enterprise-feature::after {
+  content: "";
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.2em;
+  background-color: var(--link-highlight-color);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 1 1 6 0v3H9z"/></svg>') no-repeat center / contain;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 1 1 6 0v3H9z"/></svg>') no-repeat center / contain;
+}
+
 h1 [data-tippy-root],
 h2 [data-tippy-root],
 h3 [data-tippy-root],
