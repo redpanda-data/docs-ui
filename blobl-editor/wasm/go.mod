@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/redpanda-data/benthos/v4 v4.77.0
-	github.com/redpanda-data/connect/v4 v4.103.1
+	github.com/redpanda-data/connect/v4 v4.104.0
 )
 
 require (
@@ -21,7 +21,7 @@ require (
 	github.com/PaesslerAG/jsonpath v0.1.1 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
-	github.com/apache/thrift v0.23.0 // indirect
+	github.com/apache/thrift v0.24.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/benhoyt/goawk v1.31.0 // indirect
 	github.com/bufbuild/prototransform v0.4.0 // indirect
