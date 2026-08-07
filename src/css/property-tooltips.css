@@ -97,8 +97,8 @@ code.has-property-tooltip:focus-visible {
 .property-doc-tooltip .prop-badge-enterprise::before {
   content: "";
   display: inline-block;
-  width: 0.8em;
-  height: 0.8em;
+  width: 0.9em;
+  height: 0.9em;
   margin-right: 0.25em;
   vertical-align: -0.05em;
   background-color: currentColor;

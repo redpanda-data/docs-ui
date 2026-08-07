@@ -27,8 +27,8 @@ a.glossary-term {
 code.is-enterprise-property::after {
   content: "";
   display: inline-block;
-  width: 0.7em;
-  height: 0.7em;
+  width: 0.9em;
+  height: 0.9em;
   margin-left: 0.2em;
   background-color: var(--link-highlight-color);
   -webkit-mask: var(--enterprise-lock-icon) no-repeat center / contain;
