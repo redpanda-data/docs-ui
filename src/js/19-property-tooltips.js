@@ -39,6 +39,21 @@
   }
 
   /**
+   * Get the component-local property pages base URL from meta tag.
+   * head-meta resolves reference:properties/cluster-properties.adoc in the
+   * current page's own component, so cloud pages link to cloud's property
+   * pages, streaming pages to streaming's, and so on.
+   */
+  function getPropertiesPagesUrl () {
+    var meta = document.querySelector('meta[name="properties-pages-url"]')
+    // Ignore unresolved placeholders (the UI preview resolver emits '#').
+    if (meta && meta.content && meta.content.indexOf('cluster-properties') !== -1) {
+      return meta.content
+    }
+    return null
+  }
+
+  /**
    * Get the latest Redpanda tag from meta tag (for cache versioning)
    */
   function getLatestRedpandaTag () {
@@ -280,14 +295,21 @@
       parts.push('<div class="prop-tooltip-range"><strong>Range:</strong> ' + range.join(', ') + '</div>')
     }
 
-    // Link to full documentation (use current page version)
+    // Link to full documentation, relative to the current page's component
     var scope = prop.configScope || 'cluster'
-    var version = getDocVersion()
     // AsciiDoc auto-ID generation: dots are removed, underscores become hyphens
     // e.g., "redpanda.storage.mode" -> "redpandastoragemode"
     // e.g., "log_retention_ms" -> "log-retention-ms"
     var anchor = prop.name.replace(/\./g, '').replace(/_/g, '-')
-    var docUrl = '/' + version + '/reference/properties/' + scope + '-properties/#' + anchor
+    var pagesUrl = getPropertiesPagesUrl()
+    var docUrl
+    if (pagesUrl) {
+      // Swap the scope into the component-resolved cluster-properties URL.
+      docUrl = pagesUrl.replace('cluster-properties', scope + '-properties') + '#' + anchor
+    } else {
+      // Fallback for pages without the meta tag: streaming URL space.
+      docUrl = '/' + getDocVersion() + '/reference/properties/' + scope + '-properties/#' + anchor
+    }
     parts.push('<a href="' + escapeHtml(docUrl) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
     return '<div class="property-doc-tooltip">' + parts.join('') + '</div>'
