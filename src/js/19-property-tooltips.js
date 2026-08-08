@@ -398,6 +398,9 @@
           // Mark as having tooltip (for styling and to avoid re-processing)
           codeEl.classList.add('has-property-tooltip')
           codeEl.classList.add('has-documentation')
+          if (prop.isEnterprise) {
+            codeEl.classList.add('is-enterprise-property')
+          }
           codeEl.style.cursor = 'help'
           codeEl.setAttribute('tabindex', '0')
           codeEl.setAttribute('role', 'button')

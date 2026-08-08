@@ -10,6 +10,31 @@ a.glossary-term {
   text-decoration: none !important;
 }
 
+/* Enterprise feature terms, emitted by the enterprise inline macro
+   (docs-extensions-and-macros). A dotted underline matches the glossary
+   affordance, and a small lock glyph marks the term as license-gated.
+   Both use --link-highlight-color, so dark mode adapts automatically. */
+.enterprise-feature > a {
+  border-bottom: 2px dotted var(--link-highlight-color);
+  text-decoration: none !important;
+}
+
+.enterprise-feature:not(:has(> a)) {
+  border-bottom: 2px dotted var(--link-highlight-color);
+}
+
+.enterprise-feature::after,
+code.is-enterprise-property::after {
+  content: "";
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-left: 0.2em;
+  background-color: var(--link-highlight-color);
+  -webkit-mask: var(--enterprise-lock-icon) no-repeat center / contain;
+  mask: var(--enterprise-lock-icon) no-repeat center / contain;
+}
+
 h1 [data-tippy-root],
 h2 [data-tippy-root],
 h3 [data-tippy-root],
