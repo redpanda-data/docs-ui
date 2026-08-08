@@ -355,8 +355,21 @@
     // Convert backticks to code tags
     var withCode = escaped.replace(/`([^`]+)`/g, '<code>$1</code>')
 
+    // Render prop macro calls from generated descriptions as code (the
+    // text= attribute wins as the display, matching the macro's rendering)
+    var withProps = withCode.replace(/prop:([^[\s]+)\[([^\]]*)\]/g, function (match, name, attrs) {
+      var textMatch = attrs.match(/text=([^,\]]+)/)
+      return '<code>' + (textMatch ? textMatch[1] : name) + '</code>'
+    })
+
+    // Legacy config_ref macro calls survive in older published JSONs
+    withProps = withProps.replace(/config_ref:([^[,]+)(?:,[^[]*)?\[([^\]]*)\]/g, function (match, name, payload) {
+      var display = payload.replace(/^`|`$/g, '') || name
+      return '<code>' + display + '</code>'
+    })
+
     // Fallback: resolve any remaining xrefs that weren't pre-resolved
-    var withXrefs = withCode.replace(
+    var withXrefs = withProps.replace(
       /xref:\.?\/?([^[]+)\.adoc(?:#([^[]*))?\[([^\]]+)\]/g,
       function (match, path, anchor, display) {
         var href = path.replace(/^\.\//, '') + '/'

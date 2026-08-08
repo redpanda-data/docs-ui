@@ -37,6 +37,10 @@ Some properties are enterprise-only:
 
 Per-broker settings like +++<code class="property-ref" data-property-name="kafka_connections_max">kafka_connections_max</code>+++ control resource limits.
 
+== Macro Calls Inside Tooltip Descriptions
+
+The +++<code class="property-ref" data-property-name="group_max_session_timeout_ms">group_max_session_timeout_ms</code>+++ tooltip description contains a `prop:` macro call and a legacy `config_ref:` call. Both must render as plain code in the tooltip, never as raw macro text.
+
 == Deprecated Properties
 
 The property +++<code class="property-ref" data-property-name="group_max_session_timeout_ms">group_max_session_timeout_ms</code>+++ is deprecated but still shown with appropriate styling.
