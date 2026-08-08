@@ -25,18 +25,27 @@
     { name: 'quantity', type: 'int' },
     { name: 'price', type: 'double' },
     { name: 'shipped', type: 'boolean' },
-    { name: 'shipping_address', type: 'struct', fields: [
-      { name: 'street', type: 'string' },
-      { name: 'city', type: 'string' },
-      { name: 'zip', type: 'string' },
-      { name: 'tags', type: 'list<string>' },
-    ] },
+    {
+      name: 'shipping_address',
+      type: 'struct',
+      fields: [
+        { name: 'street', type: 'string' },
+        { name: 'city', type: 'string' },
+        { name: 'zip', type: 'string' },
+        { name: 'tags', type: 'list<string>' },
+      ],
+    },
   ]
   var RECORD = {
-    partition: 3, offset: 42, timestamp: 1720000000000,
+    partition: 3,
+    offset: 42,
+    timestamp: 1720000000000,
     value: {
-      order_id: 'ORD-98765', product: 'Redpanda Plushie', quantity: 3,
-      price: 29.99, shipped: false,
+      order_id: 'ORD-98765',
+      product: 'Redpanda Plushie',
+      quantity: 3,
+      price: 29.99,
+      shipped: false,
       shipping_address: { street: '123 Main St', city: 'Seattle', zip: '98101', tags: ['residential', 'priority'] },
     },
     headers: [
@@ -51,19 +60,28 @@
   // Iceberg value fields (see below); otherwise the tool falls back to the
   // VAL_SCHEMA rules above (interim engine).
   var AVRO_VALUE_SCHEMA = JSON.stringify({
-    type: 'record', name: 'order', fields: [
+    type: 'record',
+    name: 'order',
+    fields: [
       { name: 'order_id', type: 'string' },
       { name: 'product', type: 'string' },
       { name: 'quantity', type: 'int' },
       { name: 'price', type: 'double' },
       { name: 'shipped', type: 'boolean' },
-      { name: 'shipping_address', type: { type: 'record', name: 'shipping_address', fields: [
-        { name: 'street', type: 'string' },
-        { name: 'city', type: 'string' },
-        { name: 'zip', type: 'string' },
-        { name: 'tags', type: { type: 'array', items: 'string' } }
-      ] } }
-    ]
+      {
+        name: 'shipping_address',
+        type: {
+          type: 'record',
+          name: 'shipping_address',
+          fields: [
+            { name: 'street', type: 'string' },
+            { name: 'city', type: 'string' },
+            { name: 'zip', type: 'string' },
+            { name: 'tags', type: { type: 'array', items: 'string' } },
+          ],
+        },
+      },
+    ],
   })
 
   // ── Real WASM engine loader (lazy singleton). Resolves to the parsed value
@@ -107,8 +125,10 @@
       var script = document.createElement('script')
       script.src = url
       script.onload = function () {
-        if (typeof createIcebergEngine !== 'function') { resolve(null); return }
-        createIcebergEngine({ locateFile: function (p) { return cand.dir.replace(/\/$/, '') + '/' + p } })
+        // Emscripten is built with MODULARIZE + EXPORT_NAME=createIcebergEngine,
+        // so the loaded classic script leaves the factory on `window`.
+        if (typeof window.createIcebergEngine !== 'function') { resolve(null); return }
+        window.createIcebergEngine({ locateFile: function (p) { return cand.dir.replace(/\/$/, '') + '/' + p } })
           .then(function (mod) {
             try {
               var parsed = JSON.parse(mod.avroToIcebergJson(AVRO_VALUE_SCHEMA))
@@ -402,9 +422,14 @@
 
     function getConfig () {
       return {
-        keyMode: val('key-mode'), valMode: val('val-mode'), valLayout: val('val-layout'), hdrType: val('hdr-type'),
-        keySubject: field('key-subject'), keyProto: field('key-proto'),
-        valSubject: field('val-subject'), valProto: field('val-proto'),
+        keyMode: val('key-mode'),
+        valMode: val('val-mode'),
+        valLayout: val('val-layout'),
+        hdrType: val('hdr-type'),
+        keySubject: field('key-subject'),
+        keyProto: field('key-proto'),
+        valSubject: field('val-subject'),
+        valProto: field('val-proto'),
       }
     }
 
@@ -412,11 +437,19 @@
     // its sections back onto the controls. Best-effort; unknown tokens ignored.
     function applyInitialConfig (str) {
       if (!str) return
-      if (str.indexOf(':') === -1) {
+      // Legacy strings never contain ';'; the section format always joins all
+      // three sections with ';'. A legacy string CAN contain ':' (for example
+      // `value_schema_latest:subject=my-topic-value`), so ':' is not a valid
+      // discriminant.
+      if (str.indexOf(';') === -1) {
         // legacy string
-        if (str === 'key_value') { setRadioValue('val-mode', 'binary') }
-        else if (str === 'value_schema_id_prefix') { setRadioValue('val-mode', 'schema_id_prefix') }
-        else if (str.indexOf('value_schema_latest') === 0) { setRadioValue('val-mode', 'schema_latest') }
+        if (str === 'key_value') {
+          setRadioValue('val-mode', 'binary')
+        } else if (str === 'value_schema_id_prefix') {
+          setRadioValue('val-mode', 'schema_id_prefix')
+        } else if (str.indexOf('value_schema_latest') === 0) {
+          setRadioValue('val-mode', 'schema_latest')
+        }
         return
       }
       // Map DSL section names to control-group prefixes. The value section is
@@ -498,7 +531,14 @@
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
         var text = q('[data-out="config"]').textContent.replace(/\s*(legacy|new) format$/, '')
-        var done = function () { copyBtn.textContent = 'Copied!'; copyBtn.classList.add('ice-copied'); setTimeout(function () { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('ice-copied') }, 1500) }
+        var done = function () {
+          copyBtn.textContent = 'Copied!'
+          copyBtn.classList.add('ice-copied')
+          setTimeout(function () {
+            copyBtn.textContent = 'Copy'
+            copyBtn.classList.remove('ice-copied')
+          }, 1500)
+        }
         if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, function () {}) } else { done() }
       })
     }

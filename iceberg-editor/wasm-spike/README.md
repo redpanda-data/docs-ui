@@ -10,7 +10,7 @@ DSL parser, JSON bindings, per-release CI) is mechanical.
 
 The real production mapper runs in wasm. `stage2-schema-avro.sh` prints:
 
-```
+```text
 OK: converted Avro record to iceberg::struct_type with 3 field(s)
 ```
 
@@ -20,7 +20,7 @@ OK: converted Avro record to iceberg::struct_type with 3 field(s)
 | --- | --- | --- |
 | Emscripten | 6.0.3 | `brew install emscripten` |
 | fmt | **12.1.0** | matches redpanda `MODULE.bazel`; fmt 11 fails |
-| Avro C++ | **redpanda-data/avro** @ `6821e2b4…` + `avro-fmt-const.patch` | upstream apache/avro 1.12 does **not** compile under fmt 12 |
+| Avro C++ | **redpanda-data/avro** @ `6821e2b4…` + redpanda's patches | resolved from `bazel/repositories.bzl` at the pinned Redpanda revision; upstream apache/avro 1.12 does **not** compile under fmt 12 |
 | Boost | 1.85.0 (headers) | for `boost::outcome` |
 | Redpanda source | `dev` | `iceberg/datatypes.cc`, `conversion/{avro_utils,schema_avro}.cc` |
 
@@ -90,6 +90,14 @@ export REDPANDA_REF=dev          # or a release tag, e.g. v26.2.1
 ./build-avro-cpp.sh              # builds Avro C++ for wasm (slow, one-time)
 ./stage2-schema-avro.sh          # the real proof; runs the wasm via node
 ```
+
+`fetch-sources.sh` resolves `$REDPANDA_REF` to a commit once, fetches every file
+at that commit, and records it in `vendor/REDPANDA_COMMIT`.
+`third_party/fetch-deps.sh` then reads that commit and takes the Avro fork
+revision, its `sha256`, and the patch set from `bazel/repositories.bzl` at the
+same revision — all three change between Redpanda releases — so one build maps
+to exactly one Redpanda revision. For a release build, set
+`REDPANDA_REQUIRE_PINNED=1` to reject a mutable ref such as `dev`.
 
 ## Interpreting results (this is the decision the spike exists to inform)
 

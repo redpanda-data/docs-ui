@@ -26,13 +26,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Resolve Redpanda ref and docs version
         id: ver
+        # The ref comes from workflow_dispatch input or repository_dispatch
+        # payload, so it is event-controlled: pass it through env (never
+        # interpolate it into the script) and validate it before use.
+        env:
+          REF_INPUT: ${{ github.event.inputs.redpanda_ref || github.event.client_payload.ref }}
         run: |
-          REF="${{ github.event.inputs.redpanda_ref || github.event.client_payload.ref }}"
+          REF="$REF_INPUT"
+          if [[ ! "$REF" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]*$ ]]; then
+            echo "Invalid Redpanda ref: $REF" >&2
+            exit 1
+          fi
           echo "ref=$REF" >> "$GITHUB_OUTPUT"
           # major.minor from a vX.Y.Z tag; 'dev' stays 'dev'.
           if [[ "$REF" =~ ^v?([0-9]+)\.([0-9]+) ]]; then
@@ -60,8 +73,16 @@ jobs:
 
       - name: Stage versioned artifact
         id: stage
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
         run: |
-          V="${{ steps.ver.outputs.version }}"
+          V="$VERSION"
+          # V lands in filenames and a sed replacement, so keep it to the
+          # characters a docs version / branch name may legitimately use.
+          if [[ ! "$V" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo "Invalid engine version: $V" >&2
+            exit 1
+          fi
           mkdir -p dist
           cp src/static/iceberg-engine.js  "dist/iceberg-engine-$V.js"
           cp src/static/iceberg-engine.wasm "dist/iceberg-engine-$V.wasm"

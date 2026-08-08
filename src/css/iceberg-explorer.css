@@ -17,9 +17,11 @@
   --ice-yellow: #9a6b00;
   --ice-purple: #7c3aed;
   --ice-cyan: #0e7490;
+
   font-size: var(--secondary-font-size, 0.9rem);
   margin: 1.25rem 0;
 }
+
 [data-theme="dark"] .iceberg-explorer {
   --ice-green: #4ade80;
   --ice-blue: #60a5fa;
@@ -34,6 +36,7 @@
   gap: 1.25rem;
   align-items: start;
 }
+
 @media (max-width: 900px) {
   .iceberg-explorer .ice-grid { grid-template-columns: 1fr; }
 }
@@ -45,6 +48,7 @@
   padding: 1rem 1.1rem;
   margin-bottom: 1rem;
 }
+
 .iceberg-explorer .ice-card h3 {
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -70,6 +74,7 @@
   gap: 0.35rem;
   margin-bottom: 0.4rem;
 }
+
 .iceberg-explorer .ice-radio {
   display: inline-flex;
   align-items: center;
@@ -83,7 +88,11 @@
   transition: border-color 0.15s, background 0.15s;
 }
 .iceberg-explorer .ice-radio:hover { border-color: var(--ice-accent); }
-.iceberg-explorer .ice-radio input { accent-color: var(--ice-accent); margin: 0; }
+
+.iceberg-explorer .ice-radio input {
+  accent-color: var(--ice-accent);
+  margin: 0;
+}
 
 .iceberg-explorer .ice-textrow {
   display: flex;
@@ -91,12 +100,14 @@
   gap: 0.5rem;
   margin-top: 0.4rem;
 }
+
 .iceberg-explorer .ice-textrow label {
   font-size: 0.75rem;
   color: var(--ice-muted);
   min-width: 88px;
   text-align: right;
 }
+
 .iceberg-explorer .ice-textrow input {
   flex: 1;
   background: var(--ice-pre);
@@ -107,7 +118,11 @@
   font-family: var(--code-font-family, monospace);
   font-size: 0.78rem;
 }
-.iceberg-explorer .ice-textrow input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.iceberg-explorer .ice-textrow input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .iceberg-explorer .ice-configbar {
   display: flex;
@@ -119,6 +134,7 @@
   padding: 0.85rem 1rem;
   margin-bottom: 1rem;
 }
+
 .iceberg-explorer .ice-configlabel {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -126,6 +142,7 @@
   color: var(--ice-muted);
   white-space: nowrap;
 }
+
 .iceberg-explorer .ice-configstr {
   flex: 1;
   font-family: var(--code-font-family, monospace);
@@ -135,6 +152,7 @@
   background: none;
   padding: 0;
 }
+
 .iceberg-explorer .ice-copy {
   flex-shrink: 0;
   background: transparent;
@@ -146,8 +164,16 @@
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
-.iceberg-explorer .ice-copy:hover { border-color: var(--ice-accent); color: var(--ice-accent); }
-.iceberg-explorer .ice-copy.ice-copied { border-color: var(--ice-green); color: var(--ice-green); }
+
+.iceberg-explorer .ice-copy:hover {
+  border-color: var(--ice-accent);
+  color: var(--ice-accent);
+}
+
+.iceberg-explorer .ice-copy.ice-copied {
+  border-color: var(--ice-green);
+  color: var(--ice-green);
+}
 
 .iceberg-explorer .ice-tree {
   font-family: var(--code-font-family, monospace);
@@ -161,9 +187,17 @@
 }
 .iceberg-explorer .ice-tree .field-name { color: var(--ice-blue); }
 .iceberg-explorer .ice-tree .field-type { color: var(--ice-green); }
-.iceberg-explorer .ice-tree .field-req { color: var(--ice-muted); font-size: 0.72rem; }
+
+.iceberg-explorer .ice-tree .field-req {
+  color: var(--ice-muted);
+  font-size: 0.72rem;
+}
 .iceberg-explorer .ice-tree .struct-brace { color: var(--ice-muted); }
-.iceberg-explorer .ice-tree .comment { color: var(--ice-muted); font-style: italic; }
+
+.iceberg-explorer .ice-tree .comment {
+  color: var(--ice-muted);
+  font-style: italic;
+}
 .iceberg-explorer .ice-tree .field-val-str { color: var(--ice-green); }
 .iceberg-explorer .ice-tree .field-val-num { color: var(--ice-yellow); }
 .iceberg-explorer .ice-tree .field-val-bin { color: var(--ice-purple); }
@@ -177,7 +211,27 @@
   border-radius: 4px;
   vertical-align: middle;
 }
-.iceberg-explorer .ice-tag.ice-new { background: rgba(124, 58, 237, 0.15); color: var(--ice-purple); }
-.iceberg-explorer .ice-tag.ice-legacy { background: rgba(154, 107, 0, 0.15); color: var(--ice-yellow); }
-.iceberg-explorer .ice-tag.ice-engine-real { background: rgba(26, 127, 90, 0.15); color: var(--ice-green); text-transform: none; letter-spacing: 0; }
-.iceberg-explorer .ice-tag.ice-engine-preview { background: rgba(107, 114, 128, 0.15); color: var(--ice-muted); text-transform: none; letter-spacing: 0; }
+
+.iceberg-explorer .ice-tag.ice-new {
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--ice-purple);
+}
+
+.iceberg-explorer .ice-tag.ice-legacy {
+  background: rgba(154, 107, 0, 0.15);
+  color: var(--ice-yellow);
+}
+
+.iceberg-explorer .ice-tag.ice-engine-real {
+  background: rgba(26, 127, 90, 0.15);
+  color: var(--ice-green);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.iceberg-explorer .ice-tag.ice-engine-preview {
+  background: rgba(107, 114, 128, 0.15);
+  color: var(--ice-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}

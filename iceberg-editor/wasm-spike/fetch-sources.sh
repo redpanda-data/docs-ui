@@ -27,23 +27,20 @@ FILES=(
     "container/chunked_vector.h"
 )
 
+# Resolve the ref to an immutable commit ONCE and fetch every file at that
+# commit, so a build cannot straddle two revisions of `dev`. The commit is
+# recorded for third_party/fetch-deps.sh (and for attributing the built engine).
+require_pinned_ref
+REV="$(resolve_redpanda_commit)"
+
 fetch_file() {
     local rel="$1"
-    local src="src/v/$rel"
-    local dst="$VENDOR_DIR/$rel"
-    mkdir -p "$(dirname "$dst")"
-    if command -v gh >/dev/null 2>&1; then
-        gh api "repos/$REDPANDA_REPO/contents/$src?ref=$REDPANDA_REF" \
-            -q '.content' 2>/dev/null | base64 -d >"$dst"
-    else
-        curl -fsSL \
-            "https://raw.githubusercontent.com/$REDPANDA_REPO/$REDPANDA_REF/$src" \
-            -o "$dst"
-    fi
-    [ -s "$dst" ] || { echo "ERROR: failed to fetch $src" >&2; exit 1; }
+    fetch_redpanda_file "src/v/$rel" "$REV" "$VENDOR_DIR/$rel"
     echo "  vendor/$rel"
 }
 
-echo "Fetching Redpanda source @ $REDPANDA_REF ($REDPANDA_REPO):"
+echo "Fetching Redpanda source @ $REDPANDA_REF = $REV ($REDPANDA_REPO):"
 for f in "${FILES[@]}"; do fetch_file "$f"; done
-echo "Done. Vendored $(echo "${#FILES[@]}") files into $VENDOR_DIR"
+printf '%s\n' "$REV" >"$REDPANDA_COMMIT_FILE"
+echo "Done. Vendored ${#FILES[@]} files into $VENDOR_DIR"
+echo "Pinned Redpanda revision recorded in $REDPANDA_COMMIT_FILE"

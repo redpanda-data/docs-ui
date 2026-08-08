@@ -27,8 +27,14 @@ on:
 jobs:
   conformance:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
+      # This job only reads the checkout, so don't leave GITHUB_TOKEN in the
+      # runner's git config for the rest of the job.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

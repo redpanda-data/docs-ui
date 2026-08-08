@@ -44,8 +44,30 @@ void escape_json(const std::string& s, std::string& out) {
         case '\n':
             out += "\\n";
             break;
+        case '\r':
+            out += "\\r";
+            break;
+        case '\t':
+            out += "\\t";
+            break;
+        case '\b':
+            out += "\\b";
+            break;
+        case '\f':
+            out += "\\f";
+            break;
         default:
-            out += c;
+            // Any other control byte must be escaped, or the UI's JSON.parse
+            // rejects the whole payload instead of showing the engine error.
+            if (static_cast<unsigned char>(c) < 0x20) {
+                static constexpr char hex[] = "0123456789abcdef";
+                const auto byte = static_cast<unsigned char>(c);
+                out += "\\u00";
+                out += hex[byte >> 4];
+                out += hex[byte & 0x0f];
+            } else {
+                out += c;
+            }
         }
     }
 }
