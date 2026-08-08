@@ -1,14 +1,14 @@
 = Enterprise Macro Test
 :page-layout: default
 
-Test page for the `enterprise` inline macro from docs-extensions-and-macros (DOC-887). The markup below replicates the macro's exact rendered output so the `enterprise-feature` class can be styled in this UI bundle. Every output shape the macro can emit appears here, plus stress contexts for the lock glyph and underline.
+Test page for the `enterprise` inline macro from docs-extensions-and-macros (DOC-887). The markup below replicates the macro's exact rendered output so the `enterprise-feature` class can be styled in this UI bundle. Every output shape the macro can emit appears here, plus stress contexts for the lock glyph and underline. The first two sections use the link targets the macro really resolves to: the licensing page for `Topic Deletion Control`, which has no feature page in the registry, and the feature page for `Tiered Storage`, which has one. Later sections vary only the tooltip, role, or link handling, so their targets are placeholders.
 
 == Default output
 
-The macro `enterprise:Continuous Data Balancing[]` renders:
+The macro `enterprise:Topic Deletion Control[]` with a registry entry that carries no `xref` renders, linking to the licensing page:
 
 ++++
-<p>This cluster uses <span class="enterprise-feature" title="Continuous Data Balancing requires an Enterprise Edition license."><a href="#" class="xref page">Continuous Data Balancing</a></span> to spread partitions evenly.</p>
+<p>This cluster uses <span class="enterprise-feature" title="Topic Deletion Control requires an Enterprise Edition license."><a href="https://docs.redpanda.com/streaming/current/get-started/licensing/overview/" class="xref page">Topic Deletion Control</a></span> to block accidental topic deletes.</p>
 ++++
 
 == With a feature xref
@@ -16,7 +16,7 @@ The macro `enterprise:Continuous Data Balancing[]` renders:
 The macro `enterprise:Tiered Storage[]` with a registry entry that carries an `xref` (or a per-use `xref=` attribute) renders the same shape, linking to the feature page:
 
 ++++
-<p>Enable <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="#" class="xref page">Tiered Storage</a></span> to offload data to object storage.</p>
+<p>Enable <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="https://docs.redpanda.com/streaming/current/manage/tiered-storage/" class="xref page">Tiered Storage</a></span> to offload data to object storage.</p>
 ++++
 
 == Display text override
