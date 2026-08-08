@@ -22,8 +22,11 @@ export BUILD_DIR="$HERE/build"
 # revision, and the generated engine can be attributed to that revision.
 export REDPANDA_COMMIT_FILE="$VENDOR_DIR/REDPANDA_COMMIT"
 
-# Dependency include roots. Override any of these to point at a preinstalled
-# copy (recommended in CI). If unset, third_party/fetch-deps.sh populates them.
+# Dependency include roots. Override FMT_INCLUDE/BOOST_INCLUDE to point at a
+# preinstalled copy (recommended in CI); if unset, third_party/fetch-deps.sh
+# populates them. AVRO_SRC is different: fetch-deps.sh owns it as a symlink and
+# re-points it at the Avro fork revision the pinned Redpanda revision requires,
+# so it must name a path to link, never a preinstalled tree.
 export FMT_INCLUDE="${FMT_INCLUDE:-$TP_DIR/fmt/include}"         # fmt 12.1.0
 export BOOST_INCLUDE="${BOOST_INCLUDE:-$TP_DIR/boost}"          # boost/ header root
 export AVRO_SRC="${AVRO_SRC:-$TP_DIR/avro-cpp}"                 # -> redpanda avro fork lang/c++

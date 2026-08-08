@@ -64,8 +64,13 @@ if [ ! -d "$BOOST_INCLUDE/boost" ]; then
 fi
 
 # --- Avro C++ (Redpanda fork @ AVRO_SHA, patched) ---
+# The cache is keyed on the RESOLVED pin ($AVRO_EXTRACT), not on $AVRO_SRC: the
+# symlink left by an earlier pin still resolves, so guarding on it would skip the
+# fetch, the checksum verify and the new patch set once the pin changes, and
+# build.sh (which reads third_party/avro-cpp) would compile the previous
+# revision while this script reports the new one.
 AVRO_EXTRACT="$TP_DIR/avro-$AVRO_SHA"
-if [ ! -e "$AVRO_SRC/include/avro/Node.hh" ]; then
+if [ ! -e "$AVRO_EXTRACT/lang/c++/include/avro/Node.hh" ]; then
     echo "Fetching redpanda-data/avro @ $AVRO_SHA ..."
     curl -fsSL "https://github.com/redpanda-data/avro/archive/$AVRO_SHA.tar.gz" \
         -o "$TP_DIR/avro.tar.gz"
@@ -83,7 +88,6 @@ if [ ! -e "$AVRO_SRC/include/avro/Node.hh" ]; then
     }
     # Ignore tar's harmless CRC warnings on Java test-resource files.
     tar -xzf "$TP_DIR/avro.tar.gz" -C "$TP_DIR" || true
-    ln -sfn "$AVRO_EXTRACT/lang/c++" "$AVRO_SRC"
 
     # Apply exactly the patches redpanda @ $REV applies, in its order.
     # `git apply --unidiff-zero` rather than `patch -p1`: avro-libcxx-includes.patch
@@ -110,6 +114,9 @@ if [ ! -e "$AVRO_SRC/include/avro/Node.hh" ]; then
         )
     done
 fi
+# Re-pointed on every run, inside the block or not, so the tree build.sh reads
+# can never lag the pin reported below.
+ln -sfn "$AVRO_EXTRACT/lang/c++" "$AVRO_SRC"
 
 echo "third_party ready (redpanda @ $REV):"
 echo "  fmt   -> $FMT_INCLUDE ($FMT_TAG)"

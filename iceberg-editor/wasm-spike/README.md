@@ -97,7 +97,10 @@ at that commit, and records it in `vendor/REDPANDA_COMMIT`.
 revision, its `sha256`, and the patch set from `bazel/repositories.bzl` at the
 same revision — all three change between Redpanda releases — so one build maps
 to exactly one Redpanda revision. For a release build, set
-`REDPANDA_REQUIRE_PINNED=1` to reject a mutable ref such as `dev`.
+`REDPANDA_REQUIRE_PINNED=1` to reject a mutable ref such as `dev`;
+`.github/workflows/build-iceberg-engine.yml` always sets it, and ships the
+resolved commit next to the engine as
+`dist/iceberg-engine-<version>.provenance.json`.
 
 ## Interpreting results (this is the decision the spike exists to inform)
 

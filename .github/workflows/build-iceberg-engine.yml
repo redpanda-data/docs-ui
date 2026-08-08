@@ -15,9 +15,8 @@ on:
   workflow_dispatch:
     inputs:
       redpanda_ref:
-        description: 'Redpanda git ref/tag to build the engine from (e.g. v26.2.1 or dev)'
+        description: 'Immutable Redpanda ref to build the engine from: a release tag (e.g. v26.2.1) or a 40-char commit SHA. Mutable branches such as dev are rejected.'
         required: true
-        default: 'dev'
   # Trigger from the redpanda repo on a new release via repository_dispatch:
   #   curl -X POST .../dispatches -d '{"event_type":"redpanda-release","client_payload":{"ref":"v26.2.1"}}'
   repository_dispatch:
@@ -63,6 +62,10 @@ jobs:
         working-directory: iceberg-editor/wasm-spike
         env:
           REDPANDA_REF: ${{ steps.ver.outputs.ref }}
+          # This workflow is the only path that publishes engines, so it always
+          # builds from an immutable ref: env.sh's require_pinned_ref() rejects a
+          # branch such as `dev` instead of producing an unattributable artifact.
+          REDPANDA_REQUIRE_PINNED: '1'
         run: |
           ./fetch-sources.sh
           ./third_party/fetch-deps.sh
@@ -75,6 +78,7 @@ jobs:
         id: stage
         env:
           VERSION: ${{ steps.ver.outputs.version }}
+          REF: ${{ steps.ver.outputs.ref }}
         run: |
           V="$VERSION"
           # V lands in filenames and a sed replacement, so keep it to the
@@ -89,6 +93,14 @@ jobs:
           # The emscripten glue references the .wasm by its build name; rewrite
           # it to the versioned name so both files can coexist per version.
           sed -i "s/iceberg-engine\.wasm/iceberg-engine-$V.wasm/g" "dist/iceberg-engine-$V.js"
+          # Attribute the artifact to the Redpanda revision it was built from.
+          # fetch-sources.sh records that commit in vendor/REDPANDA_COMMIT, which
+          # is git-ignored and outside dist/, so without this the published
+          # engine carries no provenance. $REF and $V are already validated
+          # above, so neither can break out of the JSON.
+          COMMIT="$(cat iceberg-editor/wasm-spike/vendor/REDPANDA_COMMIT)"
+          printf '{"engine_version":"%s","redpanda_ref":"%s","redpanda_commit":"%s"}\n' \
+            "$V" "$REF" "$COMMIT" >"dist/iceberg-engine-$V.provenance.json"
           ls -la dist
 
       - name: Smoke-test the built engine under Node
