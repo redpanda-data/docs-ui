@@ -1,29 +1,29 @@
 = Property Tooltips Test
 :page-layout: default
 
-Test page for Redpanda configuration property tooltips. Property tooltips are enabled by default on all pages. To disable on a specific page, use `:page-disable-property-tooltips: true`.
+Test page for Redpanda configuration property tooltips. Tooltips are opt-in: only code elements emitted by the `prop:` AsciiDoc macro (class `property-ref` plus a `data-property-name` attribute) are decorated. This page simulates the macro's output with pass-through HTML because the UI preview doesn't run the docs macros. To disable tooltips on a specific page, use `:page-disable-property-tooltips: true`.
 
 TIP: Hover over property names to see documentation tooltips!
 
 == Cluster Properties in Paragraphs
 
-When configuring Redpanda, you may need to adjust `log_segment_size` for optimal storage performance. The default segment size works for most workloads, but large messages may benefit from larger segments.
+When configuring Redpanda, you may need to adjust +++<code class="property-ref" data-property-name="log_segment_size">log_segment_size</code>+++ for optimal storage performance. The default segment size works for most workloads, but large messages may benefit from larger segments.
 
-To enable authentication, set `enable_sasl` to true. This requires clients to authenticate using SASL mechanisms.
+To enable authentication, set +++<code class="property-ref" data-property-name="enable_sasl">enable_sasl</code>+++ to true. This requires clients to authenticate using SASL mechanisms.
 
 == Topic Properties in Lists
 
 Topic-level configuration properties:
 
-* `retention_bytes` - Controls maximum partition size before deletion
+* +++<code class="property-ref" data-property-name="retention_bytes">retention_bytes</code>+++ - Controls maximum partition size before deletion
 * This is a topic-scoped property that can override cluster defaults
 
 == Dotted Property Names (Topic-scoped)
 
 These properties use dot notation and test the anchor slugification fix:
 
-* `redpanda.storage.mode` - Controls storage mode (local vs tiered)
-* `redpanda.remote.read` - Enables remote reads from object storage
+* +++<code class="property-ref" data-property-name="redpanda.storage.mode">redpanda.storage.mode</code>+++ - Controls storage mode (local vs tiered)
+* +++<code class="property-ref" data-property-name="redpanda.remote.read">redpanda.remote.read</code>+++ - Enables remote reads from object storage
 
 The "View full documentation" link for `redpanda.storage.mode` should generate an anchor like `#redpanda-storage-mode` (dots replaced with hyphens), not `#redpanda.storage.mode`.
 
@@ -31,15 +31,31 @@ The "View full documentation" link for `redpanda.storage.mode` should generate a
 
 Some properties are enterprise-only:
 
-* `cloud_storage_enabled` - Requires Enterprise license (self-hosted only)
+* +++<code class="property-ref" data-property-name="cloud_storage_enabled">cloud_storage_enabled</code>+++ - Requires Enterprise license (self-hosted only)
 
 == Broker Properties
 
-Per-broker settings like `kafka_connections_max` control resource limits.
+Per-broker settings like +++<code class="property-ref" data-property-name="kafka_connections_max">kafka_connections_max</code>+++ control resource limits.
 
 == Deprecated Properties
 
-The property `group_max_session_timeout_ms` is deprecated but still shown with appropriate styling.
+The property +++<code class="property-ref" data-property-name="group_max_session_timeout_ms">group_max_session_timeout_ms</code>+++ is deprecated but still shown with appropriate styling.
+
+== Display text override
+
+The macro's text attribute changes the display while keeping the lookup name: +++<code class="property-ref" data-property-name="cloud_storage_enabled">object storage flag</code>+++ should show the Tiered Storage property tooltip.
+
+== Unmarked property names get NO tooltip (the old false-positive case)
+
+These are real property names in plain backticks, exactly what used to be auto-matched. With opt-in marking they must NOT have tooltips:
+
+* `log_segment_size` - No tooltip (not marked)
+* `enable_sasl` - No tooltip (not marked)
+* The `admin` listener in a Helm values file - No tooltip (ambiguous word)
+
+== Marked but unknown property
+
+A marked element whose name is not in the published data renders untouched: +++<code class="property-ref" data-property-name="this_is_not_a_property">this_is_not_a_property</code>+++ - No tooltip.
 
 == Properties in Code Blocks
 
@@ -57,7 +73,3 @@ Regular code elements should NOT have tooltips:
 * `this_is_not_a_property` - No tooltip
 * `some_random_function()` - No tooltip
 * `myVariable` - No tooltip
-
-== Mixed Content
-
-In a paragraph with both properties and regular text: Set `enable_sasl` to configure authentication, then use `kubectl apply` to deploy. Only `enable_sasl` should have a tooltip.

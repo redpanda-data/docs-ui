@@ -2,8 +2,12 @@
 /**
  * Redpanda Property Tooltips
  *
- * Adds hover documentation tooltips to configuration property names.
- * Enabled by default on all pages. Disable on specific pages with:
+ * Adds hover documentation tooltips to configuration property references.
+ * Marking is opt-in: only code elements emitted by the prop: AsciiDoc macro
+ * (class property-ref plus a data-property-name attribute) are decorated.
+ * Plain backticked words are never matched, so ambiguous terms such as
+ * admin or rack in Helm or feature contexts don't pick up wrong tooltips.
+ * Disable on specific pages with:
  *   :page-disable-property-tooltips: true
  */
 
@@ -363,14 +367,13 @@
         return
       }
 
-      // Create a Set for fast lookup
-      var propertyNames = new Set(Object.keys(properties))
-
-      // Scope: opt-in pages look at all <code> elements in the article
+      // Scope: only elements marked by the prop: macro are decorated
       var article = document.querySelector('article.doc')
       if (!article) return
 
-      var codeElements = article.querySelectorAll('code:not(.has-property-tooltip)')
+      var codeElements = article.querySelectorAll(
+        'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
+      )
       var isTouch = isTouchDevice()
 
       var getTippyConfig = function (content) {
@@ -388,10 +391,10 @@
       }
 
       codeElements.forEach(function (codeEl) {
-        var text = codeEl.textContent.trim()
+        var text = codeEl.getAttribute('data-property-name') || codeEl.textContent.trim()
 
-        // Check if this code element matches a property name
-        if (propertyNames.has(text)) {
+        // Look up the marked property in the published data
+        if (Object.prototype.hasOwnProperty.call(properties, text)) {
           var prop = properties[text]
           var tooltipContent = createPropertyTooltip(prop)
 
