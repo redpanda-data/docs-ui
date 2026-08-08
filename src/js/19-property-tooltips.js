@@ -2,8 +2,12 @@
 /**
  * Redpanda Property Tooltips
  *
- * Adds hover documentation tooltips to configuration property names.
- * Enabled by default on all pages. Disable on specific pages with:
+ * Adds hover documentation tooltips to configuration property references.
+ * Marking is opt-in: only code elements emitted by the prop: AsciiDoc macro
+ * (class property-ref plus a data-property-name attribute) are decorated.
+ * Plain backticked words are never matched, so ambiguous terms such as
+ * admin or rack in Helm or feature contexts don't pick up wrong tooltips.
+ * Disable on specific pages with:
  *   :page-disable-property-tooltips: true
  */
 
@@ -29,6 +33,21 @@
   function getPropertiesJsonUrl () {
     var meta = document.querySelector('meta[name="properties-json-url"]')
     if (meta && meta.content) {
+      return meta.content
+    }
+    return null
+  }
+
+  /**
+   * Get the component-local property pages base URL from meta tag.
+   * head-meta resolves reference:properties/cluster-properties.adoc in the
+   * current page's own component, so cloud pages link to cloud's property
+   * pages, streaming pages to streaming's, and so on.
+   */
+  function getPropertiesPagesUrl () {
+    var meta = document.querySelector('meta[name="properties-pages-url"]')
+    // Ignore unresolved placeholders (the UI preview resolver emits '#').
+    if (meta && meta.content && meta.content.indexOf('cluster-properties') !== -1) {
       return meta.content
     }
     return null
@@ -276,14 +295,21 @@
       parts.push('<div class="prop-tooltip-range"><strong>Range:</strong> ' + range.join(', ') + '</div>')
     }
 
-    // Link to full documentation (use current page version)
+    // Link to full documentation, relative to the current page's component
     var scope = prop.configScope || 'cluster'
-    var version = getDocVersion()
     // AsciiDoc auto-ID generation: dots are removed, underscores become hyphens
     // e.g., "redpanda.storage.mode" -> "redpandastoragemode"
     // e.g., "log_retention_ms" -> "log-retention-ms"
     var anchor = prop.name.replace(/\./g, '').replace(/_/g, '-')
-    var docUrl = '/' + version + '/reference/properties/' + scope + '-properties/#' + anchor
+    var pagesUrl = getPropertiesPagesUrl()
+    var docUrl
+    if (pagesUrl) {
+      // Swap the scope into the component-resolved cluster-properties URL.
+      docUrl = pagesUrl.replace('cluster-properties', scope + '-properties') + '#' + anchor
+    } else {
+      // Fallback for pages without the meta tag: streaming URL space.
+      docUrl = '/' + getDocVersion() + '/reference/properties/' + scope + '-properties/#' + anchor
+    }
     parts.push('<a href="' + escapeHtml(docUrl) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
     return '<div class="property-doc-tooltip">' + parts.join('') + '</div>'
@@ -329,8 +355,21 @@
     // Convert backticks to code tags
     var withCode = escaped.replace(/`([^`]+)`/g, '<code>$1</code>')
 
+    // Render prop macro calls from generated descriptions as code (the
+    // text= attribute wins as the display, matching the macro's rendering)
+    var withProps = withCode.replace(/prop:([^[\s]+)\[([^\]]*)\]/g, function (match, name, attrs) {
+      var textMatch = attrs.match(/text=([^,\]]+)/)
+      return '<code>' + (textMatch ? textMatch[1] : name) + '</code>'
+    })
+
+    // Legacy config_ref macro calls survive in older published JSONs
+    withProps = withProps.replace(/config_ref:([^[,]+)(?:,[^[]*)?\[([^\]]*)\]/g, function (match, name, payload) {
+      var display = payload.replace(/^`|`$/g, '') || name
+      return '<code>' + display + '</code>'
+    })
+
     // Fallback: resolve any remaining xrefs that weren't pre-resolved
-    var withXrefs = withCode.replace(
+    var withXrefs = withProps.replace(
       /xref:\.?\/?([^[]+)\.adoc(?:#([^[]*))?\[([^\]]+)\]/g,
       function (match, path, anchor, display) {
         var href = path.replace(/^\.\//, '') + '/'
@@ -363,14 +402,13 @@
         return
       }
 
-      // Create a Set for fast lookup
-      var propertyNames = new Set(Object.keys(properties))
-
-      // Scope: opt-in pages look at all <code> elements in the article
+      // Scope: only elements marked by the prop: macro are decorated
       var article = document.querySelector('article.doc')
       if (!article) return
 
-      var codeElements = article.querySelectorAll('code:not(.has-property-tooltip)')
+      var codeElements = article.querySelectorAll(
+        'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
+      )
       var isTouch = isTouchDevice()
 
       var getTippyConfig = function (content) {
@@ -388,10 +426,10 @@
       }
 
       codeElements.forEach(function (codeEl) {
-        var text = codeEl.textContent.trim()
+        var text = codeEl.getAttribute('data-property-name') || codeEl.textContent.trim()
 
-        // Check if this code element matches a property name
-        if (propertyNames.has(text)) {
+        // Look up the marked property in the published data
+        if (Object.prototype.hasOwnProperty.call(properties, text)) {
           var prop = properties[text]
           var tooltipContent = createPropertyTooltip(prop)
 

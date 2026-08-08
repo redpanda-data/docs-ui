@@ -68,7 +68,7 @@
       "name": "group_max_session_timeout_ms",
       "type": "integer",
       "default": 300000,
-      "description": "The maximum session timeout for consumer groups. If a consumer does not send a heartbeat within this time, it is considered dead and removed from the group.",
+      "description": "The maximum session timeout for consumer groups. If a consumer does not send a heartbeat within this time, it is considered dead and removed from the group. Works together with prop:log_segment_size[link=true] and the legacy config_ref:enable_sasl,true,cluster-properties[`enable_sasl`] form renders too.",
       "config_scope": "cluster",
       "needs_restart": false,
       "cloud_supported": true,
