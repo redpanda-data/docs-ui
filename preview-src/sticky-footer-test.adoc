@@ -1,0 +1,16 @@
+= Sticky Footer Test
+:description: This page tests the sticky footer behavior when content is short.
+
+This page has minimal content to test that the footer stays at the bottom of the viewport.
+
+== Expected Behavior
+
+The footer should:
+
+* Stay at the bottom of the viewport when content is short
+* Not float in the middle of the page
+* Have proper spacing from the content above
+
+== Short Content
+
+This is intentionally a short page. The footer below should be at the bottom of the browser window, not immediately after this text.

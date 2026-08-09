@@ -91,8 +91,9 @@
 
     // Check if scrolling is needed and show hint
     setTimeout(function () {
-      var needsScroll = modalContainer.scrollWidth > modalContainer.clientWidth ||
-                        modalContainer.scrollHeight > modalContainer.clientHeight
+      var needsScroll =
+        modalContainer.scrollWidth > modalContainer.clientWidth ||
+        modalContainer.scrollHeight > modalContainer.clientHeight
       if (needsScroll) {
         modalHint.classList.remove('hidden')
         // Auto-hide hint after 3 seconds

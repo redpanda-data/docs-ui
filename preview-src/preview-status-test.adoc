@@ -1,0 +1,16 @@
+= Preview Status Test Page
+:page-preview: true
+:description: This page tests the Preview status badge in the UI preview.
+
+This page demonstrates the **Preview** status badge.
+
+== Badge locations
+
+1. **In the sticky header** below the title: a dark "Preview" pill
+2. **In the left nav**: "(Preview)" after the page title (only when a content catalog is available; may not render in the gulp preview)
+
+== Test the tooltip
+
+Hover the Preview pill. Default text:
+
+_"This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process."_

@@ -1,0 +1,20 @@
+= Redpanda Data Platform
+:page-layout: data-platform
+:page-role: data-platform
+:hero-ask-placeholder: Ask AI about Redpanda...
+:hero-suggestion-1: How do I get started?
+:hero-suggestion-2: What's the difference between Cloud and Self-managed?
+:hero-suggestion-3: How do I build a CDC pipeline?
+:hero-stat2-number: 200+
+
+:product-1-name: Self-Managed
+:product-1-desc: Run Redpanda on your own infrastructure with complete control over configuration and deployment.
+:product-1-link: #
+:product-1-color: #6366f1
+
+:product-2-name: Cloud
+:product-2-desc: Fully managed Redpanda clusters in AWS, GCP, or Azure. Focus on your data, not infrastructure.
+:product-2-link: #
+:product-2-color: #0891B2
+
+This is a test page for the data-platform layout showcasing the new color tokens.

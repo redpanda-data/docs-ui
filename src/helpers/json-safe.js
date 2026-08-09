@@ -57,15 +57,17 @@ module.exports = (value) => {
   // First decode HTML entities to their actual characters
   const decoded = decodeHtmlEntities(value)
 
-  return decoded
-    // Escape backslashes first (must be done before escaping quotes)
-    .replace(/\\/g, '\\\\')
-    // Escape double quotes
-    .replace(/"/g, '\\"')
-    // Escape </script> to prevent breaking out of script block
-    .replace(/<\/script>/gi, '<\\/script>')
-    // Escape other control characters that could break JSON
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')
+  return (
+    decoded
+      // Escape backslashes first (must be done before escaping quotes)
+      .replace(/\\/g, '\\\\')
+      // Escape double quotes
+      .replace(/"/g, '\\"')
+      // Escape </script> to prevent breaking out of script block
+      .replace(/<\/script>/gi, '<\\/script>')
+      // Escape other control characters that could break JSON
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '\\r')
+      .replace(/\t/g, '\\t')
+  )
 }

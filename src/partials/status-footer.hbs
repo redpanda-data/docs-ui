@@ -1,0 +1,50 @@
+{{!--
+  Status Footer - Shows system status at bottom of sidebar
+  Only displays for Cloud component, fetches live status from status.redpanda.com
+--}}
+{{#if (eq page.component.name 'cloud-data-platform')}}
+<div class="nav-status-footer" id="nav-status-footer">
+  <a href="https://status.redpanda.com" target="_blank" rel="noopener" class="nav-status-link">
+    <span class="nav-status-dot" id="nav-status-dot" aria-hidden="true"></span>
+    <span class="nav-status-text" id="nav-status-text">Status · Checking...</span>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-status-icon">
+      <path d="M7 17L17 7"></path>
+      <path d="M7 7h10v10"></path>
+    </svg>
+  </a>
+</div>
+<script>
+(function() {
+  // Fetch status from Redpanda status page (Atlassian Statuspage API)
+  const STATUS_API = 'https://status.redpanda.com/api/v2/status.json';
+  const statusText = document.getElementById('nav-status-text');
+  const statusDot = document.getElementById('nav-status-dot');
+
+  function updateStatus() {
+    fetch(STATUS_API)
+      .then(response => response.json())
+      .then(data => {
+        const indicator = data.status?.indicator || 'none';
+        const description = data.status?.description || 'All Systems Operational';
+
+        // Update text
+        statusText.textContent = 'Status · ' + description;
+
+        // Update dot color based on indicator
+        statusDot.classList.remove('status-none', 'status-minor', 'status-major', 'status-critical');
+        statusDot.classList.add('status-' + indicator);
+      })
+      .catch(() => {
+        statusText.textContent = 'Status · Unable to fetch';
+        statusDot.classList.add('status-unknown');
+      });
+  }
+
+  // Initial fetch
+  updateStatus();
+
+  // Refresh every 5 minutes
+  setInterval(updateStatus, 5 * 60 * 1000);
+})();
+</script>
+{{/if}}

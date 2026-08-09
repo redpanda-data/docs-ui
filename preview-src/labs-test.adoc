@@ -1,0 +1,50 @@
+= Redpanda Labs
+:page-layout: component-home-v3
+:page-role: component-home-v3
+:page-hero-color: #227093
+:hero-description: Explore experimental features, community projects, and cutting-edge tools from the Redpanda ecosystem.
+:hero-ask-placeholder: Ask AI about Redpanda Labs...
+:stats: 50+;;Community|projects;;100%;;Open Source|always;;Fast;;Iteration|cycles
+:page-ai-suggestions: ["What projects are available in Labs?", "How do I contribute to Labs?", "What's the difference between Labs and production features?"]
+
+:deploy-title: Explore Labs projects
+:deploy-1-title: Data Transforms
+:deploy-1-desc: Build serverless data transformations that run inside Redpanda.
+:deploy-1-link: #
+:deploy-1-time: 10 min
+:deploy-1-icon: code
+
+:deploy-2-title: MCP Server
+:deploy-2-desc: Connect AI agents to Redpanda using the Model Context Protocol.
+:deploy-2-link: #
+:deploy-2-time: 15 min
+:deploy-2-icon: brain
+
+:deploy-3-title: Sample Apps
+:deploy-3-desc: Production-ready sample applications showcasing Redpanda patterns.
+:deploy-3-link: #
+:deploy-3-time: 5 min
+:deploy-3-icon: layers
+
+:popular-title: Featured projects
+:popular-1-title: CDC Examples
+:popular-1-desc: Change data capture patterns with Debezium and Redpanda.
+:popular-1-link: #
+:popular-1-icon: activity
+
+:popular-2-title: Streaming ETL
+:popular-2-desc: Real-time data pipelines with Redpanda Connect.
+:popular-2-link: #
+:popular-2-icon: flow
+
+:popular-3-title: IoT Patterns
+:popular-3-desc: Edge-to-cloud streaming for IoT workloads.
+:popular-3-link: #
+:popular-3-icon: terminal
+
+:popular-4-title: ML Pipelines
+:popular-4-desc: Real-time machine learning inference pipelines.
+:popular-4-link: #
+:popular-4-icon: sparkles
+
+This is a test page for the component-home-v3 layout with Labs component colors.

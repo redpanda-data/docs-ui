@@ -1,9 +1,22 @@
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
-    <!--{{#with @root.page.componentVersion}}
-    <h3 class="title"><a href="{{{relativize ./url}}}">{{./title}}</a></h3>
-    {{/with}}-->
-{{#if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
+    {{!-- Product Switcher at top of sidebar --}}
+    {{> product-switcher}}
+
+    {{!-- Version Selector below product switcher (hidden for config-driven nav) --}}
+    {{#unless page.attributes.has-custom-nav}}
+    {{> nav-explore}}
+    {{/unless}}
+
+    {{!-- DEBUG: Show custom-nav attribute value --}}
+    <!-- DEBUG: has-custom-nav = "{{page.attributes.has-custom-nav}}" -->
+
+{{#if page.attributes.has-custom-nav}}
+    {{!-- Config-driven navigation from page-navigation attribute --}}
+    {{#each (parse-json page.attributes.custom-navigation)}}
+      {{> nav-bucket-recursive bucket=this}}
+    {{/each}}
+{{else if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
 {{> nav-tree-lab}}
 {{else}}
 {{> nav-tree navigation=page.navigation}}

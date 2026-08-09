@@ -1,20 +1,5 @@
 {{#if (and (ne page.attributes.role 'two-column') (not page.attributes.no-toc))}}
 <aside class="toc sidebar" data-title="{{{page.attributes.toctitle}}}" data-levels="{{{or page.attributes.toclevels 2}}}">
-  <div class="metadata metadata--nav hidden">
-    {{#if page.attributes.beta}}
-    <div class="nav-beta-container">
-      <p class="nav-beta-label" aria-hidden="true">beta</p>
-    </div>
-    {{/if}}
-    {{#if page.attributes.limited-availability}}
-    <div class="nav-limited-availability-container">
-      <p class="nav-limited-availability-label" aria-hidden="true">Limited Availability</p>
-    </div>
-    {{/if}}
-    {{#if page.attributes.context-switcher}}
-      {{> context-switcher}}
-    {{/if}}
-  </div>
   <div class="toc-menu"></div>
   {{!-- Configurable tools section - components can define toc-tools-title and toc-tools-links in antora.yml --}}
   {{#if page.componentVersion.asciidoc.attributes.toc-tools-title}}
@@ -53,14 +38,16 @@
     </ul>
   </div>
   {{/if}}
-  <div class="thumbs">
+  {{#if page.attributes.additional-resources}}
+  <div class="toc-additional-resources">
     <ul style="list-style:none">
       {{#each page.attributes.additional-resources}}
       <li><a target="_blank" href="{{{this.url}}}">{{{this.label}}}</a></li>
       {{/each}}
     </ul>
   </div>
-    {{> thumbs id='thumbs-toc'}}
+  {{/if}}
+  {{> thumbs id='thumbs-toc'}}
     {{> feedback-success id='thumbs-toc'}}
 </aside>
 {{/if}}

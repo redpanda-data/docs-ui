@@ -9,6 +9,7 @@
 {{/if}}
 <!--<script async src="{{{uiRootPath}}}/js/vendor/highlight.js"></script>-->
 {{#if (and env.ALGOLIA_API_KEY (ne page.layout 'search')) }}
+<div id="autocomplete"></div>
 {{> algolia-script}}
 {{/if}}
 

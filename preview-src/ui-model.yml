@@ -2,29 +2,80 @@ antoraVersion: '1.0.0'
 site:
   url: https://deploy-preview-327--docs-ui.netlify.app
   title: UI Preview
-  homeUrl: &home_url /xyz/24.3/index.html
+  homeUrl: &home_url /streaming/24.3/index.html
   components:
-  - name: abc
-    title: Project ABC
-    url: '#'
+  # Agentic Data Plane component
+  - &adp_component
+    name: agentic-data-plane
+    title: Agentic Data Plane
+    url: /agentic-data-plane/1.0/index.html
     versions:
-    - &latest_version_abc
-      url: '#'
-      version: '1.1'
-      displayVersion: '1.1'
-    - url: '#'
+    - &latest_version_adp
+      url: /agentic-data-plane/1.0/index.html
       version: '1.0'
       displayVersion: '1.0'
-    latestVersion: *latest_version_abc
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Agentic Data Plane
+            description: Build, connect, and govern AI agents.
+            color: '#7C3AED'
+            order: 1
+    latestVersion: *latest_version_adp
+  # Data Platform umbrella component
+  - name: data-platform
+    title: Data Platform
+    url: '#'
+    versions:
+    - &latest_version_dp
+      url: '#'
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Data Platform
+            description: The streaming foundation for everything you build.
+            color: '#5239CC'
+            order: 2
+    latestVersion: *latest_version_dp
+  # Self-Managed component - parent for Streaming and Connect
+  - name: self-managed
+    title: Self-Managed
+    url: '#'
+    versions:
+    - &latest_version_sm
+      url: '#'
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Self-Managed
+            description: Run Redpanda on your own infrastructure.
+            color: '#9F1239'
+            order: 1
+    latestVersion: *latest_version_sm
+  # Streaming component - under Data Platform (formerly Self-Managed/ROOT)
   - &component
-    name: ROOT
-    title: &component_title Redpanda
-    url: /xyz/6.0/index.html
+    name: streaming
+    title: &component_title Streaming
+    url: /streaming/6.0/index.html
     versions:
     - &latest_version_xyz
-      url: /xyz/6.0/index.html
+      url: /streaming/6.0/index.html
       version: '6.0'
       displayVersion: '6.0'
+      asciidoc:
+        attributes:
+          latest-redpanda-tag: 'v25.1.1'
+          component-metadata:
+            title: Streaming
+            parent-component: self-managed
+            description: Run Redpanda on your own infrastructure.
+            color: '#4D7C0F'
+            icon: activity
+            order: 1
     - &component_version
       title: *component_title
       url: '#'
@@ -32,6 +83,14 @@ site:
       displayVersion: '24.3'
       asciidoc:
         attributes:
+          latest-redpanda-tag: 'v24.3.1'
+          component-metadata:
+            title: Streaming
+            parent-component: self-managed
+            description: Run Redpanda on your own infrastructure.
+            color: '#4D7C0F'
+            icon: activity
+            order: 1
           toc-tools-title: Connect Tools
           toc-tools-links: '[{"text": "Bloblang Playground", "url": "/playground", "icon": "terminal"}, {"text": "Claude AI Skills", "url": "https://github.com/redpanda-data/connect/blob/main/.claude-plugin/README.md", "icon": "layers", "external": true}]'
     - url: '#'
@@ -40,28 +99,73 @@ site:
     - url: '#'
       version: '5.0'
       displayVersion: '5.0'
+    latest: *latest_version_xyz
     latestVersion: *latest_version_xyz
-  - name: '123'
-    title: Project 123
-    url: '#'
+  # Cloud component - under Data Platform
+  - &cloud_component
+    name: cloud-data-platform
+    title: Cloud
+    url: /cloud/1.0/index.html
     versions:
-    - &latest_version_123
-      url: '#'
-      version: '2.2'
-      displayVersion: '2.2'
-    - url: '#'
-      version: '2.1'
-      displayVersion: '2.1'
-    - url: '#'
-      version: '2.0'
-      displayVersion: '2.0'
-    latestVersion: *latest_version_123
+    - &latest_version_cloud
+      url: /cloud/1.0/index.html
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Cloud
+            description: Fully managed Redpanda clusters.
+            color: '#1D4ED8'
+            icon: cloud
+            order: 2
+    latestVersion: *latest_version_cloud
+  # Connect component - under Data Platform (formerly redpanda-connect)
+  - &connect_component
+    name: connect
+    title: Connect
+    url: /connect/4.0/index.html
+    versions:
+    - &latest_version_connect
+      url: /connect/4.0/index.html
+      version: '4.0'
+      displayVersion: '4.0'
+      asciidoc:
+        attributes:
+          latest-connect-version: '4.43.0'
+          component-metadata:
+            title: Connect
+            parent-component: self-managed
+            description: Stream processing and integration connectors.
+            color: '#A21CAF'
+            icon: plug-connected
+            order: 2
+    latestVersion: *latest_version_connect
+  # Labs component
+  - &labs_component
+    name: labs
+    title: Labs
+    url: /labs/1.0/index.html
+    versions:
+    - &latest_version_labs
+      url: /labs/1.0/index.html
+      version: '1.0'
+      displayVersion: '1.0'
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Labs
+            description: Experimental features and community projects.
+            color: '#227093'
+            icon: flask
+            order: 10
+    latestVersion: *latest_version_labs
 page:
   url: *home_url
   home: true
   title: Brand&#8217;s Hardware &amp; Software Requirements
   component: *component
-  componentVersion: *component_version
+  componentVersion: *latest_version_xyz
   version: '24.3'
   displayVersion: '24.3'
   module: ROOT
@@ -81,13 +185,23 @@ page:
     url: '#'
     urlType: 'internal'
   breadcrumbs:
+  - content: Data Platform
+    url: '#'
+    urlType: internal
+  - content: Streaming
+    url: '#'
+    urlType: internal
   - content: Quickstart
     url: '#'
     urlType: internal
   - content: Brand&#8217;s Hardware &amp; Software Requirements
-    url: /xyz/24.3/index.html
+    url: /streaming/24.3/index.html
     urlType: internal
   versions:
+  - version: '7.0'
+    displayVersion: '7.0 Beta'
+    prerelease: true
+    url: '#'
   - version: '6.0'
     displayVersion: '6.0'
     url: '#'
@@ -109,16 +223,25 @@ page:
       urlType: internal
       items:
       - content: Brand&#8217;s Hardware &amp; Software Requirements
-        url: /xyz/24.3/index.html
+        url: /streaming/24.3/index.html
         urlType: internal
       - content: Bloblang Syntax
-        url: /xyz/24.3/bloblang-syntax-test.html
+        url: /streaming/24.3/bloblang-syntax-test.html
         urlType: internal
       - content: Bloblang Playground
-        url: /xyz/24.3/playground.html
+        url: /streaming/24.3/playground.html
+        urlType: internal
+      - content: Property Tooltips
+        url: /streaming/24.3/property-tooltips-test.html
         urlType: internal
       - content: Home page
-        url: /xyz/24.3/home.html
+        url: /streaming/24.3/home.html
+        urlType: internal
+      - content: Limited Availability Test
+        url: /limited-availability-test.html
+        urlType: internal
+      - content: Preview Status Test
+        url: /preview-status-test.html
         urlType: internal
     - content: Get Started
       url: '#'
@@ -336,7 +459,30 @@ page:
       - content: Data Loss Prevention
         url: '#'
         urlType: internal
-      - content: Limited Availability Test
-        url: /xyz/24.3/limited-availability-test.html
+    - content: Dev Tools
+      url: '#'
+      urlType: internal
+      items:
+      - content: Widget Test (Bump.sh)
+        url: /_/widget-test.html
         urlType: internal
+      - content: Landing Pages
+        url: '#'
+        urlType: internal
+        items:
+        - content: Streaming (Landing)
+          url: /component-home-test.html
+          urlType: internal
+        - content: Connect (Landing)
+          url: /connect-test.html
+          urlType: internal
+        - content: Cloud (Landing)
+          url: /cloud-test.html
+          urlType: internal
+        - content: Labs (Landing)
+          url: /labs-test.html
+          urlType: internal
+        - content: Data Platform (Landing)
+          url: /data-platform-test.html
+          urlType: internal
 

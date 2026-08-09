@@ -17,6 +17,62 @@
   let docsLoadQueue = [];
 
   /**
+   * Check if a value is an unresolved Antora resource ID
+   * (resolve-resource returns the raw ID when resource not found)
+   */
+  function isUnresolvedResourceId(value) {
+    return value && (value.startsWith('attachment$') || value.startsWith('page$'));
+  }
+
+  /**
+   * Get Connect JSON URL from meta tag (resolved by Antora)
+   */
+  function getConnectJsonUrl() {
+    const meta = document.querySelector('meta[name="connect-json-url"]');
+    const value = meta?.content;
+    // If unresolved resource ID, return null to trigger fallback
+    return (value && !isUnresolvedResourceId(value)) ? value : null;
+  }
+
+  /**
+   * Get Connect functions page URL from meta tag
+   */
+  function getConnectFunctionsUrl() {
+    const meta = document.querySelector('meta[name="connect-functions-url"]');
+    const value = meta?.content;
+    return (value && !isUnresolvedResourceId(value)) ? value : '/redpanda-connect/guides/bloblang/functions/';
+  }
+
+  /**
+   * Get Connect methods page URL from meta tag
+   */
+  function getConnectMethodsUrl() {
+    const meta = document.querySelector('meta[name="connect-methods-url"]');
+    const value = meta?.content;
+    return (value && !isUnresolvedResourceId(value)) ? value : '/redpanda-connect/guides/bloblang/methods/';
+  }
+
+  /**
+   * Get Connect playground page URL from meta tag
+   */
+  function getConnectPlaygroundUrl() {
+    const meta = document.querySelector('meta[name="connect-playground-url"]');
+    const value = meta?.content;
+    return (value && !isUnresolvedResourceId(value)) ? value : '/redpanda-connect/guides/bloblang/playground/';
+  }
+
+  /**
+   * Check if running in preview/development mode
+   */
+  function isPreviewMode() {
+    return (
+      window.location.hostname.includes('docs-ui.netlify.app') ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+    );
+  }
+
+  /**
    * Parse a Bloblang snippet into mapping, input, and metadata sections.
    * Looks for # In: and # Meta: comment directives.
    * # Out: lines are ignored.
@@ -122,11 +178,26 @@
   }
 
   /**
-   * Try to fetch Connect JSON for a specific version
+   * Try to fetch Connect JSON - uses meta tag URL or falls back to version-based path
    */
   async function tryFetchConnectJSON(version) {
     try {
-      const url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
+      let url;
+
+      // In preview mode, always use static fallback (resolved URLs won't exist)
+      if (isPreviewMode()) {
+        const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
+        url = `${rootPath}/connect.json`;
+      } else {
+        // Production: try meta tag URL first (resolved by Antora)
+        url = getConnectJsonUrl();
+
+        // Fallback if meta tag not set
+        if (!url) {
+          url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
+        }
+      }
+
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -169,7 +240,7 @@
           parameters: params,
           returns: 'any',
           category: fn.category || 'general',
-          url: `https://docs.redpanda.com/redpanda-connect/guides/bloblang/functions/#${fn.name.toLowerCase().replace(/_/g, '-')}`
+          url: `${getConnectFunctionsUrl()}#${fn.name.toLowerCase().replace(/_/g, '-')}`
         };
 
         // Add example if available
@@ -201,7 +272,7 @@
           parameters: params,
           returns: 'any',
           category: method.categories && method.categories.length > 0 ? method.categories[0].Category : 'general',
-          url: `https://docs.redpanda.com/redpanda-connect/guides/bloblang/methods/#${method.name.toLowerCase().replace(/_/g, '-')}`
+          url: `${getConnectMethodsUrl()}#${method.name.toLowerCase().replace(/_/g, '-')}`
         };
 
         // Add example if available
@@ -739,7 +810,7 @@
    * Build the full playground URL with encoded parameters
    */
   function buildPlaygroundUrl(input, mapping, meta) {
-    const baseUrl = '/redpanda-connect/guides/bloblang/playground/';
+    const baseUrl = getConnectPlaygroundUrl();
     const params = new URLSearchParams();
 
     if (input) {

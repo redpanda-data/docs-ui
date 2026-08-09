@@ -1,4 +1,4 @@
-(function () {
+;(function () {
   'use strict'
 
   const modalOverlay = document.createElement('div')
@@ -18,6 +18,9 @@
   if (!blocks.length || !modalOverlay) return
 
   blocks.forEach((block) => {
+    // Mermaid diagrams have their own zoom modal (20-mermaid-zoom.js).
+    // Binding both opens two stacked modals for one click.
+    if (block.querySelector('.mermaid')) return
     block.addEventListener('click', function (e) {
       const media = block.querySelector('img, svg')
       if (!media) return

@@ -1,7 +1,5 @@
 <main class="article{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}">
-{{#if (ne page.attributes.role 'home')}}
   {{> toolbar}}
-{{/if}}
   <div class="content">
     {{#if (eq page.layout '404')}}
     {{> article-404}}

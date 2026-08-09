@@ -1,35 +1,51 @@
-{{#with page.versions}}
-<div class="nav-panel-explore{{#unless @root.page.navigation}} is-active{{/unless}}" data-panel="explore" title="View other versions of Redpanda {{{@root.page.component.title}}}">
+{{#if page.componentVersion}}
+<div class="nav-panel-explore{{#unless page.navigation}} is-active{{/unless}}" data-panel="explore" title="View other versions of Redpanda {{{page.component.title}}}">
   <div class="context">
-    <div class="container has-dropdown">
-      <span class="current-version">Version {{@root.page.componentVersion.displayVersion}}
-        {{#each this as |ver|}}
+    {{!-- Only show version selector if not "default" OR if there are multiple versions --}}
+    {{#if (or (ne page.componentVersion.displayVersion 'default') (and page.versions (gt page.versions.length 1)))}}
+    <div class="container{{#if (and page.versions (gt page.versions.length 1))}} has-dropdown{{/if}}">
+      {{#if (and page.versions (gt page.versions.length 1))}}
+      {{!-- Multiple versions: use accessible button trigger --}}
+      <button type="button" class="version-selector-trigger" aria-expanded="false" aria-controls="version-dropdown" aria-label="Select version">
+        <span class="current-version">Version {{page.componentVersion.displayVersion}}
+          {{#each page.versions as |ver|}}
+            {{#if (eq ver.version @root.page.attributes.version)}}
+              {{#if (is-eol ver.asciidoc.attributes)}}
+                <span class="eol-label">(end of life)</span>
+              {{/if}}
+            {{/if}}
+          {{/each}}
+        </span>
+        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+      </button>
+      <div id="version-dropdown" class="versions">
+        {{#each page.versions}}
+          {{#if (ne ./version @root.page.version)}}
+            {{#with (resolve-resource ./url) as |targetPage|}}
+              <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
+                {{../displayVersion}}
+                {{#if (is-eol ../asciidoc.attributes)}}
+                  <span class="eol-label">(end of life)</span>
+                {{/if}}
+              </a>
+            {{/with}}
+          {{/if}}
+        {{/each}}
+      </div>
+      {{else}}
+      {{!-- Single version: just display the version --}}
+      <span class="current-version">Version {{page.componentVersion.displayVersion}}
+        {{#each page.versions as |ver|}}
           {{#if (eq ver.version @root.page.attributes.version)}}
             {{#if (is-eol ver.asciidoc.attributes)}}
               <span class="eol-label">(end of life)</span>
             {{/if}}
           {{/if}}
         {{/each}}
-      </span><span class="material-symbols-outlined">
-keyboard_arrow_down
-</span>
-      <div class="versions">
-        {{#if (ne @root.page.componentVersion.displayVersion 'default')}}
-            {{#each this}}
-              {{#if (ne ./version @root.page.version)}}
-                {{#with (resolve-resource ./url) as |targetPage|}}
-                  <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
-                    {{../displayVersion}}
-                    {{#if (is-eol ../asciidoc.attributes)}}
-                      <span class="eol-label">(end of life)</span>
-                    {{/if}}
-                  </a>
-                {{/with}}
-              {{/if}}
-            {{/each}}
-        {{/if}}
-      </div>
+      </span>
+      {{/if}}
     </div>
+    {{/if}}
   </div>
 </div>
-{{/with}}
+{{/if}}

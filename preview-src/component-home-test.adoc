@@ -1,0 +1,49 @@
+= Redpanda Streaming
+:page-layout: component-home-v3
+:page-role: component-home-v3
+:hero-description: Build real-time applications with a Kafka-compatible streaming data platform designed for mission-critical workloads.
+:hero-ask-placeholder: Ask AI about Redpanda Streaming...
+:stats: 10x;;Faster|than Kafka;;6ms;;p99 latency|at scale;;Zero;;Dependencies|single binary
+:page-ai-suggestions: ["How do I get started with Redpanda?", "What's the difference between Redpanda and Kafka?", "How do I deploy Redpanda on Kubernetes?"]
+
+:deploy-title: Get started with Streaming
+:deploy-1-title: Docker Quickstart
+:deploy-1-desc: Get Redpanda running locally in minutes with Docker Compose.
+:deploy-1-link: #
+:deploy-1-time: 5 min
+:deploy-1-icon: package
+
+:deploy-2-title: Kubernetes
+:deploy-2-desc: Deploy production-ready Redpanda clusters using Helm charts or the operator.
+:deploy-2-link: #
+:deploy-2-time: 15 min
+:deploy-2-icon: cloud
+
+:deploy-3-title: Linux
+:deploy-3-desc: Install and configure Redpanda directly on Linux servers.
+:deploy-3-link: #
+:deploy-3-time: 10 min
+:deploy-3-icon: terminal
+
+:popular-title: Popular topics
+:popular-1-title: What's New
+:popular-1-desc: Explore the latest features and improvements in Redpanda.
+:popular-1-link: #
+:popular-1-icon: sparkles
+
+:popular-2-title: Configuration
+:popular-2-desc: Learn how to tune Redpanda for your specific workload.
+:popular-2-link: #
+:popular-2-icon: flow
+
+:popular-3-title: Monitoring
+:popular-3-desc: Set up dashboards and alerts for your Redpanda clusters.
+:popular-3-link: #
+:popular-3-icon: chart
+
+:popular-4-title: Schema Registry
+:popular-4-desc: Manage and evolve your data schemas safely.
+:popular-4-link: #
+:popular-4-icon: book
+
+This is a test page for the component-home-v3 layout showcasing the new color tokens.

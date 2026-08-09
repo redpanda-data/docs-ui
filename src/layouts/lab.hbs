@@ -2,8 +2,9 @@
 <html lang="en">
   <head>
 {{> head defaultPageTitle='Untitled'}}
+{{> head-component-color}}
   </head>
-  <body class="article lab {{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}">
+  <body class="article lab {{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}>
 {{> header}}
 {{> body}}
   </body>

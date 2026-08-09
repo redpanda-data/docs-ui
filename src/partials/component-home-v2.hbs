@@ -7,7 +7,7 @@
   {{/with}}
   <div class="sectionbody">
     <div class="paragraph home-intro">
-      <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{{relativize (resolve-resource this)}}}">Learn more</a>{{/with}}
+      <p>{{{page.attributes.home-intro}}} {{#with page.attributes.home-intro-learn-more}}<a href="{{#if (or (starts-with this '/') (starts-with this 'http'))}}{{{this}}}{{else}}{{{relativize (resolve-resource this)}}}{{/if}}">Learn more</a>{{/with}}
       </p>
       {{#if page.attributes.home-ai-summary}}
         <p class="home-ai-summary">{{{page.attributes.home-ai-summary}}}</p>
@@ -28,7 +28,7 @@
     <div class="grid-primary boxes">
       {{#each page.attributes.home-primary-row}}
       <article class="feature-box">
-        <a href="{{{relativize (resolve-resource url)}}}" class="feature-link">
+        <a href="{{#if (or (starts-with url '/') (starts-with url 'http'))}}{{{url}}}{{else}}{{{relativize (resolve-resource url)}}}{{/if}}" class="feature-link">
           <div class="feature-text">
             <h3 class="feature-title">{{{title}}}</h3>
             {{#if description}}
@@ -54,7 +54,7 @@
     <div class="grid-secondary boxes">
       {{#each page.attributes.home-secondary-row}}
       <article class="feature-box">
-        <a href="{{{relativize (resolve-resource url)}}}" class="feature-link">
+        <a href="{{#if (or (starts-with url '/') (starts-with url 'http'))}}{{{url}}}{{else}}{{{relativize (resolve-resource url)}}}{{/if}}" class="feature-link">
           <div class="feature-text">
             <h3 class="feature-title">{{{title}}}</h3>
             {{#if description}}
@@ -81,7 +81,7 @@
       <ul class="grid-tertiary">
       {{#each page.attributes.home-tertiary-row}}
       <li>
-      <a href="{{{relativize (resolve-resource url)}}}">{{{title}}}</a>
+      <a href="{{#if (or (starts-with url '/') (starts-with url 'http'))}}{{{url}}}{{else}}{{{relativize (resolve-resource url)}}}{{/if}}">{{{title}}}</a>
       </li>
       {{/each}}
       </ul>

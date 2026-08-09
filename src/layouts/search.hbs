@@ -15,6 +15,9 @@
         {{/with}}
         <div class="container">
           <div class="searchbox" id="searchbox"></div>
+          <label class="exact-match-toggle" for="exact-match" title="Require exact term spelling; disables typo tolerance and optional-word fallback">
+            <input type="checkbox" id="exact-match"> Exact match
+          </label>
           <div class="search-content">
             <div class="badge-button" id="display-filters">Filters </div>
             <div class="filters" id="filters">
@@ -43,16 +46,55 @@
     </div>
     {{> footer}}
     <script>
-      if (typeof algoliasearch != "undefined" && typeof instantsearch != "undefined") {
+      if (typeof window.algoliasearch != "undefined" && typeof window.instantsearch != "undefined") {
         const { algoliasearch, instantsearch } = window;
         const { searchBox } = instantsearch.widgets;
 
-        const searchClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
+        // "Exact match" toggle state. When on, we require every term, exact spelling,
+        // and no optional-word fallback. We do this in a search-client wrapper so the
+        // search box keeps showing exactly what the user typed. NOTE: we deliberately
+        // do NOT wrap the query in quotes for a phrase match — the index's searchable
+        // attributes use unordered(...), which disables phrase/proximity matching, so
+        // a quoted phrase returns nothing; strict params give reliable exact matching.
+        let exactMatch = false;
+
+        const baseClient = algoliasearch('{{{env.ALGOLIA_APP_ID}}}', '{{{env.ALGOLIA_API_KEY}}}');
+        const searchClient = {
+          ...baseClient,
+          search(requests) {
+            requests = requests.map((request) => {
+              const params = { ...(request.params || {}) };
+              // Keep empty "root" queries out of Algolia Search analytics. These
+              // fire on initial page load and during facet-only browsing (no term
+              // typed). They still return results, but `analytics: false` stops
+              // them being recorded as a searched term — otherwise they show up as
+              // "<empty search>" and dominate the report and skew average CTR.
+              if (!params.query) {
+                params.analytics = false;
+              }
+              // Exact match: require every term, exact spelling, no optional-word
+              // fallback. Only meaningful when there's an actual query.
+              if (exactMatch && params.query) {
+                params.typoTolerance = false;
+                params.removeWordsIfNoResults = 'none';
+                params.optionalWords = [];
+              }
+              return { ...request, params };
+            });
+            return baseClient.search(requests);
+          },
+        };
         const indexName = '{{{env.ALGOLIA_INDEX_NAME}}}';
 
         const search = instantsearch({
           searchClient,
           indexName,
+          // Enable click/conversion analytics. Reuses the global `aa`
+          // (search-insights) already initialised in algolia-script.hbs, sets
+          // clickAnalytics on queries, and attaches a queryID so the click
+          // events we send below are attributed to the search that produced them.
+          // https://www.algolia.com/doc/api-reference/widgets/insights/js/
+          insights: true,
           routing: {
             stateMapping: {
               // Convert UI state to URL parameters
@@ -109,18 +151,23 @@
           instantsearch.widgets.hits({
             container: '.results',
             templates: {
-              item: (hit, { html, components }) => {
+              item: (hit, { html, components, sendEvent }) => {
+                // Record a click event attributed to the current query (queryID)
+                // so Algolia can report CTR/CVR for the results page. Uses
+                // navigator.sendBeacon under the hood, so it survives the
+                // navigation triggered by the link.
+                const onHitClick = () => sendEvent('click', hit, 'Hit Clicked');
                 const isExternal = hit.objectID.startsWith('https');
                 if (isExternal) {
                   return html`
                     <div class="card">
                       <h2 class="ais-Heading">
-                        <a href="${hit.objectID}" target="_blank">
+                        <a href="${hit.objectID}" target="_blank" onClick=${onHitClick}>
                           ${components.Highlight({ attribute: 'title', hit })}
                         </a>
                       </h2>
                       <p>
-                        <a href="${hit.objectID}">
+                        <a href="${hit.objectID}" onClick=${onHitClick}>
                           ${components.Snippet({ attribute: 'intro', hit })}
                         </a>
                       </p>
@@ -136,10 +183,10 @@
                 return html`
                   <div class="card">
                     <h2 class="ais-Heading">
-                      <a href="${hit.objectID}">${components.Highlight({ attribute: 'title', hit })}</a>
+                      <a href="${hit.objectID}" onClick=${onHitClick}>${components.Highlight({ attribute: 'title', hit })}</a>
                     </h2>
                     <p>
-                      <a href="${hit.objectID}">${components.Snippet({ attribute: 'intro', hit })}</a>
+                      <a href="${hit.objectID}" onClick=${onHitClick}>${components.Snippet({ attribute: 'intro', hit })}</a>
                     </p>
                     <div class="aa-ItemContentRow">
                       <div class="aa-ItemContentTitle result-type">${hit.type}</div>
@@ -197,6 +244,15 @@
         ]);
 
         search.start();
+
+        // Wire the "Exact match" checkbox: flip the flag and re-run the search.
+        const exactMatchCheckbox = document.getElementById('exact-match');
+        if (exactMatchCheckbox) {
+          exactMatchCheckbox.addEventListener('change', (e) => {
+            exactMatch = e.target.checked;
+            if (search.helper) search.helper.search();
+          });
+        }
       }
 
       document.addEventListener('DOMContentLoaded', function(event) {

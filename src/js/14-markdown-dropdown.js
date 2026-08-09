@@ -12,7 +12,15 @@
 ;(function () {
   'use strict'
 
-  document.addEventListener('DOMContentLoaded', init)
+  // Run init when DOM is ready - handle both cases:
+  // 1. If DOM is still loading, wait for DOMContentLoaded
+  // 2. If DOM is already ready (interactive or complete), run immediately
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init)
+  } else {
+    // DOM already ready, run immediately
+    setTimeout(init, 0)
+  }
 
   function init () {
     const dropdowns = document.querySelectorAll('.markdown-dropdown')
@@ -26,6 +34,8 @@
     const menu = dropdown.querySelector('.markdown-dropdown-menu')
     const items = dropdown.querySelectorAll('.markdown-dropdown-item')
     const markdownUrl = dropdown.dataset.markdownUrl
+    const componentName = dropdown.dataset.componentName
+    const agentHandoffMode = dropdown.dataset.agentHandoffMode
 
     if (!toggle || !menu || !markdownUrl) {
       return
@@ -52,6 +62,14 @@
           setTimeout(function () {
             setOpen(false)
           }, 2500)
+        } else if (action === 'copy-agent') {
+          handleCopyAgent(markdownUrl, componentName, agentHandoffMode, item).then(function (didCopy) {
+            if (didCopy) {
+              setTimeout(function () {
+                setOpen(false)
+              }, 2500)
+            }
+          })
         } else if (action === 'view') {
           handleView(markdownUrl)
           setOpen(false)
@@ -126,7 +144,8 @@
    */
   function handleCopy (markdownUrl, button) {
     // Fetch markdown content and copy to clipboard
-    window.fetch(markdownUrl)
+    window
+      .fetch(markdownUrl)
       .then(function (response) {
         if (!response.ok) throw new Error('Failed to fetch')
         return response.text()
@@ -146,6 +165,67 @@
       )
   }
 
+  function flashCopyStatus (button, message) {
+    const status = button.querySelector('[data-agent-handoff-status]')
+    if (status) status.textContent = message
+
+    button.classList.add('clicked')
+    // Force reflow so the animation can restart.
+    button.offsetHeight // eslint-disable-line no-unused-expressions
+    button.classList.remove('clicked')
+  }
+
+  /**
+   * Copy a complete agent handoff with the current documentation section inline.
+   */
+  function handleCopyAgent (markdownUrl, componentName, mode, button) {
+    const buildAgentHandoffPrompt = window.RedpandaDocsAgentHandoff?.buildAgentHandoffPrompt
+    if (typeof buildAgentHandoffPrompt !== 'function') {
+      console.error('Could not copy agent handoff: prompt builder is unavailable.')
+      flashCopyStatus(button, 'Could not copy. Try again.')
+      return Promise.resolve(false)
+    }
+
+    return window
+      .fetch(markdownUrl)
+      .then(function (response) {
+        if (!response.ok) throw new Error(`Failed to fetch documentation (${response.status})`)
+        return response.text()
+      })
+      .then(function (markdown) {
+        const pageUrl = window.location.href
+        const absoluteMarkdownUrl = new URL(markdownUrl, window.location.origin).href
+        const pageTitle = document.querySelector('h1.page')?.textContent?.trim() || document.title
+        const sectionAnchor = window.location.hash
+        const sectionId = sectionAnchor.replace(/^#/, '')
+        const sectionTitle = document.getElementById(sectionId)?.textContent?.trim() || ''
+        const prompt = buildAgentHandoffPrompt({
+          componentName,
+          docsOrigin: window.location.origin,
+          markdown,
+          markdownUrl: absoluteMarkdownUrl,
+          mode,
+          pageTitle,
+          pageUrl,
+          sectionAnchor,
+          sectionTitle,
+        })
+
+        return window.navigator.clipboard.writeText(prompt)
+      })
+      .then(
+        function () {
+          flashCopyStatus(button, 'Copied!')
+          return true
+        },
+        function (error) {
+          console.error('Could not copy agent handoff:', error)
+          flashCopyStatus(button, 'Could not copy. Try again.')
+          return false
+        }
+      )
+  }
+
   /**
    * Handle view in new tab
    */
@@ -157,20 +237,25 @@
    * Handle Ask AI about this doc
    */
   function handleAskAI () {
-    var kapa = window.Kapa
+    // Find and click the "Ask AI" button in the top nav to open the chat drawer
+    var askAiBtn = document.querySelector('[data-action="open-chat"]')
 
-    if (kapa) {
-      // Get page title for context
-      var pageTitle = document.querySelector('h1.page')?.textContent || 'this page'
-      var aiPromptText = 'I have a question about the documentation page: ' + pageTitle
+    if (askAiBtn) {
+      askAiBtn.click()
 
-      kapa.open({
-        mode: 'ai',
-        query: aiPromptText,
-        submit: false,
-      })
+      // Optional: Pre-fill the chat input with context about the page
+      // Wait a moment for the drawer to open, then set the input value
+      setTimeout(function () {
+        var pageTitle = document.querySelector('h1.page')?.textContent || 'this page'
+        var chatInput = document.querySelector('#chat-panel-input')
+
+        if (chatInput) {
+          chatInput.value = 'I have a question about the documentation page: ' + pageTitle
+          chatInput.focus()
+        }
+      }, 100)
     } else {
-      console.warn('Kapa AI is not available.')
+      console.warn('Ask AI drawer is not available.')
     }
   }
 

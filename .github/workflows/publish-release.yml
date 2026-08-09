@@ -8,6 +8,7 @@
   jobs:
     build:
       runs-on: ubuntu-22.04
+      timeout-minutes: 20
       permissions:
         contents: write
 
@@ -19,14 +20,26 @@
       steps:
         - uses: actions/checkout@v4
 
-        - uses: actions/cache@v4
+        - name: Set up Go
+          uses: actions/setup-go@v5
           with:
-            path: ~/.npm
-            key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-            restore-keys: |
-              ${{ runner.os }}-node-
+            go-version: stable
+            cache-dependency-path: blobl-editor/wasm/go.sum
 
-        - run: npm install
+        - uses: actions/setup-node@v4
+          with:
+            node-version: 18
+
+        - name: Cache node_modules
+          id: cache-node-modules
+          uses: actions/cache@v4
+          with:
+            path: node_modules
+            key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+        - name: Install dependencies
+          if: steps.cache-node-modules.outputs.cache-hit != 'true'
+          run: npm ci
 
         - run: gulp bundle
 

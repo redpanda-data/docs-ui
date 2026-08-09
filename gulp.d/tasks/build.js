@@ -47,7 +47,7 @@ module.exports = (src, dest, preview) => () => {
         },
       },
     ]),
-    postcssVar({ preserve: preview }),
+    postcssVar({ preserve: true }),
     // NOTE to make vars.css available to all top-level stylesheets, use the next line in place of the previous one
     //postcssVar({ importFrom: path.join(src, 'css', 'vars.css'), preserve: preview }),
     preview ? postcssCalc : () => {}, // cssnano already applies postcssCalc
@@ -82,7 +82,7 @@ module.exports = (src, dest, preview) => () => {
     vfs
       .src(['css/site.css', 'css/vendor/*.css'], { ...opts, sourcemaps })
       .pipe(postcss((file) => ({ plugins: postcssPlugins, options: { file } }))),
-    vfs.src('font/*.{ttf,woff*(2)}', opts),
+    vfs.src('font/**/*.{ttf,woff*(2)}', opts),
     vfs.src('img/**/*.{gif,ico,jpg,png,svg}', opts).pipe(
       preview
         ? through()
@@ -103,13 +103,16 @@ module.exports = (src, dest, preview) => () => {
     ),
     vfs.src('css/vendor/**/*.css', opts),
     // Copy remaining vendor JS files (excluding already minified/processed ones)
-    vfs.src([
-      'js/vendor/**/*.js',
-      '!js/vendor/prism/prism-line-highlight-plugin.js',
-      '!js/vendor/prism/prism-line-numbers-plugin.js',
-      '!js/vendor/*.bundle.js',
-      '!js/vendor/*.min.js',
-    ], opts),
+    vfs.src(
+      [
+        'js/vendor/**/*.js',
+        '!js/vendor/prism/prism-line-highlight-plugin.js',
+        '!js/vendor/prism/prism-line-numbers-plugin.js',
+        '!js/vendor/*.bundle.js',
+        '!js/vendor/*.min.js',
+      ],
+      opts
+    ),
     vfs.src('helpers/*.js', opts),
     vfs.src('layouts/*.hbs', opts),
     vfs.src('partials/*.hbs', opts),

@@ -1,4 +1,5 @@
-{{#unless (eq page.attributes.pagination undefined)}}
+{{!-- Skip pagination for home page and when explicitly disabled --}}
+{{#unless (or (eq page.attributes.role 'home') (eq page.attributes.pagination undefined))}}
 {{#if (or page.previous page.next)}}
 <nav class="pagination">
   {{#with page.previous}}

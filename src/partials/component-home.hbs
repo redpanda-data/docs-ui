@@ -2,7 +2,7 @@
   <div class='container'>
     <div class="grid boxes">
       {{#each page.attributes.feature-list}}
-      <a href="{{{relativize (resolve-resource  url)}}}" class="feature-link">
+      <a href="{{#if (or (starts-with url '/') (starts-with url 'http'))}}{{{url}}}{{else}}{{{relativize (resolve-resource url)}}}{{/if}}" class="feature-link">
         <div class="feature-box">
           <div class="feature-image">
             <img src='../_images/{{image}}' alt={{{title}}} loading="lazy"/>
@@ -32,7 +32,7 @@
         <ul class="menu-list">
           {{#each items}}
             <li class="menu-list-item">
-              <a href="{{{relativize (resolve-resource  this.url)}}}"  class="menu-list-item-link">
+              <a href="{{#if (or (starts-with this.url '/') (starts-with this.url 'http'))}}{{{this.url}}}{{else}}{{{relativize (resolve-resource this.url)}}}{{/if}}" class="menu-list-item-link">
                 {{{this.text}}}
               </a>
             </li>

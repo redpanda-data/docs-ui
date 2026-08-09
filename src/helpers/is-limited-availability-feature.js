@@ -11,8 +11,8 @@ module.exports = (navUrl, { data: { root } }) => {
   // Preview mode: contentCatalog doesn't contain preview pages
   if (!contentCatalog) {
     const currentPageUrl = page.url
-    const isCurrentPage = navUrl === currentPageUrl ||
-                          (navUrl && page.src && navUrl.endsWith(page.src.basename.replace('.adoc', '.html')))
+    const isCurrentPage =
+      navUrl === currentPageUrl || (navUrl && page.src && navUrl.endsWith(page.src.basename.replace('.adoc', '.html')))
     return isCurrentPage && page.attributes && page.attributes['limited-availability']
   }
 

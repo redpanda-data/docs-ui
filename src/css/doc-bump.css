@@ -203,7 +203,7 @@ html[data-theme=dark] {
 }
 */
 
-.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;
@@ -223,11 +223,10 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc pre > code,
 .aa-DetachedOverlay .doc details .listingblock .content pre > code {
-  padding-bottom: 1rem;
   border: none;
   white-space: pre-wrap;
   font-weight: lighter;
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
 .aa-DetachedOverlay .doc blockquote {
@@ -682,7 +681,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc details > summary::after {
   content: "";
-  background: url(../img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
+  background: url(/_/img/nav-tree-chevron.svg) no-repeat center right / auto 100%;
   width: 1em;
   height: 1.2em;
   position: absolute;
@@ -903,7 +902,7 @@ html[data-theme=dark] {
   color: var(--body-font-color);
   margin-top: 0;
   cursor: pointer;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
   transition: 'background 0.3s';
 }
 
@@ -919,7 +918,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc .choices__placeholder {
   opacity: 9;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
 }
 
 .aa-DetachedOverlay .doc .type-dropdown {
@@ -938,7 +937,7 @@ html[data-theme=dark] {
   align-items: center; /* Align vertically */
   margin-bottom: 15px; /* Add space between the filters and the table */
   margin-top: 15px;
-  font-size: 14px;
+  font-size: calc(15 / var(--rem-base) * 1rem);
 }
 
 @media (max-width: 768px) {
@@ -1001,7 +1000,7 @@ html[data-theme=dark] {
 .aa-DetachedOverlay .doc .terminal-icon::after {
   content: '>_';
   color: white;
-  font-size: 10px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
   position: absolute;
   left: 3px;
   bottom: 2px;
@@ -1076,6 +1075,7 @@ html[data-theme=dark] {
 
 .aa-DetachedOverlay .doc .source-toolbox {
   display: flex;
+  align-items: center;
   visibility: hidden;
   position: absolute;
   top: 0.25rem;
@@ -1086,6 +1086,16 @@ html[data-theme=dark] {
   line-height: 1.5;
   white-space: nowrap;
   z-index: 1;
+  /* Toolbox floats over the code on hover - backdrop keeps it legible */
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--grey-50-new, #f9fafb);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="dark"] .aa-DetachedOverlay .doc .source-toolbox {
+  background: #182236;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .aa-DetachedOverlay .doc .listingblock:hover .source-toolbox {

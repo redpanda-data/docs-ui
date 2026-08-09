@@ -39,7 +39,39 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18.x'
-        cache: 'npm'
+    - name: Cache node_modules
+      id: cache-node-modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+    - name: Install npm dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: npm ci
+    - name: Cache Puppeteer browsers
+      id: cache-puppeteer
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/puppeteer
+        key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+    - name: Install Chrome for Puppeteer
+      run: |
+        # Install Chrome and pin Puppeteer to the exact binary path the installer
+        # reports. On a node_modules cache hit, `npm ci` (and Puppeteer's
+        # postinstall) is skipped, and Puppeteer's launch-time cache-dir
+        # resolution then fails to locate the browser even though it is present.
+        # Setting PUPPETEER_EXECUTABLE_PATH makes launch() use this binary directly.
+        install_output="$(npx puppeteer browsers install chrome)"
+        echo "$install_output"
+        # Installer prints "chrome@<version> <path>"; strip the prefix so paths
+        # containing spaces are preserved.
+        chrome_path="$(echo "$install_output" | sed -n 's/^chrome@[^ ]* //p' | tail -n1)"
+        if [ ! -x "$chrome_path" ]; then
+          echo "::error::Chrome binary not found at reported path: '$chrome_path'"
+          exit 1
+        fi
+        echo "PUPPETEER_EXECUTABLE_PATH=$chrome_path" >> "$GITHUB_ENV"
+        echo "Using PUPPETEER_EXECUTABLE_PATH=$chrome_path"
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
@@ -53,12 +85,11 @@ jobs:
         key: ${{ runner.os }}-go-1.25.x-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-1.25.x-
-    - name: Install dependencies
-      run: |
-        npm ci
-        cd blobl-editor/wasm && go mod download
+    - name: Download Go modules
+      run: cd blobl-editor/wasm && go mod download
     - name: Lint Go code
       uses: golangci/golangci-lint-action@v8
+      timeout-minutes: 10
       with:
         working-directory: blobl-editor/wasm
       env:
