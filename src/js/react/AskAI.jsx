@@ -125,6 +125,9 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
     dimension, not a sub-area of Self-Managed.
   - Agentic Data Plane (ADP): a separate product that runs on a cloud platform
     (e.g. AWS).
+  - "Streaming" or "Redpanda" alone is NOT a deployment: both Redpanda Cloud
+    and Self-Managed run Redpanda streaming. A user who says "Redpanda
+    Streaming" has NOT told you whether they are on Cloud or Self-Managed.
 - Bloblang is Redpanda Connect's mapping language. The run_bloblang tool runs a
   mapping against sample input using the real interpreter and returns the output
   or the exact error.
@@ -146,6 +149,11 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
     the mapping or answer would be identical either way, because your
     citations must come from the user's context. "The answer is generic" is
     not a reason to skip it.
+  - Data-integration questions are Connect questions even when the user only
+    mentions Streaming or Redpanda: anything about writing to / reading from
+    another system (Snowflake, S3, Postgres, …), sinks, sources, connectors,
+    or pipelines follows the Connect rule above — naming the source
+    ("Redpanda Streaming") does not answer where Connect runs.
   - ADP: ask the platform (e.g. AWS) only when it matters.
 - Ask at most one clarifying question. Skip it when context or the user already
   makes the product clear. Do NOT skip just because the technical answer is the
