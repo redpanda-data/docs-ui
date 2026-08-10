@@ -1190,3 +1190,12 @@ html[data-theme="dark"] .tb-signin-modal-cta {
 html[data-theme="dark"] .tb-signin-modal-cta:hover {
   background: #a5b4fc;
 }
+
+/* Bump's portal stylesheet globally hides aria-hidden elements
+   (:is([aria-hidden="true"], [hidden]) { display: none }) because it drives its
+   own tab panels with aria-hidden. Our decorative elements — the avatar letter
+   and the sign-in modal icons — carry aria-hidden for screen readers and must
+   stay visible, so re-show them, scoped to the account control. Real hiding in
+   this widget uses the `hidden` attribute, which the rules above still enforce. */
+.tb-account .tb-account-avatar[aria-hidden="true"] { display: inline-grid !important; }
+.tb-account svg[aria-hidden="true"]:not([hidden]) { display: inline !important; }
