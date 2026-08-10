@@ -1,5 +1,5 @@
 {{#if (ne page.attributes.role 'home')}}
-{{#if (not page.origin.private)}}
+{{#if page.attributes.contribution}}
 {{> contributors-modal}}
 {{/if}}
 <section class="feedback-section">
@@ -15,7 +15,7 @@
       <span> Share your feedback</span>
     </a>
   </div>
-  {{#if (not page.origin.private)}}
+  {{#if page.attributes.contribution}}
   <div class="col">
     <a href="#" aria-label="See options for contributing" onclick="handleModal(event)" rel="nofollow">
       <span class="material-symbols-outlined">group_add</span>
