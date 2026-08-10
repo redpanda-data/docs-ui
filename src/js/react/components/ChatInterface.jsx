@@ -111,18 +111,23 @@ const PRODUCT_LABELS = {
   'redpanda-connect': 'Connect',
 }
 
-// A short qualifier to disambiguate same-titled sources: the section (for
-// same-page anchors) or the product/version (for the same page across versions).
+// A short qualifier to disambiguate same-titled sources. Product/version comes
+// first, then the section: single-sourced pages exist under several products
+// (Cloud, Self-Managed, Connect), so two products' copies of the same section
+// must not render identically (an anchor-only qualifier made "Walkthrough
+// (Coalescing)" appear twice with no way to tell the products apart).
 function sourceQualifier(url) {
   try {
     const u = new URL(url)
-    if (u.hash && u.hash.length > 1) return humanize(u.hash.slice(1))
     const segs = u.pathname.split('/').filter(Boolean)
     const version = segs.find((s) => /^\d+\.\d+$/.test(s) || s === 'current')
     const product = PRODUCT_LABELS[segs[0]]
     const ver = version === 'current' ? 'latest' : version
-    if (product && ver) return `${product} ${ver}`
-    return ver || product || ''
+    const parts = []
+    if (product) parts.push(ver ? `${product} ${ver}` : product)
+    else if (ver) parts.push(ver)
+    if (u.hash && u.hash.length > 1) parts.push(humanize(u.hash.slice(1)))
+    return parts.join(', ')
   } catch {
     return ''
   }
@@ -134,21 +139,29 @@ function AnswerSources({ blocks }) {
   // Only qualify titles that repeat, so unique sources stay clean
   const titles = sources.map(baseTitle)
   const counts = titles.reduce((acc, t) => ({ ...acc, [t]: (acc[t] || 0) + 1 }), {})
+  // Collapse entries whose rendered label would be identical: different anchors
+  // of one page (or Kapa returning the page twice) are one source to a reader.
+  const rendered = new Set()
+  const items = []
+  sources.forEach((s, i) => {
+    const title = titles[i]
+    const qualifier = counts[title] > 1 ? sourceQualifier(s.sourceUrl) : ''
+    const label = qualifier ? `${title} (${qualifier})` : title
+    if (rendered.has(label)) return
+    rendered.add(label)
+    items.push({ source: s, label })
+  })
   return (
     <div className="answer-sources">
       <span className="answer-sources-label">Sources</span>
       <ul>
-        {sources.map((s, i) => {
-          const title = titles[i]
-          const qualifier = counts[title] > 1 ? sourceQualifier(s.sourceUrl) : ''
-          return (
-            <li key={s.sourceUrl}>
-              <a href={s.sourceUrl} target="_blank" rel="noopener noreferrer">
-                {title}{qualifier ? ` (${qualifier})` : ''}
-              </a>
-            </li>
-          )
-        })}
+        {items.map(({ source, label }) => (
+          <li key={source.sourceUrl}>
+            <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">
+              {label}
+            </a>
+          </li>
+        ))}
       </ul>
     </div>
   )
