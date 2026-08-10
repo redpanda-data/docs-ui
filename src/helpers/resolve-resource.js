@@ -112,7 +112,21 @@ module.exports = (resource, { data, hash: context }) => {
   }
 
   if (page && page.component) {
-    context = Object.assign({ component: page.component.name, version: page.version, module: page.module }, context)
+    // Hash params whose expression evaluated to undefined must not clobber
+    // the page defaults (version=(or ...) can legitimately come up empty).
+    const explicit = {}
+    for (const [key, value] of Object.entries(context || {})) {
+      if (value !== undefined) explicit[key] = value
+    }
+    context = Object.assign({ component: page.component.name, version: page.version, module: page.module }, explicit)
+  }
+
+  // Cross-component resolution from a versionless component (version '')
+  // asks for a version the target component doesn't have. Default to the
+  // target component's latest version instead.
+  if (!context.version && context.component && contentCatalog.getComponent) {
+    const targetComponent = contentCatalog.getComponent(context.component)
+    if (targetComponent && targetComponent.latest) context.version = targetComponent.latest.version
   }
 
   // Convert module-relative resource (module:page.adoc) to fully qualified (version@component:module:page.adoc)
