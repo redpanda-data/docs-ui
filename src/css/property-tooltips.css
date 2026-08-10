@@ -163,6 +163,16 @@ html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description::-webkit
   margin-bottom: 4px;
 }
 
+/* Links inside the rendered description (xref and <<...>> references) */
+.property-doc-tooltip .prop-tooltip-description a {
+  color: var(--link-color, #005cc5);
+  text-decoration: underline;
+}
+
+.property-doc-tooltip .prop-tooltip-description a:hover {
+  color: var(--link-color-hover, #004094);
+}
+
 .property-doc-tooltip .prop-tooltip-description code {
   background: var(--code-background, #f6f8fa);
   padding: 2px 4px;
@@ -248,6 +258,14 @@ html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link {
 }
 
 html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link:hover {
+  color: #79b8ff;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description a {
+  color: #58a6ff;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description a:hover {
   color: #79b8ff;
 }
 
