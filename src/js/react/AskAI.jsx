@@ -151,6 +151,17 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
   you do not know the user's, ask, so your answer and its citations come from
   the user's context.
 
+## Offering choices
+- When you ask the user to choose among a small set of known options (product,
+  cluster type, where they run Connect, version), end the message with ONE
+  final line in exactly this form, nothing else on the line:
+  OPTIONS: First choice | Second choice | Third choice
+- 2 to 5 options, each under 40 characters, no markdown inside the line. The
+  UI renders them as buttons the user can click, and the click sends the
+  option text back as their reply.
+- Only use it for closed choices you can enumerate. Never use it for open
+  questions, and never put the OPTIONS line anywhere but the very end.
+
 ## Citing sources
 - Most docs pages exist in several product contexts (Cloud, Self-Managed /
   Streaming, Connect) with near-identical content. Cite ONLY the variant that

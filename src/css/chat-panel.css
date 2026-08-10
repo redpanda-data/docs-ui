@@ -1377,3 +1377,51 @@
   flex: 1;
   min-width: 0;
 }
+
+/* ——— Interim narration (model reasoning summaries between tool calls) ——— */
+/* Machine-condensed thinking, not the agent's voice: mute it so nobody reads
+   it as the answer. Preserved for transparency during long tool chains. */
+#chat-panel-kapa-root .answer-interim {
+  margin: 6px 0;
+  font-size: calc(12.5 / var(--rem-base) * 1rem);
+  font-style: italic;
+  color: var(--kapa-text-muted, #6b7280);
+  opacity: 0.85;
+  white-space: pre-wrap;
+}
+
+/* ——— Clarifying-question option chips (OPTIONS: A | B protocol) ——— */
+#chat-panel-kapa-root .answer-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+
+#chat-panel-kapa-root .answer-option {
+  padding: 6px 14px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--kapa-accent, #444ce7);
+  background: transparent;
+  border: 1px solid var(--kapa-accent, #444ce7);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+#chat-panel-kapa-root .answer-option:hover:not(:disabled) {
+  background: var(--kapa-accent, #444ce7);
+  color: #fff;
+}
+
+#chat-panel-kapa-root .answer-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#chat-panel-kapa-root .answer-option:focus-visible {
+  outline: 2px solid var(--kapa-accent, #444ce7);
+  outline-offset: 2px;
+}
+

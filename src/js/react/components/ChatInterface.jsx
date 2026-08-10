@@ -133,6 +133,42 @@ function sourceQualifier(url) {
   }
 }
 
+// ——— Clarifying-question options ————————————————————————————————————
+// The agent is instructed (AskAI.jsx CUSTOM_INSTRUCTIONS) to end a clarifying
+// question with a machine-readable final line:  OPTIONS: A | B | C
+// Split it off the answer markdown so the UI can render clickable choices.
+function splitOptions(md) {
+  const text = md || ''
+  const match = /\n\s*OPTIONS:\s*([^\n]+)\s*$/.exec(text)
+  if (!match) return { md: text, options: [] }
+  const options = match[1]
+    .split('|')
+    .map((s) => s.trim())
+    .filter((s) => s && s.length <= 60)
+    .slice(0, 5)
+  if (options.length < 2) return { md: text, options: [] }
+  return { md: text.slice(0, match.index), options }
+}
+
+function AnswerOptions({ options, onPick, disabled }) {
+  if (!options.length) return null
+  return (
+    <div className="answer-options" role="group" aria-label="Choose an option">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          className="answer-option"
+          disabled={disabled}
+          onClick={() => onPick(opt)}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function AnswerSources({ blocks }) {
   const sources = extractSources(blocks)
   if (sources.length === 0) return null
@@ -832,24 +868,51 @@ export default function ChatInterface() {
                   </div>
                 )
               }
-              const toolCallBlocks = (m.blocks || []).filter((b) => b.type === 'tool_calls')
+              // Render blocks in their streamed order. Text blocks BEFORE the
+              // final one are the model's interim narration — including its
+              // machine-summarized reasoning, which reads as clipped shorthand
+              // ("Need context Connect question ask one clarifying…") — so
+              // style them as muted thinking, not as the agent's voice. Only
+              // the final text block is the real answer.
+              const blocks = m.blocks || []
+              let lastTextIdx = -1
+              blocks.forEach((b, i) => {
+                if (b.type === 'text' && (b.content || '').trim()) lastTextIdx = i
+              })
+              const answerMd = lastTextIdx >= 0 ? blocks[lastTextIdx].content : m.content
+              const { md: answerBody, options } = splitOptions(answerMd)
+              const optionsLive = isLast && !isStreaming && !m.isError
               return (
                 <div key={idx} className={`qa-pair ${m.isError ? 'qa-pair-error' : ''}`}>
-                  {toolCallBlocks.map((block, bi) => (
-                    <div key={bi} className="tool-calls">
-                      <ToolCallGroup>
-                        {(block.toolCalls || []).map((tc) => (
-                          <ToolCallCard
-                            key={tc.id}
-                            toolCall={{ ...tc, displayName: tc.displayName || TOOL_DISPLAY_NAMES[tc.name] }}
-                            onApprove={approveToolCall}
-                            onReject={rejectToolCall}
-                          />
-                        ))}
-                      </ToolCallGroup>
-                    </div>
-                  ))}
-                  <Answer md={m.content} />
+                  {blocks.map((block, bi) => {
+                    if (block.type === 'tool_calls') {
+                      return (
+                        <div key={bi} className="tool-calls">
+                          <ToolCallGroup>
+                            {(block.toolCalls || []).map((tc) => (
+                              <ToolCallCard
+                                key={tc.id}
+                                toolCall={{ ...tc, displayName: tc.displayName || TOOL_DISPLAY_NAMES[tc.name] }}
+                                onApprove={approveToolCall}
+                                onReject={rejectToolCall}
+                              />
+                            ))}
+                          </ToolCallGroup>
+                        </div>
+                      )
+                    }
+                    if (block.type !== 'text' || !(block.content || '').trim()) return null
+                    if (bi === lastTextIdx) return <Answer key={bi} md={answerBody} />
+                    return (
+                      <div key={bi} className="answer-interim" aria-label="Agent thinking">
+                        {block.content}
+                      </div>
+                    )
+                  })}
+                  {lastTextIdx < 0 && <Answer md={answerBody} />}
+                  {options.length > 0 && (
+                    <AnswerOptions options={options} onPick={doQuery} disabled={!optionsLive} />
+                  )}
                   <AnswerSources blocks={m.blocks} />
                   {isLast && !isStreaming && (
                     <div className="actions-feedback flex justify-between items-center">
