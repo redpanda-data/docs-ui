@@ -34,7 +34,13 @@ const glob = {
  */
 function compileWidgets (cb) {
   const partialsToCompile = [
-    { name: 'header', context: 'context/header.json' },
+    // The header widget wraps the same header-content partial as docs pages, so
+    // the docs-account markup (sign in / user menu) ships with it — but it
+    // renders hidden and only comes alive via its JS. Bundle the account
+    // control, the dropdown handler it delegates to, and the signed-in
+    // pageview beacon so Bump API pages get the same login + lead capture as
+    // the rest of the docs (the styles are already in header-bump.css).
+    { name: 'header', context: 'context/header.json', scripts: ['25-topbar-dropdown.js', '26-docs-account.js', '27-docs-activity.js'] },
     { name: 'footer', context: 'context/footer.json', scripts: ['05-mobile-navbar.js'] },
     { name: 'head-bump', context: 'context/head.json' },
     { name: 'chat-panel-bump', context: 'context/chat-panel.json' },
