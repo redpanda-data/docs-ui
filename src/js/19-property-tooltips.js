@@ -274,9 +274,10 @@
       parts.push('<div class="prop-tooltip-badges">' + badges.join(' ') + '</div>')
     }
 
-    // Description
+    // Description: first paragraph only. The tooltip is a preview; the full
+    // accepted-values detail lives at the "View full documentation" anchor.
     if (prop.description) {
-      parts.push('<div class="prop-tooltip-description">' + formatDescription(prop.description) + '</div>')
+      parts.push('<div class="prop-tooltip-description">' + formatDescription(prop.description, true) + '</div>')
     }
 
     // Default value
@@ -500,8 +501,10 @@
   /**
    * Format description - evaluate conditionals, then render paragraphs and
    * bullet lists so multi-line descriptions don't collapse into one blob.
+   * With summaryOnly, keep just the first block (the summary sentence) and
+   * mark the truncation with an ellipsis.
    */
-  function formatDescription (text) {
+  function formatDescription (text, summaryOnly) {
     if (!text) return ''
 
     var cleaned = stripConditionals(String(text), definedConditionalAttributes())
@@ -546,6 +549,13 @@
     flushParagraph()
     flushList()
 
+    if (summaryOnly && blocks.length > 1) {
+      var first = blocks[0]
+      if (first.slice(-4) === '</p>') {
+        return first.slice(0, -4) + '&#8230;</p>'
+      }
+      return first + '<p>&#8230;</p>'
+    }
     return blocks.join('')
   }
 
@@ -585,6 +595,15 @@
           appendTo: document.body,
           trigger: isTouch ? 'click' : 'mouseenter focus',
           hideOnClick: isTouch ? 'toggle' : true,
+          // Same show delay as the glossary and enterprise tooltips, so
+          // dragging the cursor across a paragraph doesn't fire previews.
+          delay: [200, 0],
+          popperOptions: {
+            modifiers: [
+              { name: 'preventOverflow', options: { boundary: 'viewport' } },
+              { name: 'flip', options: { fallbackPlacements: ['bottom', 'top'] } },
+            ],
+          },
         }
       }
 
