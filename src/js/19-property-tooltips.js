@@ -296,21 +296,7 @@
     }
 
     // Link to full documentation, relative to the current page's component
-    var scope = prop.configScope || 'cluster'
-    // AsciiDoc auto-ID generation: dots are removed, underscores become hyphens
-    // e.g., "redpanda.storage.mode" -> "redpandastoragemode"
-    // e.g., "log_retention_ms" -> "log-retention-ms"
-    var anchor = prop.name.replace(/\./g, '').replace(/_/g, '-')
-    var pagesUrl = getPropertiesPagesUrl()
-    var docUrl
-    if (pagesUrl) {
-      // Swap the scope into the component-resolved cluster-properties URL.
-      docUrl = pagesUrl.replace('cluster-properties', scope + '-properties') + '#' + anchor
-    } else {
-      // Fallback for pages without the meta tag: streaming URL space.
-      docUrl = '/' + getDocVersion() + '/reference/properties/' + scope + '-properties/#' + anchor
-    }
-    parts.push('<a href="' + escapeHtml(docUrl) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
+    parts.push('<a href="' + escapeHtml(buildDocUrl(prop)) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
     return '<div class="property-doc-tooltip">' + parts.join('') + '</div>'
   }
@@ -326,14 +312,107 @@
   }
 
   /**
-   * Format description - sanitize HTML while preserving safe links and code
+   * Build the component-relative documentation URL for a property.
+   * AsciiDoc auto-ID generation: dots are removed, underscores become hyphens
+   * e.g., "redpanda.storage.mode" -> "redpandastoragemode"
+   * e.g., "log_retention_ms" -> "log-retention-ms"
+   */
+  function propertyAnchor (name) {
+    return name.replace(/\./g, '').replace(/_/g, '-')
+  }
+
+  function buildDocUrl (prop) {
+    var scope = prop.configScope || 'cluster'
+    var anchor = propertyAnchor(prop.name)
+    var pagesUrl = getPropertiesPagesUrl()
+    if (pagesUrl) {
+      // Swap the scope into the component-resolved cluster-properties URL.
+      return pagesUrl.replace('cluster-properties', scope + '-properties') + '#' + anchor
+    }
+    // Fallback for pages without the meta tag: streaming URL space.
+    return '/' + getDocVersion() + '/reference/properties/' + scope + '-properties/#' + anchor
+  }
+
+  /**
+   * Find a property whose generated heading anchor matches the given anchor,
+   * so <<anchor,text>> internal references can link across property pages.
+   */
+  var anchorIndex = null
+  function propertyForAnchor (anchor) {
+    if (!propertiesData) return null
+    if (!anchorIndex) {
+      anchorIndex = {}
+      Object.keys(propertiesData).forEach(function (name) {
+        anchorIndex[propertyAnchor(name)] = propertiesData[name]
+      })
+    }
+    return anchorIndex[anchor] || null
+  }
+
+  /**
+   * Attribute names considered "defined" when evaluating ifdef/ifndef
+   * conditionals in property descriptions. Property descriptions are shared
+   * between the self-managed and cloud sites, so pick the branch matching
+   * the site this page belongs to.
+   */
+  function definedConditionalAttributes () {
+    var defined = []
+    var pagesUrl = getPropertiesPagesUrl() || ''
+    if (pagesUrl.indexOf('redpanda-cloud') !== -1 || window.location.pathname.indexOf('/redpanda-cloud/') !== -1) {
+      defined.push('env-cloud')
+    }
+    return defined
+  }
+
+  /**
+   * Evaluate AsciiDoc preprocessor conditionals (ifdef/ifndef/endif) in a
+   * description, keeping only the lines for the current site.
+   */
+  function stripConditionals (text, defined) {
+    var out = []
+    var stack = []
+    text.split('\n').forEach(function (line) {
+      var directive = line.match(/^\s*(ifdef|ifndef)::([^[\]]+)\[(.*)\]\s*$/)
+      if (directive) {
+        var attrs = directive[2]
+        var satisfied
+        if (attrs.indexOf(',') !== -1) {
+          satisfied = attrs.split(',').some(function (a) { return defined.indexOf(a.trim()) !== -1 })
+        } else if (attrs.indexOf('+') !== -1) {
+          satisfied = attrs.split('+').every(function (a) { return defined.indexOf(a.trim()) !== -1 })
+        } else {
+          satisfied = defined.indexOf(attrs.trim()) !== -1
+        }
+        if (directive[1] === 'ifndef') satisfied = !satisfied
+        if (directive[3]) {
+          // Single-line form: ifdef::attr[content]
+          if (satisfied && stack.every(Boolean)) out.push(directive[3])
+        } else {
+          stack.push(satisfied)
+        }
+        return
+      }
+      if (/^\s*endif::[^[\]]*\[\]\s*$/.test(line)) {
+        stack.pop()
+        return
+      }
+      if (stack.every(Boolean)) out.push(line)
+    })
+    return out.join('\n')
+  }
+
+  /**
+   * Format one run of inline text - sanitize HTML while preserving safe
+   * links, code spans, and property cross-references.
    *
    * Handles:
    * - Pre-resolved <a> tags from JSON (safe, with href attribute)
    * - Backticks converted to <code> tags
-   * - Fallback xref resolution for any unresolved xrefs
+   * - prop:/config_ref macro calls rendered as code
+   * - <<anchor,text>> internal references linked when they name a property
+   * - Fallback xref resolution for unqualified same-component targets
    */
-  function formatDescription (text) {
+  function formatInline (text) {
     if (!text) return ''
 
     // Extract and preserve <a> tags (already resolved in JSON generation)
@@ -368,22 +447,102 @@
       return '<code>' + display + '</code>'
     })
 
-    // Fallback: resolve any remaining xrefs that weren't pre-resolved
-    var withXrefs = withProps.replace(
-      /xref:\.?\/?([^[]+)\.adoc(?:#([^[]*))?\[([^\]]+)\]/g,
+    // Internal <<anchor,text>> references (escaped to &lt;&lt;...&gt;&gt;).
+    // Link when the anchor names another documented property; otherwise
+    // render the display text alone.
+    var withRefs = withProps.replace(/&lt;&lt;([^,&\s]+)(?:,\s*((?:(?!&gt;&gt;).)*?))?&gt;&gt;/g, function (match, anchor, display) {
+      var target = propertyForAnchor(anchor)
+      var label = display || (target ? '<code>' + target.name + '</code>' : anchor)
+      if (target) {
+        return '<a href="' + escapeHtml(buildDocUrl(target)) + '">' + label + '</a>'
+      }
+      return label
+    })
+
+    // Fallback: resolve remaining xrefs. Unqualified targets resolve
+    // relative to the current page; module-qualified targets (one ':')
+    // resolve against the component root derived from the property pages
+    // URL. Component-qualified targets can't be resolved client-side and
+    // render as their display text.
+    var withXrefs = withRefs.replace(
+      /xref:([^[\]]+?)\.adoc(?:#([^[\]]*))?\[([^\]]*)\]/g,
       function (match, path, anchor, display) {
-        var href = path.replace(/^\.\//, '') + '/'
+        var label = display || path.split('/').pop()
+        var href
+        var parts = path.split(':')
+        if (parts.length === 1) {
+          href = path.replace(/^\.\//, '')
+        } else if (parts.length === 2) {
+          var pagesUrl = getPropertiesPagesUrl()
+          if (!pagesUrl) return label
+          var componentRoot = pagesUrl.replace(/reference\/properties\/cluster-properties\/?$/, '')
+          href = componentRoot + parts[0] + '/' + parts[1].replace(/^\.\//, '')
+        } else {
+          return label
+        }
+        // Antora indexifies page URLs: index pages drop the final segment.
+        href = href.replace(/\/index$/, '') + '/'
         if (anchor) href += '#' + anchor
-        return '<a href="' + href + '">' + display + '</a>'
+        return '<a href="' + escapeHtml(href) + '">' + label + '</a>'
       }
     )
 
     // Restore preserved links
-    var result = withXrefs.replace(/___LINK_(\d+)___/g, function (match, index) {
+    return withXrefs.replace(/___LINK_(\d+)___/g, function (match, index) {
       return linkPlaceholders[parseInt(index, 10)] || match
     })
+  }
 
-    return result
+  /**
+   * Format description - evaluate conditionals, then render paragraphs and
+   * bullet lists so multi-line descriptions don't collapse into one blob.
+   */
+  function formatDescription (text) {
+    if (!text) return ''
+
+    var cleaned = stripConditionals(String(text), definedConditionalAttributes())
+    var blocks = []
+    var paragraph = []
+    var list = null
+
+    function flushParagraph () {
+      if (paragraph.length) {
+        blocks.push('<p>' + formatInline(paragraph.join(' ')) + '</p>')
+        paragraph = []
+      }
+    }
+    function flushList () {
+      if (list) {
+        blocks.push('<ul>' + list.map(function (item) { return '<li>' + formatInline(item) + '</li>' }).join('') + '</ul>')
+        list = null
+      }
+    }
+
+    cleaned.split('\n').forEach(function (rawLine) {
+      var line = rawLine.trim()
+      if (!line) {
+        flushParagraph()
+        flushList()
+        return
+      }
+      var item = line.match(/^[*-]\s+(.*)$/)
+      if (item) {
+        flushParagraph()
+        if (!list) list = []
+        list.push(item[1])
+        return
+      }
+      if (list) {
+        // Continuation of the previous list item
+        list[list.length - 1] += ' ' + line
+        return
+      }
+      paragraph.push(line)
+    })
+    flushParagraph()
+    flushList()
+
+    return blocks.join('')
   }
 
   /**

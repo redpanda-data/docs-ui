@@ -113,10 +113,31 @@ code.has-property-tooltip:focus-visible {
   border: 1px solid #f5c6cb;
 }
 
-/* Description text */
+/* Description text. Long generated descriptions scroll inside the tooltip
+   so the signature, default, and documentation link always stay visible. */
 .property-doc-tooltip .prop-tooltip-description {
   margin-bottom: 12px;
   color: var(--body-font-color, #333);
+  max-height: 14em;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.property-doc-tooltip .prop-tooltip-description p {
+  margin: 0 0 8px;
+}
+
+.property-doc-tooltip .prop-tooltip-description p:last-child {
+  margin-bottom: 0;
+}
+
+.property-doc-tooltip .prop-tooltip-description ul {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+
+.property-doc-tooltip .prop-tooltip-description li {
+  margin-bottom: 4px;
 }
 
 .property-doc-tooltip .prop-tooltip-description code {
