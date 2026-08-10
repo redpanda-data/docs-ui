@@ -73,7 +73,8 @@ class ErrorBoundary extends Component {
 // is reading (body data-component), else the first cited.
 
 // Identity of a page across its product variants: the path with leading
-// product/version segments stripped, plus the anchor.
+// product/version segments stripped. No anchor — different sections of one
+// page are one source to a reader.
 function variantKey(url) {
   try {
     const u = new URL(url)
@@ -81,7 +82,7 @@ function variantKey(url) {
     while (segs.length && (PRODUCT_LABELS[segs[0]] || /^\d+\.\d+$/.test(segs[0]) || segs[0] === 'current' || segs[0] === 'beta')) {
       segs.shift()
     }
-    return segs.join('/') + (u.hash || '')
+    return segs.join('/')
   } catch {
     return url
   }
@@ -95,10 +96,30 @@ function productOf(url) {
   }
 }
 
-function extractSources(blocks) {
-  const preferred = (typeof document !== 'undefined' &&
+// Which product variants to prefer for the user's answer to the clarifying
+// question. Self-Managed users of Connect read the standalone Connect docs,
+// so their preference list leads with Connect.
+const PRODUCT_PREFERENCE = {
+  Cloud: ['Cloud'],
+  'Self-Managed': ['Connect', 'Self-Managed', 'Streaming'],
+  Connect: ['Connect'],
+  Streaming: ['Streaming', 'Self-Managed', 'Connect'],
+  'Data Platform': ['Data Platform'],
+}
+
+// Collapse the agent's citations to one entry per page: single-sourced pages
+// exist under several products with near-identical content — and with
+// DIFFERENT path tails per component, so URL-based keys can't match them.
+// Stage 1 dedupes by product-stripped path (kills anchors + same-tail
+// variants); stage 2 collapses same-titled pages across products, preferring
+// the product the conversation established (the user's clarifying answer),
+// else the product of the page being read, else the first cited.
+function extractSources(blocks, conversationProduct) {
+  const pageComponent = (typeof document !== 'undefined' &&
     PRODUCT_LABELS[document.body?.getAttribute('data-component')]) || null
-  const byKey = new Map()
+  const preference = PRODUCT_PREFERENCE[conversationProduct || pageComponent] || []
+
+  const byPage = new Map()
   for (const block of blocks || []) {
     if (block.type !== 'tool_calls') continue
     for (const call of block.toolCalls || []) {
@@ -107,20 +128,27 @@ function extractSources(blocks) {
         // Only render web URLs — React doesn't block javascript: hrefs
         if (!/^https?:\/\//i.test(source.sourceUrl)) continue
         const key = variantKey(source.sourceUrl)
-        const existing = byKey.get(key)
-        if (!existing) {
-          byKey.set(key, source)
-        } else if (preferred &&
-          productOf(source.sourceUrl) === preferred &&
-          productOf(existing.sourceUrl) !== preferred) {
-          // Same page, and this variant matches the user's current product —
-          // swap it in (Map preserves the original insertion position).
-          byKey.set(key, source)
-        }
+        if (!byPage.has(key)) byPage.set(key, source)
       }
     }
   }
-  return [...byKey.values()]
+
+  // Stage 2: same title across products = the same single-sourced page.
+  const byTitle = new Map()
+  for (const source of byPage.values()) {
+    const title = baseTitle(source).toLowerCase()
+    const existing = byTitle.get(title)
+    if (!existing) {
+      byTitle.set(title, source)
+      continue
+    }
+    const rank = (s) => {
+      const i = preference.indexOf(productOf(s.sourceUrl))
+      return i === -1 ? preference.length : i
+    }
+    if (rank(source) < rank(existing)) byTitle.set(title, source)
+  }
+  return [...byTitle.values()]
 }
 
 // Kapa titles can arrive pipe-joined ("Page title|Page title") or empty
@@ -209,8 +237,8 @@ function AnswerOptions({ options, onPick, disabled }) {
   )
 }
 
-function AnswerSources({ blocks }) {
-  const sources = extractSources(blocks)
+function AnswerSources({ blocks, conversationProduct }) {
+  const sources = extractSources(blocks, conversationProduct)
   if (sources.length === 0) return null
   // Only qualify titles that repeat, so unique sources stay clean
   const titles = sources.map(baseTitle)
@@ -539,6 +567,18 @@ export default function ChatInterface() {
     }
     document.querySelector('[data-chat-action="close"]')?.click()
     window.loadKapa(true)
+  }
+
+  // The user's clarifying answer ("Redpanda Cloud" / "Self-Managed", usually
+  // via an option chip) fixes the product used for citation preference across
+  // the whole conversation (see extractSources).
+  let conversationProduct = null
+  for (let i = messages.length - 1; i >= 0 && !conversationProduct; i--) {
+    const mm = messages[i]
+    if (mm.role !== 'user') continue
+    const t = (mm.content || '').toLowerCase()
+    if (/\bredpanda cloud\b|\bon cloud\b/.test(t)) conversationProduct = 'Cloud'
+    else if (/self[- ]managed/.test(t)) conversationProduct = 'Self-Managed'
   }
 
   const doQuery = (q) => {
@@ -953,7 +993,7 @@ export default function ChatInterface() {
                   {options.length > 0 && (
                     <AnswerOptions options={options} onPick={doQuery} disabled={!optionsLive} />
                   )}
-                  <AnswerSources blocks={m.blocks} />
+                  <AnswerSources blocks={m.blocks} conversationProduct={conversationProduct} />
                   {isLast && !isStreaming && (
                     <div className="actions-feedback flex justify-between items-center">
                       <ActionButtons
