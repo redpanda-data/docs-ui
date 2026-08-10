@@ -42,12 +42,16 @@ function logUnresolved (resource, reason, page, context, logger) {
 module.exports = (resource, { data, hash: context }) => {
   const { page, logger } = data.root || {}
   const fallbackUrl = context?.fallback
+  // An explicitly provided fallback (even an empty one) marks the resolution
+  // as optional: the caller handles the miss, so an unresolved target is
+  // expected on components that don't publish the resource and must not warn.
+  const optional = context ? 'fallback' in context : false
 
   // Log and return undefined if resource is not provided
   if (!resource || typeof resource !== 'string') {
     // Only log if we have page context (not during initial template compilation)
     if (page && resource === undefined) {
-      logUnresolved('undefined', 'attribute not defined (check page attributes)', page, context, logger)
+      if (!optional) logUnresolved('undefined', 'attribute not defined (check page attributes)', page, context, logger)
     }
     return fallbackUrl || undefined
   }
@@ -141,7 +145,7 @@ module.exports = (resource, { data, hash: context }) => {
     result = fallbackUrl
   } else {
     // Log warning for unresolved resource (only if no fallback provided)
-    logUnresolved(resolvedResource, 'target not found in content catalog', page, context, logger)
+    if (!optional) logUnresolved(resolvedResource, 'target not found in content catalog', page, context, logger)
     result = resource
   }
 
