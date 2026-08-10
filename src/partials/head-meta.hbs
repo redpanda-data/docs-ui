@@ -53,6 +53,14 @@
 <meta name="properties-pages-url" content="{{this}}">
 {{/with}}
 {{!--
+  Cloud components set page-cloud: true in antora.yml. Property tooltip
+  descriptions carry ifdef::env-cloud conditionals; this flag tells the
+  tooltip formatter which branch to render.
+--}}
+{{#if page.attributes.cloud}}
+<meta name="page-env-cloud" content="true">
+{{/if}}
+{{!--
   Connect JSON URL for Bloblang tooltips
 
   Resolution strategy:

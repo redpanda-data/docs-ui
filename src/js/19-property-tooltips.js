@@ -357,8 +357,12 @@
    */
   function definedConditionalAttributes () {
     var defined = []
+    // Cloud components set page-cloud: true, which head-meta surfaces as a
+    // meta tag. Fall back to the component-resolved pages URL for pages
+    // built before the meta tag existed.
+    var meta = document.querySelector('meta[name="page-env-cloud"]')
     var pagesUrl = getPropertiesPagesUrl() || ''
-    if (pagesUrl.indexOf('redpanda-cloud') !== -1 || window.location.pathname.indexOf('/redpanda-cloud/') !== -1) {
+    if ((meta && meta.content === 'true') || pagesUrl.indexOf('cloud-data-platform') !== -1) {
       defined.push('env-cloud')
     }
     return defined
