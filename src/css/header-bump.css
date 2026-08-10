@@ -1198,4 +1198,7 @@ html[data-theme="dark"] .tb-signin-modal-cta:hover {
    stay visible, so re-show them, scoped to the account control. Real hiding in
    this widget uses the `hidden` attribute, which the rules above still enforce. */
 .tb-account .tb-account-avatar[aria-hidden="true"] { display: inline-grid !important; }
-.tb-account svg[aria-hidden="true"]:not([hidden]) { display: inline !important; }
+/* The sign-in modal is portaled to <body> (26-docs-account.js moves it out of
+   the navbar's stacking context), so scope to the modal class too — a
+   .tb-account-descendant selector misses its close and feature icons. */
+:is(.tb-account, .tb-signin-modal) svg[aria-hidden="true"]:not([hidden]) { display: inline !important; }
