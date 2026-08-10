@@ -584,6 +584,22 @@
       )
       var isTouch = isTouchDevice()
 
+      // Only the first mention of a property in a paragraph (or list item,
+      // table cell, ...) gets a tooltip. Repeats render as plain code so a
+      // dense paragraph isn't wall-to-wall dotted underlines.
+      var decoratedContainers = new WeakMap()
+      var isRepeatMention = function (codeEl, name) {
+        var container = codeEl.closest('p, li, td, th, dt, dd') || codeEl.parentElement || article
+        var seen = decoratedContainers.get(container)
+        if (seen && seen.has(name)) return true
+        if (!seen) {
+          seen = new Set()
+          decoratedContainers.set(container, seen)
+        }
+        seen.add(name)
+        return false
+      }
+
       var getTippyConfig = function (content) {
         return {
           content: content,
@@ -612,6 +628,7 @@
 
         // Look up the marked property in the published data
         if (Object.prototype.hasOwnProperty.call(properties, text)) {
+          if (isRepeatMention(codeEl, text)) return
           var prop = properties[text]
           var tooltipContent = createPropertyTooltip(prop)
 
