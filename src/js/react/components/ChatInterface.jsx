@@ -64,23 +64,63 @@ class ErrorBoundary extends Component {
 
 // ——— Sources ————————————————————————————————————————————————————————————
 // Assistant messages carry sources inside tool-call blocks; collect and
-// dedupe them by URL for a compact link list under the answer.
+// dedupe them for a compact link list under the answer.
+//
+// Dedupe is by PAGE IDENTITY, not raw URL: single-sourced pages exist under
+// several products (Cloud, Self-Managed, Connect) with near-identical content,
+// and the agent sometimes cites more than one variant despite instructions.
+// Collapse variants to one entry, preferring the product of the page the user
+// is reading (body data-component), else the first cited.
+
+// Identity of a page across its product variants: the path with leading
+// product/version segments stripped, plus the anchor.
+function variantKey(url) {
+  try {
+    const u = new URL(url)
+    const segs = u.pathname.split('/').filter(Boolean)
+    while (segs.length && (PRODUCT_LABELS[segs[0]] || /^\d+\.\d+$/.test(segs[0]) || segs[0] === 'current' || segs[0] === 'beta')) {
+      segs.shift()
+    }
+    return segs.join('/') + (u.hash || '')
+  } catch {
+    return url
+  }
+}
+
+function productOf(url) {
+  try {
+    return PRODUCT_LABELS[new URL(url).pathname.split('/').filter(Boolean)[0]] || null
+  } catch {
+    return null
+  }
+}
+
 function extractSources(blocks) {
-  const seen = new Set()
-  const sources = []
+  const preferred = (typeof document !== 'undefined' &&
+    PRODUCT_LABELS[document.body?.getAttribute('data-component')]) || null
+  const byKey = new Map()
   for (const block of blocks || []) {
     if (block.type !== 'tool_calls') continue
     for (const call of block.toolCalls || []) {
       for (const source of call.sources || []) {
-        if (!source?.sourceUrl || seen.has(source.sourceUrl)) continue
+        if (!source?.sourceUrl) continue
         // Only render web URLs — React doesn't block javascript: hrefs
         if (!/^https?:\/\//i.test(source.sourceUrl)) continue
-        seen.add(source.sourceUrl)
-        sources.push(source)
+        const key = variantKey(source.sourceUrl)
+        const existing = byKey.get(key)
+        if (!existing) {
+          byKey.set(key, source)
+        } else if (preferred &&
+          productOf(source.sourceUrl) === preferred &&
+          productOf(existing.sourceUrl) !== preferred) {
+          // Same page, and this variant matches the user's current product —
+          // swap it in (Map preserves the original insertion position).
+          byKey.set(key, source)
+        }
       }
     }
   }
-  return sources
+  return [...byKey.values()]
 }
 
 // Kapa titles can arrive pipe-joined ("Page title|Page title") or empty
