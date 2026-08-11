@@ -243,7 +243,7 @@
   /**
    * Create HTML content for property tooltip
    */
-  function createPropertyTooltip (prop) {
+  function createPropertyTooltip (prop, stampedUrl) {
     var parts = []
 
     // Signature line with type
@@ -297,7 +297,7 @@
     }
 
     // Link to full documentation, relative to the current page's component
-    parts.push('<a href="' + escapeHtml(buildDocUrl(prop)) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
+    parts.push('<a href="' + escapeHtml(buildDocUrl(prop, stampedUrl)) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
     return '<div class="property-doc-tooltip">' + parts.join('') + '</div>'
   }
@@ -313,16 +313,24 @@
   }
 
   /**
-   * Build the component-relative documentation URL for a property.
-   * AsciiDoc auto-ID generation: dots are removed, underscores become hyphens
-   * e.g., "redpanda.storage.mode" -> "redpandastoragemode"
-   * e.g., "log_retention_ms" -> "log-retention-ms"
+   * The anchor Asciidoctor generates for a property heading: dots become
+   * hyphens, underscores are valid id characters and stay.
+   * e.g., "redpanda.storage.mode" -> "redpanda-storage-mode"
+   * e.g., "cloud_storage_enabled" -> "cloud_storage_enabled"
    */
   function propertyAnchor (name) {
-    return name.replace(/\./g, '').replace(/_/g, '-')
+    return name.replace(/\./g, '-')
   }
 
-  function buildDocUrl (prop) {
+  /**
+   * Documentation URL for a property. The prop macro stamps data-doc-url
+   * with the URL of the page it discovered actually documents the property
+   * (per component, respecting include tags) -- always prefer that. The
+   * scope-derived guess remains only for markers built before the stamp
+   * existed.
+   */
+  function buildDocUrl (prop, stampedUrl) {
+    if (stampedUrl) return stampedUrl
     var scope = prop.configScope || 'cluster'
     var anchor = propertyAnchor(prop.name)
     var pagesUrl = getPropertiesPagesUrl()
@@ -335,8 +343,11 @@
   }
 
   /**
-   * Find a property whose generated heading anchor matches the given anchor,
-   * so <<anchor,text>> internal references can link across property pages.
+   * Find a property whose heading anchor matches the given anchor, so
+   * <<anchor,text>> internal references can link across property pages.
+   * Hand-written references use inconsistent anchor spellings, so index
+   * each property under the real Asciidoctor id plus the legacy variants
+   * (dots removed / underscores hyphenated).
    */
   var anchorIndex = null
   function propertyForAnchor (anchor) {
@@ -344,7 +355,10 @@
     if (!anchorIndex) {
       anchorIndex = {}
       Object.keys(propertiesData).forEach(function (name) {
-        anchorIndex[propertyAnchor(name)] = propertiesData[name]
+        var prop = propertiesData[name]
+        anchorIndex[propertyAnchor(name)] = prop
+        anchorIndex[name.replace(/\./g, '').replace(/_/g, '-')] = prop
+        anchorIndex[name.replace(/[._]/g, '-')] = prop
       })
     }
     return anchorIndex[anchor] || null
@@ -630,7 +644,7 @@
         if (Object.prototype.hasOwnProperty.call(properties, text)) {
           if (isRepeatMention(codeEl, text)) return
           var prop = properties[text]
-          var tooltipContent = createPropertyTooltip(prop)
+          var tooltipContent = createPropertyTooltip(prop, codeEl.getAttribute('data-doc-url'))
 
           // Mark as having tooltip (for styling and to avoid re-processing)
           codeEl.classList.add('has-property-tooltip')
