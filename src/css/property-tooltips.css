@@ -113,10 +113,64 @@ code.has-property-tooltip:focus-visible {
   border: 1px solid #f5c6cb;
 }
 
-/* Description text */
+/* Description text. Long generated descriptions scroll inside the tooltip
+   so the signature, default, and documentation link always stay visible.
+   The scrollbar is styled so it stays visible when content overflows:
+   macOS overlay scrollbars only appear mid-scroll, which hides the fact
+   that there is more content. Styling ::-webkit-scrollbar opts out of the
+   overlay behavior in Chrome and Safari. */
 .property-doc-tooltip .prop-tooltip-description {
   margin-bottom: 12px;
   color: var(--body-font-color, #333);
+  max-height: 14em;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 100, 100, 0.5) transparent;
+}
+
+.property-doc-tooltip .prop-tooltip-description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.property-doc-tooltip .prop-tooltip-description::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.5);
+  border-radius: 3px;
+}
+
+.property-doc-tooltip .prop-tooltip-description::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description::-webkit-scrollbar-thumb {
+  background: rgba(180, 180, 180, 0.5);
+}
+
+.property-doc-tooltip .prop-tooltip-description p {
+  margin: 0 0 8px;
+}
+
+.property-doc-tooltip .prop-tooltip-description p:last-child {
+  margin-bottom: 0;
+}
+
+.property-doc-tooltip .prop-tooltip-description ul {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+
+.property-doc-tooltip .prop-tooltip-description li {
+  margin-bottom: 4px;
+}
+
+/* Links inside the rendered description (xref and <<...>> references) */
+.property-doc-tooltip .prop-tooltip-description a {
+  color: var(--link-color, #005cc5);
+  text-decoration: underline;
+}
+
+.property-doc-tooltip .prop-tooltip-description a:hover {
+  color: var(--link-color-hover, #004094);
 }
 
 .property-doc-tooltip .prop-tooltip-description code {
@@ -165,6 +219,7 @@ html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-signature {
 
 html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description {
   color: #e0e0e0;
+  scrollbar-color: rgba(180, 180, 180, 0.5) transparent;
 }
 
 html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description code,
@@ -203,6 +258,14 @@ html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link {
 }
 
 html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link:hover {
+  color: #79b8ff;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description a {
+  color: #58a6ff;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-description a:hover {
   color: #79b8ff;
 }
 

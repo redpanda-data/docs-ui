@@ -43,6 +43,24 @@
 {{/with}}
 {{/if}}
 {{!--
+  Component-local property pages base for tooltip doc links. Resolved in the
+  current page's own component (resolve-resource defaults to the page's
+  component and version), so cloud pages link to cloud's property pages and
+  streaming pages to streaming's. Omitted when the component has no property
+  pages; the JS then falls back to streaming's URL space.
+--}}
+{{#with (resolve-resource 'reference:properties/cluster-properties.adoc' fallback='')}}
+<meta name="properties-pages-url" content="{{this}}">
+{{/with}}
+{{!--
+  Cloud components set page-cloud: true in antora.yml. Property tooltip
+  descriptions carry ifdef::env-cloud conditionals; this flag tells the
+  tooltip formatter which branch to render.
+--}}
+{{#if page.attributes.cloud}}
+<meta name="page-env-cloud" content="true">
+{{/if}}
+{{!--
   Connect JSON URL for Bloblang tooltips
 
   Resolution strategy:

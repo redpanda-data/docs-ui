@@ -500,6 +500,15 @@
         // Mouse devices: show on hover
         trigger: isTouch ? 'click' : 'mouseenter focus',
         hideOnClick: isTouch ? 'toggle' : true,
+        // Same show delay as the glossary and enterprise tooltips, so
+        // dragging the cursor across a code block doesn't fire previews.
+        delay: [200, 0],
+        popperOptions: {
+          modifiers: [
+            { name: 'preventOverflow', options: { boundary: 'viewport' } },
+            { name: 'flip', options: { fallbackPlacements: ['bottom', 'top'] } },
+          ],
+        },
         onShow(instance) {
           // Hide other tooltips
           document.querySelectorAll('.tippy-box').forEach(box => {
