@@ -61,7 +61,7 @@
                data-cloud-link: hidden by 26-docs-account.js when signed in (the
                account dropdown carries the console link instead). --}}
           {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
-          <a class="tb-link tb-link-cloud" data-cloud-link href="https://cloud.redpanda.com" target="_blank" rel="noopener noreferrer">
+          <a class="tb-link tb-link-cloud" data-cloud-link href="https://cloud.redpanda.com/?utm_source=docs" target="_blank" rel="noopener noreferrer">
             <span class="tb-link-text">Cloud Console</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
@@ -95,7 +95,7 @@
           <div class="tb-dropdown-menu tb-overflow-dropdown" role="menu">
             <a class="tb-dropdown-item" href="/labs">Labs</a>
             {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
-            <a class="tb-dropdown-item" data-cloud-link href="https://cloud.redpanda.com" target="_blank" rel="noopener noreferrer">Cloud Console</a>
+            <a class="tb-dropdown-item" data-cloud-link href="https://cloud.redpanda.com/?utm_source=docs" target="_blank" rel="noopener noreferrer">Cloud Console</a>
             {{/if}}
             {{#if (eq page.component.name 'agentic-data-plane')}}
             <a class="tb-dropdown-item" data-cloud-link href="https://ai.redpanda.com" target="_blank" rel="noopener noreferrer">ADP Console</a>
@@ -159,7 +159,7 @@
                 </li>
               </ul>
               <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login">Continue</a>
-              <p class="tb-signin-modal-foot">No account yet? <a href="https://cloud.redpanda.com/sign-up" target="_blank" rel="noopener noreferrer">Create a free account</a></p>
+              <p class="tb-signin-modal-foot">No account yet? <a href="https://cloud.redpanda.com/sign-up?utm_source=docs&utm_medium=referral&utm_campaign=docs-signup&utm_content=signin-modal" target="_blank" rel="noopener noreferrer">Create a free account</a></p>
               {{!-- Privacy disclosure shown here lets /login skip the server
                     interstitial (disclosed=1) — keep in sync with
                     loginInterstitialHtml in docs-site lib/oauth/pages.mjs --}}
@@ -173,7 +173,7 @@
             <div class="tb-dropdown-menu tb-account-dropdown" role="menu">
               <div class="tb-account-email" data-account-email>Signed in</div>
               {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
-              <a class="tb-dropdown-item" href="https://cloud.redpanda.com" target="_blank" rel="noopener noreferrer">Open Cloud Console</a>
+              <a class="tb-dropdown-item" href="https://cloud.redpanda.com/?utm_source=docs" target="_blank" rel="noopener noreferrer">Open Cloud Console</a>
               {{/if}}
               {{#if (eq page.component.name 'agentic-data-plane')}}
               <a class="tb-dropdown-item" href="https://ai.redpanda.com" target="_blank" rel="noopener noreferrer">Open ADP Console</a>
