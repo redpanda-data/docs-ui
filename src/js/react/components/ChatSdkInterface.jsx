@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, Component } from 'react'
 import { useChat } from '@kapaai/react-sdk'
-import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles } from 'lucide-react'
-import { safeHeap } from '../heap.js'
+import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { loadConversation, clearConversation } from '../chatPersistence.js'
 import { Answer, Toast } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
@@ -9,6 +9,37 @@ import { Answer, Toast } from './chatShared.jsx'
 // signed-in Agent interface, so the two tiers look identical — the agent tier
 // just adds tools, history, and account-scoped features on top. Needs no
 // session backend (the Chat SDK uses its own bot protection).
+
+// Thumbs up/down on the latest answer. The Chat SDK's addFeedback posts the
+// reaction to Kapa, which is where the docs team's answer-quality signal comes
+// from — the Agent SDK has no equivalent, so this tier is the only source.
+// Reported to Heap by the provider's onFeedbackSubmit callback (AskAI.jsx).
+function FeedbackButtons ({ questionAnswerId, showToast }) {
+  const { addFeedback } = useChat()
+
+  const handleFeedback = async (reaction) => {
+    try {
+      await addFeedback(questionAnswerId, reaction)
+      showToast(reaction === 'upvote' ? 'Thanks for the feedback!' : 'Feedback received', 'success')
+    } catch (err) {
+      console.error('Feedback error', err)
+      showToast('Could not send feedback', 'error')
+    }
+  }
+
+  return (
+    <div className="feedback-container">
+      <div className="feedback-group">
+        <button className="feedback-button" type="button" onClick={() => handleFeedback('upvote')} title="This was helpful">
+          <ThumbsUp className="feedback-icon" />
+        </button>
+        <button className="feedback-button" type="button" onClick={() => handleFeedback('downvote')} title="This wasn't helpful">
+          <ThumbsDown className="feedback-icon" />
+        </button>
+      </div>
+    </div>
+  )
+}
 
 class ErrorBoundary extends Component {
   constructor (props) { super(props); this.state = { hasError: false } }
@@ -31,6 +62,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1150)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [signingIn, setSigningIn] = useState(false)
+  const [restoredConversation, setRestoredConversation] = useState(null)
   const inputRef = useRef(null)
 
   const showToast = (msg, type = 'success') => setToast({ message: msg, type })
@@ -45,6 +77,22 @@ export default function ChatSdkInterface ({ loginUrl }) {
   } = useChat()
 
   const isBusy = isPreparingAnswer || isGeneratingAnswer
+
+  // Cross-page persistence: the saved exchange renders until the user asks
+  // something new in this drawer, at which point the live conversation (which
+  // the api service resumes on the same threadId) takes over.
+  const displayConversation =
+    restoredConversation && conversation.length === 0 ? restoredConversation : conversation
+  const latestQA = conversation[conversation.length - 1]
+
+  // Restore the saved conversation on mount (24h expiry, handled by the module)
+  useEffect(() => {
+    const saved = loadConversation()
+    if (saved?.conversation?.length > 0) {
+      setRestoredConversation(saved.conversation)
+      setHasInteracted(true)
+    }
+  }, [])
 
   useEffect(() => {
     let s = window.AI_SUGGESTIONS
@@ -74,10 +122,12 @@ export default function ChatSdkInterface ({ loginUrl }) {
     return () => clearInterval(timer)
   }, [isPreparingAnswer])
 
+  // Heap's ask_question_docs_home is reported by the provider's onQuerySubmit
+  // callback (AskAI.jsx), which also carries the thread id — tracking here too
+  // would double-count every submission.
   const doQuery = (q) => {
     if (!q.trim() || isBusy) return
     if (!hasInteracted) setHasInteracted(true)
-    safeHeap('ask_question_docs_home', { question: q, tier: 'anonymous' })
     submitQuery(q)
     setMessage('')
     setDropdownOpen(false)
@@ -101,7 +151,9 @@ export default function ChatSdkInterface ({ loginUrl }) {
   const handleSubmit = (e) => { e.preventDefault(); doQuery(message) }
 
   const handleReset = () => {
+    clearConversation() // drop the cross-page copy too, or it reappears on nav
     resetConversation()
+    setRestoredConversation(null)
     setMessage('')
     setHasInteracted(false)
     setDropdownOpen(false)
@@ -109,7 +161,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(
-      conversation.map((qa) => `Question: ${qa.question}\nAnswer: ${qa.answer}`).join('\n---\n')
+      displayConversation.map((qa) => `Question: ${qa.question}\nAnswer: ${qa.answer}`).join('\n---\n')
     )
     showToast('Copied to clipboard', 'success')
   }
@@ -187,10 +239,14 @@ export default function ChatSdkInterface ({ loginUrl }) {
 
         <div className="conversation-area" style={hasInteracted ? undefined : { display: 'none' }}>
           <div className="conversation">
-            {conversation.map((qa, idx) => {
-              const isLast = idx === conversation.length - 1
+            {displayConversation.map((qa, idx) => {
+              const isLast = idx === displayConversation.length - 1
+              // Feedback needs a live Kapa questionAnswerId: a restored exchange
+              // is replayed from localStorage, so voting on it would post against
+              // an id from a previous page's session.
+              const canFeedback = conversation.length > 0 && latestQA?.id === qa.id
               return (
-                <div key={qa.id ?? idx} className="qa-pair">
+                <div key={qa.id ?? `temp-${idx}`} className="qa-pair">
                   <hr className="section-divider" />
                   <div className="question">{qa.question}</div>
                   <Answer md={qa.answer} />
@@ -200,6 +256,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
                         <button type="button" onClick={handleReset} className="action-button"><RefreshCcw /> Clear</button>
                         <button type="button" onClick={() => handleCopy().catch(() => showToast('Failed to copy', 'error'))} className="action-button"><ClipboardCopy /> Copy</button>
                       </div>
+                      {canFeedback && <FeedbackButtons questionAnswerId={qa.id} showToast={showToast} />}
                     </div>
                   )}
                 </div>

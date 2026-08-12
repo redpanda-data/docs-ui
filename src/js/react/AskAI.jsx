@@ -6,6 +6,14 @@ import ChatInterface from './components/ChatInterface.jsx'
 import ChatSdkInterface from './components/ChatSdkInterface.jsx'
 import { agentTools } from './agentTools.js'
 import { safeHeap } from './heap.js'
+import { saveConversation } from './chatPersistence.js'
+import { createPersistentApiService } from './persistentApiService.js'
+
+// Singleton Chat SDK api service for the anonymous tier: injects the saved
+// threadId so a conversation survives page navigation. The signed-in tier gets
+// this from the Agent SDK's server-side history instead, so the anonymous tier
+// is the only consumer — but it is the DEFAULT tier, so it can't go without.
+const persistentApiService = createPersistentApiService()
 
 /**
  * Fetches a Kapa Agent SDK session token from the docs backend
@@ -95,16 +103,18 @@ function probeSession () {
   // Establish the tier. getSessionToken announces on a 200 (authenticated) or a
   // clean 401 (signed-out; carries the real login_url, or null when auth is
   // deliberately turned off / "coming soon"). Any OTHER failure — network error,
-  // 5xx, abort — lands here having announced nothing (__KAPA_AUTHENTICATED still
-  // undefined). That is a transient blip, NOT the coming-soon signal: the auth
-  // backend ships in the same deploy as this bundle, so a truly "absent" backend
-  // isn't a real production state. Degrade to the anonymous Chat SDK tier, but
-  // keep the sign-in affordance visible pointing at the default /login rather
-  // than hiding it as if auth were off — only an authoritative 401 with
-  // login_url===null should hide sign-in. Self-heals on the next probe.
+  // 5xx, abort, or a 404 because this bundle is deployed ahead of the auth
+  // backend — lands here having announced nothing (__KAPA_AUTHENTICATED still
+  // undefined). Degrade to the anonymous Chat SDK tier and announce NO login URL:
+  // we can't distinguish a transient blip from a missing backend from the client,
+  // and guessing a default /login would surface a sign-in affordance that 404s
+  // wherever the backend isn't deployed. Consumers gate sign-in on a login URL
+  // (26-docs-account.js render(), ChatSdkInterface), so it stays hidden until a
+  // real 401 supplies one. authoritative:false keeps this from clearing a
+  // signed-in user's auth hint. Self-heals on the next probe.
   getSessionToken().catch(() => {
     if (window.__KAPA_AUTHENTICATED === undefined) {
-      announceSession(false, null, window.__KAPA_LOGIN_URL || '/login', false)
+      announceSession(false, null, window.__KAPA_LOGIN_URL || null, false)
     }
   })
 }
@@ -362,10 +372,49 @@ function App () {
     )
   }
 
-  // Anonymous: same drawer, Chat SDK (no session backend, no agent quota)
+  // Anonymous: same drawer, Chat SDK (no session backend, no agent quota).
+  // This is the tier every visitor gets until the auth backend is live, so it
+  // keeps the full pre-agent feature set: cross-page conversation persistence
+  // (apiService + saveConversation) and the three Heap events. The agent tier
+  // reports its own equivalents from handleAgentEvent; these callbacks are the
+  // Chat SDK's only hook for threadId/answer/feedback, so tracking lives here
+  // rather than in ChatSdkInterface (which would double-count submissions and
+  // has no access to the thread id).
   if (authenticated === false) {
     return (
-      <KapaProvider integrationId={window.KAPA_CHAT_INTEGRATION_ID}>
+      <KapaProvider
+        integrationId={window.KAPA_CHAT_INTEGRATION_ID}
+        apiService={persistentApiService}
+        callbacks={{
+          askAI: {
+            onQuerySubmit: (data) => {
+              safeHeap('ask_question_docs_home', {
+                question: data.question,
+                thread_id: data.threadId,
+                tier: 'anonymous',
+              })
+            },
+            onAnswerGenerationCompleted: (data) => {
+              // Save after the answer completes so the stored exchange is whole
+              if (data.threadId && data.conversation) {
+                saveConversation(data.threadId, data.conversation)
+              }
+              safeHeap('answer_generated_docs_home', {
+                question_id: data.questionAnswerId,
+                answer_length: data.answer.length,
+                tier: 'anonymous',
+              })
+            },
+            onFeedbackSubmit: (data) => {
+              safeHeap('feedback_submitted_docs_home', {
+                question_id: data.questionAnswerId,
+                reaction: data.reaction,
+                tier: 'anonymous',
+              })
+            },
+          },
+        }}
+      >
         <ChatSdkInterface loginUrl={loginUrl} />
       </KapaProvider>
     )

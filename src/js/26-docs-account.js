@@ -317,9 +317,9 @@
     var authed = !!(e.detail && e.detail.authenticated)
     // Clear a stale auth hint ONLY on an authoritative not-signed-in answer (a
     // clean 401 from getSessionToken, detail.authoritative===true). A transient/
-    // opaque probe failure now also carries a loginUrl (so sign-in stays visible)
-    // but sets authoritative:false — we must NOT clear the hint on a blip, or a
-    // genuinely-signed-in user gets flipped to signed-out by one network hiccup.
+    // opaque probe failure announces no loginUrl and sets authoritative:false —
+    // we must NOT clear the hint on a blip, or a genuinely-signed-in user gets
+    // flipped to signed-out by one network hiccup.
     if (!authed && e.detail && e.detail.authoritative && e.detail.loginUrl && hasAuthHint()) { clearStaleAuth(); return }
     render()
     if (authed && e.detail && e.detail.user) {

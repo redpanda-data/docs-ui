@@ -341,7 +341,42 @@
   height: 12px;
 }
 
-/* Feedback buttons (thumbs up/down) */
+/* Feedback buttons (thumbs up/down) — anonymous (Chat SDK) tier only; the
+   Agent SDK has no addFeedback equivalent, so the agent drawer omits them. */
+#chat-panel-kapa-root .feedback-container {
+  display: flex;
+  gap: 2px;
+}
+
+#chat-panel-kapa-root .feedback-group {
+  display: flex;
+  gap: 2px;
+}
+
+#chat-panel-kapa-root .feedback-button {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--kapa-border-subtle, #e5e5e5);
+  border-radius: 6px;
+  color: var(--kapa-text-muted, #6b7280);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+#chat-panel-kapa-root .feedback-button:hover {
+  background: var(--kapa-surface-hover, #f9fafb);
+  border-color: var(--kapa-border, #d1d5db);
+  color: var(--kapa-text, #374151);
+}
+
+#chat-panel-kapa-root .feedback-icon {
+  width: 14px;
+  height: 14px;
+}
 
 /* Footer wrapper - fixed at bottom */
 #chat-panel-kapa-root .chat-footer-wrapper {
@@ -1031,12 +1066,14 @@ html[data-theme="dark"] #chat-panel-kapa-root .disclaimer a {
   color: #818cf8 !important;
 }
 
-html[data-theme="dark"] #chat-panel-kapa-root .action-button {
+html[data-theme="dark"] #chat-panel-kapa-root .action-button,
+html[data-theme="dark"] #chat-panel-kapa-root .feedback-button {
   border-color: rgba(255, 255, 255, 0.1) !important;
   color: #7c8ca8 !important;
 }
 
-html[data-theme="dark"] #chat-panel-kapa-root .action-button:hover {
+html[data-theme="dark"] #chat-panel-kapa-root .action-button:hover,
+html[data-theme="dark"] #chat-panel-kapa-root .feedback-button:hover {
   background: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
   color: #aab8ca !important;
@@ -1447,6 +1484,7 @@ html[data-theme="dark"] #chat-panel-kapa-root .signin-feature-desc {
 }
 
 html[data-theme="dark"] #chat-panel-kapa-root .action-button,
+html[data-theme="dark"] #chat-panel-kapa-root .feedback-button,
 html[data-theme="dark"] #chat-panel-kapa-root .chat-history-toggle {
   color: var(--kapa-text-subtle, #aab8ca);
   background: var(--kapa-surface-elevated, #232f3e);
@@ -1454,6 +1492,7 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-history-toggle {
 }
 
 html[data-theme="dark"] #chat-panel-kapa-root .action-button:hover,
+html[data-theme="dark"] #chat-panel-kapa-root .feedback-button:hover,
 html[data-theme="dark"] #chat-panel-kapa-root .chat-history-toggle:hover {
   color: var(--kapa-text, #e8eef6);
   border-color: rgba(255, 255, 255, 0.4);
