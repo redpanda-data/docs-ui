@@ -45,6 +45,14 @@
       })
     })
 
+    // Initialize tippy for enterprise feature terms (enterprise inline macro)
+    document.querySelectorAll('[data-enterprise-tooltip]').forEach((el) => {
+      tippy(el, {
+        ...tooltipConfig,
+        content: el.getAttribute('data-enterprise-tooltip'),
+      })
+    })
+
     // Convert title attributes to tippy tooltips for code block buttons
     document.querySelectorAll('.source-toolbox [title]').forEach((el) => {
       const titleContent = el.getAttribute('title')

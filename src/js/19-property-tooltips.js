@@ -2,8 +2,12 @@
 /**
  * Redpanda Property Tooltips
  *
- * Adds hover documentation tooltips to configuration property names.
- * Enabled by default on all pages. Disable on specific pages with:
+ * Adds hover documentation tooltips to configuration property references.
+ * Marking is opt-in: only code elements emitted by the prop: AsciiDoc macro
+ * (class property-ref plus a data-property-name attribute) are decorated.
+ * Plain backticked words are never matched, so ambiguous terms such as
+ * admin or rack in Helm or feature contexts don't pick up wrong tooltips.
+ * Disable on specific pages with:
  *   :page-disable-property-tooltips: true
  */
 
@@ -29,6 +33,21 @@
   function getPropertiesJsonUrl () {
     var meta = document.querySelector('meta[name="properties-json-url"]')
     if (meta && meta.content) {
+      return meta.content
+    }
+    return null
+  }
+
+  /**
+   * Get the component-local property pages base URL from meta tag.
+   * head-meta resolves reference:properties/cluster-properties.adoc in the
+   * current page's own component, so cloud pages link to cloud's property
+   * pages, streaming pages to streaming's, and so on.
+   */
+  function getPropertiesPagesUrl () {
+    var meta = document.querySelector('meta[name="properties-pages-url"]')
+    // Ignore unresolved placeholders (the UI preview resolver emits '#').
+    if (meta && meta.content && meta.content.indexOf('cluster-properties') !== -1) {
       return meta.content
     }
     return null
@@ -224,7 +243,7 @@
   /**
    * Create HTML content for property tooltip
    */
-  function createPropertyTooltip (prop) {
+  function createPropertyTooltip (prop, stampedUrl) {
     var parts = []
 
     // Signature line with type
@@ -255,9 +274,10 @@
       parts.push('<div class="prop-tooltip-badges">' + badges.join(' ') + '</div>')
     }
 
-    // Description
+    // Description: first paragraph only. The tooltip is a preview; the full
+    // accepted-values detail lives at the "View full documentation" anchor.
     if (prop.description) {
-      parts.push('<div class="prop-tooltip-description">' + formatDescription(prop.description) + '</div>')
+      parts.push('<div class="prop-tooltip-description">' + formatDescription(prop.description, true) + '</div>')
     }
 
     // Default value
@@ -276,15 +296,8 @@
       parts.push('<div class="prop-tooltip-range"><strong>Range:</strong> ' + range.join(', ') + '</div>')
     }
 
-    // Link to full documentation (use current page version)
-    var scope = prop.configScope || 'cluster'
-    var version = getDocVersion()
-    // AsciiDoc auto-ID generation: dots are removed, underscores become hyphens
-    // e.g., "redpanda.storage.mode" -> "redpandastoragemode"
-    // e.g., "log_retention_ms" -> "log-retention-ms"
-    var anchor = prop.name.replace(/\./g, '').replace(/_/g, '-')
-    var docUrl = '/' + version + '/reference/properties/' + scope + '-properties/#' + anchor
-    parts.push('<a href="' + escapeHtml(docUrl) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
+    // Link to full documentation, relative to the current page's component
+    parts.push('<a href="' + escapeHtml(buildDocUrl(prop, stampedUrl)) + '" class="prop-tooltip-link">View full documentation &rarr;</a>')
 
     return '<div class="property-doc-tooltip">' + parts.join('') + '</div>'
   }
@@ -300,14 +313,125 @@
   }
 
   /**
-   * Format description - sanitize HTML while preserving safe links and code
+   * The anchor Asciidoctor generates for a property heading: dots become
+   * hyphens, underscores are valid id characters and stay.
+   * e.g., "redpanda.storage.mode" -> "redpanda-storage-mode"
+   * e.g., "cloud_storage_enabled" -> "cloud_storage_enabled"
+   */
+  function propertyAnchor (name) {
+    return name.replace(/\./g, '-')
+  }
+
+  /**
+   * Documentation URL for a property. The prop macro stamps data-doc-url
+   * with the URL of the page it discovered actually documents the property
+   * (per component, respecting include tags) -- always prefer that. The
+   * scope-derived guess remains only for markers built before the stamp
+   * existed.
+   */
+  function buildDocUrl (prop, stampedUrl) {
+    if (stampedUrl) return stampedUrl
+    var scope = prop.configScope || 'cluster'
+    var anchor = propertyAnchor(prop.name)
+    var pagesUrl = getPropertiesPagesUrl()
+    if (pagesUrl) {
+      // Swap the scope into the component-resolved cluster-properties URL.
+      return pagesUrl.replace('cluster-properties', scope + '-properties') + '#' + anchor
+    }
+    // Fallback for pages without the meta tag: streaming URL space.
+    return '/' + getDocVersion() + '/reference/properties/' + scope + '-properties/#' + anchor
+  }
+
+  /**
+   * Find a property whose heading anchor matches the given anchor, so
+   * <<anchor,text>> internal references can link across property pages.
+   * Hand-written references use inconsistent anchor spellings, so index
+   * each property under the real Asciidoctor id plus the legacy variants
+   * (dots removed / underscores hyphenated).
+   */
+  var anchorIndex = null
+  function propertyForAnchor (anchor) {
+    if (!propertiesData) return null
+    if (!anchorIndex) {
+      anchorIndex = {}
+      Object.keys(propertiesData).forEach(function (name) {
+        var prop = propertiesData[name]
+        anchorIndex[propertyAnchor(name)] = prop
+        anchorIndex[name.replace(/\./g, '').replace(/_/g, '-')] = prop
+        anchorIndex[name.replace(/[._]/g, '-')] = prop
+      })
+    }
+    return anchorIndex[anchor] || null
+  }
+
+  /**
+   * Attribute names considered "defined" when evaluating ifdef/ifndef
+   * conditionals in property descriptions. Property descriptions are shared
+   * between the self-managed and cloud sites, so pick the branch matching
+   * the site this page belongs to.
+   */
+  function definedConditionalAttributes () {
+    var defined = []
+    // Cloud components set page-cloud: true, which head-meta surfaces as a
+    // meta tag. Fall back to the component-resolved pages URL for pages
+    // built before the meta tag existed.
+    var meta = document.querySelector('meta[name="page-env-cloud"]')
+    var pagesUrl = getPropertiesPagesUrl() || ''
+    if ((meta && meta.content === 'true') || pagesUrl.indexOf('cloud-data-platform') !== -1) {
+      defined.push('env-cloud')
+    }
+    return defined
+  }
+
+  /**
+   * Evaluate AsciiDoc preprocessor conditionals (ifdef/ifndef/endif) in a
+   * description, keeping only the lines for the current site.
+   */
+  function stripConditionals (text, defined) {
+    var out = []
+    var stack = []
+    text.split('\n').forEach(function (line) {
+      var directive = line.match(/^\s*(ifdef|ifndef)::([^[\]]+)\[(.*)\]\s*$/)
+      if (directive) {
+        var attrs = directive[2]
+        var satisfied
+        if (attrs.indexOf(',') !== -1) {
+          satisfied = attrs.split(',').some(function (a) { return defined.indexOf(a.trim()) !== -1 })
+        } else if (attrs.indexOf('+') !== -1) {
+          satisfied = attrs.split('+').every(function (a) { return defined.indexOf(a.trim()) !== -1 })
+        } else {
+          satisfied = defined.indexOf(attrs.trim()) !== -1
+        }
+        if (directive[1] === 'ifndef') satisfied = !satisfied
+        if (directive[3]) {
+          // Single-line form: ifdef::attr[content]
+          if (satisfied && stack.every(Boolean)) out.push(directive[3])
+        } else {
+          stack.push(satisfied)
+        }
+        return
+      }
+      if (/^\s*endif::[^[\]]*\[\]\s*$/.test(line)) {
+        stack.pop()
+        return
+      }
+      if (stack.every(Boolean)) out.push(line)
+    })
+    return out.join('\n')
+  }
+
+  /**
+   * Format one run of inline text - sanitize HTML while preserving safe
+   * links, code spans, and property cross-references.
    *
    * Handles:
    * - Pre-resolved <a> tags from JSON (safe, with href attribute)
    * - Backticks converted to <code> tags
-   * - Fallback xref resolution for any unresolved xrefs
+   * - prop:/config_ref macro calls rendered as code
+   * - <<anchor,text>> internal references linked when they name a property
+   * - Fallback xref resolution for unqualified same-component targets
    */
-  function formatDescription (text) {
+  function formatInline (text) {
     if (!text) return ''
 
     // Extract and preserve <a> tags (already resolved in JSON generation)
@@ -329,22 +453,124 @@
     // Convert backticks to code tags
     var withCode = escaped.replace(/`([^`]+)`/g, '<code>$1</code>')
 
-    // Fallback: resolve any remaining xrefs that weren't pre-resolved
-    var withXrefs = withCode.replace(
-      /xref:\.?\/?([^[]+)\.adoc(?:#([^[]*))?\[([^\]]+)\]/g,
+    // Render prop macro calls from generated descriptions as code (the
+    // text= attribute wins as the display, matching the macro's rendering)
+    var withProps = withCode.replace(/prop:([^[\s]+)\[([^\]]*)\]/g, function (match, name, attrs) {
+      var textMatch = attrs.match(/text=([^,\]]+)/)
+      return '<code>' + (textMatch ? textMatch[1] : name) + '</code>'
+    })
+
+    // Legacy config_ref macro calls survive in older published JSONs
+    withProps = withProps.replace(/config_ref:([^[,]+)(?:,[^[]*)?\[([^\]]*)\]/g, function (match, name, payload) {
+      var display = payload.replace(/^`|`$/g, '') || name
+      return '<code>' + display + '</code>'
+    })
+
+    // Internal <<anchor,text>> references (escaped to &lt;&lt;...&gt;&gt;).
+    // Link when the anchor names another documented property; otherwise
+    // render the display text alone.
+    var withRefs = withProps.replace(/&lt;&lt;([^,&\s]+)(?:,\s*((?:(?!&gt;&gt;).)*?))?&gt;&gt;/g, function (match, anchor, display) {
+      var target = propertyForAnchor(anchor)
+      var label = display || (target ? '<code>' + target.name + '</code>' : anchor)
+      if (target) {
+        return '<a href="' + escapeHtml(buildDocUrl(target)) + '">' + label + '</a>'
+      }
+      return label
+    })
+
+    // Fallback: resolve remaining xrefs. Unqualified targets resolve
+    // relative to the current page; module-qualified targets (one ':')
+    // resolve against the component root derived from the property pages
+    // URL. Component-qualified targets can't be resolved client-side and
+    // render as their display text.
+    var withXrefs = withRefs.replace(
+      /xref:([^[\]]+?)\.adoc(?:#([^[\]]*))?\[([^\]]*)\]/g,
       function (match, path, anchor, display) {
-        var href = path.replace(/^\.\//, '') + '/'
+        var label = display || path.split('/').pop()
+        var href
+        var parts = path.split(':')
+        if (parts.length === 1) {
+          href = path.replace(/^\.\//, '')
+        } else if (parts.length === 2) {
+          var pagesUrl = getPropertiesPagesUrl()
+          if (!pagesUrl) return label
+          var componentRoot = pagesUrl.replace(/reference\/properties\/cluster-properties\/?$/, '')
+          href = componentRoot + parts[0] + '/' + parts[1].replace(/^\.\//, '')
+        } else {
+          return label
+        }
+        // Antora indexifies page URLs: index pages drop the final segment.
+        href = href.replace(/\/index$/, '') + '/'
         if (anchor) href += '#' + anchor
-        return '<a href="' + href + '">' + display + '</a>'
+        return '<a href="' + escapeHtml(href) + '">' + label + '</a>'
       }
     )
 
     // Restore preserved links
-    var result = withXrefs.replace(/___LINK_(\d+)___/g, function (match, index) {
+    return withXrefs.replace(/___LINK_(\d+)___/g, function (match, index) {
       return linkPlaceholders[parseInt(index, 10)] || match
     })
+  }
 
-    return result
+  /**
+   * Format description - evaluate conditionals, then render paragraphs and
+   * bullet lists so multi-line descriptions don't collapse into one blob.
+   * With summaryOnly, keep just the first block (the summary sentence) and
+   * mark the truncation with an ellipsis.
+   */
+  function formatDescription (text, summaryOnly) {
+    if (!text) return ''
+
+    var cleaned = stripConditionals(String(text), definedConditionalAttributes())
+    var blocks = []
+    var paragraph = []
+    var list = null
+
+    function flushParagraph () {
+      if (paragraph.length) {
+        blocks.push('<p>' + formatInline(paragraph.join(' ')) + '</p>')
+        paragraph = []
+      }
+    }
+    function flushList () {
+      if (list) {
+        blocks.push('<ul>' + list.map(function (item) { return '<li>' + formatInline(item) + '</li>' }).join('') + '</ul>')
+        list = null
+      }
+    }
+
+    cleaned.split('\n').forEach(function (rawLine) {
+      var line = rawLine.trim()
+      if (!line) {
+        flushParagraph()
+        flushList()
+        return
+      }
+      var item = line.match(/^[*-]\s+(.*)$/)
+      if (item) {
+        flushParagraph()
+        if (!list) list = []
+        list.push(item[1])
+        return
+      }
+      if (list) {
+        // Continuation of the previous list item
+        list[list.length - 1] += ' ' + line
+        return
+      }
+      paragraph.push(line)
+    })
+    flushParagraph()
+    flushList()
+
+    if (summaryOnly && blocks.length > 1) {
+      var first = blocks[0]
+      if (first.slice(-4) === '</p>') {
+        return first.slice(0, -4) + '&#8230;</p>'
+      }
+      return first + '<p>&#8230;</p>'
+    }
+    return blocks.join('')
   }
 
   /**
@@ -363,15 +589,30 @@
         return
       }
 
-      // Create a Set for fast lookup
-      var propertyNames = new Set(Object.keys(properties))
-
-      // Scope: opt-in pages look at all <code> elements in the article
+      // Scope: only elements marked by the prop: macro are decorated
       var article = document.querySelector('article.doc')
       if (!article) return
 
-      var codeElements = article.querySelectorAll('code:not(.has-property-tooltip)')
+      var codeElements = article.querySelectorAll(
+        'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
+      )
       var isTouch = isTouchDevice()
+
+      // Only the first mention of a property in a paragraph (or list item,
+      // table cell, ...) gets a tooltip. Repeats render as plain code so a
+      // dense paragraph isn't wall-to-wall dotted underlines.
+      var decoratedContainers = new WeakMap()
+      var isRepeatMention = function (codeEl, name) {
+        var container = codeEl.closest('p, li, td, th, dt, dd') || codeEl.parentElement || article
+        var seen = decoratedContainers.get(container)
+        if (seen && seen.has(name)) return true
+        if (!seen) {
+          seen = new Set()
+          decoratedContainers.set(container, seen)
+        }
+        seen.add(name)
+        return false
+      }
 
       var getTippyConfig = function (content) {
         return {
@@ -384,20 +625,33 @@
           appendTo: document.body,
           trigger: isTouch ? 'click' : 'mouseenter focus',
           hideOnClick: isTouch ? 'toggle' : true,
+          // Same show delay as the glossary and enterprise tooltips, so
+          // dragging the cursor across a paragraph doesn't fire previews.
+          delay: [200, 0],
+          popperOptions: {
+            modifiers: [
+              { name: 'preventOverflow', options: { boundary: 'viewport' } },
+              { name: 'flip', options: { fallbackPlacements: ['bottom', 'top'] } },
+            ],
+          },
         }
       }
 
       codeElements.forEach(function (codeEl) {
-        var text = codeEl.textContent.trim()
+        var text = codeEl.getAttribute('data-property-name') || codeEl.textContent.trim()
 
-        // Check if this code element matches a property name
-        if (propertyNames.has(text)) {
+        // Look up the marked property in the published data
+        if (Object.prototype.hasOwnProperty.call(properties, text)) {
+          if (isRepeatMention(codeEl, text)) return
           var prop = properties[text]
-          var tooltipContent = createPropertyTooltip(prop)
+          var tooltipContent = createPropertyTooltip(prop, codeEl.getAttribute('data-doc-url'))
 
           // Mark as having tooltip (for styling and to avoid re-processing)
           codeEl.classList.add('has-property-tooltip')
           codeEl.classList.add('has-documentation')
+          if (prop.isEnterprise) {
+            codeEl.classList.add('is-enterprise-property')
+          }
           codeEl.style.cursor = 'help'
           codeEl.setAttribute('tabindex', '0')
           codeEl.setAttribute('role', 'button')
