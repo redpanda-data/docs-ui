@@ -378,6 +378,41 @@
   height: 14px;
 }
 
+/* Failed exchange: shown in place of the action row when a query settled with
+   no answer (most often the captcha gate aborting before any request). */
+#chat-panel-kapa-root .chat-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--kapa-border-subtle, #e5e5e5);
+  border-left: 3px solid #d97706;
+  border-radius: 6px;
+  background: var(--kapa-surface-elevated, #fffbeb);
+  font-size: 13px;
+  color: var(--kapa-text, #374151);
+}
+
+#chat-panel-kapa-root .chat-error-icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+  color: #d97706;
+}
+
+#chat-panel-kapa-root .chat-error-text {
+  flex: 1 1 auto;
+  line-height: 1.45;
+}
+
+#chat-panel-kapa-root .chat-error-retry {
+  flex: none;
+  align-self: center;
+  white-space: nowrap;
+}
+
 /* Footer wrapper - fixed at bottom */
 #chat-panel-kapa-root .chat-footer-wrapper {
   background: #fff;
@@ -1481,6 +1516,17 @@ html[data-theme="dark"] #chat-panel-kapa-root .signin-feature-desc {
 #chat-panel-kapa-root .scroll-down-button svg {
   width: 18px;
   height: 18px;
+}
+
+html[data-theme="dark"] #chat-panel-kapa-root .chat-error {
+  background: var(--kapa-surface-elevated, #232f3e);
+  border-color: rgba(255, 255, 255, 0.28);
+  border-left-color: #f0b429;
+  color: var(--kapa-text, #e8eef6);
+}
+
+html[data-theme="dark"] #chat-panel-kapa-root .chat-error-icon {
+  color: #f0b429;
 }
 
 html[data-theme="dark"] #chat-panel-kapa-root .action-button,

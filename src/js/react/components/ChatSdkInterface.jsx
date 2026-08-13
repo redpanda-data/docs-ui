@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, Component } from 'react'
 import { useChat } from '@kapaai/react-sdk'
-import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles, ThumbsUp, ThumbsDown, TriangleAlert } from 'lucide-react'
 import { loadConversation, clearConversation } from '../chatPersistence.js'
+import { safeHeap } from '../heap.js'
 import { Answer, Toast } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
@@ -74,6 +75,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
     isGeneratingAnswer,
     stopGeneration,
     resetConversation,
+    error,
   } = useChat()
 
   const isBusy = isPreparingAnswer || isGeneratingAnswer
@@ -84,6 +86,40 @@ export default function ChatSdkInterface ({ loginUrl }) {
   const displayConversation =
     restoredConversation && conversation.length === 0 ? restoredConversation : conversation
   const latestQA = conversation[conversation.length - 1]
+
+  // A query can die before a single byte streams back — most often when the Chat
+  // SDK's bot protection can't obtain a captcha token, which aborts client-side
+  // without issuing any request at all. The SDK doesn't reliably populate `error`
+  // in that case, so treat a settled exchange with a question and no answer as
+  // failed too. Without this the drawer renders the question above an empty
+  // bubble and the user cannot tell the difference between "no answer came back"
+  // and "the AI had nothing to say".
+  const queryFailed = !isBusy && Boolean(latestQA?.question) && !latestQA?.answer
+  // Deliberately NOT the SDK's `error` string. The most common failure here
+  // reports itself as "Error in verifying browser for feedback submission.
+  // Captcha token could not be obtained." — which names feedback for what was
+  // a question, and means nothing to a reader. The raw text goes to Heap and
+  // the console (below); the panel shows something a user can act on.
+  const failureMessage =
+    "No answer came back. The browser check may still be loading — try again in a moment."
+
+  // Report failures the way the agent tier reports its own (handleAgentEvent's
+  // response_error), so the rate of silent drops is visible in Heap rather than
+  // only in the console. Once per failed exchange, not once per render.
+  const reportedFailure = useRef(null)
+  useEffect(() => {
+    if (!queryFailed) {
+      reportedFailure.current = null
+      return
+    }
+    const signature = `${conversation.length}:${latestQA?.question || ''}`
+    if (reportedFailure.current === signature) return
+    reportedFailure.current = signature
+    safeHeap('chat_error_docs_home', {
+      error: error || 'no_answer_returned',
+      tier: 'anonymous',
+    })
+  }, [queryFailed, error, conversation.length])
 
   // Restore the saved conversation on mount (24h expiry, handled by the module)
   useEffect(() => {
@@ -149,6 +185,14 @@ export default function ChatSdkInterface ({ loginUrl }) {
   }, [hasInteracted, isBusy])
 
   const handleSubmit = (e) => { e.preventDefault(); doQuery(message) }
+
+  // Re-ask the question that failed. The SDK owns the conversation array and
+  // gives us no way to drop the dead exchange, so this appends a fresh one —
+  // the same thing the user would do by retyping, minus the retyping.
+  const handleRetry = (question) => {
+    if (!question || isBusy) return
+    doQuery(question)
+  }
 
   const handleReset = () => {
     clearConversation() // drop the cross-page copy too, or it reappears on nav
@@ -249,7 +293,12 @@ export default function ChatSdkInterface ({ loginUrl }) {
                 <div key={qa.id ?? `temp-${idx}`} className="qa-pair">
                   <hr className="section-divider" />
                   <div className="question">{qa.question}</div>
-                  <Answer md={qa.answer} />
+                  {/* Render the bubble only when there is text, or while this
+                      exchange is actively streaming into it. An empty bubble
+                      otherwise reads as an answer that arrived and said
+                      nothing — including for an earlier failed exchange the
+                      user has since retried past. */}
+                  {(qa.answer || (isLast && isBusy)) && <Answer md={qa.answer} />}
                   {isLast && !isBusy && qa.answer && (
                     <div className="actions-feedback flex justify-between items-center">
                       <div className="action-buttons">
@@ -257,6 +306,23 @@ export default function ChatSdkInterface ({ loginUrl }) {
                         <button type="button" onClick={() => handleCopy().catch(() => showToast('Failed to copy', 'error'))} className="action-button"><ClipboardCopy /> Copy</button>
                       </div>
                       {canFeedback && <FeedbackButtons questionAnswerId={qa.id} showToast={showToast} />}
+                    </div>
+                  )}
+                  {/* Complement of the row above: the exchange settled with no
+                      answer, so say so and offer a retry instead of leaving a
+                      blank bubble. Only for the live conversation — a restored
+                      exchange always carries the answer it was saved with. */}
+                  {isLast && queryFailed && conversation.length > 0 && (
+                    <div className="chat-error" role="alert">
+                      <TriangleAlert className="chat-error-icon" aria-hidden="true" />
+                      <span className="chat-error-text">{failureMessage}</span>
+                      <button
+                        type="button"
+                        className="action-button chat-error-retry"
+                        onClick={() => handleRetry(qa.question)}
+                      >
+                        <RefreshCcw /> Try again
+                      </button>
                     </div>
                   )}
                 </div>
