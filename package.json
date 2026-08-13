@@ -74,6 +74,7 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "scripts": {
+    "test:markdown-dropdown": "node --test tests/markdown-dropdown/*.test.js",
     "test:headless": "node tests/bloblang-playground/test-runner.js",
     "test:playground": "npm run build:wasm && npm run test:headless",
     "test:interactive": "node tests/bloblang-interactive/test-runner.js",

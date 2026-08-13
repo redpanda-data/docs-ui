@@ -42,18 +42,28 @@ function logUnresolved (resource, reason, page, context, logger) {
 module.exports = (resource, { data, hash: context }) => {
   const { page, logger } = data.root || {}
   const fallbackUrl = context?.fallback
+  // An explicitly provided fallback (even an empty one) marks the resolution
+  // as optional: the caller handles the miss, so an unresolved target is
+  // expected on components that don't publish the resource and must not warn.
+  const optional = context ? 'fallback' in context : false
 
   // Log and return undefined if resource is not provided
   if (!resource || typeof resource !== 'string') {
     // Only log if we have page context (not during initial template compilation)
     if (page && resource === undefined) {
-      logUnresolved('undefined', 'attribute not defined (check page attributes)', page, context, logger)
+      if (!optional) logUnresolved('undefined', 'attribute not defined (check page attributes)', page, context, logger)
     }
     return fallbackUrl || undefined
   }
 
   // External URLs pass through
   if (resource.startsWith('http')) {
+    return resource
+  }
+
+  // Root-relative URLs pass through (e.g. pub.url values set by extensions such as
+  // the component_type_dropdown macro's page-context-switcher attribute)
+  if (resource.startsWith('/')) {
     return resource
   }
 
@@ -102,7 +112,21 @@ module.exports = (resource, { data, hash: context }) => {
   }
 
   if (page && page.component) {
-    context = Object.assign({ component: page.component.name, version: page.version, module: page.module }, context)
+    // Hash params whose expression evaluated to undefined must not clobber
+    // the page defaults (version=(or ...) can legitimately come up empty).
+    const explicit = {}
+    for (const [key, value] of Object.entries(context || {})) {
+      if (value !== undefined) explicit[key] = value
+    }
+    context = Object.assign({ component: page.component.name, version: page.version, module: page.module }, explicit)
+  }
+
+  // Cross-component resolution from a versionless component (version '')
+  // asks for a version the target component doesn't have. Default to the
+  // target component's latest version instead.
+  if (!context.version && context.component && contentCatalog.getComponent) {
+    const targetComponent = contentCatalog.getComponent(context.component)
+    if (targetComponent && targetComponent.latest) context.version = targetComponent.latest.version
   }
 
   // Convert module-relative resource (module:page.adoc) to fully qualified (version@component:module:page.adoc)
@@ -135,7 +159,7 @@ module.exports = (resource, { data, hash: context }) => {
     result = fallbackUrl
   } else {
     // Log warning for unresolved resource (only if no fallback provided)
-    logUnresolved(resolvedResource, 'target not found in content catalog', page, context, logger)
+    if (!optional) logUnresolved(resolvedResource, 'target not found in content catalog', page, context, logger)
     result = resource
   }
 

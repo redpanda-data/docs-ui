@@ -1,5 +1,7 @@
 {{#if (ne page.attributes.role 'home')}}
+{{#if (and (ne page.attributes.contribution undefined) (ne page.attributes.contribution 'false'))}}
 {{> contributors-modal}}
+{{/if}}
 <section class="feedback-section">
   {{> thumbs}}
   <div class="col">
@@ -13,12 +15,14 @@
       <span> Share your feedback</span>
     </a>
   </div>
+  {{#if (and (ne page.attributes.contribution undefined) (ne page.attributes.contribution 'false'))}}
   <div class="col">
     <a href="#" aria-label="See options for contributing" onclick="handleModal(event)" rel="nofollow">
       <span class="material-symbols-outlined">group_add</span>
       <span>Make a contribution</span>
     </a>
   </div>
+  {{/if}}
 </section>
 {{> feedback-success}}
 <script>

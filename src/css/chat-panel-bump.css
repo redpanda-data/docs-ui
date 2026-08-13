@@ -239,6 +239,12 @@
   margin: 0;
 }
 
+/* Images - constrain to the panel width (Kapa answers can include images) */
+#chat-panel-kapa-root img {
+  max-width: 100%;
+  height: auto;
+}
+
 #chat-panel-kapa-root .answer ul,
 #chat-panel-kapa-root .answer ol {
   margin: 8px 0;
