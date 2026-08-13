@@ -1,30 +1,32 @@
-= Link target test
-// Sample page for verifying link behavior in a local preview: external,
-// internal, localhost, and attachment links. Exercises the rules in
-// src/js/26-open-external-and-attachment-links.js and the a[href*="//"] /
-// a.attachment ::after rules in doc.css.
+= Quickstart link preview
+// Dev-only sample page. It reproduces the LINK TYPES on the real Redpanda
+// quickstart (external, internal, localhost, attachment) so a local or deploy
+// preview shows how each behaves: icons, open-in-new-tab, and the visually
+// hidden "(opens in a new tab)" hint. This is NOT the real quickstart (which
+// lives in the docs repo and depends on its modules/attachments) — it just
+// mirrors its links. Exercises src/js/26-open-external-and-attachment-links.js
+// and the a[href*="//"] / a.attachment ::after rules in doc.css.
 
-Inspect each link (or click through) to check `target="_blank"`, the icons, and the visually-hidden "(opens in a new tab)" phrase that screen readers announce.
+This page mirrors the link types on the Redpanda quickstart. None of the external links below use the `^` suffix — the docs-ui rule opens them in a new tab anyway (which is what makes the per-link `^` unnecessary).
 
-== External links (external icon + new tab)
+== Deploy Redpanda
 
-None of these use the `^` suffix; the JS still opens them in a new tab and announces it:
+This quickstart uses Docker. To download the Redpanda binary, see https://github.com/redpanda-data/redpanda/releases/latest[GitHub]. For a managed option, sign up for https://cloud.redpanda.com[Redpanda Cloud].
 
-* https://github.com/redpanda-data/redpanda[Redpanda on GitHub]
-* https://kubernetes.io/docs/home/[Kubernetes documentation]
+For Docker Compose, see the https://docs.docker.com/compose/install/[Docker Compose documentation]. On Windows, use https://learn.microsoft.com/windows/wsl/install[Windows Subsystem for Linux].
 
-A link written with `^` still gets the hint and isn't double-targeted: https://redpanda.com/[Redpanda home^].
+[NOTE]
+====
+The source code for the data transform function is in the pass:[<a class="attachment" href="transform.go"><code>docker-compose/transform/transform.go</code> file</a>] that you downloaded. This file is commented to explain how it works.
+====
 
-== Internal link (no icon, same tab)
+The profile is configured in the pass:[<a class="attachment" href="rpk-profile.yaml"><code>docker-compose/rpk-profile.yaml</code> file</a>] that you downloaded.
 
-* https://docs.redpanda.com/current/get-started/quick-start/[Quickstart]
+== Explore Redpanda Console
 
-== localhost (external icon + new tab)
+Redpanda Console runs locally at http://localhost:8080/login[Console on localhost:8080], and the object store UI is at http://localhost:9001/browser[MinIO on localhost:9001]. These now open in a new tab too.
 
-* http://localhost:8080/login[Local Redpanda Console]
+== Next steps
 
-== Attachment / download link (download glyph + new tab)
-
-// Raw anchor carrying the .attachment class that Antora adds to
-// xref:...attachment$... links, so the sample needs no real published attachment.
-pass:[<a class="attachment" href="sample.yaml">docker-compose/rpk-profile.yaml file</a>]
+* For production, see the internal docs: https://docs.redpanda.com/current/deploy/redpanda/kubernetes/[Kubernetes deployment guides] — an internal `docs.redpanda.com` link, so no icon and same tab.
+* A link written with `^` still works and is not double-targeted: https://www.redpanda.com/[Redpanda home^].
