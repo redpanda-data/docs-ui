@@ -1,0 +1,30 @@
+= Link target test
+// Sample page for verifying link behavior in a local preview: external,
+// internal, localhost, and attachment links. Exercises the rules in
+// src/js/26-open-external-and-attachment-links.js and the a[href*="//"] /
+// a.attachment ::after rules in doc.css.
+
+Inspect each link (or click through) to check `target="_blank"`, the icons, and the visually-hidden "(opens in a new tab)" phrase that screen readers announce.
+
+== External links (external icon + new tab)
+
+None of these use the `^` suffix; the JS still opens them in a new tab and announces it:
+
+* https://github.com/redpanda-data/redpanda[Redpanda on GitHub]
+* https://kubernetes.io/docs/home/[Kubernetes documentation]
+
+A link written with `^` still gets the hint and isn't double-targeted: https://redpanda.com/[Redpanda home^].
+
+== Internal link (no icon, same tab)
+
+* https://docs.redpanda.com/current/get-started/quick-start/[Quickstart]
+
+== localhost (external icon + new tab)
+
+* http://localhost:8080/login[Local Redpanda Console]
+
+== Attachment / download link (download glyph + new tab)
+
+// Raw anchor carrying the .attachment class that Antora adds to
+// xref:...attachment$... links, so the sample needs no real published attachment.
+pass:[<a class="attachment" href="sample.yaml">docker-compose/rpk-profile.yaml file</a>]
