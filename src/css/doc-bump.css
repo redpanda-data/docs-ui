@@ -219,6 +219,20 @@ html[data-theme=dark] {
   filter: var(--external-link-filter);
 }
 
+/* The visually-hidden "(opens in a new tab)" phrase appended by
+   26-open-external-and-attachment-links.js (see doc.css). */
+.aa-DetachedOverlay .doc .doc-new-tab-hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .aa-DetachedOverlay .doc i.fa {
   hyphens: none;
   font-style: normal;

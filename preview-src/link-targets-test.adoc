@@ -26,6 +26,15 @@ The profile is configured in the pass:[<a class="attachment" href="rpk-profile.y
 
 Redpanda Console runs locally at http://localhost:8080/login[Console on localhost:8080], and the object store UI is at http://localhost:9001/browser[MinIO on localhost:9001]. These now open in a new tab too.
 
+== Hardening cases
+
+These exercise the URL parsing in the JS (hostname comparison, not substring matching):
+
+* An external URL that mentions an internal host in its *path* still opens in a new tab: https://example.com/docs.redpanda.com/fake[example.com/docs.redpanda.com/...]. (The CSS icon rule is substring-based, so this link shows no icon — a known, cosmetic-only divergence.)
+* An external host that merely ends with an internal host's spelling is still external: https://fakenetlify.app.example.com/[fakenetlify.app.example.com] — new tab. Real subdomains such as `deploy-preview-417--docs-ui.netlify.app` stay internal.
+* A `mailto:` link is untouched — same tab semantics, no icon, no hint: mailto:support@redpanda.com[email support].
+* An explicit `target` set by the author is respected and not overridden: pass:[<a href="https://www.redpanda.com/blog" target="_self">redpanda.com blog, forced same-tab</a>].
+
 == Next steps
 
 * For production, see the internal docs: https://docs.redpanda.com/current/deploy/redpanda/kubernetes/[Kubernetes deployment guides] — an internal `docs.redpanda.com` link, so no icon and same tab.
