@@ -303,7 +303,18 @@
    * Also handles continuation content after blank lines
    */
   function processMultilineMapping(token) {
-    var bloblangCode = extractBloblangFromBlock(token.textContent)
+    var rawText = token.textContent
+    var bloblangCode = extractBloblangFromBlock(rawText)
+
+    // extractBloblangFromBlock() trims rawText before tokenizing, which
+    // strips the newline + indentation that visually separates the YAML
+    // block-scalar indicator (| or >) from the first line of content.
+    // Capture it here so it can be restored below — otherwise the token's
+    // original whitespace is discarded when its innerHTML is replaced, and
+    // "mapping: |" collapses onto the same line as the first Bloblang
+    // statement (e.g. "mapping: |let jokes = [").
+    var leadingWhitespaceMatch = rawText.match(/^(\r?\n[ \t]*)/)
+    var leadingWhitespace = leadingWhitespaceMatch ? leadingWhitespaceMatch[1] : ''
 
     // Check for continuation content after this token
     var continuationNodes = collectLiteralBlockContinuation(token)
@@ -323,7 +334,7 @@
 
     var wrapper = document.createElement('span')
     wrapper.className = 'bloblang-embedded'
-    wrapper.innerHTML = highlighted
+    wrapper.innerHTML = escapeHtml(leadingWhitespace) + highlighted
 
     token.innerHTML = ''
     token.appendChild(wrapper)
