@@ -726,8 +726,23 @@ html[data-theme="dark"] .status-badge--self-managed-only {
 }
 */
 
+/* External (off-site) links get the external-link icon and open in a new tab.
+   The matching new-tab behavior is applied in
+   src/js/26-open-external-and-attachment-links.js — keep the excluded-host
+   list below in sync with the selector in that file. */
 .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
+  position: relative;
+  margin-left: 2px;
+  filter: var(--external-link-filter);
+}
+
+/* On-site attachment/download links (Antora adds .attachment to
+   xref:...attachment$... links). They open in a new tab (see
+   26-open-external-and-attachment-links.js) and get a download glyph, distinct
+   from the external-link icon, so the new-tab behavior is signaled. */
+.doc a.attachment::after {
+  content: url('/_/img/download.svg');
   position: relative;
   margin-left: 2px;
   filter: var(--external-link-filter);

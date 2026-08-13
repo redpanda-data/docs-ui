@@ -210,6 +210,15 @@ html[data-theme=dark] {
   filter: var(--external-link-filter);
 }
 
+/* On-site attachment/download links: download glyph (see doc.css and
+   src/js/26-open-external-and-attachment-links.js). */
+.aa-DetachedOverlay .doc a.attachment::after {
+  content: url('/_/img/download.svg');
+  position: relative;
+  margin-left: 2px;
+  filter: var(--external-link-filter);
+}
+
 .aa-DetachedOverlay .doc i.fa {
   hyphens: none;
   font-style: normal;
