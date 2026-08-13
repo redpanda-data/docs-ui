@@ -1,0 +1,42 @@
+= Quickstart link preview
+// Dev-only sample page. It reproduces the LINK TYPES on the real Redpanda
+// quickstart (external, internal, localhost, attachment) so a local or deploy
+// preview shows how each behaves: icons, open-in-new-tab, and the visually
+// hidden "(opens in a new tab)" hint. This is NOT the real quickstart (which
+// lives in the docs repo and depends on its modules/attachments) — it just
+// mirrors its links. Exercises src/js/26-open-external-and-attachment-links.js
+// and the a[href*="//"] / a.attachment ::after rules in doc.css.
+
+This page mirrors the link types on the Redpanda quickstart. None of the external links below use the `^` suffix — the docs-ui rule opens them in a new tab anyway (which is what makes the per-link `^` unnecessary).
+
+== Deploy Redpanda
+
+This quickstart uses Docker. To download the Redpanda binary, see https://github.com/redpanda-data/redpanda/releases/latest[GitHub]. For a managed option, sign up for https://cloud.redpanda.com[Redpanda Cloud].
+
+For Docker Compose, see the https://docs.docker.com/compose/install/[Docker Compose documentation]. On Windows, use https://learn.microsoft.com/windows/wsl/install[Windows Subsystem for Linux].
+
+[NOTE]
+====
+The source code for the data transform function is in the pass:[<a class="attachment" href="transform.go"><code>docker-compose/transform/transform.go</code> file</a>] that you downloaded. This file is commented to explain how it works.
+====
+
+The profile is configured in the pass:[<a class="attachment" href="rpk-profile.yaml"><code>docker-compose/rpk-profile.yaml</code> file</a>] that you downloaded.
+
+== Explore Redpanda Console
+
+Redpanda Console runs locally at http://localhost:8080/login[Console on localhost:8080], and the object store UI is at http://localhost:9001/browser[MinIO on localhost:9001]. These now open in a new tab too.
+
+== Hardening cases
+
+These exercise the URL parsing in the JS (hostname comparison, not substring matching):
+
+* An external URL that mentions an internal host in its *path* still opens in a new tab: https://example.com/docs.redpanda.com/fake[example.com/docs.redpanda.com/...]. (The CSS icon rule is substring-based, so this link shows no icon — a known, cosmetic-only divergence.)
+* An external host that merely ends with an internal host's spelling is still external: https://fakenetlify.app.example.com/[fakenetlify.app.example.com] — new tab. Real subdomains such as `deploy-preview-417--docs-ui.netlify.app` stay internal.
+* A `mailto:` link is untouched — same tab semantics, no icon, no hint: mailto:support@redpanda.com[email support].
+* An explicit `target` set by the author is respected and not overridden: pass:[<a href="https://www.redpanda.com/blog" target="_self">redpanda.com blog, forced same-tab</a>].
+
+== Next steps
+
+* For production, see the internal docs: https://docs.redpanda.com/current/deploy/redpanda/kubernetes/[Kubernetes deployment guides] — an internal `docs.redpanda.com` link, so no icon and same tab.
+* An internal link written with `^` opens in a new tab but shows no icon (it's on `docs.redpanda.com`): https://docs.redpanda.com/current/get-started/intro-to-events/[Intro to events^]. It should still get `rel="noopener"` and the "(opens in a new tab)" hint.
+* An external link written with `^` still works and is not double-targeted: https://www.redpanda.com/[Redpanda home^].

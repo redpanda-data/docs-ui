@@ -203,11 +203,34 @@ html[data-theme=dark] {
 }
 */
 
-.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+.aa-DetachedOverlay .doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;
   filter: var(--external-link-filter);
+}
+
+/* On-site attachment/download links: download glyph (see doc.css and
+   src/js/26-open-external-and-attachment-links.js). */
+.aa-DetachedOverlay .doc a.attachment[href]::after {
+  content: url('/_/img/download.svg');
+  position: relative;
+  margin-left: 2px;
+  filter: var(--external-link-filter);
+}
+
+/* The visually-hidden "(opens in a new tab)" phrase appended by
+   26-open-external-and-attachment-links.js (see doc.css). */
+.aa-DetachedOverlay .doc .doc-new-tab-hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .aa-DetachedOverlay .doc i.fa {

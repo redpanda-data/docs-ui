@@ -726,11 +726,44 @@ html[data-theme="dark"] .status-badge--self-managed-only {
 }
 */
 
-.doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
+/* External (off-site) links get the external-link icon and open in a new tab.
+   The matching new-tab behavior is applied in
+   src/js/26-open-external-and-attachment-links.js, which parses each URL and
+   compares hostnames; the substring :not() exclusions below approximate that
+   policy (the best CSS can do). Keep the excluded hosts in sync with the
+   INTERNAL_HOSTS list in that file. */
+.doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not(section.feedback-section a):not(.aa-ItemIcon a)::after {
   content: url('/_/img/external-link.svg');
   position: relative;
   margin-left: 2px;
   filter: var(--external-link-filter);
+}
+
+/* On-site attachment/download links (Antora adds .attachment to
+   xref:...attachment$... links). They open in a new tab (see
+   26-open-external-and-attachment-links.js) and get a download glyph, distinct
+   from the external-link icon, so the new-tab behavior is signaled. */
+.doc a.attachment[href]::after {
+  content: url('/_/img/download.svg');
+  position: relative;
+  margin-left: 2px;
+  filter: var(--external-link-filter);
+}
+
+/* The visually-hidden "(opens in a new tab)" phrase that
+   26-open-external-and-attachment-links.js appends to new-tab links for
+   screen readers. Defined here (not via home.css's .visually-hidden) so the
+   hint doesn't depend on another stylesheet staying global. */
+.doc-new-tab-hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .doc i.fa {
