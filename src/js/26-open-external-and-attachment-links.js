@@ -2,36 +2,58 @@
   'use strict'
 
   // Open external (off-site) links and on-site attachment/download links in a
-  // new tab, so readers don't lose their place in the current page.
+  // new tab, and announce that to assistive tech, so readers don't silently
+  // lose their place in the current page.
   //
   // The external-link selector below MIRRORS the CSS rule that renders the
   // external-link icon in src/css/doc.css (and src/css/doc-bump.css). Keep the
   // two in sync: if you change the excluded hosts here, change them there too.
+  // (localhost is intentionally NOT excluded: a link to a local app opens a
+  // different origin, so a new tab keeps the docs page in place.)
   // Attachment links are matched by the `.attachment` class Antora adds to
   // `xref:...attachment$...` links; they get the download glyph via CSS.
 
-  function markNewTab (a) {
-    if (a.hasAttribute('target')) return
-    a.setAttribute('target', '_blank')
+  const HINT_CLASS = 'doc-new-tab-hint'
+
+  function ensureRel (a) {
     const rel = (a.getAttribute('rel') || '').split(/\s+/).filter(Boolean)
     if (rel.indexOf('noopener') === -1) rel.push('noopener')
     a.setAttribute('rel', rel.join(' '))
   }
 
+  // Append a visually-hidden phrase so screen readers announce the new tab.
+  // The external-link / download icons are decorative CSS and are not exposed
+  // to assistive tech, so this is the only signal AT users get.
+  function addHint (a) {
+    if (a.querySelector('.' + HINT_CLASS)) return
+    const hint = document.createElement('span')
+    hint.className = 'visually-hidden ' + HINT_CLASS
+    hint.textContent = ' (opens in a new tab)'
+    a.appendChild(hint)
+  }
+
+  function process (a) {
+    // Respect an explicit target the author or a widget already set: only add a
+    // new tab where none was requested. Still announce any link that ends up
+    // opening in a new tab, including ^-suffixed links that already carry it.
+    if (!a.hasAttribute('target')) {
+      a.setAttribute('target', '_blank')
+      ensureRel(a)
+    }
+    if (a.getAttribute('target') === '_blank') addHint(a)
+  }
+
   function run () {
-    // External, off-site links. The attribute-based :not() chain matches the
-    // doc.css selector; the feedback-section / autocomplete exclusions are
-    // applied in JS via closest() for broader browser support.
     const external = document.querySelectorAll(
-      '.doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"]):not([href*="localhost"])'
+      '.doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"])'
     )
     external.forEach(function (a) {
       if (a.closest('section.feedback-section') || a.closest('.aa-ItemIcon')) return
-      markNewTab(a)
+      process(a)
     })
 
     // On-site attachment/download links (the _attachments files).
-    document.querySelectorAll('.doc a.attachment[href]').forEach(markNewTab)
+    document.querySelectorAll('.doc a.attachment[href]').forEach(process)
   }
 
   if (document.readyState === 'loading') {
