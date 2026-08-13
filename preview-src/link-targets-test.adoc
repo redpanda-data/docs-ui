@@ -29,4 +29,5 @@ Redpanda Console runs locally at http://localhost:8080/login[Console on localhos
 == Next steps
 
 * For production, see the internal docs: https://docs.redpanda.com/current/deploy/redpanda/kubernetes/[Kubernetes deployment guides] — an internal `docs.redpanda.com` link, so no icon and same tab.
-* A link written with `^` still works and is not double-targeted: https://www.redpanda.com/[Redpanda home^].
+* An internal link written with `^` opens in a new tab but shows no icon (it's on `docs.redpanda.com`): https://docs.redpanda.com/current/get-started/intro-to-events/[Intro to events^]. It should still get `rel="noopener"` and the "(opens in a new tab)" hint.
+* An external link written with `^` still works and is not double-targeted: https://www.redpanda.com/[Redpanda home^].

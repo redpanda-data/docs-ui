@@ -45,17 +45,28 @@
     }
   }
 
+  // Links inside the feedback widget and the search autocomplete are excluded
+  // (matching the icon CSS) so we don't annotate or restyle UI chrome.
+  function isExcluded (a) {
+    return !!(a.closest('section.feedback-section') || a.closest('.aa-ItemIcon'))
+  }
+
   function run () {
-    const external = document.querySelectorAll(
+    // External off-site links -> open in a new tab.
+    document.querySelectorAll(
       '.doc a[href*="//"]:not([href*="docs.redpanda.com"]):not([href*="netlify.app"])'
-    )
-    external.forEach(function (a) {
-      if (a.closest('section.feedback-section') || a.closest('.aa-ItemIcon')) return
-      process(a)
-    })
+    ).forEach(function (a) { if (!isExcluded(a)) process(a) })
 
     // On-site attachment/download links (the _attachments files).
     document.querySelectorAll('.doc a.attachment[href]').forEach(process)
+
+    // Any remaining link that already opens in a new tab -- e.g. an internal or
+    // relative ^-suffixed link that the two passes above don't match -- still
+    // needs rel="noopener" and the screen-reader hint. process() is idempotent,
+    // so links already handled above are unaffected.
+    document.querySelectorAll('.doc a[target="_blank"]').forEach(function (a) {
+      if (!isExcluded(a)) process(a)
+    })
   }
 
   if (document.readyState === 'loading') {
