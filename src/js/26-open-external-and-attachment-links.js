@@ -34,13 +34,15 @@
 
   function process (a) {
     // Respect an explicit target the author or a widget already set: only add a
-    // new tab where none was requested. Still announce any link that ends up
-    // opening in a new tab, including ^-suffixed links that already carry it.
-    if (!a.hasAttribute('target')) {
-      a.setAttribute('target', '_blank')
+    // new tab where none was requested. But any link that opens in a new tab
+    // must carry rel="noopener" (reverse-tabnabbing protection) and announce
+    // itself to assistive tech — including ^-suffixed or widget-set links that
+    // already have target="_blank" but may be missing rel.
+    if (!a.hasAttribute('target')) a.setAttribute('target', '_blank')
+    if (a.getAttribute('target') === '_blank') {
       ensureRel(a)
+      addHint(a)
     }
-    if (a.getAttribute('target') === '_blank') addHint(a)
   }
 
   function run () {

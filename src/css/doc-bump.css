@@ -212,7 +212,7 @@ html[data-theme=dark] {
 
 /* On-site attachment/download links: download glyph (see doc.css and
    src/js/26-open-external-and-attachment-links.js). */
-.aa-DetachedOverlay .doc a.attachment::after {
+.aa-DetachedOverlay .doc a.attachment[href]::after {
   content: url('/_/img/download.svg');
   position: relative;
   margin-left: 2px;

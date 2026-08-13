@@ -741,7 +741,7 @@ html[data-theme="dark"] .status-badge--self-managed-only {
    xref:...attachment$... links). They open in a new tab (see
    26-open-external-and-attachment-links.js) and get a download glyph, distinct
    from the external-link icon, so the new-tab behavior is signaled. */
-.doc a.attachment::after {
+.doc a.attachment[href]::after {
   content: url('/_/img/download.svg');
   position: relative;
   margin-left: 2px;
