@@ -101,7 +101,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
   // a question, and means nothing to a reader. The raw text goes to Heap and
   // the console (below); the panel shows something a user can act on.
   const failureMessage =
-    "No answer came back. The browser check may still be loading — try again in a moment."
+    'No answer came back. The browser check may still be loading, so try again in a moment.'
 
   // Report failures the way the agent tier reports its own (handleAgentEvent's
   // response_error), so the rate of silent drops is visible in Heap rather than

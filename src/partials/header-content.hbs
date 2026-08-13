@@ -160,10 +160,16 @@
               </ul>
               <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login">Continue</a>
               <p class="tb-signin-modal-foot">No account yet? <a href="https://cloud.redpanda.com/sign-up?utm_source=docs&utm_medium=referral&utm_campaign=docs-signup&utm_content=signin-modal" target="_blank" rel="noopener noreferrer">Create a free account</a></p>
-              {{!-- Privacy disclosure shown here lets /login skip the server
-                    interstitial (disclosed=1) — keep in sync with
-                    loginInterstitialHtml in docs-site lib/oauth/pages.mjs --}}
-              <p class="tb-signin-modal-note">When you sign in, we collect your verified work email to track documentation usage and attribute it to your organization, and we share it with service providers that help us run and analyze the service. See our <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> for details.</p>
+              {{!-- Privacy disclosure. The modal CTA links to /login?disclosed=1,
+                    which docs-login.mjs uses to SKIP the server interstitial, so
+                    for anyone signing in from here this note is the only
+                    disclosure they ever see. It must therefore stay verbatim in
+                    sync with loginInterstitialHtml in docs-site
+                    lib/oauth/pages.mjs — that copy is what the launch review
+                    approved (activity capture + sales/CRM follow-up). Weakening
+                    it here silently weakens the disclosure for the primary
+                    sign-in path. --}}
+              <p class="tb-signin-modal-note">When you sign in, we collect your verified work email and record how you use the docs (pages you view, searches, and questions you ask the AI assistant) to attribute documentation usage to your organization and to follow up about Redpanda products, including through our sales team. We share this with service providers (such as our CRM) that help us run, analyze, and market the service. See our <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> for details.</p>
             </div>
           </div>
           <div class="tb-dropdown tb-account-menu" data-account-menu hidden>

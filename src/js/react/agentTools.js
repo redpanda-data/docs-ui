@@ -112,8 +112,8 @@ const runBloblang = {
   description:
     'Execute a Bloblang mapping against sample input JSON using the real Redpanda Connect interpreter, ' +
     'and return the output or the exact parse/runtime error. ' +
-    'ALWAYS run a mapping through this tool before presenting it to the user or opening the playground — ' +
-    'if it errors, fix the mapping and run it again until it works, then show the user the verified mapping ' +
+    'ALWAYS run a mapping through this tool before presenting it to the user or opening the playground. ' +
+    'If it errors, fix the mapping and run it again until it works, then show the user the verified mapping ' +
     'together with the sample input and output.',
   // Deliberately not approval-gated: pure sandboxed computation in page-local
   // WASM — no network, DOM, or navigation side effects — and the agent may
@@ -265,7 +265,7 @@ const openBloblangPlayground = {
     return {
       opened,
       url: url.toString(),
-      note: opened ? 'Playground opened in a new tab.' : 'Popup blocked — give the user this link instead.',
+      note: opened ? 'Playground opened in a new tab.' : 'Popup blocked, so give the user this link instead.',
     }
   },
 }
@@ -275,8 +275,8 @@ const submitDocsFeedback = {
   displayName: 'Send feedback to the docs team',
   description:
     'Send user feedback (bug reports, documentation gaps, incorrect or missing information, feature requests) ' +
-    'to the Redpanda docs team. Ask the user before calling this and summarize their feedback clearly — ' +
-    'never include passwords, tokens, or other personal data in the summary. ' +
+    'to the Redpanda docs team. Ask the user before calling this and summarize their feedback clearly. ' +
+    'Never include passwords, tokens, or other personal data in the summary. ' +
     'The submission includes the signed-in user\'s email and a reference to this conversation so the team can ' +
     'follow up; mention that to the user when asking for consent. Never submit without their consent.',
   needsApproval: true,
@@ -392,7 +392,7 @@ const lookupConfigProperty = {
     }
     const rec = properties[name]
     if (!rec) {
-      return { found: false, property: name, note: 'Not in the property reference — fall back to searching the docs.' }
+      return { found: false, property: name, note: 'Not in the property reference, so fall back to searching the docs.' }
     }
     return {
       found: true,
@@ -457,7 +457,7 @@ const openConsole = {
   description:
     'Open a page in the Redpanda Cloud console in a new tab. Supported destinations: ' +
     Object.keys(CLOUD_ROUTES).join(', ') + '. Cannot open a specific cluster, topic, or ' +
-    'other resource (no access to the user’s IDs) — open the general area and tell the ' +
+    'other resource (no access to the user’s IDs), so open the general area and tell the ' +
     'user what to do next.',
   needsApproval: false, // opens a new tab; degrades to a link if the popup is blocked
   parameters: {
@@ -481,7 +481,7 @@ const openConsole = {
       opened,
       url,
       destination,
-      note: opened ? 'Opened in a new tab.' : 'Popup blocked — give the user the link.',
+      note: opened ? 'Opened in a new tab.' : 'Popup blocked, so give the user the link.',
     }
   },
 }

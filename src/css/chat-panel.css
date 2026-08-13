@@ -9,7 +9,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 420px;
+  width: 480px;
   height: 100vh;
   background: var(--kapa-surface, #fff);
   color: var(--kapa-text, #181818);
@@ -816,7 +816,16 @@
 /* Narrow desktop: reduce chat panel width to fit better */
 @media (min-width: 1024px) and (max-width: 1399px) {
   .chat-panel {
-    width: 340px;
+    width: 380px;
+  }
+}
+
+/* Tablet / small laptop inherits the 480px default, which would swallow most of
+   a narrow window — cap it against the viewport instead. Scoped to :not(
+   .is-fullscreen) so the full-screen toggle still spans the width. */
+@media (min-width: 521px) and (max-width: 1023px) {
+  .chat-panel:not(.is-fullscreen) {
+    width: min(480px, 70vw);
   }
 }
 
