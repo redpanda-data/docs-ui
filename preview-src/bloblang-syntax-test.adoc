@@ -368,3 +368,37 @@ spec:
             - name: DATABASE_URL
               value: "postgres://localhost:5432/mydb"
 ----
+
+== Regression: Block Scalar Indicator Must Stay on Its Own Line
+
+Reported against docs.redpanda.com as
+https://redpandadata.atlassian.net/browse/DOC-2433[DOC-2433]: this exact
+example (the Connect quickstart's producer pipeline) rendered as
+`mapping: |let jokes = [` on one line instead of `|` followed by a line
+break. Root cause was `extractBloblangFromBlock()` in
+`src/js/17-bloblang-yaml.js` trimming away the newline + indentation
+between the block-scalar indicator and the first line of Bloblang before
+`processMultilineMapping()` discarded the token's original content
+entirely.
+
+**Check visually**: `mapping: |` must end its own line, with `let jokes`
+starting the next line, indented — not glued onto the same line as `|`.
+If this collapses again, the leading-whitespace preservation in
+`processMultilineMapping()` has regressed.
+
+[source,yaml]
+----
+input:
+  generate:
+    interval: 5s
+    count: 0
+    mapping: |
+      let jokes = [
+        "Why don't scientists trust atoms? Because they make up everything!",
+        "I'm reading a book about anti-gravity. It's impossible to put down!"
+      ]
+      root = jokes.index(random_int(seed: timestamp_unix_nano(), max: jokes.length() - 1))
+output:
+  redpanda:
+    topic: dad-jokes
+----
