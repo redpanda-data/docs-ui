@@ -40,16 +40,40 @@ function announceSession (authenticated, user, loginUrl, authoritative = true) {
     })
   )
   try {
-    // Persist only authoritative states. A cached transient-assumption must not
-    // replay as if it were a definitive answer on the next pageview.
+    // Persist only authoritative states under the main key. A cached transient
+    // assumption must not replay as if it were a definitive answer.
     if (authoritative) {
       sessionStorage.setItem(
         'kapa-session-state',
         JSON.stringify({ authenticated, user: user || null, loginUrl: loginUrl || null })
       )
+      // The backend answered, so any "unavailable" marker is stale.
+      sessionStorage.removeItem(UNAVAILABLE_KEY)
     }
   } catch (err) { /* private browsing */ }
 }
+
+// Marker for "the probe failed and we don't know why", kept apart from
+// kapa-session-state so it can never be read back as a definitive answer.
+// Without it, a backend that isn't deployed yet costs one POST /kapa/session
+// per pageview, all 404s. With it, that becomes one per tab per TTL window.
+//
+// Availability is deliberately learned at runtime rather than baked in at build
+// time: kapa-session.mjs treats REDPANDA_OAUTH_CLIENT_ID as the single on/off
+// var for sign-in and signals "off" by omitting login_url. Asking the server
+// keeps that env var an instant kill switch. A build-time flag would move the
+// decision into a playbook key, so disabling sign-in would need a code change
+// and a full docs rebuild, and the two could disagree.
+//
+// The TTL alone is a poor safety net for the day auth ships: nobody holds a
+// session yet, so the hasAuthHint bypass covers no one, and a tab that probed
+// just before the deploy would hide sign-in until the window elapsed. Shortening
+// the TTL doesn't fix that either — pageviews are spread out, so a short window
+// re-probes almost every pageview and gives the noise back. Instead the marker
+// is dropped on explicit intent (see probeOnIntent), so the affordance appears
+// the moment anyone actually reaches for Ask AI while idle navigation stays quiet.
+const UNAVAILABLE_KEY = 'kapa-session-unavailable'
+const UNAVAILABLE_TTL_MS = 10 * 60 * 1000
 
 async function getSessionToken () {
   const endpoint = window.KAPA_SESSION_ENDPOINT || '/kapa/session'
@@ -100,6 +124,18 @@ function probeSession () {
       // Login state changed since the cache was written — fall through
     } catch (err) { /* fall through to a fresh probe */ }
   }
+  // A recent probe already failed in this tab, so don't ask again on every
+  // pageview. Skipped when the auth hint is present: that visitor may hold a
+  // real session, and getting them the agent tier is worth one request.
+  if (!hasAuthHint) {
+    try {
+      const failedAt = Number(sessionStorage.getItem(UNAVAILABLE_KEY))
+      if (failedAt && Date.now() - failedAt < UNAVAILABLE_TTL_MS) {
+        announceSession(false, null, null, false)
+        return
+      }
+    } catch (err) { /* private browsing */ }
+  }
   // Establish the tier. getSessionToken announces on a 200 (authenticated) or a
   // clean 401 (signed-out; carries the real login_url, or null when auth is
   // deliberately turned off / "coming soon"). Any OTHER failure — network error,
@@ -114,9 +150,29 @@ function probeSession () {
   // signed-in user's auth hint. Self-heals on the next probe.
   getSessionToken().catch(() => {
     if (window.__KAPA_AUTHENTICATED === undefined) {
+      try {
+        sessionStorage.setItem(UNAVAILABLE_KEY, String(Date.now()))
+      } catch (err) { /* private browsing */ }
       announceSession(false, null, window.__KAPA_LOGIN_URL || null, false)
     }
   })
+}
+
+// Explicit intent beats the cached "unavailable" answer. 19-chat-panel.js fires
+// docs-account:warm when a signed-out visitor deliberately opens the drawer (not
+// on the restore-on-load path), which is exactly when a stale marker would cost
+// something real: the sign-in upsell missing on the day auth ships. Drop the
+// marker and ask again. Once per page — a second open learns nothing new.
+let intentProbed = false
+function probeOnIntent () {
+  if (intentProbed) return
+  // Nothing to learn: we already have a definitive answer this pageview.
+  if (window.__KAPA_AUTHENTICATED === true || window.__KAPA_LOGIN_URL) return
+  intentProbed = true
+  try {
+    sessionStorage.removeItem(UNAVAILABLE_KEY)
+  } catch (err) { /* private browsing */ }
+  probeSession()
 }
 
 // Custom instructions are injected into the agent's system prompt server-side
@@ -436,6 +492,7 @@ function mount () {
   if (mountEl && !mountEl.dataset.mounted) {
     mountEl.dataset.mounted = 'true'
     probeSession()
+    window.addEventListener('docs-account:warm', probeOnIntent)
     createRoot(mountEl).render(<ErrorBoundary><App /></ErrorBoundary>)
   }
 }
