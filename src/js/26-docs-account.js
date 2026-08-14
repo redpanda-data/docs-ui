@@ -267,7 +267,12 @@
       // Auth0 access_denied: the account isn't a member of a required Redpanda
       // Cloud organization (or declined consent). Retrying the same account won't
       // help, so say why instead of a generic "try again" loop.
-      access_denied: 'Your account doesn’t have access to the docs AI. It must belong to a Redpanda Cloud organization.',
+      access_denied: 'Your account is not in a Redpanda Cloud organization yet. Click the verification link in your email, or ask your organization admin to invite you.',
+      // Signed up but never clicked the verification link Redpanda Cloud emailed.
+      // Kept in sync with LOGIN_ERROR_MESSAGES in docs-site docs-login.mjs: without
+      // an entry here this code fell through to the generic "try again" default,
+      // which is the one thing that cannot work until the address is verified.
+      org_setup_incomplete: 'Click the verification link Redpanda Cloud emailed you, then sign in again.',
     }
     var toast = document.createElement('div')
     toast.setAttribute('role', 'alert')
