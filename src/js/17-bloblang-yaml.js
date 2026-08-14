@@ -313,7 +313,7 @@
     // original whitespace is discarded when its innerHTML is replaced, and
     // "mapping: |" collapses onto the same line as the first Bloblang
     // statement (e.g. "mapping: |let jokes = [").
-    var leadingWhitespaceMatch = rawText.match(/^(\r?\n[ \t]*)/)
+    var leadingWhitespaceMatch = rawText.match(/^((?:\r?\n[ \t]*)+)/)
     var leadingWhitespace = leadingWhitespaceMatch ? leadingWhitespaceMatch[1] : ''
 
     // Check for continuation content after this token
