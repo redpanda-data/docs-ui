@@ -65,7 +65,13 @@
   </script>
   {{!-- Agent SDK styles emitted by esbuild alongside the JS bundle --}}
   <link rel="stylesheet" href="{{{uiRootPath}}}/js/AskAI.bundle.css">
-  <script src="{{{uiRootPath}}}/js/AskAI.bundle.js"></script>
+  {{!-- defer: this is React + the Kapa SDKs in one bundle, and a plain blocking
+        script here gated site.js (nav, TOC, code-copy, tabs, version selector)
+        and the DOMContentLoaded theme toggle behind it, so a slow third-party
+        fetch left the article readable but every control dead, with no timeout.
+        Nothing about reading the docs needs this bundle. The Bump variant already
+        injects it dynamically, so this matches that behaviour. --}}
+  <script defer src="{{{uiRootPath}}}/js/AskAI.bundle.js"></script>
 
   {{!-- Footer disclaimer - Kapa SDK provides privacy policy and kapa.ai attribution --}}
   <div class="chat-foot" data-chat-foot>AI answers may be imprecise. Always verify in the docs.</div>

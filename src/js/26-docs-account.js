@@ -159,6 +159,25 @@
     }
   }
 
+  // Last authoritative answer this tab received from /kapa/session, written by
+  // AskAI.jsx announceSession. Only pages that mount the Ask AI drawer run the
+  // probe, so on pages without one (search, labs-search — both render the header)
+  // window.__KAPA_LOGIN_URL is unset and sign-in used to vanish entirely, even
+  // for a visitor who had just seen it on a docs page.
+  //
+  // Reading the cache cannot resurrect the bug this gate exists for: the value is
+  // only ever written from a definitive backend answer, so on a deploy where auth
+  // is absent no page can have stored one, and sign-in stays hidden everywhere.
+  function cachedLoginUrl () {
+    try {
+      var raw = sessionStorage.getItem('kapa-session-state')
+      if (!raw) return null
+      return JSON.parse(raw).loginUrl || null
+    } catch (e) {
+      return null
+    }
+  }
+
   function render () {
     var signedIn = hasAuthHint()
     // Auth availability: the Ask AI panel's session probe sets
@@ -167,7 +186,7 @@
     // entry on this so, if this UI ever ships ahead of the backend, we don't show
     // a sign-in link that 404s — the account UI stays hidden until auth is known
     // available. Re-runs on the kapa-session event once the probe resolves.
-    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL
+    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL || !!cachedLoginUrl()
     signinLink.hidden = signedIn || !authAvailable
     menu.hidden = !signedIn
     container.hidden = !authAvailable

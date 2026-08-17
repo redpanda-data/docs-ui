@@ -15,22 +15,40 @@
   var nav = navContainer.querySelector('.nav')
 
   if (navToggle) navToggle.addEventListener('click', showNav)
+  // localStorage throws SecurityError outright when cookies/site data are blocked
+  // (and QuotaExceededError when full). This file sorts FIRST into the
+  // concatenated site.js, so an uncaught throw here aborted the whole bundle:
+  // no TOC, no code-copy, no tabs, no version selector, no account menu, no
+  // activity beacon. Nav preference is a nicety; losing it must not cost the rest.
+  function rememberNavState (collapsed) {
+    try {
+      window.localStorage.setItem('navCollapsed', collapsed ? 'true' : 'false')
+    } catch (e) { /* private mode / storage blocked — preference just won't persist */ }
+  }
+  function navWasCollapsed () {
+    try {
+      return window.localStorage.getItem('navCollapsed') === 'true'
+    } catch (e) {
+      return false
+    }
+  }
+
   if (navCollapse) {
     navCollapse.addEventListener('click', function (e) {
       hideNav(e, true)
-      window.localStorage.setItem('navCollapsed', 'true')
+      rememberNavState(true)
     })
   }
   if (navExpand) {
     navExpand.addEventListener('click', function (e) {
       showNav(e, true)
-      window.localStorage.setItem('navCollapsed', 'false')
+      rememberNavState(false)
     })
   }
   navContainer.addEventListener('click', trapEvent)
 
   // Restore nav collapse state from localStorage
-  if (window.localStorage.getItem('navCollapsed') === 'true' && navCollapse) {
+  if (navWasCollapsed() && navCollapse) {
     hideNav(null, true)
   }
 
