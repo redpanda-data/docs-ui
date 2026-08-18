@@ -6,20 +6,27 @@ const path = require('path');
  * Test runner for JSON-fetch negative caching
  *
  * Verifies that:
- * - 404/410 responses for Connect JSON and properties JSON are negative-cached
- *   in localStorage, so they are not re-requested on every page view
- * - Transient failures (429, 5xx) are NOT cached and are retried on the next
+ * - HTTP 404 and 410 responses for Connect JSON and properties JSON are
+ *   negative-cached in localStorage, so they are not re-requested on every
  *   page view
+ * - Transient failures (429, 5xx, network errors, JSON parse errors) are NOT
+ *   cached and are retried on the next page view
  * - Markers expire after their TTL and successful fetches clear them
+ * - Preview mode (localhost) never writes markers and always retries
  *
- * The negative cache is disabled in preview mode (localhost /
- * docs-ui.netlify.app), so these tests use Puppeteer request interception to
- * serve the page from a fake production hostname without touching the network.
+ * The negative cache is disabled in preview mode (localhost / 127.0.0.1 /
+ * docs-ui.netlify.app), so most tests use Puppeteer request interception to
+ * serve the page from a fake production hostname without touching the
+ * network; the preview-mode scenario serves the same page from localhost.
  */
 
-const HOST = 'http://docs.example.test';
+const PROD_HOST = 'http://docs.example.test';
+const PREVIEW_HOST = 'http://localhost';
 const CONNECT_PATH = '/redpanda-connect/components/_attachments/connect-9.9.9.json';
 const PROPERTIES_PATH = '/current/reference/properties/_attachments/redpanda-properties-v9.9.9.json';
+// In preview mode the Connect fetch ignores the meta tag and uses the static
+// UI path instead
+const CONNECT_PREVIEW_PATH = '/_/connect.json';
 
 const BLOBLANG_JS = fs.readFileSync(path.resolve(__dirname, '../../src/js/16-bloblang-interactive.js'), 'utf8');
 const PROPERTY_JS = fs.readFileSync(path.resolve(__dirname, '../../src/js/19-property-tooltips.js'), 'utf8');
@@ -89,13 +96,25 @@ async function runTests() {
 
         const page = await browser.newPage();
 
-        // Mutable per-scenario response statuses and request counters
+        // Per-scenario response behavior: an HTTP status number, 'abort'
+        // (network error), or 'badjson' (200 with a non-JSON body)
         const state = {
-            connectStatus: 404,
-            propertiesStatus: 404,
+            connect: 404,
+            properties: 404,
             connectRequests: 0,
             propertiesRequests: 0
         };
+
+        function respondJson(req, behavior, successBody) {
+            if (behavior === 'abort') return req.abort('failed');
+            if (behavior === 'badjson') {
+                return req.respond({ status: 200, contentType: 'application/json', body: 'this is not json' });
+            }
+            if (behavior === 200) {
+                return req.respond({ status: 200, contentType: 'application/json', body: successBody });
+            }
+            return req.respond({ status: behavior, contentType: 'text/plain', body: 'error' });
+        }
 
         await page.setRequestInterception(true);
         page.on('request', (req) => {
@@ -106,16 +125,18 @@ async function runTests() {
                 return req.respond({ status: 404, contentType: 'text/plain', body: 'bad url' });
             }
 
-            // Connect version lookup (external) - always succeeds
+            // Connect version lookup (external) - always succeeds. Only
+            // fetched when the connect-json-url meta tag is absent.
             if (url.hostname === 'raw.githubusercontent.com') {
                 return req.respond({
                     status: 200,
                     contentType: 'text/yaml',
+                    headers: { 'Access-Control-Allow-Origin': '*' },
                     body: "latest-connect-version: '9.9.9'\n"
                 });
             }
 
-            if (url.origin === HOST) {
+            if (url.origin === PROD_HOST || url.origin === PREVIEW_HOST) {
                 if (url.pathname === '/test.html') {
                     return req.respond({ status: 200, contentType: 'text/html', body: TEST_PAGE });
                 }
@@ -125,19 +146,13 @@ async function runTests() {
                 if (url.pathname === '/js/19-property-tooltips.js') {
                     return req.respond({ status: 200, contentType: 'application/javascript', body: PROPERTY_JS });
                 }
-                if (url.pathname === CONNECT_PATH) {
+                if (url.pathname === CONNECT_PATH || url.pathname === CONNECT_PREVIEW_PATH) {
                     state.connectRequests++;
-                    if (state.connectStatus === 200) {
-                        return req.respond({ status: 200, contentType: 'application/json', body: CONNECT_JSON_BODY });
-                    }
-                    return req.respond({ status: state.connectStatus, contentType: 'text/plain', body: 'error' });
+                    return respondJson(req, state.connect, CONNECT_JSON_BODY);
                 }
                 if (url.pathname === PROPERTIES_PATH) {
                     state.propertiesRequests++;
-                    if (state.propertiesStatus === 200) {
-                        return req.respond({ status: 200, contentType: 'application/json', body: PROPERTIES_JSON_BODY });
-                    }
-                    return req.respond({ status: state.propertiesStatus, contentType: 'text/plain', body: 'error' });
+                    return respondJson(req, state.properties, PROPERTIES_JSON_BODY);
                 }
             }
 
@@ -145,14 +160,14 @@ async function runTests() {
             return req.respond({ status: 404, contentType: 'text/plain', body: 'not found' });
         });
 
-        // Loads the test page and returns how many requests hit each JSON URL
-        // during that page view
-        async function loadPage() {
+        // Loads the test page from the given origin and returns how many
+        // requests hit each JSON URL during that page view
+        async function loadPage(origin = PROD_HOST) {
             const before = {
                 connect: state.connectRequests,
                 properties: state.propertiesRequests
             };
-            await page.goto(`${HOST}/test.html`, { waitUntil: 'networkidle0', timeout: 30000 });
+            await page.goto(`${origin}/test.html`, { waitUntil: 'networkidle0', timeout: 30000 });
             // Property tooltips fetch via requestIdleCallback; give async work
             // time to settle beyond networkidle0
             await page.waitForNetworkIdle({ idleTime: 600, timeout: 5000 }).catch(() => {});
@@ -167,16 +182,36 @@ async function runTests() {
             return page.evaluate((k) => localStorage.getItem(k), key);
         }
 
+        async function readMissingMarkers() {
+            return JSON.parse(await readStorage('redpanda-properties-missing') || '{}');
+        }
+
+        async function readConnectFailures() {
+            return JSON.parse(await readStorage('connect-json-fetch-failures') || '{}');
+        }
+
+        // Rewrites all stored marker timestamps to two hours ago
+        function expireMarkers() {
+            return page.evaluate(() => {
+                const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+                const failures = JSON.parse(localStorage.getItem('connect-json-fetch-failures') || '{}');
+                Object.keys(failures).forEach((url) => { failures[url] = twoHoursAgo; });
+                localStorage.setItem('connect-json-fetch-failures', JSON.stringify(failures));
+                const missing = JSON.parse(localStorage.getItem('redpanda-properties-missing') || '{}');
+                Object.keys(missing).forEach((url) => { missing[url].timestamp = twoHoursAgo; });
+                localStorage.setItem('redpanda-properties-missing', JSON.stringify(missing));
+            });
+        }
+
         // --- Scenario 1: 404 responses are negative-cached ---
         console.log('\n📋 Scenario 1: 404 responses are negative-cached');
-        state.connectStatus = 404;
-        state.propertiesStatus = 404;
+        state.connect = 404;
+        state.properties = 404;
         const load1 = await loadPage();
         assert('404: Connect JSON requested once on first view', load1.connect === 1, `got ${load1.connect}`);
         assert('404: properties JSON requested once on first view', load1.properties === 1, `got ${load1.properties}`);
-        const connectFailures = JSON.parse(await readStorage('connect-json-fetch-failures') || '{}');
-        assert('404: Connect failure marker written', CONNECT_PATH in connectFailures);
-        assert('404: properties missing-marker written', !!(await readStorage('redpanda-properties-missing')));
+        assert('404: Connect failure marker written', CONNECT_PATH in await readConnectFailures());
+        assert('404: properties missing-marker written for URL', PROPERTIES_PATH in await readMissingMarkers());
 
         const load2 = await loadPage();
         assert('404: Connect JSON NOT re-requested on next view', load2.connect === 0, `got ${load2.connect}`);
@@ -184,74 +219,105 @@ async function runTests() {
 
         // --- Scenario 2: markers expire after their TTL ---
         console.log('\n📋 Scenario 2: markers expire after their TTL');
-        await page.evaluate((connectPath) => {
-            const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
-            const failures = JSON.parse(localStorage.getItem('connect-json-fetch-failures') || '{}');
-            if (failures[connectPath]) failures[connectPath] = twoHoursAgo;
-            localStorage.setItem('connect-json-fetch-failures', JSON.stringify(failures));
-            const missing = JSON.parse(localStorage.getItem('redpanda-properties-missing') || 'null');
-            if (missing) {
-                missing.timestamp = twoHoursAgo;
-                localStorage.setItem('redpanda-properties-missing', JSON.stringify(missing));
-            }
-        }, CONNECT_PATH);
+        await expireMarkers();
         const load3 = await loadPage();
         assert('Expiry: Connect JSON re-requested after TTL', load3.connect === 1, `got ${load3.connect}`);
         assert('Expiry: properties JSON re-requested after TTL', load3.properties === 1, `got ${load3.properties}`);
 
-        // --- Scenario 3: transient failures (503, 429) are retried ---
-        console.log('\n📋 Scenario 3: transient failures are retried');
+        // --- Scenario 3: 410 responses are negative-cached ---
+        console.log('\n📋 Scenario 3: 410 responses are negative-cached');
         await page.evaluate(() => localStorage.clear());
-        state.connectStatus = 503;
-        state.propertiesStatus = 503;
+        state.connect = 410;
+        state.properties = 410;
+        const load410a = await loadPage();
+        assert('410: Connect JSON requested once on first view', load410a.connect === 1, `got ${load410a.connect}`);
+        assert('410: properties JSON requested once on first view', load410a.properties === 1, `got ${load410a.properties}`);
+        const load410b = await loadPage();
+        assert('410: Connect JSON NOT re-requested on next view', load410b.connect === 0, `got ${load410b.connect}`);
+        assert('410: properties JSON NOT re-requested on next view', load410b.properties === 0, `got ${load410b.properties}`);
+
+        // --- Scenario 4: transient failures (503, 429) are retried ---
+        console.log('\n📋 Scenario 4: transient HTTP failures are retried');
+        await page.evaluate(() => localStorage.clear());
+        state.connect = 503;
+        state.properties = 503;
         const load4 = await loadPage();
-        assert('503: Connect JSON requested', load4.connect >= 1, `got ${load4.connect}`);
-        assert('503: properties JSON requested', load4.properties >= 1, `got ${load4.properties}`);
-        const failuresAfter503 = JSON.parse(await readStorage('connect-json-fetch-failures') || '{}');
-        assert('503: no Connect failure marker written', !(CONNECT_PATH in failuresAfter503));
-        assert('503: no properties missing-marker written', !(await readStorage('redpanda-properties-missing')));
+        assert('503: Connect JSON requested exactly once', load4.connect === 1, `got ${load4.connect}`);
+        assert('503: properties JSON requested exactly once', load4.properties === 1, `got ${load4.properties}`);
+        assert('503: no Connect failure marker written', !(CONNECT_PATH in await readConnectFailures()));
+        assert('503: no properties missing-marker written', !(PROPERTIES_PATH in await readMissingMarkers()));
 
-        state.connectStatus = 429;
-        state.propertiesStatus = 429;
+        state.connect = 429;
+        state.properties = 429;
         const load5 = await loadPage();
-        assert('429: Connect JSON retried on next view', load5.connect >= 1, `got ${load5.connect}`);
-        assert('429: properties JSON retried on next view', load5.properties >= 1, `got ${load5.properties}`);
-        const failuresAfter429 = JSON.parse(await readStorage('connect-json-fetch-failures') || '{}');
-        assert('429: no Connect failure marker written', !(CONNECT_PATH in failuresAfter429));
-        assert('429: no properties missing-marker written', !(await readStorage('redpanda-properties-missing')));
+        assert('429: Connect JSON retried on next view', load5.connect === 1, `got ${load5.connect}`);
+        assert('429: properties JSON retried on next view', load5.properties === 1, `got ${load5.properties}`);
+        assert('429: no Connect failure marker written', !(CONNECT_PATH in await readConnectFailures()));
+        assert('429: no properties missing-marker written', !(PROPERTIES_PATH in await readMissingMarkers()));
 
-        // --- Scenario 4: success clears markers and populates the cache ---
-        console.log('\n📋 Scenario 4: success clears markers and populates the cache');
-        await page.evaluate(() => localStorage.clear());
-        state.connectStatus = 404;
-        state.propertiesStatus = 404;
-        await loadPage(); // writes fresh markers
-        state.connectStatus = 200;
-        state.propertiesStatus = 200;
+        // --- Scenario 5: network errors are retried ---
+        console.log('\n📋 Scenario 5: network errors are retried');
+        state.connect = 'abort';
+        state.properties = 'abort';
         const load6 = await loadPage();
-        assert('Fresh markers still suppress fetches', load6.connect === 0 && load6.properties === 0,
-            `connect ${load6.connect}, properties ${load6.properties}`);
-
-        // Expire the markers so the next view retries and succeeds
-        await page.evaluate((connectPath) => {
-            const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
-            const failures = JSON.parse(localStorage.getItem('connect-json-fetch-failures') || '{}');
-            if (failures[connectPath]) failures[connectPath] = twoHoursAgo;
-            localStorage.setItem('connect-json-fetch-failures', JSON.stringify(failures));
-            const missing = JSON.parse(localStorage.getItem('redpanda-properties-missing') || 'null');
-            if (missing) {
-                missing.timestamp = twoHoursAgo;
-                localStorage.setItem('redpanda-properties-missing', JSON.stringify(missing));
-            }
-        }, CONNECT_PATH);
+        assert('Network error: Connect JSON requested', load6.connect === 1, `got ${load6.connect}`);
+        assert('Network error: properties JSON requested', load6.properties === 1, `got ${load6.properties}`);
         const load7 = await loadPage();
-        assert('Success: Connect JSON fetched', load7.connect === 1, `got ${load7.connect}`);
-        assert('Success: properties JSON fetched', load7.properties === 1, `got ${load7.properties}`);
-        assert('Success: properties missing-marker cleared', !(await readStorage('redpanda-properties-missing')));
-        assert('Success: properties data cached', !!(await readStorage('redpanda-properties-cache')));
+        assert('Network error: Connect JSON retried on next view', load7.connect === 1, `got ${load7.connect}`);
+        assert('Network error: properties JSON retried on next view', load7.properties === 1, `got ${load7.properties}`);
+        assert('Network error: no Connect failure marker written', !(CONNECT_PATH in await readConnectFailures()));
+        assert('Network error: no properties missing-marker written', !(PROPERTIES_PATH in await readMissingMarkers()));
 
+        // --- Scenario 6: JSON parse errors are retried ---
+        console.log('\n📋 Scenario 6: JSON parse errors are retried');
+        state.connect = 'badjson';
+        state.properties = 'badjson';
         const load8 = await loadPage();
-        assert('Success: properties served from cache on next view', load8.properties === 0, `got ${load8.properties}`);
+        assert('Parse error: Connect JSON requested', load8.connect === 1, `got ${load8.connect}`);
+        assert('Parse error: properties JSON requested', load8.properties === 1, `got ${load8.properties}`);
+        const load9 = await loadPage();
+        assert('Parse error: Connect JSON retried on next view', load9.connect === 1, `got ${load9.connect}`);
+        assert('Parse error: properties JSON retried on next view', load9.properties === 1, `got ${load9.properties}`);
+        assert('Parse error: no Connect failure marker written', !(CONNECT_PATH in await readConnectFailures()));
+        assert('Parse error: no properties missing-marker written', !(PROPERTIES_PATH in await readMissingMarkers()));
+
+        // --- Scenario 7: success clears markers and populates the cache ---
+        console.log('\n📋 Scenario 7: success clears markers and populates the cache');
+        await page.evaluate(() => localStorage.clear());
+        state.connect = 404;
+        state.properties = 404;
+        await loadPage(); // writes fresh markers
+        state.connect = 200;
+        state.properties = 200;
+        const load10 = await loadPage();
+        assert('Fresh markers still suppress fetches', load10.connect === 0 && load10.properties === 0,
+            `connect ${load10.connect}, properties ${load10.properties}`);
+
+        await expireMarkers();
+        const load11 = await loadPage();
+        assert('Success: Connect JSON fetched', load11.connect === 1, `got ${load11.connect}`);
+        assert('Success: properties JSON fetched', load11.properties === 1, `got ${load11.properties}`);
+        assert('Success: properties missing-marker cleared', !(PROPERTIES_PATH in await readMissingMarkers()));
+        assert('Success: properties data cached', !!(await readStorage('redpanda-properties-cache')));
+        const tooltipAttached = await page.waitForSelector('code.has-property-tooltip', { timeout: 5000 })
+            .then(() => true).catch(() => false);
+        assert('Success: property tooltip attached to matching code element', tooltipAttached);
+
+        const load12 = await loadPage();
+        assert('Success: properties served from cache on next view', load12.properties === 0, `got ${load12.properties}`);
+
+        // --- Scenario 8: preview mode (localhost) never negative-caches ---
+        console.log('\n📋 Scenario 8: preview mode (localhost) never negative-caches');
+        state.connect = 404;
+        state.properties = 404;
+        const load13 = await loadPage(PREVIEW_HOST);
+        assert('Preview: Connect JSON requested', load13.connect === 1, `got ${load13.connect}`);
+        assert('Preview: properties JSON requested', load13.properties === 1, `got ${load13.properties}`);
+        const load14 = await loadPage(PREVIEW_HOST);
+        assert('Preview: Connect JSON re-requested on next view', load14.connect === 1, `got ${load14.connect}`);
+        assert('Preview: properties JSON re-requested on next view', load14.properties === 1, `got ${load14.properties}`);
+        assert('Preview: no Connect failure marker written', Object.keys(await readConnectFailures()).length === 0);
+        assert('Preview: no properties missing-marker written', Object.keys(await readMissingMarkers()).length === 0);
 
         // --- Summary ---
         const total = results.length;

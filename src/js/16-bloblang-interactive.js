@@ -73,9 +73,10 @@
   }
 
   /**
-   * Track Connect JSON URLs that recently returned an error response, so a
-   * URL that is known to 404 (for example, a version whose JSON was never
-   * generated) is not re-requested on every page view.
+   * Track Connect JSON URLs that recently returned HTTP 404/410, so a URL
+   * that is known not to exist (for example, a version whose JSON was never
+   * generated) is not re-requested on every page view. Transient failures
+   * (429, 5xx, network errors) are never recorded here.
    */
   const FETCH_FAILURE_KEY = 'connect-json-fetch-failures';
   const FETCH_FAILURE_TTL = 60 * 60 * 1000; // 1 hour
@@ -404,18 +405,25 @@
 
       // Skip remote fetches on docs-ui preview site - JSON files don't exist there
       if (!isDocsUiPreview) {
-        // Try to get latest version from cached antora.yml
-        var latestVersion = await getConnectVersion();
-        if (latestVersion) {
-          data = await tryFetchConnectJSON(latestVersion);
-        }
+        if (getConnectJsonUrl()) {
+          // The meta-tag URL takes precedence over any version inside
+          // tryFetchConnectJSON, so one attempt is enough: the version
+          // lookup and fallback loop could only re-request the same URL.
+          data = await tryFetchConnectJSON(null);
+        } else {
+          // Try to get latest version from cached antora.yml
+          var latestVersion = await getConnectVersion();
+          if (latestVersion) {
+            data = await tryFetchConnectJSON(latestVersion);
+          }
 
-        // Fallback: try known recent versions
-        if (!data) {
-          var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
-          for (var i = 0; i < fallbackVersions.length; i++) {
-            data = await tryFetchConnectJSON(fallbackVersions[i]);
-            if (data) break;
+          // Fallback: try known recent versions
+          if (!data) {
+            var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
+            for (var i = 0; i < fallbackVersions.length; i++) {
+              data = await tryFetchConnectJSON(fallbackVersions[i]);
+              if (data) break;
+            }
           }
         }
       }

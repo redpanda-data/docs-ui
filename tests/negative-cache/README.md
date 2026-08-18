@@ -6,16 +6,24 @@ Verifies the localStorage negative caching for tooltip data fetches in
 
 - HTTP `404`/`410` responses are negative-cached for 1 hour, so a missing
   JSON file is not re-requested on every page view (the 404-storm fix).
-- Transient failures (`429`, `5xx`, network errors) are **not** cached and
-  are retried on the next page view.
+  Both caches are keyed per URL, so browsing multiple doc versions with
+  missing JSON cannot thrash a shared marker.
+- Transient failures (`429`, `5xx`, network errors, JSON parse errors) are
+  **not** cached and are retried on the next page view.
 - Markers expire after their TTL, and a successful fetch clears the
-  properties missing-marker.
+  matching properties missing-marker and populates the dataset cache.
+- Preview mode never writes markers and always retries.
 
-The negative cache is disabled in preview mode (`localhost`,
-`docs-ui.netlify.app`), so the runner uses Puppeteer request interception to
-serve a synthetic test page from a fake production hostname
-(`docs.example.test`) and to control the HTTP status of each JSON response.
-No real network requests are made.
+Preview mode means the hostname is `localhost`, `127.0.0.1`, or contains
+`docs-ui.netlify.app`. Content-repo deploy previews (other `*.netlify.app`
+hosts) are treated as production, so a 404 seen there is negative-cached
+for up to 1 hour on that origin; clear the browser's localStorage to retry
+sooner.
+
+The runner uses Puppeteer request interception to serve a synthetic test
+page from a fake production hostname (`docs.example.test`) — and from
+`localhost` for the preview-mode scenario — controlling the HTTP status of
+each JSON response. No real network requests are made.
 
 ## Run
 
