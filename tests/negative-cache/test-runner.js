@@ -54,7 +54,19 @@ const TEST_PAGE = `<!DOCTYPE html>
   <meta name="properties-json-url" content="${PROPERTIES_PATH}">
   <meta name="latest-redpanda-tag" content="v9.9.9">
   <script>
-    window.tippy = function () { return {}; };
+    window.__tippyCalls = [];
+    window.tippy = function (el) {
+      window.__tippyCalls.push(el && el.textContent ? el.textContent.slice(0, 30) : String(el));
+      return {};
+    };
+    // Track lookups of the tooltip container: processCodeElements queries
+    // 'article.doc' only after passing its empty-properties check
+    window.__qsArticle = 0;
+    var origQS = Document.prototype.querySelector;
+    Document.prototype.querySelector = function (sel) {
+      if (sel === 'article.doc') window.__qsArticle++;
+      return origQS.apply(this, arguments);
+    };
     // Test probes: record unhandled rejections and idle-callback activity
     window.__rejections = [];
     window.addEventListener('unhandledrejection', function (e) {
@@ -334,6 +346,8 @@ async function runTests() {
                 ricScheduled: window.__ricScheduled,
                 ricFired: window.__ricFired,
                 rejections: window.__rejections,
+                qsArticle: window.__qsArticle,
+                tippyCalls: window.__tippyCalls,
                 // Which requests THIS page actually issued
                 resources: performance.getEntriesByType('resource').map((r) => r.name)
             })).catch((e) => ({ evalError: String(e) }));
