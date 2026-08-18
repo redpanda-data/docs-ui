@@ -125,17 +125,6 @@ async function runTests() {
                 return req.respond({ status: 404, contentType: 'text/plain', body: 'bad url' });
             }
 
-            // Connect version lookup (external) - always succeeds. Only
-            // fetched when the connect-json-url meta tag is absent.
-            if (url.hostname === 'raw.githubusercontent.com') {
-                return req.respond({
-                    status: 200,
-                    contentType: 'text/yaml',
-                    headers: { 'Access-Control-Allow-Origin': '*' },
-                    body: "latest-connect-version: '9.9.9'\n"
-                });
-            }
-
             if (url.origin === PROD_HOST || url.origin === PREVIEW_HOST) {
                 if (url.pathname === '/test.html') {
                     return req.respond({ status: 200, contentType: 'text/html', body: TEST_PAGE });

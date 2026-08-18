@@ -497,34 +497,39 @@ async function fetchConnectCompletions() {
     return extractCompletionsFromConnectData(mockConnectData);
   }
 
-  // Try to get latest version from GitHub releases
+  // Prefer the connect-json-url meta tag: it is resolved at build time
+  // against the attachments that actually exist in the catalog
+  // (set-available-attachment-versions extension), so it never points at
+  // a version whose JSON was not generated.
+  const meta = document.querySelector('meta[name="connect-json-url"]');
+  const metaUrl = meta && meta.content;
+  if (metaUrl && !metaUrl.startsWith('attachment$') && !metaUrl.startsWith('page$')) {
+    const result = await tryFetchConnectJSON(metaUrl);
+    if (result.length > 0) return result;
+  }
+
+  // Secondary: derive the URL from the latest GitHub release. Only the
+  // newest connect-<version>.json is hosted, so no other version is worth
+  // guessing when this fails.
   try {
     const releasesResp = await fetch('https://api.github.com/repos/redpanda-data/connect/releases/latest');
     if (releasesResp.ok) {
       const release = await releasesResp.json();
       const version = release.tag_name.replace(/^v/, ''); // Remove 'v' prefix if present
-      const result = await tryFetchConnectJSON(version);
+      const result = await tryFetchConnectJSON(`/connect/components/_attachments/connect-${version}.json`);
       if (result.length > 0) {
         return result;
       }
     }
   } catch (e) {
-    // Silently fall back to known versions
-  }
-
-  // Fallback: try known recent versions
-  const fallbackVersions = ['4.78.0', '4.77.0', '4.76.0', '4.75.0'];
-  for (const version of fallbackVersions) {
-    const result = await tryFetchConnectJSON(version);
-    if (result.length > 0) return result;
+    // Silently fall back to static completions
   }
 
   return [];
 }
 
-async function tryFetchConnectJSON(version) {
+async function tryFetchConnectJSON(url) {
   try {
-    const url = `/connect/components/_attachments/connect-${version}.json`;
     const response = await fetch(url);
 
     if (!response.ok) {
