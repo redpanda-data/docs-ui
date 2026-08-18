@@ -153,6 +153,9 @@
         // Cache the result (skip in preview mode)
         if (!isPreviewMode()) {
           try {
+            // Clear the missing-marker before the cache write: if setItem
+            // throws on quota, a stale marker must not outlive a successful fetch
+            localStorage.removeItem(MISSING_CACHE_KEY)
             localStorage.setItem(
               CACHE_KEY,
               JSON.stringify({
@@ -161,7 +164,6 @@
                 data: propertiesData,
               })
             )
-            localStorage.removeItem(MISSING_CACHE_KEY)
           } catch (e) {
             // localStorage full or unavailable
           }

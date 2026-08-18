@@ -241,7 +241,10 @@
       const response = await fetch(url);
 
       if (!response.ok) {
-        if (!isPreviewMode()) {
+        // Only mark deterministic missing-resource responses (404/410).
+        // Transient failures (429, 5xx) are not cached, so the next page
+        // view retries them.
+        if (!isPreviewMode() && (response.status === 404 || response.status === 410)) {
           markFetchFailure(url);
         }
         return null;
