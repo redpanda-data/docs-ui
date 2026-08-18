@@ -53,7 +53,26 @@ const TEST_PAGE = `<!DOCTYPE html>
   <meta name="connect-json-url" content="${CONNECT_PATH}">
   <meta name="properties-json-url" content="${PROPERTIES_PATH}">
   <meta name="latest-redpanda-tag" content="v9.9.9">
-  <script>window.tippy = function () { return {}; };</script>
+  <script>
+    window.tippy = function () { return {}; };
+    // Test probes: record unhandled rejections and idle-callback activity
+    window.__rejections = [];
+    window.addEventListener('unhandledrejection', function (e) {
+      window.__rejections.push(String((e.reason && e.reason.stack) || e.reason));
+    });
+    window.__ricScheduled = 0;
+    window.__ricFired = 0;
+    if (window.requestIdleCallback) {
+      var origRIC = window.requestIdleCallback.bind(window);
+      window.requestIdleCallback = function (cb, opts) {
+        window.__ricScheduled++;
+        return origRIC(function (deadline) {
+          window.__ricFired++;
+          return cb(deadline);
+        }, opts);
+      };
+    }
+  </script>
 </head>
 <body>
   <article class="doc">
@@ -311,7 +330,12 @@ async function runTests() {
                     cls: el.className
                 })),
                 cachedData: (localStorage.getItem('redpanda-properties-cache') || 'null').slice(0, 300),
-                tippyType: typeof window.tippy
+                tippyType: typeof window.tippy,
+                ricScheduled: window.__ricScheduled,
+                ricFired: window.__ricFired,
+                rejections: window.__rejections,
+                // Which requests THIS page actually issued
+                resources: performance.getEntriesByType('resource').map((r) => r.name)
             })).catch((e) => ({ evalError: String(e) }));
             console.log('   🔍 DIAG:', JSON.stringify(diag));
         }
