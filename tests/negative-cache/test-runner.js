@@ -96,6 +96,14 @@ async function runTests() {
 
         const page = await browser.newPage();
 
+        // Surface page-side failures in the runner output for debugging
+        page.on('pageerror', (err) => console.log(`   ⚠️ pageerror: ${err.message}`));
+        page.on('console', (msg) => {
+            if (msg.type() === 'error' || msg.type() === 'warning') {
+                console.log(`   ⚠️ console.${msg.type()}: ${msg.text().slice(0, 200)}`);
+            }
+        });
+
         // Per-scenario response behavior: an HTTP status number, 'abort'
         // (network error), or 'badjson' (200 with a non-JSON body)
         const state = {
@@ -295,6 +303,18 @@ async function runTests() {
             () => !!document.querySelector('code.has-property-tooltip'),
             { polling: 100, timeout: 10000 }
         ).then(() => true).catch(() => false);
+        if (!tooltipAttached) {
+            const diag = await page.evaluate(() => ({
+                hasArticle: !!document.querySelector('article.doc'),
+                codeEls: Array.from(document.querySelectorAll('code')).map((el) => ({
+                    text: el.textContent.slice(0, 40),
+                    cls: el.className
+                })),
+                cachedData: (localStorage.getItem('redpanda-properties-cache') || 'null').slice(0, 300),
+                tippyType: typeof window.tippy
+            })).catch((e) => ({ evalError: String(e) }));
+            console.log('   🔍 DIAG:', JSON.stringify(diag));
+        }
         assert('Success: property tooltip attached to matching code element', tooltipAttached);
 
         const load12 = await loadPage();
