@@ -288,8 +288,13 @@ async function runTests() {
         assert('Success: properties JSON fetched', load11.properties === 1, `got ${load11.properties}`);
         assert('Success: properties missing-marker cleared', !(PROPERTIES_PATH in await readMissingMarkers()));
         assert('Success: properties data cached', !!(await readStorage('redpanda-properties-cache')));
-        const tooltipAttached = await page.waitForSelector('code.has-property-tooltip', { timeout: 5000 })
-            .then(() => true).catch(() => false);
+        // Interval polling, not the default requestAnimationFrame polling:
+        // RAF can stall in headless Chrome on busy CI runners even though
+        // the element is present
+        const tooltipAttached = await page.waitForFunction(
+            () => !!document.querySelector('code.has-property-tooltip'),
+            { polling: 100, timeout: 10000 }
+        ).then(() => true).catch(() => false);
         assert('Success: property tooltip attached to matching code element', tooltipAttached);
 
         const load12 = await loadPage();
