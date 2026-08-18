@@ -536,10 +536,12 @@
 
     function tryInit (retriesLeft) {
       if (window.tippy) {
-        // Use requestIdleCallback for non-blocking processing
-        var schedule = window.requestIdleCallback || function (cb) {
-          setTimeout(cb, 100)
-        }
+        // Use requestIdleCallback for non-blocking processing, with a
+        // timeout so tooltips still attach promptly when the main thread
+        // never goes idle (busy pages, loaded CI runners)
+        var schedule = window.requestIdleCallback
+          ? function (cb) { window.requestIdleCallback(cb, { timeout: 500 }) }
+          : function (cb) { setTimeout(cb, 100) }
         schedule(function () {
           processCodeElements()
         })
