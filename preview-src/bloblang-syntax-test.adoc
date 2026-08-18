@@ -402,3 +402,48 @@ output:
   redpanda:
     topic: dad-jokes
 ----
+
+== Regression: Literal Block Scalars Are Not Rewritten (DOC-2441)
+
+https://redpandadata.atlassian.net/browse/DOC-2441[DOC-2441]: YAML performs
+no quote or escape processing on literal block scalars, so the highlighter
+must not either.
+
+**Check visually and with the copy button**: `join("\n")` and `join("\t")`
+must render (and copy) as two characters each - a backslash followed by a
+letter - never as a real line break or tab inside the string literal.
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: |
+        root.lines = this.values.join("\n")
+        root.tabbed = this.cols.join("\t")
+----
+
+**Check visually**: the first line's opening quote on `"prefix-"` and the
+last line's closing quote on `"-suffix"` must both render. They belong to
+two different string literals, and must not be stripped as if they enclosed
+the whole block.
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: |
+        "prefix-" + this.id + "-suffix"
+----
+
+**Check visually**: a trailing space after the `|` indicator must not glue
+the first Bloblang line onto the `mapping:` line (the space after `|` below
+is intentional).
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: | 
+        let doubled = this.value * 2
+        root.result = $doubled
+----
