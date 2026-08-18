@@ -67,6 +67,22 @@ const TEST_PAGE = `<!DOCTYPE html>
       if (sel === 'article.doc') window.__qsArticle++;
       return origQS.apply(this, arguments);
     };
+    // Capture what processCodeElements actually works with: the Set of
+    // property names it builds, and every membership test it performs
+    window.__setArgs = [];
+    window.__hasCalls = [];
+    var OrigSet = window.Set;
+    var origHas = OrigSet.prototype.has;
+    OrigSet.prototype.has = function (v) {
+      var r = origHas.call(this, v);
+      window.__hasCalls.push([String(v).slice(0, 30), r]);
+      return r;
+    };
+    window.Set = function (arr) {
+      window.__setArgs.push(Array.isArray(arr) ? arr.slice(0, 10) : String(arr));
+      return new OrigSet(arr);
+    };
+    window.Set.prototype = OrigSet.prototype;
     // Test probes: record unhandled rejections and idle-callback activity
     window.__rejections = [];
     window.addEventListener('unhandledrejection', function (e) {
@@ -348,6 +364,8 @@ async function runTests() {
                 rejections: window.__rejections,
                 qsArticle: window.__qsArticle,
                 tippyCalls: window.__tippyCalls,
+                setArgs: window.__setArgs,
+                hasCalls: window.__hasCalls.slice(0, 20),
                 // Which requests THIS page actually issued
                 resources: performance.getEntriesByType('resource').map((r) => r.name)
             })).catch((e) => ({ evalError: String(e) }));
