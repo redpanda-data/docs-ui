@@ -140,23 +140,30 @@
    *
    * Quoted flow scalars (mapping: "root = ...") are unwrapped and
    * unescaped according to their quote style: double quotes process
-   * backslash escapes, single quotes only the '' escape.
+   * backslash escapes, single quotes only the '' escape. The stripped
+   * quote character is returned so the caller can re-render it - the
+   * quotes are part of the YAML source the reader sees and copies.
    */
   function extractBloblangFromBlock(tokenText, isBlockScalar) {
     var leading = tokenText.slice(0, tokenText.length - tokenText.trimStart().length)
     var text = tokenText.trim()
+    var quote = null
 
     if (!isBlockScalar) {
-      var quote = text.charAt(0)
-      if ((quote === '"' || quote === "'") && text.length >= 2 && text.endsWith(quote)) {
+      var q = text.charAt(0)
+      if ((q === '"' || q === "'") && text.length >= 2 && text.endsWith(q)) {
+        quote = q
         text = text.slice(1, -1)
-        if (quote === '"') {
+        if (q === '"') {
           // Single pass so an escaped backslash can't feed a later rule
-          // (the old sequential replace chain turned \\n into \<newline>)
+          // (the old sequential replace chain turned \\n into \<newline>).
+          // Escapes this display code doesn't translate stay verbatim
+          // rather than losing their backslash (\r must not become r).
           text = text.replace(/\\(.)/g, function (match, ch) {
             if (ch === 'n') return '\n'
             if (ch === 't') return '\t'
-            return ch
+            if (ch === '"' || ch === "'" || ch === '\\' || ch === '/') return ch
+            return match
           })
         } else {
           text = text.replace(/''/g, "'")
@@ -164,7 +171,7 @@
       }
     }
 
-    return { leading: leading, code: text }
+    return { leading: leading, code: text, quote: quote }
   }
 
   /**
@@ -337,8 +344,11 @@
     var bloblangCode = extracted.code
     var leadingWhitespace = extracted.leading
 
-    // Check for continuation content after this token
-    var continuationNodes = collectLiteralBlockContinuation(token)
+    // Check for continuation content after this token. Only block scalars
+    // can have it (Prism splits them at blank lines); a quoted flow scalar
+    // is single-line by grammar, and collecting "continuation" for one
+    // swallows sibling keys that sit at or above the fallback base indent.
+    var continuationNodes = isBlockScalar ? collectLiteralBlockContinuation(token) : []
     var continuationText = extractTextFromNodes(continuationNodes)
 
     // Combine the token content with continuation
@@ -355,11 +365,15 @@
 
     var wrapper = document.createElement('span')
     wrapper.className = 'bloblang-embedded'
+    // Re-render the quotes stripped from a quoted flow scalar (same as
+    // processSingleLineCheck) so the reader still sees them and the copy
+    // button keeps them.
+    var quoteHtml = extracted.quote ? '<span class="token punctuation">' + extracted.quote + '</span>' : ''
     // leadingWhitespace is whitespace-only (what trim() stripped), so it is
     // HTML-inert and safe to concatenate unescaped. Asymmetry note: trailing
     // whitespace on the scalar's last content line is still dropped by the
     // trim - invisible in the render, observable only via the copy button.
-    wrapper.innerHTML = leadingWhitespace + highlighted
+    wrapper.innerHTML = leadingWhitespace + quoteHtml + highlighted + quoteHtml
 
     token.innerHTML = ''
     token.appendChild(wrapper)

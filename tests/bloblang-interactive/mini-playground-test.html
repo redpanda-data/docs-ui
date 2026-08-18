@@ -211,6 +211,36 @@ spec:
   processors:
     - mapping: "root = this.name.uppercase()"</code></pre>
         </div>
+
+        <!-- Fixture 12: double-quoted flow scalars WITH escape sequences,
+             pinning the unescape path: \" -> ", \\n -> \n, and untranslated
+             escapes like \r keep their backslash -->
+        <div class="listingblock" id="fixture-yaml-quoted-escapes">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-yaml">pipeline:
+  processors:
+    - mapping: "root.joined = this.parts.join(\"\\n\")"
+    - mapping: "root.clean = this.text.replace_all(\"\r\", \"\")"</code></pre>
+        </div>
+
+        <!-- Fixture 13: single-quoted flow scalar (no backslash processing) -->
+        <div class="listingblock" id="fixture-yaml-single-quoted">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-yaml">pipeline:
+  processors:
+    - mapping: 'root.id = this.user_id.string()'</code></pre>
+        </div>
+
+        <!-- Fixture 14: chomping indicator (|-). Prism's YAML grammar emits
+             no scalar token for these, so the highlighter must pass the
+             block through untouched (known limitation, not a regression) -->
+        <div class="listingblock" id="fixture-yaml-chomping">
+            <div class="source-toolbox"></div>
+            <pre class="highlight"><code class="language-yaml">pipeline:
+  processors:
+    - mapping: |-
+        root.value = this.count</code></pre>
+        </div>
     </div>
 
     <script>
@@ -623,7 +653,7 @@ spec:
 
             runner.test(
                 'Double-quoted flow scalar mapping still highlights',
-                'Quoted scalars keep their unwrap-and-unescape path (YAML does process those)',
+                'Quoted scalars keep their unwrap-and-unescape path (YAML does process those), and the quotes stay visible',
                 async () => {
                     const fixture = document.getElementById('fixture-yaml-quoted-mapping');
                     await sleep(200);
@@ -631,10 +661,76 @@ spec:
                     if (!code.querySelector('.bloblang-embedded')) {
                         throw new Error('Bloblang not detected in quoted mapping');
                     }
-                    if (!code.textContent.includes('root = this.name.uppercase()')) {
-                        throw new Error('Quoted mapping content corrupted: ' + JSON.stringify(code.textContent));
+                    if (!code.textContent.includes('mapping: "root = this.name.uppercase()"')) {
+                        throw new Error('Quoted mapping content or quotes corrupted: ' + JSON.stringify(code.textContent));
                     }
-                    return 'Quoted flow scalar unwrapped and highlighted';
+                    return 'Quoted flow scalar highlighted with its quotes intact';
+                }
+            );
+
+            runner.test(
+                'Double-quoted escapes are processed exactly once',
+                'DOC-2441: \\" becomes " and \\\\n becomes the two characters \\n - never a real newline',
+                async () => {
+                    const fixture = document.getElementById('fixture-yaml-quoted-escapes');
+                    await sleep(200);
+                    const code = fixture.querySelector('code');
+                    if (!code.querySelector('.bloblang-embedded')) {
+                        throw new Error('Bloblang not detected in quoted mapping');
+                    }
+                    const text = code.textContent;
+                    // Source: "root.joined = this.parts.join(\"\\n\")"
+                    // Rendered: "root.joined = this.parts.join("\n")" with
+                    // \n as two characters inside real (unescaped) quotes
+                    if (!text.includes('join("\\n")')) {
+                        throw new Error('Escapes mishandled (want join("\\n") after unescaping): ' + JSON.stringify(text));
+                    }
+                    if (text.includes('join("\n')) {
+                        throw new Error('\\\\n became a real newline inside the string literal');
+                    }
+                    if (!text.includes('"root.joined')) {
+                        throw new Error('Outer quote of quoted mapping lost: ' + JSON.stringify(text));
+                    }
+                    // \r is a YAML escape this display code does not
+                    // translate: it must keep its backslash, not become "r"
+                    if (!text.includes('replace_all("\\r", "")')) {
+                        throw new Error('Untranslated escape \\r lost its backslash: ' + JSON.stringify(text));
+                    }
+                    return 'Double-quoted escape sequences processed exactly once';
+                }
+            );
+
+            runner.test(
+                'Single-quoted flow scalar mapping highlights',
+                'Single-quoted scalars unwrap without backslash processing, keeping their quotes visible',
+                async () => {
+                    const fixture = document.getElementById('fixture-yaml-single-quoted');
+                    await sleep(200);
+                    const code = fixture.querySelector('code');
+                    if (!code.querySelector('.bloblang-embedded')) {
+                        throw new Error('Bloblang not detected in single-quoted mapping');
+                    }
+                    if (!code.textContent.includes("mapping: 'root.id = this.user_id.string()'")) {
+                        throw new Error('Single-quoted mapping corrupted: ' + JSON.stringify(code.textContent));
+                    }
+                    return 'Single-quoted flow scalar highlighted with its quotes intact';
+                }
+            );
+
+            runner.test(
+                'Chomping indicator (|-) passes through untouched',
+                'Prism emits no scalar token for |- blocks; the highlighter must leave them alone (known limitation)',
+                async () => {
+                    const fixture = document.getElementById('fixture-yaml-chomping');
+                    await sleep(200);
+                    const code = fixture.querySelector('code');
+                    if (code.querySelector('.bloblang-embedded')) {
+                        throw new Error('|- block unexpectedly processed - grammar behavior changed, re-verify DOC-2433/DOC-2441 handling for it');
+                    }
+                    if (!code.textContent.includes('mapping: |-') || !code.textContent.includes('root.value = this.count')) {
+                        throw new Error('|- block content corrupted: ' + JSON.stringify(code.textContent));
+                    }
+                    return '|- block left untouched with content intact';
                 }
             );
 

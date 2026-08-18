@@ -447,3 +447,16 @@ pipeline:
         let doubled = this.value * 2
         root.result = $doubled
 ----
+
+**Check visually and with the copy button**: quoted flow-scalar mappings must
+keep their quotes in the rendered output. The double-quoted example's escapes
+are processed once: `\"` renders as `"` and `\\n` renders as the two
+characters `\n` inside the string literal.
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: "root.joined = this.parts.join(\"\\n\")"
+    - mapping: 'root.id = this.user_id.string()'
+----
