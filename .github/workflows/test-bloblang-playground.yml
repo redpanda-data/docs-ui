@@ -8,10 +8,14 @@ on:
       - 'src/js/vendor/wasm_exec.js'
       - 'src/js/16-bloblang-interactive.js'
       - 'src/js/17-bloblang-yaml.js'
+      - 'src/js/19-property-tooltips.js'
       - 'src/css/bloblang-interactive.css'
       - 'src/static/bloblang-docs.json'
       - 'tests/bloblang-playground/**'
       - 'tests/bloblang-interactive/**'
+      - 'tests/negative-cache/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'gulpfile.js'
       - '.github/workflows/test-bloblang-playground.yml'
   pull_request:
@@ -22,10 +26,14 @@ on:
       - 'src/js/vendor/wasm_exec.js'
       - 'src/js/16-bloblang-interactive.js'
       - 'src/js/17-bloblang-yaml.js'
+      - 'src/js/19-property-tooltips.js'
       - 'src/css/bloblang-interactive.css'
       - 'src/static/bloblang-docs.json'
       - 'tests/bloblang-playground/**'
       - 'tests/bloblang-interactive/**'
+      - 'tests/negative-cache/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'gulpfile.js'
       - '.github/workflows/test-bloblang-playground.yml'
   workflow_dispatch:
@@ -99,6 +107,8 @@ jobs:
       run: npx gulp test:build
     - name: Test Interactive Features
       run: npm run test:interactive
+    - name: Test Negative Cache
+      run: npm run test:negative-cache
     - name: Upload playground test results
       uses: actions/upload-artifact@v4
       if: always()
@@ -111,4 +121,10 @@ jobs:
       with:
         name: test-results-interactive
         path: test-results-interactive.json
+    - name: Upload negative-cache test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-negative-cache
+        path: test-results-negative-cache.json
 

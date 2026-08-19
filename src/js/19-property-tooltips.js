@@ -75,6 +75,65 @@
     )
   }
 
+  var CACHE_KEY = 'redpanda-properties-cache'
+  var CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
+  // Missing-resource markers live under their own key so they can never
+  // overwrite a valid cached dataset, and are only written for HTTP 404/410
+  // (the resource does not exist). Transient failures (5xx, offline, parse
+  // errors) are not cached at all: the next page view simply retries.
+  // The value is a per-URL map ({url: {version, timestamp}}) because the
+  // properties JSON URL and tag vary per doc version: a user browsing
+  // several versions with missing JSON must not thrash a single marker.
+  var MISSING_CACHE_KEY = 'redpanda-properties-missing'
+  var MISSING_CACHE_TTL = 60 * 60 * 1000 // 1 hour: re-check missing resources so a fix deploy is picked up
+
+  /**
+   * Read the missing-resource map, dropping expired or malformed entries
+   */
+  function readMissingMarkers () {
+    try {
+      var parsed = JSON.parse(localStorage.getItem(MISSING_CACHE_KEY) || '{}')
+      if (!parsed || typeof parsed !== 'object') return {}
+      var now = Date.now()
+      var fresh = {}
+      Object.keys(parsed).forEach(function (markedUrl) {
+        var entry = parsed[markedUrl]
+        if (entry && typeof entry.timestamp === 'number' && now - entry.timestamp < MISSING_CACHE_TTL) {
+          fresh[markedUrl] = entry
+        }
+      })
+      return fresh
+    } catch (e) {
+      return {}
+    }
+  }
+
+  function hasMissingMarker (url, version) {
+    var entry = readMissingMarkers()[url]
+    return !!(entry && entry.version === version)
+  }
+
+  function markMissing (url, version) {
+    try {
+      var markers = readMissingMarkers()
+      markers[url] = { version: version, timestamp: Date.now() }
+      localStorage.setItem(MISSING_CACHE_KEY, JSON.stringify(markers))
+    } catch (e) {
+      // localStorage full or unavailable
+    }
+  }
+
+  function clearMissingMarker (url) {
+    try {
+      var markers = readMissingMarkers()
+      delete markers[url]
+      // Always rewrite: this also prunes expired entries from storage
+      localStorage.setItem(MISSING_CACHE_KEY, JSON.stringify(markers))
+    } catch (e) {
+      // localStorage full or unavailable
+    }
+  }
+
   /**
    * Fetch properties JSON with caching
    */
@@ -109,12 +168,12 @@
       }
     }
 
-    var CACHE_KEY = 'redpanda-properties-cache'
-    var CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
     // Use latest-redpanda-tag meta tag for cache versioning
     var cacheVersion = getLatestRedpandaTag() || 'unknown'
 
-    // Check localStorage cache (skip in preview mode for easier testing)
+    // Check localStorage cache (skip in preview mode for easier testing).
+    // The dataset cache and the missing-marker each get their own try/catch
+    // so a corrupt entry in one cannot disable the other check.
     if (!isPreviewMode()) {
       try {
         var cached = localStorage.getItem(CACHE_KEY)
@@ -133,12 +192,25 @@
       } catch (e) {
         // Ignore cache errors
       }
+      if (hasMissingMarker(url, cacheVersion)) {
+        // The resource is known not to exist for this version: resolve to
+        // an empty lookup instead of re-requesting a 404 on every page view
+        propertiesData = {}
+        propertiesLoading = false
+        propertiesLoadQueue.forEach(function (resolve) {
+          resolve(propertiesData)
+        })
+        propertiesLoadQueue = []
+        return Promise.resolve(propertiesData)
+      }
     }
 
     return fetch(url)
       .then(function (response) {
         if (!response.ok) {
-          throw new Error('HTTP ' + response.status)
+          var httpError = new Error('HTTP ' + response.status)
+          httpError.status = response.status
+          throw httpError
         }
         return response.json()
       })
@@ -147,6 +219,9 @@
 
         // Cache the result (skip in preview mode)
         if (!isPreviewMode()) {
+          // Clear the missing-marker before the cache write: if setItem
+          // throws on quota, a stale marker must not outlive a successful fetch
+          clearMissingMarker(url)
           try {
             localStorage.setItem(
               CACHE_KEY,
@@ -201,6 +276,9 @@
         }
 
         console.warn('Property tooltips: Failed to load properties data:', error)
+        if (!isPreviewMode() && (error.status === 404 || error.status === 410)) {
+          markMissing(url, cacheVersion)
+        }
         propertiesLoading = false
         propertiesData = {}
         propertiesLoadQueue.forEach(function (resolve) {
@@ -712,10 +790,12 @@
 
     function tryInit (retriesLeft) {
       if (window.tippy) {
-        // Use requestIdleCallback for non-blocking processing
-        var schedule = window.requestIdleCallback || function (cb) {
-          setTimeout(cb, 100)
-        }
+        // Use requestIdleCallback for non-blocking processing, with a
+        // timeout so tooltips still attach promptly when the main thread
+        // never goes idle (busy pages, loaded CI runners)
+        var schedule = window.requestIdleCallback
+          ? function (cb) { window.requestIdleCallback(cb, { timeout: 500 }) }
+          : function (cb) { setTimeout(cb, 100) }
         schedule(function () {
           processCodeElements()
         })
