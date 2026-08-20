@@ -18,6 +18,7 @@
   3. If resource not in catalog, fall back to production URL
 
   Version context:
+  - A component publishing its own property JSON: that component and version
   - Streaming pages: Use page.version (readers on /25.3/ get 25.3's JSON)
   - Non-streaming pages: Use streaming.latest.version (cloud/connect get latest streaming JSON)
 
@@ -25,9 +26,21 @@
   - Running preview builds without full content catalog
   - JSON hasn't been published yet for the specified version
 --}}
-{{#if page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
-{{!-- Streaming component: resolve against page's own version --}}
-{{#with (or page.componentVersion.asciidoc.attributes.available-properties-tag page.componentVersion.asciidoc.attributes.latest-redpanda-tag)}}
+{{#if page.componentVersion.asciidoc.attributes.available-properties-tag}}
+{{!--
+  This component publishes its own property JSON, so resolve against the
+  component the page belongs to rather than assuming streaming. Hardcoding
+  streaming meant a component with its own property data validated against it
+  at build time but fetched streaming's at runtime, so its tooltips described
+  different properties from the ones its own pages document.
+--}}
+{{#with page.componentVersion.asciidoc.attributes.available-properties-tag}}
+<meta name="latest-redpanda-tag" content="{{this}}">
+<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component=@root.page.component.name module='reference' version=@root.page.version fallback=(concat 'https://docs.redpanda.com/' @root.page.component.name '/' @root.page.version '/reference/_attachments/redpanda-properties-' this '.json')}}">
+{{/with}}
+{{else if page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
+{{!-- Streaming component with no generated attachment yet: resolve against page's own version --}}
+{{#with page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
 <meta name="latest-redpanda-tag" content="{{this}}">
 <meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' version=@root.page.version fallback=(concat 'https://docs.redpanda.com/streaming/' @root.page.version '/reference/_attachments/redpanda-properties-' this '.json')}}">
 {{/with}}
