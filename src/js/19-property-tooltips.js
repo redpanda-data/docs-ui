@@ -506,6 +506,7 @@
    * - Pre-resolved <a> tags from JSON (safe, with href attribute)
    * - Backticks converted to <code> tags
    * - prop:/config_ref macro calls rendered as code
+   * - glossterm: rendered as its term, link: as a sanitized anchor
    * - <<anchor,text>> internal references linked when they name a property
    * - Fallback xref resolution for unqualified same-component targets
    */
@@ -542,6 +543,28 @@
     withProps = withProps.replace(/config_ref:([^[,]+)(?:,[^[]*)?\[([^\]]*)\]/g, function (match, name, payload) {
       var display = payload.replace(/^`|`$/g, '') || name
       return '<code>' + display + '</code>'
+    })
+
+    // glossterm:Term[] names a glossary entry. The glossary macro turns it
+    // into its own tooltip on a page, but a tooltip inside a tooltip is not
+    // something the reader can reach, so render the term itself.
+    withProps = withProps.replace(/glossterm:([^[\]]+)\[([^\]]*)\]/g, function (match, term, display) {
+      return display || term
+    })
+
+    // link:url[label] for external targets. Sanitize the scheme, as the <a>
+    // placeholder branch above does, so a javascript: URL cannot get through.
+    withProps = withProps.replace(/\blink:(\S+?)\[([^\]]*)\]/g, function (match, href, display) {
+      // A trailing ^ on the display text is AsciiDoc for "open in a new tab".
+      // Without stripping it the caret renders as part of the link text.
+      var newWindow = /\^$/.test(display)
+      var label = (newWindow ? display.slice(0, -1) : display) || href
+      // Allow http(s), a site-root path, a fragment, or a relative path. Reject
+      // everything else, including javascript: and a protocol-relative //host,
+      // which is an off-site URL wearing a path's clothing.
+      if (!href.match(/^(https?:\/\/|\/(?!\/)|#|\.\.?\/)/i)) return label
+      var attrs = newWindow ? ' target="_blank" rel="noopener"' : ''
+      return '<a href="' + escapeHtml(href) + '"' + attrs + '>' + label + '</a>'
     })
 
     // Internal <<anchor,text>> references (escaped to &lt;&lt;...&gt;&gt;).
