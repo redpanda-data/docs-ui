@@ -63,7 +63,12 @@
       const titleContent = el.getAttribute('title')
       if (!titleContent) return
       el.removeAttribute('title')
-      tippy(el, { ...tooltipConfig, content: titleContent })
+      // allowHTML: false, overriding the shared config. The browser renders a
+      // title attribute as plain text, so promoting one to a tippy that parses
+      // HTML would turn inert content into markup -- a feature name or registry
+      // tooltip containing <img src=x onerror=...> becomes executable purely by
+      // being moved. Nothing in a licence tooltip needs markup.
+      tippy(el, { ...tooltipConfig, allowHTML: false, content: titleContent })
     })
 
     // Convert title attributes to tippy tooltips for code block buttons

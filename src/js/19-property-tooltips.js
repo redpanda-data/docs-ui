@@ -545,11 +545,16 @@
       return '<code>' + display + '</code>'
     })
 
-    // glossterm:Term[] names a glossary entry. The glossary macro turns it
-    // into its own tooltip on a page, but a tooltip inside a tooltip is not
-    // something the reader can reach, so render the term itself.
-    withProps = withProps.replace(/glossterm:([^[\]]+)\[([^\]]*)\]/g, function (match, term, display) {
-      return display || term
+    // glossterm:Term[definition,customText] names a glossary entry. The macro
+    // declares its positional attributes as ['definition', 'customText'] and
+    // displays `customText || term`, so the FIRST bracketed value is the
+    // definition, not display text: glossterm:wire format[wire-format] shows
+    // "wire format". A tooltip nested inside a tooltip is not reachable, so
+    // render whichever text the macro itself would have displayed.
+    withProps = withProps.replace(/glossterm:([^[\]]+)\[([^\]]*)\]/g, function (match, term, attrlist) {
+      var comma = attrlist.indexOf(',')
+      var customText = comma === -1 ? '' : attrlist.slice(comma + 1).trim()
+      return customText || term.trim()
     })
 
     // link:url[label] for external targets. Sanitize the scheme, as the <a>
@@ -564,7 +569,12 @@
       // which is an off-site URL wearing a path's clothing.
       if (!href.match(/^(https?:\/\/|\/(?!\/)|#|\.\.?\/)/i)) return label
       var attrs = newWindow ? ' target="_blank" rel="noopener"' : ''
-      return '<a href="' + escapeHtml(href) + '"' + attrs + '>' + label + '</a>'
+      // The whole description was escaped above, so & is already &amp; here;
+      // escaping again turned ?a=1&b=2 into ?a=1&amp;amp;b=2 and the browser
+      // requested a parameter containing a literal "amp;". escapeHtml goes
+      // through textContent, which leaves quotes alone, so quote them here --
+      // that is the only character still able to close the attribute.
+      return '<a href="' + href.replace(/"/g, '&quot;') + '"' + attrs + '>' + label + '</a>'
     })
 
     // Internal <<anchor,text>> references (escaped to &lt;&lt;...&gt;&gt;).
