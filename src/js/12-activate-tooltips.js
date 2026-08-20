@@ -53,6 +53,19 @@
       })
     })
 
+    // The enterprise macro's default is a plain title attribute, which the
+    // browser renders as an unstyled native tooltip -- visibly different from
+    // the styled popovers every other term on the page gets, including
+    // property references. Promote it to tippy and drop the attribute, so the
+    // default rendering matches without every playbook having to set
+    // enterprise-tooltip=true. The attribute is still the no-JS fallback.
+    document.querySelectorAll('.enterprise-feature[title]').forEach((el) => {
+      const titleContent = el.getAttribute('title')
+      if (!titleContent) return
+      el.removeAttribute('title')
+      tippy(el, { ...tooltipConfig, content: titleContent })
+    })
+
     // Convert title attributes to tippy tooltips for code block buttons
     document.querySelectorAll('.source-toolbox [title]').forEach((el) => {
       const titleContent = el.getAttribute('title')
