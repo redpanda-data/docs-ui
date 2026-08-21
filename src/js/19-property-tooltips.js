@@ -168,8 +168,13 @@
       }
     }
 
-    // Use latest-redpanda-tag meta tag for cache versioning
-    var cacheVersion = getLatestRedpandaTag() || 'unknown'
+    // Key the cache on the resolved URL as well as the tag. Different components
+    // now publish their own dataset, so the same tag no longer identifies the
+    // same JSON: caching on the tag alone served one component's properties on
+    // another's pages for the whole TTL, which is exactly the mix-up the
+    // per-component resolution exists to prevent. The missing-marker cache
+    // beside this one was already keyed by URL.
+    var cacheVersion = (getLatestRedpandaTag() || 'unknown') + '|' + url
 
     // Check localStorage cache (skip in preview mode for easier testing).
     // The dataset cache and the missing-marker each get their own try/catch
@@ -510,6 +515,40 @@
    * - <<anchor,text>> internal references linked when they name a property
    * - Fallback xref resolution for unqualified same-component targets
    */
+  /**
+   * The text the glossary macro itself would display.
+   *
+   * macros/glossary.js declares positionalAttributes(['definition',
+   * 'customText']) and displays `customText || term`, so the SECOND positional
+   * wins, the first is the definition, and a named customText= or term=
+   * overrides either. Splitting on the first comma got the common cases right
+   * but showed 'display,extra' for three positionals and kept the quotes on a
+   * quoted value.
+   */
+  function glossaryDisplayText (term, attrlist) {
+    var positional = []
+    var named = {}
+    // Split on commas outside double quotes, keeping empty fields: the macro
+    // reads glossterm:Term[,display] as an absent definition plus a display
+    // value, so dropping the empty first field lost the display text.
+    var parts = String(attrlist) === '' ? [] : String(attrlist).split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
+    parts.forEach(function (part) {
+      var value = part.trim()
+      var eq = value.indexOf('=')
+      var name = eq === -1 ? null : value.slice(0, eq).trim()
+      if (name && /^[A-Za-z][\w-]*$/.test(name)) {
+        named[name] = unquote(value.slice(eq + 1).trim())
+      } else {
+        positional.push(unquote(value))
+      }
+    })
+    return named.customText || positional[1] || named.term || term.trim()
+  }
+
+  function unquote (value) {
+    return value.replace(/^(['"])([\s\S]*)\1$/, '$2')
+  }
+
   function formatInline (text) {
     if (!text) return ''
 
@@ -551,10 +590,8 @@
     // definition, not display text: glossterm:wire format[wire-format] shows
     // "wire format". A tooltip nested inside a tooltip is not reachable, so
     // render whichever text the macro itself would have displayed.
-    withProps = withProps.replace(/glossterm:([^[\]]+)\[([^\]]*)\]/g, function (match, term, attrlist) {
-      var comma = attrlist.indexOf(',')
-      var customText = comma === -1 ? '' : attrlist.slice(comma + 1).trim()
-      return customText || term.trim()
+    withProps = withProps.replace(/glossterm:([^[\]\s][^[\]]*)\[([^\]]*)\]/g, function (match, term, attrlist) {
+      return glossaryDisplayText(term, attrlist)
     })
 
     // link:url[label] for external targets. Sanitize the scheme, as the <a>
@@ -567,7 +604,12 @@
       // Allow http(s), a site-root path, a fragment, or a relative path. Reject
       // everything else, including javascript: and a protocol-relative //host,
       // which is an off-site URL wearing a path's clothing.
-      if (!href.match(/^(https?:\/\/|\/(?!\/)|#|\.\.?\/)/i)) return label
+      // Reject any backslash outright: browsers treat \ as / in special schemes,
+      // so /\/evil.example resolves to https://evil.example and slipped past the
+      // protocol-relative guard below. mailto: is allowed -- it is an ordinary
+      // docs link, and dropping it silently lost the address.
+      if (/\\/.test(href)) return label
+      if (!href.match(/^(https?:\/\/|mailto:|\/(?!\/)|#|\.\.?\/)/i)) return label
       var attrs = newWindow ? ' target="_blank" rel="noopener"' : ''
       // The whole description was escaped above, so & is already &amp; here;
       // escaping again turned ?a=1&b=2 into ?a=1&amp;amp;b=2 and the browser
@@ -613,7 +655,11 @@
         // Antora indexifies page URLs: index pages drop the final segment.
         href = href.replace(/\/index$/, '') + '/'
         if (anchor) href += '#' + anchor
-        return '<a href="' + escapeHtml(href) + '">' + label + '</a>'
+        // escapeHtml goes through textContent, which leaves quotes alone, and an
+        // xref target may contain one -- so quote it here as the link: branch
+        // does. Without this a crafted target closed the href and added an
+        // event handler.
+        return '<a href="' + escapeHtml(href).replace(/"/g, '&quot;') + '">' + label + '</a>'
       }
     )
 

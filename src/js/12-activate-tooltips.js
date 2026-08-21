@@ -38,9 +38,15 @@
     tippy('[data-tippy-content]:not([data-tooltip])', tooltipConfig)
 
     // Initialize tippy for custom data-tooltip elements
+    // allowHTML: false on the data-tooltip paths too. These carry the same
+    // registry-authored strings as the promoted title above -- badge tooltips and
+    // enterprise tooltips both land here -- and the DOM decodes the escaping the
+    // macro applied, so with allowHTML: true tippy re-parsed the result as
+    // markup. Tooltip text needs no markup on any of these paths.
     document.querySelectorAll('[data-tooltip]').forEach((el) => {
       tippy(el, {
         ...tooltipConfig,
+        allowHTML: false,
         content: el.getAttribute('data-tooltip'),
       })
     })
@@ -49,6 +55,7 @@
     document.querySelectorAll('[data-enterprise-tooltip]').forEach((el) => {
       tippy(el, {
         ...tooltipConfig,
+        allowHTML: false,
         content: el.getAttribute('data-enterprise-tooltip'),
       })
     })
