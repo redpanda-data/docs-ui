@@ -217,10 +217,10 @@
           httpError.status = response.status
           throw httpError
         }
-        return response.json()
+        return response.text()
       })
-      .then(function (json) {
-        propertiesData = buildPropertyLookup(json)
+      .then(function (text) {
+        propertiesData = buildPropertyLookup(parsePreservingBigInts(text))
 
         // Cache the result (skip in preview mode)
         if (!isPreviewMode()) {
@@ -257,10 +257,10 @@
               if (!response.ok) {
                 throw new Error('HTTP ' + response.status)
               }
-              return response.json()
+              return response.text()
             })
-            .then(function (json) {
-              propertiesData = buildPropertyLookup(json)
+            .then(function (text) {
+              propertiesData = buildPropertyLookup(parsePreservingBigInts(text))
               propertiesLoading = false
               propertiesLoadQueue.forEach(function (resolve) {
                 resolve(propertiesData)
@@ -388,6 +388,30 @@
   /**
    * Escape HTML to prevent XSS
    */
+  // The property data carries the uint64 and int64 limits as maxima --
+  // 18446744073709551615 and the int64 pair. response.json() rounds every one of
+  // them to a value the server does not accept (18446744073709552000), because
+  // the largest integer a JS number holds exactly is 2^53 - 1. The build now
+  // publishes them correctly, so the only thing left rounding them is this
+  // parse.
+  //
+  // They become digit STRINGS rather than BigInt: these values are only ever
+  // displayed, and the dataset is cached through JSON.stringify, which throws on
+  // a BigInt.
+  var UNSAFE_INT_RX = /([:[,]\s*)(-?\d{16,})(?=\s*[,}\]])/g
+  var INT_SENTINEL = '@@bigint:'
+
+  function parsePreservingBigInts (text) {
+    var shielded = String(text).replace(UNSAFE_INT_RX, function (match, lead, digits) {
+      return Number.isSafeInteger(Number(digits)) ? match : lead + '"' + INT_SENTINEL + digits + '"'
+    })
+    return JSON.parse(shielded, function (key, value) {
+      return typeof value === 'string' && value.indexOf(INT_SENTINEL) === 0
+        ? value.slice(INT_SENTINEL.length)
+        : value
+    })
+  }
+
   function escapeHtml (text) {
     if (text === null || text === undefined) return ''
     var div = document.createElement('div')
