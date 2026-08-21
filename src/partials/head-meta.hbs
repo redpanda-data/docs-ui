@@ -38,8 +38,19 @@
 <meta name="latest-redpanda-tag" content="{{this}}">
 <meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component=@root.page.component.name module='reference' version=@root.page.version fallback=(concat 'https://docs.redpanda.com/' @root.page.component.name '/' @root.page.version '/reference/_attachments/redpanda-properties-' this '.json')}}">
 {{/with}}
-{{else if page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
-{{!-- Streaming component with no generated attachment yet: resolve against page's own version --}}
+{{else if (and (eq page.component.name 'streaming') page.componentVersion.asciidoc.attributes.latest-redpanda-tag)}}
+{{!--
+  Streaming component with no generated attachment yet: resolve against page's
+  own version. Gated on page.component.name, not just the attribute's presence:
+  set-latest-version writes latest-redpanda-tag onto every component's `latest`
+  by design, so it exists on cloud/connect/home pages too, not only streaming's.
+  Without the component check, this branch fired for any such page and hardcoded
+  component='streaming' while building its fallback URL from THAT page's own
+  version -- empty for an unversioned component -- producing
+  https://docs.redpanda.com/streaming//reference/_attachments/... A double
+  slash, verified live: the home page served exactly this malformed URL once
+  version-fetcher started resolving latest-redpanda-tag correctly.
+--}}
 {{#with page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
 <meta name="latest-redpanda-tag" content="{{this}}">
 <meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' version=@root.page.version fallback=(concat 'https://docs.redpanda.com/streaming/' @root.page.version '/reference/_attachments/redpanda-properties-' this '.json')}}">
