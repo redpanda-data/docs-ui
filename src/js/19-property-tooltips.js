@@ -637,7 +637,13 @@
     // URL. Component-qualified targets can't be resolved client-side and
     // render as their display text.
     var withXrefs = withRefs.replace(
-      /xref:([^[\]]+?)\.adoc(?:#([^[\]]*))?\[([^\]]*)\]/g,
+      // .adoc is optional: one real description writes
+      // xref:develop:transactions#transaction-usage-tips[...] with no extension,
+      // and requiring it meant the macro did not match at all and the raw
+      // xref:...[...] source was shown to the reader. This matters more now that
+      // property datasets keep their xref macros instead of having them
+      // pre-rewritten into anchors during the build.
+      /xref:([^[\]#]+?)(?:\.adoc)?(?:#([^[\]]*))?\[([^\]]*)\]/g,
       function (match, path, anchor, display) {
         var label = display || path.split('/').pop()
         var href
