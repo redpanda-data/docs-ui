@@ -139,6 +139,14 @@
   font-weight: 600;
   border-radius: 10px;
   padding: 3px;
+}
+
+/* Only promise hover text when there is some. The help cursor was on every
+   badge, so a badge whose registry entry supplied no tooltip invited a hover
+   and then showed nothing -- the tooltip script only binds [data-tooltip].
+   Matches .status-badge[data-tippy-content] in doc.css. */
+.badge[data-tooltip],
+.badge[data-tippy-content] {
   cursor: help;
 }
 
