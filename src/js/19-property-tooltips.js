@@ -308,6 +308,12 @@
           type: prop.type,
           default: prop.default,
           description: prop.description,
+          // Pre-rendered server-side by the render-property-descriptions
+          // Antora extension, through real Asciidoctor at build time. Only
+          // absent for a JSON published before that extension ran, or for a
+          // property it skipped (no reference page to convert as) -- both
+          // real, both handled by the formatDescription fallback below.
+          descriptionHtml: prop.description_html,
           configScope: prop.config_scope,
           needsRestart: prop.needs_restart,
           isDeprecated: prop.is_deprecated,
@@ -321,6 +327,25 @@
     }
 
     return lookup
+  }
+
+  /**
+   * Truncate pre-rendered description HTML to its first top-level block, for
+   * the tooltip preview -- the same "preview is the first block, ellipsis
+   * appended" truncation formatDescription does for raw text. Nothing else
+   * from formatDescription applies here: this HTML already went through
+   * real Asciidoctor at build time (render-property-descriptions), so its
+   * ifdef::env-cloud[] conditionals were evaluated once, correctly, against
+   * the real page that produced it -- not guessed at again client-side.
+   */
+  function truncateDescriptionHtml (html, summaryOnly) {
+    if (!html) return ''
+    if (!summaryOnly) return html
+    var container = document.createElement('div')
+    container.innerHTML = html
+    var blocks = container.children
+    if (blocks.length <= 1) return html
+    return blocks[0].outerHTML + '<p>&#8230;</p>'
   }
 
   /**
@@ -359,7 +384,13 @@
 
     // Description: first paragraph only. The tooltip is a preview; the full
     // accepted-values detail lives at the "View full documentation" anchor.
-    if (prop.description) {
+    // descriptionHtml is server-rendered through real Asciidoctor and always
+    // preferred; formatDescription's own regex rendering of raw description
+    // is the fallback for a JSON published before render-property-descriptions
+    // ran, or a property that extension skipped.
+    if (prop.descriptionHtml) {
+      parts.push('<div class="prop-tooltip-description">' + truncateDescriptionHtml(prop.descriptionHtml, true) + '</div>')
+    } else if (prop.description) {
       parts.push('<div class="prop-tooltip-description">' + formatDescription(prop.description, true) + '</div>')
     }
 
