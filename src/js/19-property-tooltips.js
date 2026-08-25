@@ -436,11 +436,22 @@
     var shielded = String(text).replace(UNSAFE_INT_RX, function (match, lead, digits) {
       return Number.isSafeInteger(Number(digits)) ? match : lead + '"' + INT_SENTINEL + digits + '"'
     })
-    return JSON.parse(shielded, function (key, value) {
-      return typeof value === 'string' && value.indexOf(INT_SENTINEL) === 0
-        ? value.slice(INT_SENTINEL.length)
-        : value
-    })
+    try {
+      return JSON.parse(shielded, function (key, value) {
+        return typeof value === 'string' && value.indexOf(INT_SENTINEL) === 0
+          ? value.slice(INT_SENTINEL.length)
+          : value
+      })
+    } catch (e) {
+      // UNSAFE_INT_RX can't tell a structural number token from the same
+      // digit run appearing inside a string value's text (e.g. a
+      // description quoting the uint64 max as an accepted range), and
+      // shields it too, injecting unescaped quotes into the string and
+      // corrupting the JSON. Fall back to a plain parse so one such
+      // description degrades to rounded numbers for the values it affects
+      // instead of throwing away every tooltip on the site.
+      return JSON.parse(text)
+    }
   }
 
   function escapeHtml (text) {
