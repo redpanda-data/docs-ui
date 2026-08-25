@@ -121,25 +121,57 @@
   }
 
   /**
-   * Extract Bloblang code from a YAML literal block string
-   * Handles | and > block scalars
+   * Extract Bloblang code from a YAML scalar token's text.
+   *
+   * Returns { leading, code }:
+   * - leading: the whitespace trim() strips from the front of the token.
+   *   For block scalars this is the newline + indentation that separates
+   *   the | or > indicator from the first content line (the token can also
+   *   begin with spaces or tabs, because the [ \t]* after the indicator is
+   *   part of the scalar token in Prism's YAML grammar). It must be
+   *   restored when the token is re-rendered, or "mapping: |" collapses
+   *   onto the same line as the first Bloblang statement (DOC-2433).
+   * - code: the Bloblang source to tokenize.
+   *
+   * Block scalars (mapping: | ...) are literal source text: YAML performs
+   * no quote or escape processing on them, so neither does this function -
+   * rewriting \n inside them, or stripping a coincidental leading/trailing
+   * quote pair, corrupts the rendered and copied code (DOC-2441).
+   *
+   * Quoted flow scalars (mapping: "root = ...") are unwrapped and
+   * unescaped according to their quote style: double quotes process
+   * backslash escapes, single quotes only the '' escape. The stripped
+   * quote character is returned so the caller can re-render it - the
+   * quotes are part of the YAML source the reader sees and copies.
    */
-  function extractBloblangFromBlock(tokenText) {
-    // Remove leading/trailing quotes if present
+  function extractBloblangFromBlock(tokenText, isBlockScalar) {
+    var leading = tokenText.slice(0, tokenText.length - tokenText.trimStart().length)
     var text = tokenText.trim()
-    if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) {
-      text = text.slice(1, -1)
+    var quote = null
+
+    if (!isBlockScalar) {
+      var q = text.charAt(0)
+      if ((q === '"' || q === "'") && text.length >= 2 && text.endsWith(q)) {
+        quote = q
+        text = text.slice(1, -1)
+        if (q === '"') {
+          // Single pass so an escaped backslash can't feed a later rule
+          // (the old sequential replace chain turned \\n into \<newline>).
+          // Escapes this display code doesn't translate stay verbatim
+          // rather than losing their backslash (\r must not become r).
+          text = text.replace(/\\(.)/g, function (match, ch) {
+            if (ch === 'n') return '\n'
+            if (ch === 't') return '\t'
+            if (ch === '"' || ch === "'" || ch === '\\' || ch === '/') return ch
+            return match
+          })
+        } else {
+          text = text.replace(/''/g, "'")
+        }
+      }
     }
 
-    // Handle escape sequences
-    text = text
-      .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t')
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
-      .replace(/\\\\/g, '\\')
-
-    return text
+    return { leading: leading, code: text, quote: quote }
   }
 
   /**
@@ -303,10 +335,20 @@
    * Also handles continuation content after blank lines
    */
   function processMultilineMapping(token) {
-    var bloblangCode = extractBloblangFromBlock(token.textContent)
+    var rawText = token.textContent
+    // Prism's YAML grammar gives block scalars the "scalar" class ("string"
+    // is only an alias on them); a token with "string" alone is a quoted
+    // flow scalar, whose quotes/escapes YAML actually processes.
+    var isBlockScalar = token.classList.contains('scalar')
+    var extracted = extractBloblangFromBlock(rawText, isBlockScalar)
+    var bloblangCode = extracted.code
+    var leadingWhitespace = extracted.leading
 
-    // Check for continuation content after this token
-    var continuationNodes = collectLiteralBlockContinuation(token)
+    // Check for continuation content after this token. Only block scalars
+    // can have it (Prism splits them at blank lines); a quoted flow scalar
+    // is single-line by grammar, and collecting "continuation" for one
+    // swallows sibling keys that sit at or above the fallback base indent.
+    var continuationNodes = isBlockScalar ? collectLiteralBlockContinuation(token) : []
     var continuationText = extractTextFromNodes(continuationNodes)
 
     // Combine the token content with continuation
@@ -323,7 +365,15 @@
 
     var wrapper = document.createElement('span')
     wrapper.className = 'bloblang-embedded'
-    wrapper.innerHTML = highlighted
+    // Re-render the quotes stripped from a quoted flow scalar (same as
+    // processSingleLineCheck) so the reader still sees them and the copy
+    // button keeps them.
+    var quoteHtml = extracted.quote ? '<span class="token punctuation">' + extracted.quote + '</span>' : ''
+    // leadingWhitespace is whitespace-only (what trim() stripped), so it is
+    // HTML-inert and safe to concatenate unescaped. Asymmetry note: trailing
+    // whitespace on the scalar's last content line is still dropped by the
+    // trim - invisible in the render, observable only via the copy button.
+    wrapper.innerHTML = leadingWhitespace + quoteHtml + highlighted + quoteHtml
 
     token.innerHTML = ''
     token.appendChild(wrapper)

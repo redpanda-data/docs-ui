@@ -7,3 +7,9 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
+
+# These files carry an intentional trailing space after a YAML block-scalar
+# indicator ("mapping: | ") as a regression fixture for DOC-2433 - trimming
+# it silently weakens the test (see fixture-yaml-trailing-space)
+[{tests/bloblang-interactive/mini-playground-test.html,preview-src/bloblang-syntax-test.adoc}]
+trim_trailing_whitespace = false

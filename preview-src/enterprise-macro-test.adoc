@@ -1,0 +1,129 @@
+= Enterprise Macro Test
+:page-layout: default
+
+Test page for the `enterprise` inline macro from docs-extensions-and-macros (DOC-887). The markup below replicates the macro's exact rendered output so the `enterprise-feature` class can be styled in this UI bundle. Every output shape the macro can emit appears here, plus stress contexts for the lock glyph and underline. The first two sections use the link targets the macro really resolves to: the licensing page for `Topic Deletion Control`, which has no feature page in the registry, and the feature page for `Tiered Storage`, which has one. Later sections vary only the tooltip, role, or link handling, so their targets are placeholders.
+
+== Default output
+
+The macro `enterprise:Topic Deletion Control[]` with a registry entry that carries no `xref` renders, linking to the licensing page:
+
+++++
+<p>This cluster uses <span class="enterprise-feature" title="Topic Deletion Control requires an Enterprise Edition license."><a href="https://docs.redpanda.com/streaming/current/get-started/licensing/overview/" class="xref page">Topic Deletion Control</a></span> to block accidental topic deletes.</p>
+++++
+
+== With a feature xref
+
+The macro `enterprise:Tiered Storage[]` with a registry entry that carries an `xref` (or a per-use `xref=` attribute) renders the same shape, linking to the feature page:
+
+++++
+<p>Enable <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="https://docs.redpanda.com/streaming/current/manage/tiered-storage/" class="xref page">Tiered Storage</a></span> to offload data to object storage.</p>
+++++
+
+== Display text override
+
+`enterprise:Audit Logging[text=audit logging]` keeps the canonical feature name in the tooltip while the sentence reads naturally:
+
+++++
+<p>Enable <span class="enterprise-feature" title="Audit Logging requires an Enterprise Edition license."><a href="#" class="xref page">audit logging</a></span> before compliance review.</p>
+++++
+
+== Tooltip override
+
+`enterprise:Iceberg Topics[tooltip=...]` replaces the generated tooltip sentence:
+
+++++
+<p>Set up <span class="enterprise-feature" title="Iceberg Topics requires an Enterprise Edition license and object storage."><a href="#" class="xref page">Iceberg Topics</a></span> for your lakehouse.</p>
+++++
+
+== Without a link
+
+With the `enterprise-links` attribute set to `false`:
+
+++++
+<p>Configure <span class="enterprise-feature" title="Audit Logging requires an Enterprise Edition license.">Audit Logging</span> on a SASL listener.</p>
+++++
+
+== Without a tooltip
+
+With `enterprise-tooltip` set to `false`, the span carries no tooltip attribute at all (underline and lock must still render):
+
+++++
+<p>Use <span class="enterprise-feature"><a href="#" class="xref page">Leader Pinning</a></span> to keep leaders in one zone.</p>
+++++
+
+== Data-attribute tooltip variant
+
+With `enterprise-tooltip` set to `true`, the tooltip renders as `data-enterprise-tooltip` for UI-driven tooltips instead of the native `title` (activated as a tippy tooltip by `12-activate-tooltips.js`):
+
+++++
+<p>Set up <span class="enterprise-feature" data-enterprise-tooltip="Iceberg Topics requires an Enterprise Edition license."><a href="#" class="xref page">Iceberg Topics</a></span> for your lakehouse.</p>
+++++
+
+== Custom role
+
+With `enterprise-feature-role` set to something other than `enterprise-feature`, the UI applies no styling. This one should look like a plain link, with no underline or lock:
+
+++++
+<p>A custom role renders <span class="my-custom-role" title="Shadowing requires an Enterprise Edition license."><a href="#" class="xref page">Shadowing</a></span> unstyled.</p>
+++++
+
+== Stress contexts
+
+Multiple terms in one paragraph, with punctuation directly after the term:
+
+++++
+<p>Both <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="#" class="xref page">Tiered Storage</a></span>, <span class="enterprise-feature" title="Remote Read Replicas requires an Enterprise Edition license."><a href="#" class="xref page">Remote Read Replicas</a></span>, and <span class="enterprise-feature" title="Whole Cluster Restore (WCR) requires an Enterprise Edition license."><a href="#" class="xref page">Whole Cluster Restore (WCR)</a></span> share one license gate.</p>
+++++
+
+A long feature name that wraps across lines (the lock glyph must sit after the last word, not float alone):
+
+++++
+<p style="max-width: 14em;">Narrow container: <span class="enterprise-feature" title="Continuous Intra-Broker Partition Balancing requires an Enterprise Edition license."><a href="#" class="xref page">Continuous Intra-Broker Partition Balancing</a></span> wraps here.</p>
+++++
+
+In a list:
+
+++++
+<ul>
+<li>Plain list item for comparison</li>
+<li><span class="enterprise-feature" title="Audit Logging requires an Enterprise Edition license."><a href="#" class="xref page">Audit Logging</a></span> in a list item</li>
+</ul>
+++++
+
+In a table cell:
+
+++++
+<table class="tableblock frame-all grid-all stretch">
+<tbody>
+<tr>
+<td class="tableblock"><p class="tableblock"><span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="#" class="xref page">Tiered Storage</a></span></p></td>
+<td class="tableblock"><p class="tableblock">Feature description in the next cell</p></td>
+</tr>
+</tbody>
+</table>
+++++
+
+In an admonition:
+
+[NOTE]
+====
+This note mentions an enterprise feature: pass:[<span class="enterprise-feature" title="Shadowing requires an Enterprise Edition license."><a href="#" class="xref page">Shadowing</a></span>] inside admonition content.
+====
+
+== Enterprise properties share the lock
+
+Enterprise-only configuration properties get the same lock glyph through `code.is-enterprise-property` (added by `19-property-tooltips.js`):
+
+++++
+<p>The property <code class="is-enterprise-property">cloud_storage_enabled</code> requires an Enterprise license, while <code>log_segment_size</code> does not.</p>
+++++
+
+== Styling notes
+
+The implemented treatment for `.enterprise-feature`:
+
+* A dotted underline in `--link-highlight-color`, matching the glossary term affordance, applied to the inner link or to the span when links are disabled.
+* A small lock glyph (0.9em) after the term, rendered as an SVG mask filled with `--link-highlight-color`. The mask variable lives in the global `:root` design tokens so dark mode adapts automatically.
+* `code.is-enterprise-property` reuses the same mask variable, so feature terms and enterprise properties carry an identical lock.
+* The `data-enterprise-tooltip` variant is activated as a tippy tooltip by `12-activate-tooltips.js`, mirroring the site's other tooltips. The default `title` variant keeps the native browser tooltip.
+* The generated `enterprise_features::` tables need no UI styling: they render as ordinary AsciiDoc tables whose feature cells contain the same linked spans shown above.

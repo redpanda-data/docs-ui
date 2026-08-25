@@ -73,6 +73,43 @@
   }
 
   /**
+   * Track Connect JSON URLs that recently returned HTTP 404/410, so a URL
+   * that is known not to exist (for example, a version whose JSON was never
+   * generated) is not re-requested on every page view. Transient failures
+   * (429, 5xx, network errors) are never recorded here.
+   */
+  const FETCH_FAILURE_KEY = 'connect-json-fetch-failures';
+  const FETCH_FAILURE_TTL = 60 * 60 * 1000; // 1 hour
+
+  function readFetchFailures() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(FETCH_FAILURE_KEY) || '{}');
+      const now = Date.now();
+      const fresh = {};
+      Object.keys(parsed).forEach((url) => {
+        if (now - parsed[url] < FETCH_FAILURE_TTL) fresh[url] = parsed[url];
+      });
+      return fresh;
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function hasRecentFetchFailure(url) {
+    return url in readFetchFailures();
+  }
+
+  function markFetchFailure(url) {
+    try {
+      const failures = readFetchFailures();
+      failures[url] = Date.now();
+      localStorage.setItem(FETCH_FAILURE_KEY, JSON.stringify(failures));
+    } catch (e) {
+      // localStorage not available
+    }
+  }
+
+  /**
    * Parse a Bloblang snippet into mapping, input, and metadata sections.
    * Looks for # In: and # Meta: comment directives.
    * # Out: lines are ignored.
@@ -178,9 +215,14 @@
   }
 
   /**
-   * Try to fetch Connect JSON - uses meta tag URL or falls back to version-based path
+   * Try to fetch Connect JSON. The connect-json-url meta tag - resolved at
+   * build time against the attachments that actually exist in the catalog
+   * (set-available-attachment-versions extension in
+   * docs-extensions-and-macros) - is the only production source: only the
+   * newest connect-<version>.json is hosted, so guessing other versions can
+   * only produce 404s.
    */
-  async function tryFetchConnectJSON(version) {
+  async function tryFetchConnectJSON() {
     try {
       let url;
 
@@ -189,18 +231,22 @@
         const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
         url = `${rootPath}/connect.json`;
       } else {
-        // Production: try meta tag URL first (resolved by Antora)
         url = getConnectJsonUrl();
 
-        // Fallback if meta tag not set
-        if (!url) {
-          url = `/redpanda-connect/components/_attachments/connect-${version}.json`;
+        if (!url || hasRecentFetchFailure(url)) {
+          return null;
         }
       }
 
       const response = await fetch(url);
 
       if (!response.ok) {
+        // Only mark deterministic missing-resource responses (404/410).
+        // Transient failures (429, 5xx) are not cached, so the next page
+        // view retries them.
+        if (!isPreviewMode() && (response.status === 404 || response.status === 410)) {
+          markFetchFailure(url);
+        }
         return null;
       }
 
@@ -289,54 +335,6 @@
   }
 
   /**
-   * Get Connect version from cache or fetch from antora.yml
-   * Caches in localStorage for 1 hour to avoid repeated fetches
-   */
-  async function getConnectVersion() {
-    var CACHE_KEY = 'bloblang-connect-version';
-    var CACHE_TTL = 60 * 60 * 1000; // 1 hour
-
-    // Check cache first
-    try {
-      var cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        var parsed = JSON.parse(cached);
-        if (Date.now() - parsed.timestamp < CACHE_TTL) {
-          return parsed.version;
-        }
-      }
-    } catch (e) {
-      // localStorage not available or parse error
-    }
-
-    // Fetch from antora.yml (no rate limits, CDN-served)
-    try {
-      var resp = await fetch('https://raw.githubusercontent.com/redpanda-data/rp-connect-docs/main/antora.yml');
-      if (resp.ok) {
-        var yaml = await resp.text();
-        var match = yaml.match(/latest-connect-version:\s*['"]?(\d+\.\d+\.\d+)/);
-        if (match) {
-          var version = match[1];
-          // Cache the result
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({
-              version: version,
-              timestamp: Date.now()
-            }));
-          } catch (e) {
-            // localStorage not available
-          }
-          return version;
-        }
-      }
-    } catch (e) {
-      // Silent fail - will use fallback versions
-    }
-
-    return null;
-  }
-
-  /**
    * Load Bloblang documentation from Connect JSON
    */
   async function loadBloblangDocs() {
@@ -358,20 +356,7 @@
 
       // Skip remote fetches on docs-ui preview site - JSON files don't exist there
       if (!isDocsUiPreview) {
-        // Try to get latest version from cached antora.yml
-        var latestVersion = await getConnectVersion();
-        if (latestVersion) {
-          data = await tryFetchConnectJSON(latestVersion);
-        }
-
-        // Fallback: try known recent versions
-        if (!data) {
-          var fallbackVersions = ['4.79.0', '4.78.0', '4.77.0', '4.76.0', '4.75.0'];
-          for (var i = 0; i < fallbackVersions.length; i++) {
-            data = await tryFetchConnectJSON(fallbackVersions[i]);
-            if (data) break;
-          }
-        }
+        data = await tryFetchConnectJSON();
       }
 
       // Transform data to our format
@@ -500,6 +485,15 @@
         // Mouse devices: show on hover
         trigger: isTouch ? 'click' : 'mouseenter focus',
         hideOnClick: isTouch ? 'toggle' : true,
+        // Same show delay as the glossary and enterprise tooltips, so
+        // dragging the cursor across a code block doesn't fire previews.
+        delay: [200, 0],
+        popperOptions: {
+          modifiers: [
+            { name: 'preventOverflow', options: { boundary: 'viewport' } },
+            { name: 'flip', options: { fallbackPlacements: ['bottom', 'top'] } },
+          ],
+        },
         onShow(instance) {
           // Hide other tooltips
           document.querySelectorAll('.tippy-box').forEach(box => {

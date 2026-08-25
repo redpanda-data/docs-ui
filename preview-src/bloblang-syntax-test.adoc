@@ -368,3 +368,95 @@ spec:
             - name: DATABASE_URL
               value: "postgres://localhost:5432/mydb"
 ----
+
+== Regression: Block Scalar Indicator Must Stay on Its Own Line
+
+Reported against docs.redpanda.com as
+https://redpandadata.atlassian.net/browse/DOC-2433[DOC-2433]: this exact
+example (the Connect quickstart's producer pipeline) rendered as
+`mapping: |let jokes = [` on one line instead of `|` followed by a line
+break. Root cause was `extractBloblangFromBlock()` in
+`src/js/17-bloblang-yaml.js` trimming away the newline + indentation
+between the block-scalar indicator and the first line of Bloblang before
+`processMultilineMapping()` discarded the token's original content
+entirely.
+
+**Check visually**: `mapping: |` must end its own line, with `let jokes`
+starting the next line, indented — not glued onto the same line as `|`.
+If this collapses again, the leading-whitespace preservation in
+`processMultilineMapping()` has regressed.
+
+[source,yaml]
+----
+input:
+  generate:
+    interval: 5s
+    count: 0
+    mapping: |
+      let jokes = [
+        "Why don't scientists trust atoms? Because they make up everything!",
+        "I'm reading a book about anti-gravity. It's impossible to put down!"
+      ]
+      root = jokes.index(random_int(seed: timestamp_unix_nano(), max: jokes.length() - 1))
+output:
+  redpanda:
+    topic: dad-jokes
+----
+
+== Regression: Literal Block Scalars Are Not Rewritten (DOC-2441)
+
+https://redpandadata.atlassian.net/browse/DOC-2441[DOC-2441]: YAML performs
+no quote or escape processing on literal block scalars, so the highlighter
+must not either.
+
+**Check visually and with the copy button**: `join("\n")` and `join("\t")`
+must render (and copy) as two characters each - a backslash followed by a
+letter - never as a real line break or tab inside the string literal.
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: |
+        root.lines = this.values.join("\n")
+        root.tabbed = this.cols.join("\t")
+----
+
+**Check visually**: the first line's opening quote on `"prefix-"` and the
+last line's closing quote on `"-suffix"` must both render. They belong to
+two different string literals, and must not be stripped as if they enclosed
+the whole block.
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: |
+        "prefix-" + this.id + "-suffix"
+----
+
+**Check visually**: a trailing space after the `|` indicator must not glue
+the first Bloblang line onto the `mapping:` line (the space after `|` below
+is intentional).
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: | 
+        let doubled = this.value * 2
+        root.result = $doubled
+----
+
+**Check visually and with the copy button**: quoted flow-scalar mappings must
+keep their quotes in the rendered output. The double-quoted example's escapes
+are processed once: `\"` renders as `"` and `\\n` renders as the two
+characters `\n` inside the string literal.
+
+[source,yaml]
+----
+pipeline:
+  processors:
+    - mapping: "root.joined = this.parts.join(\"\\n\")"
+    - mapping: 'root.id = this.user_id.string()'
+----

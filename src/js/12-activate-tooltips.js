@@ -38,11 +38,44 @@
     tippy('[data-tippy-content]:not([data-tooltip])', tooltipConfig)
 
     // Initialize tippy for custom data-tooltip elements
+    // allowHTML: false on the data-tooltip paths too. These carry the same
+    // registry-authored strings as the promoted title above -- badge tooltips and
+    // enterprise tooltips both land here -- and the DOM decodes the escaping the
+    // macro applied, so with allowHTML: true tippy re-parsed the result as
+    // markup. Tooltip text needs no markup on any of these paths.
     document.querySelectorAll('[data-tooltip]').forEach((el) => {
       tippy(el, {
         ...tooltipConfig,
+        allowHTML: false,
         content: el.getAttribute('data-tooltip'),
       })
+    })
+
+    // Initialize tippy for enterprise feature terms (enterprise inline macro)
+    document.querySelectorAll('[data-enterprise-tooltip]').forEach((el) => {
+      tippy(el, {
+        ...tooltipConfig,
+        allowHTML: false,
+        content: el.getAttribute('data-enterprise-tooltip'),
+      })
+    })
+
+    // The enterprise macro's default is a plain title attribute, which the
+    // browser renders as an unstyled native tooltip -- visibly different from
+    // the styled popovers every other term on the page gets, including
+    // property references. Promote it to tippy and drop the attribute, so the
+    // default rendering matches without every playbook having to set
+    // enterprise-tooltip=true. The attribute is still the no-JS fallback.
+    document.querySelectorAll('.enterprise-feature[title]').forEach((el) => {
+      const titleContent = el.getAttribute('title')
+      if (!titleContent) return
+      el.removeAttribute('title')
+      // allowHTML: false, overriding the shared config. The browser renders a
+      // title attribute as plain text, so promoting one to a tippy that parses
+      // HTML would turn inert content into markup -- a feature name or registry
+      // tooltip containing <img src=x onerror=...> becomes executable purely by
+      // being moved. Nothing in a licence tooltip needs markup.
+      tippy(el, { ...tooltipConfig, allowHTML: false, content: titleContent })
     })
 
     // Convert title attributes to tippy tooltips for code block buttons
