@@ -338,13 +338,33 @@
    * ifdef::env-cloud[] conditionals were evaluated once, correctly, against
    * the real page that produced it -- not guessed at again client-side.
    */
+  // render-property-descriptions.js emits a single-paragraph description as
+  // bare inline HTML with no <p> wrapper -- "what a tooltip wants" per its
+  // own comment -- and only wraps in real block markup (<p>, lists,
+  // admonitions, ...) for something richer. container.children below only
+  // ever counts elements, never text nodes, so a single paragraph containing
+  // several inline elements (a <code> span, a link, another <code> span) has
+  // more than one "child" despite being one block of prose. Truncating to
+  // blocks[0] in that case grabs one inline span and silently drops every
+  // text node around it -- e.g. a description built as
+  // 'The retention time... <code>cloud_storage_enabled</code>, <code>...` on
+  // a live tooltip rendering as just "cloud_storage_enabled". Only truncate
+  // when the top level actually contains real block structure to truncate.
+  var BLOCK_TAGS = { P: 1, DIV: 1, UL: 1, OL: 1, DL: 1, TABLE: 1, BLOCKQUOTE: 1, PRE: 1 }
   function truncateDescriptionHtml (html, summaryOnly) {
     if (!html) return ''
     if (!summaryOnly) return html
     var container = document.createElement('div')
     container.innerHTML = html
     var blocks = container.children
-    if (blocks.length <= 1) return html
+    var hasBlockStructure = false
+    for (var i = 0; i < blocks.length; i++) {
+      if (BLOCK_TAGS[blocks[i].tagName]) {
+        hasBlockStructure = true
+        break
+      }
+    }
+    if (!hasBlockStructure || blocks.length <= 1) return html
     return blocks[0].outerHTML + '<p>&#8230;</p>'
   }
 
