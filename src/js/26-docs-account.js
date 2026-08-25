@@ -21,6 +21,7 @@
   var signoutLink = container.querySelector('[data-account-signout]')
   var modal = container.querySelector('[data-signin-modal]')
   var modalCta = container.querySelector('[data-signin-modal-continue]')
+  var modalSignup = container.querySelector('[data-signin-modal-signup]')
 
   var CACHE_KEY = 'docs-account-me'
 
@@ -197,6 +198,10 @@
     // and go straight to Auth0. The bare signinLink href (middle-click, or no
     // modal markup) stays undisclosed and gets the interstitial.
     if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo()
+    // Same fast path, but for signup: lands on Auth0's native "Sign up" screen
+    // instead of Cloud's cloud.redpanda.com/sign-up onboarding wizard (which
+    // provisions a trial org + resources a docs-only sign-in doesn't need).
+    if (modalSignup) modalSignup.href = '/login?disclosed=1&signup=1&return_to=' + returnTo()
 
     // Signed in: the console link lives in the account dropdown, so hide the
     // standalone toolbar/overflow Cloud Console links (avoid two paths)

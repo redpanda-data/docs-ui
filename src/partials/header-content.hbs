@@ -169,7 +169,13 @@
                 </li>
               </ul>
               <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login">Continue</a>
-              <p class="tb-signin-modal-foot">No account yet? <a href="https://cloud.redpanda.com/sign-up?utm_source=docs&utm_medium=referral&utm_campaign=docs-signup&utm_content=signin-modal" target="_blank" rel="noopener noreferrer">Create a free account</a></p>
+              {{!-- Registers directly against the docs Auth0 client (screen_hint=signup)
+                    instead of Cloud's cloud.redpanda.com/sign-up onboarding wizard, which
+                    provisions a trial org + resources a docs-only sign-in doesn't need.
+                    Same-tab like Continue (docs-account.js sets disclosed=1&signup=1&
+                    return_to=...), not target=_blank: it's our own /login now, not an
+                    external site. --}}
+              <p class="tb-signin-modal-foot">No account yet? <a data-signin-modal-signup href="/login?signup=1">Create a free account</a></p>
               {{!-- Privacy disclosure. The modal CTA links to /login?disclosed=1,
                     which docs-login.mjs uses to SKIP the server interstitial, so
                     for anyone signing in from here this note is the only
