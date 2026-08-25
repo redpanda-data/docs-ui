@@ -1,0 +1,133 @@
+name: Build Iceberg engine (WASM)
+
+# Builds the Iceberg Mode Explorer's engine — Redpanda's real C++ Avro->Iceberg
+# schema mapper compiled to WebAssembly — for a specific Redpanda release, so
+# each docs major.minor loads the engine built from that release's source.
+#
+# This is the analog of the Bloblang playground's update-go-modules workflow,
+# keyed on Redpanda release tags instead of Go module bumps. It produces
+# iceberg-engine-<major.minor>.js/.wasm as build artifacts; publish those to the
+# versioned docs content repo under
+# modules/<module>/assets/attachments/ so the tool loads the version-matched
+# engine at runtime (see src/js/27-iceberg-explorer.js loader).
+
+on:
+  workflow_dispatch:
+    inputs:
+      redpanda_ref:
+        description: 'Immutable Redpanda ref to build the engine from: a release tag (e.g. v26.2.1) or a 40-char commit SHA. Mutable branches such as dev are rejected.'
+        required: true
+  # Trigger from the redpanda repo on a new release via repository_dispatch:
+  #   curl -X POST .../dispatches -d '{"event_type":"redpanda-release","client_payload":{"ref":"v26.2.1"}}'
+  repository_dispatch:
+    types: [redpanda-release]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Resolve Redpanda ref and docs version
+        id: ver
+        # The ref comes from workflow_dispatch input or repository_dispatch
+        # payload, so it is event-controlled: pass it through env (never
+        # interpolate it into the script) and validate it before use.
+        env:
+          REF_INPUT: ${{ github.event.inputs.redpanda_ref || github.event.client_payload.ref }}
+        run: |
+          REF="$REF_INPUT"
+          if [[ ! "$REF" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]*$ ]]; then
+            echo "Invalid Redpanda ref: $REF" >&2
+            exit 1
+          fi
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          # major.minor from a vX.Y.Z tag; 'dev' stays 'dev'.
+          if [[ "$REF" =~ ^v?([0-9]+)\.([0-9]+) ]]; then
+            echo "version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$REF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 6.0.3
+
+      - name: Fetch Redpanda source + third-party deps
+        working-directory: iceberg-editor/wasm-spike
+        env:
+          REDPANDA_REF: ${{ steps.ver.outputs.ref }}
+          # This workflow is the only path that publishes engines, so it always
+          # builds from an immutable ref: env.sh's require_pinned_ref() rejects a
+          # branch such as `dev` instead of producing an unattributable artifact.
+          REDPANDA_REQUIRE_PINNED: '1'
+        run: |
+          ./fetch-sources.sh
+          ./third_party/fetch-deps.sh
+
+      - name: Build engine (web target)
+        working-directory: iceberg-editor/wasm
+        run: ./build.sh web
+
+      - name: Stage versioned artifact
+        id: stage
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          REF: ${{ steps.ver.outputs.ref }}
+        run: |
+          V="$VERSION"
+          # V lands in filenames and a sed replacement, so keep it to the
+          # characters a docs version / branch name may legitimately use.
+          if [[ ! "$V" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo "Invalid engine version: $V" >&2
+            exit 1
+          fi
+          mkdir -p dist
+          cp src/static/iceberg-engine.js  "dist/iceberg-engine-$V.js"
+          cp src/static/iceberg-engine.wasm "dist/iceberg-engine-$V.wasm"
+          # The emscripten glue references the .wasm by its build name; rewrite
+          # it to the versioned name so both files can coexist per version.
+          sed -i "s/iceberg-engine\.wasm/iceberg-engine-$V.wasm/g" "dist/iceberg-engine-$V.js"
+          # Attribute the artifact to the Redpanda revision it was built from.
+          # fetch-sources.sh records that commit in vendor/REDPANDA_COMMIT, which
+          # is git-ignored and outside dist/, so without this the published
+          # engine carries no provenance. $REF and $V are already validated
+          # above, so neither can break out of the JSON.
+          COMMIT="$(cat iceberg-editor/wasm-spike/vendor/REDPANDA_COMMIT)"
+          printf '{"engine_version":"%s","redpanda_ref":"%s","redpanda_commit":"%s"}\n' \
+            "$V" "$REF" "$COMMIT" >"dist/iceberg-engine-$V.provenance.json"
+          ls -la dist
+
+      - name: Smoke-test the built engine under Node
+        working-directory: iceberg-editor/wasm
+        run: |
+          ./build.sh node
+          node - <<'EOF'
+          const create = require('./build/iceberg-engine-node.js')
+          create().then(m => {
+            const out = m.avroToIcebergJson(JSON.stringify({
+              type:'record', name:'t', fields:[{name:'a',type:'string'}]
+            }))
+            const p = JSON.parse(out)
+            if (!p.fields || p.fields[0].type !== 'string') { console.error('FAIL', out); process.exit(1) }
+            console.log('engine smoke test OK:', out)
+          })
+          EOF
+
+      - name: Upload versioned engine artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iceberg-engine-${{ steps.ver.outputs.version }}
+          path: dist/
+          if-no-files-found: error
+
+      # Publishing step (commented): open a PR to the versioned content repo
+      # placing dist/* under modules/<module>/assets/attachments/ for the
+      # matching docs version. Wire this to your content-repo bot token.
+      # - name: Publish to content repo
+      #   run: ./ci/publish-iceberg-engine.sh "${{ steps.ver.outputs.version }}" dist/

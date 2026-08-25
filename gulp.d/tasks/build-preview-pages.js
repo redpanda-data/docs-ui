@@ -1,6 +1,7 @@
 'use strict'
 
 const Asciidoctor = require('@asciidoctor/core')()
+const log = require('fancy-log')
 const fs = require('fs-extra')
 const handlebars = require('handlebars')
 const merge = require('merge-stream')
@@ -29,12 +30,25 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
     ),
   ])
     .then(([baseUiModel, { layouts }]) => {
-      const extensions = ((baseUiModel.asciidoc || {}).extensions || []).map((request) => {
-        ASCIIDOC_ATTRIBUTES[request.replace(/^@|\.js$/, '').replace(/[/]/g, '-') + '-loaded'] = ''
-        const extension = require(request)
-        extension.register.call(Asciidoctor.Extensions)
-        return extension
-      })
+      const extensions = ((baseUiModel.asciidoc || {}).extensions || [])
+        .map((request) => {
+          let extension
+          try {
+            extension = require(request)
+          } catch (err) {
+            // A sample ui-model.yml can reference an extension from a
+            // sibling package (e.g. docs-extensions-and-macros) before that
+            // package has actually published it -- don't let one
+            // not-yet-available extension take down the whole preview
+            // build; skip it and keep going.
+            log.warn(`Preview build: could not load AsciiDoc extension '${request}', skipping it (${err.message})`)
+            return null
+          }
+          ASCIIDOC_ATTRIBUTES[request.replace(/^@|\.js$/, '').replace(/[/]/g, '-') + '-loaded'] = ''
+          extension.register.call(Asciidoctor.Extensions)
+          return extension
+        })
+        .filter(Boolean)
       const asciidoc = { extensions }
       for (const component of baseUiModel.site.components) {
         for (const version of component.versions || []) {
