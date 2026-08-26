@@ -21,7 +21,6 @@
   var signoutLink = container.querySelector('[data-account-signout]')
   var modal = container.querySelector('[data-signin-modal]')
   var modalCta = container.querySelector('[data-signin-modal-continue]')
-  var modalSignup = container.querySelector('[data-signin-modal-signup]')
 
   var CACHE_KEY = 'docs-account-me'
 
@@ -44,7 +43,11 @@
   }
 
   function returnTo () {
-    return encodeURIComponent(window.location.pathname + window.location.search)
+    // Include the hash: without it, a user reading a specific #section-anchor
+    // who signs in gets bounced back to the top of the page instead of where
+    // they were. docs-site's safeReturnTo() already accepts a path+query+hash
+    // string as-is (it only checks scheme/shape, not content).
+    return encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)
   }
 
   // Feature modal shown before sending the user to /login.
@@ -198,10 +201,6 @@
     // and go straight to Auth0. The bare signinLink href (middle-click, or no
     // modal markup) stays undisclosed and gets the interstitial.
     if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo()
-    // Same fast path, but for signup: lands on Auth0's native "Sign up" screen
-    // instead of Cloud's cloud.redpanda.com/sign-up onboarding wizard (which
-    // provisions a trial org + resources a docs-only sign-in doesn't need).
-    if (modalSignup) modalSignup.href = '/login?disclosed=1&signup=1&return_to=' + returnTo()
 
     // Signed in: the console link lives in the account dropdown, so hide the
     // standalone toolbar/overflow Cloud Console links (avoid two paths)
@@ -290,13 +289,16 @@
       state_mismatch: 'Your sign-in link expired. Please try again.',
       // Auth0 access_denied: the account isn't a member of a required Redpanda
       // Cloud organization (or declined consent). Retrying the same account won't
-      // help, so say why instead of a generic "try again" loop.
-      access_denied: 'Your account is not in a Redpanda Cloud organization yet. Click the verification link in your email, or ask your organization admin to invite you.',
-      // Signed up but never clicked the verification link Redpanda Cloud emailed.
-      // Kept in sync with LOGIN_ERROR_MESSAGES in docs-site docs-login.mjs: without
-      // an entry here this code fell through to the generic "try again" default,
-      // which is the one thing that cannot work until the address is verified.
-      org_setup_incomplete: 'Click the verification link Redpanda Cloud emailed you, then sign in again.',
+      // help, so say why instead of a generic "try again" loop. Verifying an
+      // emailed address does not create an organization -- only finishing Cloud's
+      // own onboarding does -- so this doesn't point at the inbox.
+      access_denied: 'Your account is not in a Redpanda Cloud organization yet. Ask your organization admin to invite you, or finish setting up your account on Redpanda Cloud.',
+      // Account has no Redpanda Cloud organization yet. Kept in sync with
+      // LOGIN_ERROR_MESSAGES.org_setup_incomplete in docs-site docs-login.mjs:
+      // verifying the emailed address does NOT create an organization (that only
+      // happens inside Cloud's own onboarding wizard), so retrying sign-in fails
+      // identically every time until account setup is actually finished on Cloud.
+      org_setup_incomplete: 'Finish creating your account on Redpanda Cloud, then come back and sign in.',
     }
     var toast = document.createElement('div')
     toast.setAttribute('role', 'alert')
