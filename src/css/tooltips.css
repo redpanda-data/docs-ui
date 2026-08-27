@@ -5,6 +5,20 @@
   z-index: 9999;
 }
 
+/* Glossary hover text can contain backtick-monospace, which the glossary macro
+   emits as <code>. Tippy appends the tooltip to <body>, so it escapes the .doc
+   code styling in doc.css but still picks up the site-wide code border in
+   base.css -- a border in the page's code color, drawn on top of the tooltip
+   background, which reads as a box around the term. Monospace is wanted here;
+   the box is not. color: inherit follows --tooltip-font-color so this holds in
+   both themes. */
+.tippy-box[data-theme~='redpanda-term'] code {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1em;
+}
+
 a.glossary-term {
   border-bottom: 2px dotted var(--link-highlight-color);
   text-decoration: none !important;
