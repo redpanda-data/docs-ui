@@ -21,6 +21,7 @@
   var signoutLink = container.querySelector('[data-account-signout]')
   var modal = container.querySelector('[data-signin-modal]')
   var modalCta = container.querySelector('[data-signin-modal-continue]')
+  var modalSignup = container.querySelector('[data-signin-modal-signup]')
 
   var CACHE_KEY = 'docs-account-me'
 
@@ -197,6 +198,14 @@
     // and go straight to Auth0. The bare signinLink href (middle-click, or no
     // modal markup) stays undisclosed and gets the interstitial.
     if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo()
+    // "Create a free account" — a same-origin path instead of a hardcoded
+    // cloud.redpanda.com URL, since docs-ui has no way to know which Cloud
+    // environment a given deploy (prod vs integration preview) should point
+    // at. docs-login.mjs's own /signup already resolves that per context and
+    // 302s straight to the right signup URL. Its own path rather than a
+    // /login query flag: unlike modalCta above, it shares no state with
+    // sign-in (no CSRF nonce, no PKCE, no auth-request write).
+    if (modalSignup) modalSignup.href = '/signup?return_to=' + returnTo()
 
     // Signed in: the console link lives in the account dropdown, so hide the
     // standalone toolbar/overflow Cloud Console links (avoid two paths)
