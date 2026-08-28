@@ -170,10 +170,10 @@
               </ul>
               <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login">Continue</a>
               {{!-- href is a same-origin fallback for no-JS/middle-click; 26-docs-account.js
-                    overwrites it with /login?disclosed=1&signup=1&return_to=..., which
-                    docs-login.mjs resolves to the right Cloud signup URL for this deploy
-                    context (prod vs integration) instead of a URL hardcoded here. --}}
-              <p class="tb-signin-modal-foot">No account yet? <a href="/login" data-signin-modal-signup target="_blank" rel="noopener noreferrer">Create a free account</a></p>
+                    overwrites it with /signup?return_to=..., which docs-login.mjs resolves
+                    to the right Cloud signup URL for this deploy context (prod vs
+                    integration) instead of a URL hardcoded here. --}}
+              <p class="tb-signin-modal-foot">No account yet? <a href="/signup" data-signin-modal-signup target="_blank" rel="noopener noreferrer">Create a free account</a></p>
               {{!-- Privacy disclosure. The modal CTA links to /login?disclosed=1,
                     which docs-login.mjs uses to SKIP the server interstitial, so
                     for anyone signing in from here this note is the only
