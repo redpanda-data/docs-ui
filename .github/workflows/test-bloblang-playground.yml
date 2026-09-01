@@ -14,6 +14,7 @@ on:
       - 'tests/bloblang-playground/**'
       - 'tests/bloblang-interactive/**'
       - 'tests/negative-cache/**'
+      - 'tests/property-tooltips/**'
       - 'package.json'
       - 'package-lock.json'
       - 'gulpfile.js'
@@ -32,6 +33,7 @@ on:
       - 'tests/bloblang-playground/**'
       - 'tests/bloblang-interactive/**'
       - 'tests/negative-cache/**'
+      - 'tests/property-tooltips/**'
       - 'package.json'
       - 'package-lock.json'
       - 'gulpfile.js'
@@ -109,6 +111,8 @@ jobs:
       run: npm run test:interactive
     - name: Test Negative Cache
       run: npm run test:negative-cache
+    - name: Test Property Tooltips
+      run: npm run test:property-tooltips
     - name: Upload playground test results
       uses: actions/upload-artifact@v4
       if: always()

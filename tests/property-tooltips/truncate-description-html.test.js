@@ -31,10 +31,14 @@ const SRC = fs.readFileSync(path.join(ROOT, 'src/js/19-property-tooltips.js'), '
 // Extract just the BLOCK_TAGS constant and the function under test out of
 // the IIFE -- the file as a whole assumes fetch/localStorage globals this
 // test never exercises.
-const BLOCK = SRC.slice(
-  SRC.indexOf('var BLOCK_TAGS ='),
-  SRC.indexOf('function createPropertyTooltip')
+const EXTRACT_START = SRC.indexOf('var BLOCK_TAGS =')
+const EXTRACT_END = SRC.indexOf('function createPropertyTooltip')
+assert.ok(
+  EXTRACT_START !== -1 && EXTRACT_END !== -1 && EXTRACT_START < EXTRACT_END,
+  'source-extraction anchors went stale: expected "var BLOCK_TAGS =" followed by ' +
+    '"function createPropertyTooltip" in src/js/19-property-tooltips.js'
 )
+const BLOCK = SRC.slice(EXTRACT_START, EXTRACT_END)
 
 // Real production description_html, captured from docs.redpanda.com's
 // topic-properties page (verified live, then fixed here).
@@ -67,7 +71,8 @@ test.before(async () => {
 })
 
 test.after(async () => {
-  await browser.close()
+  // A launch failure in before() must surface itself, not a close() TypeError
+  if (browser) await browser.close()
 })
 
 async function truncate (html, summaryOnly) {
@@ -81,25 +86,65 @@ async function truncate (html, summaryOnly) {
 test('a single paragraph with several inline elements is not mangled', async () => {
   const result = await truncate(TOMBSTONE_RETENTION_MS, true)
   assert.equal(result, TOMBSTONE_RETENTION_MS)
-  assert.match(result, /tombstone records/)
 })
 
 test('a single paragraph starting with a link is not mangled', async () => {
   const result = await truncate(KAFKA_MAX_MESSAGE_SIZE_UPPER_LIMIT_BYTES, true)
   assert.equal(result, KAFKA_MAX_MESSAGE_SIZE_UPPER_LIMIT_BYTES)
-  assert.match(result, /maximum value/)
 })
 
 test('real multi-paragraph content still truncates to the first paragraph', async () => {
   const html = '<p>First real paragraph of prose.</p><p>Second paragraph that should not appear.</p>'
   const result = await truncate(html, true)
-  assert.equal(result, '<p>First real paragraph of prose.</p><p>&#8230;</p>')
+  // Ellipsis merges into the closing </p>, matching formatDescription's preview shape
+  assert.equal(result, '<p>First real paragraph of prose.&#8230;</p>')
 })
 
 test('a list still truncates, since a list is real block structure', async () => {
   const html = '<p>Intro paragraph.</p><ul><li>one</li><li>two</li></ul>'
   const result = await truncate(html, true)
-  assert.equal(result, '<p>Intro paragraph.</p><p>&#8230;</p>')
+  assert.equal(result, '<p>Intro paragraph.&#8230;</p>')
+})
+
+test('mixed inline prose and a block sibling is not truncated to the inline element', async () => {
+  // hasBlockStructure via the <div>, but blocks[0] would be the <code> --
+  // truncating here reproduces the original mangling with extra steps
+  const html = 'See <code>x</code> for details. <div class="admonitionblock">Warning body.</div>'
+  const result = await truncate(html, true)
+  assert.equal(result, html)
+})
+
+test('top-level prose before real blocks is not dropped', async () => {
+  const html = 'Bare intro sentence. <p>First paragraph.</p><p>Second paragraph.</p>'
+  const result = await truncate(html, true)
+  assert.equal(result, html)
+})
+
+test('a discrete heading counts as block structure and truncates', async () => {
+  // [discrete]\n== X renders as a bare <h2> outside any <div> wrapper
+  const html = '<h2>Heading</h2><p>Body paragraph.</p>'
+  const result = await truncate(html, true)
+  assert.equal(result, '<h2>Heading</h2><p>&#8230;</p>')
+})
+
+test('a thematic break counts as block structure and truncates', async () => {
+  const html = "<p>Before the break.</p><hr><p>After the break.</p>"
+  const result = await truncate(html, true)
+  assert.equal(result, '<p>Before the break.&#8230;</p>')
+})
+
+test('passthrough markup with unknown tags renders in full instead of guessing', async () => {
+  // ++++ passthrough can emit anything; unknown top-level tags must not be
+  // truncated away, the CSS max-height cap bounds the tooltip instead
+  const html = '<details><summary>More</summary>Hidden body.</details><p>Paragraph.</p>'
+  const result = await truncate(html, true)
+  assert.equal(result, html)
+})
+
+test('whitespace and comments between blocks do not block truncation', async () => {
+  const html = '<p>First.</p>\n  <!-- generator note -->\n<p>Second.</p>'
+  const result = await truncate(html, true)
+  assert.equal(result, '<p>First.&#8230;</p>')
 })
 
 test('summaryOnly=false returns the html untouched regardless of structure', async () => {
