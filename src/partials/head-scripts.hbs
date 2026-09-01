@@ -116,6 +116,10 @@
       document.body.setAttribute('data-theme', 'light');
       if (sidebar) sidebar.setAttribute('data-theme', 'light');
     }
+
+    if (typeof window.applyThemeAdaptiveImages === 'function') {
+      window.applyThemeAdaptiveImages(theme);
+    }
   }
 
   // Expose setTheme globally for external scripts (e.g., widget test page)
@@ -136,6 +140,10 @@
 })();
 </script>
 <!-- Load these styles before those in site.css to avoid flashing -->
+<style>
+  html[data-theme="dark"] { color-scheme: dark; }
+  html[data-theme="light"] { color-scheme: light; }
+</style>
 {{#if isStandaloneWidget}}
 {{else}}
 <style>

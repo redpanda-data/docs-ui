@@ -224,6 +224,8 @@ html[data-theme=dark] {
 }
 
 html:not([data-theme=dark]) {
+  color-scheme: light;
+
   --body-font-color: #181818;
   --body-faint-font-color: #667085;
   --body-footer-font-color: #98a2b3;
