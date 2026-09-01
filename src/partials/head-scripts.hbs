@@ -65,8 +65,8 @@
 {{#if isStandaloneWidget}}
 {{else}}
     // Compute the dark-variant URL for a theme-adaptive image (-dark suffix
-    // before the extension). 27-theme-adaptive-images.js reuses this - the
-    // convention must live in exactly one place.
+    // before the extension). 27-theme-adaptive-images.js reuses this and the
+    // selector below - the convention must live in exactly one place.
     window.themeAdaptiveToDarkSrc = function (src) {
       try {
         const url = new URL(src, document.baseURI);
@@ -78,10 +78,14 @@
         return src;
       }
     };
+    // Asciidoctor puts the role class on the block/inline wrapper, not the img
+    window.themeAdaptiveSelector = '.doc img.theme-adaptive, .doc .theme-adaptive img';
 
     // When the page will render dark, rewrite theme-adaptive image sources
-    // while the document is still parsing, so dark-theme readers don't
-    // download and flash the light variant first. site.js is deferred, so
+    // while the document is still parsing, so the first paint shows the dark
+    // variant instead of flashing the light one. (The preload scanner may
+    // still fetch the light variant speculatively from the raw markup - this
+    // prevents the flash, not the extra download.) site.js is deferred, so
     // 27-theme-adaptive-images.js runs too late to affect first paint.
     if (initialTheme === 'dark') {
       const darkenImage = function (img) {
@@ -92,16 +96,24 @@
         if (darkSrc === src) return;
         img.dataset.lightSrc = src;
         img.dataset.darkSrc = darkSrc;
+        // The -dark sibling is unvalidated at build time and all other
+        // recovery lives in deferred site.js: without this fallback a
+        // missing sibling shows a broken-image icon until site.js runs
+        // (or forever, if site.js is blocked or an earlier module throws).
+        img.addEventListener('error', function () {
+          if (img.getAttribute('src') === img.dataset.darkSrc) {
+            img.dataset.darkSrcFailed = 'true';
+            img.setAttribute('src', img.dataset.lightSrc);
+          }
+        });
         img.setAttribute('src', darkSrc);
       };
-      // Asciidoctor puts the role class on the block/inline wrapper, not the img
-      const imageSelector = '.doc img.theme-adaptive, .doc .theme-adaptive img';
       const parseObserver = new MutationObserver(function (mutations) {
         for (const mutation of mutations) {
           for (const node of mutation.addedNodes) {
             if (node.nodeType !== 1) continue;
-            if (node.matches(imageSelector)) darkenImage(node);
-            else if (node.querySelectorAll) node.querySelectorAll(imageSelector).forEach(darkenImage);
+            if (node.matches(window.themeAdaptiveSelector)) darkenImage(node);
+            else if (node.querySelectorAll) node.querySelectorAll(window.themeAdaptiveSelector).forEach(darkenImage);
           }
         }
       });
