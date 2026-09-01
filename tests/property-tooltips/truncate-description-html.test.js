@@ -101,9 +101,18 @@ test('real multi-paragraph content still truncates to the first paragraph', asyn
 })
 
 test('a list still truncates, since a list is real block structure', async () => {
-  const html = '<p>Intro paragraph.</p><ul><li>one</li><li>two</li></ul>'
+  // The <ul> leads so this test actually depends on UL being in BLOCK_TAGS
+  const html = '<ul><li>one</li><li>two</li></ul><p>Trailing paragraph.</p>'
   const result = await truncate(html, true)
-  assert.equal(result, '<p>Intro paragraph.&#8230;</p>')
+  assert.equal(result, '<ul><li>one</li><li>two</li></ul><p>&#8230;</p>')
+})
+
+test('div.paragraph-wrapped multi-paragraph content truncates', async () => {
+  // The shape real Asciidoctor conversion emits for multi-paragraph
+  // descriptions - the case that depends on DIV being in BLOCK_TAGS
+  const html = '<div class="paragraph"><p>First.</p></div><div class="paragraph"><p>Second.</p></div>'
+  const result = await truncate(html, true)
+  assert.equal(result, '<div class="paragraph"><p>First.</p></div><p>&#8230;</p>')
 })
 
 test('mixed inline prose and a block sibling is not truncated to the inline element', async () => {
