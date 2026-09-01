@@ -8,7 +8,7 @@
     "url": "https://github.com/redpanda-data/docs-ui.git"
   },
   "engines": {
-    "node": ">= 18.0.0"
+    "node": ">= 18.8.0"
   },
   "browserslist": [
     "last 2 versions"
@@ -81,7 +81,8 @@
     "test:interactive": "node tests/bloblang-interactive/test-runner.js",
     "test:negative-cache": "node tests/negative-cache/test-runner.js",
     "test:head-meta": "node --test tests/head-meta/*.test.js",
-    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta",
+    "test:property-tooltips": "node --test tests/property-tooltips/*.test.js",
+    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips",
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
     "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
     "serve:playground": "npx serve ."
