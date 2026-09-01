@@ -12,6 +12,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    # Successful runs take 1-2 minutes; without a cap, a wedged npm ci (seen
+    # when the node_modules cache expires and the registry stalls) burns the
+    # runner for GitHub's full 6-hour default before the job is cancelled.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
