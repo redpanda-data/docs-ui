@@ -70,8 +70,20 @@
       img.naturalWidth === 0
     ) {
       const probe = new window.Image()
+      const stillBroken = function () {
+        return !img.dataset.darkSrcFailed && img.getAttribute('src') === img.dataset.darkSrc
+      }
       probe.onerror = function () {
-        if (!img.dataset.darkSrcFailed && img.getAttribute('src') === img.dataset.darkSrc) markFailed(img)
+        if (stillBroken()) markFailed(img)
+      }
+      // The probe succeeding means the asset is fine and the element's broken
+      // state was transient (or stale from the pre-paint rewrite). Re-setting
+      // the identical src is a no-op, so drop it first to force the reload;
+      // the probe has already warmed the cache, so this costs no extra fetch.
+      probe.onload = function () {
+        if (!stillBroken()) return
+        img.removeAttribute('src')
+        img.setAttribute('src', img.dataset.darkSrc)
       }
       probe.src = img.dataset.darkSrc
     }
