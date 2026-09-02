@@ -1,4 +1,5 @@
 html[data-theme=dark] {
+  color-scheme: dark;
   /* base */
   --body-background: var(--slate-900);
   --banner-background: #54478c;

@@ -62,6 +62,67 @@
     if (initialTheme === 'dark') {
       document.documentElement.classList.add('dark-theme');
     }
+{{#if isStandaloneWidget}}
+{{else}}
+    // Compute the dark-variant URL for a theme-adaptive image (-dark suffix
+    // before the extension). 27-theme-adaptive-images.js reuses this and the
+    // selector below - the convention must live in exactly one place.
+    window.themeAdaptiveToDarkSrc = function (src) {
+      try {
+        const url = new URL(src, document.baseURI);
+        const dotIndex = url.pathname.lastIndexOf('.');
+        if (dotIndex <= url.pathname.lastIndexOf('/')) return src;
+        url.pathname = url.pathname.slice(0, dotIndex) + '-dark' + url.pathname.slice(dotIndex);
+        return url.href;
+      } catch (e) {
+        return src;
+      }
+    };
+    // Asciidoctor puts the role class on the block/inline wrapper, not the img
+    window.themeAdaptiveSelector = '.doc img.theme-adaptive, .doc .theme-adaptive img';
+
+    // When the page will render dark, rewrite theme-adaptive image sources
+    // while the document is still parsing, so the first paint shows the dark
+    // variant instead of flashing the light one. (The preload scanner may
+    // still fetch the light variant speculatively from the raw markup - this
+    // prevents the flash, not the extra download.) site.js is deferred, so
+    // 27-theme-adaptive-images.js runs too late to affect first paint.
+    if (initialTheme === 'dark') {
+      const darkenImage = function (img) {
+        if (img.dataset.lightSrc) return;
+        const src = img.getAttribute('src');
+        if (!src) return;
+        const darkSrc = window.themeAdaptiveToDarkSrc(src);
+        if (darkSrc === src) return;
+        img.dataset.lightSrc = src;
+        img.dataset.darkSrc = darkSrc;
+        // The -dark sibling is unvalidated at build time and all other
+        // recovery lives in deferred site.js: without this fallback a
+        // missing sibling shows a broken-image icon until site.js runs
+        // (or forever, if site.js is blocked or an earlier module throws).
+        img.addEventListener('error', function () {
+          if (img.getAttribute('src') === img.dataset.darkSrc) {
+            img.dataset.darkSrcFailed = 'true';
+            img.setAttribute('src', img.dataset.lightSrc);
+          }
+        });
+        img.setAttribute('src', darkSrc);
+      };
+      const parseObserver = new MutationObserver(function (mutations) {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType !== 1) continue;
+            if (node.matches(window.themeAdaptiveSelector)) darkenImage(node);
+            else if (node.querySelectorAll) node.querySelectorAll(window.themeAdaptiveSelector).forEach(darkenImage);
+          }
+        }
+      });
+      parseObserver.observe(document.documentElement, { childList: true, subtree: true });
+      window.addEventListener('DOMContentLoaded', function () {
+        parseObserver.disconnect();
+      });
+    }
+{{/if}}
     // This script and the styles must be in the head to avoid flashing when the default white background changes to dark https://github.com/redpanda-data/docs-ui/pull/174
     window.addEventListener('DOMContentLoaded', function() {
       const switchButton = document.getElementById('switch-theme');
