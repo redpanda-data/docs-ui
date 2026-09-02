@@ -82,7 +82,8 @@
     "test:negative-cache": "node tests/negative-cache/test-runner.js",
     "test:head-meta": "node --test tests/head-meta/*.test.js",
     "test:property-tooltips": "node --test tests/property-tooltips/*.test.js",
-    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips",
+    "test:version-picker": "node --test tests/version-picker/*.test.js",
+    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips && npm run test:version-picker",
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
     "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
     "serve:playground": "npx serve ."

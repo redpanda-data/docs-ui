@@ -1,0 +1,29 @@
+= Version picker test
+:page-layout: default
+:page-has-custom-nav: true
+:page-is-umbrella-nav: true
+:page-custom-navigation: [{"componentName":"streaming","title":"Streaming","icon":"lightning","color":"#4f46e5","order":1,"currentVersion":"24.3","isCurrentBucket":true,"isExpandedByDefault":true,"componentUrl":"/streaming/24.3/home/","items":[{"content":"Get started","url":"/get-started/","urlType":"internal"},{"content":"Manage","url":"/manage/","urlType":"internal","items":[{"content":"Cluster maintenance","url":"/manage/cluster-maintenance/","urlType":"internal"}]}],"versions":[{"version":"7.0","displayVersion":"7.0","url":"/streaming/7.0/home/","isPrerelease":true,"releaseDate":null,"isEol":false},{"version":"6.0","displayVersion":"6.0","url":"/streaming/6.0/home/","isPrerelease":false,"releaseDate":null,"isEol":false},{"version":"24.3","displayVersion":"24.3","url":"/streaming/24.3/home/","isPrerelease":false,"releaseDate":null,"isEol":false},{"version":"5.1","displayVersion":"5.1","url":"/streaming/5.1/home/","isPrerelease":false,"releaseDate":null,"isEol":false},{"version":"5.0","displayVersion":"5.0","url":"/streaming/5.0/home/","isPrerelease":false,"releaseDate":null,"isEol":false},{"version":"4.2","displayVersion":"4.2","url":"/streaming/4.2/home/","isPrerelease":false,"releaseDate":null,"isEol":true},{"version":"4.1","displayVersion":"4.1","url":"/streaming/4.1/home/","isPrerelease":false,"releaseDate":null,"isEol":true},{"version":"4.0","displayVersion":"4.0","url":"/streaming/4.0/home/","isPrerelease":false,"releaseDate":null,"isEol":true}]},{"componentName":"connect","title":"Connect","icon":"plug-connected","color":"#0ea5e9","order":2,"currentVersion":"4.5","isCurrentBucket":false,"isExpandedByDefault":false,"componentUrl":"/connect/4.5/home/","items":[{"content":"Components","url":"/connect/components/","urlType":"internal"}],"versions":[{"version":"4.5","displayVersion":"4.5","url":"/connect/4.5/home/","isEol":false},{"version":"4.4","displayVersion":"4.4","url":"/connect/4.4/home/","isEol":false}]}]
+
+Exercises both version pickers against the fixture data in `preview-src/ui-model.yml`.
+
+The **sidebar** picker (per bucket, from `page-custom-navigation`) should keep you on the
+current page when the page exists in the target version, and dim the entry with a tooltip
+when it does not. `ui-model.yml` marks version 5.0 as missing, so v5.0 is the entry that
+should render dimmed and italic. Streaming has eight versions, so the newest five show and
+the rest sit behind "Show 3 older versions". The Connect bucket belongs to a different
+component, so every one of its options correctly points at that version's home page.
+
+The **article pill** ("Docs for vX") shows the same missing-page treatment in its grouped
+panel.
+
+NOTE: The preview build supplies no Antora content catalog, so only the `page.versions`
+resolution path is exercised here. The catalog fallbacks (`family: 'page'`, then
+`family: 'alias'`) are covered in `tests/version-picker/`.
+
+== Some content
+
+Scroll target so the sidebar and sticky header both have room to render.
+
+* One
+* Two
+* Three

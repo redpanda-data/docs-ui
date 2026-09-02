@@ -2299,3 +2299,17 @@ html[data-theme="dark"] .ch3-footer-note a {
 .ch3-footer-note a:hover {
   text-decoration: underline;
 }
+
+/* Page absent from this version: the row still navigates, but only as far as that
+   version's home page. Dimmed rather than struck through, since the link is not dead. */
+.sm-ver-row.is-missing .sm-ver-row-v {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--color-jet-50, #9ca3af);
+}
+
+html[data-theme="dark"] .sm-ver-row.is-missing .sm-ver-row-v {
+  font-style: italic;
+  font-weight: 500;
+  color: #8a9bb0;
+}

@@ -206,10 +206,6 @@ html .nav-container.is-active {
   .nav-container.is-active {
     z-index: 5 !important;
   }
-
-  .nav-panel-explore {
-    top: 20px !important;
-  }
 }
 
 @media screen and (min-width: 1024px) {
@@ -271,95 +267,6 @@ html .nav-container.is-active {
   color: inherit;
 }
 
-/* Version container base styling */
-.context .container {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  color: var(--sidebar-fg-muted, #a8b2c7);
-}
-
-/* Version container WITH dropdown - full button styling */
-.context .container.has-dropdown {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  width: 100%;
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  background: transparent;
-}
-
-/* Version container WITHOUT dropdown - subtle pill styling */
-.context .container:not(.has-dropdown) {
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  transition: background 0.15s;
-}
-
-.sidebar[data-theme="light"] .context .container:not(.has-dropdown) {
-  background: var(--grey-100-new, var(--grey-100, #f0f0f0));
-  color: var(--grey-700-new, var(--grey-700, #4a4a4a));
-}
-
-/* Version selector button - reset button styles for accessibility */
-.version-selector-trigger {
-  all: unset;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-}
-
-.version-selector-trigger:focus-visible {
-  outline: 2px solid var(--link-font-color);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-.context .container.has-dropdown:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.sidebar[data-theme="light"] .context .container.has-dropdown {
-  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
-}
-
-.sidebar[data-theme="light"] .context .container.has-dropdown:hover {
-  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
-  border-color: var(--grey-300-new, var(--grey-300, #aaabae));
-}
-
-.context .container.has-dropdown .components,
-.context .container.has-dropdown .versions {
-  display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 8px);
-  align-items: center;
-  z-index: 100;
-  background: #1a2332;
-  white-space: nowrap;
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #e8eef6;
-  animation: versionMenuIn 0.15s ease-out;
-}
-
 @keyframes versionMenuIn {
   from {
     opacity: 0;
@@ -370,49 +277,6 @@ html .nav-container.is-active {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.sidebar[data-theme="light"] .context .container.has-dropdown .components,
-.sidebar[data-theme="light"] .context .container.has-dropdown .versions {
-  background: #fff;
-  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 8px 24px rgba(0, 0, 0, 0.12);
-  color: var(--grey-900-new, var(--grey-900, #181818));
-}
-
-.context:hover {
-  cursor: pointer;
-}
-
-.context .container.has-dropdown .components a,
-.context .container.has-dropdown .versions a {
-  padding: 10px 12px;
-  border-radius: 8px;
-  transition: background 0.12s;
-  display: block;
-  font-size: calc(15 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  letter-spacing: -0.005em;
-}
-
-.context .container.has-dropdown .components a:hover,
-.context .container.has-dropdown .versions a:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar[data-theme="light"] .context .container.has-dropdown .components a:hover,
-.sidebar[data-theme="light"] .context .container.has-dropdown .versions a:hover {
-  background: var(--grey-50-new, var(--grey-50, #f5f5f5));
-}
-
-.context .container.has-dropdown.is-active .components,
-.context .container.has-dropdown.is-active .versions {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: calc(100% + 8px); /* Position below parent, not covering it */
 }
 
 .article.lab .nav .panels {
@@ -594,76 +458,6 @@ html[data-theme="light"] .nav-item-toggle {
 
 .nav-item.is-active > .item > .nav-item-toggle {
   transform: rotate(90deg);
-}
-
-.nav-panel-explore {
-  position: relative;
-  z-index: 9;
-  padding: 0 var(--nav-side-padding) 12px;
-}
-
-.nav-panel-explore:not(:first-child) {
-  top: auto;
-  max-height: var(--nav-panel-explore-height);
-}
-
-.nav-panel-explore .context {
-  font-size: var(--secondary-font-size);
-  color: var(--link-highlight-color);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  line-height: 1;
-}
-
-.nav-panel-explore:not(:first-child) .context .container.has-dropdown:has(.components,.versions) {
-  cursor: pointer;
-}
-
-.nav-panel-explore .context .current-version,
-.nav-panel-explore .context .title {
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  color: inherit;
-  letter-spacing: -0.005em;
-}
-
-.sidebar[data-theme="light"] .nav-panel-explore .context .current-version,
-.sidebar[data-theme="light"] .nav-panel-explore .context .title {
-  color: var(--grey-900-new, var(--grey-900, #181818));
-}
-
-.nav-panel-explore .context .version.is-latest,
-.nav-panel-explore .context .version:hover,
-.nav-panel-explore .context .component.is-current,
-.nav-panel-explore .context .component:hover,
-.nav-panel-explore .context .version a:hover,
-.nav-panel-explore .context .component a:hover {
-  background-color: var(--link-highlight-background-color);
-  color: var(--body-font-color);
-}
-
-.nav-panel-explore .context .versions a,
-.nav-panel-explore .context .component a {
-  color: var(--page-version-font-color);
-  text-decoration: none;
-  line-height: 25px;
-  padding-left: 5px;
-  display: block;
-  width: 100%;
-}
-
-.nav-panel-explore .context .version,
-.nav-panel-explore .context .component {
-  flex: 0 0 25px;
-}
-
-.nav-panel-explore .component .title {
-  font-family: var(--body-font-family-bold);
 }
 
 .nav-link.cloud-beta::after {
@@ -1040,39 +834,6 @@ html[data-theme="light"] .sb-search-kbd kbd {
   color: var(--grey-600-new, var(--grey-600, #606164));
 }
 
-/* Sidebar Version Selector Wrapper */
-.sb-version-wrap {
-  padding: 0 14px 12px;
-}
-
-.sb-version-wrap:empty {
-  display: none;
-}
-
-/* Adjust version selector pill styling for sidebar context */
-.sb-version-wrap .sm-ver-pill {
-  width: 100%;
-  justify-content: flex-start;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  padding: 8px 10px;
-}
-
-.sb-version-wrap .sm-ver-pill:hover {
-  background: rgba(255, 255, 255, 0.07);
-}
-
-html[data-theme="light"] .sb-version-wrap .sm-ver-pill {
-  background: #fff;
-  border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
-}
-
-html[data-theme="light"] .sb-version-wrap .sm-ver-pill:hover {
-  background: #fff;
-  border-color: var(--grey-300-new, var(--grey-300, #aaabae));
-}
-
 html[data-theme="light"] .nav-list {
   color: var(--grey-600-new, var(--grey-600, #606164));
 }
@@ -1362,14 +1123,6 @@ html[data-theme="light"] .nav-bucket-version-btn:hover {
     right: auto;
     max-width: calc(100vw - 40px);
   }
-
-  /* Fix explore panel version dropdown positioning on mobile */
-  .context .container.has-dropdown .versions,
-  .context .container.has-dropdown .components {
-    left: 0;
-    right: auto;
-    max-width: calc(100vw - var(--nav-side-padding) - var(--nav-side-padding) - 32px);
-  }
 }
 
 @keyframes bucket-version-menu-in {
@@ -1600,4 +1353,10 @@ html[data-theme="light"] .nav-menu > .nav-list > .nav-item .item.is-current-page
   border-left-width: 1.5px;
   margin-left: 10px;
   padding-left: 10px;
+}
+
+/* Version exists, this page does not: the option lands on that version's home page */
+.nav-bucket-version-opt.is-missing {
+  font-style: italic;
+  opacity: 0.7;
 }

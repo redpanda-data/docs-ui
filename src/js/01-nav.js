@@ -37,8 +37,6 @@
   var menuPanel = navContainer.querySelector('[data-panel=menu]')
   if (!menuPanel) return
 
-  var explorePanel = navContainer.querySelector('[data-panel=explore]')
-
   var currentPageItem = menuPanel.querySelector('.is-current-page')
   var originalPageItem = currentPageItem
   var is404 = !!document.getElementById('page-404')
@@ -91,34 +89,6 @@
       })
     }
   })
-
-  if (explorePanel) {
-    explorePanel.querySelector('.context').addEventListener('click', function () {
-      // NOTE logic assumes there are only two panels
-      find(nav, '[data-panel]').forEach(function (panel) {
-        panel.classList.toggle('is-active')
-      })
-    })
-    // Get all the containers with the "has-dropdown" class
-    const dropdownContainers = explorePanel.querySelectorAll('.context .container.has-dropdown')
-
-    dropdownContainers.forEach((container) => {
-      container.addEventListener('click', () => {
-        var isActive = container.classList.toggle('is-active')
-        // Update aria-expanded on the button trigger for accessibility
-        var trigger = container.querySelector('.version-selector-trigger')
-        if (trigger) trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false')
-      })
-    })
-    document.documentElement.addEventListener('click', function () {
-      dropdownContainers.forEach((container) => {
-        container.classList.remove('is-active')
-        // Reset aria-expanded when closing dropdowns
-        var trigger = container.querySelector('.version-selector-trigger')
-        if (trigger) trigger.setAttribute('aria-expanded', 'false')
-      })
-    })
-  }
 
   // NOTE prevent text from being selected by double click
   menuPanel.addEventListener('mousedown', function (e) {

@@ -59,7 +59,7 @@
         <div class="sm-ver-rows">
           {{#each page.versions}}
           {{#if ./prerelease}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="beta" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}{{#if ./missing}} is-missing{{/if}}" data-status="beta"{{#if ./missing}} title="Not available in v{{./displayVersion}}. Opens that version's home page."{{/if}} href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{./displayVersion}}</span>
               <span class="sm-ver-row-note">Beta</span>
@@ -101,7 +101,7 @@
         <div class="sm-ver-rows">
           {{#each page.versions}}
           {{#if (and (not ./prerelease) (eq ./version @root.page.component.latest.version))}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="current" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}{{#if ./missing}} is-missing{{/if}}" data-status="current"{{#if ./missing}} title="Not available in v{{./displayVersion}}. Opens that version's home page."{{/if}} href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{./displayVersion}}</span>
               <span class="sm-ver-row-note">Latest</span>
@@ -145,7 +145,7 @@
           {{#unless ./prerelease}}
           {{#unless (eq ./version @root.page.component.latest.version)}}
           {{#unless (is-eol ./asciidoc.attributes)}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="supported" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}{{#if ./missing}} is-missing{{/if}}" data-status="supported"{{#if ./missing}} title="Not available in v{{./displayVersion}}. Opens that version's home page."{{/if}} href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{./displayVersion}}</span>
             </div>
@@ -189,7 +189,7 @@
           {{#each page.versions}}
           {{#unless ./prerelease}}
           {{#if (is-eol ./asciidoc.attributes)}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="eol" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}{{#if ./missing}} is-missing{{/if}}" data-status="eol"{{#if ./missing}} title="Not available in v{{./displayVersion}}. Opens that version's home page."{{/if}} href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{./displayVersion}}</span>
             </div>

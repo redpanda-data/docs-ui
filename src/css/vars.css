@@ -171,7 +171,6 @@ html[data-theme=dark] {
   --announcement-bar-height--desktop: 0px; /* Set by JS when announcement is shown */
   --nav-height--desktop: var(--body-min-height);
   --nav-panel-menu-height: calc(100% - var(--drawer-height));
-  --nav-panel-explore-height: calc(50% + var(--drawer-height));
   --nav-width: 280px;
   --toc-top: calc(var(--body-top) + var(--toolbar-height) + 3rem);
   --toc-height: calc(100vh - var(--toc-top) - 2.5rem);

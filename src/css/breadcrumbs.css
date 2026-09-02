@@ -62,44 +62,6 @@ a + .breadcrumbs {
   text-decoration: none;
 }
 
-/* Version selector in breadcrumbs */
-.breadcrumbs .sm-ver {
-  position: relative;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-/* Adjust pill colors for light background context */
-.breadcrumbs .sm-ver-pill {
-  background: var(--color-smoke-30, #f4f4f5);
-  border-color: var(--color-smoke-70, #dcdcde);
-}
-
-.breadcrumbs .sm-ver-pill:hover {
-  background: var(--color-smoke-50, #e8e8ea);
-  border-color: var(--color-smoke-90, #c3c4c6);
-}
-
-.breadcrumbs .sm-ver-pill-label,
-.breadcrumbs .sm-ver-pill-num {
-  color: var(--color-jet-80, #48484a);
-}
-
-.breadcrumbs .sm-ver-pill-caret {
-  color: var(--color-jet-50, #9ca3af);
-}
-
-/* Panel positioning for breadcrumbs context */
-.breadcrumbs .sm-ver-panel {
-  right: 0;
-  left: auto;
-}
-
-/* Hide version selector from breadcrumbs on component-home-v3 pages (shown in hero instead) */
-.component-home-v3 .breadcrumbs .sm-ver {
-  display: none;
-}
-
 /* Mobile: Stack version selector below breadcrumbs */
 @media screen and (max-width: 768px) {
   .breadcrumbs {
@@ -109,24 +71,5 @@ a + .breadcrumbs {
   .breadcrumbs ul {
     width: 100%;
     margin-bottom: 8px;
-  }
-
-  .breadcrumbs .sm-ver {
-    width: 100%;
-    margin-left: 0;
-  }
-}
-
-/* Mobile: Reset panel positioning to allow centering on small screens */
-@media (max-width: 640px) {
-  .breadcrumbs .sm-ver-panel {
-    right: auto;
-    left: 50%;
-    position: fixed;
-    top: 50%;
-  }
-
-  .breadcrumbs .sm-ver.is-open .sm-ver-panel {
-    transform: translate(-50%, -50%) scale(1);
   }
 }

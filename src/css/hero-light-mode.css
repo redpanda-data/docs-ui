@@ -86,8 +86,6 @@ html:not([data-theme="dark"]) .ch3-product-chip {
   color: #fff;
 }
 
-/* Light mode version pill */
-html:not([data-theme="dark"]) .ch3-sm-ver-pill,
 html:not([data-theme="dark"]) .sm-ver-pill {
   background: rgba(20, 26, 54, 0.06);
   border-color: rgba(20, 26, 54, 0.12);

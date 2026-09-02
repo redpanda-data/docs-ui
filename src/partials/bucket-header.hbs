@@ -86,65 +86,51 @@
     <span class="nav-bucket-title">{{bucket.title}}</span>
   </a>
 
-  {{!-- Per-bucket version selector (only if multiple versions) --}}
-  {{#if (and bucket.versions (gt bucket.versions.length 1))}}
+  {{!-- Per-bucket version selector. resolve-bucket-versions points each option at the
+        equivalent page in that version and returns undefined when there is nothing to
+        show (pseudo-bucket, or a single version), so #with is the guard. --}}
+  {{#with (resolve-bucket-versions bucket) as |vers|}}
+  {{#* inline "navBucketVersionOpt"}}
+      <a class="nav-bucket-version-opt{{#if ver.isCurrent}} is-selected{{/if}}{{#if ver.missing}} is-missing{{/if}}"
+         role="option"
+         aria-selected="{{#if ver.isCurrent}}true{{else}}false{{/if}}"
+         {{#if ver.missing}}title="Not available in v{{ver.displayVersion}}. Opens that version's home page."{{/if}}
+         href="{{{relativize ver.url}}}">
+        v{{ver.displayVersion}}
+        {{#if ver.isEol}}<span class="version-eol">(EOL)</span>{{/if}}
+      </a>
+  {{/inline}}
   <div class="nav-bucket-version" data-bucket-version>
     <button type="button" class="nav-bucket-version-btn" aria-haspopup="listbox" aria-expanded="false">
-      <span>v{{bucket.currentVersion}}</span>
+      <span>v{{vers.currentDisplayVersion}}</span>
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
     </button>
     <div class="nav-bucket-version-menu" role="listbox" style="display: none;">
-      {{!-- Show first 5 versions by default (recent versions) --}}
-      {{#each bucket.versions}}
-      {{#if (lt @index 5)}}
-      <a class="nav-bucket-version-opt{{#if (eq this.displayVersion ../bucket.currentVersion)}} is-selected{{/if}}"
-         role="option"
-         href="{{{this.url}}}">
-        v{{this.displayVersion}}
-        {{#if this.isEol}}<span class="version-eol">(EOL)</span>{{/if}}
-      </a>
-      {{/if}}
+      {{!-- Newest versions: all of them when the list is short, the newest 5 otherwise --}}
+      {{#each vers.recent as |ver|}}
+      {{> navBucketVersionOpt ver=ver}}
       {{/each}}
 
-      {{!-- Older versions (hidden by default if more than 6 total) --}}
-      {{#if (gt bucket.versions.length 6)}}
+      {{!-- Older versions, collapsed behind the toggle that 23-nav-bucket.js drives --}}
+      {{#if vers.older.length}}
       <div class="nav-bucket-version-older" style="display: none;">
-        {{#each bucket.versions}}
-        {{#if (gte @index 5)}}
-        <a class="nav-bucket-version-opt{{#if (eq this.displayVersion ../bucket.currentVersion)}} is-selected{{/if}}"
-           role="option"
-           href="{{{this.url}}}">
-          v{{this.displayVersion}}
-          {{#if this.isEol}}<span class="version-eol">(EOL)</span>{{/if}}
-        </a>
-        {{/if}}
+        {{#each vers.older as |ver|}}
+        {{> navBucketVersionOpt ver=ver}}
         {{/each}}
       </div>
       <button type="button" class="nav-bucket-version-toggle" data-version-toggle>
-        <span class="version-toggle-show">Show {{subtract bucket.versions.length 5}} older versions</span>
+        <span class="version-toggle-show">Show {{vers.older.length}} older versions</span>
         <span class="version-toggle-hide" style="display: none;">Hide older versions</span>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
-      {{else}}
-      {{!-- If 6 or fewer versions, show remaining without toggle --}}
-      {{#each bucket.versions}}
-      {{#if (gte @index 5)}}
-      <a class="nav-bucket-version-opt{{#if (eq this.displayVersion ../bucket.currentVersion)}} is-selected{{/if}}"
-         role="option"
-         href="{{{this.url}}}">
-        v{{this.displayVersion}}
-        {{#if this.isEol}}<span class="version-eol">(EOL)</span>{{/if}}
-      </a>
-      {{/if}}
-      {{/each}}
       {{/if}}
     </div>
   </div>
-  {{/if}}
+  {{/with}}
 
   {{!-- Expand/collapse caret - always at far right --}}
   <button type="button" class="nav-bucket-caret-btn" aria-hidden="true" tabindex="-1" data-bucket-caret>

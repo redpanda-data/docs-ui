@@ -1145,17 +1145,6 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
 
 /* Responsive sizing for topbar - compact mode at medium widths */
 @media screen and (min-width: 1024px) and (max-width: 1400px) {
-  /* Hide version selector label to save space */
-  .topbar-crumbs .sm-ver-pill-label {
-    display: none;
-  }
-
-  /* Compact version status badge */
-  .topbar-crumbs .sm-ver-pill-status {
-    font-size: calc(12 / var(--rem-base) * 1rem);
-    padding: 2px 6px;
-  }
-
   .tb-ai-btn svg {
     width: 14px;
     height: 14px;
