@@ -9,7 +9,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 420px;
+  width: 480px;
   height: 100vh;
   background: var(--kapa-surface, #fff);
   color: var(--kapa-text, #181818);
@@ -94,8 +94,7 @@
 /* Scrollable content area */
 .chat-scroll {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   padding: 0;
   min-height: 0; /* Critical for flex children to respect parent constraints */
   position: relative;
@@ -124,7 +123,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 0;
   font-family: var(--font-sans, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
 }
 
@@ -132,17 +130,17 @@
 #chat-panel-kapa-root .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Conversation area - scrollable */
 #chat-panel-kapa-root .conversation-area {
   flex: 1;
-  overflow-y: auto;
-  padding: 16px 18px 240px;
   min-height: 0;
+  overflow-y: auto;
   overscroll-behavior: contain;
+  padding: 16px 18px 24px;
 }
 
 #chat-panel-kapa-root .conversation {
@@ -311,9 +309,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
-  margin-bottom: 20px;
-  min-height: 60px;
+  margin: 8px 0 12px;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
 #chat-panel-kapa-root .action-buttons {
@@ -345,7 +347,8 @@
   height: 12px;
 }
 
-/* Feedback buttons (thumbs up/down) */
+/* Feedback buttons (thumbs up/down) — anonymous (Chat SDK) tier only; the
+   Agent SDK has no addFeedback equivalent, so the agent drawer omits them. */
 #chat-panel-kapa-root .feedback-container {
   display: flex;
   gap: 2px;
@@ -381,6 +384,41 @@
   height: 14px;
 }
 
+/* Failed exchange: shown in place of the action row when a query settled with
+   no answer (most often the captcha gate aborting before any request). */
+#chat-panel-kapa-root .chat-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--kapa-border-subtle, #e5e5e5);
+  border-left: 3px solid #d97706;
+  border-radius: 6px;
+  background: var(--kapa-surface-elevated, #fffbeb);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--kapa-text, #374151);
+}
+
+#chat-panel-kapa-root .chat-error-icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+  color: #d97706;
+}
+
+#chat-panel-kapa-root .chat-error-text {
+  flex: 1 1 auto;
+  line-height: 1.45;
+}
+
+#chat-panel-kapa-root .chat-error-retry {
+  flex: none;
+  align-self: center;
+  white-space: nowrap;
+}
+
 /* Footer wrapper - fixed at bottom */
 #chat-panel-kapa-root .chat-footer-wrapper {
   background: var(--kapa-surface, #fff);
@@ -389,14 +427,22 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  /* Explicit: page-level styles for the legacy home-page chat (home.css
+     .chat-footer-wrapper rules) must not leak into the panel. relative (not
+     static) so the absolute .scroll-down-button is contained here rather than
+     falling back to .chat-scroll and being clipped by its overflow:hidden. */
+  position: relative;
+  z-index: auto;
+  max-width: none;
+  width: auto;
 }
 
 #chat-panel-kapa-root .chat-footer-wrapper.fixed-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   border-top: 1px solid var(--kapa-border, #e5e5e5);
+  position: relative;
+  bottom: auto;
+  padding: 0;
+  background: var(--kapa-surface, #fff);
 }
 
 #chat-panel-kapa-root .chat-footer-wrapper form {
@@ -550,11 +596,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 60px 24px 24px;
+  justify-content: flex-start;
+  padding: 40px 24px 24px;
   text-align: center;
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
 }
 
 #chat-panel-kapa-root .welcome-icon {
@@ -624,7 +671,7 @@
 
 #chat-panel-kapa-root .chat-input-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   background: var(--kapa-surface, #fff);
   border: 2px solid var(--kapa-border-subtle, #e5e5e5);
@@ -706,7 +753,8 @@
 
 /* Disclaimer - always visible at bottom */
 #chat-panel-kapa-root .disclaimer {
-  padding: 10px 14px 14px;
+  margin: 0;
+  padding: 8px 14px 10px;
   font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--kapa-text-muted, #6b7280);
   text-align: center;
@@ -774,7 +822,16 @@
 /* Narrow desktop: reduce chat panel width to fit better */
 @media (min-width: 1024px) and (max-width: 1399px) {
   .chat-panel {
-    width: 340px;
+    width: 380px;
+  }
+}
+
+/* Tablet / small laptop inherits the 480px default, which would swallow most of
+   a narrow window — cap it against the viewport instead. Scoped to :not(
+   .is-fullscreen) so the full-screen toggle still spans the width. */
+@media (min-width: 521px) and (max-width: 1023px) {
+  .chat-panel:not(.is-fullscreen) {
+    width: min(480px, 70vw);
   }
 }
 
@@ -909,17 +966,6 @@
   color: var(--kapa-text-muted);
 }
 
-.dark-theme #chat-panel-kapa-root .feedback-button {
-  border-color: var(--kapa-border-subtle);
-  color: var(--kapa-text-muted);
-}
-
-.dark-theme #chat-panel-kapa-root .feedback-button:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--kapa-border);
-  color: var(--kapa-text-subtle);
-}
-
 /* =============================================================================
    TOAST NOTIFICATIONS
    Floating toast for copy/feedback confirmations
@@ -1018,4 +1064,461 @@
   color: #fecaca;
   border-color: #ef4444;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(239, 68, 68, 0.2);
+}
+
+/* ——— Conversation history (Kapa Agent SDK) ——— */
+#chat-panel-kapa-root .chat-history-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 0 0;
+}
+
+#chat-panel-kapa-root .chat-history-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 8px 18px;
+  border: 1px solid var(--kapa-border, #dcdcde);
+  border-radius: 8px;
+  background: var(--kapa-surface, #fff);
+}
+
+/* ——— Per-answer sources ——— */
+#chat-panel-kapa-root .answer-sources {
+  margin-top: 8px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+}
+
+#chat-panel-kapa-root .answer-sources-label {
+  display: block;
+  font-weight: 600;
+  color: var(--kapa-text-muted, #4b5563);
+  margin-bottom: 2px;
+}
+
+#chat-panel-kapa-root .answer-sources ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+#chat-panel-kapa-root .answer-sources li {
+  margin: 2px 0;
+}
+
+#chat-panel-kapa-root .answer-sources a {
+  color: var(--kapa-accent, #444ce7);
+  text-decoration: none;
+}
+
+#chat-panel-kapa-root .answer-sources a:hover {
+  text-decoration: underline;
+}
+
+/* ——— Error answers ——— */
+/* #ef4444 failed WCAG AA as text in both themes (3.76:1 on white, 4.44:1 on the
+   dark surface). Use a darker red in light and a lighter one in dark. */
+#chat-panel-kapa-root .qa-pair-error .answer {
+  color: #d92d20;
+}
+
+.dark-theme #chat-panel-kapa-root .qa-pair-error .answer {
+  color: #f87171;
+}
+
+/* ——— Full-screen mode ——— */
+.chat-panel .chat-icon-collapse {
+  display: none;
+}
+
+.chat-panel.is-fullscreen .chat-icon-expand {
+  display: none;
+}
+
+.chat-panel.is-fullscreen .chat-icon-collapse {
+  display: block;
+}
+
+.chat-panel.is-fullscreen {
+  width: 100%;
+  border-left: none;
+  box-shadow: none;
+}
+
+/* Keep a readable centered column when the panel spans the viewport */
+.chat-panel.is-fullscreen #chat-panel-kapa-root .conversation,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .welcome-screen,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .chat-history-toggle-row,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .chat-history-view,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .chat-input-form,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .disclaimer {
+  width: 100%;
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* The drawer is already full-width on small screens */
+@media (max-width: 520px) {
+  .chat-panel [data-chat-action="expand"] {
+    display: none;
+  }
+}
+
+/* ——— Multiline input (Enter submits, Shift+Enter adds a line) ——— */
+#chat-panel-kapa-root .chat-input-wrapper textarea.chat-input {
+  resize: none;
+  min-height: 0;
+  max-height: 132px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+#chat-panel-kapa-root .chat-input-wrapper .submit-button {
+  flex-shrink: 0;
+}
+
+/* ——— Agent tool call cards (SDK-rendered) ——— */
+#chat-panel-kapa-root .tool-calls {
+  margin: 8px 0;
+}
+
+/* ——— Sign-in gate (agent tier is signed-in only) ——— */
+#chat-panel-kapa-root .signin-screen {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 48px 24px 24px;
+  text-align: center;
+}
+
+#chat-panel-kapa-root .signin-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 28px;
+  background: var(--kapa-accent, #444ce7);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  text-decoration: none;
+}
+
+#chat-panel-kapa-root .signin-button:hover {
+  background: var(--kapa-accent-hover, #3538cd);
+  text-decoration: none;
+}
+
+#chat-panel-kapa-root .signin-quick-ask {
+  margin-top: 14px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  color: var(--kapa-text-muted, #79797d);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#chat-panel-kapa-root .signin-quick-ask:hover {
+  color: var(--kapa-text, #181818);
+}
+
+#chat-panel-kapa-root .signin-coming-soon {
+  margin: 16px 0 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--kapa-text-muted, #79797d);
+}
+
+/* Privacy disclosure — showing it here lets /login skip the server
+   interstitial (disclosed=1). Keep in sync with the header modal note. */
+#chat-panel-kapa-root .signin-privacy-note {
+  margin: 18px 0 0;
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--kapa-text-muted, #79797d);
+}
+
+#chat-panel-kapa-root .signin-privacy-note a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+#chat-panel-kapa-root button.signin-button {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dark-theme #chat-panel-kapa-root .signin-button {
+  color: #0f1729;
+}
+
+#chat-panel-kapa-root .signin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--kapa-accent-soft, #eef0fe);
+  color: var(--kapa-accent, #444ce7);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 600;
+}
+
+#chat-panel-kapa-root .signin-features {
+  margin: 4px auto 22px;
+  padding: 0;
+  max-width: 340px;
+  width: 100%;
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--kapa-text, #181818);
+}
+
+#chat-panel-kapa-root .signin-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#chat-panel-kapa-root .signin-feature-icon {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--kapa-accent-soft, #eef0fe);
+  color: var(--kapa-accent, #444ce7);
+}
+
+#chat-panel-kapa-root .signin-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+#chat-panel-kapa-root .signin-feature-label {
+  font-size: calc(14.5 / var(--rem-base) * 1rem);
+  font-weight: 650;
+  line-height: 1.3;
+  color: var(--kapa-text, #181818);
+}
+
+#chat-panel-kapa-root .signin-feature-desc {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  line-height: 1.4;
+  color: var(--kapa-text-muted, #6b7280);
+}
+
+/* Sign-in intro reads a touch larger than the shared welcome-screen copy. */
+#chat-panel-kapa-root .signin-screen .welcome-description {
+  font-size: calc(16 / var(--rem-base) * 1rem);
+}
+
+/* Dark mode: indigo tint tiles + readable text */
+.dark-theme #chat-panel-kapa-root .signin-badge,
+.dark-theme #chat-panel-kapa-root .signin-feature-icon {
+  background: rgba(128, 152, 249, 0.14);
+  color: #9fb0fb;
+}
+
+.dark-theme #chat-panel-kapa-root .signin-feature-label {
+  color: var(--kapa-text, #e8eef6);
+}
+
+.dark-theme #chat-panel-kapa-root .signin-feature-desc {
+  color: var(--kapa-text-subtle, #aab8ca);
+}
+
+/* ——— Scroll-to-input button (panel-scoped; home.css only styles it under .home) ——— */
+#chat-panel-kapa-root .scroll-down-button {
+  position: absolute;
+  top: -3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--kapa-surface, #fff);
+  color: var(--kapa-text, #181818);
+  border: 1px solid var(--kapa-border, #e5e5e5);
+  border-radius: 50%;
+  padding: 8px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+}
+
+#chat-panel-kapa-root .scroll-down-button:hover {
+  background: var(--kapa-surface-hover, #ebebeb);
+}
+
+#chat-panel-kapa-root .scroll-down-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dark-theme #chat-panel-kapa-root .chat-error {
+  background: var(--kapa-surface-elevated, #232f3e);
+  border-color: rgba(255, 255, 255, 0.28);
+  border-left-color: #f0b429;
+  color: var(--kapa-text, #e8eef6);
+}
+
+.dark-theme #chat-panel-kapa-root .chat-error-icon {
+  color: #f0b429;
+}
+
+.dark-theme #chat-panel-kapa-root .action-button,
+.dark-theme #chat-panel-kapa-root .feedback-button,
+.dark-theme #chat-panel-kapa-root .chat-history-toggle {
+  color: var(--kapa-text-subtle, #aab8ca);
+  background: var(--kapa-surface-elevated, #232f3e);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.dark-theme #chat-panel-kapa-root .action-button:hover,
+.dark-theme #chat-panel-kapa-root .feedback-button:hover,
+.dark-theme #chat-panel-kapa-root .chat-history-toggle:hover {
+  color: var(--kapa-text, #e8eef6);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: var(--kapa-surface-hover, #2d3a53);
+}
+
+/* ——— Anonymous-tier upsell banner ——— */
+#chat-panel-kapa-root .chat-upsell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 18px 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--kapa-surface-elevated, #f5f5f5);
+  border: 1px solid var(--kapa-border, #e5e5e5);
+  color: var(--kapa-text, #181818);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+#chat-panel-kapa-root .chat-upsell:hover {
+  border-color: var(--kapa-accent, #444ce7);
+  text-decoration: none;
+}
+
+/* While /login loads (it can cold-start): dim + block re-clicks. */
+#chat-panel-kapa-root .chat-upsell.is-signing-in,
+#chat-panel-kapa-root .signin-button.is-signing-in {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+#chat-panel-kapa-root .chat-upsell svg:first-child {
+  color: var(--kapa-accent, #444ce7);
+  flex-shrink: 0;
+}
+
+#chat-panel-kapa-root .chat-upsell span {
+  flex: 1;
+  min-width: 0;
+}
+
+#chat-panel-kapa-root .chat-upsell svg:last-child {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* ——— Tier probe loading dot ——— */
+#chat-panel-kapa-root .chat-tier-loading {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--kapa-border, #e5e5e5);
+  border-top-color: var(--kapa-accent, #444ce7);
+  border-radius: 50%;
+  animation: chat-tier-spin 0.7s linear infinite;
+}
+
+@keyframes chat-tier-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  #chat-panel-kapa-root .chat-tier-loading { animation: none; }
+}
+
+/* ——— Agent example-action cards (signed-in welcome screen) ——— */
+#chat-panel-kapa-root .suggestion-card-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+#chat-panel-kapa-root .suggestion-card-action .suggestion-card-icon {
+  flex-shrink: 0;
+  color: var(--kapa-accent, #444ce7);
+}
+
+#chat-panel-kapa-root .suggestion-card-action span {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ——— Interim narration (model reasoning summaries between tool calls) ——— */
+/* Machine-condensed thinking, not the agent's voice: mute it so nobody reads
+   it as the answer. Preserved for transparency during long tool chains. */
+#chat-panel-kapa-root .answer-interim {
+  margin: 6px 0;
+  font-size: calc(12.5 / var(--rem-base) * 1rem);
+  font-style: italic;
+  color: var(--kapa-text-muted, #6b7280);
+  opacity: 0.85;
+  white-space: pre-wrap;
+}
+
+/* ——— Clarifying-question option chips (OPTIONS: A | B protocol) ——— */
+#chat-panel-kapa-root .answer-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+
+#chat-panel-kapa-root .answer-option {
+  padding: 6px 14px;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--kapa-accent, #444ce7);
+  background: transparent;
+  border: 1px solid var(--kapa-accent, #444ce7);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+#chat-panel-kapa-root .answer-option:hover:not(:disabled) {
+  background: var(--kapa-accent, #444ce7);
+  color: #fff;
+}
+
+#chat-panel-kapa-root .answer-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#chat-panel-kapa-root .answer-option:focus-visible {
+  outline: 2px solid var(--kapa-accent, #444ce7);
+  outline-offset: 2px;
 }

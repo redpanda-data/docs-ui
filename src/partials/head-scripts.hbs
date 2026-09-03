@@ -286,7 +286,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </script>
 <script src="{{{uiRootPath}}}/js/vendor/wasm_exec.js"></script>
 {{/if}}
-{{#if (ne page.attributes.role 'home')}}
+{{!-- Loaded on every page (including role=home): the signed-in-only agent
+      panel hands anonymous visitors to this stock widget via loadKapa() --}}
 <!-- Kapa AI Widget - Lazy loaded on first interaction for performance -->
 <script>
 (function() {
@@ -381,7 +382,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
 })();
 </script>
-{{/if}}
 {{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true'))}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css" media="print" onload="this.media='all'">
 <noscript>
