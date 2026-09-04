@@ -32,6 +32,11 @@ const ROOT = path.join(__dirname, '..', '..')
 const helper = require(path.join(ROOT, 'src/helpers/get-kapa-source-groups.js'))
 const { versionSegmentFromUrl } = helper
 
+// Antora compiles each helper in isolation, so the segment is a MODE of the one
+// helper rather than a second file that requires it. A sibling require fails at
+// page-composition time with a fatal error and takes the whole build down.
+const segmentHelper = (opts) => helper('segment', opts)
+
 // A trimmed copy of the shape doc-tools' generate kapa-source-groups emits.
 const MAPPING = {
   project_id: '97f44223-f930-4fb9-ae1e-ecd436a4d85c',
@@ -240,4 +245,105 @@ test('sourceGroupProps omits the prop entirely when there is nothing to send', (
   for (const w of [{}, { KAPA_SOURCE_GROUP_IDS: [] }, { KAPA_SOURCE_GROUP_IDS: null }, { KAPA_SOURCE_GROUP_IDS: 'nope' }, { KAPA_SOURCE_GROUP_IDS: [null, ''] }]) {
     assert.deepEqual(fn(w, SOURCE_GROUP_PROP)('agent'), {}, JSON.stringify(w))
   }
+})
+
+// The reported segment and the sent group must come from ONE resolution.
+//
+// The bug this prevents, found by review: currentPageContext() in AskAI.jsx
+// re-derived the version with its own URL regex, so for /streaming/26.2/... it
+// said "26.2" while get-kapa-source-groups sent the `current` group (26.2 is
+// not a segment; the latest release publishes at /streaming/current/). The
+// prompt then told the model the results were 26.2-only AND not to ask, so the
+// agent attributed a current-version answer to 26.2.
+
+// A page carrying the mapping on its component version, built without hand
+// nesting so the brace depth cannot drift.
+const withMapping = (url, mapping = MAPPING) => ({
+  data: {
+    root: {
+      page: {
+        url,
+        componentVersion: { asciidoc: { attributes: { 'kapa-source-groups': mapping } } },
+      },
+    },
+  },
+})
+
+test('the reported segment always names the group that was actually sent', () => {
+  for (const url of [
+    '/streaming/25.2/manage/monitoring/',
+    '/streaming/current/get-started/intro/',
+    '/streaming/26.2/get-started/intro/',   // the reported failure: not a segment
+    '/streaming/26.9/get-started/intro/',   // published, no Kapa group yet
+    '/24.2/manage/monitoring/',             // pre-rename layout
+    '/cloud-data-platform/get-started/',
+    '/home/',
+  ]) {
+    const opts = withMapping(url)
+    const ids = helper(opts)
+    const segment = segmentHelper(opts)
+    assert.equal(ids.length, 1, `expected one group for ${url}`)
+    assert.equal(MAPPING.segments[segment].group_id, ids[0], `segment/group disagree for ${url}`)
+  }
+})
+
+test('a page on the latest release reports current, not the release number', () => {
+  // 26.2 publishes at /streaming/current/, so 26.2 must never be reported.
+  assert.equal(segmentHelper(withMapping('/streaming/26.2/x/')), 'current')
+})
+
+test('the reported segment is empty whenever no group is sent', () => {
+  // The prompt keys off this to decide whether it may claim a restriction.
+  const cases = [
+    { data: { root: {} } },
+    { data: { root: { page: { url: '/streaming/25.2/x/' } } } },  // no mapping anywhere
+    withMapping('/x/', '{ not json'),                             // unparseable mapping
+  ]
+  for (const opts of cases) {
+    assert.deepEqual(helper(opts), [], 'expected no group')
+    assert.equal(segmentHelper(opts), '', 'expected no segment')
+  }
+})
+
+test('AskAI reads the emitted segment rather than re-deriving it from the URL', () => {
+  // Guards the fix structurally: a reintroduced regex here would silently
+  // reopen the disagreement.
+  const askai = fs.readFileSync(path.join(ROOT, 'src/js/react/AskAI.jsx'), 'utf8')
+  const ctx = askai.slice(askai.indexOf('function currentPageContext'))
+  const body = ctx.slice(0, ctx.indexOf('\n}'))
+  assert.match(body, /window\.KAPA_SOURCE_GROUP_SEGMENT/)
+  assert.doesNotMatch(body, /\\d\+\\\.\\d\+/, 'currentPageContext must not parse a version out of the URL itself')
+})
+
+test('the chat panel emits the segment alongside the group ids', () => {
+  const partial = fs.readFileSync(path.join(ROOT, 'src/partials/chat-panel.hbs'), 'utf8')
+  assert.match(partial, /window\.KAPA_SOURCE_GROUP_SEGMENT/)
+  assert.match(partial, /get-kapa-source-groups 'segment'/)
+})
+
+test('a helper must never require a sibling helper', () => {
+  // Antora compiles every UI helper in isolation. A relative require of another
+  // helper resolves at page-composition time, not load time, and fails FATAL:
+  // "Cannot find module './get-kapa-source-groups.js' ... in UI template
+  // layouts/default.hbs", which aborts the entire site build. Caught by a real
+  // all-components Antora build, not by unit tests.
+  const dir = path.join(ROOT, 'src/helpers')
+  const offenders = []
+  for (const f of fs.readdirSync(dir).filter((n) => n.endsWith('.js'))) {
+    const src = fs.readFileSync(path.join(dir, f), 'utf8')
+    for (const m of src.matchAll(/require\(\s*['"](\.\/[^'"]+)['"]\s*\)/g)) {
+      offenders.push(`${f} requires ${m[1]}`)
+    }
+  }
+  assert.deepEqual(offenders, [])
+})
+
+test('the helper serves both outputs from one call site', () => {
+  // The array form must keep working with no argument, because that is how
+  // Handlebars invokes it in the each-block.
+  const opts = withMapping('/streaming/25.2/x/')
+  assert.deepEqual(helper(opts), [MAPPING.segments['25.2'].group_id])
+  assert.equal(helper('segment', opts), '25.2')
+  // An unrecognised mode falls back to the array rather than throwing.
+  assert.deepEqual(helper('nonsense', opts), [MAPPING.segments['25.2'].group_id])
 })

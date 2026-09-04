@@ -51,23 +51,69 @@
  * @param {object} options - Handlebars options with data.root.page and data.root.site
  * @returns {string[]} Zero or one Kapa source group id
  */
-module.exports = function (options) {
+/**
+ * Two outputs from one resolution, selected by an optional mode argument:
+ *
+ *   {{#each (get-kapa-source-groups)}}   -> array of zero or one group id
+ *   {{get-kapa-source-groups 'segment'}} -> the segment that group represents
+ *
+ * One helper rather than two, because Antora compiles every UI helper in
+ * isolation and a helper CANNOT require a sibling helper: doing so fails at
+ * page-composition time with a fatal "Cannot find module" and takes the whole
+ * build down. Copying the resolution into a second file instead would
+ * reintroduce exactly the disagreement this is here to prevent.
+ *
+ * Handlebars passes params before the options object, so with no argument the
+ * first parameter IS the options object.
+ */
+module.exports = function (mode, options) {
+  const opts = options === undefined ? mode : options
+  const { segment, groupId } = resolve(opts)
+  if (mode === 'segment') {
+    // Only name a segment when a group is genuinely being sent, so the agent
+    // prompt cannot claim a restriction that is not in force.
+    return groupId && segment ? segment : ''
+  }
+  return groupId ? [groupId] : []
+}
+
+/**
+ * Resolve a page to the group that will actually scope its retrieval, AND the
+ * segment that group represents.
+ *
+ * Both are returned from one place on purpose. The agent's prompt needs to tell
+ * the reader's model which version the answers came from, and any second
+ * derivation of that (say, a regex over window.location) can disagree with the
+ * group actually sent. It did: for /streaming/26.2/... a URL regex yields
+ * "26.2" while this resolves to the `current` group, because the latest release
+ * publishes at /streaming/current/ and 26.2 is not a segment. The prompt would
+ * then promise 26.2-only results over `current` retrieval.
+ *
+ * `segment` is the EFFECTIVE segment, after the fallback to default_segment, so
+ * it always names the group in `groupId` rather than what the URL asked for.
+ *
+ * @param {object} options - Handlebars options
+ * @returns {{segment: string|null, groupId: string|null}}
+ */
+function resolve (options) {
   const root = (options && options.data && options.data.root) || {}
   const { page, site } = root
+  const none = { segment: null, groupId: null }
 
   const mapping = readMapping(page, site)
-  if (!mapping || !mapping.segments) return []
+  if (!mapping || !mapping.segments) return none
 
-  const segment = versionSegmentFromUrl(page && page.url, mapping.segments)
+  const asked = versionSegmentFromUrl(page && page.url, mapping.segments)
 
   // A versioned page whose segment has no group is the case the drift check
   // exists to catch: a version was published and nobody created the Kapa source
   // and group. Fall back to the default rather than sending nothing, so the
   // reader gets current-version answers instead of every version at once.
-  const entry = (segment && mapping.segments[segment]) || mapping.segments[mapping.default_segment]
-  if (!entry || !entry.group_id) return []
+  const effective = (asked && mapping.segments[asked]) ? asked : mapping.default_segment
+  const entry = mapping.segments[effective]
+  if (!entry || !entry.group_id) return none
 
-  return [entry.group_id]
+  return { segment: effective, groupId: entry.group_id }
 }
 
 /**
@@ -151,5 +197,6 @@ function versionSegmentFromUrl (url, segments) {
   return null
 }
 
+module.exports.resolve = resolve
 module.exports.versionSegmentFromUrl = versionSegmentFromUrl
 module.exports.readMapping = readMapping

@@ -65,6 +65,12 @@
       "{{{this}}}"{{#unless @last}},{{/unless}}
       {{/each}}
     ];
+    {{!-- The segment that the group above represents, so the agent prompt can
+          name the version its answers came from without deriving it again from
+          the URL. A second derivation disagrees: /streaming/26.2/ reads as
+          "26.2" while the group sent is `current`. Empty string means nothing
+          was scoped, so the prompt must not claim a restriction. --}}
+    window.KAPA_SOURCE_GROUP_SEGMENT = window.KAPA_SOURCE_GROUP_SEGMENT || "{{{get-kapa-source-groups 'segment'}}}";
     {{!-- Signed-in agent tier: per-component prompts that showcase the agent tools --}}
     window.AGENT_SUGGESTIONS = window.AGENT_SUGGESTIONS || [
       {{#each (get-agent-suggestions)}}
