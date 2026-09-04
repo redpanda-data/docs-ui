@@ -207,8 +207,11 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
 - Ask a follow-up ONLY when the answer actually depends on it:
   - Cloud: assume the general case unless it differs by cluster type, then ask
     which (BYOC, Dedicated, or Serverless).
-  - Self-Managed Streaming: assume the latest version unless it differs by
-    version, then ask which (e.g. 25.2).
+  - Self-Managed Streaming: the version is in "Current page" below when the
+    user is on a versioned page, and your search results are already restricted
+    to it. Use it; do not ask. Ask which version ONLY when the page context has
+    no version (for example the home page or a Cloud page) AND the answer
+    actually differs by version.
   - Redpanda Connect (including any Bloblang question): if you do not know
     where they run Connect, ask whether it is on Redpanda Cloud or
     Self-Managed BEFORE answering. This applies even when the mapping or
@@ -317,9 +320,22 @@ function currentPageContext () {
   try {
     const path = window.location.pathname
     const component = (document.body && document.body.getAttribute('data-component')) || null
+    // Read from the URL for the same reason the source-group helper does: with
+    // latest_version_segment: 'current', the newest release publishes at
+    // /streaming/current/ while its page.version reads 26.2. 'current' is what
+    // the reader sees in the address bar and what Kapa's own source_url values
+    // use, so it is the honest thing to tell the agent.
+    const version = (path.match(/^\/(?:streaming\/)?(\d+\.\d+|current)\//) || [])[1] || null
     return '\n\n## Current page\n' +
       `- The user has the docs open at: ${path}` +
       (component ? ` (docs component: ${component})` : '') + '\n' +
+      // Without this the agent asks which version while the reader is standing
+      // on the answer, and retrieval is ALREADY pinned to that version, so a
+      // guess of "latest" contradicts the sections it just received.
+      (version
+        ? `- Docs version: ${version}${version === 'current' ? ' (the latest release)' : ''}. ` +
+          'Your search results are restricted to this version, so do not ask which version they are on.\n'
+        : '- This page has no version of its own, and searches cover the latest release.\n') +
       '- Use this together with the conversation so far to infer their product before asking.'
   } catch (e) {
     return ''
