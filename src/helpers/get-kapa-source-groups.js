@@ -87,6 +87,12 @@ function readMapping (page, site) {
     page && page.component && page.component.asciidoc && page.component.asciidoc.attributes,
     page && page.attributes,
     site && site.asciidoc && site.asciidoc.attributes,
+    // site.keys last but never redundant: it is the ONLY channel that reaches a
+    // page with no component. The 404 page renders the Ask AI panel yet has no
+    // page.component or page.componentVersion, so without this it would search
+    // every docs version -- and a 404 is a plausible place to ask the AI where
+    // something went.
+    site && site.keys,
   ]
 
   for (const attrs of candidates) {

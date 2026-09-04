@@ -95,6 +95,27 @@ test('a published version with no group falls back to the default rather than se
   assert.deepEqual(call({ url: '/streaming/26.3/get-started/intro/' }), ['grp-cur'])
 })
 
+test('reads the mapping from site.keys, the only channel that reaches the 404 page', () => {
+  // 404.hbs has no page.component and no page.componentVersion, yet it renders
+  // the Ask AI panel. Without site.keys it searched every docs version. Verified
+  // in a real Antora build: 404.html now emits the default group.
+  const root = { page: { url: '/nonexistent/' }, site: { keys: { 'kapa-source-groups': JSON.stringify(MAPPING) } } }
+  assert.deepEqual(helper({ data: { root } }), ['grp-cur'])
+
+  // With no page object at all, which is closer to what the 404 model provides.
+  const bare = { site: { keys: { 'kapa-source-groups': JSON.stringify(MAPPING) } } }
+  assert.deepEqual(helper({ data: { root: bare } }), ['grp-cur'])
+})
+
+test('a component attribute still wins over site.keys', () => {
+  const other = { ...MAPPING, segments: { ...MAPPING.segments, '25.2': { group_id: 'grp-override' } } }
+  const root = {
+    page: { url: '/streaming/25.2/x/', componentVersion: { asciidoc: { attributes: { 'kapa-source-groups': JSON.stringify(other) } } } },
+    site: { keys: { 'kapa-source-groups': JSON.stringify(MAPPING) } },
+  }
+  assert.deepEqual(helper({ data: { root } }), ['grp-override'])
+})
+
 test('reads the mapping from componentVersion, component or site attributes', () => {
   for (const where of ['componentVersion', 'component', 'site']) {
     assert.deepEqual(call({ url: '/streaming/25.2/x/' }, { where }), ['grp-252'], `from ${where}`)
