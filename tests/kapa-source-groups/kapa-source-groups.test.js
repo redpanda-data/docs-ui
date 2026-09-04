@@ -55,19 +55,45 @@ const call = (page, { mapping = MAPPING, where = 'componentVersion' } = {}) => {
   return helper({ data: { root } })
 }
 
+const SEGS = MAPPING.segments
+const seg = (url) => versionSegmentFromUrl(url, SEGS)
+
 test('versionSegmentFromUrl reads the URL segment, which is what the mapping is keyed on', () => {
-  assert.equal(versionSegmentFromUrl('/streaming/25.2/get-started/intro/'), '25.2')
+  assert.equal(seg('/streaming/25.2/get-started/intro/'), '25.2')
   // The latest release publishes at /streaming/current/ even though page.version
   // is 26.2. Getting this from the URL is the whole point.
-  assert.equal(versionSegmentFromUrl('/streaming/current/get-started/intro/'), 'current')
-  assert.equal(versionSegmentFromUrl('/streaming/beta/get-started/intro/'), 'beta')
+  assert.equal(seg('/streaming/current/get-started/intro/'), 'current')
   // Unversioned components have no segment.
-  assert.equal(versionSegmentFromUrl('/cloud-data-platform/get-started/'), null)
-  assert.equal(versionSegmentFromUrl('/agentic-data-plane/reference/'), null)
-  assert.equal(versionSegmentFromUrl('/connect/components/'), null)
-  assert.equal(versionSegmentFromUrl('/home/'), null)
+  assert.equal(seg('/cloud-data-platform/get-started/'), null)
+  assert.equal(seg('/agentic-data-plane/reference/'), null)
+  assert.equal(seg('/connect/components/'), null)
+  assert.equal(seg('/home/'), null)
   // Junk must not throw.
-  for (const v of [undefined, null, '', 42, {}, '/streaming/']) assert.equal(versionSegmentFromUrl(v), null)
+  for (const v of [undefined, null, '', 42, {}, '/streaming/']) assert.equal(seg(v), null)
+  // No segments map: degrade, do not throw.
+  assert.equal(versionSegmentFromUrl('/streaming/25.2/x/', null), null)
+})
+
+test('versionSegmentFromUrl also reads the pre-rename layout', () => {
+  // The docs component was renamed ROOT -> streaming, which moved every
+  // versioned page from /<version>/ to /streaming/<version>/. A build over
+  // pre-rename branches emitted 451 pages of 24.3 content scoped to current,
+  // silently, because the old function matched a hardcoded /streaming/ prefix.
+  assert.equal(seg('/24.2/manage/monitoring/'), '24.2')
+  assert.equal(seg('/current/manage/monitoring/'), 'current')
+})
+
+test('versionSegmentFromUrl recognises only real segments, never a path word', () => {
+  // Driven off the mapping's keys, so it cannot mistake an ordinary path
+  // component for a version.
+  assert.equal(seg('/cloud-data-platform/manage/cluster/'), null)
+  assert.equal(seg('/streaming/beta/get-started/'), null, 'beta is not in this mapping')
+  // Only the first two positions are considered, so a version-shaped word deep
+  // in a path cannot hijack the scope.
+  assert.equal(seg('/connect/components/outputs/25.2/'), null)
+  // A file named after a version is not a segment.
+  assert.equal(seg('/streaming/25.2.json'), null)
+  assert.equal(seg('/25.2.html'), null)
 })
 
 test('a versioned page resolves to its own version group', () => {

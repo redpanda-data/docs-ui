@@ -58,7 +58,7 @@ module.exports = function (options) {
   const mapping = readMapping(page, site)
   if (!mapping || !mapping.segments) return []
 
-  const segment = versionSegmentFromUrl(page && page.url)
+  const segment = versionSegmentFromUrl(page && page.url, mapping.segments)
 
   // A versioned page whose segment has no group is the case the drift check
   // exists to catch: a version was published and nobody created the Kapa source
@@ -113,16 +113,42 @@ function readMapping (page, site) {
 /**
  * Pull the version segment out of a page URL.
  *
- * Only /streaming/ is versioned today. Every other component publishes
- * unversioned, so this returns null for them and the caller uses the default.
+ * Recognises a segment by looking it up in the mapping, rather than by matching
+ * a hardcoded /streaming/ prefix, and checks the first TWO path positions:
+ *
+ *   /streaming/25.2/manage/monitoring/  -> 25.2   (today's layout)
+ *   /24.3/manage/monitoring/            -> 24.3   (the pre-rename layout)
+ *
+ * Both are checked because the layout has already changed once: the docs
+ * component was renamed from ROOT to streaming, which moved every versioned
+ * page from /<version>/ to /streaming/<version>/. A prefix-matching version of
+ * this function silently returned null for the old layout, so an all-components
+ * build over pre-rename branches produced 451 pages of 24.3 content advertising
+ * the current group. Nothing failed; the answers were just wrong.
+ *
+ * Driven off the mapping's own keys, so this stays correct if a second
+ * component is ever versioned, and cannot mistake an ordinary path word for a
+ * version: /connect/current/ only resolves if 'current' is a real segment, and
+ * /cloud-data-platform/manage/ never resolves because 'manage' is not.
  *
  * @param {string} url - e.g. /streaming/25.2/get-started/intro-to-events/
+ * @param {object} segments - The mapping's segments, keyed by URL segment
  * @returns {string|null} e.g. '25.2', 'current', or null when not versioned
  */
-function versionSegmentFromUrl (url) {
-  if (typeof url !== 'string') return null
-  const match = url.match(/^\/streaming\/([^/]+)\//)
-  return match ? match[1] : null
+function versionSegmentFromUrl (url, segments) {
+  if (typeof url !== 'string' || !segments) return null
+  // Leading empty string from the leading slash, so [1] and [2] are the first
+  // two path positions.
+  const parts = url.split('/')
+  for (const candidate of [parts[1], parts[2]]) {
+    // Requires a trailing slash after the candidate, so a FILE named after a
+    // version (/25.2.html, or /streaming/25.2.json) is not read as a segment.
+    if (candidate && Object.prototype.hasOwnProperty.call(segments, candidate) &&
+        url.includes(`/${candidate}/`)) {
+      return candidate
+    }
+  }
+  return null
 }
 
 module.exports.versionSegmentFromUrl = versionSegmentFromUrl
