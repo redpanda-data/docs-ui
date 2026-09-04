@@ -287,6 +287,32 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
 // The docs page the widget is open on, appended to the agent instructions so it
 // can infer the user's product (Cloud / Self-Managed / ADP) from context before
 // asking. Antora sets <body data-component> to the docs component.
+// Kapa source group scoping retrieval to the docs version of THIS page
+// (DOC-1807, DOC-2450). The array is emitted per page by chat-panel.hbs via the
+// get-kapa-source-groups helper, so it varies by URL without rebuilding the bundle.
+//
+// The two SDKs spell the same option differently, and Kapa documents the
+// inconsistency deliberately (dev/agent/migrating-from-chat-sdk):
+//
+//   Agent SDK (signed in)  sourceGroupIdsInclude   lowercase d
+//   Chat SDK  (anonymous)  sourceGroupIDsInclude   capital ID
+//
+// A typo in either fails silently -- an unknown prop is ignored, no filter is
+// sent, and answers quietly come from every docs version. So the name is derived
+// from one place rather than written out at each call site.
+//
+// Spread rather than passed directly so that an empty array omits the prop
+// entirely instead of sending []. Kapa treats an explicit empty list as "clear
+// filtering", which is the same outcome, but omitting keeps the provider props
+// identical to their pre-DOC-2450 shape when scoping cannot be resolved.
+const SOURCE_GROUP_PROP = { agent: 'sourceGroupIdsInclude', chat: 'sourceGroupIDsInclude' }
+
+function sourceGroupProps (tier) {
+  const ids = Array.isArray(window.KAPA_SOURCE_GROUP_IDS) ? window.KAPA_SOURCE_GROUP_IDS.filter(Boolean) : []
+  if (!ids.length) return {}
+  return { [SOURCE_GROUP_PROP[tier]]: ids }
+}
+
 function currentPageContext () {
   try {
     const path = window.location.pathname
@@ -419,6 +445,7 @@ function App () {
         tools={agentTools}
         customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext()}
         user={user?.email ? { email: user.email } : undefined}
+        {...sourceGroupProps('agent')}
         enableHistory
         onEvent={handleAgentEvent}
         theme={{ accentColor: '#444ce7', colorScheme }}
@@ -441,6 +468,7 @@ function App () {
       <KapaProvider
         integrationId={window.KAPA_CHAT_INTEGRATION_ID}
         apiService={persistentApiService}
+        {...sourceGroupProps('chat')}
         callbacks={{
           askAI: {
             onQuerySubmit: (data) => {
