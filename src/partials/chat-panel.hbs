@@ -60,17 +60,16 @@
           DOC-2450). Empty array means send no filter, which is the pre-DOC-2450
           behaviour of searching every version at once. Emitted per page rather than
           bundled, so it varies by URL for free. --}}
-    window.KAPA_SOURCE_GROUP_IDS = window.KAPA_SOURCE_GROUP_IDS || [
-      {{#each (get-kapa-source-groups)}}
-      "{{{this}}}"{{#unless @last}},{{/unless}}
-      {{/each}}
-    ];
+    {{!-- Emitted as one script-safe JSON literal by the helper, never as raw
+          values in triple-stash: the ids come from page attributes, and a quote
+          or </script> in one would end the string or the script element. --}}
+    window.KAPA_SOURCE_GROUP_IDS = window.KAPA_SOURCE_GROUP_IDS || {{{get-kapa-source-groups 'json'}}};
     {{!-- The segment that the group above represents, so the agent prompt can
           name the version its answers came from without deriving it again from
           the URL. A second derivation disagrees: /streaming/26.2/ reads as
           "26.2" while the group sent is `current`. Empty string means nothing
           was scoped, so the prompt must not claim a restriction. --}}
-    window.KAPA_SOURCE_GROUP_SEGMENT = window.KAPA_SOURCE_GROUP_SEGMENT || "{{{get-kapa-source-groups 'segment'}}}";
+    window.KAPA_SOURCE_GROUP_SEGMENT = window.KAPA_SOURCE_GROUP_SEGMENT || {{{get-kapa-source-groups 'segment-json'}}};
     {{!-- Signed-in agent tier: per-component prompts that showcase the agent tools --}}
     window.AGENT_SUGGESTIONS = window.AGENT_SUGGESTIONS || [
       {{#each (get-agent-suggestions)}}

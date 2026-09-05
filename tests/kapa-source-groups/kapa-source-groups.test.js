@@ -183,7 +183,7 @@ test('chat-panel.hbs emits the group id as a JS array literal', () => {
   // Only the config <script> is needed, and the surrounding partial pulls in
   // helpers this test does not register.
   const start = source.indexOf('window.KAPA_SOURCE_GROUP_IDS')
-  const snippet = source.slice(start, source.indexOf('];', start) + 2)
+  const snippet = source.slice(start, source.indexOf(';\n', start) + 1)
   assert.ok(snippet.includes('get-kapa-source-groups'), 'partial should call the helper')
 
   Handlebars.registerHelper('get-kapa-source-groups', helper)
@@ -203,19 +203,38 @@ test('chat-panel.hbs emits the group id as a JS array literal', () => {
 test('chat-panel.hbs emits a valid empty array when scoping cannot be resolved', () => {
   const source = fs.readFileSync(path.join(ROOT, 'src/partials/chat-panel.hbs'), 'utf8')
   const start = source.indexOf('window.KAPA_SOURCE_GROUP_IDS')
-  const snippet = source.slice(start, source.indexOf('];', start) + 2)
+  const snippet = source.slice(start, source.indexOf(';\n', start) + 1)
   Handlebars.registerHelper('get-kapa-source-groups', helper)
   const rendered = Handlebars.compile(snippet)({ page: { url: '/streaming/25.2/x/' } })
   const arr = eval(rendered.replace(/window\.KAPA_SOURCE_GROUP_IDS\s*=\s*window\.KAPA_SOURCE_GROUP_IDS\s*\|\|\s*/, '')) // eslint-disable-line no-eval
   assert.deepEqual(arr, [], 'an unresolvable page must emit [] and not a syntax error')
 })
 
-test('AskAI.jsx uses the correct, different prop name for each SDK tier', () => {
+test('the prop name for each tier matches the installed SDK typings, not just itself', () => {
+  // Review caught the previous version of this test asserting the same literal
+  // strings the source contains, so it passed even if both names were wrong.
+  // The oracle is now the installed packages' own .d.mts. An unknown React prop
+  // is dropped with no error, so a wrong name means no filter is ever sent and
+  // answers come from every version again; this is the check that makes that
+  // fail CI instead of shipping.
   const src = fs.readFileSync(path.join(ROOT, 'src/js/react/AskAI.jsx'), 'utf8')
+  const agentName = src.match(/agent:\s*'([A-Za-z]+)'/)[1]
+  const chatName = src.match(/chat:\s*'([A-Za-z]+)'/)[1]
 
-  // Kapa documents this casing difference deliberately; a typo is silent.
-  assert.match(src, /agent:\s*'sourceGroupIdsInclude'/, 'Agent SDK takes lowercase d')
-  assert.match(src, /chat:\s*'sourceGroupIDsInclude'/, 'Chat SDK takes capital ID')
+  const agentTypes = fs.readFileSync(path.join(ROOT, 'node_modules/@kapaai/agent-react/dist/index.d.mts'), 'utf8')
+  const chatTypes = fs.readFileSync(path.join(ROOT, 'node_modules/@kapaai/react-sdk/dist/index.d.mts'), 'utf8')
+
+  // Declared as an optional string[] prop on the provider in each SDK.
+  assert.match(agentTypes, new RegExp(`^\\s*${agentName}\\?: string\\[\\];`, 'm'),
+    `@kapaai/agent-react does not declare a prop named ${agentName}`)
+  assert.match(chatTypes, new RegExp(`^\\s*${chatName}\\?: string\\[\\];`, 'm'),
+    `@kapaai/react-sdk does not declare a prop named ${chatName}`)
+
+  // And the names really are different, which is the trap. If Kapa ever
+  // unifies them this assertion is the one to relax.
+  assert.notEqual(agentName, chatName)
+  assert.doesNotMatch(agentTypes, new RegExp(`^\\s*${chatName}\\?:`, 'm'), 'the chat name must not also be valid on the agent SDK, or this test proves nothing')
+  assert.doesNotMatch(chatTypes, new RegExp(`^\\s*${agentName}\\?:`, 'm'), 'the agent name must not also be valid on the chat SDK, or this test proves nothing')
 
   // Both providers must actually receive it.
   const agentBlock = src.slice(src.indexOf('<AgentProvider'), src.indexOf('</AgentProvider>'))
@@ -224,9 +243,52 @@ test('AskAI.jsx uses the correct, different prop name for each SDK tier', () => 
   assert.match(chatBlock, /sourceGroupProps\('chat'\)/, 'KapaProvider must be scoped')
 
   // Neither tier may send source_ids_include: verified live against Kapa's
-  // retrieval API to be silently ignored (a garbage uuid returned full results),
-  // and it is not a documented parameter of that endpoint.
-  assert.doesNotMatch(src, /source_?[iI]ds_?[iI]nclude/, 'must not use source ids, only source groups')
+  // retrieval API to be silently ignored (a garbage uuid returned full results).
+  assert.doesNotMatch(src, /sourceIdsInclude|source_ids_include/i)
+})
+
+test('both SDKs send the prop to the wire as source_group_ids_include', () => {
+  // The prop name is only half of it; the built SDK must translate it to the
+  // field Kapa's API reads. Established live: source_group_ids_include is
+  // honoured, source_ids_include is accepted and ignored.
+  const chatBuilt = fs.readFileSync(path.join(ROOT, 'node_modules/@kapaai/react-sdk/dist/index.mjs'), 'utf8')
+  assert.match(chatBuilt, /source_group_ids_include/)
+  // agent-react forwards the prop to agent-core, which builds the request body.
+  const agentCore = fs.readFileSync(path.join(ROOT, 'node_modules/@kapaai/agent-core/dist/index.mjs'), 'utf8')
+  assert.match(agentCore, /body\.source_group_ids_include\s*=\s*sourceGroupIdsInclude/)
+})
+
+test('group ids are emitted as script-safe JSON, never raw', () => {
+  const hostile = 'a"</script><script>alert(1)//'
+  const mapping = { ...MAPPING, segments: { ...MAPPING.segments, current: { group_id: hostile } } }
+  const opts = withMapping('/home/', mapping)
+  const json = helper('json', opts)
+  // No literal </script>, no unescaped quote, and it round-trips to the value.
+  assert.doesNotMatch(json, /<\/script>/i)
+  assert.doesNotMatch(json, /<script/i)
+  assert.deepEqual(JSON.parse(json), [hostile])
+  // A plain id is unchanged apart from being a JSON literal.
+  assert.equal(helper('json', withMapping('/streaming/25.2/x/')), JSON.stringify([MAPPING.segments['25.2'].group_id]))
+  // Empty when nothing resolves.
+  assert.equal(helper('json', { data: { root: {} } }), '[]')
+  assert.equal(helper('segment-json', { data: { root: {} } }), '""')
+})
+
+test('a non-string group_id yields no group at all, not "[object Object]"', () => {
+  for (const bad of [{}, [], 42, true, '']) {
+    const mapping = { ...MAPPING, segments: { ...MAPPING.segments, '25.2': { group_id: bad } } }
+    const opts = withMapping('/streaming/25.2/x/', mapping)
+    assert.deepEqual(helper(opts), [], `group_id ${JSON.stringify(bad)} must resolve to nothing`)
+    assert.equal(helper('segment', opts), '')
+    assert.equal(helper('json', opts), '[]')
+  }
+})
+
+test('the template emits only the two JSON modes, never a raw triple-stash of an id', () => {
+  const partial = fs.readFileSync(path.join(ROOT, 'src/partials/chat-panel.hbs'), 'utf8')
+  assert.match(partial, /KAPA_SOURCE_GROUP_IDS \|\| \{\{\{get-kapa-source-groups 'json'\}\}\}/)
+  assert.match(partial, /KAPA_SOURCE_GROUP_SEGMENT \|\| \{\{\{get-kapa-source-groups 'segment-json'\}\}\}/)
+  assert.doesNotMatch(partial, /\{\{#each \(get-kapa-source-groups\)/)
 })
 
 test('sourceGroupProps omits the prop entirely when there is nothing to send', () => {
@@ -318,7 +380,7 @@ test('AskAI reads the emitted segment rather than re-deriving it from the URL', 
 test('the chat panel emits the segment alongside the group ids', () => {
   const partial = fs.readFileSync(path.join(ROOT, 'src/partials/chat-panel.hbs'), 'utf8')
   assert.match(partial, /window\.KAPA_SOURCE_GROUP_SEGMENT/)
-  assert.match(partial, /get-kapa-source-groups 'segment'/)
+  assert.match(partial, /get-kapa-source-groups 'segment-json'/)
 })
 
 test('a helper must never require a sibling helper', () => {

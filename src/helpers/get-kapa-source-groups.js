@@ -69,12 +69,34 @@
 module.exports = function (mode, options) {
   const opts = options === undefined ? mode : options
   const { segment, groupId } = resolve(opts)
-  if (mode === 'segment') {
-    // Only name a segment when a group is genuinely being sent, so the agent
-    // prompt cannot claim a restriction that is not in force.
-    return groupId && segment ? segment : ''
+  // Only name a segment when a group is genuinely being sent, so the agent
+  // prompt cannot claim a restriction that is not in force.
+  const segmentOut = groupId && segment ? segment : ''
+  const idsOut = groupId ? [groupId] : []
+  switch (mode) {
+    case 'segment': return segmentOut
+    // The two JSON modes are what the template uses. They exist so that no raw
+    // value is ever interpolated into an executable <script>: the ids come from
+    // page or site attributes, and a quote or a </script> in one would end the
+    // string or the script element. Handlebars' triple-stash does no escaping
+    // at all inside <script>, so the encoding has to happen here.
+    case 'json': return scriptSafeJson(idsOut)
+    case 'segment-json': return scriptSafeJson(segmentOut)
+    default: return idsOut
   }
-  return groupId ? [groupId] : []
+}
+
+/**
+ * JSON.stringify plus `<` as \u003c. JSON.stringify alone leaves `<` intact, so
+ * a literal `</script>` inside a value would close the script element early and
+ * dump the rest into the document as markup. Same treatment the docs-site edge
+ * function gives the same value for the /api/ pages.
+ *
+ * @param {*} value
+ * @returns {string} A JavaScript expression safe to place inside <script>
+ */
+function scriptSafeJson (value) {
+  return JSON.stringify(value).replace(/</g, '\\u003c')
 }
 
 /**
@@ -111,7 +133,11 @@ function resolve (options) {
   // reader gets current-version answers instead of every version at once.
   const effective = (asked && mapping.segments[asked]) ? asked : mapping.default_segment
   const entry = mapping.segments[effective]
-  if (!entry || !entry.group_id) return none
+  // A non-empty string, not merely truthy. A malformed mapping with
+  // group_id: {} would otherwise be emitted as "[object Object]" and sent to
+  // Kapa as a filter, which returns only global sources with no error. Nothing
+  // is the safer failure.
+  if (!entry || typeof entry.group_id !== 'string' || !entry.group_id) return none
 
   return { segment: effective, groupId: entry.group_id }
 }
@@ -198,5 +224,6 @@ function versionSegmentFromUrl (url, segments) {
 }
 
 module.exports.resolve = resolve
+module.exports.scriptSafeJson = scriptSafeJson
 module.exports.versionSegmentFromUrl = versionSegmentFromUrl
 module.exports.readMapping = readMapping
