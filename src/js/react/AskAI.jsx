@@ -8,6 +8,7 @@ import { agentTools } from './agentTools.js'
 import { safeHeap } from './heap.js'
 import { saveConversation } from './chatPersistence.js'
 import { createPersistentApiService } from './persistentApiService.js'
+import { readScopeIds, dropScope, isScopeRejection, SCOPE_DROPPED_EVENT } from './kapaScope.js'
 
 // Singleton Chat SDK api service for the anonymous tier: injects the saved
 // threadId so a conversation survives page navigation. The signed-in tier gets
@@ -310,10 +311,32 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
 // identical to their pre-DOC-2450 shape when scoping cannot be resolved.
 const SOURCE_GROUP_PROP = { agent: 'sourceGroupIdsInclude', chat: 'sourceGroupIDsInclude' }
 
-function sourceGroupProps (tier) {
-  const ids = Array.isArray(window.KAPA_SOURCE_GROUP_IDS) ? window.KAPA_SOURCE_GROUP_IDS.filter(Boolean) : []
-  if (!ids.length) return {}
-  return { [SOURCE_GROUP_PROP[tier]]: ids }
+//
+// `ids` is the scope App holds in state (see useKapaScopeIds), so a scope that
+// Kapa rejected mid-session can be dropped by re-rendering the provider without
+// the prop. With no argument it reads the page globals directly.
+function sourceGroupProps (tier, ids) {
+  const fromPage = Array.isArray(window.KAPA_SOURCE_GROUP_IDS) ? window.KAPA_SOURCE_GROUP_IDS : []
+  const list = Array.isArray(ids) ? ids : fromPage
+  const clean = list.filter(Boolean)
+  if (!clean.length) return {}
+  return { [SOURCE_GROUP_PROP[tier]]: clean }
+}
+
+// The scope as React state, so the providers can be re-rendered without it.
+// Starts from the page globals and empties when kapaScope.dropScope() fires
+// SCOPE_DROPPED_EVENT: Kapa answers a stale group id with a 400 (measured live,
+// not the silent global-only fallback the design first assumed), so a group the
+// dashboard no longer knows would otherwise fail every question on the page
+// until the regenerated mapping ships through three repos.
+function useKapaScopeIds () {
+  const [ids, setIds] = useState(readScopeIds)
+  useEffect(() => {
+    const onDropped = () => setIds([])
+    window.addEventListener(SCOPE_DROPPED_EVENT, onDropped)
+    return () => window.removeEventListener(SCOPE_DROPPED_EVENT, onDropped)
+  }, [])
+  return ids
 }
 
 function currentPageContext () {
@@ -361,6 +384,10 @@ function handleAgentEvent (event) {
         thread_id: event.data.threadId,
         error: event.data.error,
       })
+      // The Agent SDK puts Kapa's response body in the message, so a rejected
+      // source group is named outright. Drop the scope so the reader's next
+      // question (and the retry the SDK offers) goes out unscoped.
+      if (isScopeRejection(event.data.error)) dropScope(event.data.error)
       break
     case 'thread_resumed':
       safeHeap('thread_resumed_docs_home', { thread_id: event.data.threadId })
@@ -448,6 +475,7 @@ class ErrorBoundary extends Component {
 }
 
 function App () {
+  const scopeIds = useKapaScopeIds()
   const colorScheme = useSiteColorScheme()
   const { authenticated, user, loginUrl } = useSession()
 
@@ -467,7 +495,7 @@ function App () {
         tools={agentTools}
         customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext()}
         user={user?.email ? { email: user.email } : undefined}
-        {...sourceGroupProps('agent')}
+        {...sourceGroupProps('agent', scopeIds)}
         enableHistory
         onEvent={handleAgentEvent}
         theme={{ accentColor: '#444ce7', colorScheme }}
@@ -490,7 +518,7 @@ function App () {
       <KapaProvider
         integrationId={window.KAPA_CHAT_INTEGRATION_ID}
         apiService={persistentApiService}
-        {...sourceGroupProps('chat')}
+        {...sourceGroupProps('chat', scopeIds)}
         callbacks={{
           askAI: {
             onQuerySubmit: (data) => {

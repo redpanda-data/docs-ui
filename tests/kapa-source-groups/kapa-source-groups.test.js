@@ -238,9 +238,9 @@ test('the prop name for each tier matches the installed SDK typings, not just it
 
   // Both providers must actually receive it.
   const agentBlock = src.slice(src.indexOf('<AgentProvider'), src.indexOf('</AgentProvider>'))
-  assert.match(agentBlock, /sourceGroupProps\('agent'\)/, 'AgentProvider must be scoped')
+  assert.match(agentBlock, /sourceGroupProps\('agent', scopeIds\)/, 'AgentProvider must be scoped')
   const chatBlock = src.slice(src.indexOf('<KapaProvider'), src.indexOf('</KapaProvider>'))
-  assert.match(chatBlock, /sourceGroupProps\('chat'\)/, 'KapaProvider must be scoped')
+  assert.match(chatBlock, /sourceGroupProps\('chat', scopeIds\)/, 'KapaProvider must be scoped')
 
   // Neither tier may send source_ids_include: verified live against Kapa's
   // retrieval API to be silently ignored (a garbage uuid returned full results).
