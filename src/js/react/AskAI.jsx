@@ -8,6 +8,7 @@ import { agentTools } from './agentTools.js'
 import { safeHeap } from './heap.js'
 import { saveConversation } from './chatPersistence.js'
 import { createPersistentApiService } from './persistentApiService.js'
+import { readScopeIds, dropScope, isScopeRejection, SCOPE_DROPPED_EVENT } from './kapaScope.js'
 
 // Singleton Chat SDK api service for the anonymous tier: injects the saved
 // threadId so a conversation survives page navigation. The signed-in tier gets
@@ -207,8 +208,11 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
 - Ask a follow-up ONLY when the answer actually depends on it:
   - Cloud: assume the general case unless it differs by cluster type, then ask
     which (BYOC, Dedicated, or Serverless).
-  - Self-Managed Streaming: assume the latest version unless it differs by
-    version, then ask which (e.g. 25.2).
+  - Self-Managed Streaming: when "Current page" below names a docs version, your
+    search results are already restricted to it, so use it and do not ask. When
+    it says searches are not restricted to a version, the results may mix
+    versions: read each result's url, and ask which version only if the answer
+    actually differs by version.
   - Redpanda Connect (including any Bloblang question): if you do not know
     where they run Connect, ask whether it is on Redpanda Cloud or
     Self-Managed BEFORE answering. This applies even when the mapping or
@@ -287,13 +291,80 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
 // The docs page the widget is open on, appended to the agent instructions so it
 // can infer the user's product (Cloud / Self-Managed / ADP) from context before
 // asking. Antora sets <body data-component> to the docs component.
+// Kapa source group scoping retrieval to the docs version of THIS page
+// (DOC-1807, DOC-2450). The array is emitted per page by chat-panel.hbs via the
+// get-kapa-source-groups helper, so it varies by URL without rebuilding the bundle.
+//
+// The two SDKs spell the same option differently, and Kapa documents the
+// inconsistency deliberately (dev/agent/migrating-from-chat-sdk):
+//
+//   Agent SDK (signed in)  sourceGroupIdsInclude   lowercase d
+//   Chat SDK  (anonymous)  sourceGroupIDsInclude   capital ID
+//
+// A typo in either fails silently -- an unknown prop is ignored, no filter is
+// sent, and answers quietly come from every docs version. So the name is derived
+// from one place rather than written out at each call site.
+//
+// Spread rather than passed directly so that an empty array omits the prop
+// entirely instead of sending []. Kapa treats an explicit empty list as "clear
+// filtering", which is the same outcome, but omitting keeps the provider props
+// identical to their pre-DOC-2450 shape when scoping cannot be resolved.
+const SOURCE_GROUP_PROP = { agent: 'sourceGroupIdsInclude', chat: 'sourceGroupIDsInclude' }
+
+//
+// `ids` is the scope App holds in state (see useKapaScopeIds), so a scope that
+// Kapa rejected mid-session can be dropped by re-rendering the provider without
+// the prop. With no argument it reads the page globals directly.
+function sourceGroupProps (tier, ids) {
+  const fromPage = Array.isArray(window.KAPA_SOURCE_GROUP_IDS) ? window.KAPA_SOURCE_GROUP_IDS : []
+  const list = Array.isArray(ids) ? ids : fromPage
+  const clean = list.filter(Boolean)
+  if (!clean.length) return {}
+  return { [SOURCE_GROUP_PROP[tier]]: clean }
+}
+
+// The scope as React state, so the providers can be re-rendered without it.
+// Starts from the page globals and empties when kapaScope.dropScope() fires
+// SCOPE_DROPPED_EVENT: Kapa answers a stale group id with a 400 (measured live,
+// not the silent global-only fallback the design first assumed), so a group the
+// dashboard no longer knows would otherwise fail every question on the page
+// until the regenerated mapping ships through three repos.
+function useKapaScopeIds () {
+  const [ids, setIds] = useState(readScopeIds)
+  useEffect(() => {
+    const onDropped = () => setIds([])
+    window.addEventListener(SCOPE_DROPPED_EVENT, onDropped)
+    return () => window.removeEventListener(SCOPE_DROPPED_EVENT, onDropped)
+  }, [])
+  return ids
+}
+
 function currentPageContext () {
   try {
     const path = window.location.pathname
     const component = (document.body && document.body.getAttribute('data-component')) || null
+    // Taken from the SAME resolution that chose the source group, never
+    // re-derived. A URL regex here reads "26.2" out of /streaming/26.2/... while
+    // the group actually sent is `current`, because the latest release publishes
+    // at /streaming/current/ and its own number is not a segment. The prompt
+    // below asserts a restriction and forbids asking, so a disagreement makes
+    // the agent attribute an answer to a version it never searched.
+    //
+    // Empty or absent means no group was sent, so nothing is restricted.
+    const version = (typeof window.KAPA_SOURCE_GROUP_SEGMENT === 'string' && window.KAPA_SOURCE_GROUP_SEGMENT) || null
     return '\n\n## Current page\n' +
       `- The user has the docs open at: ${path}` +
       (component ? ` (docs component: ${component})` : '') + '\n' +
+      // Without this the agent asks which version while the reader is standing
+      // on the answer, and retrieval is ALREADY pinned to that version, so a
+      // guess of "latest" contradicts the sections it just received.
+      (version
+        ? `- Docs version: ${version}${version === 'current' ? ' (the latest release)' : ''}. ` +
+          'Your search results are restricted to this version, so do not ask which version they are on.\n'
+        // No group was sent, so retrieval spans every indexed version. Saying
+        // so is what stops the model asserting a version it cannot support.
+        : '- Searches are NOT restricted to a version, so results may mix versions. ' +
+          'Check each result url before stating that something applies to a particular version.\n') +
       '- Use this together with the conversation so far to infer their product before asking.'
   } catch (e) {
     return ''
@@ -313,6 +384,10 @@ function handleAgentEvent (event) {
         thread_id: event.data.threadId,
         error: event.data.error,
       })
+      // The Agent SDK puts Kapa's response body in the message, so a rejected
+      // source group is named outright. Drop the scope so the reader's next
+      // question (and the retry the SDK offers) goes out unscoped.
+      if (isScopeRejection(event.data.error)) dropScope(event.data.error)
       break
     case 'thread_resumed':
       safeHeap('thread_resumed_docs_home', { thread_id: event.data.threadId })
@@ -400,6 +475,7 @@ class ErrorBoundary extends Component {
 }
 
 function App () {
+  const scopeIds = useKapaScopeIds()
   const colorScheme = useSiteColorScheme()
   const { authenticated, user, loginUrl } = useSession()
 
@@ -419,6 +495,7 @@ function App () {
         tools={agentTools}
         customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext()}
         user={user?.email ? { email: user.email } : undefined}
+        {...sourceGroupProps('agent', scopeIds)}
         enableHistory
         onEvent={handleAgentEvent}
         theme={{ accentColor: '#444ce7', colorScheme }}
@@ -441,6 +518,7 @@ function App () {
       <KapaProvider
         integrationId={window.KAPA_CHAT_INTEGRATION_ID}
         apiService={persistentApiService}
+        {...sourceGroupProps('chat', scopeIds)}
         callbacks={{
           askAI: {
             onQuerySubmit: (data) => {
