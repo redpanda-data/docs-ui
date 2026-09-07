@@ -81,6 +81,9 @@
     if (width > 0 && height > 0) {
       img.setAttribute('width', width)
       img.setAttribute('height', height)
+      // Mark JS-stamped (vs author-set) dimensions so 27-theme-adaptive-images.js
+      // knows it may re-stamp them after swapping to a different image variant
+      img.dataset.autoDims = 'true'
 
       // Log warning if image is significantly oversized (developer tool)
       if (

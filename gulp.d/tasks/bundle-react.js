@@ -56,6 +56,9 @@ async function bundleAllReactTask ({ srcDir, destDir }) {
         define: {
           'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
         },
+        // @kapaai/agent-core lazily imports zod-to-json-schema only when a tool
+        // defines Zod-schema parameters; we register no tools, so leave it unresolved
+        external: ['zod-to-json-schema'],
       })
       log.info(`Built ${outName}`)
     } catch (error) {

@@ -8,8 +8,17 @@
 
   if (!chatPanel) return
 
-  // Storage key for persisting panel state
+  // The panel is closed at load. `aria-hidden`+`transform:translateX(100%)` hide
+  // it visually and from AT, but its controls (Close/Full-screen and, once React
+  // mounts, the textarea/Submit/sign-in) stay in the keyboard tab order off-screen
+  // — a keyboard user Tabs into invisible controls on every docs page (WCAG
+  // 2.4.3/4.1.2). `inert` removes the whole subtree from focus AND the a11y tree;
+  // openPanel/closePanel toggle it in lockstep with `is-open`.
+  if ('inert' in chatPanel) chatPanel.inert = true
+
+  // Storage keys for persisting panel state
   var STORAGE_KEY = 'redpanda-chat-panel-open'
+  var FULLSCREEN_KEY = 'redpanda-chat-panel-fullscreen'
 
   // State
   var isOpen = false
@@ -18,6 +27,17 @@
   chatPanel.querySelectorAll('[data-chat-action="close"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       closePanel()
+    })
+  })
+
+  chatPanel.querySelectorAll('[data-chat-action="expand"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var fullscreen = chatPanel.classList.toggle('is-fullscreen')
+      try {
+        localStorage.setItem(FULLSCREEN_KEY, String(fullscreen))
+      } catch (e) {
+        // localStorage not available, ignore
+      }
     })
   })
 
@@ -49,26 +69,52 @@
   // Used by playground error buttons and code block Ask AI buttons
   window.openChatWithQuery = function (query, autoSubmit) {
     openPanel()
-    // Wait for panel animation and React to be ready, then submit query
-    setTimeout(function () {
+    // submitChatQuery is registered only once a chat interface component mounts.
+    // During the initial session probe App renders a spinner and mounts neither
+    // interface, so a fixed 100ms timer can fire before it exists and silently
+    // drop the query. Poll on a short interval up to a bounded deadline instead.
+    var waited = 0
+    var step = 100
+    var deadline = 8000 // matches the session-probe abort budget
+    var timer = setInterval(function () {
       if (typeof window.submitChatQuery === 'function') {
+        clearInterval(timer)
         window.submitChatQuery(query, autoSubmit !== false)
+      } else if ((waited += step) >= deadline) {
+        clearInterval(timer)
       }
-    }, 100)
+    }, step)
   }
 
   // Functions
-  function openPanel () {
+  function openPanel (restored) {
     isOpen = true
     chatPanel.classList.add('is-open')
     chatPanel.setAttribute('aria-hidden', 'false')
+    if ('inert' in chatPanel) chatPanel.inert = false
     if (main) main.classList.add('chat-push')
+
+    // Signed-out panels show a sign-in prompt — pre-warm the login backend
+    // (handled by 26-docs-account.js) so a sign-in click lands warm. Only on
+    // explicit opens: the page-load restore path would otherwise fire warm-up
+    // requests on every pageview for users who keep the panel open.
+    if (!restored && !/(?:^|;\s*)rp_docs_auth=1(?:;|$)/.test(document.cookie)) {
+      window.dispatchEvent(new window.CustomEvent('docs-account:warm'))
+    }
 
     // Hide all Ask AI buttons if they exist
     var askAiBtns = document.querySelectorAll('[data-action="open-chat"]')
     askAiBtns.forEach(function (btn) {
       btn.style.display = 'none'
     })
+
+    // Move focus into the panel so keyboard/AT users land inside it on open
+    // (pairs with the focus-restore on close). The close control is part of the
+    // static panel chrome, present before the React drawer mounts.
+    if (!restored) {
+      var closeBtn = chatPanel.querySelector('[data-chat-action="close"]')
+      if (closeBtn && typeof closeBtn.focus === 'function') { try { closeBtn.focus() } catch (e) { /* ignore */ } }
+    }
 
     // Persist state to localStorage
     try {
@@ -81,7 +127,6 @@
   function closePanel () {
     isOpen = false
     chatPanel.classList.remove('is-open')
-    chatPanel.setAttribute('aria-hidden', 'true')
     if (main) main.classList.remove('chat-push')
 
     // Show all Ask AI buttons if they exist
@@ -89,6 +134,17 @@
     askAiBtns.forEach(function (btn) {
       btn.style.display = ''
     })
+
+    // Move focus to the (now-visible) opener BEFORE hiding the panel, so a
+    // keyboard/AT user who activated the in-panel Close control isn't stranded
+    // inside an aria-hidden subtree (WCAG 2.4.3 / 4.1.2). Then hide the panel.
+    var opener = document.querySelector('[data-action="open-chat"]')
+    if (opener && typeof opener.focus === 'function') { try { opener.focus() } catch (e) { /* ignore */ } }
+    chatPanel.setAttribute('aria-hidden', 'true')
+    // Focus is now on the opener (outside the panel), so making the subtree inert
+    // won't strand the active element. Pulls all panel controls back out of the
+    // tab order until the next open.
+    if ('inert' in chatPanel) chatPanel.inert = true
 
     // Remove from localStorage (panel explicitly closed)
     try {
@@ -105,8 +161,11 @@
     try {
       var savedState = localStorage.getItem(STORAGE_KEY)
       var isMobile = window.innerWidth <= 520
+      if (localStorage.getItem(FULLSCREEN_KEY) === 'true') {
+        chatPanel.classList.add('is-fullscreen')
+      }
       if (savedState === 'true' && !isMobile) {
-        openPanel()
+        openPanel(true)
       }
     } catch (e) {
       // localStorage not available, ignore

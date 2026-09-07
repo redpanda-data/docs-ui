@@ -1,23 +1,42 @@
 import React, { useState, useEffect, useRef, Component } from 'react'
-import { useChat, useDeepThinking } from '@kapaai/react-sdk'
+import { useAgentChat, AgentThreadHistory, ToolCallCard, ToolCallGroup } from '@kapaai/agent-react'
 import {
   ArrowRight,
   ArrowDown,
-  ThumbsUp,
-  ThumbsDown,
   RefreshCcw,
   ClipboardCopy,
   CircleStop,
-  FileSearch,
-  Check,
-  AlertCircle,
+  History,
   Sparkles,
+  Compass,
+  Braces,
+  MessageSquare,
+  X,
 } from 'lucide-react'
-import DOMPurify from 'dompurify'
-import { Marked } from 'marked'
-import { markedHighlight } from 'marked-highlight'
-import hljs from 'highlight.js'
-import { loadConversation, clearConversation } from '../chatPersistence.js'
+import { safeHeap } from '../heap.js'
+import { Answer, Toast } from './chatShared.jsx'
+
+// Example prompts for the signed-in agent welcome screen come from
+// window.AGENT_SUGGESTIONS (set per component by the get-agent-suggestions
+// helper in chat-panel.hbs) so they showcase the agent's tools in the context
+// of the product being read. This JS default is only a fallback if the global
+// is missing (e.g. an older host page).
+// sessionStorage key for the active conversation, so navigating between docs
+// pages (full reloads) resumes the same thread instead of starting fresh.
+const ACTIVE_THREAD_KEY = 'kapa-active-thread'
+
+const AGENT_EXAMPLES_FALLBACK = [
+  'Write and test a Bloblang mapping that flattens nested JSON',
+  "What's the latest Redpanda Streaming version?",
+  'Take me to the right quickstart for my setup',
+]
+import { agentTools } from '../agentTools.js'
+
+// Resumed threads come back without displayName on tool calls (the SDK only
+// backfills icon/render), so map names to friendly labels ourselves
+const TOOL_DISPLAY_NAMES = Object.fromEntries(
+  agentTools.map((t) => [t.name, t.displayName])
+)
 
 // ——— ErrorBoundary ——————————————————————————————————————————————————
 class ErrorBoundary extends Component {
@@ -43,105 +62,220 @@ class ErrorBoundary extends Component {
   }
 }
 
-const marked = new Marked(
-  markedHighlight({
-    emptyLangClass: 'hljs',
-    langPrefix:     'hljs language-',
-    highlight(code, info = '') {
-      try {
-        return hljs.highlightAuto(code).value
-      } catch {
-        return code
-      }
-    },
-  })
-)
+// ——— Sources ————————————————————————————————————————————————————————————
+// Assistant messages carry sources inside tool-call blocks; collect and
+// dedupe them for a compact link list under the answer.
+//
+// Dedupe is by PAGE IDENTITY, not raw URL: single-sourced pages exist under
+// several products (Cloud, Self-Managed, Connect) with near-identical content,
+// and the agent sometimes cites more than one variant despite instructions.
+// Collapse variants to one entry, preferring the product of the page the user
+// is reading (body data-component), else the first cited.
 
-
-// ——— Toast component ————————————————————————————————————————————————————
-function Toast({ message, type = 'success', onDismiss }) {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (onDismiss) onDismiss()
-    }, 3000)
-    return () => clearTimeout(timer)
-  }, [onDismiss])
-
-  const isError = type === 'error'
-
-  return (
-    <div className={`chat-toast ${isError ? 'chat-toast-error' : 'chat-toast-success'}`}>
-      <span className="chat-toast-icon">
-        {isError ? <AlertCircle size={16} /> : <Check size={16} />}
-      </span>
-      <span className="chat-toast-message">{message}</span>
-    </div>
-  )
-}
-
-// ——— Answer component ———————————————————————————————————————————————————
-function Answer({ md }) {
-  const containerRef = useRef(null)
-
-  useEffect(() => {
-    try {
-      const rawHtml = marked.parse(md || '')
-      const clean   = DOMPurify.sanitize(rawHtml)
-      if (containerRef.current) {
-        containerRef.current.innerHTML = clean
-      }
-    } catch (err) {
-      console.error('Markdown render error:', err)
-      if (containerRef.current) {
-        containerRef.current.textContent = md
-      }
+// Identity of a page across its product variants: the path with leading
+// product/version segments stripped. No anchor — different sections of one
+// page are one source to a reader.
+function variantKey(url) {
+  try {
+    const u = new URL(url)
+    const segs = u.pathname.split('/').filter(Boolean)
+    while (segs.length && (PRODUCT_LABELS[segs[0]] || /^\d+\.\d+$/.test(segs[0]) || segs[0] === 'current' || segs[0] === 'beta')) {
+      segs.shift()
     }
-  }, [md])
-
-  return <div ref={containerRef} className="answer" />
+    return segs.join('/')
+  } catch {
+    return url
+  }
 }
 
-// ——— FeedbackButtons —————————————————————————————————————————————————————
-function FeedbackButtons({ questionAnswerId, showToast }) {
-  const { addFeedback } = useChat()
+function productOf(url) {
+  try {
+    return PRODUCT_LABELS[new URL(url).pathname.split('/').filter(Boolean)[0]] || null
+  } catch {
+    return null
+  }
+}
 
-  const handleFeedback = async (reaction) => {
-    try {
-      await addFeedback(questionAnswerId, reaction)
-      showToast(
-        reaction === 'upvote'
-          ? 'Thanks for the feedback!'
-          : 'Feedback received',
-        'success'
-      )
-    } catch (err) {
-      console.error('Feedback error', err)
-      showToast('Could not send feedback', 'error')
+// Which product variants to prefer for the user's answer to the clarifying
+// question. Self-Managed users of Connect read the standalone Connect docs,
+// so their preference list leads with Connect.
+const PRODUCT_PREFERENCE = {
+  Cloud: ['Cloud'],
+  'Self-Managed': ['Connect', 'Self-Managed', 'Streaming'],
+  Connect: ['Connect'],
+  Streaming: ['Streaming', 'Self-Managed', 'Connect'],
+  'Data Platform': ['Data Platform'],
+}
+
+// Collapse the agent's citations to one entry per page: single-sourced pages
+// exist under several products with near-identical content — and with
+// DIFFERENT path tails per component, so URL-based keys can't match them.
+// Stage 1 dedupes by product-stripped path (kills anchors + same-tail
+// variants); stage 2 collapses same-titled pages across products, preferring
+// the product the conversation established (the user's clarifying answer),
+// else the product of the page being read, else the first cited.
+function extractSources(blocks, conversationProduct) {
+  const pageComponent = (typeof document !== 'undefined' &&
+    PRODUCT_LABELS[document.body?.getAttribute('data-component')]) || null
+  const preference = PRODUCT_PREFERENCE[conversationProduct || pageComponent] || []
+
+  const byPage = new Map()
+  for (const block of blocks || []) {
+    if (block.type !== 'tool_calls') continue
+    for (const call of block.toolCalls || []) {
+      for (const source of call.sources || []) {
+        if (!source?.sourceUrl) continue
+        // Only render web URLs — React doesn't block javascript: hrefs
+        if (!/^https?:\/\//i.test(source.sourceUrl)) continue
+        const key = variantKey(source.sourceUrl)
+        if (!byPage.has(key)) byPage.set(key, source)
+      }
     }
   }
 
+  // Stage 2: same title across products = the same single-sourced page.
+  const byTitle = new Map()
+  for (const source of byPage.values()) {
+    const title = baseTitle(source).toLowerCase()
+    const existing = byTitle.get(title)
+    if (!existing) {
+      byTitle.set(title, source)
+      continue
+    }
+    const rank = (s) => {
+      const i = preference.indexOf(productOf(s.sourceUrl))
+      return i === -1 ? preference.length : i
+    }
+    if (rank(source) < rank(existing)) byTitle.set(title, source)
+  }
+  return [...byTitle.values()]
+}
+
+// Kapa titles can arrive pipe-joined ("Page title|Page title") or empty
+function baseTitle(source) {
+  const title = (source.title || '').split('|').map((p) => p.trim()).filter(Boolean)[0]
+  if (title) return title
+  try {
+    const segs = new URL(source.sourceUrl).pathname.split('/').filter(Boolean)
+    const last = segs[segs.length - 1] || ''
+    return humanize(last) || source.sourceUrl
+  } catch {
+    return source.sourceUrl
+  }
+}
+
+function humanize(slug) {
+  return decodeURIComponent(slug).replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).trim()
+}
+
+// Friendly names for the docs product/section path segments
+const PRODUCT_LABELS = {
+  'redpanda-cloud': 'Cloud',
+  'cloud-data-platform': 'Cloud',
+  'self-managed': 'Self-Managed',
+  'data-platform': 'Data Platform',
+  streaming: 'Streaming',
+  connect: 'Connect',
+  'redpanda-connect': 'Connect',
+}
+
+// A short qualifier to disambiguate same-titled sources. Product/version comes
+// first, then the section: single-sourced pages exist under several products
+// (Cloud, Self-Managed, Connect), so two products' copies of the same section
+// must not render identically (an anchor-only qualifier made "Walkthrough
+// (Coalescing)" appear twice with no way to tell the products apart).
+function sourceQualifier(url) {
+  try {
+    const u = new URL(url)
+    const segs = u.pathname.split('/').filter(Boolean)
+    const version = segs.find((s) => /^\d+\.\d+$/.test(s) || s === 'current')
+    const product = PRODUCT_LABELS[segs[0]]
+    const ver = version === 'current' ? 'latest' : version
+    const parts = []
+    if (product) parts.push(ver ? `${product} ${ver}` : product)
+    else if (ver) parts.push(ver)
+    if (u.hash && u.hash.length > 1) parts.push(humanize(u.hash.slice(1)))
+    return parts.join(', ')
+  } catch {
+    return ''
+  }
+}
+
+// ——— Clarifying-question options ————————————————————————————————————
+// The agent is instructed (AskAI.jsx CUSTOM_INSTRUCTIONS) to end a clarifying
+// question with a machine-readable final line:  OPTIONS: A | B | C
+// Split it off the answer markdown so the UI can render clickable choices.
+function splitOptions(md) {
+  const text = md || ''
+  const match = /\n\s*OPTIONS:\s*([^\n]+)\s*$/.exec(text)
+  if (!match) return { md: text, options: [] }
+  const options = match[1]
+    .split('|')
+    .map((s) => s.trim())
+    .filter((s) => s && s.length <= 60)
+    .slice(0, 5)
+  if (options.length < 2) return { md: text, options: [] }
+  return { md: text.slice(0, match.index), options }
+}
+
+function AnswerOptions({ options, onPick, disabled }) {
+  if (!options.length) return null
   return (
-    <div className="feedback-container">
-      <div className="feedback-group">
+    <div className="answer-options" role="group" aria-label="Choose an option">
+      {options.map((opt) => (
         <button
-          className="feedback-button"
+          key={opt}
           type="button"
-          onClick={() => handleFeedback('upvote')}
-          title="This was helpful"
+          className="answer-option"
+          disabled={disabled}
+          onClick={() => onPick(opt)}
         >
-          <ThumbsUp className="feedback-icon" />
+          {opt}
         </button>
-        <button
-          className="feedback-button"
-          type="button"
-          onClick={() => handleFeedback('downvote')}
-          title="This wasn't helpful"
-        >
-          <ThumbsDown className="feedback-icon" />
-        </button>
-      </div>
+      ))}
     </div>
   )
+}
+
+function AnswerSources({ blocks, conversationProduct }) {
+  const sources = extractSources(blocks, conversationProduct)
+  if (sources.length === 0) return null
+  // Only qualify titles that repeat, so unique sources stay clean
+  const titles = sources.map(baseTitle)
+  const counts = titles.reduce((acc, t) => ({ ...acc, [t]: (acc[t] || 0) + 1 }), {})
+  // Collapse entries whose rendered label would be identical: different anchors
+  // of one page (or Kapa returning the page twice) are one source to a reader.
+  const rendered = new Set()
+  const items = []
+  sources.forEach((s, i) => {
+    const title = titles[i]
+    const qualifier = counts[title] > 1 ? sourceQualifier(s.sourceUrl) : ''
+    const label = qualifier ? `${title} (${qualifier})` : title
+    if (rendered.has(label)) return
+    rendered.add(label)
+    items.push({ source: s, label })
+  })
+  return (
+    <div className="answer-sources">
+      <span className="answer-sources-label">Sources</span>
+      <ul>
+        {items.map(({ source, label }) => (
+          <li key={source.sourceUrl}>
+            <a href={source.sourceUrl} target="_blank" rel="noopener noreferrer">
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Grow the input with its content, capped by the CSS max-height
+function autosizeTextarea(el) {
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = `${el.scrollHeight}px`
 }
 
 // ——— ActionButtons ———————————————————————————————————————————————————————
@@ -169,20 +303,35 @@ function ActionButtons({ onReset, onCopy, showToast }) {
 }
 
 /**
- * Renders the main chat interface, providing a conversational UI with markdown-rendered answers, feedback and copy/reset actions, animated loading states, and responsive suggestion chips.
+ * Renders the main chat interface, providing a conversational UI with markdown-rendered answers, copy/reset actions, animated loading states, and responsive suggestion chips.
  *
- * Manages user input, conversation state, and UI responsiveness for both desktop and mobile. Handles dynamic textarea resizing, scroll-to-bottom behavior, and conditional display of header/footer elements based on user interaction. Integrates with the chat backend via the `useChat` hook to submit queries, stop or reset conversations, and display AI-generated suggestions. Also manages inline toast notifications for copy and feedback actions.
+ * Manages user input, conversation state, and UI responsiveness for both desktop and mobile. Handles dynamic textarea resizing, scroll-to-bottom behavior, and conditional display of header/footer elements based on user interaction. Integrates with the chat backend via the `useAgentChat` hook to submit queries, stop or reset conversations, and display AI-generated suggestions. Signed-in users (detected via the `kapa-session` event from AskAI.jsx) also get a conversation-history view backed by the Kapa Agent SDK.
  */
 export default function ChatInterface() {
   const [message, setMessage]               = useState('')
   const [dots, setDots]                     = useState('')
   const [showScrollDown, setShowScrollDown] = useState(false)
-  const [stoppedIds, setStoppedIds]         = useState(new Set())
   const [suggestions, setSuggestions]       = useState([])
+  const [agentExamples, setAgentExamples]   = useState(AGENT_EXAMPLES_FALLBACK)
   const [hasInteracted, setHasInteracted]   = useState(false)
+  // Read the stored thread pointer SYNCHRONOUSLY on first render so a navigating
+  // user who has a conversation to resume sees a loading state instead of a flash
+  // of the welcome screen / default questions before resumeThread() resolves.
+  // Cleared once the resume settles (success, failure, or nothing to resume).
+  const [resuming, setResuming]             = useState(() => {
+    try { return !!sessionStorage.getItem(ACTIVE_THREAD_KEY) } catch { return false }
+  })
   const [toast, setToast]                   = useState(null)
-  const [restoredConversation, setRestoredConversation] = useState(null)
+  // null = session state unknown (probe in flight), false = anonymous, true = signed in
+  const [authenticated, setAuthenticated]   = useState(() =>
+    window.__KAPA_AUTHENTICATED === undefined ? null : Boolean(window.__KAPA_AUTHENTICATED)
+  )
+  // Where "Sign in" goes — supplied by the session endpoint once docs login exists
+  const [loginUrl, setLoginUrl]             = useState(() => window.__KAPA_LOGIN_URL || null)
+  const [signingIn, setSigningIn]           = useState(false)
+  const [showHistory, setShowHistory]       = useState(false)
   const textareaRef = useRef(null)
+  const conversationAreaRef = useRef(null)
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type })
@@ -219,13 +368,25 @@ export default function ChatInterface() {
     }
   }, []);
 
-  // Restore conversation from localStorage on mount (cross-page persistence)
+  // Signed-in welcome prompts come from window.AGENT_SUGGESTIONS (per-component,
+  // tool-showcasing). Fall back to the JS default if the global is absent.
   useEffect(() => {
-    const saved = loadConversation()
-    if (saved?.conversation?.length > 0) {
-      setRestoredConversation(saved.conversation)
-      setHasInteracted(true)
+    let s = window.AGENT_SUGGESTIONS;
+    if (typeof s === 'string') {
+      try { s = JSON.parse(s) } catch (e) { console.warn('Could not parse AGENT_SUGGESTIONS JSON', e) }
     }
+    if (Array.isArray(s) && s.length > 0) setAgentExamples(s);
+  }, []);
+
+  // The session endpoint reports whether the visitor is signed in; the flag
+  // gates the whole agent UI (AskAI.jsx broadcasts it after every token fetch).
+  useEffect(() => {
+    const handleSession = (e) => {
+      setAuthenticated(Boolean(e.detail?.authenticated))
+      setLoginUrl(e.detail?.loginUrl || null)
+    }
+    window.addEventListener('kapa-session', handleSession)
+    return () => window.removeEventListener('kapa-session', handleSession)
   }, [])
 
   // Update isMobile on resize. Close dropdown if switching breakpoints.
@@ -244,33 +405,72 @@ export default function ChatInterface() {
   }, [])
 
   const {
-    conversation,
-    submitQuery,
-    isGeneratingAnswer,
+    messages,
+    threadId,
+    isStreaming,
+    sendMessage,
     stopGeneration,
     resetConversation,
-    isPreparingAnswer,
-  } = useChat()
+    resumeThread,
+    approveToolCall,
+    rejectToolCall,
+    historyDisabled,
+  } = useAgentChat()
 
-  const deepThinking = useDeepThinking()
+  // Expose the live thread ID so the feedback tool can reference the
+  // conversation without pasting its contents into the form. Also persist it
+  // per browser session so navigating between docs pages — which are full page
+  // reloads on this static (Antora) site — reopens the SAME conversation
+  // instead of starting a fresh one. sessionStorage is per-tab by design: a new
+  // tab still starts clean, and "New chat" clears it (see handleReset).
+  useEffect(() => {
+    window.__KAPA_THREAD_ID = threadId
+    if (threadId) {
+      try { sessionStorage.setItem(ACTIVE_THREAD_KEY, threadId) } catch { /* storage unavailable */ }
+    }
+    return () => {
+      delete window.__KAPA_THREAD_ID
+    }
+  }, [threadId])
 
-  // Merge restored conversation with live conversation for display
-  // Show restored conversation when live is empty, otherwise show live
-  // (live conversation will include new queries that continue the thread)
-  const displayConversation = restoredConversation && conversation.length === 0
-    ? restoredConversation
-    : conversation
+  // On mount, reopen the last conversation from this session (if any) so the
+  // drawer resumes where you left off after navigating. Runs once; a
+  // missing/deleted thread just clears the stale pointer so we don't retry.
+  const didResumeRef = useRef(false)
+  useEffect(() => {
+    if (didResumeRef.current || authenticated !== true || typeof resumeThread !== 'function') {
+      // Still probing (authenticated !== true) keeps the loading state up. But if
+      // we're signed in and the SDK has no resumeThread, don't strand the skeleton.
+      if (authenticated === true && typeof resumeThread !== 'function') setResuming(false)
+      return
+    }
+    let stored = null
+    try { stored = sessionStorage.getItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ }
+    if (!stored || stored === threadId) { setResuming(false); return }
+    didResumeRef.current = true
+    resumeThread(stored)
+      .then(() => setHasInteracted(true))
+      .catch(() => { try { sessionStorage.removeItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ } })
+      .finally(() => setResuming(false))
+  }, [authenticated, resumeThread, threadId])
 
-  const latestQA = conversation.length > 0 ? conversation.getLatest() : null
+  // A resumed or in-flight conversation should show the conversation view
+  useEffect(() => {
+    if (messages.length > 0 && !hasInteracted) setHasInteracted(true)
+  }, [messages.length, hasInteracted])
+
+  const lastMessage = messages[messages.length - 1]
+  // Waiting for the first assistant tokens of the current turn
+  const isPreparing = isStreaming && (!lastMessage || lastMessage.role === 'user')
 
   // Show/hide "scroll down" button
   useEffect(() => {
-    if (!hasInteracted || isPreparingAnswer) return
+    if (!hasInteracted || isPreparing) return
     const THRESHOLD = 300
 
-    // Check if we're in chat panel drawer
-    const chatScroll = document.querySelector('.chat-scroll')
-    const isInPanel = chatScroll && chatScroll.contains(document.getElementById('chat-panel-kapa-root'))
+    // In the panel the conversation area scrolls; on the home page the window does
+    const chatScroll = conversationAreaRef.current
+    const isInPanel = Boolean(document.getElementById('chat-panel-kapa-root')) && chatScroll
 
     const handleScroll = () => {
       let scrollTop, innerH, scrollH
@@ -305,12 +505,12 @@ export default function ChatInterface() {
       scrollTarget.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
     }
-  }, [hasInteracted, isPreparingAnswer, isGeneratingAnswer])
+  }, [hasInteracted, isPreparing, isStreaming])
 
   const scrollToBottom = () => {
-    // Check if we're in the chat panel drawer
-    const chatScroll = document.querySelector('.chat-scroll')
-    if (chatScroll && chatScroll.contains(document.getElementById('chat-panel-kapa-root'))) {
+    // In the panel the conversation area scrolls; on the home page the window does
+    const chatScroll = conversationAreaRef.current
+    if (chatScroll && document.getElementById('chat-panel-kapa-root')) {
       // Scroll within the chat panel
       chatScroll.scrollTo({
         top: chatScroll.scrollHeight,
@@ -328,7 +528,7 @@ export default function ChatInterface() {
   // “Preparing answer…” dots animation
   useEffect(() => {
     let timer
-    if (isPreparingAnswer) {
+    if (isPreparing) {
       timer = setInterval(() => {
         setDots((d) => (d.length < 3 ? d + '.' : ''))
       }, 500)
@@ -336,7 +536,7 @@ export default function ChatInterface() {
       setDots('')
     }
     return () => clearInterval(timer)
-  }, [isPreparingAnswer])
+  }, [isPreparing])
 
   // Hide header/footer until user interacts
   useEffect(() => {
@@ -359,10 +559,41 @@ export default function ChatInterface() {
     }
   }, [hasInteracted])
 
+  // Hand anonymous visitors to the stock Kapa widget (chat-SDK tier)
+  const openQuickAsk = () => {
+    if (typeof window.loadKapa !== 'function') {
+      showToast('Quick ask is unavailable on this page', 'error')
+      return
+    }
+    document.querySelector('[data-chat-action="close"]')?.click()
+    window.loadKapa(true)
+  }
+
+  // The user's clarifying answer ("Redpanda Cloud" / "Self-Managed", usually
+  // via an option chip) fixes the product used for citation preference across
+  // the whole conversation (see extractSources).
+  let conversationProduct = null
+  for (let i = messages.length - 1; i >= 0 && !conversationProduct; i--) {
+    const mm = messages[i]
+    if (mm.role !== 'user') continue
+    const t = (mm.content || '').toLowerCase()
+    if (/\bredpanda cloud\b|\bon cloud\b/.test(t)) conversationProduct = 'Cloud'
+    else if (/self[- ]managed/.test(t)) conversationProduct = 'Self-Managed'
+  }
+
   const doQuery = (q) => {
+    if (authenticated !== true) return
     if (!q.trim()) return
     if (!hasInteracted) setHasInteracted(true)
-    submitQuery(q)
+    setShowHistory(false)
+    safeHeap('ask_question_docs_home', {
+      question: q,
+      thread_id: threadId,
+    })
+    sendMessage(q).catch((err) => {
+      console.error('Chat error:', err)
+      showToast('Chat is temporarily unavailable. Try again shortly.', 'error')
+    })
     setMessage('')
     setDropdownOpen(false) // close dropdown when you tap anything
   }
@@ -384,7 +615,7 @@ export default function ChatInterface() {
     return () => {
       delete window.submitChatQuery
     }
-  }, [submitQuery, hasInteracted])
+  }, [sendMessage, hasInteracted, threadId, authenticated])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -393,13 +624,14 @@ export default function ChatInterface() {
   }
 
   const handleReset = () => {
-    clearConversation()  // Clear localStorage persistence
     resetConversation()
+    // Starting a new chat drops the resume pointer, so navigating away doesn't
+    // reopen the conversation we just left.
+    try { sessionStorage.removeItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ }
     setMessage('')
-    setStoppedIds(new Set())
-    setRestoredConversation(null)
     setHasInteracted(false)
     setShowScrollDown(false)
+    setShowHistory(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
     setDropdownOpen(false)
     resetTextareaHeight()
@@ -408,8 +640,8 @@ export default function ChatInterface() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(
-        displayConversation
-          .map((q) => `Question: ${q.question}\nAnswer: ${q.answer}`)
+        messages
+          .map((m) => `${m.role === 'user' ? 'Question' : 'Answer'}: ${m.content}`)
           .join('\n---\n')
       )
     } catch {
@@ -417,12 +649,15 @@ export default function ChatInterface() {
     }
   }
 
-  const handleStop = () => {
-    stopGeneration()
-    const idx     = conversation.length - 1
-    const lastKey = conversation[idx]?.id ?? `temp-${idx}`
-    setStoppedIds((s) => new Set(s).add(lastKey))
+  const handleThreadSelected = () => {
+    setShowHistory(false)
+    setHasInteracted(true)
   }
+
+  const showHistoryButton = authenticated && !historyDisabled
+  // Offer "New chat" once there's a conversation to reset (not on the empty
+  // welcome screen, and not while browsing history).
+  const showNewChat = authenticated === true && hasInteracted && !showHistory
 
   // ——— RENDERING FUNCTIONS ————————————————————————————————————————————————
 
@@ -522,80 +757,267 @@ export default function ChatInterface() {
           />
         )}
 
-        {/* Welcome screen - shown before interaction */}
-        {!hasInteracted && (
+        {/* Top toolbar: start a new chat + browse conversation history */}
+        {(showNewChat || showHistoryButton) && (
+          <div className="chat-history-toggle-row">
+            {showNewChat && (
+              <button
+                type="button"
+                className="action-button chat-history-toggle chat-new-chat"
+                onClick={handleReset}
+                aria-label="Start a new chat"
+              >
+                <MessageSquare /> New chat
+              </button>
+            )}
+            {showHistoryButton && (
+              <button
+                type="button"
+                className="action-button chat-history-toggle"
+                onClick={() => setShowHistory((open) => !open)}
+                aria-label={showHistory ? 'Close conversation history' : 'Show conversation history'}
+              >
+                {showHistory ? <X /> : <History />}
+                {showHistory ? 'Close' : 'History'}
+              </button>
+            )}
+          </div>
+        )}
+        {showHistory && (
+          <div className="chat-history-view">
+            <AgentThreadHistory onThreadSelected={handleThreadSelected} />
+          </div>
+        )}
+
+        {/* Sign-in prompt — the agent tier is for signed-in users; quick
+            questions go to the stock Kapa widget instead */}
+        {authenticated === false && (
+          <div className="signin-screen">
+            <span className="signin-badge">
+              <Sparkles size={14} />
+              Free with Redpanda Cloud
+            </span>
+            <h2 className="welcome-title">Sign in to unlock the docs AI agent</h2>
+            <p className="welcome-description">
+              Your personal assistant for Redpanda docs. Sign in and it can:
+            </p>
+            <ul className="signin-features">
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><History size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Pick up where you left off</span>
+                  <span className="signin-feature-desc">Every conversation is saved and synced across your devices.</span>
+                </span>
+              </li>
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><Compass size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Find answers, not just pages</span>
+                  <span className="signin-feature-desc">It searches the docs and opens the exact page you need.</span>
+                </span>
+              </li>
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><Braces size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Write Bloblang with confidence</span>
+                  <span className="signin-feature-desc">Draft mappings and verify they work before you run them.</span>
+                </span>
+              </li>
+              <li className="signin-feature">
+                <span className="signin-feature-icon"><MessageSquare size={19} /></span>
+                <span className="signin-feature-text">
+                  <span className="signin-feature-label">Help shape the docs</span>
+                  <span className="signin-feature-desc">Send feedback to the docs team without leaving the page.</span>
+                </span>
+              </li>
+            </ul>
+            {loginUrl ? (
+              <>
+                {/* disclosed=1: the privacy note below covers the disclosure the
+                    server interstitial exists for, so /login skips straight to
+                    Auth0 (see docs-site docs-login.mjs) */}
+                <a
+                  className={`signin-button${signingIn ? ' is-signing-in' : ''}`}
+                  aria-disabled={signingIn}
+                  href={`${loginUrl}${loginUrl.includes('?') ? '&' : '?'}disclosed=1&return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+                  onClick={() => setSigningIn(true)}
+                >
+                  {signingIn ? 'Signing in…' : 'Sign in'}
+                </a>
+                <button type="button" className="signin-quick-ask" onClick={openQuickAsk}>
+                  Or ask a quick question without signing in
+                </button>
+                {/* Keep in sync with the header modal note and docs-site
+                    loginInterstitialHtml (lib/oauth/pages.mjs) */}
+                <p className="signin-privacy-note">
+                  When you sign in, we collect your verified work email to track documentation usage and attribute it to
+                  your organization, and we share it with service providers that help us run and analyze the service.
+                  See our <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> for details.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="signin-coming-soon">
+                  Docs sign-in is coming soon. Until then:
+                </p>
+                <button type="button" className="signin-button" onClick={openQuickAsk}>
+                  Ask a quick question
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Resuming a prior conversation from this session: show a loading state
+            (reuses the tier-probe spinner + reduced-motion handling) instead of
+            flashing the welcome screen / default questions before the thread
+            history arrives. */}
+        {authenticated === true && !hasInteracted && !showHistory && resuming && (
+          <div className="welcome-screen">
+            <div className="chat-tier-loading" aria-hidden="true" />
+            <p className="welcome-description" role="status" style={{ marginTop: '16px' }}>
+              Restoring your conversation…
+            </p>
+          </div>
+        )}
+
+        {/* Welcome screen - shown before interaction (not while resuming) */}
+        {authenticated === true && !hasInteracted && !showHistory && !resuming && (
           <div className="welcome-screen">
             <div className="welcome-icon">
               <Sparkles size={28} />
             </div>
             <h2 className="welcome-title">How can I help?</h2>
             <p className="welcome-description">
-              I can answer questions about Redpanda docs, write quickstarts, and help you troubleshoot.
+              Ask a question, or let the agent take an action for you.
             </p>
-            {suggestions.length > 0 && (
-              <div className="suggestion-cards">
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="suggestion-card"
-                    onClick={() => doQuery(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+            {/* Original question prompts (per component) lead. */}
+            <div className="suggestion-cards">
+              {(suggestions.length ? suggestions : agentExamples).slice(0, 4).map((text, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="suggestion-card suggestion-card-action"
+                  onClick={() => doQuery(text)}
+                >
+                  <Compass className="suggestion-card-icon" size={16} />
+                  <span>{text}</span>
+                </button>
+              ))}
+            </div>
+            {/* A small, distinct row of agent actions — surfaced, not overwhelming. */}
+            {suggestions.length > 0 && agentExamples.length > 0 && (
+              <>
+                <p
+                  className="agent-actions-label"
+                  style={{ margin: '16px 0 8px', fontSize: '12.5px', fontWeight: 600, color: 'var(--kapa-text-muted)' }}
+                >
+                  Or get the agent to help:
+                </p>
+                <div className="suggestion-cards">
+                  {agentExamples.slice(0, 2).map((text, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="suggestion-card suggestion-card-action"
+                      onClick={() => doQuery(text)}
+                    >
+                      <Sparkles className="suggestion-card-icon" size={16} />
+                      <span>{text}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}
 
         <div
+          ref={conversationAreaRef}
           className="conversation-area"
-          style={hasInteracted ? { paddingBottom: '180px' } : { display: 'none' }}
+          style={authenticated === true && hasInteracted && !showHistory ? undefined : { display: 'none' }}
         >
           <div className="conversation">
-            {displayConversation.map((qa, idx) => {
-              const key        = qa.id ?? `temp-${idx}`
-              const wasStopped = stoppedIds.has(key)
-              // For restored conversations, show action buttons on the last item
-              const isLast     = idx === displayConversation.length - 1
-              // Feedback only available for live conversation items (not restored)
-              const canFeedback = conversation.length > 0 && latestQA?.id === qa.id
+            {messages.map((m, idx) => {
+              const isLast = idx === messages.length - 1
+              if (m.role === 'user') {
+                return (
+                  <div key={idx} className="qa-pair">
+                    <hr className="section-divider" />
+                    <div className="question">{m.content}</div>
+                  </div>
+                )
+              }
+              // Render blocks in their streamed order. Text blocks BEFORE the
+              // final one are the model's interim narration — including its
+              // machine-summarized reasoning, which reads as clipped shorthand
+              // ("Need context Connect question ask one clarifying…") — so
+              // style them as muted thinking, not as the agent's voice. Only
+              // the final text block is the real answer.
+              const blocks = m.blocks || []
+              let lastTextIdx = -1
+              blocks.forEach((b, i) => {
+                if (b.type === 'text' && (b.content || '').trim()) lastTextIdx = i
+              })
+              const answerMd = lastTextIdx >= 0 ? blocks[lastTextIdx].content : m.content
+              const { md: answerBody, options } = splitOptions(answerMd)
+              const optionsLive = isLast && !isStreaming && !m.isError
               return (
-                <div key={key} className="qa-pair">
-                  <hr className="section-divider" />
-                  <div className="question">{qa.question}</div>
-                  <Answer md={qa.answer} />
-                  {isLast && !isPreparingAnswer && !isGeneratingAnswer && (
+                <div key={idx} className={`qa-pair ${m.isError ? 'qa-pair-error' : ''}`}>
+                  {blocks.map((block, bi) => {
+                    if (block.type === 'tool_calls') {
+                      return (
+                        <div key={bi} className="tool-calls">
+                          <ToolCallGroup>
+                            {(block.toolCalls || []).map((tc) => (
+                              <ToolCallCard
+                                key={tc.id}
+                                toolCall={{ ...tc, displayName: tc.displayName || TOOL_DISPLAY_NAMES[tc.name] }}
+                                onApprove={approveToolCall}
+                                onReject={rejectToolCall}
+                              />
+                            ))}
+                          </ToolCallGroup>
+                        </div>
+                      )
+                    }
+                    if (block.type !== 'text' || !(block.content || '').trim()) return null
+                    if (bi === lastTextIdx) return <Answer key={bi} md={answerBody} />
+                    return (
+                      <div key={bi} className="answer-interim" aria-label="Agent thinking">
+                        {block.content}
+                      </div>
+                    )
+                  })}
+                  {lastTextIdx < 0 && <Answer md={answerBody} />}
+                  {options.length > 0 && (
+                    <AnswerOptions options={options} onPick={doQuery} disabled={!optionsLive} />
+                  )}
+                  <AnswerSources blocks={m.blocks} conversationProduct={conversationProduct} />
+                  {isLast && !isStreaming && (
                     <div className="actions-feedback flex justify-between items-center">
                       <ActionButtons
                         onReset={handleReset}
                         onCopy={handleCopy}
                         showToast={showToast}
                       />
-                      {!wasStopped && canFeedback && (
-                        <FeedbackButtons
-                          questionAnswerId={qa.id}
-                          showToast={showToast}
-                        />
-                      )}
                     </div>
                   )}
                 </div>
               )
             })}
-            {isPreparingAnswer && (
+            {isPreparing && (
               <div className="loading">
-                {deepThinking.active
-                  ? `Running deep thinking mode up to a minute. ${deepThinking.seconds}s…`
-                  : `Preparing answer${dots}`
-                }
+                {`Preparing answer${dots}`}
               </div>
             )}
           </div>
         </div>
 
-        <div className={`chat-footer-wrapper ${hasInteracted ? 'fixed-bottom' : ''}`}>
+        <div
+          className={`chat-footer-wrapper ${hasInteracted ? 'fixed-bottom' : ''}`}
+          style={authenticated === true ? undefined : { display: 'none' }}
+        >
           {/* Optional Scroll Down Button */}
           {showScrollDown && (
             <button
@@ -612,22 +1034,32 @@ export default function ChatInterface() {
               <label htmlFor="chat-message" className="visually-hidden">
                 Ask a question about Redpanda
               </label>
-              <input
+              <textarea
                 ref={textareaRef}
-                type="text"
                 id="chat-message"
                 name="chat-message"
                 className="chat-input"
                 autoComplete="off"
+                rows={1}
                 placeholder="Ask anything about Redpanda docs..."
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                disabled={isGeneratingAnswer || isPreparingAnswer}
+                onChange={(e) => {
+                  setMessage(e.target.value)
+                  autosizeTextarea(e.target)
+                }}
+                onKeyDown={(e) => {
+                  // Enter submits; Shift+Enter inserts a newline
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmit(e)
+                  }
+                }}
+                disabled={isStreaming}
               />
-              {isPreparingAnswer || isGeneratingAnswer ? (
+              {isStreaming ? (
                 <button
                   type="button"
-                  onClick={handleStop}
+                  onClick={stopGeneration}
                   className="submit-button stop-button"
                   aria-label="Stop"
                 >
@@ -648,17 +1080,14 @@ export default function ChatInterface() {
 
           <div className="disclaimer">
             <p>
-              Review the{' '}
               <a
                 href="https://www.redpanda.com/legal/privacy-policy"
                 target="_blank"
                 rel="noopener"
               >
-                Redpanda privacy policy
-              </a>{' '}
-              to understand how your data is used.
-            </p>
-            <p>
+                Privacy policy
+              </a>
+              {' · '}
               Powered by <a href="https://kapa.ai" target="_blank" rel="noopener noreferrer">kapa.ai</a>
             </p>
           </div>
