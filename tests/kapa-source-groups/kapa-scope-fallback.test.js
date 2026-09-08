@@ -14,9 +14,28 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const path = require('node:path')
 const fs = require('node:fs')
+const Module = require('node:module')
+const esbuild = require('esbuild')
 
 const ROOT = path.join(__dirname, '..', '..')
-const scope = require(path.join(ROOT, 'src/js/react/kapaScope.js'))
+
+// kapaScope.js is an ES module (it is bundled into AskAI.bundle.js by esbuild)
+// in a package without "type": "module", so require() of it throws
+// "Unexpected token 'export'" on Node 18 and 20, which is what CI runs. Only
+// Node 22.12+ can require() ESM directly. Transform it to CommonJS with the same
+// esbuild the bundle uses, then compile it as a module, so the test exercises
+// the real source on every Node version rather than a copy.
+function loadEsm (relPath) {
+  const filename = path.join(ROOT, relPath)
+  const { code } = esbuild.transformSync(fs.readFileSync(filename, 'utf8'), { format: 'cjs', loader: 'js' })
+  const mod = new Module(filename, module)
+  mod.filename = filename
+  mod.paths = Module._nodeModulePaths(path.dirname(filename))
+  mod._compile(code, filename)
+  return mod.exports
+}
+
+const scope = loadEsm('src/js/react/kapaScope.js')
 
 // A minimal window for the module's globals and events.
 function fakeWindow (ids) {

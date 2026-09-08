@@ -44,6 +44,8 @@ jobs:
         run: npm ci
       - name: Test page actions
         run: npm run test:markdown-dropdown
+      - name: Test Kapa source-group scoping
+        run: npm run test:kapa-source-groups
       - name: Cache generated files
         uses: actions/cache@v4
         with:
