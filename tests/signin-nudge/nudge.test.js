@@ -40,7 +40,7 @@ function makeEl (attrs) {
 }
 
 // Drive the IIFE against a stub DOM and hand back the pieces the assertions need.
-function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows }) {
+function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows, uiPreview }) {
   const els = {
     container: makeEl({}),
     signin: makeEl({}),
@@ -98,6 +98,7 @@ function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows }) {
       removeEventListener () {},
     },
     window: {
+      isUiPreview: uiPreview === true,
       __KAPA_LOGIN_URL: loginUrlKnown ? '/login' : undefined,
       location: { pathname: '/home/', search: '', hash: '' },
       history: { replaceState () {} },
@@ -179,4 +180,22 @@ test('a dismissal click still hides it when storage throws', () => {
   els.dismiss.handlers.click()
 
   assert.equal(els.nudge.hidden, true)
+})
+
+// docs-ui's preview has no docs-site behind it, so the session probe never
+// answers. Without this the account UI is invisible in the one place built for
+// reviewing frontend changes.
+test('shows in the docs-ui preview, which has no auth backend', () => {
+  const { els } = run({ signedIn: false, loginUrlKnown: false, nudgeSeen: false, uiPreview: true })
+
+  assert.equal(els.container.hidden, false, 'account control is revealed')
+  assert.equal(els.signin.hidden, false, 'Sign in is visible')
+  assert.equal(els.nudge.hidden, false, 'and so is the nudge under it')
+})
+
+test('the preview escape hatch is off on a real docs build', () => {
+  const { els } = run({ signedIn: false, loginUrlKnown: false, nudgeSeen: false, uiPreview: false })
+
+  assert.equal(els.container.hidden, true)
+  assert.equal(els.signin.hidden, true)
 })

@@ -222,7 +222,18 @@
     // entry on this so, if this UI ever ships ahead of the backend, we don't show
     // a sign-in link that 404s — the account UI stays hidden until auth is known
     // available. Re-runs on the kapa-session event once the probe resolves.
-    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL || !!cachedLoginUrl()
+    //
+    // docs-ui's own preview is the exception. It has no docs-site behind it, so
+    // /kapa/session never answers, no loginUrl is ever announced, and the
+    // account UI would be permanently invisible there — in the one place whose
+    // entire purpose is reviewing frontend changes. Treat the preview as
+    // auth-available so the Sign in control and its nudge can be seen. /login
+    // itself 404s there, which is fine: the preview is for looking, not for
+    // signing in. isUiPreview comes from site.title in head-scripts.hbs, so it
+    // is false on every real docs build (same idiom as 16-bloblang-interactive
+    // and react/agentTools).
+    var isUiPreviewBuild = typeof window.isUiPreview !== 'undefined' ? window.isUiPreview : false
+    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL || !!cachedLoginUrl() || isUiPreviewBuild
     signinLink.hidden = signedIn || !authAvailable
     menu.hidden = !signedIn
     container.hidden = !authAvailable

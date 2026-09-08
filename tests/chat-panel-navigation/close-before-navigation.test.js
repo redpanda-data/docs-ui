@@ -17,34 +17,52 @@ const vm = require('node:vm')
 const TOOLS = path.join(__dirname, '../../src/js/react/agentTools.js')
 const PANEL = path.join(__dirname, '../../src/js/19-chat-panel.js')
 
-// Minimal window/document stubs: agentTools.js touches the DOM only inside
-// execute(), so stubbing globals is enough to drive the two navigation tools.
-function stubGlobals () {
+// agentTools.js is an ES module, but this repo has no "type": "module" and CI
+// runs Node 18, which will not reparse a .js file as ESM the way newer Node
+// does — a dynamic import() here passes locally and throws
+// "Unexpected token 'export'" in CI. Load it through vm instead, rewriting its
+// single export into a global assignment (top-level const/let stay in the
+// script's lexical scope and never reach the context object, so the rewrite has
+// to be an assignment). Version independent, and it matches the vm approach the
+// other suites in this repo use.
+//
+// agentTools.js touches the DOM only inside execute(), so stubbed globals are
+// enough to drive the two navigation tools.
+function loadTools () {
   const calls = []
-  const listeners = {}
-  global.window = {
-    location: {
-      origin: 'https://docs.redpanda.com',
-      href: 'https://docs.redpanda.com/home/',
-      assign: (url) => calls.push({ type: 'assign', url }),
+  const source = fs.readFileSync(TOOLS, 'utf8')
+  const rewritten = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
+  assert.notEqual(rewritten, source, 'the agentTools export shape changed; update this harness')
+
+  const context = {
+    console,
+    URL,
+    fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
+    window: {
+      location: {
+        origin: 'https://docs.redpanda.com',
+        href: 'https://docs.redpanda.com/home/',
+        assign: (url) => calls.push({ type: 'assign', url }),
+      },
+      CustomEvent: class { constructor (type) { this.type = type } },
+      dispatchEvent: (e) => { calls.push({ type: 'dispatch', event: e.type }); return true },
+      addEventListener: () => {},
+      open: () => null,
     },
-    CustomEvent: class { constructor (type) { this.type = type } },
-    dispatchEvent: (e) => { calls.push({ type: 'dispatch', event: e.type }); return true },
-    addEventListener: (t, fn) => { listeners[t] = fn },
-    open: () => null,
+    document: {
+      querySelectorAll: () => [],
+      querySelector: () => null,
+      addEventListener: () => {},
+    },
   }
-  global.document = {
-    querySelectorAll: () => [],
-    querySelector: () => null,
-    addEventListener: () => {},
-  }
-  return { calls, listeners }
+  context.globalThis = context
+  vm.runInNewContext(rewritten, context)
+  return { calls, tools: context.agentTools, context }
 }
 
 test('navigate_to_page closes the drawer before it navigates', async () => {
-  const { calls } = stubGlobals()
-  const { agentTools } = await import(`${TOOLS}?nav=${Date.now()}`)
-  const navigate = agentTools.find((t) => t.name === 'navigate_to_page')
+  const { calls, tools } = loadTools()
+  const navigate = tools.find((t) => t.name === 'navigate_to_page')
   assert.ok(navigate, 'navigate_to_page tool is registered')
 
   const result = await navigate.execute({ url: '/home/how-to-use-these-docs/' })
@@ -56,9 +74,8 @@ test('navigate_to_page closes the drawer before it navigates', async () => {
 })
 
 test('an invalid URL neither closes the drawer nor navigates', async () => {
-  const { calls } = stubGlobals()
-  const { agentTools } = await import(`${TOOLS}?bad=${Date.now()}`)
-  const navigate = agentTools.find((t) => t.name === 'navigate_to_page')
+  const { calls, tools } = loadTools()
+  const navigate = tools.find((t) => t.name === 'navigate_to_page')
 
   const result = await navigate.execute({ url: 'https://evil.example.com/phish' })
 
@@ -67,8 +84,8 @@ test('an invalid URL neither closes the drawer nor navigates', async () => {
 })
 
 test('switch_product closes the drawer before it navigates', async () => {
-  const { calls } = stubGlobals()
-  global.document.querySelectorAll = (sel) => {
+  const { calls, tools, context } = loadTools()
+  context.document.querySelectorAll = (sel) => {
     if (!String(sel).includes('sb-product-opt')) return []
     return [{
       getAttribute: () => '/agentic-data-plane/',
@@ -76,8 +93,7 @@ test('switch_product closes the drawer before it navigates', async () => {
       querySelector: () => ({ textContent: 'Agentic Data Plane' }),
     }]
   }
-  const { agentTools } = await import(`${TOOLS}?sw=${Date.now()}`)
-  const sw = agentTools.find((t) => t.name === 'switch_product')
+  const sw = tools.find((t) => t.name === 'switch_product')
 
   const result = await sw.execute({ product: 'agentic-data-plane' })
 
