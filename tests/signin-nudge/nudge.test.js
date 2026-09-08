@@ -40,7 +40,7 @@ function makeEl (attrs) {
 }
 
 // Drive the IIFE against a stub DOM and hand back the pieces the assertions need.
-function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows, uiPreview }) {
+function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows, uiPreview, store: sharedStore }) {
   const els = {
     container: makeEl({}),
     signin: makeEl({}),
@@ -68,7 +68,7 @@ function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows, uiPreview }) 
   }
   els.container.querySelector = (sel) => bySelector[sel] || null
 
-  const store = nudgeSeen ? { 'docs-account-signin-nudge-seen': '1' } : {}
+  const store = sharedStore || (nudgeSeen ? { 'docs-account-signin-nudge-seen': '1' } : {})
   const listeners = {}
   const context = {
     console,
@@ -198,4 +198,24 @@ test('the preview escape hatch is off on a real docs build', () => {
 
   assert.equal(els.container.hidden, true)
   assert.equal(els.signin.hidden, true)
+})
+
+// Rollout order matters: the new UI bundle can ship while sign-in is still
+// switched off in production (DOCS_LOGIN_URL=""), and sign-in is turned on
+// later. Readers browsing during that window must NOT have the once-per-browser
+// flag burned while the nudge was suppressed, or they would never see it.
+test('a reader who browsed while sign-in was off still sees it once it is turned on', () => {
+  const browser = {}
+
+  // Window 1: new UI released, sign-in still off.
+  const before = run({ signedIn: false, loginUrlKnown: false, store: browser })
+  assert.equal(before.els.signin.hidden, true, 'sign-in is off')
+  assert.equal(before.els.nudge.hidden, true, 'nudge suppressed with it')
+  assert.equal(browser['docs-account-signin-nudge-seen'], undefined,
+    'suppressed is not the same as seen: the flag must stay unset')
+
+  // Window 2: same browser, sign-in now turned on.
+  const after = run({ signedIn: false, loginUrlKnown: true, store: browser })
+  assert.equal(after.els.signin.hidden, false)
+  assert.equal(after.els.nudge.hidden, false, 'nudge still owed to this reader')
 })
