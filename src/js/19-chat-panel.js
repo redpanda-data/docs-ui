@@ -172,6 +172,24 @@
     }
   }
 
+  // The Ask AI agent can navigate the reader in the same tab (navigate_to_page
+  // and switch_product in react/agentTools.js). It fires this first so the
+  // persisted open flag doesn't reopen the drawer on top of the page it was
+  // just asked to show. Storage is cleared even when the panel isn't currently
+  // open (mobile skips the restore, so a stale flag would otherwise reopen it
+  // on the reader's next desktop visit).
+  window.addEventListener('docs-chat:close', function () {
+    if (isOpen) {
+      closePanel()
+      return
+    }
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch (e) {
+      // localStorage not available, ignore
+    }
+  })
+
   // Restore state on page load
   restoreState()
 })()

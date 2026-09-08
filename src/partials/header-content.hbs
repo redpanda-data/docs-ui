@@ -125,6 +125,19 @@
              folds into the overflow menu). State driven by 26-docs-account.js --}}
         <div class="tb-account" data-docs-account hidden>
           <a class="tb-link tb-signin-link" data-account-signin href="/login">Sign in</a>
+          {{!-- First-view nudge. Shown once per browser by 26-docs-account.js, and
+               only while the Sign in link itself is visible, so it can never
+               point at a control that isn't there (the account UI is gated on
+               auth being available at all). Not a live region: it's a
+               promotional aside, so it must not interrupt what a screen reader
+               is doing. It sits right after the link in DOM order, so AT and
+               keyboard users reach it in the place it visually refers to. --}}
+          <div class="tb-signin-nudge" data-signin-nudge hidden>
+            <span>New. Sign in to unlock the docs AI agent.</span>
+            <button class="tb-signin-nudge-x" data-signin-nudge-dismiss type="button" aria-label="Dismiss">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
           {{!-- Feature modal shown when Sign in is clicked (26-docs-account.js) --}}
           <div class="tb-signin-modal" data-signin-modal hidden>
             <div class="tb-signin-modal-backdrop" data-signin-modal-close></div>
