@@ -70,6 +70,15 @@
           "26.2" while the group sent is `current`. Empty string means nothing
           was scoped, so the prompt must not claim a restriction. --}}
     window.KAPA_SOURCE_GROUP_SEGMENT = window.KAPA_SOURCE_GROUP_SEGMENT || {{{get-kapa-source-groups 'segment-json'}}};
+    {{!-- The version segment this page is actually published under, ONLY when it
+          differs from the one above: the beta docs, or a release published before
+          its Kapa group exists, fall back to the default group. The prompt uses
+          it to say the reader is on that version while retrieval ran against
+          the segment above. Empty string means the two agree (or nothing was
+          scoped), which is also what the /api/ pages get: docs-site injects the
+          ids and segment there and never this, and /api/ tracks the latest
+          release so there is no fallback to report. --}}
+    window.KAPA_SOURCE_GROUP_REQUESTED = window.KAPA_SOURCE_GROUP_REQUESTED || {{{get-kapa-source-groups 'requested-json'}}};
     {{!-- Signed-in agent tier: per-component prompts that showcase the agent tools --}}
     window.AGENT_SUGGESTIONS = window.AGENT_SUGGESTIONS || [
       {{#each (get-agent-suggestions)}}

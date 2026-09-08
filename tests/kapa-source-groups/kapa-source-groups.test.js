@@ -124,6 +124,68 @@ test('a published version with no group falls back to the default rather than se
   // This is the drift case: 26.3 published, nobody made the Kapa group yet.
   // Falling back to current beats searching all nine versions at once.
   assert.deepEqual(call({ url: '/streaming/26.3/get-started/intro/' }), ['grp-cur'])
+  // ... but the prompt must be able to say the reader is NOT on current. The
+  // page model says which version it is published under; the mapping does not
+  // know it, so it cannot come from the mapping's keys.
+  const page = versionedPage('/streaming/26.3/get-started/intro/', '26.3')
+  assert.deepEqual(helper(page), ['grp-cur'])
+  assert.equal(helper('segment', page), 'current', 'segment names the group actually sent')
+  assert.equal(helper('requested', page), '26.3', 'requested names the version the page is on')
+})
+
+// A page as Antora's UI model presents it inside a versioned component version:
+// docs-site publishes the streaming component with latest_version_segment
+// 'current' and latest_prerelease_version_segment 'beta'.
+const versionedPage = (url, version, component = 'streaming', mapping = MAPPING) => ({
+  data: {
+    root: {
+      page: {
+        url,
+        version,
+        component: { name: component },
+        componentVersion: { version, asciidoc: { attributes: { 'kapa-source-groups': mapping } } },
+      },
+    },
+  },
+})
+
+test('the beta docs fall back to the default group and report beta as the requested segment', () => {
+  const page = versionedPage('/streaming/beta/get-started/intro/', '26.3-beta1')
+  assert.deepEqual(helper(page), ['grp-cur'])
+  assert.equal(helper('segment', page), 'current')
+  assert.equal(helper('requested', page), 'beta')
+  assert.equal(helper('requested-json', page), '"beta"')
+  // Pre-rename layout: ROOT component, so the segment is the first position.
+  const root = versionedPage('/beta/get-started/intro/', '26.3-beta1', 'ROOT')
+  assert.equal(helper('requested', root), 'beta')
+})
+
+test('the requested segment is empty whenever it would only repeat the segment sent', () => {
+  // A mapped version: segment and requested agree, so nothing to report.
+  assert.equal(helper('requested', versionedPage('/streaming/25.2/x/', '25.2')), '')
+  assert.equal(helper('requested-json', versionedPage('/streaming/25.2/x/', '25.2')), '""')
+  // The latest release publishes at /streaming/current/ with version 26.2:
+  // the URL segment is what counts, so no fallback is reported.
+  assert.equal(helper('requested', versionedPage('/streaming/current/x/', '26.2')), '')
+  // An unversioned component version has no segment to request.
+  assert.equal(helper('requested', versionedPage('/cloud-data-platform/x/', '', 'cloud-data-platform')), '')
+  // No component version at all (the 404 page, a bare page object).
+  assert.equal(helper('requested', withMapping('/streaming/26.3/x/')), '')
+  // Nothing scoped at all: no mapping, so no group, so nothing to compare.
+  assert.equal(helper('requested', { data: { root: { page: { url: '/streaming/beta/x/', componentVersion: { version: '26.3-beta1' } } } } }), '')
+  assert.equal(helper('requested-json', { data: { root: {} } }), '""')
+})
+
+test('the requested segment is emitted as script-safe JSON, never raw', () => {
+  // A quote and an opening tag, but no slash: a slash is a path separator and
+  // would split the segment, so a literal </script> cannot be a segment. The
+  // escaping under test is the same `<` to \u003c that protects the ids.
+  const hostile = 'x"<script>alert(1)<'
+  const page = versionedPage(`/streaming/${hostile}/x/`, '26.3-beta1')
+  const json = helper('requested-json', page)
+  assert.doesNotMatch(json, /</, 'no literal < may reach the script element')
+  assert.match(json, /\\u003c/)
+  assert.equal(JSON.parse(json), hostile)
 })
 
 test('reads the mapping from site.keys, the only channel that reaches the 404 page', () => {
@@ -136,6 +198,19 @@ test('reads the mapping from site.keys, the only channel that reaches the 404 pa
   // With no page object at all, which is closer to what the 404 model provides.
   const bare = { site: { keys: { 'kapa-source-groups': JSON.stringify(MAPPING) } } }
   assert.deepEqual(helper({ data: { root: bare } }), ['grp-cur'])
+})
+
+test('a malformed component attribute does not hide a good site.keys copy', () => {
+  // Review note: the first parse failure used to return null outright, so one
+  // broken attribute silently disabled scoping even with a valid site.keys.
+  const root = {
+    page: { url: '/streaming/25.2/x/', componentVersion: { asciidoc: { attributes: { 'kapa-source-groups': '{not json' } } } },
+    site: { keys: { 'kapa-source-groups': JSON.stringify(MAPPING) } },
+  }
+  assert.deepEqual(helper({ data: { root } }), ['grp-252'])
+  // And when every candidate is malformed, still no throw and no group.
+  root.site.keys['kapa-source-groups'] = '{also not json'
+  assert.deepEqual(helper({ data: { root } }), [])
 })
 
 test('a component attribute still wins over site.keys', () => {
@@ -224,11 +299,18 @@ test('the prop name for each tier matches the installed SDK typings, not just it
   const agentTypes = fs.readFileSync(path.join(ROOT, 'node_modules/@kapaai/agent-react/dist/index.d.mts'), 'utf8')
   const chatTypes = fs.readFileSync(path.join(ROOT, 'node_modules/@kapaai/react-sdk/dist/index.d.mts'), 'utf8')
 
-  // Declared as an optional string[] prop on the provider in each SDK.
-  assert.match(agentTypes, new RegExp(`^\\s*${agentName}\\?: string\\[\\];`, 'm'),
-    `@kapaai/agent-react does not declare a prop named ${agentName}`)
-  assert.match(chatTypes, new RegExp(`^\\s*${chatName}\\?: string\\[\\];`, 'm'),
-    `@kapaai/react-sdk does not declare a prop named ${chatName}`)
+  // Declared as an optional list-of-strings prop on the provider in each SDK.
+  // The name must match exactly; the type may be spelled string[],
+  // readonly string[], Array<string> or ReadonlyArray<string>, so an SDK bump
+  // that only reformats the typings does not fail this for the wrong reason.
+  const declared = (name) => new RegExp(
+    `^\\s*${name}\\?:\\s*(?:readonly\\s+string\\[\\]|string\\[\\]|Array<string>|ReadonlyArray<string>)\\s*;?\\s*$`, 'm')
+  assert.match(agentTypes, declared(agentName),
+    `@kapaai/agent-react does not declare a string-list prop named ${agentName}`)
+  assert.match(chatTypes, declared(chatName),
+    `@kapaai/react-sdk does not declare a string-list prop named ${chatName}`)
+  // Negative control for the regex itself: a wrong name must not match.
+  assert.doesNotMatch(agentTypes, declared(agentName + 'X'))
 
   // And the names really are different, which is the trap. If Kapa ever
   // unifies them this assertion is the one to relax.
@@ -255,7 +337,7 @@ test('both SDKs send the prop to the wire as source_group_ids_include', () => {
   assert.match(chatBuilt, /source_group_ids_include/)
   // agent-react forwards the prop to agent-core, which builds the request body.
   const agentCore = fs.readFileSync(path.join(ROOT, 'node_modules/@kapaai/agent-core/dist/index.mjs'), 'utf8')
-  assert.match(agentCore, /body\.source_group_ids_include\s*=\s*sourceGroupIdsInclude/)
+  assert.match(agentCore, /body\.source_group_ids_include\s*=\s*sourceGroupIdsInclude\s*;?/)
 })
 
 test('group ids are emitted as script-safe JSON, never raw', () => {
@@ -284,11 +366,26 @@ test('a non-string group_id yields no group at all, not "[object Object]"', () =
   }
 })
 
-test('the template emits only the two JSON modes, never a raw triple-stash of an id', () => {
+test('the template emits only the JSON modes, never a raw triple-stash of an id', () => {
   const partial = fs.readFileSync(path.join(ROOT, 'src/partials/chat-panel.hbs'), 'utf8')
   assert.match(partial, /KAPA_SOURCE_GROUP_IDS \|\| \{\{\{get-kapa-source-groups 'json'\}\}\}/)
   assert.match(partial, /KAPA_SOURCE_GROUP_SEGMENT \|\| \{\{\{get-kapa-source-groups 'segment-json'\}\}\}/)
+  assert.match(partial, /KAPA_SOURCE_GROUP_REQUESTED \|\| \{\{\{get-kapa-source-groups 'requested-json'\}\}\}/)
   assert.doesNotMatch(partial, /\{\{#each \(get-kapa-source-groups\)/)
+})
+
+test('chat-panel.hbs renders the requested segment through the real helper', () => {
+  const source = fs.readFileSync(path.join(ROOT, 'src/partials/chat-panel.hbs'), 'utf8')
+  const start = source.indexOf('window.KAPA_SOURCE_GROUP_REQUESTED')
+  const snippet = source.slice(start, source.indexOf(';\n', start) + 1)
+  Handlebars.registerHelper('get-kapa-source-groups', helper)
+  const strip = (r) => r.replace(/window\.KAPA_SOURCE_GROUP_REQUESTED\s*=\s*window\.KAPA_SOURCE_GROUP_REQUESTED\s*\|\|\s*/, '')
+  const beta = versionedPage('/streaming/beta/get-started/', '26.3-beta1').data.root
+  assert.equal(eval(strip(Handlebars.compile(snippet)(beta))), 'beta') // eslint-disable-line no-eval
+  const mapped = versionedPage('/streaming/25.2/x/', '25.2').data.root
+  assert.equal(eval(strip(Handlebars.compile(snippet)(mapped))), '') // eslint-disable-line no-eval
+  // Extension absent: still valid JS, still empty.
+  assert.equal(eval(strip(Handlebars.compile(snippet)({ page: { url: '/streaming/beta/x/' } }))), '') // eslint-disable-line no-eval
 })
 
 test('sourceGroupProps omits the prop entirely when there is nothing to send', () => {
@@ -374,7 +471,38 @@ test('AskAI reads the emitted segment rather than re-deriving it from the URL', 
   const ctx = askai.slice(askai.indexOf('function currentPageContext'))
   const body = ctx.slice(0, ctx.indexOf('\n}'))
   assert.match(body, /window\.KAPA_SOURCE_GROUP_SEGMENT/)
+  assert.match(body, /window\.KAPA_SOURCE_GROUP_REQUESTED/)
   assert.doesNotMatch(body, /\\d\+\\\.\\d\+/, 'currentPageContext must not parse a version out of the URL itself')
+})
+
+test('the prompt names the version the reader is on when retrieval fell back to the default', () => {
+  // Rebuild currentPageContext in isolation so the real branching is exercised.
+  const askai = fs.readFileSync(path.join(ROOT, 'src/js/react/AskAI.jsx'), 'utf8')
+  const start = askai.indexOf('function currentPageContext')
+  const body = askai.slice(start, askai.indexOf('\n}', start) + 2)
+  const fn = (win) => new Function('window', 'document', body + '\nreturn currentPageContext()')(win, { body: null }) // eslint-disable-line no-new-func
+  const loc = { location: { pathname: '/streaming/beta/x/' } }
+
+  const fellBack = fn({ ...loc, KAPA_SOURCE_GROUP_SEGMENT: 'current', KAPA_SOURCE_GROUP_REQUESTED: 'beta' })
+  assert.match(fellBack, /on the beta docs/)
+  assert.match(fellBack, /restricted to current \(the latest release\)/)
+  assert.match(fellBack, /where beta may differ from current/)
+  assert.match(fellBack, /do not ask which version/)
+
+  // Agreement, or an absent global (the /api/ pages), is the plain restriction.
+  for (const win of [
+    { ...loc, KAPA_SOURCE_GROUP_SEGMENT: '25.2', KAPA_SOURCE_GROUP_REQUESTED: '' },
+    { ...loc, KAPA_SOURCE_GROUP_SEGMENT: '25.2', KAPA_SOURCE_GROUP_REQUESTED: '25.2' },
+    { ...loc, KAPA_SOURCE_GROUP_SEGMENT: '25.2' },
+  ]) {
+    const out = fn(win)
+    assert.match(out, /Docs version: 25\.2\. Your search results are restricted to this version/)
+    assert.doesNotMatch(out, /differ from/)
+  }
+
+  // Nothing scoped: a leftover requested value must not invent a restriction.
+  const unscoped = fn({ ...loc, KAPA_SOURCE_GROUP_SEGMENT: '', KAPA_SOURCE_GROUP_REQUESTED: 'beta' })
+  assert.match(unscoped, /NOT restricted to a version/)
 })
 
 test('the chat panel emits the segment alongside the group ids', () => {

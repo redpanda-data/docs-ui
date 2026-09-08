@@ -352,19 +352,34 @@ function currentPageContext () {
     //
     // Empty or absent means no group was sent, so nothing is restricted.
     const version = (typeof window.KAPA_SOURCE_GROUP_SEGMENT === 'string' && window.KAPA_SOURCE_GROUP_SEGMENT) || null
+    // The version the page is published under, when it is NOT the one searched.
+    // Set by chat-panel.hbs only for a published version with no Kapa group of
+    // its own (beta, or a release newer than the mapping), which falls back to
+    // the default group. Absent on the /api/ pages, where docs-site injects the
+    // ids and segment and there is no fallback, so a missing value means the two
+    // agree.
+    const requested = (typeof window.KAPA_SOURCE_GROUP_REQUESTED === 'string' && window.KAPA_SOURCE_GROUP_REQUESTED) || null
+    const fellBack = Boolean(version && requested && requested !== version)
     return '\n\n## Current page\n' +
       `- The user has the docs open at: ${path}` +
       (component ? ` (docs component: ${component})` : '') + '\n' +
       // Without this the agent asks which version while the reader is standing
       // on the answer, and retrieval is ALREADY pinned to that version, so a
       // guess of "latest" contradicts the sections it just received.
-      (version
-        ? `- Docs version: ${version}${version === 'current' ? ' (the latest release)' : ''}. ` +
-          'Your search results are restricted to this version, so do not ask which version they are on.\n'
-        // No group was sent, so retrieval spans every indexed version. Saying
-        // so is what stops the model asserting a version it cannot support.
-        : '- Searches are NOT restricted to a version, so results may mix versions. ' +
-          'Check each result url before stating that something applies to a particular version.\n') +
+      (fellBack
+        // Retrieval ran against the default because the reader's version has
+        // no search index yet. Say so, or the agent asserts current-version
+        // facts about the beta docs with no caveat and no way to know better.
+        ? `- Docs version: the user is on the ${requested} docs, which have no dedicated search index yet, ` +
+          `so your search results are restricted to ${version}${version === 'current' ? ' (the latest release)' : ''} instead. ` +
+          `Point out where ${requested} may differ from ${version}, and do not ask which version they are on.\n`
+        : version
+          ? `- Docs version: ${version}${version === 'current' ? ' (the latest release)' : ''}. ` +
+            'Your search results are restricted to this version, so do not ask which version they are on.\n'
+          // No group was sent, so retrieval spans every indexed version. Saying
+          // so is what stops the model asserting a version it cannot support.
+          : '- Searches are NOT restricted to a version, so results may mix versions. ' +
+            'Check each result url before stating that something applies to a particular version.\n') +
       '- Use this together with the conversation so far to infer their product before asking.'
   } catch (e) {
     return ''

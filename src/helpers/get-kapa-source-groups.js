@@ -52,10 +52,13 @@
  * @returns {string[]} Zero or one Kapa source group id
  */
 /**
- * Two outputs from one resolution, selected by an optional mode argument:
+ * Three outputs from one resolution, selected by an optional mode argument:
  *
- *   {{#each (get-kapa-source-groups)}}   -> array of zero or one group id
- *   {{get-kapa-source-groups 'segment'}} -> the segment that group represents
+ *   {{#each (get-kapa-source-groups)}}     -> array of zero or one group id
+ *   {{get-kapa-source-groups 'segment'}}   -> the segment that group represents
+ *   {{get-kapa-source-groups 'requested'}} -> the version segment the page is
+ *                                             actually published under, when it
+ *                                             differs from 'segment' (see below)
  *
  * One helper rather than two, because Antora compiles every UI helper in
  * isolation and a helper CANNOT require a sibling helper: doing so fails at
@@ -68,20 +71,26 @@
  */
 module.exports = function (mode, options) {
   const opts = options === undefined ? mode : options
-  const { segment, groupId } = resolve(opts)
+  const { segment, groupId, requested } = resolve(opts)
   // Only name a segment when a group is genuinely being sent, so the agent
   // prompt cannot claim a restriction that is not in force.
   const segmentOut = groupId && segment ? segment : ''
+  // Only name a requested segment when a group is being sent AND it is not the
+  // group for the version the page is published under. Empty means "what was
+  // sent is what the reader is on", including the no-scope case.
+  const requestedOut = groupId && requested && requested !== segment ? requested : ''
   const idsOut = groupId ? [groupId] : []
   switch (mode) {
     case 'segment': return segmentOut
-    // The two JSON modes are what the template uses. They exist so that no raw
+    case 'requested': return requestedOut
+    // The JSON modes are what the template uses. They exist so that no raw
     // value is ever interpolated into an executable <script>: the ids come from
     // page or site attributes, and a quote or a </script> in one would end the
     // string or the script element. Handlebars' triple-stash does no escaping
     // at all inside <script>, so the encoding has to happen here.
     case 'json': return scriptSafeJson(idsOut)
     case 'segment-json': return scriptSafeJson(segmentOut)
+    case 'requested-json': return scriptSafeJson(requestedOut)
     default: return idsOut
   }
 }
@@ -114,32 +123,67 @@ function scriptSafeJson (value) {
  * `segment` is the EFFECTIVE segment, after the fallback to default_segment, so
  * it always names the group in `groupId` rather than what the URL asked for.
  *
+ * `requested` is the version segment the page is actually published under, read
+ * from the page's component version (see requestedSegmentFromPage), or null for
+ * an unversioned page. It differs from `segment` exactly when a published
+ * version has no group of its own yet: the beta docs at /streaming/beta/, or a
+ * release published before its Kapa source and group exist. The prompt uses it
+ * to tell the agent the reader is on `requested` while retrieval ran against
+ * `segment`, so the agent caveats instead of asserting the wrong version.
+ *
  * @param {object} options - Handlebars options
- * @returns {{segment: string|null, groupId: string|null}}
+ * @returns {{segment: string|null, groupId: string|null, requested: string|null}}
  */
 function resolve (options) {
   const root = (options && options.data && options.data.root) || {}
   const { page, site } = root
-  const none = { segment: null, groupId: null }
+  const none = { segment: null, groupId: null, requested: null }
 
   const mapping = readMapping(page, site)
   if (!mapping || !mapping.segments) return none
 
+  // versionSegmentFromUrl only ever returns a key of mapping.segments, so
+  // `asked` is either a mapped segment or null. Null covers both unversioned
+  // pages (Cloud, Connect, home) and versioned pages whose segment has no group
+  // yet (beta, or a release published before its Kapa group exists). Both fall
+  // back to the default: for the first that IS the DOC-2450 fix, and for the
+  // second it beats searching every version at once. `requested` below is what
+  // tells the two apart for the prompt.
   const asked = versionSegmentFromUrl(page && page.url, mapping.segments)
-
-  // A versioned page whose segment has no group is the case the drift check
-  // exists to catch: a version was published and nobody created the Kapa source
-  // and group. Fall back to the default rather than sending nothing, so the
-  // reader gets current-version answers instead of every version at once.
-  const effective = (asked && mapping.segments[asked]) ? asked : mapping.default_segment
+  const effective = asked || mapping.default_segment
   const entry = mapping.segments[effective]
   // A non-empty string, not merely truthy. A malformed mapping with
   // group_id: {} would otherwise be emitted as "[object Object]" and sent to
-  // Kapa as a filter, which returns only global sources with no error. Nothing
-  // is the safer failure.
+  // Kapa as a filter. Nothing is the safer failure, so an entry that exists but
+  // has no usable group_id resolves to none rather than to the default.
   if (!entry || typeof entry.group_id !== 'string' || !entry.group_id) return none
 
-  return { segment: effective, groupId: entry.group_id }
+  return { segment: effective, groupId: entry.group_id, requested: asked || requestedSegmentFromPage(page) }
+}
+
+/**
+ * The version segment a page is published under, whether or not the mapping
+ * knows it. Only the mapping's own keys are recognised by versionSegmentFromUrl,
+ * so this is the only way to notice that /streaming/beta/... is a versioned page
+ * that fell back to the default group.
+ *
+ * Read from Antora's page model rather than by guessing at the URL: a page in a
+ * versioned component version has a non-empty componentVersion.version and a URL
+ * of /<component>/<segment>/..., or /<segment>/... for the ROOT component. An
+ * unversioned component (version '') has no segment in its URL at all, and the
+ * 404 page has no componentVersion, so both yield null.
+ *
+ * @param {object} page - The UI model page
+ * @returns {string|null} e.g. 'beta', '26.3', or null when the page is not versioned
+ */
+function requestedSegmentFromPage (page) {
+  if (!page || typeof page.url !== 'string') return null
+  const cv = page.componentVersion
+  if (!cv || typeof cv.version !== 'string' || !cv.version) return null
+  const parts = page.url.split('/')
+  const name = page.component && page.component.name
+  const candidate = name && name !== 'ROOT' && parts[1] === name ? parts[2] : parts[1]
+  return candidate && page.url.includes(`/${candidate}/`) ? candidate : null
 }
 
 /**
@@ -175,8 +219,9 @@ function readMapping (page, site) {
       return JSON.parse(raw)
     } catch (err) {
       // A malformed attribute must not break the page. Losing version scoping is
-      // a degraded answer; a thrown helper is a broken build.
-      return null
+      // a degraded answer; a thrown helper is a broken build. Keep looking: a
+      // broken component attribute should not hide a good site.keys copy.
+      continue
     }
   }
   return null
@@ -227,3 +272,4 @@ module.exports.resolve = resolve
 module.exports.scriptSafeJson = scriptSafeJson
 module.exports.versionSegmentFromUrl = versionSegmentFromUrl
 module.exports.readMapping = readMapping
+module.exports.requestedSegmentFromPage = requestedSegmentFromPage
