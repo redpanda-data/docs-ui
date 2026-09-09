@@ -42,6 +42,15 @@ const endpoint = () => window.KAPA_QUOTA_ENDPOINT || '/kapa/quota'
 let snapshot = null
 export const getQuota = () => snapshot
 
+// Request ordering. The mount-time peek doubles as the database's cold-start
+// warmer, so it can take seconds, and a reader who types fast can have their
+// first consume answered before it. Every verdict carries the sequence number
+// of the request that produced it, and an older request never overwrites a
+// newer one's verdict, otherwise the stale peek would put the composer back
+// for a question the next consume rejects.
+let sequence = 0
+let published = 0
+
 // What a caller gets when we couldn't reach a verdict. `degraded` tells the UI
 // to say nothing about counts it can't trust rather than render "3 left".
 const openVerdict = () => ({ allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null })
@@ -54,7 +63,13 @@ function isAbsent () {
   try { return sessionStorage.getItem(ABSENT_KEY) === '1' } catch (err) { return false }
 }
 
-function announce (verdict) {
+// Every verdict is published, the fail-open ones included: a visitor who was
+// walled and whose next check times out must get the composer back, because
+// the api service would let that question through. Publishing keeps the UI and
+// the gate telling the same story.
+function announce (verdict, seq) {
+  if (seq < published) return verdict
+  published = seq
   snapshot = verdict
   window.__DOCS_ANON_QUOTA = verdict
   window.dispatchEvent(new CustomEvent(QUOTA_EVENT, { detail: verdict }))
@@ -62,7 +77,8 @@ function announce (verdict) {
 }
 
 async function ask (peek) {
-  if (isAbsent()) return openVerdict()
+  const seq = ++sequence
+  if (isAbsent()) return announce(openVerdict(), seq)
 
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
@@ -78,7 +94,7 @@ async function ask (peek) {
   } catch (err) {
     // Network error or our own timeout: allow, and don't cache the failure,
     // a blip shouldn't disable the quota for the rest of the browser session.
-    return openVerdict()
+    return announce(openVerdict(), seq)
   } finally {
     clearTimeout(timer)
   }
@@ -86,29 +102,32 @@ async function ask (peek) {
   // The function isn't deployed here. Stop asking for the rest of the session.
   if (res.status === 404 || res.status === 405) {
     markAbsent()
-    return openVerdict()
+    return announce(openVerdict(), seq)
   }
 
   const data = await res.json().catch(() => null)
-  if (!data) return openVerdict()
+  if (!data) return announce(openVerdict(), seq)
 
   // Signed in: no counting at all, and no wall to render.
-  if (data.unlimited) return announce({ allowed: true, unlimited: true, degraded: false, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null })
+  if (data.unlimited) return announce({ allowed: true, unlimited: true, degraded: false, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null }, seq)
 
   // Endpoint-level abuse control, not the product wall (no login_url). Allow:
   // this isn't the signal we gate the UI on, and someone tripping the flood
   // guard is not someone we want to invite to sign in.
-  if (data.error === 'rate_limited') return openVerdict()
+  if (data.error === 'rate_limited') return announce(openVerdict(), seq)
 
+  // The backend only ever degrades to "allowed" (lib/anon-quota.mjs), but the
+  // gate must never refuse on a verdict the UI treats as unknown, so pin it.
+  const degraded = data.degraded === true
   return announce({
-    allowed: data.allowed !== false,
-    degraded: data.degraded === true,
+    allowed: degraded || data.allowed !== false,
+    degraded,
     limit: data.limit ?? null,
     used: data.used ?? null,
     remaining: data.remaining ?? null,
     resetAt: data.reset_at ?? null,
     loginUrl: data.login_url ?? null,
-  })
+  }, seq)
 }
 
 /** Read the current state without spending a question. */
@@ -118,10 +137,21 @@ export const peekQuota = () => ask(true)
 export const consumeQuota = () => ask(false)
 
 /**
- * True when the LAST known state says this visitor is out of questions.
- * Synchronous, for the pre-submit check in the drawer, the authoritative
- * decision is always the consumeQuota call inside the api service.
+ * Whether a verdict means this visitor is out of questions, i.e. the wall
+ * should replace the composer.
+ *
+ * Two shapes say so. A refused consume (`allowed: false`) is the obvious one.
+ * The other is the LAST permitted question: the backend answers it with
+ * `allowed: true, remaining: 0` so Kapa can still answer, and without this the
+ * composer would stay live under "0 free questions left" until the next
+ * submission was refused into an empty bubble. `settled` is false while an
+ * answer is still streaming, so the wall waits for it (and its Stop control)
+ * to finish.
+ *
+ * Never true on a degraded or unlimited verdict: no wall on a guess.
  */
-export function isExhausted () {
-  return Boolean(snapshot) && snapshot.allowed === false && !snapshot.degraded
+export function quotaExhausted (verdict, settled = true) {
+  if (!verdict || verdict.degraded || verdict.unlimited) return false
+  if (verdict.allowed === false) return true
+  return settled && Number.isFinite(verdict.remaining) && verdict.remaining <= 0
 }

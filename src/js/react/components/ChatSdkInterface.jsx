@@ -3,7 +3,7 @@ import { useChat } from '@kapaai/react-sdk'
 import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles, ThumbsUp, ThumbsDown, TriangleAlert } from 'lucide-react'
 import { loadConversation, clearConversation } from '../chatPersistence.js'
 import { safeHeap } from '../heap.js'
-import { peekQuota, getQuota, QUOTA_EVENT } from '../anonQuota.js'
+import { peekQuota, getQuota, quotaExhausted, QUOTA_EVENT } from '../anonQuota.js'
 import { Answer, Toast } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
@@ -192,9 +192,11 @@ export default function ChatSdkInterface ({ loginUrl }) {
     return () => window.removeEventListener(QUOTA_EVENT, onQuota)
   }, [])
 
-  // `degraded` means we couldn't get a trustworthy answer out of the endpoint,
-  // so behave as though there is no limit: never wall someone on a guess.
-  const exhausted = Boolean(quota) && quota.allowed === false && !quota.degraded
+  // Out of questions: a refused consume, or the last permitted one once its
+  // answer has finished streaming (the backend answers that one with
+  // allowed + remaining 0, so Kapa can still reply). Degraded and unlimited
+  // verdicts are never exhausted: no wall on a guess. See quotaExhausted.
+  const exhausted = quotaExhausted(quota, !isBusy)
   const quotaRemaining = quota && !quota.degraded && !quota.unlimited ? quota.remaining : null
   const quotaLoginUrl = quota?.loginUrl || loginUrl
 
@@ -392,9 +394,13 @@ export default function ChatSdkInterface ({ loginUrl }) {
                 // Budget unknown (endpoint absent or degraded): sell the tier,
                 // never imply a count we can't stand behind.
                 ? 'Sign in to save your conversations and unlock the AI agent'
-                : quotaRemaining === 1
-                  ? '1 free question left. Sign in for unlimited questions and the AI agent'
-                  : `${quotaRemaining} free questions left. Sign in for unlimited questions and the AI agent`}
+                : quotaRemaining <= 0
+                  // Only visible while the last permitted answer is still
+                  // streaming; the wall takes over once it settles.
+                  ? 'That was your last free question. Sign in for unlimited questions and the AI agent'
+                  : quotaRemaining === 1
+                    ? '1 free question left. Sign in for unlimited questions and the AI agent'
+                    : `${quotaRemaining} free questions left. Sign in for unlimited questions and the AI agent`}
           </span>
           <ArrowRight size={14} />
         </a>

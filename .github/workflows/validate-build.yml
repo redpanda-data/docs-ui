@@ -48,6 +48,8 @@ jobs:
         run: npm run test:signin-nudge
       - name: Test agent navigation closes the chat panel
         run: npm run test:chat-panel-navigation
+      - name: Test anonymous Ask AI quota
+        run: npm run test:anon-quota
       - name: Cache generated files
         uses: actions/cache@v4
         with:
