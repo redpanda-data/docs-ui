@@ -124,7 +124,7 @@
              item (top-right corner). Stays visible at all breakpoints (never
              folds into the overflow menu). State driven by 26-docs-account.js --}}
         <div class="tb-account" data-docs-account hidden>
-          <a class="tb-link tb-signin-link" data-account-signin href="/login">Sign in</a>
+          <a class="tb-link tb-signin-link" data-account-signin href="/login" rel="nofollow">Sign in</a>
           {{!-- First-view nudge. Shown once per browser by 26-docs-account.js, and
                only while the Sign in link itself is visible, so it can never
                point at a control that isn't there (the account UI is gated on
@@ -181,12 +181,12 @@
                   </span>
                 </li>
               </ul>
-              <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login">Continue</a>
+              <a class="tb-signin-modal-cta" data-signin-modal-continue href="/login" rel="nofollow">Continue</a>
               {{!-- href is a same-origin fallback for no-JS/middle-click; 26-docs-account.js
                     overwrites it with /signup?return_to=..., which docs-login.mjs resolves
                     to the right Cloud signup URL for this deploy context (prod vs
                     integration) instead of a URL hardcoded here. --}}
-              <p class="tb-signin-modal-foot">No account yet? <a href="/signup" data-signin-modal-signup target="_blank" rel="noopener noreferrer">Create a free account</a></p>
+              <p class="tb-signin-modal-foot">No account yet? <a href="/signup" data-signin-modal-signup target="_blank" rel="noopener noreferrer nofollow">Create a free account</a></p>
               {{!-- Privacy disclosure. The modal CTA links to /login?disclosed=1,
                     which docs-login.mjs uses to SKIP the server interstitial, so
                     for anyone signing in from here this note is the only
@@ -211,7 +211,7 @@
               {{#if (eq page.component.name 'agentic-data-plane')}}
               <a class="tb-dropdown-item" href="https://ai.redpanda.com" target="_blank" rel="noopener noreferrer">Open Console<span class="visually-hidden"> for Redpanda Agentic Data Plane</span></a>
               {{/if}}
-              <a class="tb-dropdown-item" data-account-signout href="/logout">Sign out</a>
+              <a class="tb-dropdown-item" data-account-signout href="/logout" rel="nofollow">Sign out</a>
             </div>
           </div>
         </div>
