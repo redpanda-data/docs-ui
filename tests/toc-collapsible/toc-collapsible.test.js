@@ -3,7 +3,9 @@
  *
  * The grouping is the part worth testing: level-1 entries become toggleable groups holding the
  * deeper entries that follow them, only the first group starts expanded, and a group must open
- * when one of its entries is activated. Pages without the attribute must keep the flat list.
+ * when one of its entries is activated. Activation is covered on every path the script has: a
+ * sidebar click, the load pass that handles deep links, scrolling, and the end-of-page pass.
+ * Pages without the attribute must keep the flat list.
  */
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -14,11 +16,13 @@ const vm = require('node:vm')
 const SCRIPT = path.join(__dirname, '../../src/js/02-on-this-page.js')
 const PARTIAL = path.join(__dirname, '../../src/partials/toc.hbs')
 
-test('toc.hbs exposes the page attribute as data-collapsible on the sidebar', () => {
+test('toc.hbs sets data-collapsible only when the page attribute is exactly "true"', () => {
   const hbs = fs.readFileSync(PARTIAL, 'utf8')
   const aside = hbs.match(/<aside class="toc sidebar"[^>]*>/)
   assert.ok(aside, 'sidebar aside is in the partial')
-  assert.match(aside[0], /\{\{#if page\.attributes\.toc-collapsible\}\} data-collapsible="true"\{\{\/if\}\}/)
+  // A bare {{#if}} would also fire for the string "false", which is what :page-toc-collapsible: false yields.
+  const collapsibleAttr = "{{#if (eq page.attributes.toc-collapsible 'true')}} data-collapsible=\"true\"{{/if}}"
+  assert.ok(aside[0].includes(collapsibleAttr), 'the attribute is gated on the exact string "true"')
 })
 
 // Minimal DOM: enough of createElement/appendChild/querySelector for the TOC builder.
@@ -118,8 +122,11 @@ const HEADINGS = [
   heading(3, 'december-2024', 'December 2024'),
 ]
 
-// Drive the IIFE against a stub DOM and hand back the built list.
-function run ({ collapsible, headings = HEADINGS }) {
+// Drive the IIFE against a stub DOM and hand back the built list. Headings are copied so scrollTo()
+// can position them per test; scrollY and scrollHeight feed the end-of-page check in onScroll, and
+// hash is what window.location.hash reports on load.
+function run ({ collapsible, headings = HEADINGS, scrollY = 0, scrollHeight = 5000, hash = '' }) {
+  headings = headings.map((h) => Object.assign({}, h))
   const sidebar = makeEl('aside')
   sidebar.dataset = { levels: '2', title: '', collapsible: collapsible ? 'true' : undefined }
   const menu = makeEl('div')
@@ -137,7 +144,7 @@ function run ({ collapsible, headings = HEADINGS }) {
       addEventListener () {},
       getElementById: () => null,
       createElement: makeEl,
-      documentElement: {},
+      documentElement: { scrollHeight },
       querySelector: (sel) => {
         if (sel === 'aside.toc.sidebar') return sidebar
         if (sel === 'article.doc') return article
@@ -146,14 +153,45 @@ function run ({ collapsible, headings = HEADINGS }) {
     },
     window: {
       addEventListener: (t, fn) => { listeners[t] = fn },
-      scrollY: 0,
+      location: { hash },
+      scrollY,
       innerHeight: 800,
-      getComputedStyle: () => ({}),
+      // A 16px root font and an 80px sticky header (scroll-padding-top) put the activation line at 80px.
+      getComputedStyle: () => ({ fontSize: '16px', paddingTop: '0px', scrollPaddingTop: '80px' }),
     },
   }
   vm.runInNewContext(fs.readFileSync(SCRIPT, 'utf8'), context)
   const list = menu.children[0]
-  return { sidebar, menu, list, listeners }
+  return { sidebar, menu, list, listeners, headings }
+}
+
+// Document position of each heading: a year heading sits 60px above its first month, and everything
+// else is 400px apart, so the layout has the same adjacency as a real What's New page.
+function layout (headings) {
+  let y = 0
+  return headings.map((h, i) => {
+    const pos = y
+    const next = headings[i + 1]
+    y += next && parseInt(next.nodeName.slice(1), 10) > parseInt(h.nodeName.slice(1), 10) ? 60 : 400
+    return pos
+  })
+}
+
+// Pretend the window is scrolled so the heading with this id sits `landing` px from the top of the
+// viewport. 80 is the activation line (scroll-padding-top). A deep-linked heading lands lower, at
+// scroll-padding-top + scroll-margin-top, which is 165 here and in the real stylesheet.
+function scrollTo (headings, id, landing = 80) {
+  const index = headings.findIndex((h) => h.id === id)
+  assert.notEqual(index, -1, 'scrollTo target exists: ' + id)
+  const ys = layout(headings)
+  headings.forEach((h, i) => { h.getBoundingClientRect = () => ({ top: landing + ys[i] - ys[index] }) })
+}
+
+// Sidebar links keyed by fragment, so tests can read active state without walking the tree.
+function linksByHref (list) {
+  const out = {}
+  list.querySelectorAll('a').forEach((a) => { out[a.href] = a })
+  return out
 }
 
 test('without the attribute the TOC stays a flat list', () => {
@@ -205,7 +243,7 @@ test('the toggle opens and closes its own group', () => {
   assert.equal(toggle.getAttribute('aria-expanded'), 'false')
 })
 
-test('activating an entry inside a collapsed group opens that group', () => {
+test('clicking an entry inside a collapsed group opens that group', () => {
   const { list } = run({ collapsible: true })
   const group = list.children[2]
   assert.equal(group.classList.contains('is-expanded'), false)
@@ -217,6 +255,79 @@ test('activating an entry inside a collapsed group opens that group', () => {
   assert.equal(monthLink.classList.contains('is-active'), true)
   assert.equal(group.classList.contains('is-expanded'), true)
   assert.equal(group.children[1].getAttribute('aria-expanded'), 'true')
+})
+
+test('the load pass activates the entry on the activation line and opens its group', () => {
+  const { list, listeners, headings } = run({ collapsible: true })
+  const [y2026, y2025, y2024] = list.children
+  assert.equal(y2025.classList.contains('is-expanded'), false)
+
+  scrollTo(headings, 'october-2025')
+  listeners.load()
+
+  const links = linksByHref(list)
+  assert.equal(links['#october-2025'].classList.contains('is-active'), true)
+  assert.equal(y2025.classList.contains('is-expanded'), true)
+  assert.equal(y2025.children[1].getAttribute('aria-expanded'), 'true')
+  assert.equal(y2026.classList.contains('is-expanded'), true, 'the first group keeps its default')
+  assert.equal(y2024.classList.contains('is-expanded'), false, 'unrelated groups stay collapsed')
+})
+
+test('arriving on a deep link opens the group of the target entry', () => {
+  // Browsers park a deep-linked heading at scroll-padding-top + scroll-margin-top, below the
+  // activation line, so the scroll pass marks the heading above it active. For the first entry of
+  // a group that heading belongs to the previous group and would leave the target's group
+  // collapsed. The load handler has to open it from the hash instead.
+  const { list, listeners, headings } = run({ collapsible: true, hash: '#december-2025' })
+  const [y2026, y2025, y2024] = list.children
+  scrollTo(headings, 'december-2025', 165)
+  listeners.load()
+
+  const links = linksByHref(list)
+  assert.equal(links['#august-2026'].classList.contains('is-active'), true, 'the scroll pass picks the heading above')
+  assert.equal(y2025.classList.contains('is-expanded'), true, 'the hash opens the target group anyway')
+  assert.equal(y2025.children[1].getAttribute('aria-expanded'), 'true')
+  assert.equal(y2026.classList.contains('is-expanded'), true)
+  assert.equal(y2024.classList.contains('is-expanded'), false)
+})
+
+test('a hash that is not a TOC entry is ignored on load', () => {
+  const { list, listeners, headings } = run({ collapsible: true, hash: '#feature-one' })
+  scrollTo(headings, '2026')
+  listeners.load()
+  assert.deepEqual(list.children.map((g) => g.classList.contains('is-expanded')), [true, false, false])
+})
+
+test('scrolling into a collapsed group opens it and leaves the previous group open', () => {
+  const { list, listeners, headings } = run({ collapsible: true })
+  const [, y2025, y2024] = list.children
+  scrollTo(headings, 'october-2025')
+  listeners.load() // registers the scroll handler
+  assert.equal(y2024.classList.contains('is-expanded'), false)
+
+  scrollTo(headings, 'december-2024')
+  listeners.scroll()
+
+  const links = linksByHref(list)
+  assert.equal(links['#december-2024'].classList.contains('is-active'), true)
+  assert.equal(links['#october-2025'].classList.contains('is-active'), false)
+  assert.equal(y2024.classList.contains('is-expanded'), true)
+  assert.equal(y2025.classList.contains('is-expanded'), true, 'groups are revealed, never auto-collapsed')
+})
+
+test('reaching the end of the page opens the group of the trailing entries', () => {
+  // At the bottom of the page every heading still on screen is marked active at once, through a
+  // separate branch of onScroll from the single-active case.
+  const { list, listeners, headings } = run({ collapsible: true, scrollY: 4200, scrollHeight: 5000 })
+  const y2024 = list.children[2]
+  scrollTo(headings, 'october-2025') // 2024 and its month sit below the activation line, on screen
+  listeners.load()
+
+  const links = linksByHref(list)
+  assert.equal(links['#2024'].classList.contains('is-active'), true)
+  assert.equal(links['#december-2024'].classList.contains('is-active'), true)
+  assert.equal(y2024.classList.contains('is-expanded'), true)
+  assert.equal(y2024.children[1].getAttribute('aria-expanded'), 'true')
 })
 
 test('entries before the first level-1 heading stay at the top level', () => {
