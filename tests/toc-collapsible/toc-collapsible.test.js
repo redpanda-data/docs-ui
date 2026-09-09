@@ -162,7 +162,7 @@ function run ({ collapsible, headings = HEADINGS, scrollY = 0, scrollHeight = 50
   }
   vm.runInNewContext(fs.readFileSync(SCRIPT, 'utf8'), context)
   const list = menu.children[0]
-  return { sidebar, menu, list, listeners, headings }
+  return { sidebar, menu, list, listeners, headings, win: context.window }
 }
 
 // Document position of each heading: a year heading sits 60px above its first month, and everything
@@ -226,6 +226,26 @@ test('only the first group starts expanded, and the toggles say so', () => {
   assert.deepEqual(groups.map((g) => g.children[1].getAttribute('aria-expanded')), ['true', 'false', 'false'])
   assert.equal(groups[0].children[1].getAttribute('aria-label'), 'Toggle 2026')
   assert.equal(groups[0].children[1].type, 'button', 'a real button, so it is keyboard operable')
+  groups.forEach((g) => {
+    assert.ok(g.children[2].id, 'the nested list has an id')
+    assert.equal(g.children[1].getAttribute('aria-controls'), g.children[2].id, 'the toggle names the list it controls')
+  })
+})
+
+test('a level-1 entry with nothing under it stays a plain entry', () => {
+  const { list } = run({
+    collapsible: true,
+    headings: [heading(2, 'overview', 'Overview')].concat(HEADINGS, [heading(2, 'notes', 'Notes')]),
+  })
+  assert.equal(list.children.length, 5)
+  const [overview, y2026, , , notes] = list.children
+  assert.equal(overview.children[0].href, '#overview')
+  assert.equal(overview.classList.contains('toc-group'), false)
+  assert.deepEqual(overview.children.map((c) => c.tagName), ['A'], 'no toggle and no empty list')
+  assert.equal(notes.classList.contains('toc-group'), false)
+  assert.deepEqual(notes.children.map((c) => c.tagName), ['A'])
+  assert.equal(y2026.classList.contains('is-expanded'), true, 'the first real group is the expanded one')
+  assert.equal(list.querySelectorAll('button').length, 3)
 })
 
 test('the toggle opens and closes its own group', () => {
@@ -289,6 +309,27 @@ test('arriving on a deep link opens the group of the target entry', () => {
   assert.equal(y2025.children[1].getAttribute('aria-expanded'), 'true')
   assert.equal(y2026.classList.contains('is-expanded'), true)
   assert.equal(y2024.classList.contains('is-expanded'), false)
+})
+
+test('changing the hash after load opens the group of the new target', () => {
+  // An in-page link or back/forward fires hashchange, not load. The scroll pass still picks the
+  // heading above the target, so the group has to be opened from the new hash.
+  const { list, listeners, headings, win } = run({ collapsible: true })
+  const [, y2025, y2024] = list.children
+  scrollTo(headings, '2026')
+  listeners.load()
+  assert.equal(typeof listeners.hashchange, 'function', 'a hashchange handler is registered on load')
+  assert.equal(y2024.classList.contains('is-expanded'), false)
+
+  win.location.hash = '#december-2024'
+  scrollTo(headings, 'december-2024', 165)
+  listeners.scroll()
+  listeners.hashchange()
+
+  const links = linksByHref(list)
+  assert.equal(links['#october-2025'].classList.contains('is-active'), true, 'the scroll pass picks the heading above')
+  assert.equal(y2024.classList.contains('is-expanded'), true, 'the hash opens the target group anyway')
+  assert.equal(y2025.classList.contains('is-expanded'), true)
 })
 
 test('a hash that is not a TOC entry is ignored on load', () => {

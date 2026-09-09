@@ -3,7 +3,7 @@
 :page-toclevels: 2
 :page-toc-collapsible: true
 
-This page exercises `:page-toc-collapsible: true`. In the right-side TOC, each level-1 heading (the years below) is a group with a caret. Only the first group starts expanded. Click a caret to open or close a group, or scroll into a later year and watch its group open on its own. Below 1024px the "On this page" dropdown lists every entry with no carets.
+This page exercises `:page-toc-collapsible: true`. In the right-side TOC, each level-1 heading (the years below) is a group with a caret. Only the first group starts expanded. Click a caret to open or close a group, or scroll into a later year and watch its group open on its own. Below 1024px the "On this page" dropdown lists every entry with no carets. The Notes section at the end has no subsections, so it gets no caret.
 
 == 2026
 
@@ -78,3 +78,7 @@ Omnis voluptas assumenda est, omnis dolor repellendus.
 Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.
 
 Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.
+
+== Notes
+
+A level-1 heading with nothing under it stays a plain entry in the TOC.

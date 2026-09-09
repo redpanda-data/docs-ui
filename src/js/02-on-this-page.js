@@ -172,6 +172,8 @@
     onScroll()
     revealHashTarget()
     window.addEventListener('scroll', onScroll, { passive: true })
+    // In-page links and back/forward change the hash without a load, so reveal on those too
+    window.addEventListener('hashchange', revealHashTarget)
     // On initial load, scroll active item into view (e.g., when navigating to a hash)
     scrollActiveIntoView()
   })
@@ -249,32 +251,42 @@
   /**
    * Turn the flat TOC list into collapsible groups. Opt-in with :page-toc-collapsible: true.
    * Each level-1 entry becomes a group that holds the deeper entries following it, behind a
-   * toggle button. Only the first group starts expanded; a group also opens whenever one of its
-   * entries becomes active (click, scroll, or a deep link). The mobile dropdown clones this
-   * markup but shows everything; see .toc.embedded in toc.css.
+   * toggle button. A level-1 entry with nothing under it stays a plain entry. Only the first
+   * group starts expanded; a group also opens whenever one of its entries becomes active (click,
+   * scroll, or a hash change). The mobile dropdown clones this markup but shows everything; see
+   * .toc.embedded in toc.css.
    * @param {HTMLUListElement} root - The <ul> built from the page headings, one <li> per heading.
    */
   function buildCollapsibleGroups (root) {
+    var groups = []
     var groupList
     find('li', root).forEach(function (item) {
       if (parseInt(item.dataset.level, 10) === 1) {
-        item.classList.add('toc-group')
-        var toggle = document.createElement('button')
-        toggle.type = 'button'
-        toggle.className = 'toc-group-toggle'
-        toggle.setAttribute('aria-expanded', 'false')
-        toggle.setAttribute('aria-label', 'Toggle ' + item.textContent)
-        toggle.addEventListener('click', function () {
-          setGroupExpanded(item, !item.classList.contains('is-expanded'))
-        })
         groupList = document.createElement('ul')
-        item.appendChild(toggle)
-        item.appendChild(groupList)
+        groupList.id = 'toc-group-' + (groups.length + 1)
+        groups.push({ item: item, list: groupList })
       } else if (groupList) {
         groupList.appendChild(item)
       }
     })
-    var firstGroup = root.querySelector('li.toc-group')
+    var firstGroup
+    groups.forEach(function (group) {
+      if (!group.list.children.length) return
+      var item = group.item
+      item.classList.add('toc-group')
+      var toggle = document.createElement('button')
+      toggle.type = 'button'
+      toggle.className = 'toc-group-toggle'
+      toggle.setAttribute('aria-expanded', 'false')
+      toggle.setAttribute('aria-controls', group.list.id)
+      toggle.setAttribute('aria-label', 'Toggle ' + item.textContent)
+      toggle.addEventListener('click', function () {
+        setGroupExpanded(item, !item.classList.contains('is-expanded'))
+      })
+      item.appendChild(toggle)
+      item.appendChild(group.list)
+      if (!firstGroup) firstGroup = item
+    })
     if (firstGroup) setGroupExpanded(firstGroup, true)
   }
 
@@ -311,10 +323,11 @@
   }
 
   /**
-   * Open the group that holds the entry a deep link points at. Browsers park a linked heading at
-   * scroll-padding-top + scroll-margin-top, below the activation line onScroll uses, so the heading
-   * above it becomes active instead. For the first entry of a group that heading belongs to the
-   * previous group, which would leave the target's own group collapsed.
+   * Open the group that holds the entry the URL hash points at, on load and on every hash change.
+   * Browsers park a linked heading at scroll-padding-top + scroll-margin-top, below the activation
+   * line onScroll uses, so the heading above it becomes active instead. For the first entry of a
+   * group that heading belongs to the previous group, which would leave the target's own group
+   * collapsed.
    */
   function revealHashTarget () {
     var hash = window.location.hash
