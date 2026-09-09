@@ -149,10 +149,19 @@
     }, 100);
   };
 
-  function openPanel() {
+  // `restored` marks the page-load path below, which reopens a panel the reader
+  // left open on a previous page. It is not a fresh decision to use Ask AI, so
+  // it must not fire the anonymous quota peek: that would put a function
+  // invocation and a database read behind every pageview for anyone browsing
+  // with the panel open (react/anonQuota.js schedulePeek).
+  function openPanel(restored) {
     isOpen = true;
     chatPanel.classList.add('is-open');
     chatPanel.setAttribute('aria-hidden', 'false');
+
+    if (!restored) {
+      window.dispatchEvent(new window.CustomEvent('docs-chat:open'));
+    }
 
     // Hide Ask AI buttons
     document.querySelectorAll('[data-action="open-chat"]').forEach(function(btn) {
@@ -185,7 +194,7 @@
       chatPanel.classList.add('is-fullscreen');
     }
     if (localStorage.getItem(STORAGE_KEY) === 'true') {
-      openPanel();
+      openPanel(true);
     }
   } catch (e) {}
 })();

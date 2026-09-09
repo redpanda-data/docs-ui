@@ -3,7 +3,7 @@ import { useChat } from '@kapaai/react-sdk'
 import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles, ThumbsUp, ThumbsDown, TriangleAlert } from 'lucide-react'
 import { loadConversation, clearConversation } from '../chatPersistence.js'
 import { safeHeap } from '../heap.js'
-import { peekQuota, getQuota, quotaExhausted, QUOTA_EVENT } from '../anonQuota.js'
+import { schedulePeek, getQuota, quotaExhausted, QUOTA_EVENT } from '../anonQuota.js'
 import { Answer, Toast } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
@@ -185,11 +185,19 @@ export default function ChatSdkInterface ({ loginUrl }) {
   // the backend's scale-to-zero database while the user is still typing, so the
   // consume that runs in front of their first question doesn't pay the
   // multi-second cold start (the same trick /auth/warm plays for sign-in).
+  //
+  // schedulePeek decides WHEN, and it is not on mount: this component mounts on
+  // every pageview whether or not the drawer is ever opened, so peeking here
+  // would put a request behind every page view rather than behind every reader
+  // who actually opens Ask AI. See the note on schedulePeek in anonQuota.js.
   useEffect(() => {
     const onQuota = (e) => setQuota(e.detail)
     window.addEventListener(QUOTA_EVENT, onQuota)
-    peekQuota().catch(() => {}) // fails open inside; nothing to handle here
-    return () => window.removeEventListener(QUOTA_EVENT, onQuota)
+    const cancelPeek = schedulePeek()
+    return () => {
+      window.removeEventListener(QUOTA_EVENT, onQuota)
+      cancelPeek()
+    }
   }, [])
 
   // Out of questions: a refused consume, or the last permitted one once its

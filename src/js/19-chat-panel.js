@@ -102,6 +102,16 @@
       window.dispatchEvent(new window.CustomEvent('docs-account:warm'))
     }
 
+    // Same reasoning, one door along: the anonymous Ask AI quota peek is a
+    // function invocation and a database read, so it waits for a deliberate
+    // open too (react/anonQuota.js schedulePeek). Not gated on the auth cookie
+    // like the warm-up above, because a stale rp_docs_auth with an expired
+    // session still lands the reader on the anonymous drawer, and that reader
+    // needs the countdown.
+    if (!restored) {
+      window.dispatchEvent(new window.CustomEvent('docs-chat:open'))
+    }
+
     // Hide all Ask AI buttons if they exist
     var askAiBtns = document.querySelectorAll('[data-action="open-chat"]')
     askAiBtns.forEach(function (btn) {

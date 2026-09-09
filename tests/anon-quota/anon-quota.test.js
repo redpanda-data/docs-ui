@@ -28,20 +28,43 @@ function loadEsm (relPath) {
 }
 
 // Minimal browser: window events, sessionStorage, CustomEvent (a global only
-// from Node 19, so always provide it), and a scriptable fetch.
-function fakeBrowser () {
+// from Node 19, so always provide it), a document stub, and a scriptable fetch.
+//
+// Listeners are really registered and really called, because schedulePeek's
+// whole job is deciding which event it waits for. `events` collects published
+// verdicts only (detail-carrying), so a bare signal like docs-chat:open doesn't
+// show up in the verdict assertions.
+function fakeBrowser ({ inline = false } = {}) {
   const events = []
   const store = new Map()
+  const listeners = new Map()
   global.window = {
-    addEventListener () {},
-    dispatchEvent (ev) { events.push(ev.detail); return true },
+    addEventListener (type, fn) {
+      if (!listeners.has(type)) listeners.set(type, new Set())
+      listeners.get(type).add(fn)
+    },
+    removeEventListener (type, fn) {
+      const set = listeners.get(type)
+      if (set) set.delete(fn)
+    },
+    dispatchEvent (ev) {
+      if (ev.detail !== undefined) events.push(ev.detail)
+      const set = listeners.get(ev.type)
+      if (set) for (const fn of Array.from(set)) fn(ev)
+      return true
+    },
   }
   global.sessionStorage = {
     getItem: (k) => (store.has(k) ? store.get(k) : null),
     setItem: (k, v) => { store.set(k, String(v)) },
   }
   global.CustomEvent = class CustomEvent { constructor (type, init) { this.type = type; this.detail = init && init.detail } }
-  return { events, store }
+  // #kapa-chat-root carrying AskAI.jsx's data-mounted marker is the docs home
+  // page's inline Ask AI. Absent (or unmounted) means the drawer.
+  global.document = {
+    getElementById: (id) => (inline && id === 'kapa-chat-root' ? { dataset: { mounted: 'true' } } : null),
+  }
+  return { events, store, listeners }
 }
 
 const calls = []
@@ -55,7 +78,18 @@ test.beforeEach(() => {
   calls.length = 0
   quota = loadEsm('src/js/react/anonQuota.js')
 })
-test.afterEach(() => { delete global.window; delete global.sessionStorage; delete global.CustomEvent; delete global.fetch })
+test.afterEach(() => { delete global.window; delete global.sessionStorage; delete global.CustomEvent; delete global.document; delete global.fetch })
+
+// Rebuild the environment for a test that needs the home page's inline mount
+// rather than the drawer.
+function inlineBrowser () {
+  browser = fakeBrowser({ inline: true })
+  quota = loadEsm('src/js/react/anonQuota.js')
+  return browser
+}
+
+const openDrawer = () => global.window.dispatchEvent(new global.CustomEvent('docs-chat:open'))
+const settle = () => new Promise((resolve) => setImmediate(resolve))
 
 test('a normal verdict is mapped from the wire shape and published everywhere', async () => {
   respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2026-09-10T10:00:00Z' })
@@ -163,4 +197,57 @@ test('the api service gate refuses on the verdict, not on the UI', async () => {
   // is what a refused consume produces and what a degraded one never does.
   const src = fs.readFileSync(path.join(ROOT, 'src/js/react/persistentApiService.js'), 'utf8')
   assert.match(src, /const verdict = await consumeQuota\(\)\s*\n\s*if \(!verdict\.allowed\)/)
+})
+
+// --- schedulePeek: WHERE the peek fires ------------------------------------
+//
+// The drawer's root markup ships on every page and AskAI.bundle.js is a plain
+// defer script, so ChatSdkInterface mounts on every pageview. Peeking from that
+// mount put a function invocation and a Neon read behind every anonymous
+// pageview, which is what these tests exist to stop regressing.
+
+test('in the drawer, schedulePeek asks nothing until the reader opens it', async () => {
+  respond(200, { allowed: true, limit: 3, used: 0, remaining: 3, reset_at: '2026-09-10T10:00:00Z' })
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 0, 'mounting the drawer must not touch the endpoint')
+
+  openDrawer()
+  await settle()
+  assert.deepEqual(calls, [{ peek: true }], 'a deliberate open peeks, and only peeks')
+  assert.equal(browser.events.length, 1, 'the verdict reaches the UI')
+})
+
+test('a second open does not peek again', async () => {
+  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2026-09-10T10:00:00Z' })
+  quota.schedulePeek()
+  openDrawer()
+  await settle()
+  openDrawer()
+  openDrawer()
+  await settle()
+  assert.equal(calls.length, 1, 'one peek per pageview; later verdicts come from the consumes')
+})
+
+test('the home page inline chat peeks on mount, since its composer is already on screen', async () => {
+  browser = inlineBrowser()
+  respond(200, { allowed: true, limit: 3, used: 0, remaining: 3, reset_at: '2026-09-10T10:00:00Z' })
+  quota.schedulePeek()
+  await settle()
+  assert.deepEqual(calls, [{ peek: true }], 'no drawer to open, so waiting for one would strand the countdown')
+})
+
+test('teardown unsubscribes, so a later open cannot peek for an unmounted drawer', async () => {
+  respond(200, { allowed: true, limit: 3, used: 0, remaining: 3, reset_at: '2026-09-10T10:00:00Z' })
+  const cancel = quota.schedulePeek()
+  cancel()
+  openDrawer()
+  await settle()
+  assert.equal(calls.length, 0)
+})
+
+test('the drawer-open signal is the one the panel scripts dispatch', () => {
+  // 19-chat-panel.js and partials/chat-panel-bump.hbs both dispatch this exact
+  // name on a deliberate open, and deliberately not on their restore path.
+  assert.equal(quota.DRAWER_OPEN_EVENT, 'docs-chat:open')
 })

@@ -1,4 +1,4 @@
-/* global sessionStorage, fetch, AbortController, CustomEvent */
+/* global sessionStorage, fetch, AbortController, CustomEvent, document */
 /**
  * Anonymous Ask AI quota client.
  *
@@ -13,8 +13,8 @@
  *     (composer, suggestion chips, retry, window.submitChatQuery, code-block
  *     "Ask AI") goes through the api service, so this is the one place that
  *     cannot be bypassed by adding another entry point.
- *   - ChatSdkInterface, presentation. Peeks on mount so the drawer can show
- *     what's left and pre-render the wall before anyone types.
+ *   - ChatSdkInterface, presentation. Peeks via schedulePeek() below, so the
+ *     drawer can show what's left and pre-render the wall before anyone types.
  *
  * FAILS OPEN, everywhere. If the endpoint is missing, slow, or broken, people
  * get to ask their question. The backend takes the same direction for the same
@@ -42,9 +42,9 @@ const endpoint = () => window.KAPA_QUOTA_ENDPOINT || '/kapa/quota'
 let snapshot = null
 export const getQuota = () => snapshot
 
-// Request ordering. The mount-time peek doubles as the database's cold-start
-// warmer, so it can take seconds, and a reader who types fast can have their
-// first consume answered before it. Every verdict carries the sequence number
+// Request ordering. The peek doubles as the database's cold-start warmer, so it
+// can take seconds, and a reader who types fast can have their first consume
+// answered before it. Every verdict carries the sequence number
 // of the request that produced it, and an older request never overwrites a
 // newer one's verdict, otherwise the stale peek would put the composer back
 // for a question the next consume rejects.
@@ -135,6 +135,71 @@ export const peekQuota = () => ask(true)
 
 /** Spend one question. Returns the verdict; `allowed: false` means don't ask Kapa. */
 export const consumeQuota = () => ask(false)
+
+// Dispatched by the drawer scripts (19-chat-panel.js, and the inline logic in
+// partials/chat-panel-bump.hbs) when a reader DELIBERATELY opens the panel, and
+// deliberately not on their page-load restore path.
+export const DRAWER_OPEN_EVENT = 'docs-chat:open'
+
+// Which element AskAI.jsx mounted into. It stamps data-mounted on the one it
+// chose, so this reads the real decision rather than re-deriving it:
+// #kapa-chat-root is the docs home page's inline Ask AI, on screen with no
+// interaction at all. Anything else is the drawer, hidden until opened.
+function mountedInline () {
+  const home = document.getElementById('kapa-chat-root')
+  return Boolean(home && home.dataset.mounted === 'true')
+}
+
+/**
+ * Start the peek when it is worth starting. Returns a teardown.
+ *
+ * The peek is one function invocation and one database read, so WHERE it fires
+ * decides whether this endpoint's traffic tracks Ask AI users or pageviews.
+ * The drawer's root markup ships in body.hbs on every page and AskAI.bundle.js
+ * is a plain defer script, so the React tree mounts on every pageview: peeking
+ * from that mount meant a request per pageview from every anonymous visitor,
+ * before any of them had shown the slightest interest in asking a question.
+ *
+ * Three things went wrong with that. It kept the backend's scale-to-zero
+ * database permanently resumed instead of warming it just in time, which is
+ * the opposite of what the warm-up is for. It scaled with page count rather
+ * than with people. And it spent the endpoint's per-IP flood budget (300 per
+ * 600s, sized in docs-site lib/oauth/ratelimit.mjs for "a peek per drawer open
+ * plus a check per question") on navigation, so a large shared NAT could
+ * exhaust it by browsing; the consume in front of a real question then answers
+ * rate_limited, which fails open, and metering silently stops for everyone
+ * behind that address.
+ *
+ * So: on the home page's inline chat, where the composer is on screen
+ * immediately, peek on mount. In the drawer, wait for a deliberate open. The
+ * page-load restore path does not qualify, which is the same line 19-chat-panel
+ * already draws for the /auth/warm pre-warm, for the same reason.
+ *
+ * Either way this stays ahead of the reader: opening the drawer or landing on
+ * the home page both precede typing, so the countdown and the wall are in
+ * place before there is a question to spend, and the database is warm before
+ * the consume that gates it.
+ */
+export function schedulePeek () {
+  const fire = () => { peekQuota().catch(() => {}) /* fails open inside */ }
+
+  if (mountedInline()) {
+    fire()
+    return () => {}
+  }
+
+  // Once per pageview: a second open learns nothing the first didn't, and
+  // every later verdict arrives from the consume in front of each question.
+  let fired = false
+  const onOpen = () => {
+    if (fired) return
+    fired = true
+    window.removeEventListener(DRAWER_OPEN_EVENT, onOpen)
+    fire()
+  }
+  window.addEventListener(DRAWER_OPEN_EVENT, onOpen)
+  return () => window.removeEventListener(DRAWER_OPEN_EVENT, onOpen)
+}
 
 /**
  * Whether a verdict means this visitor is out of questions, i.e. the wall
