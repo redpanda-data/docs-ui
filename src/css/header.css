@@ -1191,6 +1191,89 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
 .tb-account {
   display: inline-flex;
   align-items: center;
+  /* Anchor for .tb-signin-nudge below. */
+  position: relative;
+}
+
+/* ——— First-view sign-in nudge ——— */
+.tb-signin-nudge {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: max-content;
+  max-width: 250px;
+  padding: 10px 10px 10px 12px;
+  border-radius: 8px;
+  background: var(--indigo-600-new, #444ce7);
+  color: #fff;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  line-height: 1.4;
+  text-align: left;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, 0.18);
+  animation: tbSigninNudgeIn 180ms ease-out;
+}
+
+/* Caret pointing back up at the Sign in link. */
+.tb-signin-nudge::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  right: 14px;
+  border: 6px solid transparent;
+  border-bottom-color: var(--indigo-600-new, #444ce7);
+}
+
+.tb-signin-nudge-x {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.tb-signin-nudge-x:hover { opacity: 1; }
+
+.tb-signin-nudge-x:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+@keyframes tbSigninNudgeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tb-signin-nudge { animation: none; }
+}
+
+/* Narrow screens: the account control stays pinned right at every breakpoint
+   (it never folds into the overflow menu), and the bubble is right-anchored and
+   capped at 250px, so it has room to open leftward without overflowing. Just
+   tighten the cap on the narrowest viewports. Deliberately still absolute:
+   position:fixed here would need an explicit offset to place it predictably. */
+@media screen and (max-width: 400px) {
+  .tb-signin-nudge { max-width: 210px; }
 }
 
 .tb-signin-link {

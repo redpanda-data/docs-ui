@@ -152,6 +152,24 @@ const runBloblang = {
   },
 }
 
+// Same-tab navigation closes the Ask AI drawer first.
+//
+// 19-chat-panel.js persists the drawer's open state in localStorage and
+// restores it on load, so navigating with it open lands the user on the page
+// they asked for with the drawer sitting over it. That defeats the point of
+// these tools: the agent was asked to SHOW someone a page.
+//
+// Dispatched as an event because the panel is a separate IIFE with no exported
+// API. CustomEvent dispatch is synchronous, so the panel's localStorage write
+// completes before location.assign starts the navigation.
+const closeChatPanelBeforeNavigating = () => {
+  try {
+    window.dispatchEvent(new window.CustomEvent('docs-chat:close'))
+  } catch (e) {
+    // Never block the navigation the user actually asked for.
+  }
+}
+
 const navigateToPage = {
   name: 'navigate_to_page',
   displayName: 'Open documentation page',
@@ -175,6 +193,7 @@ const navigateToPage = {
     if (!resolved) {
       return { error: 'invalid_url', message: 'Only docs.redpanda.com pages can be opened.' }
     }
+    closeChatPanelBeforeNavigating()
     window.location.assign(resolved)
     return { navigated: true, url: resolved }
   },
@@ -230,6 +249,7 @@ const switchProduct = {
     if (match.current) {
       return { alreadyCurrent: true, product: match.label }
     }
+    closeChatPanelBeforeNavigating()
     window.location.assign(match.url)
     return { switched: true, product: match.label, url: match.url }
   },

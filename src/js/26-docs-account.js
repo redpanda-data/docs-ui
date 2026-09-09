@@ -1,4 +1,4 @@
-/* global sessionStorage, fetch */
+/* global sessionStorage, localStorage, fetch */
 /**
  * Docs account control in the header (sign in / user menu).
  *
@@ -22,8 +22,16 @@
   var modal = container.querySelector('[data-signin-modal]')
   var modalCta = container.querySelector('[data-signin-modal-continue]')
   var modalSignup = container.querySelector('[data-signin-modal-signup]')
+  var nudge = container.querySelector('[data-signin-nudge]')
 
   var CACHE_KEY = 'docs-account-me'
+  // First-view nudge, shown once. localStorage (not session) so it doesn't
+  // return in every new tab, and deliberately per-browser: a nudge is not worth
+  // a server round trip, and the cost of it reappearing on a second device is
+  // one dismissal. A storage failure (private browsing, blocked site data)
+  // reads as "already seen", so the nudge fails closed rather than showing on
+  // every single page view.
+  var NUDGE_KEY = 'docs-account-signin-nudge-seen'
 
   // Sign-in/out land on cold Netlify functions (docs-login.mjs, plus the
   // mcp-oauth.mjs callback leg) and a scale-to-zero Neon database — a cold
@@ -62,6 +70,9 @@
 
   function openModal () {
     if (!modal) return
+    // Covers every entry point, including docs-account:open-signin from the Ask
+    // AI panel, not just the header link's own click handler.
+    retireNudge()
     warm()
     lastFocused = document.activeElement
     modal.hidden = false
@@ -122,10 +133,14 @@
     })
   }
   signinLink.addEventListener('click', function (e) {
+    retireNudge() // engaging with sign-in is the outcome the nudge exists for
     if (!modal) return // no modal markup — let the link navigate to /login
     e.preventDefault()
     openModal()
   })
+
+  var nudgeDismiss = container.querySelector('[data-signin-nudge-dismiss]')
+  if (nudgeDismiss) nudgeDismiss.addEventListener('click', retireNudge)
 
   // Other surfaces (the Ask AI panel's sign-in upsell) defer to this modal so
   // the feature pitch + privacy note live in one place, and can request a
@@ -179,6 +194,26 @@
     }
   }
 
+  function nudgeAlreadySeen () {
+    try {
+      return localStorage.getItem(NUDGE_KEY) === '1'
+    } catch (e) {
+      return true // fail closed: never nag on every page view
+    }
+  }
+
+  // Retire the nudge for good. Called on dismissal, on any engagement with
+  // sign-in, and once the reader is signed in — all of them mean it has served
+  // its purpose, so it must not come back later (including after a sign-out).
+  function retireNudge () {
+    if (nudge) nudge.hidden = true
+    try {
+      localStorage.setItem(NUDGE_KEY, '1')
+    } catch (e) {
+      // Private browsing: it stays hidden for this page at least.
+    }
+  }
+
   function render () {
     var signedIn = hasAuthHint()
     // Auth availability: the Ask AI panel's session probe sets
@@ -187,10 +222,32 @@
     // entry on this so, if this UI ever ships ahead of the backend, we don't show
     // a sign-in link that 404s — the account UI stays hidden until auth is known
     // available. Re-runs on the kapa-session event once the probe resolves.
-    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL || !!cachedLoginUrl()
+    //
+    // docs-ui's own preview is the exception. It has no docs-site behind it, so
+    // /kapa/session never answers, no loginUrl is ever announced, and the
+    // account UI would be permanently invisible there — in the one place whose
+    // entire purpose is reviewing frontend changes. Treat the preview as
+    // auth-available so the Sign in control and its nudge can be seen. /login
+    // itself 404s there, which is fine: the preview is for looking, not for
+    // signing in. isUiPreview comes from site.title in head-scripts.hbs, so it
+    // is false on every real docs build (same idiom as 16-bloblang-interactive
+    // and react/agentTools).
+    var isUiPreviewBuild = typeof window.isUiPreview !== 'undefined' ? window.isUiPreview : false
+    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL || !!cachedLoginUrl() || isUiPreviewBuild
     signinLink.hidden = signedIn || !authAvailable
     menu.hidden = !signedIn
     container.hidden = !authAvailable
+    // Only ever alongside a visible Sign in link: the account UI is gated on
+    // auth availability, and re-renders when the session probe resolves, so
+    // this also stops the nudge appearing for the split second before we know
+    // whether sign-in exists on this deploy.
+    if (nudge) {
+      if (signedIn) {
+        retireNudge()
+      } else {
+        nudge.hidden = signinLink.hidden || nudgeAlreadySeen()
+      }
+    }
     signinLink.href = '/login?return_to=' + returnTo()
     signoutLink.href = '/logout?return_to=' + returnTo()
     // disclosed=1: the modal shows the privacy/data-collection note itself, so
