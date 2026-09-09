@@ -42,11 +42,20 @@ function resetLabel (resetAt) {
 // Both reuse .signin-badge / .signin-button / .signin-privacy-note so this and
 // the agent tier's wall (ChatInterface.jsx) read as one feature.
 function QuotaWall ({ quota, loginUrl, signingIn, setSigningIn, hero = false }) {
-  const title = quota?.limit === 1
-    ? 'That was your free question'
-    : quota?.limit
-      ? `You've used your ${quota.limit} free questions`
-      : "You've used your free questions"
+  // Refused by the shared per-network ceiling rather than by this reader's own
+  // budget. The counts in the verdict are always the visitor's (kapa-quota.mjs
+  // does not publish the ceiling's size), so without this branch someone who
+  // has asked one question, or none, is told they have used all three. The
+  // sign-in pitch below still applies unchanged: signing in lifts both limits.
+  const byNetwork = quota?.blockedBy === 'ip'
+
+  const title = byNetwork
+    ? 'Too many questions from this network today'
+    : quota?.limit === 1
+      ? 'That was your free question'
+      : quota?.limit
+        ? `You've used your ${quota.limit} free questions`
+        : "You've used your free questions"
 
   // disclosed=1: the privacy note below carries the disclosure the server
   // interstitial exists for, so /login goes straight to Auth0 (docs-site
@@ -74,6 +83,7 @@ function QuotaWall ({ quota, loginUrl, signingIn, setSigningIn, hero = false }) 
       </span>
       <h2 className={hero ? 'welcome-title' : 'quota-wall-title'}>{title}</h2>
       <p className={hero ? 'welcome-description' : 'quota-wall-text'}>
+        {byNetwork && 'Anonymous questions are limited per network, and this one has reached today\'s. '}
         Sign in with a free Redpanda Cloud account to keep asking, and get the docs AI agent:
         saved conversations, Bloblang it can verify for you, and answers that open the exact page you need.
       </p>
@@ -222,11 +232,18 @@ export default function ChatSdkInterface ({ loginUrl }) {
   // failed too. Without this the drawer renders the question above an empty
   // bubble and the user cannot tell the difference between "no answer came back"
   // and "the AI had nothing to say".
-  // `exhausted` excluded: a question the quota refused also settles with no
-  // answer, and "the browser check may still be loading" would be a wrong and
-  // confusing explanation for "you're out of free questions". The wall below
-  // is that exchange's explanation.
-  const queryFailed = !isBusy && Boolean(latestQA?.question) && !latestQA?.answer && !exhausted
+  // A REFUSED exchange is excluded: that question settles with no answer too,
+  // and "the browser check may still be loading" would be a wrong and confusing
+  // explanation for "you're out of free questions". The wall below is that
+  // exchange's explanation.
+  //
+  // Deliberately narrower than `exhausted`, which also covers the LAST
+  // permitted question (allowed, remaining 0). That one was admitted and really
+  // was sent to Kapa, so when it dies client-side the reader deserves the
+  // normal explanation and the failure deserves its Heap event, rather than a
+  // bare question under a wall whose copy implies it was answered.
+  const refused = quota?.allowed === false
+  const queryFailed = !isBusy && Boolean(latestQA?.question) && !latestQA?.answer && !refused
   // Deliberately NOT the SDK's `error` string. The most common failure here
   // reports itself as "Error in verifying browser for feedback submission.
   // Captcha token could not be obtained." — which names feedback for what was
@@ -310,20 +327,33 @@ export default function ChatSdkInterface ({ loginUrl }) {
     setDropdownOpen(false)
   }
 
+  // Held in a ref so the global below always reaches the CURRENT doQuery. A dep
+  // list on that effect froze whatever doQuery closed over when it last ran:
+  // with [hasInteracted, isBusy] it captured `exhausted` at mount, so a reader
+  // who had spent their questions on a previous day loaded a page, the peek
+  // returned 429 and raised the wall, neither dep changed, and a code-block
+  // "Ask AI" click still went through this path with exhausted frozen false,
+  // recording a question whose consume was then refused: an orphan bubble above
+  // the wall, with the retry row suppressed. The same staleness ran the other
+  // way after a fail-open verdict. Updated after every render rather than on a
+  // dep list, so there is no next value to forget.
+  const doQueryRef = useRef(doQuery)
+  useEffect(() => { doQueryRef.current = doQuery })
+
   // Same global entry point the agent interface exposes, so code-block and
   // playground "Ask AI" triggers work for anonymous users too.
   useEffect(() => {
     window.submitChatQuery = (query, autoSubmit = true) => {
       if (!query || !query.trim()) return
       if (autoSubmit) {
-        doQuery(query)
+        doQueryRef.current(query)
       } else {
         setMessage(query)
         if (inputRef.current) inputRef.current.focus()
       }
     }
     return () => { delete window.submitChatQuery }
-  }, [hasInteracted, isBusy])
+  }, [])
 
   const handleSubmit = (e) => { e.preventDefault(); doQuery(message) }
 

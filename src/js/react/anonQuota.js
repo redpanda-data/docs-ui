@@ -53,7 +53,7 @@ let published = 0
 
 // What a caller gets when we couldn't reach a verdict. `degraded` tells the UI
 // to say nothing about counts it can't trust rather than render "3 left".
-const openVerdict = () => ({ allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null })
+const openVerdict = () => ({ allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null, blockedBy: null })
 
 function markAbsent () {
   try { sessionStorage.setItem(ABSENT_KEY, '1') } catch (err) { /* private browsing */ }
@@ -109,7 +109,7 @@ async function ask (peek) {
   if (!data) return announce(openVerdict(), seq)
 
   // Signed in: no counting at all, and no wall to render.
-  if (data.unlimited) return announce({ allowed: true, unlimited: true, degraded: false, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null }, seq)
+  if (data.unlimited) return announce({ allowed: true, unlimited: true, degraded: false, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null, blockedBy: null }, seq)
 
   // Endpoint-level abuse control, not the product wall (no login_url). Allow:
   // this isn't the signal we gate the UI on, and someone tripping the flood
@@ -127,6 +127,12 @@ async function ask (peek) {
     remaining: data.remaining ?? null,
     resetAt: data.reset_at ?? null,
     loginUrl: data.login_url ?? null,
+    // Which budget refused: 'visitor' or 'ip'. The counts above are ALWAYS the
+    // visitor's, deliberately (kapa-quota.mjs won't publish the shared
+    // ceiling's size), so a reader stopped by the ceiling arrives here with
+    // questions apparently left. Only this says so, and the wall words itself
+    // from it.
+    blockedBy: data.blocked_by ?? null,
   }, seq)
 }
 

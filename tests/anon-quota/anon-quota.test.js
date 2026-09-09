@@ -27,6 +27,42 @@ function loadEsm (relPath) {
   return mod.exports
 }
 
+// Same transform, but with named imports replaced, so a module with SDK and
+// sibling imports can be executed instead of read as text.
+function loadEsmWithStubs (relPath, stubs) {
+  const filename = path.join(ROOT, relPath)
+  const { code } = esbuild.transformSync(fs.readFileSync(filename, 'utf8'), { format: 'cjs', loader: 'js' })
+  const mod = new Module(filename, module)
+  mod.filename = filename
+  mod.paths = Module._nodeModulePaths(path.dirname(filename))
+  const load = Module._load
+  Module._load = function (request, parent, isMain) {
+    if (Object.prototype.hasOwnProperty.call(stubs, request)) return stubs[request]
+    return load.call(this, request, parent, isMain)
+  }
+  try { mod._compile(code, filename) } finally { Module._load = load }
+  return mod.exports
+}
+
+// The real quota client wired into the real service wrapper, with only the Kapa
+// SDK and the threadId store stubbed. `submitted` records what actually reached
+// Kapa, which is the thing every gate assertion below is really about.
+function makeService () {
+  const submitted = []
+  const aborts = []
+  class DefaultKapaApiService {
+    submitQuery (args) { submitted.push(args); return 'sent' }
+    abortCurrent () { aborts.push(true) }
+    addFeedback () {}
+  }
+  const svc = loadEsmWithStubs('src/js/react/persistentApiService.js', {
+    '@kapaai/react-sdk': { DefaultKapaApiService, processStream: () => {} },
+    './chatPersistence': { getSavedThreadId: () => null },
+    './anonQuota.js': quota,
+  }).createPersistentApiService()
+  return { svc, submitted, aborts }
+}
+
 // Minimal browser: window events, sessionStorage, CustomEvent (a global only
 // from Node 19, so always provide it), a document stub, and a scriptable fetch.
 //
@@ -94,7 +130,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve))
 test('a normal verdict is mapped from the wire shape and published everywhere', async () => {
   respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2026-09-10T10:00:00Z' })
   const v = await quota.consumeQuota()
-  assert.deepEqual(v, { allowed: true, degraded: false, limit: 3, used: 1, remaining: 2, resetAt: '2026-09-10T10:00:00Z', loginUrl: null })
+  assert.deepEqual(v, { allowed: true, degraded: false, limit: 3, used: 1, remaining: 2, resetAt: '2026-09-10T10:00:00Z', loginUrl: null, blockedBy: null })
   assert.deepEqual(calls, [{ peek: false }])
   assert.equal(quota.getQuota(), v)
   assert.equal(global.window.__DOCS_ANON_QUOTA, v)
@@ -112,7 +148,7 @@ test('a refused consume (429 with login_url) is exhausted and carries the sign-i
 test('404/405 marks the endpoint absent for the session and publishes an open verdict', async () => {
   respond(404, null)
   const v = await quota.peekQuota()
-  assert.deepEqual(v, { allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null })
+  assert.deepEqual(v, { allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null, blockedBy: null })
   assert.equal(browser.store.get('docs-quota-absent'), '1')
   assert.deepEqual(browser.events, [v], 'the open verdict is published, not just returned')
   // No further round trips this session.
@@ -192,11 +228,44 @@ test('quotaExhausted: the last permitted question walls once the answer settles'
   assert.equal(quota.quotaExhausted(null), false)
 })
 
-test('the api service gate refuses on the verdict, not on the UI', async () => {
-  // The gate is `if (!verdict.allowed)` in persistentApiService.js; pin that it
-  // is what a refused consume produces and what a degraded one never does.
-  const src = fs.readFileSync(path.join(ROOT, 'src/js/react/persistentApiService.js'), 'utf8')
-  assert.match(src, /const verdict = await consumeQuota\(\)\s*\n\s*if \(!verdict\.allowed\)/)
+// --- the gate, run rather than read ----------------------------------------
+
+test('a refused consume never reaches Kapa, and says why', async () => {
+  respond(429, { allowed: false, limit: 3, used: 3, remaining: 0, reset_at: '2026-09-10T10:00:00Z', login_url: '/login', blocked_by: 'visitor' })
+  const { svc, submitted } = makeService()
+  const errors = []
+  await svc.submitQuery({ query: 'q' }, { onError: (m) => errors.push(m) })
+  assert.deepEqual(submitted, [], 'the refusal is the gate, so nothing is sent')
+  assert.equal(errors.length, 1)
+})
+
+test('a degraded verdict is let through: the docs AI never goes dark on a broken counter', async () => {
+  respond(200, null) // unparseable body -> the fail-open verdict
+  const { svc, submitted } = makeService()
+  await svc.submitQuery({ query: 'q' }, {})
+  assert.equal(submitted.length, 1)
+})
+
+test('Stop during the quota round trip settles the submission without waiting for it', async () => {
+  // The point of the race in submitQuery. With a plain await, this submission
+  // stays pending for the client's full 4s timeout and the SDK's own `finally`
+  // (no request-id guard) then fires against whatever is in flight by then,
+  // re-enabling the composer and swapping out Stop mid-stream. Nothing here
+  // ever resolves the fetch, so `await` returning at all IS the assertion.
+  global.fetch = () => new Promise(() => {})
+  const { svc, submitted, aborts } = makeService()
+  const inFlight = svc.submitQuery({ query: 'q' }, {})
+  svc.abortCurrent()
+  // Raced against a short deadline rather than plainly awaited, so a regression
+  // reports itself as a clean failure here instead of hanging the run and
+  // stranding the never-resolving fetch for every test after it.
+  const outcome = await Promise.race([
+    inFlight.then(() => 'settled'),
+    new Promise((resolve) => setTimeout(() => resolve('still pending'), 500)),
+  ])
+  assert.equal(outcome, 'settled', 'Stop must not wait out the quota round trip')
+  assert.deepEqual(submitted, [], 'a stopped question must not start streaming afterwards')
+  assert.deepEqual(aborts, [true], 'and the abort still reaches the default service')
 })
 
 // --- schedulePeek: WHERE the peek fires ------------------------------------
@@ -250,4 +319,22 @@ test('the drawer-open signal is the one the panel scripts dispatch', () => {
   // 19-chat-panel.js and partials/chat-panel-bump.hbs both dispatch this exact
   // name on a deliberate open, and deliberately not on their restore path.
   assert.equal(quota.DRAWER_OPEN_EVENT, 'docs-chat:open')
+})
+
+test('the refusing budget is carried through, so the wall can word itself', async () => {
+  // The counts are always the visitor's, even when the shared per-network
+  // ceiling is what refused (docs-site kapa-quota.mjs won't publish the
+  // ceiling's size). Without blockedBy the wall tells someone who asked one
+  // question that they have used all three.
+  respond(429, { allowed: false, limit: 3, used: 1, remaining: 2, reset_at: '2026-09-10T10:00:00Z', login_url: '/login', blocked_by: 'ip' })
+  const v = await quota.consumeQuota()
+  assert.equal(v.blockedBy, 'ip')
+  assert.equal(v.remaining, 2, 'and the misleading count is still what the server sent')
+  assert.equal(quota.quotaExhausted(v), true, 'a refusal still walls, whichever budget refused')
+})
+
+test('a verdict with no blocker reports none rather than undefined', async () => {
+  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2026-09-10T10:00:00Z' })
+  const v = await quota.consumeQuota()
+  assert.equal(v.blockedBy, null)
 })
