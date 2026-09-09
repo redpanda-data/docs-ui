@@ -34,6 +34,8 @@
   if (document.querySelector('body.-toc')) return sidebar.parentNode.removeChild(sidebar)
   var levels = parseInt(sidebar.dataset.levels || 2, 10)
   if (levels < 0) return
+  // Set from :page-toc-collapsible: true via toc.hbs. See buildCollapsibleGroups below.
+  var collapsible = sidebar.dataset.collapsible === 'true'
 
   var articleSelector = 'article.doc'
   var article = document.querySelector(articleSelector)
@@ -65,6 +67,8 @@
     return accum
   }, document.createElement('ul'))
 
+  if (collapsible) buildCollapsibleGroups(list)
+
   // Add click handlers to TOC links to immediately highlight clicked item
   Object.keys(links).forEach(function (fragment) {
     links[fragment].addEventListener('click', function () {
@@ -79,6 +83,7 @@
         }
       }
       links[fragment].classList.add('is-active')
+      revealGroup(links[fragment])
       lastActiveFragment = fragment
       // Skip scroll-based updates briefly to prevent flicker during scroll animation
       skipScrollUpdate = true
@@ -149,6 +154,7 @@
             }
           }
           links[fragment].classList.add('is-active')
+          revealGroup(links[fragment])
           lastActiveFragment = fragment
           skipScrollUpdate = true
           setTimeout(function () {
@@ -195,7 +201,10 @@
         var fragment = '#' + heading.id
         if (idx === lastIdx || heading.getBoundingClientRect().top + getNumericStyleVal(heading, 'paddingTop') > ceil) {
           activeFragments.push(fragment)
-          if (lastActiveFragment.indexOf(fragment) < 0) links[fragment].classList.add('is-active')
+          if (lastActiveFragment.indexOf(fragment) < 0) {
+            links[fragment].classList.add('is-active')
+            revealGroup(links[fragment])
+          }
         } else if (~lastActiveFragment.indexOf(fragment)) {
           links[lastActiveFragment.shift()].classList.remove('is-active')
         }
@@ -220,6 +229,7 @@
       if (lastActiveFragment) links[lastActiveFragment].classList.remove('is-active')
       var activeLink = links[activeFragment]
       activeLink.classList.add('is-active')
+      revealGroup(activeLink)
       if (scrollableContainer.scrollHeight > scrollableContainer.offsetHeight) {
         // Scroll to keep active item visible, centered if possible
         var containerHeight = scrollableContainer.offsetHeight
@@ -232,6 +242,56 @@
     } else if (lastActiveFragment) {
       links[lastActiveFragment].classList.remove('is-active')
       lastActiveFragment = undefined
+    }
+  }
+
+  // Opt-in with :page-toc-collapsible: true. Each level-1 entry becomes a group that holds the
+  // deeper entries following it, behind a toggle button. Only the first group starts expanded; a
+  // group also opens whenever one of its entries becomes active (click, scroll, or a deep link).
+  // The mobile dropdown clones this markup but shows everything; see .toc.embedded in toc.css.
+  function buildCollapsibleGroups (root) {
+    var groupList
+    find('li', root).forEach(function (item) {
+      if (parseInt(item.dataset.level, 10) === 1) {
+        item.classList.add('toc-group')
+        var toggle = document.createElement('button')
+        toggle.type = 'button'
+        toggle.className = 'toc-group-toggle'
+        toggle.setAttribute('aria-expanded', 'false')
+        toggle.setAttribute('aria-label', 'Toggle ' + item.textContent)
+        toggle.addEventListener('click', function () {
+          setGroupExpanded(item, !item.classList.contains('is-expanded'))
+        })
+        groupList = document.createElement('ul')
+        item.appendChild(toggle)
+        item.appendChild(groupList)
+      } else if (groupList) {
+        groupList.appendChild(item)
+      }
+    })
+    var firstGroup = root.querySelector('li.toc-group')
+    if (firstGroup) setGroupExpanded(firstGroup, true)
+  }
+
+  function setGroupExpanded (group, expanded) {
+    if (expanded) {
+      group.classList.add('is-expanded')
+    } else {
+      group.classList.remove('is-expanded')
+    }
+    var toggle = group.querySelector('.toc-group-toggle')
+    if (toggle) toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false')
+  }
+
+  function revealGroup (link) {
+    if (!collapsible) return
+    var el = link.parentNode
+    while (el && el !== list) {
+      if (el.classList && el.classList.contains('toc-group')) {
+        setGroupExpanded(el, true)
+        return
+      }
+      el = el.parentNode
     }
   }
 
