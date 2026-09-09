@@ -83,8 +83,9 @@
     "test:property-tooltips": "node --test tests/property-tooltips/*.test.js",
     "test:signin-nudge": "node --test tests/signin-nudge/*.test.js",
     "test:chat-panel-navigation": "node --test tests/chat-panel-navigation/*.test.js",
+    "test:toc-collapsible": "node --test tests/toc-collapsible/*.test.js",
     "test:anon-quota": "node --test tests/anon-quota/*.test.js",
-    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips && npm run test:signin-nudge && npm run test:chat-panel-navigation && npm run test:anon-quota",
+    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips && npm run test:signin-nudge && npm run test:chat-panel-navigation && npm run test:toc-collapsible && npm run test:anon-quota",
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
     "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
     "serve:playground": "npx serve ."

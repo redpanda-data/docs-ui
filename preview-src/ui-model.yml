@@ -243,6 +243,9 @@ page:
       - content: Preview Status Test
         url: /preview-status-test.html
         urlType: internal
+      - content: Collapsible TOC Test
+        url: /toc-collapsible-test.html
+        urlType: internal
     - content: Get Started
       url: '#'
       urlType: internal
