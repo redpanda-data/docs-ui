@@ -40,6 +40,10 @@ on:
 jobs:
   test-bloblang-playground:
     runs-on: ubuntu-latest
+    # Healthy runs take 2-8 minutes. Three runs in Sep 2026 hung for the full
+    # 6-hour default (twice in "Install Chrome for Puppeteer", once in npm ci);
+    # the step-level timeout below only covers the test step itself.
+    timeout-minutes: 20
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
