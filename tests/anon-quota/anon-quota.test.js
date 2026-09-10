@@ -505,3 +505,26 @@ test('a degraded verdict is never remembered', async () => {
   assert.equal(calls.length, 1, 'so the next page asks for a real one')
   assert.equal(quota.getQuota().remaining, 2)
 })
+
+test('setting off to sign in forgets the remembered refusal', async () => {
+  // The wall funnels readers to sign-in, so a cached "you're out" would outlive
+  // the thing it describes. If they come back and are misread as anonymous, the
+  // cache would raise the wall again with no request made to correct it.
+  respond(429, { allowed: false, limit: 3, used: 3, remaining: 0, reset_at: '2099-01-01T00:00:00Z', login_url: '/login', blocked_by: 'visitor' })
+  quota.schedulePeek()
+  openDrawer()
+  await settle()
+  assert.equal(browser.store.has('docs-quota-verdict'), true)
+
+  quota.forgetQuota()
+  assert.equal(browser.store.has('docs-quota-verdict'), false)
+  assert.equal(quota.getQuota(), null)
+
+  // Next page in the same tab asks again rather than serving the stale wall.
+  reload({ drawerOpenedBy: 'restore' }, browser.store)
+  respond(200, { allowed: true, limit: 3, used: 0, remaining: 3, reset_at: '2099-01-01T00:00:00Z' })
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 1)
+  assert.equal(quota.quotaExhausted(quota.getQuota()), false)
+})

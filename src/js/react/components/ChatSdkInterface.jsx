@@ -3,7 +3,7 @@ import { useChat } from '@kapaai/react-sdk'
 import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles, ThumbsUp, ThumbsDown, TriangleAlert } from 'lucide-react'
 import { loadConversation, clearConversation } from '../chatPersistence.js'
 import { safeHeap } from '../heap.js'
-import { schedulePeek, getQuota, quotaExhausted, QUOTA_EVENT } from '../anonQuota.js'
+import { schedulePeek, forgetQuota, getQuota, quotaExhausted, QUOTA_EVENT } from '../anonQuota.js'
 import { Answer, Toast } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
@@ -67,6 +67,8 @@ function QuotaWall ({ quota, loginUrl, signingIn, setSigningIn, hero = false }) 
   const onSignIn = (e) => {
     // Prefer the header's sign-in modal when the page has one (same behaviour
     // as the upsell bar); otherwise let the link navigate to /login.
+    // Anything we remember about their allowance is about to be wrong.
+    forgetQuota()
     if (document.querySelector('[data-signin-modal]')) {
       e.preventDefault()
       window.dispatchEvent(new CustomEvent('docs-account:open-signin'))
@@ -416,7 +418,9 @@ export default function ChatSdkInterface ({ loginUrl }) {
           aria-disabled={signingIn}
           href={`${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
           onClick={(e) => {
-            if (document.querySelector('[data-signin-modal]')) {
+            // Anything we remember about their allowance is about to be wrong.
+    forgetQuota()
+    if (document.querySelector('[data-signin-modal]')) {
               e.preventDefault()
               window.dispatchEvent(new CustomEvent('docs-account:open-signin'))
               return

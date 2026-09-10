@@ -179,6 +179,24 @@ async function ask (peek) {
   }, seq)
 }
 
+/**
+ * Forget the remembered verdict.
+ *
+ * Called when a reader sets off to sign in, because everything we remember is
+ * about to stop being true: signing in lifts the limit entirely. Without this,
+ * the tab keeps a cached "you're out" across the sign-in round trip, and a
+ * reader who comes back and is misread as anonymous (a flaky /auth/me, a cold
+ * start) would be served that stale refusal from cache with no request made to
+ * correct it -- the wall greeting them immediately after they did what it asked.
+ * The consume in front of their next question would fix it, but the wall should
+ * not be there to begin with.
+ */
+export function forgetQuota () {
+  snapshot = null
+  window.__DOCS_ANON_QUOTA = undefined
+  try { sessionStorage.removeItem(CACHE_KEY) } catch (err) { /* private browsing */ }
+}
+
 /** Read the current state without spending a question. */
 export const peekQuota = () => ask(true)
 
