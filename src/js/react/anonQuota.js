@@ -63,6 +63,48 @@ function isAbsent () {
   try { return sessionStorage.getItem(ABSENT_KEY) === '1' } catch (err) { return false }
 }
 
+// Last real verdict, remembered for this tab session so a reader who browses
+// with the drawer open gets the countdown (and the wall) on every page without
+// re-asking the endpoint on each one. See schedulePeek.
+const CACHE_KEY = 'docs-quota-verdict'
+
+// resetAt is what makes a remembered verdict safe to trust. Inside a window the
+// server's counts only ever go UP: a consume increments, nothing decrements, and
+// the window itself is what clears them. So neither an "allowed" nor an
+// "exhausted" verdict can turn out to be wrong in the reader's favour before
+// resetAt, and once it passes the verdict describes a window that no longer
+// exists. Anything unparseable or expired is treated as no cache at all.
+function readCachedVerdict () {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const v = JSON.parse(raw)
+    if (!v || typeof v !== 'object' || !v.resetAt) return null
+    return Date.parse(v.resetAt) > Date.now() ? v : null
+  } catch (err) { return null }
+}
+
+// Only verdicts that describe a real budget are worth remembering. `degraded`
+// means we could not get a trustworthy answer, and caching "we don't know"
+// would suppress the next real check for the rest of the session; `unlimited`
+// belongs to a signed-in reader, who never renders this drawer at all.
+function cacheVerdict (verdict) {
+  if (!verdict || verdict.degraded || verdict.unlimited || !verdict.resetAt) return
+  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(verdict)) } catch (err) { /* private browsing */ }
+}
+
+// Whether we can remember anything at all. If sessionStorage is unavailable
+// (private mode, storage disabled), a restored-open drawer must NOT peek: with
+// nothing to cache, that peek would come back on every pageview, which is the
+// cost this whole gate exists to remove.
+function canRemember () {
+  try {
+    sessionStorage.setItem(CACHE_KEY + '-probe', '1')
+    sessionStorage.removeItem(CACHE_KEY + '-probe')
+    return true
+  } catch (err) { return false }
+}
+
 // Every verdict is published, the fail-open ones included: a visitor who was
 // walled and whose next check times out must get the composer back, because
 // the api service would let that question through. Publishing keeps the UI and
@@ -71,6 +113,7 @@ function announce (verdict, seq) {
   if (seq < published) return verdict
   published = seq
   snapshot = verdict
+  cacheVerdict(verdict)
   window.__DOCS_ANON_QUOTA = verdict
   window.dispatchEvent(new CustomEvent(QUOTA_EVENT, { detail: verdict }))
   return verdict
@@ -156,6 +199,18 @@ function mountedInline () {
   return Boolean(home && home.dataset.mounted === 'true')
 }
 
+// Was the drawer opened before this component mounted, and by whom? Script
+// order between site.js (which owns the drawer) and the deferred AskAI bundle
+// is not guaranteed, and a reader can click the CSS-only drawer open while the
+// bundle is still loading, so the open may already have happened by the time
+// schedulePeek runs. openPanel records who opened it, which is readable
+// whenever we get here; an event dispatched before we listened is not.
+function openedBeforeMount () {
+  const panel = document.querySelector('[data-chat-panel]')
+  if (!panel || !panel.classList.contains('is-open')) return null
+  return panel.dataset.openedBy === 'restore' ? 'restore' : 'user'
+}
+
 /**
  * Start the peek when it is worth starting. Returns a teardown.
  *
@@ -189,16 +244,37 @@ function mountedInline () {
 export function schedulePeek () {
   const fire = () => { peekQuota().catch(() => {}) /* fails open inside */ }
 
-  if (mountedInline()) {
-    fire()
+  // 1. A remembered verdict costs nothing and is still true for the rest of the
+  //    window, so serve it and make no request at all. This is what gives a
+  //    drawer the reader left open a countdown on every page after the first,
+  //    and it is why the peek below can afford to be so rare.
+  const cached = readCachedVerdict()
+  if (cached) {
+    announce(cached, ++sequence)
     return () => {}
   }
 
-  // Once per pageview: a second open learns nothing the first didn't, and
-  // every later verdict arrives from the consume in front of each question.
+  // 2. Nothing remembered, and the composer is already on screen: ask now,
+  //    whether that is the home page's inline chat or a drawer that was
+  //    already open when we mounted. This is the one request a reader who
+  //    browses with the drawer open pays per session, because step 1 serves
+  //    every page after it.
+  const already = openedBeforeMount()
+  if (mountedInline() || already) {
+    // The exception: a RESTORED open with no way to remember the answer. That
+    // combination is the one that would repeat on every pageview.
+    if (already !== 'restore' || canRemember()) fire()
+    return () => {}
+  }
+
+  // 3. Otherwise wait for the drawer to be opened. Once per pageview: a second
+  //    open learns nothing the first didn't, and every later verdict arrives
+  //    from the consume in front of each question.
+  const remember = canRemember()
   let fired = false
-  const onOpen = () => {
+  const onOpen = (e) => {
     if (fired) return
+    if (e && e.detail && e.detail.restored && !remember) return // as above
     fired = true
     window.removeEventListener(DRAWER_OPEN_EVENT, onOpen)
     fire()

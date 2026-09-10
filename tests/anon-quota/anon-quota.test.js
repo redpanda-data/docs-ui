@@ -70,7 +70,7 @@ function makeService () {
 // whole job is deciding which event it waits for. `events` collects published
 // verdicts only (detail-carrying), so a bare signal like docs-chat:open doesn't
 // show up in the verdict assertions.
-function fakeBrowser ({ inline = false } = {}) {
+function fakeBrowser ({ inline = false, drawerOpenedBy = null, noStorage = false } = {}) {
   const events = []
   const store = new Map()
   const listeners = new Map()
@@ -84,21 +84,42 @@ function fakeBrowser ({ inline = false } = {}) {
       if (set) set.delete(fn)
     },
     dispatchEvent (ev) {
-      if (ev.detail !== undefined) events.push(ev.detail)
+      if (ev.type === 'docs-quota' && ev.detail !== undefined) events.push(ev.detail)
       const set = listeners.get(ev.type)
       if (set) for (const fn of Array.from(set)) fn(ev)
       return true
     },
   }
-  global.sessionStorage = {
-    getItem: (k) => (store.has(k) ? store.get(k) : null),
-    setItem: (k, v) => { store.set(k, String(v)) },
-  }
+  // noStorage models private browsing / storage disabled, where every accessor
+  // throws. The module must degrade rather than break, and must not fall back
+  // to peeking on every pageview.
+  global.sessionStorage = noStorage
+    ? {
+      getItem () { throw new Error('storage disabled') },
+      setItem () { throw new Error('storage disabled') },
+      removeItem () { throw new Error('storage disabled') },
+    }
+    : {
+      getItem: (k) => (store.has(k) ? store.get(k) : null),
+      setItem: (k, v) => { store.set(k, String(v)) },
+      removeItem: (k) => { store.delete(k) },
+    }
   global.CustomEvent = class CustomEvent { constructor (type, init) { this.type = type; this.detail = init && init.detail } }
   // #kapa-chat-root carrying AskAI.jsx's data-mounted marker is the docs home
   // page's inline Ask AI. Absent (or unmounted) means the drawer.
+  //
+  // drawerOpenedBy models a panel that was ALREADY open when the component
+  // mounted: 'user' for a deliberate click that beat the bundle, 'restore' for
+  // the page-load path that reopens a panel the reader left open.
   global.document = {
     getElementById: (id) => (inline && id === 'kapa-chat-root' ? { dataset: { mounted: 'true' } } : null),
+    querySelector: (sel) => {
+      if (sel !== '[data-chat-panel]' || !drawerOpenedBy) return null
+      return {
+        classList: { contains: (c) => c === 'is-open' },
+        dataset: { openedBy: drawerOpenedBy },
+      }
+    },
   }
   return { events, store, listeners }
 }
@@ -123,6 +144,21 @@ function inlineBrowser () {
   quota = loadEsm('src/js/react/anonQuota.js')
   return browser
 }
+
+// Rebuild the environment with a chosen starting state, keeping whatever the
+// previous one had in sessionStorage when `keepStore` is passed. That is how a
+// second pageview in the same tab session is modelled: new page, new module
+// instance, same session storage.
+function reload (opts = {}, keepStore = null) {
+  browser = fakeBrowser(opts)
+  if (keepStore) for (const [k, v] of keepStore) browser.store.set(k, v)
+  calls.length = 0
+  quota = loadEsm('src/js/react/anonQuota.js')
+  return browser
+}
+
+const openDrawerRestored = () =>
+  global.window.dispatchEvent(Object.assign(new global.CustomEvent('docs-chat:open'), { detail: { restored: true } }))
 
 const openDrawer = () => global.window.dispatchEvent(new global.CustomEvent('docs-chat:open'))
 const settle = () => new Promise((resolve) => setImmediate(resolve))
@@ -337,4 +373,135 @@ test('a verdict with no blocker reports none rather than undefined', async () =>
   respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2026-09-10T10:00:00Z' })
   const v = await quota.consumeQuota()
   assert.equal(v.blockedBy, null)
+})
+
+// --- the remembered verdict -------------------------------------------------
+//
+// Gating the peek on a deliberate open left one group behind: a reader who
+// browses with the drawer already open never opens it again, so they saw no
+// countdown and no wall until a question was refused. Remembering the verdict
+// for the tab session serves them from cache instead of from the endpoint.
+
+const A_VERDICT = { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' }
+
+test('a verdict remembered earlier in the session is served without a request', async () => {
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  openDrawer()
+  await settle()
+  assert.equal(calls.length, 1, 'first page pays one request')
+
+  // Next pageview in the same tab: new module instance, same session storage,
+  // and this time the drawer comes back already open.
+  reload({ drawerOpenedBy: 'restore' }, browser.store)
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 0, 'no request on the restored page')
+  assert.equal(quota.getQuota().remaining, 2, 'and the countdown still knows the budget')
+})
+
+test('a remembered refusal raises the wall with no request', async () => {
+  // The property the peek existed for, kept for restored drawers: the wall is
+  // up before the reader types, rather than after a question is swallowed.
+  respond(429, { allowed: false, limit: 3, used: 3, remaining: 0, reset_at: '2099-01-01T00:00:00Z', login_url: '/login', blocked_by: 'visitor' })
+  quota.schedulePeek()
+  openDrawer()
+  await settle()
+
+  reload({ drawerOpenedBy: 'restore' }, browser.store)
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 0)
+  assert.equal(quota.quotaExhausted(quota.getQuota()), true)
+  assert.equal(quota.getQuota().loginUrl, '/login', 'including what the wall needs to render')
+})
+
+test('a restored drawer with nothing remembered asks once, then remembers', async () => {
+  reload({ drawerOpenedBy: 'restore' })
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 1, 'one request per session, not per pageview')
+
+  reload({ drawerOpenedBy: 'restore' }, browser.store)
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 0)
+})
+
+test('a restored drawer asks nothing when the session cannot be remembered', async () => {
+  // Private browsing: with no cache, peeking here would come back on every
+  // pageview, which is the cost the gate exists to remove. Losing the countdown
+  // is the better failure.
+  reload({ drawerOpenedBy: 'restore', noStorage: true })
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 0)
+
+  // ...and the same reader still gets a verdict the moment they open it
+  // themselves, because that is a fresh decision to use Ask AI.
+  reload({ noStorage: true })
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  openDrawer()
+  await settle()
+  assert.equal(calls.length, 1)
+})
+
+test('a restored open event is ignored without storage, a deliberate one is not', async () => {
+  reload({ noStorage: true })
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  openDrawerRestored()
+  await settle()
+  assert.equal(calls.length, 0, 'restore cannot be remembered, so it must not ask')
+  openDrawer()
+  await settle()
+  assert.equal(calls.length, 1, 'the reader opening it is still worth a request')
+})
+
+test('a drawer the reader opened before the bundle loaded is not missed', async () => {
+  // The CSS-only drawer opens on click before JS attaches, so the open can
+  // predate this component. An event sent then is lost; the attribute is not.
+  reload({ drawerOpenedBy: 'user' })
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  await settle()
+  assert.deepEqual(calls, [{ peek: true }])
+})
+
+test('a remembered verdict from a window that has ended is discarded', async () => {
+  respond(200, { ...A_VERDICT, reset_at: '2020-01-01T00:00:00Z' })
+  quota.schedulePeek()
+  openDrawer()
+  await settle()
+  assert.equal(calls.length, 1)
+
+  reload({ drawerOpenedBy: 'restore' }, browser.store)
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 1, 'the expired verdict is no cache at all, so it asks again')
+})
+
+test('a degraded verdict is never remembered', async () => {
+  // "We could not get a trustworthy answer" must not be cached, or it would
+  // suppress the next real check for the rest of the session.
+  // The server's own degraded answer (kapa-quota.mjs's belt-and-braces catch),
+  // which unlike the client-side fail-open DOES carry a reset_at and so would
+  // otherwise look cacheable.
+  respond(200, { allowed: true, degraded: true, limit: 3, used: 0, remaining: 3, reset_at: '2099-01-01T00:00:00Z' })
+  quota.schedulePeek()
+  openDrawer()
+  await settle()
+  assert.equal(quota.getQuota().degraded, true)
+  assert.equal(browser.store.has('docs-quota-verdict'), false, 'not written to the session cache')
+
+  reload({ drawerOpenedBy: 'restore' }, browser.store)
+  respond(200, A_VERDICT)
+  quota.schedulePeek()
+  await settle()
+  assert.equal(calls.length, 1, 'so the next page asks for a real one')
+  assert.equal(quota.getQuota().remaining, 2)
 })
