@@ -8,7 +8,7 @@
     "url": "https://github.com/redpanda-data/docs-ui.git"
   },
   "engines": {
-    "node": ">= 18.0.0"
+    "node": ">= 18.8.0"
   },
   "browserslist": [
     "last 2 versions"
@@ -23,7 +23,6 @@
     "@docsearch/js": "^3.3.3",
     "@fontsource/roboto": "~4.5",
     "@fontsource/roboto-mono": "~4.5",
-    "@kapaai/react-sdk": "^0.9.0",
     "autoprefixer": "~9.7",
     "babelify": "^10.0.0",
     "browser-pack-flat": "~3.4",
@@ -37,6 +36,7 @@
     "eslint-plugin-node": "~11.1",
     "eslint-plugin-promise": "~4.2",
     "eslint-plugin-standard": "~4.0",
+    "express": "^4.18.0",
     "fancy-log": "~1.3",
     "fs-extra": "~8.1",
     "gulp": "~4.0",
@@ -63,7 +63,6 @@
     "postcss-url": "~8.0",
     "prettier-eslint": "~9.0",
     "puppeteer": "^21.0.0",
-    "express": "^4.18.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "require-directory": "~2.1",
@@ -81,9 +80,17 @@
     "test:interactive": "node tests/bloblang-interactive/test-runner.js",
     "test:negative-cache": "node tests/negative-cache/test-runner.js",
     "test:head-meta": "node --test tests/head-meta/*.test.js",
-    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta",
+    "test:property-tooltips": "node --test tests/property-tooltips/*.test.js",
+    "test:signin-nudge": "node --test tests/signin-nudge/*.test.js",
+    "test:chat-panel-navigation": "node --test tests/chat-panel-navigation/*.test.js",
+    "test:toc-collapsible": "node --test tests/toc-collapsible/*.test.js",
+    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips && npm run test:signin-nudge && npm run test:chat-panel-navigation && npm run test:toc-collapsible",
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
     "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
     "serve:playground": "npx serve ."
+  },
+  "dependencies": {
+    "@kapaai/agent-react": "^1.0.0",
+    "@kapaai/react-sdk": "^0.9.10"
   }
 }

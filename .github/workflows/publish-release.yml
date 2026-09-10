@@ -16,6 +16,11 @@
         ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
         ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
         ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
+        # puppeteer (devDep, used only by the playground tests — not the bundle)
+        # downloads ~120 MB of Chromium on install, which repeatedly stalled
+        # `npm ci` on CI for the full 20-min timeout. The release build doesn't
+        # use puppeteer, so skip the browser download.
+        PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       steps:
         - uses: actions/checkout@v4
@@ -29,17 +34,14 @@
         - uses: actions/setup-node@v4
           with:
             node-version: 18
-
-        - name: Cache node_modules
-          id: cache-node-modules
-          uses: actions/cache@v4
-          with:
-            path: node_modules
-            key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+            # Cache the npm download cache (~/.npm), keyed by the lockfile. More
+            # reliable than caching node_modules: it's saved as a post-step even
+            # when a later step fails, so it survives the cancelled-on-timeout
+            # runs that left the old node_modules cache permanently empty.
+            cache: npm
 
         - name: Install dependencies
-          if: steps.cache-node-modules.outputs.cache-hit != 'true'
-          run: npm ci
+          run: npm ci --no-audit --no-fund --prefer-offline
 
         - run: gulp bundle
 

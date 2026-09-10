@@ -338,14 +338,62 @@
    * ifdef::env-cloud[] conditionals were evaluated once, correctly, against
    * the real page that produced it -- not guessed at again client-side.
    */
+  // render-property-descriptions.js emits a single-paragraph description as
+  // bare inline HTML with no <p> wrapper -- "what a tooltip wants" per its
+  // own comment -- and only wraps in real block markup (<p>, lists,
+  // admonitions, ...) for something richer. Truncating to blocks[0] when the
+  // top level is anything other than a clean sequence of blocks grabs one
+  // element and silently drops every text node around it -- e.g. a
+  // description built as
+  // 'The retention time... <code>cloud_storage_enabled</code>, <code>...` on
+  // a live tooltip rendering as just "cloud_storage_enabled". So truncate
+  // ONLY when every top-level node is a known block element (whitespace-only
+  // text between them aside): bare inline prose, mixed inline+block content,
+  // and passthrough markup with unknown tags all render in full instead --
+  // the tooltip's CSS max-height cap bounds the fallout in that direction,
+  // while dropping prose around blocks[0] is exactly the mangling this
+  // function exists to avoid.
+  // H1-H6 and HR are the Asciidoctor html5 outputs (discrete headings,
+  // thematic breaks) that escape <div> wrapping alongside <p>.
+  var BLOCK_TAGS = {
+    P: 1,
+    DIV: 1,
+    UL: 1,
+    OL: 1,
+    DL: 1,
+    TABLE: 1,
+    BLOCKQUOTE: 1,
+    PRE: 1,
+    H1: 1,
+    H2: 1,
+    H3: 1,
+    H4: 1,
+    H5: 1,
+    H6: 1,
+    HR: 1,
+  }
   function truncateDescriptionHtml (html, summaryOnly) {
     if (!html) return ''
     if (!summaryOnly) return html
     var container = document.createElement('div')
     container.innerHTML = html
-    var blocks = container.children
-    if (blocks.length <= 1) return html
-    return blocks[0].outerHTML + '<p>&#8230;</p>'
+    var blockCount = 0
+    for (var i = 0; i < container.childNodes.length; i++) {
+      var node = container.childNodes[i]
+      if (node.nodeType === 8) continue // comment
+      if (node.nodeType === 3) {
+        if (/\S/.test(node.data)) return html // top-level prose: not purely block-structured
+        continue
+      }
+      if (node.nodeType !== 1 || !BLOCK_TAGS[node.tagName]) return html
+      blockCount++
+    }
+    if (blockCount <= 1) return html
+    // Same preview shape as formatDescription: merge the ellipsis into a
+    // closing </p>, fall back to a separate paragraph for other blocks.
+    var first = container.children[0].outerHTML
+    if (first.slice(-4) === '</p>') return first.slice(0, -4) + '&#8230;</p>'
+    return first + '<p>&#8230;</p>'
   }
 
   /**
