@@ -71,6 +71,8 @@ jobs:
         run: npm run test:signin-nudge
       - name: Test agent navigation closes the chat panel
         run: npm run test:chat-panel-navigation
+      - name: Test Kapa source-group scoping
+        run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
         run: npm run test:toc-collapsible
       - name: Cache generated files

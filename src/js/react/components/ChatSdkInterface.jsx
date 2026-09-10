@@ -3,6 +3,7 @@ import { useChat } from '@kapaai/react-sdk'
 import { ArrowRight, CircleStop, RefreshCcw, ClipboardCopy, Sparkles, ThumbsUp, ThumbsDown, TriangleAlert } from 'lucide-react'
 import { loadConversation, clearConversation } from '../chatPersistence.js'
 import { safeHeap } from '../heap.js'
+import { SCOPE_DROPPED_MESSAGE } from '../kapaScope.js'
 import { Answer, Toast } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
@@ -100,8 +101,15 @@ export default function ChatSdkInterface ({ loginUrl }) {
   // Captcha token could not be obtained." — which names feedback for what was
   // a question, and means nothing to a reader. The raw text goes to Heap and
   // the console (below); the panel shows something a user can act on.
-  const failureMessage =
-    'No answer came back. The browser check may still be loading, so try again in a moment.'
+  //
+  // One exception: a dropped version scope (kapaScope.js). That failure is ours
+  // to explain, is not the captcha, and is retried below without waiting for a
+  // click, so the panel says what actually happened.
+  const scopeDropped = error === SCOPE_DROPPED_MESSAGE
+  const failureMessage = scopeDropped
+    ? SCOPE_DROPPED_MESSAGE
+    : 'No answer came back. The browser check may still be loading, so try again in a moment.'
+
 
   // Report failures the way the agent tier reports its own (handleAgentEvent's
   // response_error), so the rate of silent drops is visible in Heap rather than
@@ -193,6 +201,20 @@ export default function ChatSdkInterface ({ loginUrl }) {
     if (!question || isBusy) return
     doQuery(question)
   }
+
+  // Re-ask automatically, once per failed exchange, after the scope was dropped.
+  // By the time this effect runs the App has re-rendered KapaProvider without
+  // sourceGroupIDsInclude (same batched update as the SDK's error state), so the
+  // retry goes out unscoped with a fresh captcha token. A second failure shows
+  // the message and the manual Try again button like any other error.
+  const autoRetried = useRef(null)
+  useEffect(() => {
+    if (!scopeDropped || !queryFailed || !latestQA?.question) return
+    const signature = `${conversation.length}:${latestQA.question}`
+    if (autoRetried.current === signature) return
+    autoRetried.current = signature
+    handleRetry(latestQA.question)
+  }, [scopeDropped, queryFailed, conversation.length])
 
   const handleReset = () => {
     clearConversation() // drop the cross-page copy too, or it reappears on nav

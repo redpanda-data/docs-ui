@@ -5,6 +5,7 @@
 
 import { DefaultKapaApiService, processStream } from '@kapaai/react-sdk'
 import { getSavedThreadId } from './chatPersistence'
+import { wrapScopeFallback } from './kapaScope.js'
 
 /**
  * Creates a persistent API service that injects saved threadId into queries
@@ -20,7 +21,7 @@ export class PersistentKapaApiService {
    * @param {Object} args - Query arguments
    * @param {Object} callbacks - Stream callbacks
    */
-  submitQuery (args, callbacks) {
+  submitQuery (args, callbacks = {}) {
     const savedThreadId = getSavedThreadId()
 
     // Inject saved threadId if no threadId is provided
@@ -29,7 +30,7 @@ export class PersistentKapaApiService {
       threadId: args.threadId || savedThreadId,
     }
 
-    return this.defaultService.submitQuery(enhancedArgs, callbacks)
+    return this.defaultService.submitQuery(enhancedArgs, wrapScopeFallback(enhancedArgs, callbacks))
   }
 
   /**
