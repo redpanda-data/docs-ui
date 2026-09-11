@@ -61,6 +61,17 @@
     ];
     // Signed-in agent tier: tool-showcasing prompts (static here — the standalone
     // Bump widget has no Antora component context for get-agent-suggestions).
+    {{!-- KAPA_SOURCE_GROUP_IDS is deliberately NOT set here. This partial is compiled
+          at build time from context/chat-panel.json (compileWidgets in gulpfile.js),
+          which carries no Antora page or site data, so get-kapa-source-groups has
+          nothing to resolve against.
+          /api/ pages should scope to the latest version, and docs-site sets it: its
+          proxy-api-docs edge function already fetches this widget's compiled HTML and
+          rewrites the DOM, and it has the source-group mapping available, so it
+          injects the "current" group id there. Keeping the id out of this template
+          avoids a second hardcoded copy that would go stale the moment a group is
+          recreated -- a stale id scopes to a group holding nothing, which silently
+          returns only global sources. --}}
     window.AGENT_SUGGESTIONS = [
       'Write and test a Bloblang mapping that flattens nested JSON',
       "What's the latest Redpanda Streaming version?",

@@ -12,6 +12,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    # Warm-cache runs take 1-2 minutes, but that figure is not what the cap has
+    # to clear. A cold run is dominated by `npm ci`: runs 33752155131 and
+    # 32899354267 took 7.2 and 7.0 minutes with the install step at 5.4 and 5.8
+    # of them. Skipping Puppeteer's Chrome download below (nothing in this job
+    # uses Chrome) takes most of that back, which is what leaves 15 minutes
+    # generous over a legitimate cold run rather than merely twice it.
+    #
+    # Without a cap, a wedged npm ci (seen when the node_modules cache expires
+    # and the registry stalls) burns the runner for GitHub's full 6-hour default
+    # before the job is cancelled. Note a job cancelled by timeout-minutes never
+    # runs the cache save (actions/cache@v4 is post-if: success()), so the cap
+    # has to stay clear of the cold path or a slow-registry day leaves the cache
+    # empty for everyone.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
@@ -41,6 +55,15 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        # puppeteer (devDep) downloads ~120 MB of Chromium on install, which is
+        # roughly 5 of the 7 cold minutes and repeatedly stalled `npm ci`.
+        # Nothing in this job needs it: `gulp bundle` and the node --test suites
+        # below are Chrome-free, and puppeteer is only imported by the bloblang,
+        # negative-cache and property-tooltips tests, which run in
+        # test-bloblang-playground.yml. publish-release.yml already sets this
+        # for the same reason.
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
         run: npm ci
       - name: Test page actions
         run: npm run test:markdown-dropdown
@@ -48,6 +71,8 @@ jobs:
         run: npm run test:signin-nudge
       - name: Test agent navigation closes the chat panel
         run: npm run test:chat-panel-navigation
+      - name: Test Kapa source-group scoping
+        run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
         run: npm run test:toc-collapsible
       - name: Test anonymous Ask AI quota

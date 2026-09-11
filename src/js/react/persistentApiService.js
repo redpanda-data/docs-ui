@@ -15,6 +15,7 @@
 import { DefaultKapaApiService, processStream } from '@kapaai/react-sdk'
 import { getSavedThreadId } from './chatPersistence'
 import { consumeQuota } from './anonQuota.js'
+import { wrapScopeFallback } from './kapaScope.js'
 
 // Race winner when Stop lands while a submission is still waiting on its quota
 // check. A sentinel rather than null/undefined so it can never collide with a
@@ -48,7 +49,7 @@ export class PersistentKapaApiService {
    * @param {Object} args - Query arguments
    * @param {Object} callbacks - Stream callbacks
    */
-  async submitQuery (args, callbacks) {
+  async submitQuery (args, callbacks = {}) {
     const mine = ++this.submission
 
     // Consume one question. Fails open (see anonQuota.js): a missing or broken
@@ -101,7 +102,7 @@ export class PersistentKapaApiService {
       threadId: args.threadId || savedThreadId,
     }
 
-    return this.defaultService.submitQuery(enhancedArgs, callbacks)
+    return this.defaultService.submitQuery(enhancedArgs, wrapScopeFallback(enhancedArgs, callbacks))
   }
 
   /**
