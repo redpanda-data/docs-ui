@@ -38,6 +38,18 @@ function loadEsmWithStubs (relPath, stubs) {
   const load = Module._load
   Module._load = function (request, parent, isMain) {
     if (Object.prototype.hasOwnProperty.call(stubs, request)) return stubs[request]
+    // A relative sibling is ESM source too, so transpile it the same way
+    // instead of handing it to require(), which cannot read ESM before Node 22.
+    // Without this, any import added to the module under test that isn't in
+    // `stubs` fails as a bare "Unexpected token 'export'" whose stack points at
+    // the CJS loader rather than at the import. It also means the stub map only
+    // has to list what a test wants to REPLACE, not everything the module
+    // happens to import.
+    if (request.startsWith('./') || request.startsWith('../')) {
+      const base = path.resolve(path.dirname(filename), request)
+      const target = fs.existsSync(base) && fs.statSync(base).isFile() ? base : `${base}.js`
+      if (fs.existsSync(target)) return loadEsm(path.relative(ROOT, target))
+    }
     return load.call(this, request, parent, isMain)
   }
   try { mod._compile(code, filename) } finally { Module._load = load }
