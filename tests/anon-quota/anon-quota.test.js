@@ -59,6 +59,11 @@ function makeService () {
     '@kapaai/react-sdk': { DefaultKapaApiService, processStream: () => {} },
     './chatPersistence': { getSavedThreadId: () => null },
     './anonQuota.js': quota,
+    // Stubbed, not loaded: the real module is ESM, which require() cannot read
+    // before Node 22, and CI runs 18. A pass-through is what the real
+    // wrapScopeFallback does for these queries anyway, since none of them send
+    // sourceGroupIDsInclude (see kapaScope.js).
+    './kapaScope.js': { wrapScopeFallback: (args, callbacks) => callbacks },
   }).createPersistentApiService()
   return { svc, submitted, aborts }
 }
