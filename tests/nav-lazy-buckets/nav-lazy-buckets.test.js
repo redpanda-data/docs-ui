@@ -23,7 +23,7 @@ function renderBucket (bucket, page = {}) {
     hb.registerPartial(name, fs.readFileSync(path.join(PARTIALS, `${name}.hbs`), 'utf8'))
   }
   hb.registerPartial('bucket-header', '<div class="nav-bucket-header">{{bucket.title}}</div>')
-  for (const h of ['or', 'and', 'eq', 'not', 'increment']) {
+  for (const h of ['or', 'and', 'eq', 'not', 'increment', 'nav-contains-current']) {
     hb.registerHelper(h, require(path.join(ROOT, 'src/helpers', `${h}.js`)))
   }
   hb.registerHelper('relativize', (u) => u)
@@ -51,9 +51,12 @@ test('a collapsed leaf bucket ships its tree inside an inert <template>', () => 
 test('the current bucket renders its tree directly, with no template', () => {
   for (const flag of ['isCurrentBucket', 'isExpandedByDefault']) {
     const html = renderBucket({ componentName: 'connect', title: 'Connect', items, [flag]: true })
-    assert.doesNotMatch(html, /<template/, `${flag}: no template`)
-    assert.match(html, /<div class="nav-bucket-content" id="nav-bucket-connect">\s*<ul class="nav-list">/)
+    assert.match(html, /<div class="nav-bucket-content" id="nav-bucket-connect">\s*<ul class="nav-list">/, `${flag}: tree rendered directly`)
+    assert.doesNotMatch(html, /nav-bucket-content[^>]*>\s*<template/, `${flag}: the bucket itself is not templated`)
     assert.doesNotMatch(html, /is-collapsed/)
+    // Inside an open bucket, nav-tree.hbs still defers collapsed sub-items
+    // (Guides has children and is not on the current path).
+    assert.equal((html.match(/<template data-nav-lazy>/g) || []).length, 1)
   }
 })
 
@@ -66,11 +69,13 @@ test('a parent bucket on the umbrella page templates its children too, unless on
   }
   const umbrella = { attributes: { 'is-umbrella-nav': 'true' } }
   const collapsed = renderBucket(parent, umbrella)
-  assert.equal((collapsed.match(/<template data-nav-lazy>/g) || []).length, 2, 'parent and nested child are both templated')
+  // Parent bucket, nested child bucket, and the Guides sub-item inside it.
+  assert.equal((collapsed.match(/<template data-nav-lazy>/g) || []).length, 3, 'parent and nested child are both templated')
   assert.match(collapsed, /id="nav-bucket-data-platform">\s*<template data-nav-lazy>[\s\S]*data-bucket="connect"/, 'the child bucket is inside the parent template')
 
   const expanded = renderBucket({ ...parent, hasCurrentChild: true, children: [{ ...parent.children[0], isCurrentBucket: true }] }, umbrella)
-  assert.doesNotMatch(expanded, /<template/)
+  assert.doesNotMatch(expanded, /nav-bucket-content[^>]*>\s*<template/, 'neither bucket is templated')
+  assert.equal((expanded.match(/<template data-nav-lazy>/g) || []).length, 1, 'only the collapsed Guides sub-item inside Connect')
 })
 
 test('a trivial bucket (no items, or one childless item) is unchanged: header only', () => {
@@ -161,4 +166,75 @@ test('01-nav.js binds items in hydrated subtrees and never twice', () => {
   assert.match(src, /navContainer\.addEventListener\('nav:hydrated'/)
   assert.match(src, /function bindNavItems \(root\)/)
   assert.match(src, /element\.dataset\.navBound/)
+})
+
+// --- nav-tree.hbs: collapsed items inside an open bucket ---
+
+function renderTree (navigation, pageUrl) {
+  const hb = Handlebars.create()
+  hb.registerPartial('nav-tree', fs.readFileSync(path.join(PARTIALS, 'nav-tree.hbs'), 'utf8'))
+  for (const h of ['or', 'eq', 'increment', 'nav-contains-current']) {
+    hb.registerHelper(h, require(path.join(ROOT, 'src/helpers', `${h}.js`)))
+  }
+  hb.registerHelper('relativize', (u) => u)
+  for (const h of ['is-beta-feature', 'is-preview-feature', 'is-limited-availability-feature', 'is-byoc-feature', 'is-cloud-feature']) {
+    hb.registerHelper(h, () => false)
+  }
+  return hb.compile('{{> nav-tree navigation=navigation}}')({ navigation, page: { url: pageUrl } })
+}
+
+const tree = [
+  { content: 'Get Started', url: '/s/get-started/', urlType: 'internal', items: [
+    { content: 'Quickstarts', url: '/s/quick/', urlType: 'internal', items: [{ content: 'Docker', url: '/s/quick/docker/', urlType: 'internal' }] },
+    { content: 'Licensing', url: '/s/license/', urlType: 'internal' },
+  ] },
+  { content: 'Develop', url: '/s/develop/', urlType: 'internal', items: [{ content: 'Produce', url: '/s/develop/produce/', urlType: 'internal' }] },
+]
+
+test('only the path to the current page renders open; every other subtree is a template', () => {
+  const html = renderTree(tree, '/s/quick/docker/')
+  // Get Started -> Quickstarts -> Docker is the current path: rendered directly.
+  assert.match(html, /href="\/s\/quick\/docker\/"/)
+  const docker = html.indexOf('href="/s/quick/docker/"')
+  assert.equal(html.lastIndexOf('<template', docker), -1, 'no template opens before the current page link')
+  // Licensing is a sibling leaf: rendered (leaves have no subtree to defer).
+  assert.match(html, /href="\/s\/license\/"/)
+  // Develop is off the current path: its children are templated.
+  const develop = html.indexOf('href="/s/develop/"')
+  const produce = html.indexOf('href="/s/develop/produce/"')
+  assert.ok(develop > 0 && produce > develop)
+  assert.ok(html.slice(develop, produce).includes('<template data-nav-lazy>'), 'Develop subtree waits in a template')
+  assert.equal((html.match(/<template data-nav-lazy>/g) || []).length, 1)
+})
+
+test('the current page keeps its own children open', () => {
+  const html = renderTree(tree, '/s/quick/')
+  const quick = html.indexOf('href="/s/quick/"')
+  const docker = html.indexOf('href="/s/quick/docker/"')
+  assert.ok(!html.slice(quick, docker).includes('<template'), 'children of the current page render directly')
+})
+
+test('a page outside the tree templates every subtree, and the toggle chevron stays', () => {
+  const html = renderTree(tree, '/elsewhere/')
+  // Get Started, Develop, and Quickstarts nested inside Get Started's template:
+  // inner templates stay inert until their own expand.
+  assert.equal((html.match(/<template data-nav-lazy>/g) || []).length, 3)
+  assert.equal((html.match(/nav-item-toggle/g) || []).length, 3, 'all three expandable items keep their toggle')
+})
+
+test('nav-contains-current walks nested items and tolerates gaps', () => {
+  const contains = require(path.join(ROOT, 'src/helpers/nav-contains-current.js'))
+  assert.equal(contains(tree, '/s/quick/docker/'), true)
+  assert.equal(contains(tree, '/s/develop/produce/'), true)
+  assert.equal(contains(tree, '/nope/'), false)
+  assert.equal(contains([], '/s/quick/'), false)
+  assert.equal(contains(tree, undefined), false)
+  assert.equal(contains([null, { items: null }], '/x/'), false)
+})
+
+test('01-nav.js hydrates an item before toggling it open, by click and by keyboard', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'src/js/01-nav.js'), 'utf8')
+  assert.match(src, /function hydrateNavItem \(li\)/)
+  assert.match(src, /hydrateNavItem\(this\)\s*\n\s*this\.classList\.toggle\('is-active'\)/)
+  assert.match(src, /hydrateNavItem\(element\)\s*\n\s*element\.classList\.toggle\('is-active'\)/)
 })

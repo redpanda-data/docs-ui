@@ -382,11 +382,22 @@ if(d.readyState==='complete'){load();}else{w.addEventListener('load',function(){
     }
   });
 
-  // Fallback: Load (but don't open) after 5 seconds of idle time
+  // Fallback: load (but don't open) after 5 seconds of idle time, ONLY where
+  // the stock widget is the Ask AI experience (no chat panel on the page: the
+  // Bump.sh standalone widget, search, labs). Pages with the drawer never open
+  // this widget except through the legacy .custom-class-kapa triggers, which
+  // load it on click; preloading it there shipped 2 MB of uncompressed script
+  // to every reader for nothing.
+  // Decided when the timer fires, not here: this runs in <head>, before the
+  // body (and the drawer) exists.
+  function preloadUnlessDrawer() {
+    if (document.querySelector('[data-chat-panel]')) return;
+    window.loadKapa(false);
+  }
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(function() { setTimeout(function() { window.loadKapa(false); }, 5000); });
+    requestIdleCallback(function() { setTimeout(preloadUnlessDrawer, 5000); });
   } else {
-    setTimeout(function() { window.loadKapa(false); }, 5000);
+    setTimeout(preloadUnlessDrawer, 5000);
   }
 })();
 </script>

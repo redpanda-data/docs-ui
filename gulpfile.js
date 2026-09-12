@@ -19,6 +19,7 @@ const serverConfig = { host: '0.0.0.0', port: 5252, livereload }
 
 const task = require('./gulp.d/tasks')
 const generateBloblangGrammar = require('./gulp.d/tasks/generate-bloblang-grammar')
+const generatePrism = require('./gulp.d/tasks/generate-prism')
 const glob = {
   all: [srcDir, previewSrcDir],
   css: `${srcDir}/css/**/*.css`,
@@ -114,6 +115,12 @@ const generateBloblangGrammarTask = createTask({
   call: generateBloblangGrammar(path.join(__dirname, srcDir, 'js', 'vendor', 'prism', 'prism-bloblang.js')),
 })
 
+const generatePrismTask = createTask({
+  name: 'generate:prism',
+  desc: 'Assemble the trimmed Prism build (core + grammars in gulp.d/prism-languages.js + keep-markup) from prismjs',
+  call: generatePrism(path.join(__dirname, srcDir, 'js', 'vendor', 'prism', 'prism-core.js')),
+})
+
 const buildWasmTask = createTask({
   name: 'build:wasm',
   desc: 'Build the WebAssembly (.wasm) file using Go and the go.mod in blobl-editor/wasm',
@@ -148,6 +155,7 @@ const bundleBuildTask = createTask({
     cleanTask,
     lintTask,
     generateBloblangGrammarTask,
+    generatePrismTask,
     buildWasmTask,
     bundleReactTask,
     compileWidgets,
@@ -192,7 +200,7 @@ const compileWidgetsTask = createTask({
 const previewBuildTask = createTask({
   name: 'preview:build',
   desc: 'Process and stage the UI assets and generate pages for the preview',
-  call: series(buildWasmTask, bundleReactTask, compileWidgetsTask, buildTask, buildPreviewPagesTask),
+  call: series(generatePrismTask, buildWasmTask, bundleReactTask, compileWidgetsTask, buildTask, buildPreviewPagesTask),
 })
 
 const previewServeTask = createTask({
@@ -258,6 +266,7 @@ module.exports = exportTasks(
   lintTask,
   formatTask,
   generateBloblangGrammarTask,
+  generatePrismTask,
   buildWasmTask,
   bundleReactTask,
   compileWidgetsTask,
