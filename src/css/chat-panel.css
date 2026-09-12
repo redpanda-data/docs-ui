@@ -1454,6 +1454,15 @@
 
 @keyframes chat-tier-spin { to { transform: rotate(360deg); } }
 
+/* Shown by 19-chat-panel.js when AskAI.bundle.js fails to download. The
+   bundle's own CSS never arrived in that case, so this cannot live there. */
+#chat-panel-kapa-root .error-boundary {
+  padding: 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kapa-text-muted, #79797d);
+}
+
 @media (prefers-reduced-motion: reduce) {
   #chat-panel-kapa-root .chat-tier-loading { animation: none; }
 }

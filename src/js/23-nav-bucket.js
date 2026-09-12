@@ -13,10 +13,10 @@
     initBucketToggles()
 
     // Initialize per-bucket version selectors
-    initBucketVersionSelectors()
+    initBucketVersionSelectors(document)
 
     // Initialize version toggle buttons
-    initVersionToggles()
+    initVersionToggles(document)
 
     // Global escape handler
     document.addEventListener('keydown', function (e) {
@@ -37,15 +37,35 @@
    * Initialize bucket expand/collapse toggles
    */
   function initBucketToggles () {
-    // Handle clicks on the caret button to toggle bucket
-    var caretBtns = document.querySelectorAll('.nav-bucket-caret-btn')
-    caretBtns.forEach(function (caretBtn) {
-      caretBtn.addEventListener('click', function (e) {
-        e.preventDefault()
-        toggleBucket(caretBtn)
-      })
-    })
+    // Delegated: child buckets inside a collapsed parent arrive later via
+    // hydrate(), so per-button listeners bound at load would miss them.
+    // Capture phase, because 01-nav.js stops click propagation at
+    // .nav-container and a bubbling listener on document would never fire.
+    document.addEventListener('click', function (e) {
+      var caretBtn = e.target.closest && e.target.closest('.nav-bucket-caret-btn')
+      if (!caretBtn) return
+      e.preventDefault()
+      toggleBucket(caretBtn)
+    }, true)
   }
+
+  /**
+   * Collapsed buckets ship their nav tree inside an inert <template> (see
+   * nav-bucket-recursive.hbs) so the hidden trees never enter the document.
+   * Move the fragment into place the first time the bucket is expanded, then
+   * tell 01-nav.js (item click handling) and this file (nested bucket version
+   * selectors) about the new subtree.
+   */
+  function hydrate (content) {
+    var tpl = content.querySelector(':scope > template[data-nav-lazy]')
+    if (!tpl) return
+    var fragment = tpl.content.cloneNode(true)
+    content.replaceChild(fragment, tpl)
+    initBucketVersionSelectors(content)
+    initVersionToggles(content)
+    content.dispatchEvent(new window.CustomEvent('nav:hydrated', { bubbles: true }))
+  }
+  window.hydrateNavBucket = hydrate
 
   /**
    * Toggle a bucket's expanded/collapsed state
@@ -54,25 +74,27 @@
     var bucket = caretBtn.closest('.nav-bucket')
     // Use direct child selector to avoid selecting nested bucket content
     var content = bucket.querySelector(':scope > .nav-bucket-content')
+    if (!content) return
     var isExpanded = !content.classList.contains('is-collapsed')
 
+    if (!isExpanded) hydrate(content)
+
     // Toggle expanded state
-    if (content) {
-      content.classList.toggle('is-collapsed', isExpanded)
-    }
+    content.classList.toggle('is-collapsed', isExpanded)
   }
 
   /**
    * Initialize per-bucket version selector dropdowns
    */
-  function initBucketVersionSelectors () {
-    var versionSelectors = document.querySelectorAll('[data-bucket-version]')
+  function initBucketVersionSelectors (root) {
+    var versionSelectors = root.querySelectorAll('[data-bucket-version]')
 
     versionSelectors.forEach(function (selector) {
       var btn = selector.querySelector('.nav-bucket-version-btn')
       var menu = selector.querySelector('.nav-bucket-version-menu')
 
-      if (!btn || !menu) return
+      if (!btn || !menu || selector.dataset.bound) return
+      selector.dataset.bound = 'true'
 
       btn.addEventListener('click', function (e) {
         e.preventDefault()
@@ -123,10 +145,12 @@
   /**
    * Initialize version toggle buttons (show/hide older versions)
    */
-  function initVersionToggles () {
-    var toggleButtons = document.querySelectorAll('[data-version-toggle]')
+  function initVersionToggles (root) {
+    var toggleButtons = root.querySelectorAll('[data-version-toggle]')
 
     toggleButtons.forEach(function (toggleBtn) {
+      if (toggleBtn.dataset.bound) return
+      toggleBtn.dataset.bound = 'true'
       toggleBtn.addEventListener('click', function (e) {
         e.preventDefault()
         e.stopPropagation()

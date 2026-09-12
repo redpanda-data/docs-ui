@@ -223,10 +223,18 @@
 {{/if}}
 {{#with site.keys.googleAnalytics}}
 <!-- Google Tag Manager -->
+<!-- Deferred: the container (and the gtag + OneTrust tags it loads) is ~340 KB
+     of third-party script and ~150 ms of main-thread work. Nothing on the page
+     depends on it, so it waits for the load event, or the first interaction if
+     that comes sooner, instead of competing with the article for bandwidth and
+     CPU during first paint. dataLayer is created immediately, so any pushes
+     made before the container arrives are queued and replayed as usual. -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+new Date().getTime(),event:'gtm.js'});var loaded=false;function load(){if(loaded)return;loaded=true;
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}
+if(d.readyState==='complete'){load();}else{w.addEventListener('load',function(){setTimeout(load,0);});}
+['pointerdown','keydown','touchstart','scroll'].forEach(function(ev){w.addEventListener(ev,load,{once:true,passive:true});});
 })(window,document,'script','dataLayer','{{{this}}}');</script>
 <!-- End Google Tag Manager -->
 {{/with}}
@@ -374,15 +382,30 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
   });
 
-  // Fallback: Load (but don't open) after 5 seconds of idle time
+  // Fallback: load (but don't open) after 5 seconds of idle time, ONLY where
+  // the stock widget is the Ask AI experience (no chat panel on the page: the
+  // Bump.sh standalone widget, search, labs). Pages with the drawer never open
+  // this widget except through the legacy .custom-class-kapa triggers, which
+  // load it on click; preloading it there shipped 2 MB of uncompressed script
+  // to every reader for nothing.
+  // Decided when the timer fires, not here: this runs in <head>, before the
+  // body (and the drawer) exists.
+  function preloadUnlessDrawer() {
+    if (document.querySelector('[data-chat-panel]')) return;
+    window.loadKapa(false);
+  }
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(function() { setTimeout(function() { window.loadKapa(false); }, 5000); });
+    requestIdleCallback(function() { setTimeout(preloadUnlessDrawer, 5000); });
   } else {
-    setTimeout(function() { window.loadKapa(false); }, 5000);
+    setTimeout(preloadUnlessDrawer, 5000);
   }
 })();
 </script>
-{{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true'))}}
+{{!-- Code-block runtime only where the article has code, a tabset, or a
+      callout list (has-code-blocks helper). 11-editable-placeholders,
+      13-open-nested-tabs and 17-bloblang-yaml all check for window.Prism
+      before using it, so pages without it degrade to no-ops. --}}
+{{#if (and (ne page.attributes.role 'bloblang-playground') (ne isStandaloneWidget 'true') (has-code-blocks))}}
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css" media="print" onload="this.media='all'">
 <noscript>
   <link rel="stylesheet" href="{{{uiRootPath}}}/css/vendor/prism/prism.min.css">

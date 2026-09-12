@@ -22,8 +22,9 @@ This is the UI bundle project for the Redpanda documentation site. It produces a
 
 ### Building Components
 - `gulp build:wasm` - Build WebAssembly files from Go source (blobl-editor and console-config-migrator)
-- `gulp bundle:react` - Bundle React components using esbuild
+- `gulp bundle:react` - Bundle React components using esbuild (minified, React production build; set `NODE_ENV=development` for a readable dev build)
 - `gulp compile:widgets` - Compile standalone widget partials (header, footer, chat-panel-bump, head-bump)
+- `gulp generate:prism` - Assemble `src/js/vendor/prism/prism-core.js` (generated, not tracked) from the `prismjs` package and the grammar list in `gulp.d/prism-languages.js`; runs inside `gulp bundle` and `gulp preview`. Add a grammar there when a new `language-` class shows up unhighlighted
 - `node compile-partial.js <name> <context>` - Compile specific Handlebars partials manually
 
 ### Widget Testing (Bump.sh Standalone Widgets)

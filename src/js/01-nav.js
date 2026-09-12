@@ -71,44 +71,70 @@
     return parent.querySelector(selector)
   }
 
-  find(menuPanel, '.nav-item').forEach(function (element) {
-    var div = findClosestChild(element, '.item')
-    // Check if the nav item contains an external link
-    var externalLink = div.querySelector('a[href^="https://"]')
-    if (!externalLink) {
-      // Only attach the toggleActive listener if it's not an external link
-      div.addEventListener('click', toggleActive.bind(element))
-    } else {
-      div.addEventListener('click', function (event) {
-        window.open(externalLink.href, '_blank')
-        event.preventDefault()
-      })
-    }
-    var navItemSpan = findNextElement(element, '.nav-text')
-    if (navItemSpan) {
-      navItemSpan.style.cursor = 'pointer'
+  bindNavItems(menuPanel)
+
+  // Collapsed nav buckets keep their tree in an inert <template> until first
+  // expand; 23-nav-bucket.js swaps it in and fires this so the new items get
+  // the same click/keyboard handling as the ones rendered at load.
+  navContainer.addEventListener('nav:hydrated', function (e) {
+    bindNavItems(e.target)
+  })
+
+  // A collapsed item's children arrive in an inert <template> (nav-tree.hbs).
+  // Move them into the document the first time the item is opened and bind
+  // them like everything else. 23-nav-bucket.js does the same for whole
+  // buckets and lets nested templates wait for their own expand.
+  function hydrateNavItem (li) {
+    var tpl = li.querySelector(':scope > template[data-nav-lazy]')
+    if (!tpl) return
+    li.replaceChild(tpl.content.cloneNode(true), tpl)
+    bindNavItems(li)
+  }
+
+  function bindNavItems (root) {
+    find(root, '.nav-item').forEach(function (element) {
+      if (element.dataset.navBound) return
+      element.dataset.navBound = 'true'
+      var div = findClosestChild(element, '.item')
+      if (!div) return
+      // Check if the nav item contains an external link
+      var externalLink = div.querySelector('a[href^="https://"]')
       if (!externalLink) {
-        navItemSpan.addEventListener('click', toggleActive.bind(element))
+        // Only attach the toggleActive listener if it's not an external link
+        div.addEventListener('click', toggleActive.bind(element))
       } else {
-        navItemSpan.addEventListener('click', function (event) {
-          window.open(externalLink.href, '_blank')
+        div.addEventListener('click', function (event) {
+          window.open(externalLink.href, '_blank', 'noopener')
           event.preventDefault()
         })
       }
-    }
-    // Add keyboard handlers for nav-item-toggle buttons (WCAG 2.1 Level A requirement)
-    var navToggleButton = div.querySelector('.nav-item-toggle')
-    if (navToggleButton) {
-      navToggleButton.addEventListener('keydown', function (event) {
-        // Handle Space (32) and Enter (13) keys
-        if (event.keyCode === 32 || event.keyCode === 13) {
-          event.preventDefault()
-          // Trigger the same toggle behavior as clicking
-          element.classList.toggle('is-active')
+      var navItemSpan = findNextElement(element, '.nav-text')
+      if (navItemSpan) {
+        navItemSpan.style.cursor = 'pointer'
+        if (!externalLink) {
+          navItemSpan.addEventListener('click', toggleActive.bind(element))
+        } else {
+          navItemSpan.addEventListener('click', function (event) {
+            window.open(externalLink.href, '_blank', 'noopener')
+            event.preventDefault()
+          })
         }
-      })
-    }
-  })
+      }
+      // Add keyboard handlers for nav-item-toggle buttons (WCAG 2.1 Level A requirement)
+      var navToggleButton = div.querySelector('.nav-item-toggle')
+      if (navToggleButton) {
+        navToggleButton.addEventListener('keydown', function (event) {
+          // Handle Space (32) and Enter (13) keys
+          if (event.keyCode === 32 || event.keyCode === 13) {
+            event.preventDefault()
+            // Trigger the same toggle behavior as clicking
+            hydrateNavItem(element)
+            element.classList.toggle('is-active')
+          }
+        })
+      }
+    })
+  }
 
   if (explorePanel) {
     explorePanel.querySelector('.context').addEventListener('click', function () {
@@ -220,6 +246,7 @@
       }
     } else {
       // Toggle 'is-active' class to open the dropdown
+      hydrateNavItem(this)
       this.classList.toggle('is-active')
       if (overflowY > 0) {
         menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
