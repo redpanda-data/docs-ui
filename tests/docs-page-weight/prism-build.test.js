@@ -48,5 +48,7 @@ test('the generated file is not tracked and the build wires the task in', () => 
   assert.match(gitignore, /^src\/js\/vendor\/prism\/prism-core\.js$/m)
   const gulpfile = fs.readFileSync(path.join(ROOT, 'gulpfile.js'), 'utf8')
   assert.match(gulpfile, /generatePrismTask,\n\s+buildWasmTask/, 'runs in bundle:build before the assets are staged')
-  assert.match(gulpfile, /series\(generatePrismTask, buildWasmTask/, 'and in preview:build')
+  assert.match(gulpfile, /series\(generatePrismTask, buildWasmTask, bundleReactTask/, 'and in preview:build')
+  // The interactive test page loads the generated file from disk.
+  assert.match(gulpfile, /series\(generatePrismTask, buildWasmTask, testTask\)/, 'and before the playground tests')
 })

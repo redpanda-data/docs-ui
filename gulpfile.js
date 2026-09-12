@@ -248,16 +248,19 @@ const testTask = createTask({
   },
 })
 
+// generate:prism first: the interactive test page loads
+// src/js/vendor/prism/prism-core.js from disk, and that file is generated,
+// not tracked (see generatePrismTask).
 const testBuildTask = createTask({
   name: 'test:build',
-  desc: 'Build WASM and run playground tests',
-  call: series(buildWasmTask, testTask),
+  desc: 'Generate Prism, build WASM and run playground tests',
+  call: series(generatePrismTask, buildWasmTask, testTask),
 })
 
 const testQuickTask = createTask({
   name: 'test:quick',
   desc: 'Run playground tests with existing WASM (development)',
-  call: testTask,
+  call: series(generatePrismTask, testTask),
 })
 
 module.exports = exportTasks(
