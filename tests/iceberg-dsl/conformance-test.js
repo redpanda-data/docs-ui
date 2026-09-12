@@ -15,7 +15,7 @@
 // CI can additionally fetch iceberg_mode_test.cc from a given redpanda ref and
 // diff the expected strings to detect upstream format changes automatically.
 
-const { buildConfigString } = require('../../src/js/27-iceberg-explorer.js')
+const { buildConfigString, init, MOUNT_SELECTOR } = require('../../src/js/27-iceberg-explorer.js')
 
 // cfg shape matches getConfig() in the module.
 function cfg (o) {
@@ -69,3 +69,45 @@ if (failures) {
   console.error('\nConfig-string DSL has drifted from iceberg_mode_test.cc vectors.')
   process.exit(1)
 }
+
+
+// --- Mount contract with docs-extensions-and-macros -------------------------
+// The macro (macros/iceberg-explorer.js, MOUNT_ATTRIBUTE) marks its mount with
+// `data-iceberg-explorer="<contract version>"`. Hydration must key on that
+// attribute and nothing else: the class name changed once already and the UI
+// silently found zero mounts. Drive init() with a stand-in document that
+// serves exactly the markup the macro emits.
+;(function mountContract () {
+  var failures = 0
+  if (MOUNT_SELECTOR !== '[data-iceberg-explorer]') {
+    console.error('MOUNT_SELECTOR is ' + MOUNT_SELECTOR + ', expected [data-iceberg-explorer]')
+    failures++
+  }
+  var macroMount = {
+    attrs: { 'data-iceberg-explorer': '1', class: 'iceberg-explorer-mount' },
+    getAttribute: function (k) { return this.attrs[k] === undefined ? null : this.attrs[k] },
+    setAttribute: function (k, v) { this.attrs[k] = v },
+    // hydrate() needs a real DOM; stop it at the first touch and record that
+    // the mount was selected. Selection is what this check is about.
+    get innerHTML () { throw new Error('selected') },
+    set innerHTML (v) { throw new Error('selected') }
+  }
+  var asked = []
+  var fakeDoc = { querySelectorAll: function (sel) { asked.push(sel); return sel === MOUNT_SELECTOR ? [macroMount] : [] } }
+  var selected = false
+  try { init(fakeDoc) } catch (e) { selected = /selected/.test(String(e)) || macroMount.attrs['data-hydrated'] === 'true' }
+  if (!selected && macroMount.attrs['data-hydrated'] !== 'true') {
+    console.error('init() did not select the macro mount; selectors asked: ' + JSON.stringify(asked))
+    failures++
+  }
+  var legacy = { querySelectorAll: function (sel) { return sel === '.iceberg-explorer' ? [macroMount] : [] } }
+  macroMount.attrs['data-hydrated'] = undefined
+  var legacySelected = false
+  try { init(legacy) } catch (e) { legacySelected = true }
+  if (legacySelected || macroMount.attrs['data-hydrated'] === 'true') {
+    console.error('init() still selects the retired .iceberg-explorer class')
+    failures++
+  }
+  if (failures) process.exit(1)
+  console.log('mount contract: init() selects ' + MOUNT_SELECTOR + ' and nothing else')
+})()

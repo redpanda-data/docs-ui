@@ -3,9 +3,13 @@
 
   // Iceberg Mode Explorer — docs-ui hydration module.
   //
-  // The `[iceberg-explorer]` block (docs-extensions-and-macros) emits an empty
-  // `<div class="iceberg-explorer" data-...>` mount point. This module finds
-  // every such mount point and renders the interactive tool into it.
+  // The `[iceberg-explorer]` block (docs-extensions-and-macros) emits a mount
+  // point carrying the `data-iceberg-explorer` attribute (its value is the
+  // mount contract version) plus a fallback paragraph. That attribute is the
+  // contract: the class names are presentation and have already changed once
+  // (`.iceberg-explorer` to `.iceberg-explorer-mount`), which left this module
+  // finding zero mounts while every page showed the fallback. This module
+  // finds every such mount point and renders the interactive tool into it.
   //
   // ENGINE SEAM: all translation logic lives behind `translate(cfg)` below.
   // Today that is an in-browser port of the rules in Redpanda's
@@ -552,8 +556,13 @@
     update()
   }
 
-  function init () {
-    var mounts = document.querySelectorAll('.iceberg-explorer')
+  // Keep in step with MOUNT_ATTRIBUTE in docs-extensions-and-macros
+  // macros/iceberg-explorer.js. tests/iceberg-dsl/conformance-test.js pins it.
+  var MOUNT_SELECTOR = '[data-iceberg-explorer]'
+
+  function init (doc) {
+    doc = doc || document
+    var mounts = doc.querySelectorAll(MOUNT_SELECTOR)
     for (var i = 0; i < mounts.length; i++) {
       if (!mounts[i].getAttribute('data-hydrated')) {
         mounts[i].setAttribute('data-hydrated', 'true')
@@ -575,6 +584,6 @@
   // Export the pure DSL logic for conformance testing under Node. No effect in
   // the browser (module is undefined there).
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { buildConfigString: buildConfigString, isSchemaMode: isSchemaMode }
+    module.exports = { buildConfigString: buildConfigString, isSchemaMode: isSchemaMode, init: init, MOUNT_SELECTOR: MOUNT_SELECTOR }
   }
 })()
