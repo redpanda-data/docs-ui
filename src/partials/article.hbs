@@ -278,11 +278,13 @@
   {{> index}}
 {{else if (eq page.attributes.role 'related-labs')}}
   {{#with (list-related-labs page.title page.attributes page.contents)  as |listLabs|}}
-    {{{listLabs}}}
+    {{{lazy-images listLabs}}}
   {{/with}}
 {{else}}
+  {{!-- The default article body. lazy-images marks images below the fold
+        loading="lazy" at build time (see the helper). --}}
   {{#with (add-suggested-labs page.attributes page.contents)  as |suggestedLabs|}}
-    {{{suggestedLabs}}}
+    {{{lazy-images suggestedLabs}}}
   {{/with}}
 {{/if}}
 {{#if (and (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3'))}}
