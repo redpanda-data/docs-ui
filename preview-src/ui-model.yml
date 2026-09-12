@@ -246,6 +246,9 @@ page:
       - content: Collapsible TOC Test
         url: /toc-collapsible-test.html
         urlType: internal
+      - content: Term Tooltips Test
+        url: /tooltip-touch-test.html
+        urlType: internal
     - content: Get Started
       url: '#'
       urlType: internal
