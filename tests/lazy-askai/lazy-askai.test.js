@@ -129,7 +129,7 @@ test('the anonymous drawer re-asks once, automatically, when the browser check w
   const start = src.indexOf('const captchaRetried')
   assert.ok(start > 0, 'captcha auto-retry present')
   const effect = src.slice(start, src.indexOf('}, [scopeDropped, queryFailed, conversation.length])', start))
-  assert.match(effect, /captchaRetried\.current === signature\) return/, 'once per failed exchange')
+  assert.match(effect, /captchaRetried\.current\.has\(latestQA\.question\)\) return/, 'once per question, so a persistent failure cannot loop')
   assert.match(effect, /setTimeout\(\(\) => handleRetry\(latestQA\.question\), 1500\)/, 'one delayed retry')
 })
 

@@ -93,7 +93,7 @@
         div.addEventListener('click', toggleActive.bind(element))
       } else {
         div.addEventListener('click', function (event) {
-          window.open(externalLink.href, '_blank')
+          window.open(externalLink.href, '_blank', 'noopener')
           event.preventDefault()
         })
       }
@@ -104,7 +104,7 @@
           navItemSpan.addEventListener('click', toggleActive.bind(element))
         } else {
           navItemSpan.addEventListener('click', function (event) {
-            window.open(externalLink.href, '_blank')
+            window.open(externalLink.href, '_blank', 'noopener')
             event.preventDefault()
           })
         }
