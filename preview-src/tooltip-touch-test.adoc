@@ -1,0 +1,52 @@
+= Term Tooltips Test
+:page-layout: default
+
+Test page for the term tooltips wired up by `12-activate-tooltips.js`. The docs macros do not run in the UI preview, so the markup below replicates what the `glossterm`, `enterprise`, and badge macros emit.
+
+== What to expect
+
+On a desktop browser::
+Hover a term to see its tooltip. Glossary tooltips end with a *View in glossary* link; enterprise tooltips end with *Learn more*. Clicking the term still follows its link, as before.
+
+On a touch device (or DevTools device emulation with touch enabled)::
+Tap a term. The tooltip opens and the page does not navigate. Tap the term again to close it. The only way through to the glossary or licensing page is the link inside the tooltip. This used to need a long press, and a plain tap navigated before the definition could be read.
+
+== Glossary terms
+
+A +++<a data-tippy-content="A logical stream of related events that are written to the same log. It can be divided into multiple partitions." href="#glossary-topic" class="glossary-term">topic</a>+++ is divided into +++<a data-tippy-content="A subset of events in a topic, like a log file. It is an ordered, immutable sequence of records." href="#glossary-partition" class="glossary-term">partitions</a>+++, and each partition is replicated across +++<a data-tippy-content="A single Redpanda server. Each broker stores a subset of the cluster's partitions and serves client requests for them." href="#glossary-broker" class="glossary-term">brokers</a>+++.
+
+Definitions can carry inline code, which the glossary macro emits as `<code>`: use +++<a data-tippy-content="A rolling upgrade restarts one broker at a time. Run <code>rpk cluster maintenance enable</code> on each broker first." href="#glossary-rolling-upgrade" class="glossary-term">rolling upgrades</a>+++ on production clusters.
+
+Terms whose glossary link opens in a new tab keep that behaviour on the tooltip link too: +++<a data-tippy-content="Object storage that holds log segments offloaded from local disk." href="https://docs.redpanda.com/streaming/current/reference/glossary/#tiered-storage" target="_blank" rel="noopener noreferrer" class="glossary-term">Tiered Storage</a>+++.
+
+== Enterprise terms
+
+The enterprise macro wraps a link to the licensing or feature page, so the tooltip gets a *Learn more* link:
+
+++++
+<p>Enable <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="https://docs.redpanda.com/streaming/current/manage/tiered-storage/" class="xref page">Tiered Storage</a></span> to offload data to object storage.</p>
+<p>The same macro with a per-use tooltip attribute: <span class="enterprise-feature" data-enterprise-tooltip="Audit Logging requires an Enterprise Edition license."><a href="https://docs.redpanda.com/streaming/current/get-started/licensing/overview/" class="xref page">Audit Logging</a></span>.</p>
+++++
+
+== Tooltips with nothing to link to
+
+Elements that carry a tooltip but no link get no footer link, and a tap on them is not intercepted (there is nothing to intercept):
+
+++++
+<p><span class="status-badge status-badge--beta" data-tippy-content="This is a beta feature. Beta features are available for testing and feedback.">beta</span>
+<span class="status-badge status-badge--preview" data-tooltip="This feature is in preview and may change.">Preview</span></p>
+++++
+
+== Anchors for the glossary links above
+
+[#glossary-topic]
+=== topic
+
+[#glossary-partition]
+=== partition
+
+[#glossary-broker]
+=== broker
+
+[#glossary-rolling-upgrade]
+=== rolling upgrade
