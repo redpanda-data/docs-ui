@@ -23,11 +23,21 @@
      the full variable font was a 315 KB download on every page. Add a name
      here when a template uses a new one; an unlisted glyph renders as its
      ligature text, which is easy to spot. Material Icons (the older family)
-     and Font Awesome are gone: no page in the built site used a Material Icon,
-     and the only Font Awesome classes (checklist squares) are drawn by
-     doc.css ::before rules, so the stylesheet never did anything. -->
+     is gone: no page in the built site used it. Font Awesome loads only on
+     pages whose article uses an icon:name[] macro (see below); the checklist
+     squares it used to draw come from doc.css ::before rules. -->
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=group,group_add,keyboard_arrow_down,mail,thumb_down,thumb_up&display=block" as="style">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=group,group_add,keyboard_arrow_down,mail,thumb_down,thumb_up&display=block">
+{{#if (has-font-awesome-icons)}}
+<!-- Font Awesome, only where the article uses an icon:name[] macro other than
+     the checklist squares (has-font-awesome-icons helper). Async so it never
+     blocks rendering. -->
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</noscript>
+{{/if}}
 <style>
 .material-symbols-outlined {
   color: var(--link-highlight-color);

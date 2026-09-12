@@ -37,10 +37,15 @@ test('every Material Symbol a template renders is in the requested subset', () =
   assert.equal(new Set(requests).size, 1, 'preload and stylesheet request the same URL')
 })
 
-test('Material Icons and Font Awesome stylesheets are gone', () => {
+test('Material Icons is gone and Font Awesome loads only behind the icon-macro gate', () => {
   assert.doesNotMatch(STYLES, /Material\+Icons/)
-  assert.doesNotMatch(STYLES, /font-awesome/)
-  assert.doesNotMatch(STYLES, /cdnjs\.cloudflare\.com/, 'no consumer left for the cdnjs preconnect')
+  const gate = STYLES.indexOf('{{#if (has-font-awesome-icons)}}')
+  assert.ok(gate > 0, 'gate present')
+  const block = STYLES.slice(gate, STYLES.indexOf('{{/if}}', gate))
+  assert.match(block, /font-awesome\/4\.7\.0\/css\/font-awesome\.min\.css" media="print" onload/, 'async inside the gate')
+  assert.match(block, /cdnjs\.cloudflare\.com"/, 'preconnect only where it is used')
+  const outside = STYLES.slice(0, gate) + STYLES.slice(STYLES.indexOf('{{/if}}', gate))
+  assert.doesNotMatch(outside, /font-awesome|cdnjs\.cloudflare\.com/, 'nothing Font Awesome outside the gate')
   // The checklist glyphs Font Awesome used to draw still come from doc.css.
   const doc = fs.readFileSync(path.join(ROOT, 'src/css/doc.css'), 'utf8')
   assert.match(doc, /i\.fa-square-o::before/)
@@ -94,3 +99,16 @@ test('the stock Kapa widget is not preloaded on pages that have the drawer', () 
   const without = runKapaLoader({ hasPanel: false })
   assert.equal(without.appended.length, 1, 'standalone pages keep the 5 s idle preload')
 })
+
+test('the icon-macro gate opens for icon:name[] output and stays shut for checklists and pages without a body', () => {
+  const helper = require(path.join(ROOT, 'src/helpers/has-font-awesome-icons.js'))
+  const call = (page) => helper({ data: { root: { page } } })
+  assert.equal(call({ contents: Buffer.from('<p><i class="fa fa-warning"></i> Careful</p>') }), true)
+  assert.equal(call({ contents: '<span class="icon"><i class="fa fa-cloud-upload"></i></span>' }), true)
+  assert.equal(call({ contents: '<ul class="checklist"><li><p><i class="fa fa-square-o"></i> a</p></li><li><p><i class="fa fa-check-square-o"></i> b</p></li></ul>' }), false, 'doc.css draws the squares')
+  assert.equal(call({ contents: '<div class="admonitionblock note"><i class="fa icon-note"></i></div>' }), false, 'admonition icons are SVG backgrounds')
+  assert.equal(call({ contents: '<p>fa fa-warning mentioned in prose</p>' }), true, 'prose false positive is acceptable: it only costs one async stylesheet')
+  assert.equal(call({}), false)
+  assert.equal(call(undefined), false)
+})
+
