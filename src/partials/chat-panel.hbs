@@ -3,7 +3,7 @@
   Persistent right-side drawer for Kapa AI integration using React SDK.
   Opens with Cmd+K or Ask AI button, stays open across navigation.
 --}}
-<aside class="chat-panel" aria-hidden="true" data-chat-panel>
+<aside class="chat-panel" aria-hidden="true" data-chat-panel data-askai-bundle="{{{uiRootPath}}}/js/AskAI.bundle.js">
   {{!-- Header --}}
   <div class="chat-head">
     <div class="chat-head-title">
@@ -41,7 +41,11 @@
 
   {{!-- React SDK Chat Interface mount point --}}
   <div class="chat-scroll" data-chat-scroll>
-    <div id="chat-panel-kapa-root"></div>
+    {{!-- Placeholder until AskAI.bundle.js arrives and React replaces it: the
+          bundle is fetched when the drawer opens (19-chat-panel.js), so a
+          slow connection sees this spinner rather than an empty panel. The
+          styles live in chat-panel.css, not in the bundle's CSS. --}}
+    <div id="chat-panel-kapa-root"><div class="chat-container"><div class="welcome-screen"><div class="chat-tier-loading" aria-hidden="true"></div></div></div></div>
   </div>
   <script>
     window.UI_INTEGRATION_ID = window.UI_INTEGRATION_ID || '36b37003-41d8-4952-857e-344fbb3dc392';
@@ -86,15 +90,15 @@
       {{/each}}
     ];
   </script>
-  {{!-- Agent SDK styles emitted by esbuild alongside the JS bundle --}}
-  <link rel="stylesheet" href="{{{uiRootPath}}}/js/AskAI.bundle.css">
-  {{!-- defer: this is React + the Kapa SDKs in one bundle, and a plain blocking
-        script here gated site.js (nav, TOC, code-copy, tabs, version selector)
-        and the DOMContentLoaded theme toggle behind it, so a slow third-party
-        fetch left the article readable but every control dead, with no timeout.
-        Nothing about reading the docs needs this bundle. The Bump variant already
-        injects it dynamically, so this matches that behaviour. --}}
-  <script defer src="{{{uiRootPath}}}/js/AskAI.bundle.js"></script>
+  {{!-- The session probe on its own (~2 KB): it tells the header whether the
+        auth backend exists so Sign in can render, and that is the only part of
+        Ask AI every pageview needs. AskAI.bundle.js (React + both Kapa SDKs +
+        the reCAPTCHA they pull in, ~1 MB) and AskAI.bundle.css are injected by
+        19-chat-panel.js when the drawer opens, or as soon as the reader shows
+        intent (hovering or focusing an Ask AI control). Loading it eagerly cost
+        every docs page ~400 ms of main-thread blocking for a drawer most
+        readers never open. The Bump variant keeps its own dynamic loader. --}}
+  <script defer src="{{{uiRootPath}}}/js/kapaSession.bundle.js"></script>
 
   {{!-- Footer disclaimer - Kapa SDK provides privacy policy and kapa.ai attribution --}}
   <div class="chat-foot" data-chat-foot>AI answers may be imprecise. Always verify in the docs.</div>

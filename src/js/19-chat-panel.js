@@ -23,6 +23,62 @@
   // State
   var isOpen = false
 
+  // The React drawer (AskAI.bundle.js + AskAI.bundle.css) is not in the page
+  // markup. It is React plus both Kapa SDKs, and the anonymous-tier SDK pulls
+  // in reCAPTCHA on mount, so shipping it on every pageview cost ~400 ms of
+  // main-thread blocking on pages where nobody opens the drawer. Fetch it the
+  // first time the drawer opens, or earlier on intent (hover/focus on an Ask AI
+  // control) so the open itself feels instant. chat-panel.hbs leaves a spinner
+  // in the mount node until React replaces it. kapaSession.bundle.js still
+  // runs the session probe on every page, so the header's Sign in state does
+  // not wait on this.
+  var bundleSrc = chatPanel.getAttribute('data-askai-bundle')
+  var bundleRequested = false
+  var INTENT_SELECTOR = '[data-action="open-chat"], .custom-class-kapa, [data-kapa-trigger], ' +
+    '#home-ask-form, .home-hero-chip, #dp-ask-form, .dp-hero-ask-chip, .ch3-hero-ask-input, .ch3-hero-ask-chip, ' +
+    '[data-ask-ai], .ask-ai-btn'
+  // Landing pages put an Ask AI input in the hero: asking is the primary action
+  // there, so waiting for a hover would leave a fast typer racing the SDK's
+  // browser check. Warm on the first interaction of any kind instead.
+  var ASK_FORM_SELECTOR = '#home-ask-form, #dp-ask-form, .ch3-hero-ask-input'
+
+  function loadAskAI () {
+    if (bundleRequested || !bundleSrc) return
+    bundleRequested = true
+    var link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = bundleSrc.replace(/\.js$/, '.css')
+    document.head.appendChild(link)
+    var script = document.createElement('script')
+    script.src = bundleSrc
+    script.defer = true
+    script.onerror = function () {
+      bundleRequested = false // allow a retry on the next open
+      var root = chatPanel.querySelector('#chat-panel-kapa-root')
+      if (root && !root.dataset.mounted) {
+        root.innerHTML = '<div class="chat-container"><div class="error-boundary">' +
+          'Ask AI could not be loaded. Check your connection and try again.</div></div>'
+      }
+    }
+    document.head.appendChild(script)
+  }
+  window.loadAskAI = loadAskAI
+
+  // Warm the bundle on intent: pointer over or focus on any Ask AI trigger.
+  // Passive listeners on the document, so no per-button wiring is needed for
+  // triggers added by other partials (home hero, component homes, code blocks).
+  function onIntent (e) {
+    if (e.target && e.target.closest && e.target.closest(INTENT_SELECTOR)) loadAskAI()
+  }
+  document.addEventListener('pointerover', onIntent, { passive: true })
+  document.addEventListener('focusin', onIntent, { passive: true })
+  document.addEventListener('touchstart', onIntent, { passive: true })
+  if (document.querySelector(ASK_FORM_SELECTOR)) {
+    ;['pointermove', 'keydown', 'touchstart', 'scroll'].forEach(function (type) {
+      document.addEventListener(type, loadAskAI, { once: true, passive: true })
+    })
+  }
+
   // Event listeners
   chatPanel.querySelectorAll('[data-chat-action="close"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -75,7 +131,9 @@
     // drop the query. Poll on a short interval up to a bounded deadline instead.
     var waited = 0
     var step = 100
-    var deadline = 8000 // matches the session-probe abort budget
+    // Covers the session-probe abort budget (8 s) plus the bundle download,
+    // which only starts on open now, so a slow connection needs the headroom.
+    var deadline = 20000
     var timer = setInterval(function () {
       if (typeof window.submitChatQuery === 'function') {
         clearInterval(timer)
@@ -89,6 +147,7 @@
   // Functions
   function openPanel (restored) {
     isOpen = true
+    loadAskAI()
     chatPanel.classList.add('is-open')
     chatPanel.setAttribute('aria-hidden', 'false')
     if ('inert' in chatPanel) chatPanel.inert = false
