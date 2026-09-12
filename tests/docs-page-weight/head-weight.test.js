@@ -45,6 +45,17 @@ test('Material Icons and Font Awesome stylesheets are gone', () => {
   const doc = fs.readFileSync(path.join(ROOT, 'src/css/doc.css'), 'utf8')
   assert.match(doc, /i\.fa-square-o::before/)
   assert.match(doc, /i\.fa-check-square-o::before/)
+  // No stylesheet may still draw a glyph from either removed font: the
+  // editable-placeholder pencil (Font Awesome \f040) was missed the first time
+  // because only class names in the built HTML were checked, not CSS content.
+  const cssDir = path.join(ROOT, 'src/css')
+  const offenders = []
+  for (const f of fs.readdirSync(cssDir).filter((n) => n.endsWith('.css'))) {
+    const css = fs.readFileSync(path.join(cssDir, f), 'utf8')
+    if (/font-family:\s*['"]?(FontAwesome|Font Awesome|Material Icons)/i.test(css)) offenders.push(`${f}: font-family`)
+    if (/content:\s*"\\[ef][0-9a-f]{3}"/i.test(css)) offenders.push(`${f}: private-use glyph codepoint`)
+  }
+  assert.deepEqual(offenders, [])
 })
 
 // Run the Kapa loader IIFE with and without a chat panel in the document and
