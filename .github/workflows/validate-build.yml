@@ -83,6 +83,8 @@ jobs:
         run: npm run test:has-code-blocks
       - name: Test deferred Google Tag Manager
         run: npm run test:deferred-gtm
+      - name: Test docs page weight (lazy images, trimmed Prism, on-demand highlighting, head)
+        run: npm run test:docs-page-weight
       - name: Cache generated files
         uses: actions/cache@v4
         with:
