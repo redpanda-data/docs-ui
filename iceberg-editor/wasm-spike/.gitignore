@@ -1,0 +1,11 @@
+# Everything fetched or built is reproducible from the scripts — never commit it.
+
+# Fetched Redpanda source (fetch-sources.sh, pinned to $REDPANDA_REF)
+vendor/
+
+# Downloaded third-party deps (fmt, boost, avro fork) — keep only the fetcher
+third_party/*
+!third_party/fetch-deps.sh
+
+# Build outputs (objects, wasm, js glue)
+build/

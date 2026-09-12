@@ -1,0 +1,22 @@
+= Iceberg Mode Explorer
+:page-layout: default
+:page-no-toc: true
+:description: Interactive explorer for Redpanda Iceberg mode key/value/header translation.
+
+Pick a configuration and see the DSL config string, the resulting Iceberg table
+schema, and a sample translated record update live.
+
+== Default
+
+[iceberg-explorer]
+--
+--
+
+== With an author-supplied initial config
+
+[iceberg-explorer]
+----
+{
+  "config": "key:mode=schema_id_prefix;value:mode=schema_latest,layout=nested;headers:value_type=string"
+}
+----

@@ -80,6 +80,7 @@
     "test:interactive": "node tests/bloblang-interactive/test-runner.js",
     "test:negative-cache": "node tests/negative-cache/test-runner.js",
     "test:head-meta": "node --test tests/head-meta/*.test.js",
+    "test:iceberg-dsl": "node tests/iceberg-dsl/conformance-test.js",
     "test:property-tooltips": "node --test tests/property-tooltips/*.test.js",
     "test:signin-nudge": "node --test tests/signin-nudge/*.test.js",
     "test:chat-panel-navigation": "node --test tests/chat-panel-navigation/*.test.js",
