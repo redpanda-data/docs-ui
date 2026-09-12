@@ -75,6 +75,8 @@ jobs:
         run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
         run: npm run test:toc-collapsible
+      - name: Test anonymous Ask AI quota
+        run: npm run test:anon-quota
       - name: Cache generated files
         uses: actions/cache@v4
         with:

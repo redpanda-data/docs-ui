@@ -102,6 +102,23 @@
       window.dispatchEvent(new window.CustomEvent('docs-account:warm'))
     }
 
+    // Tell the drawer's React tree the panel is on screen, so the anonymous Ask
+    // AI quota can be shown (react/anonQuota.js schedulePeek). Both kinds of
+    // open are announced, and `restored` says which: a deliberate open is worth
+    // a request, while the page-load restore path relies on the verdict
+    // remembered from earlier in the session, so that browsing with the panel
+    // open costs one request per session rather than one per pageview.
+    //
+    // The marker is set as well as dispatched because script order between this
+    // file and the deferred AskAI bundle is not guaranteed: an event sent before
+    // the listener exists is lost, an attribute is not.
+    //
+    // Not gated on the auth cookie like the warm-up above, because a stale
+    // rp_docs_auth with an expired session still lands the reader on the
+    // anonymous drawer, and that reader needs the countdown.
+    chatPanel.dataset.openedBy = restored ? 'restore' : 'user'
+    window.dispatchEvent(new window.CustomEvent('docs-chat:open', { detail: { restored: Boolean(restored) } }))
+
     // Hide all Ask AI buttons if they exist
     var askAiBtns = document.querySelectorAll('[data-action="open-chat"]')
     askAiBtns.forEach(function (btn) {
