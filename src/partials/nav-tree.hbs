@@ -16,7 +16,16 @@
     {{/if}}
     </div>
     {{/if}}
+    {{#if ./items.length}}
+      {{#if (or (eq ./url @root.page.url) (nav-contains-current ./items @root.page.url))}}
 {{> nav-tree navigation=./items level=(increment ../level)}}
+      {{else}}
+      {{!-- Collapsed at load (01-nav.js only opens the current path): keep the
+            subtree out of the document until the reader expands it. On a long
+            product tree this is most of the sidebar. --}}
+      <template data-nav-lazy>{{> nav-tree navigation=./items level=(increment ../level)}}</template>
+      {{/if}}
+    {{/if}}
   </li>
   {{/each}}
 </ul>

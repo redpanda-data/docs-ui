@@ -80,6 +80,17 @@
     bindNavItems(e.target)
   })
 
+  // A collapsed item's children arrive in an inert <template> (nav-tree.hbs).
+  // Move them into the document the first time the item is opened and bind
+  // them like everything else. 23-nav-bucket.js does the same for whole
+  // buckets and lets nested templates wait for their own expand.
+  function hydrateNavItem (li) {
+    var tpl = li.querySelector(':scope > template[data-nav-lazy]')
+    if (!tpl) return
+    li.replaceChild(tpl.content.cloneNode(true), tpl)
+    bindNavItems(li)
+  }
+
   function bindNavItems (root) {
     find(root, '.nav-item').forEach(function (element) {
       if (element.dataset.navBound) return
@@ -117,6 +128,7 @@
           if (event.keyCode === 32 || event.keyCode === 13) {
             event.preventDefault()
             // Trigger the same toggle behavior as clicking
+            hydrateNavItem(element)
             element.classList.toggle('is-active')
           }
         })
@@ -234,6 +246,7 @@
       }
     } else {
       // Toggle 'is-active' class to open the dropdown
+      hydrateNavItem(this)
       this.classList.toggle('is-active')
       if (overflowY > 0) {
         menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
