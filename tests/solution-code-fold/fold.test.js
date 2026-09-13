@@ -97,14 +97,47 @@ test('folding only clips: the code keeps every line for the copy button', () => 
   assert.ok(long.block.querySelector('.copy-button'), 'copy button still present')
 })
 
+// Asciidoctor's [%collapsible] output: <details><summary class="title">...</summary><div class="content">...
+function collapsible (summaryText, blocks, open) {
+  const attrs = open ? { open: '' } : {}
+  return el('details', attrs, [el('summary', { class: 'title', text: summaryText }), el('div', { class: 'content' }, blocks)])
+}
+
 test('a block inside a closed <details> is never folded a second time; an open one is', () => {
   const closedInner = listing(50)
-  const closed = el('details', { class: 'collapsible' }, [el('summary', { class: 'title', text: 'Full source' }), el('div', { class: 'content' }, [closedInner.block])])
+  const closed = collapsible('Complete source: services/leaderboard/main.go', [closedInner.block])
   const openInner = listing(50)
-  const open = el('details', { class: 'collapsible', open: '' }, [el('summary', { class: 'title', text: 'Full source' }), el('div', { class: 'content' }, [openInner.block])])
+  const open = collapsible('Complete source: services/achievements/main.go', [openInner.block], true)
   run({ blocks: [closed, open] })
   assert.ok(!closedInner.block.classes.has('sol-code-fold'), 'closed details: left alone')
+  assert.equal(closedInner.block.querySelector('[data-sol-code-fold]'), null)
   assert.ok(openInner.block.classes.has('is-folded'), 'open details: folded like any block')
+})
+
+test('a long listing inside a closed <details> folds once the details opens, and only once', () => {
+  const inner = listing(50)
+  const details = collapsible('Complete source: services/leaderboard/main.go', [inner.block])
+  run({ blocks: [details] })
+  assert.ok(!inner.block.classes.has('sol-code-fold'))
+
+  details.open = true
+  details.dispatch('toggle')
+  assert.ok(inner.block.classes.has('is-folded'), 'folded on open')
+  assert.equal(inner.block.querySelectorAll('[data-sol-code-fold]').length, 1)
+  assert.equal(inner.block.querySelector('[data-sol-code-fold]').textContent, 'Show all 50 lines')
+
+  details.open = false
+  details.dispatch('toggle')
+  details.open = true
+  details.dispatch('toggle')
+  assert.equal(inner.block.querySelectorAll('[data-sol-code-fold]').length, 1, 'no second toggle after reopening')
+
+  const short = listing(12)
+  const shortDetails = collapsible('Complete source: Makefile', [short.block])
+  run({ blocks: [shortDetails] })
+  shortDetails.open = true
+  shortDetails.dispatch('toggle')
+  assert.ok(!short.block.classes.has('sol-code-fold'), 'short listing never folds')
 })
 
 test('a listing title becomes a file header bar and the toolbox moves into it', () => {
@@ -118,15 +151,16 @@ test('a listing title becomes a file header bar and the toolbox moves into it', 
   assert.ok(!titled.block.classes.has('sol-code-fold'), 'short block: header only, no fold')
 })
 
-test('details.collapsible summaries get the line count of the single listing they hide', () => {
+test('[%collapsible] summaries (no extra class) get the line count of the single listing they hide', () => {
   const inner = listing(37)
-  const summary = el('summary', { class: 'title', text: 'Full source' })
-  const details = el('details', { class: 'collapsible' }, [summary, el('div', { class: 'content' }, [inner.block])])
-  const two = el('details', { class: 'collapsible' }, [el('summary', { class: 'title', text: 'Two' }), el('div', { class: 'content' }, [listing(5).block, listing(6).block])])
+  const details = collapsible('Complete source: services/leaderboard/main.go', [inner.block])
+  const summary = details.children[0]
+  const two = collapsible('Two files', [listing(5).block, listing(6).block])
   run({ blocks: [details, two] })
   const badge = summary.querySelector('[data-sol-details-lines]')
-  assert.ok(badge)
+  assert.ok(badge, 'badge added to a plain <details><summary class="title">')
   assert.equal(badge.textContent, '37 lines')
+  assert.match(summary.textContent, /^Complete source: services\/leaderboard\/main\.go/)
   assert.ok(details.classes.has('sol-details'))
   assert.equal(two.querySelector('[data-sol-details-lines]'), null, 'ambiguous: no count')
   assert.ok(two.classes.has('sol-details'), 'still styled')

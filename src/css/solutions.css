@@ -1011,8 +1011,13 @@
   outline-offset: -2px;
 }
 
-/* details.collapsible on solution pages, styled like the file header. */
-.sol-doc details.sol-details > summary {
+/* [%collapsible] blocks on solution pages (Asciidoctor emits
+   <details><summary class="title">, no extra class), styled like the file
+   header. .sol-details is added by the script; the summary selector covers
+   the no-JS render too. */
+.sol-doc details > summary.title,
+.sol-doc details.sol-details > summary,
+.sol-doc details.collapsible > summary {
   font-family: var(--body-font-family-mono, monospace);
   font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--component-700);
@@ -1021,7 +1026,9 @@
   border-radius: 10px;
 }
 
-.sol-doc details.sol-details[open] > summary {
+.sol-doc details[open] > summary.title,
+.sol-doc details.sol-details[open] > summary,
+.sol-doc details.collapsible[open] > summary {
   border-radius: 10px 10px 0 0;
   border-bottom: 0;
 }
@@ -1047,6 +1054,7 @@ html[data-theme="dark"] .sol-doc .listingblock.sol-code-fold.is-folded > .conten
 }
 
 html[data-theme="dark"] .sol-doc .listingblock.sol-code-titled > .title.sol-code-title,
+html[data-theme="dark"] .sol-doc details > summary.title,
 html[data-theme="dark"] .sol-doc details.sol-details > summary {
   color: var(--component-200);
   background: var(--component-bg-tint-hover);

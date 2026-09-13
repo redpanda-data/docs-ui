@@ -8,12 +8,16 @@
  *    06-copy-to-clipboard.js (which reads code.innerText) still gets the full
  *    text, and so does find-in-page.
  *  - A block inside a <details> that is not open is left alone: it is already
- *    collapsed once.
+ *    collapsed once. When that details opens (toggle event) the block is
+ *    processed then, and folded if it is long.
  *  - A listing title (.listingblock > .title, used for file paths such as
  *    services/leaderboard/main.go) becomes a file header bar on the block and
  *    the block's toolbox (copy / Ask AI) moves into it, aligned right.
- *  - details.collapsible summaries get the line count of the listing they
- *    hide, when there is exactly one.
+ *  - Asciidoctor renders [%collapsible] example blocks as
+ *    <details><summary class="title">...</summary><div class="content">, with
+ *    no extra class. Every such details in the article gets the sol-details
+ *    class for styling and, when it hides exactly one listing, a line-count
+ *    badge in its summary.
  *  - prefers-reduced-motion: no smooth scrolling back to the block on
  *    collapse (the CSS also drops its transitions under the same query).
  *
@@ -150,8 +154,11 @@
     if (toolbox) title.appendChild(toolbox)
   }
 
+  // A block is processed at most once for its fold decision, except that a
+  // long block inside a closed details is deferred (not decided) until the
+  // details opens; the title header is applied on the first pass regardless.
   function processBlock (block) {
-    if (!insideDoc(block) || hasClass(block, 'sol-code-fold') || hasClass(block, 'sol-code-titled')) return null
+    if (!insideDoc(block) || hasClass(block, 'sol-code-fold') || hasClass(block, 'sol-code-checked')) return null
     var content = childWithClass(block, 'content')
     if (!content) return null
     var pre = content.querySelector('pre')
@@ -159,22 +166,34 @@
     var code = pre.querySelector('code') || pre
     var lines = countLines(code.textContent)
     var title = childWithClass(block, 'title')
-    if (title) decorateTitle(block, title, content)
-    var result = { block: block, lines: lines, folded: false }
-    if (lines > FOLD_THRESHOLD && !insideClosedDetails(block)) {
-      fold(block, content, pre, lines)
-      result.folded = true
+    if (title && !hasClass(block, 'sol-code-titled')) decorateTitle(block, title, content)
+    var result = { block: block, lines: lines, folded: false, deferred: false }
+    if (lines <= FOLD_THRESHOLD) {
+      block.classList.add('sol-code-checked')
+      return result
     }
+    if (insideClosedDetails(block)) {
+      result.deferred = true
+      return result
+    }
+    fold(block, content, pre, lines)
+    block.classList.add('sol-code-checked')
+    result.folded = true
     return result
   }
 
-  // details.collapsible: show how much code the summary hides.
+  // <details> (Asciidoctor [%collapsible]): style hook, line-count badge when
+  // it hides exactly one listing, and fold its listings once it opens.
   function decorateDetails (details) {
     if (!insideDoc(details) || hasClass(details, 'sol-details')) return
     var summary = details.querySelector('summary')
     if (!summary) return
     var listings = toArray(details.querySelectorAll('pre'))
     details.classList.add('sol-details')
+    details.addEventListener('toggle', function () {
+      if (!details.open) return
+      toArray(details.querySelectorAll('.listingblock')).forEach(processBlock)
+    })
     if (listings.length !== 1) return
     var code = listings[0].querySelector('code') || listings[0]
     var lines = countLines(code.textContent)
@@ -189,11 +208,7 @@
   function run (root) {
     var scope = root || document
     var results = toArray(scope.querySelectorAll('.listingblock')).map(processBlock).filter(function (r) { return r })
-    toArray(scope.querySelectorAll('details')).forEach(function (details) {
-      if (hasClass(details, 'collapsible') || childWithClass(details, 'title') || details.querySelector('summary')) {
-        decorateDetails(details)
-      }
-    })
+    toArray(scope.querySelectorAll('details')).forEach(decorateDetails)
     return results
   }
 

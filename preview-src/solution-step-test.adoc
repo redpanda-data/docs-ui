@@ -34,6 +34,103 @@ Everything downstream assumes a healthy broker and a reachable Schema Registry. 
 
 Redpanda starts as a single broker with the Kafka API on `9092`, the Schema Registry on `8081` and the HTTP Proxy on `8082`. Console connects to all three and turns on Protobuf decoding for the `game.*` topics.
 
+== The leaderboard consumer
+
+The full service is short enough to read in one sitting. Long listings fold to a preview; use the button under the block to expand them.
+
+.services/leaderboard/main.go
+[source,go]
+----
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/twmb/franz-go/pkg/kgo"
+)
+
+func main() {
+	ctx := context.Background()
+	brokers := os.Getenv("REDPANDA_BROKERS")
+	rdb := redis.NewClient(&redis.Options{Addr: os.Getenv("REDIS_ADDR")})
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers(brokers),
+		kgo.ConsumerGroup("leaderboard"),
+		kgo.ConsumeTopics("game.player-events"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cl.Close()
+
+	go serve(rdb)
+
+	for {
+		fetches := cl.PollFetches(ctx)
+		fetches.EachRecord(func(r *kgo.Record) {
+			apply(ctx, rdb, r)
+		})
+	}
+}
+
+func serve(rdb *redis.Client) {
+	http.HandleFunc("/top", topHandler(rdb))
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+----
+
+.Complete source: services/leaderboard/main.go
+[%collapsible]
+====
+[source,go]
+----
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/twmb/franz-go/pkg/kgo"
+)
+
+func main() {
+	ctx := context.Background()
+	brokers := os.Getenv("REDPANDA_BROKERS")
+	rdb := redis.NewClient(&redis.Options{Addr: os.Getenv("REDIS_ADDR")})
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers(brokers),
+		kgo.ConsumerGroup("leaderboard"),
+		kgo.ConsumeTopics("game.player-events"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cl.Close()
+
+	go serve(rdb)
+
+	for {
+		fetches := cl.PollFetches(ctx)
+		fetches.EachRecord(func(r *kgo.Record) {
+			apply(ctx, rdb, r)
+		})
+	}
+}
+
+func serve(rdb *redis.Client) {
+	http.HandleFunc("/top", topHandler(rdb))
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+----
+====
+
 [.solution-verify]
 .Verify
 ****
