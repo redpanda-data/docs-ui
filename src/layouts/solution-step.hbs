@@ -6,35 +6,38 @@
   </head>
   {{!-- See solution.hbs for why page-solution is parsed per partial. Step
         pages add the step id and position from the page-solution-step-*
-        attributes the solutions-catalog extension sets. --}}
+        attributes the solutions-catalog extension sets.
+
+        Shell: the same as default pages (main > .content holds article.doc
+        and a sidebar aside), because 02-on-this-page.js builds the TOC from
+        headings that are direct .sect children of article.doc. The left nav
+        (nav-tree-solution) owns navigation; the right rail is the progress
+        card, the on-this-page TOC and the code panel. --}}
   <body class="article solution-step{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}" data-step-id="{{@root.page.attributes.solution-step-id}}" data-step-index="{{@root.page.attributes.solution-step-index}}" data-solution-step-count="{{@root.page.attributes.solution-step-count}}"{{/with}}>
 {{> header}}
 <div class="body no-keep-markup">
 {{> nav}}
 <main class="article solution-step">
   {{> toolbar}}
-  <div class="content">
+  <div class="content sol-content">
     <article class="doc sol-doc sol-step-doc">
       {{> breadcrumbs}}
       {{> solution-step-header solution=(parse-json page.attributes.solution)}}
-      <div class="sol-layout">
-        <div class="sol-main">
-          {{{page.contents}}}
-          {{> solution-step-actions solution=(parse-json page.attributes.solution)}}
-        </div>
-        <aside class="sol-rail">
-          <details class="sol-rail-details" data-sol-rail open>
-            <summary class="sol-rail-summary">Progress and files</summary>
-            <div class="sol-rail-body">
-              {{> solution-progress solution=(parse-json page.attributes.solution)}}
-              {{> solution-code-download solution=(parse-json page.attributes.solution)}}
-            </div>
-          </details>
-        </aside>
-      </div>
+      {{{page.contents}}}
+      {{> solution-step-actions solution=(parse-json page.attributes.solution)}}
       {{> feedback-footer}}
       {{> tracking-pixel}}
     </article>
+    <aside class="sol-rail">
+      <details class="sol-rail-details" data-sol-rail open>
+        <summary class="sol-rail-summary">Progress and files</summary>
+        <div class="sol-rail-body">
+          {{> solution-progress solution=(parse-json page.attributes.solution)}}
+          {{> toc}}
+          {{> solution-code-download solution=(parse-json page.attributes.solution)}}
+        </div>
+      </details>
+    </aside>
   </div>
   {{> footer}}
 </main>

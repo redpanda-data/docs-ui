@@ -70,10 +70,10 @@ function buildPage (o) {
   els.account = el('div', { 'data-docs-account': '', hidden: o.accountHidden !== false ? '' : undefined })
   if (o.accountHidden === false) els.account.hidden = false
 
-  els.progressSteps = el('ol', { 'data-sol-progress-steps': '' }, stepIds.map((id) =>
-    el('li', { 'data-sol-step-id': id, 'data-sol-step-url': stepUrl(id) }, [
-      el('a', { href: stepUrl(id) }, [el('span', { 'data-sol-step-status': '' })]),
-    ])))
+  // Sidebar entries (nav-tree-solution): the only source of step ids on a
+  // step page. The rail card itself lists no steps.
+  els.nav = el('ol', { 'data-sol-nav-steps': '' }, stepIds.map((id) =>
+    el('li', { 'data-sol-nav-step': id, 'data-sol-nav-url': stepUrl(id) })))
   els.count = el('span', { 'data-sol-progress-count': '', text: '0 of ' + stepIds.length })
   els.fill = el('div', { 'data-sol-progress-fill': '' })
   els.bar = el('div', { 'data-sol-progress-bar': '' }, [els.fill])
@@ -86,9 +86,13 @@ function buildPage (o) {
   els.save = el('button', { 'data-sol-save': '', 'data-intent': 'save' }, [els.saveLabel])
   els.sync = el('span', { 'data-sol-sync-state': '' })
   els.done = el('div', { 'data-sol-done': '', hidden: '' })
-  els.progress = el('section', { 'data-sol-progress': '' }, [
-    els.count, els.bar, els.state, els.progressSteps, els.versionNotice, els.save, els.sync, els.done,
-  ])
+  const cardParts = [els.count, els.bar, els.state, els.versionNotice]
+  if (o.page === 'step') {
+    els.completeLabel = el('span', { 'data-sol-complete-label': '', text: 'Mark step complete' })
+    els.complete = el('button', { 'data-sol-complete': '', 'aria-pressed': 'false' }, [els.completeLabel])
+    cardParts.push(els.complete)
+  }
+  els.progress = el('section', { 'data-sol-progress': '' }, cardParts.concat([els.save, els.sync, els.done]))
 
   const downloadHref = '/solutions/download?solution=' + o.solutionId + '&version=' + o.version + '&return=/solutions/' + o.solutionId + '/'
   const downloadAttrs = { 'data-sol-download': '', href: downloadHref }
@@ -102,25 +106,21 @@ function buildPage (o) {
 
   const main = []
   if (o.page === 'step') {
-    els.completeLabel = el('span', { 'data-sol-complete-label': '', text: 'Mark step complete' })
-    els.complete = el('button', { 'data-sol-complete': '', 'aria-pressed': 'false' }, [els.completeLabel])
     els.headerStatus = el('span', { 'data-sol-step-header-status': '', hidden: '' })
-    main.push(els.headerStatus, els.complete)
+    main.push(els.headerStatus)
   } else {
     els.startLabel = el('span', { 'data-sol-start-label': '', text: 'Start building' })
     els.start = el('a', { 'data-sol-start': '', href: stepUrl(stepIds[0]) }, [els.startLabel])
     els.heroProgress = el('span', { 'data-sol-hero-progress': '', hidden: '' })
-    els.nav = el('ol', {}, stepIds.map((id) => el('li', { 'data-sol-nav-url': stepUrl(id) })))
-    // The overview's main step list comes BEFORE the rail in DOM order and is
-    // the first element seen per step id. It deliberately carries no url here
-    // (solution-steps.hbs does add one) so the module must still pick the url
-    // up from the rail's compact list rather than from the first element only.
+    // The overview's body Steps list (solution-steps.hbs) carries id + url
+    // and its own ticks.
     els.stepList = el('ol', { 'data-sol-steps': '' }, stepIds.map((id) =>
-      el('li', { 'data-sol-step-id': id }, [el('a', { href: stepUrl(id) }, [el('span', { 'data-sol-step-status': '' })])])))
-    main.push(els.start, els.heroProgress, els.stepList, els.nav)
+      el('li', { 'data-sol-step-id': id, 'data-sol-step-url': stepUrl(id) }, [el('a', { href: stepUrl(id) }, [el('span', { 'data-sol-step-status': '' })])])))
+    main.push(els.start, els.heroProgress, els.stepList)
   }
 
-  els.body = el('body', bodyAttrs, [els.account].concat(main, [els.rail]))
+  // DOM order as on the real page: sidebar nav, then the article, then the rail.
+  els.body = el('body', bodyAttrs, [els.account, els.nav].concat(main, [els.rail]))
   return { els, stepIds, stepUrl }
 }
 

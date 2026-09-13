@@ -8,37 +8,40 @@
         build time. It is parsed per partial (solution=...) so every shared
         partial (header, nav, footer) keeps the root context. When the
         attribute is missing the data-solution-* attributes are omitted and
-        28-solution-progress.js leaves the page alone. --}}
+        28-solution-progress.js leaves the page alone.
+
+        Shell: the same as default pages (main > .content holds article.doc
+        and a sidebar aside), so the on-this-page TOC script can read the
+        article's headings. The left nav owns navigation; the body Steps list
+        (solution-steps) carries the ticks on the overview; the right rail is
+        the progress card, the TOC and the code panel. --}}
   <body class="article solution{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}" data-solution-step-count="{{steps.length}}"{{/with}}>
 {{> header}}
 <div class="body no-keep-markup">
 {{> nav}}
 <main class="article solution">
   {{> toolbar}}
-  <div class="content">
+  <div class="content sol-content">
     <article class="doc sol-doc">
       {{> breadcrumbs}}
       {{> solution-hero solution=(parse-json page.attributes.solution)}}
       {{> solution-meta solution=(parse-json page.attributes.solution)}}
-      <div class="sol-layout">
-        <div class="sol-main">
-          {{{page.contents}}}
-          {{> solution-steps solution=(parse-json page.attributes.solution)}}
-          {{> solution-related-docs solution=(parse-json page.attributes.solution)}}
-        </div>
-        <aside class="sol-rail">
-          <details class="sol-rail-details" data-sol-rail open>
-            <summary class="sol-rail-summary">Progress and files</summary>
-            <div class="sol-rail-body">
-              {{> solution-progress solution=(parse-json page.attributes.solution)}}
-              {{> solution-code-download solution=(parse-json page.attributes.solution)}}
-            </div>
-          </details>
-        </aside>
-      </div>
+      {{{page.contents}}}
+      {{> solution-steps solution=(parse-json page.attributes.solution)}}
+      {{> solution-related-docs solution=(parse-json page.attributes.solution)}}
       {{> feedback-footer}}
       {{> tracking-pixel}}
     </article>
+    <aside class="sol-rail">
+      <details class="sol-rail-details" data-sol-rail open>
+        <summary class="sol-rail-summary">Progress and files</summary>
+        <div class="sol-rail-body">
+          {{> solution-progress solution=(parse-json page.attributes.solution)}}
+          {{> toc}}
+          {{> solution-code-download solution=(parse-json page.attributes.solution)}}
+        </div>
+      </details>
+    </aside>
   </div>
   {{> footer}}
 </main>

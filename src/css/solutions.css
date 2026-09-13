@@ -25,7 +25,6 @@
 .doc .sol-eyebrow-link,
 .doc .sol-related-link,
 .doc .sol-file-link,
-.doc .sol-progress-step a,
 .doc .sol-btn,
 .doc .sol-btn:hover,
 .doc .sol-step-nav,
@@ -55,14 +54,12 @@
 }
 
 .doc .sol-related-link,
-.doc .sol-file-link,
-.doc .sol-progress-step a {
+.doc .sol-file-link {
   color: var(--grey-700-new);
 }
 
 .doc .sol-related-link:hover,
-.doc .sol-file-link:hover,
-.doc .sol-progress-step a:hover {
+.doc .sol-file-link:hover {
   color: var(--component-700);
 }
 
@@ -470,24 +467,57 @@
   font-size: calc(13 / var(--rem-base) * 1rem);
 }
 
-.sol-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 2.5rem;
-  align-items: start;
-}
-
-.sol-main {
-  min-width: 0;
-}
-
+/* Shell: main > .content is the default-page flex row on desktop (main.css),
+   with article.doc first and the rail as the sidebar column, so the
+   on-this-page TOC script finds the article's headings. */
 .sol-rail {
-  position: sticky;
-  top: calc(var(--body-top, 4rem) + 1rem);
   min-width: 0;
 }
 
-.sol-rail-details > .sol-rail-summary {
+@media screen and (min-width: 1025px) {
+  .sol-rail {
+    flex: 0 0 300px;
+    order: 1;
+    position: sticky;
+    top: calc(var(--navbar-height, 4rem) + 1rem);
+    align-self: flex-start;
+    max-height: calc(100vh - var(--navbar-height, 4rem) - 2rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .sol-rail-details > .sol-rail-summary {
+    display: none;
+  }
+
+  /* The article's own action row duplicates the rail's card on desktop. */
+  .sol-step-actions-main {
+    display: none;
+  }
+}
+
+/* The on-this-page TOC (toc.hbs) inside the rail: static, full width, and
+   visible on narrow screens too (main.css hides aside.toc.sidebar there). */
+.sol-rail .toc.sidebar {
+  display: block;
+  position: static;
+  top: auto;
+  flex: none;
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  max-height: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.sol-rail .toc.sidebar .toc-menu {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.sol-rail .toc.sidebar .thumbs,
+.sol-rail .toc.sidebar .feedback-success {
   display: none;
 }
 
@@ -587,7 +617,6 @@
 }
 
 .sol-step-check,
-.sol-progress-step-check,
 .sol-nav-step-check {
   display: inline-flex;
   align-items: center;
@@ -601,7 +630,6 @@
 }
 
 .is-complete > .sol-step-link .sol-step-check,
-.is-complete .sol-progress-step-check,
 .is-complete .sol-nav-step-check {
   background: var(--component-600);
   border-color: var(--component-600);
@@ -632,39 +660,12 @@
   margin: 0.5rem 0 0;
 }
 
-.sol-progress-steps {
-  display: none;
-  list-style: none;
-  margin: 0.75rem 0 0;
-  padding: 0;
+.sol-progress-complete {
+  margin-top: 0.875rem;
 }
 
-.solution-step .sol-progress-steps {
-  display: block;
-}
-
-.sol-progress-step a {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0;
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--grey-700-new);
-  text-decoration: none;
-}
-
-.sol-progress-step a:hover {
-  color: var(--component-700);
-}
-
-.sol-progress-step.is-current a {
-  color: var(--component-700);
-  font-weight: 600;
-}
-
-.sol-progress-step .sol-progress-step-check {
-  width: 1rem;
-  height: 1rem;
+.sol-btn--block {
+  width: 100%;
 }
 
 .sol-progress-actions {
@@ -1500,7 +1501,6 @@ html[data-theme="dark"] .sol-link-btn,
 html[data-theme="dark"] .sol-done-title,
 html[data-theme="dark"] .sol-fact--status,
 html[data-theme="dark"] .sol-nav-step.is-complete .sol-nav-step-num,
-html[data-theme="dark"] .sol-progress-step.is-current a,
 html[data-theme="dark"] .sol-related-link svg {
   color: var(--component-200);
 }
@@ -1527,7 +1527,6 @@ html[data-theme="dark"] .sol-done-sub,
 html[data-theme="dark"] .sol-progress-count,
 html[data-theme="dark"] .sol-filter-row,
 html[data-theme="dark"] .sol-file-link,
-html[data-theme="dark"] .sol-progress-step a,
 html[data-theme="dark"] .sol-empty,
 html[data-theme="dark"] .sol-gate {
   color: var(--grey-300-new);
@@ -1563,7 +1562,6 @@ html[data-theme="dark"] .sol-doc .production-note > .title {
 
 html[data-theme="dark"] .sol-bar,
 html[data-theme="dark"] .sol-step-check,
-html[data-theme="dark"] .sol-progress-step-check,
 html[data-theme="dark"] .sol-nav-step-check,
 html[data-theme="dark"] .sol-empty {
   border-color: var(--grey-600-new);
@@ -1644,30 +1642,24 @@ html[data-theme="dark"] .sol-toast {
 /* ---- responsive ------------------------------------------------------------ */
 
 @media (max-width: 1024px) {
-  .sol-layout {
-    grid-template-columns: minmax(0, 1fr) 260px;
-    gap: 1.5rem;
-  }
-
-  .sol-home-layout {
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .sol-layout,
-  .sol-home-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sol-rail,
-  .sol-filters {
-    position: static;
+  /* Single column: the collapsed rail sits above the article. */
+  .sol-content {
+    display: flex;
+    flex-direction: column;
   }
 
   .sol-rail {
     order: -1;
+    position: static;
+    margin: 0 1rem 1rem;
+  }
+
+  .sol-home-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sol-filters {
+    position: static;
   }
 
   .sol-rail-details > .sol-rail-summary,
@@ -1679,7 +1671,9 @@ html[data-theme="dark"] .sol-toast {
   .sol-filters-body {
     margin-top: 0.75rem;
   }
+}
 
+@media (max-width: 768px) {
   .sol-hero .sol-title,
   .sol-step-header .sol-title {
     font-size: calc(28 / var(--rem-base) * 1rem);

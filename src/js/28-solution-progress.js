@@ -388,16 +388,19 @@
     var ids = []
     var urls = {}
     var seen = {}
-    // A step id can appear more than once (the overview's step list and the
-    // rail's compact list); take the url from whichever element carries it.
-    $$('[data-sol-step-id]').forEach(function (el) {
-      var id = attr(el, 'data-sol-step-id')
+    // Step ids and urls come from the sidebar entries (nav-tree-solution:
+    // data-sol-nav-step + data-sol-nav-url, present on every solution page)
+    // and from the overview's Steps list (solution-steps: data-sol-step-id +
+    // data-sol-step-url). An id can appear in both; keep the first order seen
+    // and take the url from whichever element carries one.
+    $$('[data-sol-step-id], [data-sol-nav-step]').forEach(function (el) {
+      var id = attr(el, 'data-sol-step-id') || attr(el, 'data-sol-nav-step')
       if (!isString(id)) return
       if (!seen[id]) {
         seen[id] = true
         ids.push(id)
       }
-      var url = attr(el, 'data-sol-step-url')
+      var url = attr(el, 'data-sol-step-url') || attr(el, 'data-sol-nav-url')
       if (url && !urls[id]) urls[id] = url
     })
     stepIndex = { ids: ids, urls: urls }
@@ -867,13 +870,20 @@
       var status = $('[data-sol-step-status]', el)
       if (status) status.textContent = complete ? '(completed)' : current ? '(current)' : ''
     })
-    // Sidebar nav items match on url.
-    $$('[data-sol-nav-url]').forEach(function (el) {
+    // Sidebar nav items: match on step id, falling back to url.
+    $$('[data-sol-nav-url], [data-sol-nav-step]').forEach(function (el) {
+      var navId = attr(el, 'data-sol-nav-step')
       var url = attr(el, 'data-sol-nav-url')
       var complete = false
       if (record) {
-        for (var i = 0; i < ids.length; i++) {
-          if (urls[ids[i]] === url && record.completedSteps.indexOf(ids[i]) !== -1) complete = true
+        if (navId && record.completedSteps.indexOf(navId) !== -1) complete = true
+        if (!complete && url) {
+          for (var i = 0; i < ids.length; i++) {
+            if (urls[ids[i]] === url && record.completedSteps.indexOf(ids[i]) !== -1) {
+              complete = true
+              break
+            }
+          }
         }
       }
       if (el.classList) el.classList[complete ? 'add' : 'remove']('is-complete')
@@ -1015,7 +1025,8 @@
   function manageDetails (selector) {
     var els = $$(selector)
     if (!els.length || typeof window.matchMedia !== 'function') return
-    var mq = window.matchMedia('(max-width: 768px)')
+    // Same breakpoint as the two-column layout in solutions.css.
+    var mq = window.matchMedia('(max-width: 1024px)')
     var apply = function () {
       els.forEach(function (el) {
         if (mq.matches) {

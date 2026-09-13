@@ -1,39 +1,35 @@
 {{!--
-  Progress panel for the sticky rail. Context: `solution`.
-  Everything here is driven by 28-solution-progress.js: the bar, the "n of M"
-  count, the state line, the save control and its sync state, the
-  version-changed notice, and the done panel. Server-rendered text is the
-  anonymous, nothing-started baseline so the panel reads correctly without JS.
+  Compact progress card for the right rail. Context: `solution`.
+  Navigation (Solutions home, Overview, the ordered steps with ticks) lives in
+  the left nav (nav-tree-solution); this card only shows state: bar, "n of M
+  steps", state text, the version-changed notice, Save progress with its
+  status line, and on step pages the Mark step complete button (the same
+  button also sits under the article for narrow screens, where the rail
+  collapses; CSS shows one or the other). Everything is driven by
+  28-solution-progress.js, which reads the step ids from the sidebar entries
+  (data-sol-nav-step) or the overview's Steps list (data-sol-step-id).
 --}}
 <section class="sol-panel sol-progress" data-sol-progress data-sol-step-count="{{solution.steps.length}}" aria-labelledby="sol-progress-title">
   <div class="sol-panel-head">
     <h3 id="sol-progress-title" class="sol-panel-title">Your progress</h3>
-    <span class="sol-progress-count" data-sol-progress-count>0 of {{solution.steps.length}}</span>
+    <span class="sol-progress-count"><span data-sol-progress-count>0 of {{solution.steps.length}}</span> steps</span>
   </div>
   <div class="sol-bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" data-sol-progress-bar>
     <div class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></div>
   </div>
   <p class="sol-progress-state" data-sol-progress-state>Not started</p>
-  {{!-- Compact step list: the id/url pairs 28-solution-progress.js needs on
-        every solution page (the overview's big list lives in solution-steps).
-        Shown in the rail on step pages only; see solutions.css. --}}
-  <ol class="sol-progress-steps" data-sol-progress-steps>
-    {{#each solution.steps}}
-    <li class="sol-progress-step" data-sol-step-id="{{id}}" data-sol-step-url="{{url}}">
-      <a href="{{{relativize url}}}">
-        <span class="sol-progress-step-check" data-sol-step-check aria-hidden="true">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </span>
-        <span class="sol-progress-step-title">{{title}}</span>
-        <span class="visually-hidden" data-sol-step-status></span>
-      </a>
-    </li>
-    {{/each}}
-  </ol>
   <div class="sol-version-notice" data-sol-version-notice role="status" hidden>
     <p>This solution has been updated to <code data-sol-version-new>{{solution.version}}</code> since you last worked on it. Your progress is kept, but some steps may have changed.</p>
     <button type="button" class="sol-link-btn" data-sol-version-dismiss>Got it</button>
   </div>
+  {{#if (eq @root.page.layout 'solution-step')}}
+  <div class="sol-progress-complete">
+    <button type="button" class="sol-btn sol-btn--primary sol-btn--sm sol-btn--block" data-sol-complete data-analytics="solution_step_complete" aria-pressed="false">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <span data-sol-complete-label>Mark step complete</span>
+    </button>
+  </div>
+  {{/if}}
   <div class="sol-progress-actions">
     <button type="button" class="sol-btn sol-btn--ghost sol-btn--sm" data-sol-save data-intent="save" data-analytics="solution_save_progress">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>

@@ -163,7 +163,8 @@ test('an explicit mark-complete click updates the record, the count and the tick
   assert.equal(els.count.textContent, '1 of 3')
   assert.equal(els.complete.getAttribute('aria-pressed'), 'true')
   assert.equal(els.completeLabel.textContent, 'Completed')
-  assert.ok(els.progressSteps.children[0].classes.has('is-complete'))
+  assert.ok(els.nav.children[0].classes.has('is-complete'), 'sidebar entry ticked by step id')
+  assert.ok(!els.nav.children[1].classes.has('is-complete'))
   assert.equal(els.fill.style.width, '33%')
 
   els.complete.dispatch('click')

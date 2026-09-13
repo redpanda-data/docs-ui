@@ -21,10 +21,10 @@
   <h1 class="page sol-title">{{{this}}}</h1>
   {{/with}}
   {{#if solution.description}}
-  <p class="sol-lede">{{solution.description}}</p>
+  <p class="sol-lede is-before-toc">{{solution.description}}</p>
   {{/if}}
   {{#if (eq solution.status 'deprecated')}}
-  <div class="sol-banner sol-banner--deprecated" role="note">
+  <div class="sol-banner sol-banner--deprecated is-before-toc" role="note">
     This solution is no longer maintained.
     {{#if solution.supersededBy}}
     {{#if solution.supersededBy.url}}
@@ -33,7 +33,7 @@
     {{/if}}
   </div>
   {{/if}}
-  <div class="sol-hero-actions">
+  <div class="sol-hero-actions is-before-toc">
     {{#with solution.steps.[0]}}
     <a class="sol-btn sol-btn--primary" href="{{{relativize this.url}}}" data-sol-start data-analytics="solution_start">
       <span data-sol-start-label>Start building</span>

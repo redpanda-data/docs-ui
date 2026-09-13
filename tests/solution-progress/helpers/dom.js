@@ -135,6 +135,10 @@ class El {
 
 function el (tag, attrs, children) { return new El(tag, attrs, children) }
 
+function matchesAny (el, selector) {
+  return selector.split(',').map((s) => s.trim()).filter(Boolean).some((c) => el.matches(c))
+}
+
 function makeDocument (body) {
   return {
     body,
@@ -143,8 +147,8 @@ function makeDocument (body) {
     readyState: 'complete',
     createElement: (tag) => new El(tag),
     createEvent () { throw new Error('createEvent not supported') },
-    querySelector: (sel) => (body.matches(sel) ? body : body.querySelector(sel)),
-    querySelectorAll: (sel) => (body.matches(sel) ? [body] : []).concat(body.querySelectorAll(sel)),
+    querySelector: (sel) => (matchesAny(body, sel) ? body : body.querySelector(sel)),
+    querySelectorAll: (sel) => (matchesAny(body, sel) ? [body] : []).concat(body.querySelectorAll(sel)),
     addEventListener () {},
     removeEventListener () {},
   }
