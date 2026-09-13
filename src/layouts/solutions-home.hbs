@@ -16,7 +16,7 @@
       <header class="sol-hero sol-hero--home">
         <div class="sol-eyebrow"><span class="sol-eyebrow-label">{{#if page.attributes.hero-eyebrow}}{{page.attributes.hero-eyebrow}}{{else}}Redpanda Solutions{{/if}}</span></div>
         <h1 class="page sol-title">{{#if page.attributes.hero-title}}{{{page.attributes.hero-title}}}{{else}}{{{page.title}}}{{/if}}</h1>
-        <p class="sol-lede">{{#if page.attributes.hero-subtitle}}{{page.attributes.hero-subtitle}}{{else}}Complete, runnable systems built on Redpanda. Each Solution walks you through a real architecture step by step, verifies the outcome, and shows what changes in production.{{/if}}</p>
+        <p class="sol-lede">{{#if page.attributes.hero-subtitle}}{{page.attributes.hero-subtitle}}{{else}}Complete, runnable systems built on Redpanda. Each solution walks you through a real architecture step by step, verifies the outcome, and shows what changes in production.{{/if}}</p>
       </header>
       {{{page.contents}}}
       {{#with (get-solutions-catalog) as |catalog|}}
@@ -34,7 +34,7 @@
       <script type="application/json" data-sol-catalog>{{{catalog.json}}}</script>
       {{else}}
       <div class="sol-empty" data-sol-empty>
-        <h3>No Solutions published yet</h3>
+        <h3>No solutions published yet</h3>
         <p>Solutions appear here as soon as the first one is published.</p>
       </div>
       {{/with}}

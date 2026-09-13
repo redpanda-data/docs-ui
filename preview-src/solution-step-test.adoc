@@ -60,5 +60,5 @@ OK
 [.production-note]
 .In production
 ****
-Do not run Console on the same host as a broker, and put the Schema Registry behind TLS: every producer and consumer in this Solution fetches schemas from it.
+Do not run Console on the same host as a broker, and put the Schema Registry behind TLS: every producer and consumer in this solution fetches schemas from it.
 ****

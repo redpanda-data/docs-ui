@@ -31,7 +31,7 @@
     {{/each}}
   </ol>
   <div class="sol-version-notice" data-sol-version-notice role="status" hidden>
-    <p>This Solution has been updated to <code data-sol-version-new>{{solution.version}}</code> since you last worked on it. Your progress is kept, but some steps may have changed.</p>
+    <p>This solution has been updated to <code data-sol-version-new>{{solution.version}}</code> since you last worked on it. Your progress is kept, but some steps may have changed.</p>
     <button type="button" class="sol-link-btn" data-sol-version-dismiss>Got it</button>
   </div>
   <div class="sol-progress-actions">
@@ -42,7 +42,7 @@
     <span class="sol-sync-state" data-sol-sync-state aria-live="polite"></span>
   </div>
   <div class="sol-done" data-sol-done hidden>
-    <p class="sol-done-title">You finished this Solution.</p>
+    <p class="sol-done-title">You finished this solution.</p>
     <p class="sol-done-sub">Keep the complete example around for your own projects.</p>
     {{#unless (eq solution.download 'none')}}
     <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow">Download the complete example</a>

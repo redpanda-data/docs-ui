@@ -731,7 +731,7 @@
     },
     download: {
       title: 'Sign in to download the complete example',
-      lead: 'Get the full working code for this Solution, and keep your progress across devices.',
+      lead: 'Get the full working code for this solution, and keep your progress across devices.',
       cta: 'Sign in and download',
     },
   }

@@ -6,4 +6,4 @@
 // extension puts it in a real build. This page only needs the layout.
 :page-hero-eyebrow: Redpanda Solutions
 :page-hero-title: Build real systems on Redpanda.
-:page-hero-subtitle: Each Solution is a complete, runnable architecture you build step by step, with verification at every stage and a clear path to production.
+:page-hero-subtitle: Each solution is a complete, runnable architecture you build step by step, with verification at every stage and a clear path to production.

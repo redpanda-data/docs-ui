@@ -143,7 +143,7 @@
       card.hidden = !ok
       if (ok) shown++
     })
-    if (countEl) countEl.textContent = shown + (shown === 1 ? ' Solution' : ' Solutions')
+    if (countEl) countEl.textContent = shown + (shown === 1 ? ' solution' : ' solutions')
     if (emptyEl) emptyEl.hidden = shown !== 0
     var active = activeCount()
     $$('[data-sol-filters-clear]').forEach(function (el) { el.hidden = active === 0 })
