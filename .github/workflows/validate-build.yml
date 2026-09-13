@@ -79,6 +79,8 @@ jobs:
         run: npm run test:solution-progress
       - name: Test Solutions recommendations partial and guards
         run: npm run test:solution-recommendations
+      - name: Test Solutions code folding
+        run: npm run test:solution-code-fold
       - name: Cache generated files
         uses: actions/cache@v4
         with:

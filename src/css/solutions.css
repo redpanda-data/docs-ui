@@ -908,6 +908,157 @@
   margin-bottom: 0;
 }
 
+/* ---- code blocks (30-solution-code-fold.js) --------------------------------- */
+
+/* File header bar from a listing title (`.services/leaderboard/main.go`).
+   The block's toolbox (copy / Ask AI) is moved into it by the script. */
+.sol-doc .listingblock.sol-code-titled > .title.sol-code-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.45rem 0.875rem;
+  font-family: var(--body-font-family-mono, monospace);
+  font-size: calc(12.5 / var(--rem-base) * 1rem);
+  font-style: normal;
+  font-weight: 500;
+  color: var(--component-700);
+  background: var(--component-bg-tint);
+  border: 1px solid var(--grey-200-new);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+
+.sol-doc .listingblock.sol-code-titled > .title.sol-code-title code {
+  font: inherit;
+  color: inherit;
+  background: none;
+  padding: 0;
+  border: 0;
+}
+
+.sol-doc .listingblock.sol-code-titled > .content {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.sol-doc .sol-code-title .source-toolbox {
+  position: static;
+  visibility: visible;
+  margin-left: auto;
+}
+
+/* Folded listing: clipped, faded at the bottom, with a toggle underneath. */
+.sol-doc .listingblock.sol-code-fold > .content {
+  position: relative;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.sol-doc .listingblock.sol-code-fold.is-folded > .content::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4.5rem;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(245, 245, 245, 0), var(--grey-50-new));
+}
+
+.sol-doc .sol-code-fold-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.5rem 0.875rem;
+  font-family: inherit;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--component-700);
+  background: var(--sol-surface);
+  border: 1px solid var(--grey-200-new);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  cursor: pointer;
+}
+
+.sol-doc .sol-code-fold-btn::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+.sol-doc .listingblock.sol-code-fold:not(.is-folded) .sol-code-fold-btn::before {
+  transform: rotate(-135deg) translateY(-2px);
+}
+
+.sol-doc .sol-code-fold-btn:hover {
+  background: var(--component-bg-tint);
+}
+
+.sol-doc .sol-code-fold-btn:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: -2px;
+}
+
+/* details.collapsible on solution pages, styled like the file header. */
+.sol-doc details.sol-details > summary {
+  font-family: var(--body-font-family-mono, monospace);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--component-700);
+  background: var(--component-bg-tint);
+  border: 1px solid var(--grey-200-new);
+  border-radius: 10px;
+}
+
+.sol-doc details.sol-details[open] > summary {
+  border-radius: 10px 10px 0 0;
+  border-bottom: 0;
+}
+
+.sol-doc .sol-details-lines {
+  margin-left: auto;
+  margin-right: 1.5em;
+  font-family: var(--body-font-family-mono, monospace);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 400;
+  color: var(--grey-500-new);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sol-doc .listingblock.sol-code-fold > .content,
+  .sol-doc .sol-code-fold-btn::before {
+    transition: none;
+  }
+}
+
+html[data-theme="dark"] .sol-doc .listingblock.sol-code-fold.is-folded > .content::after {
+  background: linear-gradient(180deg, rgba(24, 24, 24, 0), var(--grey-900-new));
+}
+
+html[data-theme="dark"] .sol-doc .listingblock.sol-code-titled > .title.sol-code-title,
+html[data-theme="dark"] .sol-doc details.sol-details > summary {
+  color: var(--component-200);
+  background: var(--component-bg-tint-hover);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
+  color: var(--component-200);
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+}
+
 /* ---- related --------------------------------------------------------------- */
 
 .sol-related {
