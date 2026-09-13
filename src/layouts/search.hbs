@@ -190,6 +190,12 @@
                     </p>
                     <div class="aa-ItemContentRow">
                       <div class="aa-ItemContentTitle result-type">${hit.type}</div>
+                      ${hit.type === 'Solution' && (hit.difficulty || hit.duration)
+                        ? html`<div class="aa-ItemContentTitle result-type result-solution-meta">${[
+                            hit.difficulty,
+                            hit.duration ? `${hit.duration} min` : '',
+                          ].filter(Boolean).join(' · ')}</div>`
+                        : ''}
                       ${hit.product && Array.isArray(hit.product)
                         ? (() => {
                             const seen = new Set();
