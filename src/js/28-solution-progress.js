@@ -27,14 +27,19 @@
  *     sessionStorage cache); first sign-in in this browser or dirty local state
  *     PUTs the merged store and the server's answer replaces local. Hint
  *     false -> true merges; true -> false (sign-out) clears local state.
- *   - Merge (per solution): ordered union of completedSteps (earlier-updated
- *     record's steps first, then the later record's additions), max updatedAt,
- *     min startedAt, currentStep and solutionVersion from the later record
+ *   - Merge is mergeStores(existing, incoming), the same function as the
+ *     server's mergeAll(existing, incoming); the incoming side wins ties on
+ *     updatedAt. On load the client calls mergeStores(remote, local), the same
+ *     roles the server uses for (stored, clientBody), so both compute the same
+ *     document. A PUT response is adopted as is, never merged.
+ *     Per solution: ordered union of completedSteps (earlier-updated record's
+ *     steps first, then the later record's additions), max updatedAt, min
+ *     startedAt, currentStep and solutionVersion from the later record
  *     (falling back to the other when null), completedAt = earliest unless the
- *     two versions differ, in which case the later record's value. Ties on
- *     updatedAt treat the first argument (local) as the later record. The same
- *     rules run server-side; tests/solution-progress/fixtures/merge-vectors.json
- *     is the shared contract.
+ *     two versions differ, in which case null. Ids are validated with the
+ *     server's regexes and timestamps are clamped to now + 5 minutes.
+ *     tests/solution-progress/fixtures/merge-vectors.json is the shared
+ *     contract (copied from docs-site).
  *   - Gates exist only on Save and on the authenticated download. Anonymous
  *     readers can start, mark steps, and see progress on this device.
  *   - Analytics: track(name, props) -> window.heap.track when present, and
@@ -56,6 +61,10 @@
   var ACTIVITY_ENDPOINT = '/docs-activity'
   var MAX_SOLUTIONS = 50
   var MAX_STEPS = 100
+  // Same validation as docs-site lib/solutions-progress.mjs.
+  var ID_RE = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/
+  var VERSION_RE = /^v\d+\.\d+\.\d+$/
+  var FUTURE_SKEW_MS = 5 * 60 * 1000
   var REMOTE_TTL_MS = 60 * 1000
   var PENDING_TTL_MS = 15 * 60 * 1000
   var PUT_DEBOUNCE_MS = 800
@@ -175,14 +184,26 @@
 
   function emptyStore () { return { v: 1, updatedAt: 0, solutions: {} } }
 
-  function normalizeRecord (raw) {
+  function isId (value) { return isString(value) && ID_RE.test(value) }
+  function isVersion (value) { return isString(value) && VERSION_RE.test(value) }
+
+  // Timestamps from the future (clock skew, tampering) are capped at now + 5
+  // minutes so one bad record cannot win every merge forever.
+  function clampTime (value, nowMs) {
+    if (value === null) return null
+    var max = nowMs + FUTURE_SKEW_MS
+    return value > max ? max : value
+  }
+
+  function normalizeRecord (raw, nowMs) {
     if (!raw || typeof raw !== 'object') return null
+    nowMs = nowMs || now()
     var steps = []
     var seen = {}
     var source = Array.isArray(raw.completedSteps) ? raw.completedSteps : []
     for (var i = 0; i < source.length; i++) {
       var step = source[i]
-      if (isString(step) && !seen[step]) {
+      if (isId(step) && !seen[step]) {
         seen[step] = true
         steps.push(step)
       }
@@ -190,34 +211,48 @@
     if (steps.length > MAX_STEPS) steps = steps.slice(steps.length - MAX_STEPS)
     return {
       completedSteps: steps,
-      currentStep: isString(raw.currentStep) ? raw.currentStep : null,
-      startedAt: toTime(raw.startedAt),
-      updatedAt: toTime(raw.updatedAt) || 0,
-      completedAt: toTime(raw.completedAt),
-      solutionVersion: isString(raw.solutionVersion) ? raw.solutionVersion : null,
+      currentStep: isId(raw.currentStep) ? raw.currentStep : null,
+      startedAt: clampTime(toTime(raw.startedAt), nowMs),
+      updatedAt: clampTime(toTime(raw.updatedAt), nowMs) || 0,
+      completedAt: clampTime(toTime(raw.completedAt), nowMs),
+      solutionVersion: isVersion(raw.solutionVersion) ? raw.solutionVersion : null,
     }
   }
+
+  // Keep at most 50 solutions and a serialized document of at most 32 KiB,
+  // evicting the smallest updatedAt first (ties by id). Same as the server.
+  var MAX_BYTES = 32768
 
   function applyCaps (store) {
     var ids = Object.keys(store.solutions)
-    if (ids.length > MAX_SOLUTIONS) {
-      ids.sort(function (a, b) {
-        return (store.solutions[b].updatedAt || 0) - (store.solutions[a].updatedAt || 0)
-      })
+    ids.sort(function (a, b) {
+      var diff = (store.solutions[b].updatedAt || 0) - (store.solutions[a].updatedAt || 0)
+      if (diff) return diff
+      return a < b ? 1 : a > b ? -1 : 0
+    })
+    var keep = Math.min(ids.length, MAX_SOLUTIONS)
+    var rebuild = function () {
       var kept = {}
-      for (var i = 0; i < MAX_SOLUTIONS; i++) kept[ids[i]] = store.solutions[ids[i]]
-      store.solutions = kept
+      for (var i = 0; i < keep; i++) kept[ids[i]] = store.solutions[ids[i]]
+      return kept
     }
+    var kept = ids.length > MAX_SOLUTIONS ? rebuild() : store.solutions
+    while (keep > 0 && JSON.stringify({ v: 1, updatedAt: store.updatedAt, solutions: kept }).length > MAX_BYTES) {
+      keep--
+      kept = rebuild()
+    }
+    store.solutions = kept
     return store
   }
 
-  function normalizeStore (raw) {
+  function normalizeStore (raw, nowMs) {
     var store = emptyStore()
     if (!raw || typeof raw !== 'object' || !raw.solutions || typeof raw.solutions !== 'object') return store
-    var maxUpdated = toTime(raw.updatedAt) || 0
+    nowMs = nowMs || now()
+    var maxUpdated = clampTime(toTime(raw.updatedAt), nowMs) || 0
     for (var id in raw.solutions) {
-      if (!Object.prototype.hasOwnProperty.call(raw.solutions, id) || !isString(id)) continue
-      var record = normalizeRecord(raw.solutions[id])
+      if (!Object.prototype.hasOwnProperty.call(raw.solutions, id) || !isId(id)) continue
+      var record = normalizeRecord(raw.solutions[id], nowMs)
       if (!record) continue
       store.solutions[id] = record
       if (record.updatedAt > maxUpdated) maxUpdated = record.updatedAt
@@ -287,12 +322,16 @@
     return out
   }
 
-  function mergeRecord (a, b) {
-    a = normalizeRecord(a)
-    b = normalizeRecord(b)
+  // mergeRecord(existing, incoming): the incoming record wins ties on updatedAt,
+  // exactly like the server's merge, so mergeStores(local, remote) on the
+  // client and mergeAll(existing, incoming) on the server produce one result.
+  function mergeRecord (existing, incoming, nowMs) {
+    nowMs = nowMs || now()
+    var a = normalizeRecord(existing, nowMs)
+    var b = normalizeRecord(incoming, nowMs)
     if (!a) return b
     if (!b) return a
-    var later = b.updatedAt > a.updatedAt ? b : a
+    var later = b.updatedAt >= a.updatedAt ? b : a
     var earlier = later === a ? b : a
     var versionsDiffer = !!(a.solutionVersion && b.solutionVersion && a.solutionVersion !== b.solutionVersion)
     return {
@@ -300,26 +339,29 @@
       currentStep: later.currentStep || earlier.currentStep || null,
       startedAt: minTime(a.startedAt, b.startedAt),
       updatedAt: Math.max(a.updatedAt, b.updatedAt),
-      completedAt: versionsDiffer ? later.completedAt : minTime(a.completedAt, b.completedAt),
+      // A completion recorded against a different version of the solution is
+      // not a completion of this one.
+      completedAt: versionsDiffer ? null : minTime(a.completedAt, b.completedAt),
       solutionVersion: later.solutionVersion || earlier.solutionVersion || null,
     }
   }
 
-  function mergeStores (local, remote) {
-    local = normalizeStore(local)
-    remote = normalizeStore(remote)
+  function mergeStores (existing, incoming, nowMs) {
+    nowMs = nowMs || now()
+    existing = normalizeStore(existing, nowMs)
+    incoming = normalizeStore(incoming, nowMs)
     var merged = emptyStore()
     var ids = {}
     var id
-    for (id in local.solutions) if (Object.prototype.hasOwnProperty.call(local.solutions, id)) ids[id] = true
-    for (id in remote.solutions) if (Object.prototype.hasOwnProperty.call(remote.solutions, id)) ids[id] = true
+    for (id in existing.solutions) if (Object.prototype.hasOwnProperty.call(existing.solutions, id)) ids[id] = true
+    for (id in incoming.solutions) if (Object.prototype.hasOwnProperty.call(incoming.solutions, id)) ids[id] = true
     for (id in ids) {
-      var record = mergeRecord(local.solutions[id], remote.solutions[id])
+      var record = mergeRecord(existing.solutions[id], incoming.solutions[id], nowMs)
       if (!record) continue
       merged.solutions[id] = record
       if (record.updatedAt > merged.updatedAt) merged.updatedAt = record.updatedAt
     }
-    merged.updatedAt = Math.max(merged.updatedAt, local.updatedAt || 0, remote.updatedAt || 0)
+    merged.updatedAt = Math.max(merged.updatedAt, existing.updatedAt || 0, incoming.updatedAt || 0)
     return applyCaps(merged)
   }
 
@@ -453,34 +495,45 @@
       body: JSON.stringify(payload),
     })
       .then(function (res) {
+        // Any non-2xx leaves the dirty flag set so the next page load retries
+        // (409 profile_not_ready, 429 rate limited, 5xx, or a stale session).
         if (res.status === 401) {
+          markDirty()
           setSyncState('Sign in to sync', true)
           return false
         }
-        if (res.status === 409) {
+        if (res.status === 409 || res.status === 429) {
+          markDirty()
           setSyncState('Not synced yet', true)
           return false
         }
         if (!res.ok) {
+          markDirty()
           setSyncState('Not synced', true)
           return false
         }
         return res.json().then(function (data) {
-          var serverStore = data && data.solutions ? normalizeStore(data) : normalizeStore(payload)
+          // The server answers with the merged store, either at the top level
+          // or under `progress` (the same shape GET returns). Adopt it.
+          var body = data && data.solutions ? data : (data && data.progress && data.progress.solutions ? data.progress : null)
+          var serverStore = normalizeStore(body || payload)
           persistStore(serverStore)
           writeRemoteCache(serverStore)
           clearDirty()
           setSyncState('Saved to your account')
           return true
         }, function () {
-          // 200 with no JSON body: the server accepted what we sent.
+          // 2xx with no JSON body: the server accepted what we sent.
+          var sentStore = normalizeStore(payload)
+          persistStore(sentStore)
+          writeRemoteCache(sentStore)
           clearDirty()
-          writeRemoteCache(normalizeStore(payload))
           setSyncState('Saved to your account')
           return true
         })
       })
       .catch(function () {
+        markDirty()
         setSyncState('Offline, saved on this device', true)
         return false
       })
@@ -528,15 +581,20 @@
     }
     var firstSignIn = previous !== 'true'
     writeString(localStorage, HINT_KEY, 'true')
+    // The first sign-in in this browser owes the server whatever was done
+    // anonymously. Flag it before any request so a failed GET or PUT (503,
+    // 409 profile not ready, offline) retries on the next load instead of
+    // silently dropping the upload.
+    if (firstSignIn) markDirty()
     syncPromise = fetchRemote().then(function (remote) {
-      // 401 or network failure: keep local as is and try again next load.
+      // 401 or a failed GET: keep local as is and try again next load.
       if (remote === null) return false
-      var merged = mergeStores(loadStore(), remote)
-      if (firstSignIn || isDirty()) {
-        persistStore(merged)
-        return putStore(merged)
-      }
+      // Same roles as the server's mergeAll(stored, clientBody): the server's
+      // copy is `existing`, this device's copy is `incoming` and wins ties, so
+      // what we PUT is what the server will compute (shared fixture rule).
+      var merged = mergeStores(remote, loadStore())
       persistStore(merged)
+      if (isDirty()) return putStore(merged)
       render()
       return true
     })
@@ -559,11 +617,9 @@
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          path: window.location.pathname,
-          component: component,
-          solution: { id: solutionId, event: event },
-        }),
+        // Only the solution transition. The per-page beacon in
+        // 27-docs-activity.js already reports the pageview itself.
+        body: JSON.stringify({ solution: { id: solutionId, event: event } }),
         keepalive: true,
       }).catch(function () { /* best effort */ })
     } catch (e) { /* never break the page */ }

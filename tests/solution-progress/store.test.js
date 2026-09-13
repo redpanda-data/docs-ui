@@ -12,27 +12,76 @@ const { run, STORE_KEY, HINT_KEY, DIRTY_KEY } = require('./helpers/run')
 
 const VECTORS = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/merge-vectors.json'), 'utf8'))
 
-test('the shared fixture has enough vectors to be a contract', () => {
+test('the shared fixture (docs-site tests/fixtures/solutions-progress-merge.json, copied verbatim) is a real contract', () => {
   assert.ok(VECTORS.vectors.length >= 8, 'at least 8 vectors')
   assert.ok(Array.isArray(VECTORS.rules) && VECTORS.rules.length >= 5)
+  for (const vector of VECTORS.vectors) {
+    assert.ok('existing' in vector && 'incoming' in vector && 'expected' in vector && typeof vector.now === 'number', vector.name)
+  }
   const names = new Set(VECTORS.vectors.map((v) => v.name))
   assert.equal(names.size, VECTORS.vectors.length, 'vector names are unique')
+})
+
+// The fixture is the docs-site copy, verbatim: merge(existing, incoming) at
+// time `now`, incoming winning ties. The client calls merge(remote, local) on
+// load, the same roles as the server's mergeAll(stored, clientBody).
+const vectorSides = (vector) => ({
+  existing: vector.existing !== undefined ? vector.existing : vector.local,
+  incoming: vector.incoming !== undefined ? vector.incoming : vector.remote,
+  now: vector.now,
 })
 
 for (const vector of VECTORS.vectors) {
   test('merge vector: ' + vector.name, () => {
     const { api } = run({ page: 'none' })
-    assert.deepEqual(api.merge(vector.local, vector.remote), vector.expected)
+    const { existing, incoming, now } = vectorSides(vector)
+    assert.deepEqual(api.merge(existing, incoming, now), vector.expected)
   })
 }
 
-test('merge is deterministic and idempotent on its own output', () => {
+test('merging a store with itself is a no-op', () => {
   const { api } = run({ page: 'none' })
   for (const vector of VECTORS.vectors) {
-    const once = api.merge(vector.local, vector.remote)
-    assert.deepEqual(api.merge(once, once), once, vector.name + ': merging a store with itself is a no-op')
-    assert.deepEqual(api.merge(once, vector.remote), once, vector.name + ': re-merging the remote side changes nothing')
+    const { existing, incoming, now } = vectorSides(vector)
+    const once = api.merge(existing, incoming, now)
+    assert.deepEqual(api.merge(once, once, now), once, vector.name)
   }
+})
+
+test('the incoming side wins ties on updatedAt, like the server', () => {
+  const { api } = run({ page: 'none' })
+  const rec = (step) => ({ completedSteps: [step], currentStep: step, startedAt: 1000, updatedAt: 2000, completedAt: null, solutionVersion: 'v1.0.0' })
+  const merged = api.merge({ v: 1, solutions: { demo: rec('s1') } }, { v: 1, solutions: { demo: rec('s2') } }, 5000)
+  assert.equal(merged.solutions.demo.currentStep, 's2')
+  assert.deepEqual(merged.solutions.demo.completedSteps, ['s1', 's2'], 'existing (earlier) steps first, then incoming additions')
+})
+
+test('ids and versions are validated with the server regexes, and future timestamps are clamped', () => {
+  const { api } = run({ page: 'none' })
+  const now = 10000
+  const merged = api.merge({
+    v: 1,
+    solutions: {
+      demo: { completedSteps: ['ok-1', 'Bad Step', '-lead', 'x'.repeat(70), 's2'], currentStep: 'Nope!', startedAt: 1000, updatedAt: now + 60 * 60 * 1000, completedAt: null, solutionVersion: '1.0.0' },
+      'Not An Id': { completedSteps: ['s1'], currentStep: 's1', startedAt: 1, updatedAt: 1, completedAt: null, solutionVersion: 'v1.0.0' },
+    },
+  }, { v: 1, solutions: {} }, now)
+  assert.deepEqual(Object.keys(merged.solutions), ['demo'], 'invalid solution ids are dropped')
+  assert.deepEqual(merged.solutions.demo.completedSteps, ['ok-1', 's2'])
+  assert.equal(merged.solutions.demo.currentStep, null)
+  assert.equal(merged.solutions.demo.solutionVersion, null, 'version must look like vX.Y.Z')
+  assert.equal(merged.solutions.demo.updatedAt, now + 5 * 60 * 1000, 'clamped to now + 5 minutes')
+  assert.equal(merged.updatedAt, now + 5 * 60 * 1000)
+})
+
+test('completedAt is dropped when the two records are for different versions', () => {
+  const { api } = run({ page: 'none' })
+  const merged = api.merge(
+    { v: 1, solutions: { demo: { completedSteps: ['s1'], currentStep: 's1', startedAt: 1000, updatedAt: 4000, completedAt: 4000, solutionVersion: 'v1.0.0' } } },
+    { v: 1, solutions: { demo: { completedSteps: ['s1'], currentStep: 's1', startedAt: 1000, updatedAt: 6000, completedAt: 6000, solutionVersion: 'v1.1.0' } } },
+    10000)
+  assert.equal(merged.solutions.demo.completedAt, null)
+  assert.equal(merged.solutions.demo.solutionVersion, 'v1.1.0')
 })
 
 test('the API is exposed on every page, not only solution pages', () => {
@@ -198,7 +247,8 @@ test('first sign-in: GET, then PUT the merged store, and the server answer repla
   assert.equal(r.gets().length, 1, 'one GET')
   const puts = r.puts()
   assert.equal(puts.length, 1, 'one PUT on first sign-in')
-  const expected = r.api.merge(local, remote)
+  // Same roles as the server: stored copy is existing, this device is incoming.
+  const expected = r.api.merge(remote, local)
   assert.deepEqual(puts[0].body, { v: 1, updatedAt: expected.updatedAt, solutions: expected.solutions }, 'PUT payload is the merged store')
   assert.deepEqual(puts[0].body.solutions.demo.completedSteps, ['s1', 's2'], 'anonymous progress survives the first sign-in')
   assert.equal(puts[0].init.credentials, 'include')
