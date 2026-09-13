@@ -135,6 +135,59 @@ test('get-solutions-catalog normalizes facets to {value, count} from the extensi
   assert.match(filters, /<input type="checkbox" name="category" value="Clients"><span class="sol-filter-label">Clients<\/span><span class="sol-filter-count">2<\/span>/)
 })
 
+test('nav-tree-solution consumes the object shape the extension writes for page-solution-nav', () => {
+  const navHbs = Handlebars.create()
+  ;['eq', 'ne', 'or', 'gt', 'increment', 'parse-json', 'relativize', 'find-component', 'get-solutions-catalog'].forEach((name) => {
+    navHbs.registerHelper(name, helper(name))
+  })
+  navHbs.registerPartial('nav-tree-solution', read('src/partials/nav-tree-solution.hbs'))
+  const renderNav = navHbs.compile('{{> nav-tree-solution}}')
+
+  const nav = {
+    home: { title: 'Solutions', url: '/solutions/' },
+    overview: { title: 'Gaming', url: '/solutions/gaming/' },
+    steps: [
+      { id: 'start-environment', title: 'Start the environment', url: '/solutions/gaming/start-environment/', order: 1, duration: 5 },
+      { id: 'create-topics', title: 'Create the topics', url: '/solutions/gaming/create-topics/', order: 2, duration: 5 },
+    ],
+  }
+  const site = { components: { solutions: { name: 'solutions', url: '/solutions/', versions: [{ version: '' }], latestVersion: { version: '' } } } }
+  const stepPage = { layout: 'solution-step', url: '/solutions/gaming/create-topics/', component: { name: 'solutions', url: '/solutions/' }, attributes: { 'solution-nav': JSON.stringify(nav), 'solution-step-id': 'create-topics' } }
+
+  const html = renderNav({ site, page: stepPage, uiRootPath: '/_' })
+  assert.match(html, /class="nav-link sol-nav-home" href="\.\.\/\.\.\/">Solutions home/, 'home link from the component')
+  assert.match(html, /sol-nav-overview" data-depth="1">\s*<div class="item">\s*<a class="nav-link" href="\.\.\/">Overview<\/a>/, 'overview crumb without is-current on a step page')
+  assert.equal((html.match(/data-sol-nav-step="/g) || []).length, 2, 'two steps rendered')
+  assert.match(html, /data-sol-nav-url="\/solutions\/gaming\/start-environment\/" data-sol-nav-step="start-environment"/)
+  assert.match(html, /sol-nav-step is-current-page" data-depth="2" data-sol-nav-url="\/solutions\/gaming\/create-topics\/"/, 'current step from page-solution-step-id')
+  assert.doesNotMatch(html, /sol-nav-step is-current-page" data-depth="2" data-sol-nav-url="\/solutions\/gaming\/start-environment\//)
+  assert.match(html, /aria-current="page"[^>]*>\s*<span class="sol-nav-step-num" aria-hidden="true">2<\/span>/)
+
+  const overviewPage = Object.assign({}, stepPage, { layout: 'solution', url: '/solutions/gaming/', attributes: { 'solution-nav': JSON.stringify(nav) } })
+  const overviewHtml = renderNav({ site, page: overviewPage, uiRootPath: '/_' })
+  assert.match(overviewHtml, /sol-nav-overview is-current-page"/, 'overview is current on the overview page')
+  assert.doesNotMatch(overviewHtml, /sol-nav-step is-current-page"/)
+
+  // The old flat-array shape must not blow up; it simply renders no tree.
+  const legacy = renderNav({ site, page: Object.assign({}, stepPage, { attributes: { 'solution-nav': JSON.stringify([{ title: 'x', url: '/x/', kind: 'step', order: 1 }]) } }), uiRootPath: '/_' })
+  assert.doesNotMatch(legacy, /sol-nav-step/)
+  assert.match(legacy, /Solutions home/)
+})
+
+test('entry points render only when the solutions component exists', () => {
+  const header = read('src/partials/header-content.hbs')
+  const switcher = read('src/partials/product-switcher.hbs')
+  const home = read('src/partials/home.hbs')
+  for (const [name, src] of [['header-content', header], ['product-switcher', switcher], ['home', home]]) {
+    assert.match(src, /\(has-component site 'solutions'\)/, name + ' is guarded on the component')
+  }
+  assert.equal((header.match(/>Solutions<\/a>/g) || []).length, 2, 'top bar and overflow menu links')
+  assert.match(switcher, /data-product-id="solutions"/)
+  for (const attr of ['intent-solutions-title', 'intent-solutions-desc', 'intent-solutions-link', 'intent-solutions-cta']) {
+    assert.match(home, new RegExp('page\\.attributes\\.' + attr.replace(/-/g, '\\-')), attr)
+  }
+})
+
 test('the recommendation partial never renders a repository URL', () => {
   const html = render(page({ 'related-solutions': JSON.stringify(RECS) }))
   assert.doesNotMatch(html, /github\.com/)
