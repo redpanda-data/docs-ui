@@ -1,0 +1,95 @@
+{
+  "description": "Shared merge contract for Solutions progress. docs-ui (src/js/28-solution-progress.js, mergeStores) and docs-site (netlify/functions/lib/solutions-progress.mjs, mergeAll) must both produce `expected` from merge(local, remote). Copy this file verbatim into docs-site tests/fixtures/solutions-progress-merge.json.",
+  "rules": [
+    "Store shape: {v:1, updatedAt, solutions:{<id>:{completedSteps[], currentStep, startedAt, updatedAt, completedAt, solutionVersion}}}. Timestamps are epoch milliseconds; ISO 8601 strings are accepted on input and normalized to numbers.",
+    "Normalization before merging: completedSteps keeps only non-empty strings, deduplicated in first-seen order, capped at the last 100; currentStep and solutionVersion must be non-empty strings else null; unusable timestamps become null (updatedAt becomes 0).",
+    "Per solution: the record with the greater updatedAt is `later`; the other is `earlier`. On a tie the first argument (local) is `later`.",
+    "completedSteps = earlier.completedSteps followed by the later record's steps that are not already present (ordered union).",
+    "updatedAt = max(a.updatedAt, b.updatedAt). startedAt = min of the non-null values (null only when both are null).",
+    "currentStep = later.currentStep, falling back to earlier.currentStep when null. solutionVersion follows the same rule.",
+    "completedAt = the earliest non-null value when both solutionVersions are equal or either is null; when both are set and differ, completedAt = later.completedAt (which may be null).",
+    "Solutions present on only one side are copied unchanged (after normalization).",
+    "Store updatedAt = max(local.updatedAt, remote.updatedAt, every merged record's updatedAt).",
+    "After merging, keep at most 50 solutions, evicting the smallest updatedAt first."
+  ],
+  "vectors": [
+    {
+      "name": "remote-empty-keeps-local",
+      "local": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 0, "solutions": {} },
+      "expected": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } }
+    },
+    {
+      "name": "local-empty-takes-remote",
+      "local": { "v": 1, "updatedAt": 0, "solutions": {} },
+      "remote": { "v": 1, "updatedAt": 2500, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 2500, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 2500, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 2500, "completedAt": null, "solutionVersion": "v1.0.0" } } }
+    },
+    {
+      "name": "ordered-union-earlier-record-first",
+      "local": { "v": 1, "updatedAt": 3000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 3000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1", "s3"], "currentStep": "s3", "startedAt": 1500, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 3000, "solutions": { "demo": { "completedSteps": ["s1", "s3", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 3000, "completedAt": null, "solutionVersion": "v1.0.0" } } }
+    },
+    {
+      "name": "later-remote-wins-current-step",
+      "local": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 3000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1200, "updatedAt": 3000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 3000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 3000, "completedAt": null, "solutionVersion": "v1.0.0" } } }
+    },
+    {
+      "name": "tie-treats-local-as-later",
+      "local": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": null } } },
+      "remote": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": null } } },
+      "expected": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": null } } }
+    },
+    {
+      "name": "completed-at-earliest-when-versions-match",
+      "local": { "v": 1, "updatedAt": 5000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 5000, "completedAt": 5000, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 4000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 4000, "completedAt": 4000, "solutionVersion": "v1.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 5000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 5000, "completedAt": 4000, "solutionVersion": "v1.0.0" } } }
+    },
+    {
+      "name": "completed-at-from-later-record-when-versions-differ",
+      "local": { "v": 1, "updatedAt": 4000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 4000, "completedAt": 4000, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 6000, "solutions": { "demo": { "completedSteps": ["s1", "s2", "s3"], "currentStep": "s3", "startedAt": 1000, "updatedAt": 6000, "completedAt": null, "solutionVersion": "v1.1.0" } } },
+      "expected": { "v": 1, "updatedAt": 6000, "solutions": { "demo": { "completedSteps": ["s1", "s2", "s3"], "currentStep": "s3", "startedAt": 1000, "updatedAt": 6000, "completedAt": null, "solutionVersion": "v1.1.0" } } }
+    },
+    {
+      "name": "versions-differ-later-completed-at-wins-even-when-later",
+      "local": { "v": 1, "updatedAt": 7000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 7000, "completedAt": 7000, "solutionVersion": "v1.1.0" } } },
+      "remote": { "v": 1, "updatedAt": 4000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 4000, "completedAt": 4000, "solutionVersion": "v1.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 7000, "solutions": { "demo": { "completedSteps": ["s1", "s2"], "currentStep": "s2", "startedAt": 1000, "updatedAt": 7000, "completedAt": 7000, "solutionVersion": "v1.1.0" } } }
+    },
+    {
+      "name": "current-step-falls-back-when-later-is-null",
+      "local": { "v": 1, "updatedAt": 3000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": null, "startedAt": 1000, "updatedAt": 3000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 3000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 3000, "completedAt": null, "solutionVersion": "v1.0.0" } } }
+    },
+    {
+      "name": "disjoint-solutions-are-both-kept",
+      "local": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 1500, "solutions": { "other": { "completedSteps": ["a1"], "currentStep": "a1", "startedAt": 500, "updatedAt": 1500, "completedAt": null, "solutionVersion": "v2.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" }, "other": { "completedSteps": ["a1"], "currentStep": "a1", "startedAt": 500, "updatedAt": 1500, "completedAt": null, "solutionVersion": "v2.0.0" } } }
+    },
+    {
+      "name": "unknown-and-duplicate-steps-normalized",
+      "local": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1", "ghost", "s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": null } } },
+      "remote": { "v": 1, "updatedAt": 1000, "solutions": { "demo": { "completedSteps": [5, "s2", ""], "currentStep": "s2", "startedAt": 900, "updatedAt": 1000, "completedAt": null, "solutionVersion": null } } },
+      "expected": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s2", "s1", "ghost"], "currentStep": "s1", "startedAt": 900, "updatedAt": 2000, "completedAt": null, "solutionVersion": null } } }
+    },
+    {
+      "name": "store-updated-at-is-the-max",
+      "local": { "v": 1, "updatedAt": 9000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "remote": { "v": 1, "updatedAt": 0, "solutions": {} },
+      "expected": { "v": 1, "updatedAt": 9000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } }
+    },
+    {
+      "name": "iso-timestamps-normalized-to-milliseconds",
+      "local": { "v": 1, "updatedAt": 0, "solutions": {} },
+      "remote": { "v": 1, "updatedAt": "1970-01-01T00:00:02.000Z", "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": "1970-01-01T00:00:01.000Z", "updatedAt": "1970-01-01T00:00:02.000Z", "completedAt": null, "solutionVersion": "v1.0.0" } } },
+      "expected": { "v": 1, "updatedAt": 2000, "solutions": { "demo": { "completedSteps": ["s1"], "currentStep": "s1", "startedAt": 1000, "updatedAt": 2000, "completedAt": null, "solutionVersion": "v1.0.0" } } }
+    }
+  ]
+}
