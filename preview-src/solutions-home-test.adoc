@@ -1,0 +1,9 @@
+= Redpanda Solutions
+:description: Complete, runnable systems built on Redpanda, step by step.
+:page-layout: solutions-home
+// The catalog itself lives on the `solutions` component in ui-model.yml
+// (attribute solutions-catalog), the same place the solutions-catalog
+// extension puts it in a real build. This page only needs the layout.
+:page-hero-eyebrow: Redpanda Solutions
+:page-hero-title: Build real systems on Redpanda.
+:page-hero-subtitle: Each Solution is a complete, runnable architecture you build step by step, with verification at every stage and a clear path to production.

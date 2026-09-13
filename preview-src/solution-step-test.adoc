@@ -1,0 +1,64 @@
+= Start the environment
+:description: Bring up Redpanda, Console, Redis, Postgres and Redpanda Connect with one command and confirm every service is healthy.
+:page-layout: solution-step
+:page-topic-type: solution
+:page-solution-step: start-environment
+:page-solution-step-index: 1
+:page-solution-step-count: 4
+:page-solution-next-url: /solutions/multiplayer-gaming/create-topics/
+:page-solution-next-title: Create the topics
+// Scalar mirrors of the overview attributes (set on every step page by the solutions-catalog extension).
+:page-solution-version: v1.0.0
+:page-solution-difficulty: intermediate
+:page-solution-duration: 45
+:page-solution-status: published
+:page-solution-download: authenticated
+:page-solution: {"id":"multiplayer-gaming","title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html","description":"Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.","status":"published","difficulty":"intermediate","duration":45,"featured":true,"platforms":["self-managed","cloud"],"technologies":["Go","Protobuf","Schema Registry","Redpanda Connect","Redis","Postgres"],"categories":["Stream Processing","Clients","Schema Registry","Integration"],"version":"v1.0.0","tag":"multiplayer-gaming/v1.0.0","asset":"multiplayer-gaming-v1.0.0.zip","download":"authenticated","steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"relatedDocs":[{"id":"streaming:develop:consume-data/consumer-offsets.adoc","title":"Consumer offsets","url":"/streaming/24.3/index.html","provenance":"explicit"},{"id":"streaming:manage:schema-reg/schema-reg-overview.adoc","title":"Schema Registry overview","url":"/streaming/24.3/index.html","provenance":"explicit"}],"relatedSolutions":[],"attachments":[{"name":"docker-compose.yml","url":"/solutions/multiplayer-gaming/_attachments/docker-compose.yml"},{"name":".env.example","url":"/solutions/multiplayer-gaming/_attachments/.env.example"},{"name":"scripts/verify.sh","url":"/solutions/multiplayer-gaming/_attachments/scripts/verify.sh"}],"lastModified":"2026-09-10T12:00:00Z"}
+:page-solution-nav: [{"title":"Overview","url":"/solutions-test.html","kind":"overview","order":0,"current":false},{"title":"Start the environment","url":"/solution-step-test.html","kind":"step","order":1,"current":true},{"title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","kind":"step","order":2,"current":false},{"title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","kind":"step","order":3,"current":false},{"title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","kind":"step","order":4,"current":false}]
+
+== What you do
+
+Copy the example environment file and start every service with Docker Compose. Compose waits for the health checks, so the command returns only when Redpanda, Console, Redis, Postgres and Redpanda Connect are ready.
+
+[source,bash]
+----
+cp .env.example .env
+docker compose up -d --wait
+----
+
+== Why
+
+Everything downstream assumes a healthy broker and a reachable Schema Registry. Starting the platform first and verifying it means later failures are about your code, not the environment.
+
+== What happens inside
+
+Redpanda starts as a single broker with the Kafka API on `9092`, the Schema Registry on `8081` and the HTTP Proxy on `8082`. Console connects to all three and turns on Protobuf decoding for the `game.*` topics.
+
+[.solution-verify]
+.Verify
+****
+Check that the cluster is healthy and that Connect is ready to accept a pipeline:
+
+[source,bash]
+----
+rpk cluster health
+curl -s localhost:4195/ready
+----
+
+Expected output:
+
+[source]
+----
+CLUSTER HEALTH OVERVIEW
+=======================
+Healthy:                          true
+...
+OK
+----
+****
+
+[.production-note]
+.In production
+****
+Do not run Console on the same host as a broker, and put the Schema Registry behind TLS: every producer and consumer in this Solution fetches schemas from it.
+****
