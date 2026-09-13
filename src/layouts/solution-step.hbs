@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Untitled'}}
+{{> head-component-color}}
+  </head>
+  {{!-- See solution.hbs for why page-solution is parsed per partial. Step
+        pages add the step id and position from the page-solution-step-*
+        attributes the solutions-catalog extension sets. --}}
+  <body class="article solution-step{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}" data-step-id="{{@root.page.attributes.solution-step}}" data-step-index="{{@root.page.attributes.solution-step-index}}" data-solution-step-count="{{@root.page.attributes.solution-step-count}}"{{/with}}>
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article solution-step">
+  {{> toolbar}}
+  <div class="content">
+    <article class="doc sol-doc sol-step-doc">
+      {{> breadcrumbs}}
+      {{> solution-step-header solution=(parse-json page.attributes.solution)}}
+      <div class="sol-layout">
+        <div class="sol-main">
+          {{{page.contents}}}
+          {{> solution-step-actions solution=(parse-json page.attributes.solution)}}
+        </div>
+        <aside class="sol-rail">
+          <details class="sol-rail-details" data-sol-rail open>
+            <summary class="sol-rail-summary">Progress and files</summary>
+            <div class="sol-rail-body">
+              {{> solution-progress solution=(parse-json page.attributes.solution)}}
+              {{> solution-code-download solution=(parse-json page.attributes.solution)}}
+            </div>
+          </details>
+        </aside>
+      </div>
+      {{> feedback-footer}}
+      {{> tracking-pixel}}
+    </article>
+  </div>
+  {{> footer}}
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Redpanda Solutions'}}
+{{> head-component-color}}
+  </head>
+  <body class="article solutions-home" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}>
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article solutions-home">
+  {{> toolbar}}
+  <div class="content">
+    <article class="doc sol-doc sol-home">
+      {{> breadcrumbs}}
+      <header class="sol-hero sol-hero--home">
+        <div class="sol-eyebrow"><span class="sol-eyebrow-label">{{#if page.attributes.hero-eyebrow}}{{page.attributes.hero-eyebrow}}{{else}}Redpanda Solutions{{/if}}</span></div>
+        <h1 class="page sol-title">{{#if page.attributes.hero-title}}{{{page.attributes.hero-title}}}{{else}}{{{page.title}}}{{/if}}</h1>
+        <p class="sol-lede">{{#if page.attributes.hero-subtitle}}{{page.attributes.hero-subtitle}}{{else}}Complete, runnable systems built on Redpanda. Each Solution walks you through a real architecture step by step, verifies the outcome, and shows what changes in production.{{/if}}</p>
+      </header>
+      {{{page.contents}}}
+      {{#with (get-solutions-catalog) as |catalog|}}
+      <section class="sol-continue" data-sol-continue hidden aria-labelledby="sol-continue-title">
+        <div class="sol-recs-head">
+          <h2 id="sol-continue-title" class="sol-section-title">Continue learning</h2>
+          <p class="sol-recs-sub" data-sol-continue-sub>Pick up where you left off.</p>
+        </div>
+        <div class="sol-continue-grid" data-sol-continue-grid></div>
+      </section>
+      <div class="sol-home-layout">
+        {{> solutions-filters catalog=catalog}}
+        {{> solutions-grid catalog=catalog}}
+      </div>
+      <script type="application/json" data-sol-catalog>{{{catalog.json}}}</script>
+      {{else}}
+      <div class="sol-empty" data-sol-empty>
+        <h3>No Solutions published yet</h3>
+        <p>Solutions appear here as soon as the first one is published.</p>
+      </div>
+      {{/with}}
+      {{> feedback-footer}}
+      {{> tracking-pixel}}
+    </article>
+  </div>
+  {{> footer}}
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

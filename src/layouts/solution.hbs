@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Untitled'}}
+{{> head-component-color}}
+  </head>
+  {{!-- page-solution is the record the solutions-catalog extension writes at
+        build time. It is parsed per partial (solution=...) so every shared
+        partial (header, nav, footer) keeps the root context. When the
+        attribute is missing the data-solution-* attributes are omitted and
+        28-solution-progress.js leaves the page alone. --}}
+  <body class="article solution{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}" data-solution-step-count="{{steps.length}}"{{/with}}>
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article solution">
+  {{> toolbar}}
+  <div class="content">
+    <article class="doc sol-doc">
+      {{> breadcrumbs}}
+      {{> solution-hero solution=(parse-json page.attributes.solution)}}
+      {{> solution-meta solution=(parse-json page.attributes.solution)}}
+      <div class="sol-layout">
+        <div class="sol-main">
+          {{{page.contents}}}
+          {{> solution-steps solution=(parse-json page.attributes.solution)}}
+          {{> solution-related-docs solution=(parse-json page.attributes.solution)}}
+        </div>
+        <aside class="sol-rail">
+          <details class="sol-rail-details" data-sol-rail open>
+            <summary class="sol-rail-summary">Progress and files</summary>
+            <div class="sol-rail-body">
+              {{> solution-progress solution=(parse-json page.attributes.solution)}}
+              {{> solution-code-download solution=(parse-json page.attributes.solution)}}
+            </div>
+          </details>
+        </aside>
+      </div>
+      {{> feedback-footer}}
+      {{> tracking-pixel}}
+    </article>
+  </div>
+  {{> footer}}
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

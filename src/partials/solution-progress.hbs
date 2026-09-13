@@ -1,0 +1,51 @@
+{{!--
+  Progress panel for the sticky rail. Context: `solution`.
+  Everything here is driven by 28-solution-progress.js: the bar, the "n of M"
+  count, the state line, the save control and its sync state, the
+  version-changed notice, and the done panel. Server-rendered text is the
+  anonymous, nothing-started baseline so the panel reads correctly without JS.
+--}}
+<section class="sol-panel sol-progress" data-sol-progress data-sol-step-count="{{solution.steps.length}}" aria-labelledby="sol-progress-title">
+  <div class="sol-panel-head">
+    <h3 id="sol-progress-title" class="sol-panel-title">Your progress</h3>
+    <span class="sol-progress-count" data-sol-progress-count>0 of {{solution.steps.length}}</span>
+  </div>
+  <div class="sol-bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" data-sol-progress-bar>
+    <div class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></div>
+  </div>
+  <p class="sol-progress-state" data-sol-progress-state>Not started</p>
+  {{!-- Compact step list: the id/url pairs 28-solution-progress.js needs on
+        every solution page (the overview's big list lives in solution-steps).
+        Shown in the rail on step pages only; see solutions.css. --}}
+  <ol class="sol-progress-steps" data-sol-progress-steps>
+    {{#each solution.steps}}
+    <li class="sol-progress-step" data-sol-step-id="{{id}}" data-sol-step-url="{{url}}">
+      <a href="{{{relativize url}}}">
+        <span class="sol-progress-step-check" data-sol-step-check aria-hidden="true">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <span class="sol-progress-step-title">{{title}}</span>
+        <span class="visually-hidden" data-sol-step-status></span>
+      </a>
+    </li>
+    {{/each}}
+  </ol>
+  <div class="sol-version-notice" data-sol-version-notice role="status" hidden>
+    <p>This Solution has been updated to <code data-sol-version-new>{{solution.version}}</code> since you last worked on it. Your progress is kept, but some steps may have changed.</p>
+    <button type="button" class="sol-link-btn" data-sol-version-dismiss>Got it</button>
+  </div>
+  <div class="sol-progress-actions">
+    <button type="button" class="sol-btn sol-btn--ghost sol-btn--sm" data-sol-save data-intent="save" data-analytics="solution_save_progress">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span data-sol-save-label>Save progress</span>
+    </button>
+    <span class="sol-sync-state" data-sol-sync-state aria-live="polite"></span>
+  </div>
+  <div class="sol-done" data-sol-done hidden>
+    <p class="sol-done-title">You finished this Solution.</p>
+    <p class="sol-done-sub">Keep the complete example around for your own projects.</p>
+    {{#unless (eq solution.download 'none')}}
+    <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow">Download the complete example</a>
+    {{/unless}}
+  </div>
+</section>
