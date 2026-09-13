@@ -12,6 +12,70 @@
 
 /* ---- shared primitives ---------------------------------------------------- */
 
+/* doc.css underlines every `.doc a` (0,1,1) and recolors it. The Solutions
+   surfaces are anchors wrapping cards and chips, so beat that specificity
+   here: no underline on the anchor (which is what propagates to the chips),
+   and a hover treatment that underlines only the title. */
+.doc .sol-card,
+.doc .sol-card:hover,
+.doc .sol-rec-card,
+.doc .sol-rec-card:hover,
+.doc .sol-step-link,
+.doc .sol-step-link:hover,
+.doc .sol-eyebrow-link,
+.doc .sol-related-link,
+.doc .sol-file-link,
+.doc .sol-progress-step a,
+.doc .sol-btn,
+.doc .sol-btn:hover,
+.doc .sol-step-nav,
+.doc .sol-continue .sol-rec-card {
+  text-decoration: none;
+}
+
+.doc .sol-card:hover .sol-card-title,
+.doc .sol-rec-card:hover .sol-rec-title,
+.doc .sol-step-link:hover .sol-step-title,
+.doc .sol-eyebrow-link:hover,
+.doc .sol-related-link:hover span,
+.doc .sol-file-link:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.doc .sol-card,
+.doc .sol-rec-card,
+.doc .sol-step-link {
+  color: inherit;
+}
+
+.doc .sol-eyebrow-link,
+.doc .sol-eyebrow-link:hover {
+  color: var(--component-600);
+}
+
+.doc .sol-related-link,
+.doc .sol-file-link,
+.doc .sol-progress-step a {
+  color: var(--grey-700-new);
+}
+
+.doc .sol-related-link:hover,
+.doc .sol-file-link:hover,
+.doc .sol-progress-step a:hover {
+  color: var(--component-700);
+}
+
+.doc .sol-btn--primary,
+.doc .sol-btn--primary:hover {
+  color: var(--grey-50-new);
+}
+
+.doc .sol-btn--ghost,
+.doc .sol-btn--ghost:hover {
+  color: var(--component-700);
+}
+
 /* Surface color. vars.css has no white token (grey-50-new is off-white), so
    panels, cards and buttons use one local custom property for it. */
 .sol-doc,
@@ -1091,6 +1155,17 @@
 
 .sol-filter-row input {
   margin: 0;
+}
+
+.sol-filter-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.sol-filter-count {
+  margin-left: auto;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--grey-400-new);
 }
 
 .sol-results-head {
