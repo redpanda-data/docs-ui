@@ -2,7 +2,7 @@
 :description: Bring up Redpanda, Console, Redis, Postgres and Redpanda Connect with one command and confirm every service is healthy.
 :page-layout: solution-step
 :page-topic-type: solution
-:page-solution-step: start-environment
+:page-solution-step-id: start-environment
 :page-solution-step-index: 1
 :page-solution-step-count: 4
 :page-solution-next-url: /solutions/multiplayer-gaming/create-topics/

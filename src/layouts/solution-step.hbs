@@ -7,7 +7,7 @@
   {{!-- See solution.hbs for why page-solution is parsed per partial. Step
         pages add the step id and position from the page-solution-step-*
         attributes the solutions-catalog extension sets. --}}
-  <body class="article solution-step{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}" data-step-id="{{@root.page.attributes.solution-step}}" data-step-index="{{@root.page.attributes.solution-step-index}}" data-solution-step-count="{{@root.page.attributes.solution-step-count}}"{{/with}}>
+  <body class="article solution-step{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}" data-step-id="{{@root.page.attributes.solution-step-id}}" data-step-index="{{@root.page.attributes.solution-step-index}}" data-solution-step-count="{{@root.page.attributes.solution-step-count}}"{{/with}}>
 {{> header}}
 <div class="body no-keep-markup">
 {{> nav}}
