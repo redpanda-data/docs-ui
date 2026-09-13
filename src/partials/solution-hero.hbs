@@ -8,7 +8,9 @@
     <span class="sol-eyebrow-label">Solution</span>
     {{#if (eq solution.status 'deprecated')}}
     <span class="sol-chip sol-chip--status is-deprecated">Deprecated</span>
-    {{else if (eq solution.status 'draft')}}
+    {{else if (or (eq solution.status 'draft') solution.draft)}}
+    {{!-- status 'draft', or draft: true, which the extension adds when a
+          preview build includes drafts. --}}
     <span class="sol-chip sol-chip--status is-draft">Draft</span>
     {{/if}}
     {{#if solution.featured}}

@@ -16,7 +16,7 @@
    data-analytics="solution_card_click">
   <div class="sol-card-head">
     <span class="sol-card-eyebrow">{{#if solution.featured}}Featured Solution{{else}}Solution{{/if}}</span>
-    {{#if (eq solution.status 'deprecated')}}<span class="sol-chip sol-chip--status is-deprecated">Deprecated</span>{{/if}}
+    {{#if (eq solution.status 'deprecated')}}<span class="sol-chip sol-chip--status is-deprecated">Deprecated</span>{{else if (or (eq solution.status 'draft') solution.draft)}}<span class="sol-chip sol-chip--status is-draft">Draft</span>{{/if}}
   </div>
   <h3 class="sol-card-title">{{solution.title}}</h3>
   {{#if solution.description}}<p class="sol-card-desc">{{solution.description}}</p>{{/if}}
