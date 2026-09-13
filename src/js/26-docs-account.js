@@ -47,7 +47,9 @@
     // The feature list pitches the AI agent; it is noise under a task-specific
     // title like "Sign in to save your progress".
     if (modalFeatures) modalFeatures.hidden = custom
-    customReturnTo = custom && typeof detail.returnTo === 'string' && detail.returnTo.charAt(0) === '/'
+    // Same-origin paths only: one leading slash, and not a protocol-relative
+    // `//host` or `/\host` form that browsers treat as another origin.
+    customReturnTo = custom && typeof detail.returnTo === 'string' && /^\/(?![/\\])/.test(detail.returnTo)
       ? detail.returnTo
       : null
     applyHrefs()
