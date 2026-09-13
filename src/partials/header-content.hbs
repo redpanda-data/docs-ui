@@ -90,6 +90,13 @@
             </svg>
           </a>
           {{/if}}
+          {{!-- Solutions entry point; renders only when the site has the
+                component (Labs goes away at retirement). --}}
+          {{#if (has-component site 'solutions')}}
+          {{#with (find-component site 'solutions')}}
+          <a class="tb-link tb-link-solutions" href="{{{relativize this.url}}}">Solutions</a>
+          {{/with}}
+          {{/if}}
           <a class="tb-link tb-link-labs" href="/labs">Labs</a>
         </div>
 
@@ -103,6 +110,11 @@
             </svg>
           </button>
           <div class="tb-dropdown-menu tb-overflow-dropdown" role="menu">
+            {{#if (has-component site 'solutions')}}
+            {{#with (find-component site 'solutions')}}
+            <a class="tb-dropdown-item" href="{{{relativize this.url}}}">Solutions</a>
+            {{/with}}
+            {{/if}}
             <a class="tb-dropdown-item" href="/labs">Labs</a>
             {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
             <a class="tb-dropdown-item" data-cloud-link href="https://cloud.redpanda.com/?utm_source=docs" target="_blank" rel="noopener noreferrer">Cloud Console</a>

@@ -1323,6 +1323,49 @@
   gap: 0.5rem;
 }
 
+/* ---- home page intent card ------------------------------------------------- */
+
+/* Third card under the two intent cards (home.hbs): spans both columns as a
+   compact banner rather than a third tall column. --product-color is the
+   component's signature hue from component-metadata. */
+.home-intent-card--solutions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  min-height: 0;
+  padding: 1.25rem 1.5rem;
+  border-color: var(--product-color, var(--component-600));
+  background: linear-gradient(90deg, rgba(180, 83, 9, 0.06), transparent 60%);
+}
+
+.home-intent-card--solutions .home-intent-card-header-row {
+  flex: 1 1 24rem;
+  min-width: 0;
+}
+
+.home-intent-card-icon--solutions {
+  color: var(--product-color, var(--component-600));
+  border-color: var(--product-color, var(--component-600));
+}
+
+.home-intent-card--solutions .home-intent-card-links {
+  margin: 0;
+  flex: none;
+}
+
+.home-intent-card--solutions .home-intent-card-cta {
+  color: var(--product-color, var(--component-700));
+}
+
+@media (max-width: 768px) {
+  .home-intent-card--solutions {
+    padding: 1rem;
+  }
+}
+
 /* ---- toast ----------------------------------------------------------------- */
 
 .sol-toast {
