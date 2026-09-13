@@ -176,7 +176,7 @@ site:
           component-metadata:
             title: Solutions
             description: Complete, runnable systems built on Redpanda.
-            color: '#0F766E'
+            color: '#B45309'
             icon: rocket
             order: 11
           solutions-catalog:

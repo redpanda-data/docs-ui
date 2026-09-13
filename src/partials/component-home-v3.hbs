@@ -717,7 +717,8 @@
   {{/if}}
 
   {{!-- Build it in practice: Solutions for this product. Hand-picked
-        page-solutions-* slots win when set; otherwise the automatic
+        page-solutions-N-title/-link/-desc/-id slots win when set (the id is the
+        solution's slug, for analytics); otherwise the automatic
         page-related-solutions recommendations render (nothing when empty). --}}
   {{#if (and page.attributes.solutions-title (or page.attributes.solutions-1-title page.attributes.solutions-2-title page.attributes.solutions-3-title))}}
   <section class="ch3-section sol-recs sol-recs--home" data-sol-recs data-component="{{page.component.name}}">
@@ -729,21 +730,21 @@
     </div>
     <div class="sol-recs-grid">
       {{#if page.attributes.solutions-1-title}}
-      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-1-link)}}}" data-sol-rec data-provenance="editorial" data-position="1" data-analytics="product_doc_solution_rec_click">
+      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-1-link)}}}" data-sol-rec data-solution-id="{{page.attributes.solutions-1-id}}" data-provenance="editorial" data-position="1" data-analytics="product_doc_solution_rec_click">
         <span class="sol-rec-eyebrow">Solution</span>
         <span class="sol-rec-title">{{{page.attributes.solutions-1-title}}}</span>
         {{#if page.attributes.solutions-1-desc}}<span class="sol-rec-desc">{{{page.attributes.solutions-1-desc}}}</span>{{/if}}
       </a>
       {{/if}}
       {{#if page.attributes.solutions-2-title}}
-      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-2-link)}}}" data-sol-rec data-provenance="editorial" data-position="2" data-analytics="product_doc_solution_rec_click">
+      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-2-link)}}}" data-sol-rec data-solution-id="{{page.attributes.solutions-2-id}}" data-provenance="editorial" data-position="2" data-analytics="product_doc_solution_rec_click">
         <span class="sol-rec-eyebrow">Solution</span>
         <span class="sol-rec-title">{{{page.attributes.solutions-2-title}}}</span>
         {{#if page.attributes.solutions-2-desc}}<span class="sol-rec-desc">{{{page.attributes.solutions-2-desc}}}</span>{{/if}}
       </a>
       {{/if}}
       {{#if page.attributes.solutions-3-title}}
-      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-3-link)}}}" data-sol-rec data-provenance="editorial" data-position="3" data-analytics="product_doc_solution_rec_click">
+      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-3-link)}}}" data-sol-rec data-solution-id="{{page.attributes.solutions-3-id}}" data-provenance="editorial" data-position="3" data-analytics="product_doc_solution_rec_click">
         <span class="sol-rec-eyebrow">Solution</span>
         <span class="sol-rec-title">{{{page.attributes.solutions-3-title}}}</span>
         {{#if page.attributes.solutions-3-desc}}<span class="sol-rec-desc">{{{page.attributes.solutions-3-desc}}}</span>{{/if}}
