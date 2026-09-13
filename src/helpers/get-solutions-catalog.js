@@ -22,7 +22,9 @@
  *                deprecated records sort last
  *     featured:  published records flagged featured
  *     recent:    up to 6 published records by lastModified desc
- *     facets:    { categories, technologies, difficulty, platforms } (arrays)
+ *     facets:    { categories, technologies, difficulty, platforms }, each an
+ *                array of {value, count} (the extension's shape; plain string
+ *                arrays are accepted and counted from the records)
  *     count:     all.length
  *     json:      the catalog serialized for a <script type="application/json">
  *                block (`</` is escaped so it cannot close the script tag)
@@ -113,22 +115,49 @@ function sortAll (a, b) {
   return String(a.title || '').localeCompare(String(b.title || ''))
 }
 
-function collect (records, key) {
-  const seen = new Set()
-  records.forEach((record) => toArray(record[key]).forEach((value) => value && seen.add(String(value))))
-  return Array.from(seen).sort((a, b) => a.localeCompare(b))
+// Facets. The solutions-catalog extension publishes each facet as an array of
+// `{value, count}` objects (`facets.categories = [{value: 'Clients', count: 1},
+// ...]`). Older or hand-written catalogs may use plain string arrays; both
+// normalize to `[{value, count}]`, with counts derived from the published
+// records when the input has none.
+function countValues (records, key) {
+  const counts = new Map()
+  records.forEach((record) => toArray(record[key]).forEach((value) => {
+    if (!value) return
+    counts.set(String(value), (counts.get(String(value)) || 0) + 1)
+  }))
+  return counts
+}
+
+function normalizeFacet (input, records, key) {
+  const counts = countValues(records, key)
+  const items = toArray(input)
+    .map((item) => {
+      if (item && typeof item === 'object') {
+        const value = item.value !== undefined ? item.value : item.name
+        if (value === undefined || value === null || value === '') return null
+        const count = Number(item.count)
+        return { value: String(value), count: isFinite(count) ? count : counts.get(String(value)) || 0 }
+      }
+      if (item === undefined || item === null || item === '') return null
+      return { value: String(item), count: counts.get(String(item)) || 0 }
+    })
+    .filter(Boolean)
+  if (items.length) return items
+  return Array.from(counts.keys())
+    .sort((a, b) => a.localeCompare(b))
+    .map((value) => ({ value, count: counts.get(value) }))
 }
 
 function normalizeFacets (facets, records) {
   facets = facets && typeof facets === 'object' ? facets : {}
-  const difficulty = toArray(facets.difficulty).length
-    ? toArray(facets.difficulty)
-    : collect(records, 'difficulty')
   return {
-    categories: toArray(facets.categories).length ? toArray(facets.categories) : collect(records, 'categories'),
-    technologies: toArray(facets.technologies).length ? toArray(facets.technologies) : collect(records, 'technologies'),
-    difficulty: difficulty.slice().sort((a, b) => DIFFICULTY_ORDER.indexOf(a) - DIFFICULTY_ORDER.indexOf(b)),
-    platforms: toArray(facets.platforms).length ? toArray(facets.platforms) : collect(records, 'platforms'),
+    categories: normalizeFacet(facets.categories, records, 'categories'),
+    technologies: normalizeFacet(facets.technologies, records, 'technologies'),
+    difficulty: normalizeFacet(facets.difficulty, records, 'difficulty')
+      .slice()
+      .sort((a, b) => DIFFICULTY_ORDER.indexOf(a.value) - DIFFICULTY_ORDER.indexOf(b.value)),
+    platforms: normalizeFacet(facets.platforms, records, 'platforms'),
   }
 }
 

@@ -182,11 +182,32 @@ site:
           solutions-catalog:
             generatedAt: '2026-09-12T08:00:00Z'
             siteUrl: https://docs.redpanda.com
+            # Facets are arrays of {value, count}, the shape the extension publishes.
             facets:
-              categories: [Clients, Integration, Schema Registry, Stream Processing, Kubernetes, Migration]
-              technologies: [Go, Protobuf, Schema Registry, Redpanda Connect, Redis, Postgres, Iceberg, Envoy, Kubernetes]
-              difficulty: [beginner, intermediate, advanced]
-              platforms: [self-managed, cloud]
+              categories:
+              - { value: Clients, count: 1 }
+              - { value: Integration, count: 2 }
+              - { value: Kubernetes, count: 1 }
+              - { value: Migration, count: 1 }
+              - { value: Schema Registry, count: 2 }
+              - { value: Stream Processing, count: 2 }
+              technologies:
+              - { value: Envoy, count: 1 }
+              - { value: Go, count: 1 }
+              - { value: Iceberg, count: 1 }
+              - { value: Kubernetes, count: 1 }
+              - { value: Postgres, count: 2 }
+              - { value: Protobuf, count: 1 }
+              - { value: Redis, count: 1 }
+              - { value: Redpanda Connect, count: 3 }
+              - { value: Schema Registry, count: 2 }
+              difficulty:
+              - { value: beginner, count: 1 }
+              - { value: intermediate, count: 1 }
+              - { value: advanced, count: 2 }
+              platforms:
+              - { value: self-managed, count: 4 }
+              - { value: cloud, count: 2 }
             solutions:
             - id: multiplayer-gaming
               title: Multiplayer game events and live leaderboard

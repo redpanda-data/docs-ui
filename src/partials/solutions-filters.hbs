@@ -1,9 +1,10 @@
 {{!--
-  Landing page filters. Context: `catalog` from get-solutions-catalog.
+  Landing page filters. Context: `catalog` from get-solutions-catalog; each
+  facet is an array of {value, count}. The checkbox value is the raw facet
+  value, which is what 29-solutions-home.js matches against the cards'
+  data-* attributes and writes into the URL (?category=&difficulty=&tech=&platform=).
   Rendered as <details> so it can collapse on narrow screens; on desktop the
-  summary is hidden and 29-solutions-home.js keeps it open. Filtering is
-  client-side over the embedded catalog JSON with URL state
-  (?q=&category=&difficulty=&tech=&platform=).
+  summary is hidden and 29-solutions-home.js keeps it open.
 --}}
 <details class="sol-filters" data-sol-filters open>
   <summary class="sol-filters-summary">
@@ -20,7 +21,7 @@
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Difficulty</legend>
       {{#each catalog.facets.difficulty}}
-      <label class="sol-filter-row"><input type="checkbox" name="difficulty" value="{{this}}"><span class="sol-diff is-{{this}}">{{this}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="difficulty" value="{{value}}"><span class="sol-diff is-{{value}}">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
       {{/each}}
     </fieldset>
     {{/if}}
@@ -28,7 +29,7 @@
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Category</legend>
       {{#each catalog.facets.categories}}
-      <label class="sol-filter-row"><input type="checkbox" name="category" value="{{this}}"><span>{{this}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="category" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
       {{/each}}
     </fieldset>
     {{/if}}
@@ -36,7 +37,7 @@
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Technology</legend>
       {{#each catalog.facets.technologies}}
-      <label class="sol-filter-row"><input type="checkbox" name="tech" value="{{this}}"><span>{{this}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="tech" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
       {{/each}}
     </fieldset>
     {{/if}}
@@ -44,7 +45,7 @@
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Runs on</legend>
       {{#each catalog.facets.platforms}}
-      <label class="sol-filter-row"><input type="checkbox" name="platform" value="{{this}}"><span>{{#if (eq this 'self-managed')}}Self-Managed{{else if (eq this 'cloud')}}Cloud{{else}}{{this}}{{/if}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="platform" value="{{value}}"><span class="sol-filter-label">{{#if (eq value 'self-managed')}}Self-Managed{{else if (eq value 'cloud')}}Cloud{{else}}{{value}}{{/if}}</span><span class="sol-filter-count">{{count}}</span></label>
       {{/each}}
     </fieldset>
     {{/if}}

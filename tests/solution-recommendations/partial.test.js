@@ -112,6 +112,29 @@ test('add-suggested-labs.js returns the content unchanged when related-solutions
   assert.match(malformed, /Suggested labs/, 'malformed JSON counts as none')
 })
 
+test('get-solutions-catalog normalizes facets to {value, count} from the extension shape and from plain strings', () => {
+  const getCatalog = helper('get-solutions-catalog')
+  const records = [
+    { id: 'a', title: 'A', url: '/solutions/a/', status: 'published', difficulty: 'advanced', categories: ['Clients', 'Integration'], technologies: ['Go'], platforms: ['cloud'] },
+    { id: 'b', title: 'B', url: '/solutions/b/', status: 'published', difficulty: 'beginner', categories: ['Clients'], technologies: ['Go', 'Redis'], platforms: ['self-managed', 'cloud'] },
+  ]
+  const call = (facets) => getCatalog({ data: { root: { page: { attributes: { 'solutions-catalog': JSON.stringify({ solutions: records, facets }) } } } } })
+
+  const fromExtension = call({ categories: [{ value: 'Clients', count: 2 }, { value: 'Integration', count: 1 }], difficulty: [{ value: 'advanced', count: 1 }, { value: 'beginner', count: 1 }] })
+  assert.deepEqual(fromExtension.facets.categories, [{ value: 'Clients', count: 2 }, { value: 'Integration', count: 1 }])
+  assert.deepEqual(fromExtension.facets.difficulty.map((f) => f.value), ['beginner', 'advanced'], 'difficulty sorted by level')
+  assert.deepEqual(fromExtension.facets.technologies, [{ value: 'Go', count: 2 }, { value: 'Redis', count: 1 }], 'missing facets are derived from the records')
+
+  const fromStrings = call({ categories: ['Integration', 'Clients'], platforms: ['cloud', 'self-managed'] })
+  assert.deepEqual(fromStrings.facets.categories, [{ value: 'Integration', count: 1 }, { value: 'Clients', count: 2 }], 'plain strings gain counts')
+  assert.deepEqual(fromStrings.facets.platforms, [{ value: 'cloud', count: 2 }, { value: 'self-managed', count: 1 }])
+
+  // The filters partial renders the value, never the object.
+  const filters = hbs.compile(read('src/partials/solutions-filters.hbs'))({ catalog: fromExtension })
+  assert.doesNotMatch(filters, /\[object Object\]/)
+  assert.match(filters, /<input type="checkbox" name="category" value="Clients"><span class="sol-filter-label">Clients<\/span><span class="sol-filter-count">2<\/span>/)
+})
+
 test('the recommendation partial never renders a repository URL', () => {
   const html = render(page({ 'related-solutions': JSON.stringify(RECS) }))
   assert.doesNotMatch(html, /github\.com/)
