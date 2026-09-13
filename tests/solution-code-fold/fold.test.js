@@ -1,8 +1,13 @@
 /**
  * Long code blocks on solution pages (src/js/30-solution-code-fold.js):
- * fold/unfold over 30 lines, no double-fold inside a closed <details>, the
- * copy button still sees the full text, file header bars from titles, and
- * line counts on collapsible summaries.
+ * fold by rendered height (not source lines), unfold, re-measure on resize,
+ * no double-fold inside a closed <details> (fold once it opens), the copy
+ * button still sees the full text, file header bars from titles, and line
+ * counts on collapsible summaries.
+ *
+ * The stub's getComputedStyle reports a 24px line-height and 16px vertical
+ * padding, so a block folds to 14 * 24 + 32 = 368px and is considered tall
+ * above 16 * 24 + 32 = 416px of scrollHeight.
  */
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -12,6 +17,9 @@ const vm = require('node:vm')
 const { el, makeDocument } = require('../solution-progress/helpers/dom')
 
 const SCRIPT = fs.readFileSync(path.join(__dirname, '../../src/js/30-solution-code-fold.js'), 'utf8')
+const LINE = 24
+const PAD = 32
+const FOLDED = 14 * LINE + PAD
 
 function codeText (lines) {
   const out = []
@@ -20,11 +28,13 @@ function codeText (lines) {
 }
 
 // .listingblock > [.title] + .content > pre.highlight > code, with the toolbox
-// 06-copy-to-clipboard.js appends to .content.
+// 06-copy-to-clipboard.js appends to .content. `renderedLines` mimics how many
+// lines the browser laid out (wrapping makes it larger than the source count).
 function listing (lines, opts) {
   const o = opts || {}
   const code = el('code', { class: 'language-go', 'data-lang': 'go', text: codeText(lines) })
   const pre = el('pre', { class: 'highlight' }, [code])
+  pre.scrollHeight = (o.renderedLines === undefined ? lines : o.renderedLines) * LINE + PAD
   const toolbox = el('div', { class: 'source-toolbox' }, [el('button', { class: 'copy-button' })])
   const content = el('div', { class: 'content' }, [pre, toolbox])
   const children = []
@@ -34,21 +44,33 @@ function listing (lines, opts) {
   return { block, content, pre, code, toolbox }
 }
 
+// Asciidoctor's [%collapsible] output: <details><summary class="title">...</summary><div class="content">...
+function collapsible (summaryText, blocks, open) {
+  const attrs = open ? { open: '' } : {}
+  return el('details', attrs, [el('summary', { class: 'title', text: summaryText }), el('div', { class: 'content' }, blocks)])
+}
+
 function run ({ bodyClass, blocks, reduceMotion }) {
   const doc = el('article', { class: 'doc' }, blocks)
   const body = el('body', { class: bodyClass === undefined ? 'article solution-step' : bodyClass }, [doc])
   const document = makeDocument(body)
-  const calls = { scrolled: [] }
+  const timers = []
+  const listeners = {}
   const context = {
     console,
     document,
+    setTimeout: (fn, ms) => { timers.push({ fn, ms }); return timers.length },
+    clearTimeout: (id) => { if (timers[id - 1]) timers[id - 1].fn = null },
     window: {
       matchMedia: (q) => ({ matches: q.indexOf('reduced-motion') !== -1 ? !!reduceMotion : false }),
-      getComputedStyle: () => ({ lineHeight: '24px', paddingTop: '16px', paddingBottom: '16px' }),
+      getComputedStyle: () => ({ lineHeight: LINE + 'px', paddingTop: '16px', paddingBottom: '16px' }),
+      addEventListener: (type, fn) => { (listeners[type] = listeners[type] || []).push(fn) },
     },
   }
   vm.runInNewContext(SCRIPT, context)
-  return { api: context.window.docsSolutionsCodeFold, doc, calls, document }
+  const flushTimers = () => { const due = timers.splice(0, timers.length); due.forEach((t) => t.fn && t.fn()) }
+  const fire = (type) => (listeners[type] || []).forEach((fn) => fn({ type }))
+  return { api: context.window.docsSolutionsCodeFold, doc, document, timers, flushTimers, fire }
 }
 
 test('countLines ignores one trailing newline and empty input', () => {
@@ -59,13 +81,13 @@ test('countLines ignores one trailing newline and empty input', () => {
   assert.equal(api.countLines('a\n\nb'), 3)
 })
 
-test('a listing over 30 lines folds to 14 lines with a Show all button; clicking toggles', () => {
+test('a tall listing folds to 14 lines with a Show all button; clicking toggles', () => {
   const long = listing(45)
-  const short = listing(30)
+  const short = listing(12)
   run({ blocks: [long.block, short.block] })
 
   assert.ok(long.block.classes.has('sol-code-fold') && long.block.classes.has('is-folded'))
-  assert.equal(long.content.style.maxHeight, (14 * 24 + 32) + 'px', 'about 14 lines plus padding')
+  assert.equal(long.content.style.maxHeight, FOLDED + 'px', 'about 14 lines plus padding')
   const button = long.block.querySelector('[data-sol-code-fold]')
   assert.ok(button, 'toggle rendered')
   assert.equal(button.textContent, 'Show all 45 lines')
@@ -81,8 +103,53 @@ test('a listing over 30 lines folds to 14 lines with a Show all button; clicking
   assert.ok(long.block.classes.has('is-folded'))
   assert.equal(button.textContent, 'Show all 45 lines')
 
-  assert.ok(!short.block.classes.has('sol-code-fold'), 'exactly 30 lines is not folded')
+  assert.ok(!short.block.classes.has('sol-code-fold'), 'a short block is not folded')
   assert.equal(short.block.querySelector('[data-sol-code-fold]'), null)
+})
+
+test('the decision is the rendered height, not the source line count', () => {
+  const wrapped = listing(20, { renderedLines: 40 })
+  const tallSource = listing(60, { renderedLines: 60 })
+  const justUnder = listing(16, { renderedLines: 16 })
+  const justOver = listing(17, { renderedLines: 17 })
+  run({ blocks: [wrapped.block, tallSource.block, justUnder.block, justOver.block] })
+
+  assert.ok(wrapped.block.classes.has('is-folded'), '20 source lines wrapped to 40 rendered lines folds')
+  assert.equal(wrapped.block.querySelector('[data-sol-code-fold]').textContent, 'Show all 20 lines', 'label uses the source count')
+  assert.ok(tallSource.block.classes.has('is-folded'))
+  assert.ok(!justUnder.block.classes.has('sol-code-fold'), '16 rendered lines: nothing worth hiding')
+  assert.ok(justOver.block.classes.has('is-folded'), '17 rendered lines: folds')
+})
+
+test('re-measures on resize (debounced) and on window load: folds late, unfolds when the block fits again', () => {
+  const block = listing(20, { renderedLines: 20 })
+  const r = run({ blocks: [block.block] })
+  assert.ok(block.block.classes.has('is-folded'))
+
+  // Viewport widened: no more wrapping, the block fits.
+  block.pre.scrollHeight = 12 * LINE + PAD
+  r.fire('resize')
+  assert.ok(block.block.classes.has('is-folded'), 'not before the debounce')
+  r.flushTimers()
+  assert.ok(!block.block.classes.has('sol-code-fold'), 'unfolded')
+  assert.equal(block.content.style.maxHeight, '')
+  assert.equal(block.block.querySelector('[data-sol-code-fold]'), null, 'toggle removed')
+
+  // Narrowed again: wraps, folds again, exactly one toggle.
+  block.pre.scrollHeight = 30 * LINE + PAD
+  r.fire('resize')
+  r.fire('resize')
+  r.flushTimers()
+  assert.ok(block.block.classes.has('is-folded'))
+  assert.equal(block.block.querySelectorAll('[data-sol-code-fold]').length, 1)
+
+  // A block that could not be measured at first (scrollHeight 0) decides on load.
+  const late = listing(50, { renderedLines: 0 })
+  const s = run({ blocks: [late.block] })
+  assert.ok(!late.block.classes.has('sol-code-fold'), 'undecided while unrendered')
+  late.pre.scrollHeight = 50 * LINE + PAD
+  s.fire('load')
+  assert.ok(late.block.classes.has('is-folded'))
 })
 
 test('folding only clips: the code keeps every line for the copy button', () => {
@@ -97,14 +164,8 @@ test('folding only clips: the code keeps every line for the copy button', () => 
   assert.ok(long.block.querySelector('.copy-button'), 'copy button still present')
 })
 
-// Asciidoctor's [%collapsible] output: <details><summary class="title">...</summary><div class="content">...
-function collapsible (summaryText, blocks, open) {
-  const attrs = open ? { open: '' } : {}
-  return el('details', attrs, [el('summary', { class: 'title', text: summaryText }), el('div', { class: 'content' }, blocks)])
-}
-
 test('a block inside a closed <details> is never folded a second time; an open one is', () => {
-  const closedInner = listing(50)
+  const closedInner = listing(50, { renderedLines: 0 })
   const closed = collapsible('Complete source: services/leaderboard/main.go', [closedInner.block])
   const openInner = listing(50)
   const open = collapsible('Complete source: services/achievements/main.go', [openInner.block], true)
@@ -115,12 +176,13 @@ test('a block inside a closed <details> is never folded a second time; an open o
 })
 
 test('a long listing inside a closed <details> folds once the details opens, and only once', () => {
-  const inner = listing(50)
+  const inner = listing(50, { renderedLines: 0 })
   const details = collapsible('Complete source: services/leaderboard/main.go', [inner.block])
   run({ blocks: [details] })
   assert.ok(!inner.block.classes.has('sol-code-fold'))
 
   details.open = true
+  inner.pre.scrollHeight = 50 * LINE + PAD // rendered now
   details.dispatch('toggle')
   assert.ok(inner.block.classes.has('is-folded'), 'folded on open')
   assert.equal(inner.block.querySelectorAll('[data-sol-code-fold]').length, 1)
@@ -132,10 +194,11 @@ test('a long listing inside a closed <details> folds once the details opens, and
   details.dispatch('toggle')
   assert.equal(inner.block.querySelectorAll('[data-sol-code-fold]').length, 1, 'no second toggle after reopening')
 
-  const short = listing(12)
+  const short = listing(12, { renderedLines: 0 })
   const shortDetails = collapsible('Complete source: Makefile', [short.block])
   run({ blocks: [shortDetails] })
   shortDetails.open = true
+  short.pre.scrollHeight = 12 * LINE + PAD
   shortDetails.dispatch('toggle')
   assert.ok(!short.block.classes.has('sol-code-fold'), 'short listing never folds')
 })
@@ -152,7 +215,7 @@ test('a listing title becomes a file header bar and the toolbox moves into it', 
 })
 
 test('[%collapsible] summaries (no extra class) get the line count of the single listing they hide', () => {
-  const inner = listing(37)
+  const inner = listing(37, { renderedLines: 0 })
   const details = collapsible('Complete source: services/leaderboard/main.go', [inner.block])
   const summary = details.children[0]
   const two = collapsible('Two files', [listing(5).block, listing(6).block])
@@ -175,7 +238,8 @@ test('does nothing outside solution pages, and is idempotent when re-run', () =>
   const again = listing(80)
   const s = run({ blocks: [again.block] })
   s.api.run(s.document)
-  assert.equal(again.block.querySelectorAll('[data-sol-code-fold]').length, 1, 'one toggle after a second pass')
+  s.api.measure(s.document)
+  assert.equal(again.block.querySelectorAll('[data-sol-code-fold]').length, 1, 'one toggle after further passes')
 })
 
 test('reduced motion: collapsing scrolls without smooth behavior', () => {

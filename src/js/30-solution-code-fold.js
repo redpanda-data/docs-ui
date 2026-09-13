@@ -1,15 +1,20 @@
 /**
  * Long code blocks on solution pages (body.solution, body.solution-step).
  *
- *  - A listing whose <pre> has more than 30 lines is folded to about 14 lines
- *    with a bottom fade and a "Show all N lines" button that toggles to
- *    "Show less". Folding only clips the block (max-height + overflow), it
- *    never removes or hides lines, so the copy button from
- *    06-copy-to-clipboard.js (which reads code.innerText) still gets the full
- *    text, and so does find-in-page.
- *  - A block inside a <details> that is not open is left alone: it is already
- *    collapsed once. When that details opens (toggle event) the block is
- *    processed then, and folded if it is long.
+ *  - A listing whose rendered <pre> is taller than about 16 line-heights is
+ *    folded to about 14 lines with a bottom fade and a "Show all N lines"
+ *    button (N is the source line count) that toggles to "Show less". The
+ *    decision is made from pre.scrollHeight, not from source lines, so a
+ *    block that wraps into many rendered lines folds too. Folding only clips
+ *    the block (max-height + overflow on .content); it never removes or hides
+ *    lines, so the copy button from 06-copy-to-clipboard.js (which reads
+ *    code.innerText) still gets the full text, and so does find-in-page.
+ *  - Blocks are measured on load, again on window load (fonts) and on window
+ *    resize (debounced), because wrapping changes height: an undecided block
+ *    can fold later and a folded block that now fits unfolds.
+ *  - A block inside a <details> that is not open is left alone (it cannot be
+ *    measured and is already collapsed once). When that details opens
+ *    (toggle event) the block is measured and folded if it is long.
  *  - A listing title (.listingblock > .title, used for file paths such as
  *    services/leaderboard/main.go) becomes a file header bar on the block and
  *    the block's toolbox (copy / Ask AI) moves into it, aligned right.
@@ -27,10 +32,12 @@
 ;(function () {
   'use strict'
 
-  var FOLD_THRESHOLD = 30
   var VISIBLE_LINES = 14
+  // Fold only when at least a couple of lines would be hidden.
+  var FOLD_AT_LINES = 16
   var DEFAULT_LINE_HEIGHT = 24
   var DEFAULT_PADDING = 16
+  var RESIZE_DEBOUNCE_MS = 150
 
   var body = document.body
   if (!body || !body.classList) return
@@ -72,8 +79,8 @@
     return !!(el && el.tagName && String(el.tagName).toUpperCase() === 'DETAILS')
   }
 
-  // Number of lines in a code listing: the text split on newlines, ignoring a
-  // single trailing newline that the converter adds.
+  // Number of source lines in a code listing: the text split on newlines,
+  // ignoring a single trailing newline that the converter adds.
   function countLines (text) {
     if (!text) return 0
     var trimmed = String(text).replace(/\n$/, '')
@@ -86,7 +93,7 @@
     return isFinite(n) && n > 0 ? n : fallback
   }
 
-  function foldedHeight (pre) {
+  function metrics (pre) {
     var lineHeight = DEFAULT_LINE_HEIGHT
     var padding = DEFAULT_PADDING * 2
     try {
@@ -96,7 +103,26 @@
         padding = pxValue(cs.paddingTop, DEFAULT_PADDING) + pxValue(cs.paddingBottom, DEFAULT_PADDING)
       }
     } catch (e) { /* use defaults */ }
-    return Math.round(VISIBLE_LINES * lineHeight + padding)
+    return { lineHeight: lineHeight, padding: padding }
+  }
+
+  function foldedHeight (pre) {
+    var m = metrics(pre)
+    return Math.round(VISIBLE_LINES * m.lineHeight + m.padding)
+  }
+
+  // Rendered height of the code. 0 when the block is not rendered (display:
+  // none, a closed details), which means "cannot decide yet".
+  function renderedHeight (pre) {
+    var h = pre.scrollHeight
+    return typeof h === 'number' && isFinite(h) && h > 0 ? h : 0
+  }
+
+  function isTall (pre) {
+    var h = renderedHeight(pre)
+    if (!h) return null
+    var m = metrics(pre)
+    return h > FOLD_AT_LINES * m.lineHeight + m.padding
   }
 
   function insideClosedDetails (block) {
@@ -147,6 +173,14 @@
     return button
   }
 
+  // The block fits again (wider viewport, less wrapping): drop the fold.
+  function unfold (block, content) {
+    block.classList.remove('sol-code-fold', 'is-folded')
+    content.style.maxHeight = ''
+    var button = childWithClass(block, 'sol-code-fold-btn')
+    if (button && button.parentNode) button.parentNode.removeChild(button)
+  }
+
   function decorateTitle (block, title, content) {
     block.classList.add('sol-code-titled')
     title.classList.add('sol-code-title')
@@ -154,11 +188,10 @@
     if (toolbox) title.appendChild(toolbox)
   }
 
-  // A block is processed at most once for its fold decision, except that a
-  // long block inside a closed details is deferred (not decided) until the
-  // details opens; the title header is applied on the first pass regardless.
+  // Header treatment once; fold decision whenever the block can be measured.
+  // Returns null for non-listings, else {block, lines, folded, deferred}.
   function processBlock (block) {
-    if (!insideDoc(block) || hasClass(block, 'sol-code-fold') || hasClass(block, 'sol-code-checked')) return null
+    if (!insideDoc(block)) return null
     var content = childWithClass(block, 'content')
     if (!content) return null
     var pre = content.querySelector('pre')
@@ -167,18 +200,27 @@
     var lines = countLines(code.textContent)
     var title = childWithClass(block, 'title')
     if (title && !hasClass(block, 'sol-code-titled')) decorateTitle(block, title, content)
-    var result = { block: block, lines: lines, folded: false, deferred: false }
-    if (lines <= FOLD_THRESHOLD) {
-      block.classList.add('sol-code-checked')
-      return result
-    }
+
+    var result = { block: block, lines: lines, folded: hasClass(block, 'sol-code-fold'), deferred: false }
     if (insideClosedDetails(block)) {
       result.deferred = true
       return result
     }
-    fold(block, content, pre, lines)
-    block.classList.add('sol-code-checked')
-    result.folded = true
+    var tall = isTall(pre)
+    if (tall === null) {
+      result.deferred = true
+      return result
+    }
+    if (tall && !result.folded) {
+      fold(block, content, pre, lines)
+      result.folded = true
+    } else if (!tall && result.folded) {
+      unfold(block, content)
+      result.folded = false
+    } else if (result.folded && hasClass(block, 'is-folded')) {
+      // Line height may have changed with the viewport; keep the clip honest.
+      content.style.maxHeight = foldedHeight(pre) + 'px'
+    }
     return result
   }
 
@@ -205,19 +247,37 @@
     summary.appendChild(badge)
   }
 
+  function measureAll (root) {
+    var scope = root || document
+    return toArray(scope.querySelectorAll('.listingblock')).map(processBlock).filter(function (r) { return r })
+  }
+
   function run (root) {
     var scope = root || document
-    var results = toArray(scope.querySelectorAll('.listingblock')).map(processBlock).filter(function (r) { return r })
+    var results = measureAll(scope)
     toArray(scope.querySelectorAll('details')).forEach(decorateDetails)
     return results
+  }
+
+  var resizeTimer = null
+  function onResize () {
+    if (resizeTimer) clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(function () {
+      resizeTimer = null
+      measureAll(document)
+    }, RESIZE_DEBOUNCE_MS)
   }
 
   window.docsSolutionsCodeFold = {
     countLines: countLines,
     run: run,
-    FOLD_THRESHOLD: FOLD_THRESHOLD,
+    measure: measureAll,
     VISIBLE_LINES: VISIBLE_LINES,
+    FOLD_AT_LINES: FOLD_AT_LINES,
   }
 
   run(document)
+  window.addEventListener('resize', onResize)
+  // Web fonts and late stylesheets change line metrics.
+  window.addEventListener('load', function () { measureAll(document) })
 })()

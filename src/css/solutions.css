@@ -367,11 +367,26 @@
   hyphens: manual;
 }
 
-@media (min-width: 1024px) {
-  .doc.sol-doc {
-    max-width: 1200px;
-    margin-right: 48px;
-  }
+/* Long lines scroll instead of wrapping mid-token. doc.css wraps site-wide in
+   two places, `.doc pre > code { white-space: pre-wrap }` and
+   `pre[class*=language-] { white-space: pre-wrap !important }`, so this needs
+   !important too. `.listingblock.wrap` (the explicit opt-in role) keeps
+   wrapping. The copy button reads the code text, not the visible box, and the
+   fold clips .content, so both keep working with horizontal scroll. */
+.solution .doc .listingblock:not(.wrap) pre,
+.solution-step .doc .listingblock:not(.wrap) pre,
+.solution .doc .listingblock:not(.wrap) pre > code,
+.solution-step .doc .listingblock:not(.wrap) pre > code,
+.solution .doc .literalblock pre,
+.solution-step .doc .literalblock pre {
+  white-space: pre !important;
+}
+
+.solution .doc .listingblock:not(.wrap) pre,
+.solution-step .doc .listingblock:not(.wrap) pre,
+.solution .doc .literalblock pre,
+.solution-step .doc .literalblock pre {
+  overflow-x: auto;
 }
 
 .sol-hero {
@@ -474,9 +489,14 @@
   min-width: 0;
 }
 
-@media screen and (min-width: 1025px) {
+/* Two columns only from 1281px: the standard TOC-width rail (280px) plus the
+   left sidebar must still leave the article at least ~640px, otherwise code
+   reads as broken. Below that the rail collapses into its <details> above
+   the article (28-solution-progress.js uses the same 1280px query). */
+@media screen and (min-width: 1281px) {
   .sol-rail {
-    flex: 0 0 300px;
+    flex: 0 0 280px;
+    max-width: 280px;
     order: 1;
     position: sticky;
     top: calc(var(--navbar-height, 4rem) + 1rem);
@@ -1800,11 +1820,18 @@ html[data-theme="dark"] .sol-toast {
 
 /* ---- responsive ------------------------------------------------------------ */
 
-@media (max-width: 1024px) {
-  /* Single column: the collapsed rail sits above the article. */
-  .sol-content {
+@media (max-width: 1280px) {
+  /* Single column: the collapsed rail sits above the article. Specific enough
+     to override main.css's `main > .content` flex row between 1024 and 1280. */
+  main > .content.sol-content {
     display: flex;
     flex-direction: column;
+    gap: 0;
+  }
+
+  main > .content.sol-content > .doc {
+    max-width: none;
+    margin-right: 48px;
   }
 
   .sol-rail {

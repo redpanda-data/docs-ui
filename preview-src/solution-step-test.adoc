@@ -26,6 +26,16 @@ cp .env.example .env
 docker compose up -d --wait
 ----
 
+If you prefer to create the topics by hand, these commands set the same partition counts and retention the compose file applies. The lines are long; on solution pages they scroll sideways instead of wrapping.
+
+[source,bash]
+----
+rpk topic create game.player-events --partitions 6 --replicas 1 --topic-config retention.ms=604800000 --topic-config cleanup.policy=delete --topic-config max.message.bytes=1048576
+rpk topic create game.match-events --partitions 3 --replicas 1 --topic-config retention.ms=604800000 --topic-config cleanup.policy=delete
+rpk topic create game.achievements --partitions 3 --replicas 1 --topic-config retention.ms=2592000000 --topic-config cleanup.policy=compact,delete
+rpk topic create game.player-events.dlq --partitions 1 --replicas 1 --topic-config retention.ms=2592000000
+----
+
 == Why
 
 Everything downstream assumes a healthy broker and a reachable Schema Registry. Starting the platform first and verifying it means later failures are about your code, not the environment.

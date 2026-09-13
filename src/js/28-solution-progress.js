@@ -1026,7 +1026,7 @@
     var els = $$(selector)
     if (!els.length || typeof window.matchMedia !== 'function') return
     // Same breakpoint as the two-column layout in solutions.css.
-    var mq = window.matchMedia('(max-width: 1024px)')
+    var mq = window.matchMedia('(max-width: 1280px)')
     var apply = function () {
       els.forEach(function (el) {
         if (mq.matches) {
