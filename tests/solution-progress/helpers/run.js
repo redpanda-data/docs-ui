@@ -126,11 +126,13 @@ function buildPage (o) {
   const downloadHref = '/solutions/download?solution=' + o.solutionId + '&version=' + o.version + '&return=/solutions/' + o.solutionId + '/'
   const downloadAttrs = { 'data-sol-download': '', href: downloadHref }
   if ((o.download || 'authenticated') === 'authenticated') downloadAttrs['data-requires-auth'] = ''
-  els.download = el('a', downloadAttrs)
+  // download: 'none' renders no CTA at all (solution-progress.hbs wraps it in
+  // {{#unless (eq solution.download 'none')}}).
+  if (o.download !== 'none') els.download = el('a', downloadAttrs)
   els.gateText = el('span', { 'data-sol-gate-text': '', text: 'Sign in to save progress and download the complete example.' })
   els.signin = el('button', { 'data-sol-signin': '', 'data-intent': 'download' })
   els.gate = el('div', { 'data-sol-gate': '' }, [els.gateText, els.signin])
-  els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, [els.download, els.gate])
+  els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat([els.gate]))
   els.rail = el('details', { 'data-sol-rail': '', open: '' }, [els.progress, els.downloadPanel])
 
   const main = []

@@ -30,21 +30,86 @@ test('only the annotated blocks get a control, and it goes in the toolbox after 
   assert.equal(button.getAttribute('data-sol-file-download'), MAIN_GO)
   assert.equal(button.tagName, 'BUTTON')
   assert.equal(button.getAttribute('type'), 'button')
-  assert.equal(button.getAttribute('aria-label'), 'Download ' + MAIN_GO, 'the label names the file')
-  assert.equal(button.getAttribute('title'), 'Download ' + MAIN_GO)
+  // fileBlock is a tagged region, so its label says so; the wording itself is
+  // asserted in the next test.
+  assert.equal(button.getAttribute('aria-label'), 'Download the full file ' + MAIN_GO, 'the label names the file')
+  assert.equal(button.getAttribute('title'), 'Download the full file ' + MAIN_GO)
   assert.equal(button.getAttribute('data-analytics'), 'solution_download')
   assert.ok(button.classes.has('sol-file-download'))
   assert.match(button.innerHTML, /<svg[^>]*>/, 'an icon, like the copy button')
   assert.match(button.innerHTML, /Download<\/span>/)
 })
 
-test('a tag on the block changes nothing: the whole file is served either way', () => {
+test('a block that showed only a tagged region says the whole file is what downloads', () => {
   const r = run({ signedIn: true })
   assert.equal(r.els.fileBlock.getAttribute('data-solution-tag'), 'consumer')
   assert.equal(r.els.fileBlockPlain.getAttribute('data-solution-tag'), null)
-  r.els.fileBlock.querySelector('[data-sol-file-download]').dispatch('click')
-  r.els.fileBlockPlain.querySelector('[data-sol-file-download]').dispatch('click')
+
+  const tagged = r.control(MAIN_GO)
+  assert.equal(tagged.getAttribute('aria-label'), 'Download the full file ' + MAIN_GO)
+  assert.equal(tagged.getAttribute('title'), 'Download the full file ' + MAIN_GO)
+
+  const whole = r.control('docker-compose.yml')
+  assert.equal(whole.getAttribute('aria-label'), 'Download docker-compose.yml', 'an untagged block is left as it was')
+  assert.equal(whole.getAttribute('title'), 'Download docker-compose.yml')
+  assert.doesNotMatch(whole.getAttribute('aria-label'), /full file/)
+
+  // The wording differs; what is served does not. The filename has to match the
+  // repo's own, so a tagged region still downloads its whole file.
+  tagged.dispatch('click')
+  whole.dispatch('click')
   assert.deepEqual(r.calls.assign, [fileUrl(MAIN_GO), fileUrl('docker-compose.yml')])
+})
+
+test('a public solution gates neither the file nor the bundle', () => {
+  const r = run({ signedIn: false, accountHidden: false, download: 'public' })
+  assert.equal(r.controls().length, 3, 'the control is there for an anonymous reader')
+
+  r.control(MAIN_GO).dispatch('click')
+  assert.deepEqual(r.calls.assign, [fileUrl(MAIN_GO)], 'straight to the endpoint, no sign-in')
+  assert.equal(r.signinEvents().length, 0, 'no modal')
+  assert.equal(r.session.data[PENDING_KEY], undefined, 'nothing pending: there is nothing to come back for')
+  const events = r.downloads()
+  assert.equal(events.length, 1)
+  assert.equal(events[0].props.kind, 'file')
+
+  // The same reader, the same page: the bundle is ungated too, which is the
+  // incoherence this alignment removes.
+  const ev = r.els.download.dispatch('click')
+  assert.equal(ev.defaultPrevented, false, 'the bundle link navigates on its own href')
+  assert.equal(r.signinEvents().length, 0)
+  assert.equal(r.downloads().length, 2)
+  assert.equal(r.downloads()[1].props.kind, 'bundle')
+})
+
+test('a public solution still serves files to a signed-in reader', () => {
+  const r = run({ signedIn: true, download: 'public' })
+  r.control(MAIN_GO).dispatch('click')
+  assert.deepEqual(r.calls.assign, [fileUrl(MAIN_GO)])
+  assert.equal(r.signinEvents().length, 0)
+})
+
+test('download: none means no control at all, as it means no bundle CTA', () => {
+  for (const signedIn of [false, true]) {
+    const r = run({ signedIn, accountHidden: false, download: 'none' })
+    assert.equal(r.controls().length, 0, 'signedIn=' + signedIn + ': nothing to click')
+    assert.equal(r.els.download, undefined, 'and no bundle CTA either')
+  }
+})
+
+test('no control where the reader could not complete it: an authenticated solution with no account backend', () => {
+  const r = run({ signedIn: false, accountHidden: true })
+  assert.equal(r.controls().length, 0, 'signing in is impossible here, so the affordance is absent')
+  assert.equal(r.els.download.hidden, true, 'exactly as the bundle CTA is hidden')
+
+  // The backend becoming available later (26-docs-account.js learns after us)
+  // brings both back.
+  r.window.listeners['kapa-session'].forEach((fn) => fn({ detail: { authoritative: true } }))
+  assert.equal(r.controls().length, 0, 'still nothing while the account element stays hidden')
+
+  const withBackend = run({ signedIn: false, accountHidden: false })
+  assert.equal(withBackend.controls().length, 3)
+  assert.equal(withBackend.els.download.hidden, false)
 })
 
 test('a block whose toolbox does not exist yet gets one, so no annotated block is left without a control', () => {
