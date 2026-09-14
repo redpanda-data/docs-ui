@@ -563,6 +563,12 @@ html[data-theme="dark"] .sol-fact--verified {
   border-radius: var(--radius-lg-new);
   background: var(--sol-surface);
   list-style: none;
+  /* A flex row so the position/count can sit right-aligned before the
+     chevron. Previously a block with a float-right chevron, which left no way
+     to push a second label to the right edge. */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .sol-rail-summary::-webkit-details-marker {
@@ -571,10 +577,12 @@ html[data-theme="dark"] .sol-fact--verified {
 
 .sol-rail-summary::after {
   content: "";
-  float: right;
+  flex: none;
   width: 0.5rem;
   height: 0.5rem;
-  margin-top: 0.4rem;
+  /* Nudged down so the rotated square reads as a chevron on the text
+     baseline, not centred on its own box. */
+  margin-top: -0.2rem;
   border-right: 2px solid var(--grey-500-new);
   border-bottom: 2px solid var(--grey-500-new);
   transform: rotate(45deg);
@@ -582,7 +590,7 @@ html[data-theme="dark"] .sol-fact--verified {
 
 .sol-rail-details[open] > .sol-rail-summary::after {
   transform: rotate(-135deg);
-  margin-top: 0.6rem;
+  margin-top: 0.2rem;
 }
 
 /* ---- steps (overview) ----------------------------------------------------- */
@@ -680,6 +688,39 @@ html[data-theme="dark"] .sol-fact--verified {
 }
 
 /* ---- progress panel ------------------------------------------------------- */
+
+/* Position and completion in the collapsed rail summary. Below 1281px the
+   details is closed by script, so this is the only place either shows without
+   the reader opening a disclosure first. */
+.sol-rail-summary-meta {
+  margin-left: auto;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 400;
+  color: var(--grey-600-new);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The footer's copy of the progress bar and counter, shown only where the
+   rail collapses; above that the rail's own card already has both. */
+.sol-step-actions-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+@media screen and (min-width: 1281px) {
+  .sol-step-actions-progress {
+    display: none;
+  }
+}
+
+.sol-step-actions-count {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--grey-600-new);
+  font-variant-numeric: tabular-nums;
+}
 
 .sol-progress-count {
   font-size: calc(13 / var(--rem-base) * 1rem);
@@ -1760,6 +1801,27 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   color: var(--component-600);
 }
 
+/* The step you are on. Without this the marker is identical to a step you
+   have not reached, so the sidebar shows progress but not position. A current
+   step that is also complete keeps the filled tick below: that says more. */
+.sol-nav-step.is-current-page .sol-nav-step-num {
+  color: var(--component-600);
+  font-weight: 800;
+}
+
+.sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check {
+  border-color: var(--component-600);
+}
+
+/* A dot rather than a tick: the step is where you are, not finished. */
+.sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check::after {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--radius-full-new);
+  background: var(--component-600);
+}
+
 .sol-nav-step-title {
   flex: 1;
   min-width: 0;
@@ -1836,8 +1898,17 @@ html[data-theme="dark"] .sol-link-btn,
 html[data-theme="dark"] .sol-done-title,
 html[data-theme="dark"] .sol-fact--status,
 html[data-theme="dark"] .sol-nav-step.is-complete .sol-nav-step-num,
+html[data-theme="dark"] .sol-nav-step.is-current-page .sol-nav-step-num,
 html[data-theme="dark"] .sol-related-link svg {
   color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check {
+  border-color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check::after {
+  background: var(--component-200);
 }
 
 html[data-theme="dark"] .sol-title,
@@ -1859,6 +1930,8 @@ html[data-theme="dark"] .sol-rec-desc,
 html[data-theme="dark"] .sol-card-desc,
 html[data-theme="dark"] .sol-recs-sub,
 html[data-theme="dark"] .sol-done-sub,
+html[data-theme="dark"] .sol-rail-summary-meta,
+html[data-theme="dark"] .sol-step-actions-count,
 html[data-theme="dark"] .sol-progress-count,
 html[data-theme="dark"] .sol-filter-row,
 html[data-theme="dark"] .sol-file-link,

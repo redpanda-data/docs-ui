@@ -2,8 +2,23 @@
   Step page footer actions: explicit mark-complete (the only way a step is
   ever marked), save, and prev/next from page-solution-prev/next-url/title.
   Context: `solution`.
+
+  It also carries a compact copy of the progress bar and the step counter,
+  shown only where the right rail collapses. The rail's progress card is the
+  only place either appears otherwise, so on a phone the reader could mark
+  steps complete with nothing telling them how far through they were.
+  28-solution-progress.js drives both copies: every selector it renders
+  through uses querySelectorAll, so the duplicate needs no JavaScript change.
 --}}
 <nav class="sol-step-actions" aria-label="Step actions">
+  <div class="sol-step-actions-progress">
+    <span class="sol-step-actions-count">
+      <span data-sol-progress-count>0 of {{solution.steps.length}}</span> steps
+    </span>
+    <div class="sol-bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" data-sol-progress-bar>
+      <div class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></div>
+    </div>
+  </div>
   <div class="sol-step-actions-main">
     <button type="button" class="sol-btn sol-btn--primary" data-sol-complete data-analytics="solution_step_complete" aria-pressed="false">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
