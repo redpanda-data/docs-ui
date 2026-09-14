@@ -40,6 +40,10 @@
  *     server's regexes and timestamps are clamped to now + 5 minutes.
  *     tests/solution-progress/fixtures/merge-vectors.json is the shared
  *     contract (copied from docs-site).
+ *   - Every code block the extension annotated with data-solution-file gets a
+ *     download control in its toolbox (next to Copy), which serves that one
+ *     file from the same endpoint as the bundle. Gated the same way, and the
+ *     download starts on return from sign-in.
  *   - Gates exist only on Save and on the authenticated download. Anonymous
  *     readers can start, mark steps, and see progress on this device.
  *   - Analytics: track(name, props) -> window.heap.track when present, and
@@ -739,15 +743,27 @@
     },
   }
 
-  function intentReturnTo (intent) {
+  // One file from the solution rather than the whole bundle: the copy names it,
+  // and the return path carries the path so the download can resume itself.
+  function fileSigninCopy (filePath) {
+    return {
+      title: 'Sign in to download ' + filePath,
+      lead: 'Get the file behind this snippet, and keep your progress across devices.',
+      cta: 'Sign in and download',
+    }
+  }
+
+  function intentReturnTo (intent, filePath) {
     var returnTo = window.location.pathname + '?intent=' + intent
     if (stepId) returnTo += '&step=' + encodeURIComponent(stepId)
     if (intent === 'download' && pageVersion) returnTo += '&version=' + encodeURIComponent(pageVersion)
+    if (intent === 'download' && filePath) returnTo += '&path=' + encodeURIComponent(filePath)
     return returnTo
   }
 
-  function openSignin (intent) {
+  function openSignin (intent, filePath) {
     intent = intent === 'download' ? 'download' : 'save'
+    if (intent !== 'download') filePath = null
     if (!authAvailable()) {
       toast('Progress is saved on this device.')
       return false
@@ -757,15 +773,16 @@
       solution: solutionId,
       step: stepId,
       version: pageVersion,
+      path: filePath || undefined,
       at: now(),
     })
-    track('solution_login_cta_click', baseProps({ intent: intent }))
-    var copy = SIGNIN_COPY[intent]
+    track('solution_login_cta_click', baseProps({ intent: intent, path: filePath || undefined }))
+    var copy = filePath ? fileSigninCopy(filePath) : SIGNIN_COPY[intent]
     dispatch('docs-account:open-signin', {
       title: copy.title,
       lead: copy.lead,
       cta: copy.cta,
-      returnTo: intentReturnTo(intent),
+      returnTo: intentReturnTo(intent, filePath),
     })
     return true
   }
@@ -779,10 +796,24 @@
       '&return=' + encodeURIComponent(window.location.pathname)
   }
 
+  // The same endpoint as the bundle, for one file: it answers with a
+  // Content-Disposition filename matching the repo's own filename.
+  function fileDownloadUrl (filePath, version) {
+    return DOWNLOAD_ENDPOINT + '?solution=' + encodeURIComponent(solutionId || '') +
+      '&version=' + encodeURIComponent(version || pageVersion || '') +
+      '&path=' + encodeURIComponent(filePath || '') +
+      '&return=' + encodeURIComponent(window.location.pathname)
+  }
+
+  function startDownload (url) {
+    try { window.location.assign(url) } catch (e) { /* ignore */ }
+  }
+
   function stripIntentParams (params) {
     params.delete('intent')
     params.delete('step')
     params.delete('version')
+    params.delete('path')
     var qs = params.toString()
     try {
       window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash)
@@ -797,12 +828,16 @@
     var intent = params.get('intent')
     if (!intent) return
     var version = params.get('version')
+    var filePath = params.get('path')
     var pending = readJSON(sessionStorage, PENDING_KEY)
     removeKey(sessionStorage, PENDING_KEY)
     stripIntentParams(params)
     if (!hasAuthHint()) return
+    // The path has to match the pending record too, so a URL edited to point at
+    // another file is no more trusted than a bookmarked one.
     var fresh = !!(pending && pending.intent === intent && pending.solution === solutionId &&
-      pending.at && now() - pending.at < PENDING_TTL_MS)
+      pending.at && now() - pending.at < PENDING_TTL_MS &&
+      (pending.path || '') === (filePath || ''))
     if (intent === 'save') {
       markDirty()
       ;(syncPromise || Promise.resolve(false)).then(function () {
@@ -816,10 +851,17 @@
     }
     if (intent === 'download') {
       // The pending record is the replay guard: a bookmarked or shared URL with
-      // intent=download must not start a download on its own.
+      // intent=download must not start a download on its own, with or without
+      // a path.
       if (!fresh) return
-      track('solution_download', baseProps({ source: 'intent' }))
-      try { window.location.assign(downloadUrl(version || (pending && pending.version))) } catch (e) { /* ignore */ }
+      version = version || (pending && pending.version)
+      if (filePath) {
+        track('solution_download', baseProps({ source: 'intent', kind: 'file', path: filePath }))
+        startDownload(fileDownloadUrl(filePath, version))
+        return
+      }
+      track('solution_download', baseProps({ source: 'intent', kind: 'bundle' }))
+      startDownload(downloadUrl(version))
     }
   }
 
@@ -1069,6 +1111,63 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Snippet file downloads
+  // ---------------------------------------------------------------------------
+
+  // Arrow into a tray, matching the stroke weight of the toolbox copy icon.
+  var DOWNLOAD_ICON =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" ' +
+    'class="sol-file-download-icon">' +
+    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/>' +
+    '<line x1="12" y1="15" x2="12" y2="3"/></svg>'
+
+  // 06-copy-to-clipboard.js builds the toolbox for every block it can copy, so
+  // one is normally already there; a block it skipped still gets a control.
+  function toolboxFor (block) {
+    var toolbox = $('.source-toolbox', block)
+    if (toolbox) return toolbox
+    var content = $('.content', block)
+    if (!content || !document.createElement) return null
+    toolbox = document.createElement('div')
+    toolbox.className = 'source-toolbox'
+    content.appendChild(toolbox)
+    return toolbox
+  }
+
+  // Only blocks the extension traced back to an include::example$ carry
+  // data-solution-file. A shell command is not a file, so command blocks have
+  // no annotation and get no control.
+  function decorateFileBlocks () {
+    $$('.listingblock[data-solution-file]').forEach(function (block) {
+      var filePath = attr(block, 'data-solution-file')
+      if (!filePath) return
+      var toolbox = toolboxFor(block)
+      if (!toolbox || $('[data-sol-file-download]', toolbox)) return
+      var button = document.createElement('button')
+      button.className = 'sol-file-download'
+      button.setAttribute('type', 'button')
+      button.setAttribute('data-sol-file-download', filePath)
+      button.setAttribute('data-analytics', 'solution_download')
+      // The visible label is short because the toolbox is narrow; the file is
+      // named for screen readers and on hover.
+      button.setAttribute('aria-label', 'Download ' + filePath)
+      button.setAttribute('title', 'Download ' + filePath)
+      button.innerHTML = DOWNLOAD_ICON + '<span class="sol-file-download-label">Download</span>'
+      toolbox.appendChild(button)
+      button.addEventListener('click', function (e) {
+        if (e && e.preventDefault) e.preventDefault()
+        if (!hasAuthHint()) {
+          openSignin('download', filePath)
+          return
+        }
+        track('solution_download', baseProps({ source: 'click', kind: 'file', path: filePath }))
+        startDownload(fileDownloadUrl(filePath, pageVersion))
+      })
+    })
+  }
+
+  // ---------------------------------------------------------------------------
   // Wire up
   // ---------------------------------------------------------------------------
 
@@ -1085,6 +1184,7 @@
     hasAuthHint: hasAuthHint,
     manageDetails: manageDetails,
     placeRailRecs: placeRailRecs,
+    decorateFileBlocks: decorateFileBlocks,
   }
 
   syncOnLoad()
@@ -1116,7 +1216,7 @@
           openSignin('download')
           return
         }
-        track('solution_download', baseProps({ source: 'click' }))
+        track('solution_download', baseProps({ source: 'click', kind: 'bundle' }))
       })
     })
     $$('[data-sol-version-dismiss]').forEach(function (el) {
@@ -1126,6 +1226,7 @@
       el.addEventListener('click', function () { track('solution_start_click', baseProps()) })
     })
 
+    decorateFileBlocks()
     manageDetails('[data-sol-rail]')
     render()
     handleIntent()

@@ -2267,7 +2267,10 @@ html[data-theme="dark"] .doc .source-toolbox .source-lang {
   line-height: inherit;
 }
 
-.doc .source-toolbox .copy-button {
+/* The snippet download control shares the copy button's styling exactly:
+   both are toolbox controls and should read as one row. */
+.doc .source-toolbox .copy-button,
+.doc .source-toolbox .sol-file-download {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -2284,17 +2287,20 @@ html[data-theme="dark"] .doc .source-toolbox .source-lang {
   transition: background 0.12s, color 0.12s;
 }
 
-.doc .source-toolbox .copy-button:hover {
+.doc .source-toolbox .copy-button:hover,
+.doc .source-toolbox .sol-file-download:hover {
   background: var(--grey-100-new, #f3f4f6); /* Light mode hover */
   color: var(--grey-900-new, #111827);
 }
 
-html[data-theme="dark"] .doc .source-toolbox .copy-button {
+html[data-theme="dark"] .doc .source-toolbox .copy-button,
+html[data-theme="dark"] .doc .source-toolbox .sol-file-download {
   border-color: rgba(255, 255, 255, 0.08);
   color: #a8b2c7;
 }
 
-html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
+html[data-theme="dark"] .doc .source-toolbox .copy-button:hover,
+html[data-theme="dark"] .doc .source-toolbox .sol-file-download:hover {
   background: rgba(255, 255, 255, 0.04);
   color: #fff;
 }
