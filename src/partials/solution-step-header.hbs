@@ -27,6 +27,11 @@
     {{#if @root.page.attributes.solution-difficulty}}
     <span class="sol-diff is-{{@root.page.attributes.solution-difficulty}}">{{@root.page.attributes.solution-difficulty}}</span>
     {{/if}}
+    {{!-- The difficulty word on its own says nothing about what the reader
+          needs, so it travels with what the solution assumes. --}}
+    {{#with (format-assumes ../solution.assumes max=2) as |assumes|}}
+    <span class="sol-fact sol-fact--assumes" title="Assumes {{format-assumes ../../solution.assumes}}">Assumes {{assumes}}</span>
+    {{/with}}
     <span class="sol-fact sol-fact--status" data-sol-step-header-status hidden>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       Completed

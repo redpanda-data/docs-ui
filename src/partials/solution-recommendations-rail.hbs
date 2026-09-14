@@ -36,6 +36,10 @@
           {{#if duration}}{{#if difficulty}}<span class="sol-rail-rec-dot" aria-hidden="true">·</span>{{/if}}{{format-duration duration}}{{/if}}
         </span>
         {{/if}}
+        {{!-- Assumes, only when it fits the rail on one line (see format-assumes). --}}
+        {{#with (format-assumes assumes max=2 maxChars=30) as |short|}}
+        <span class="sol-rail-rec-assumes" title="Assumes {{format-assumes ../assumes}}">Assumes {{short}}</span>
+        {{/with}}
         {{#if reason}}<span class="sol-rec-why" data-sol-rec-why hidden>Why this? {{reason}}</span>{{/if}}
       </a>
     </li>

@@ -31,6 +31,11 @@
       {{/if}}
       {{#if solution.stepCount}}<span class="sol-time">{{solution.stepCount}} steps</span>{{/if}}
     </div>
+    {{!-- What the reader should already know. Past two items it truncates to a
+          count, with the full list in the title attribute. --}}
+    {{#with (format-assumes solution.assumes max=2) as |assumes|}}
+    <p class="sol-card-assumes" title="Assumes {{format-assumes ../solution.assumes}}">Assumes {{assumes}}</p>
+    {{/with}}
     {{#if solution.technologies.length}}
     <div class="sol-card-tags">
       {{#each solution.technologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
