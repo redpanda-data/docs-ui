@@ -70,6 +70,90 @@ test('escapes titles and descriptions', () => {
   assert.match(html, /a &quot;quote&quot; &amp; more/)
 })
 
+// ---- rail placement (solution-recommendations-rail.hbs, included from toc.hbs) ----
+
+hbs.registerPartial('solution-recommendations-rail', read('src/partials/solution-recommendations-rail.hbs'))
+const renderRail = hbs.compile('{{> solution-recommendations-rail}}')
+
+function railPage (attributes, over) {
+  return {
+    page: Object.assign({
+      layout: 'default',
+      attributes,
+      component: { name: 'streaming' },
+      url: '/streaming/current/develop/x/',
+    }, over),
+  }
+}
+
+test('the rail partial renders nothing without the attribute, and nothing for an empty or malformed one', () => {
+  assert.equal(renderRail(railPage({})).trim(), '')
+  assert.equal(renderRail(railPage({ 'related-solutions': '[]' })).trim(), '')
+  assert.equal(renderRail(railPage({ 'related-solutions': '{not json' })).trim(), '')
+})
+
+test('the rail partial renders up to 3 one-line entries with placement, provenance and a hidden reason', () => {
+  const html = renderRail(railPage({ 'related-solutions': JSON.stringify(RECS) }))
+  assert.match(html, /<h3 class="sol-rail-recs-title">Build it in practice<\/h3>/)
+  assert.equal((html.match(/class="sol-rail-rec"/g) || []).length, 3)
+  assert.equal((html.match(/data-placement="rail"/g) || []).length, 3)
+  assert.doesNotMatch(html, /Delta|Echo/, 'capped at 3')
+  assert.match(html, /data-provenance="explicit"[^>]*data-position="1"/)
+  assert.match(html, /<span class="sol-rail-rec-title">Alpha<\/span>/)
+  assert.match(html, /<span class="sol-rail-rec-diff is-beginner">beginner<\/span>/)
+  assert.match(html, /30 min/)
+  assert.match(html, /1 hr 15 min/)
+  assert.match(html, /<span class="sol-rec-why" data-sol-rec-why hidden>Why this\? Linked from this page<\/span>/)
+  // Compact: no descriptions and no card markup.
+  assert.doesNotMatch(html, /sol-rec-card|sol-rec-desc/)
+  assert.doesNotMatch(html, /First|Second|Third/)
+  assert.match(html, /href="\.\.\/\.\.\/\.\.\/\.\.\/solutions\/a\/"/, 'relativized like the cards')
+})
+
+test('the rail partial honours every guard the article section honours', () => {
+  const attrs = { 'related-solutions': JSON.stringify(RECS) }
+  assert.notEqual(renderRail(railPage(attrs)).trim(), '', 'sanity')
+  assert.equal(renderRail(railPage(Object.assign({ 'exclude-related-solutions': '' }, attrs))).trim(), '', 'valueless opt-out')
+  assert.equal(renderRail(railPage(Object.assign({ 'exclude-related-solutions': 'true' }, attrs))).trim(), '')
+  assert.equal(renderRail(railPage(Object.assign({ role: 'home' }, attrs))).trim(), '', 'home role')
+  assert.equal(renderRail(railPage(Object.assign({ role: 'component-home-v3' }, attrs))).trim(), '', 'component landing role')
+  assert.equal(renderRail(railPage(attrs, { component: { name: 'solutions' } })).trim(), '', 'solutions component')
+  assert.equal(renderRail(railPage(attrs, { layout: 'solution-step' })).trim(), '', 'not a Product Docs layout')
+  assert.equal(renderRail(railPage(attrs, { layout: 'component-home-v3' })).trim(), '')
+  assert.notEqual(renderRail(railPage(attrs, { layout: 'index' })).trim(), '', 'index pages get it too')
+})
+
+test('both placements exist, read the same attribute, and are distinguishable in analytics', () => {
+  const rail = read('src/partials/solution-recommendations-rail.hbs')
+  const article = read('src/partials/solution-recommendations.hbs')
+  const toc = read('src/partials/toc.hbs')
+  const progress = read('src/js/28-solution-progress.js')
+
+  for (const [name, src] of [['rail', rail], ['article', article]]) {
+    assert.match(src, /parse-json page\.attributes\.related-solutions/, name + ' reads page-related-solutions')
+    assert.match(src, /page\.attributes\.exclude-related-solutions/, name + ' honours the opt-out')
+    assert.match(src, /data-sol-rec\b/, name + ' entries are tracked')
+  }
+  assert.match(rail, /data-placement="rail"/)
+  assert.match(article, /data-placement="article"/)
+
+  // toc.hbs renders the rail block right after the On this page list.
+  const tocMenu = toc.indexOf('<div class="toc-menu">')
+  const include = toc.indexOf('{{> solution-recommendations-rail}}')
+  assert.ok(include > tocMenu, 'included after .toc-menu')
+  assert.ok(include < toc.indexOf('toc-tools-title'), 'and before the tools section')
+
+  // One tracking path covers both placements, with placement in the payload.
+  assert.match(progress, /placement: attr\(el, 'data-placement'\)/)
+  assert.match(progress, /product_doc_solution_rec_impression/)
+  assert.match(progress, /product_doc_solution_rec_click/)
+  // Narrow screens: the block is moved into the embedded on-this-page region.
+  assert.match(progress, /function placeRailRecs/)
+  assert.match(progress, /aside\.toc\.embedded/)
+  assert.ok(progress.indexOf('placeRailRecs()') < progress.indexOf('observeImpressions()'),
+    'relocated before impressions are observed, so the observer sees its final position')
+})
+
 test('article.hbs hooks the partial in after the role chain, only for default/index layouts and never for home, component-home-v3 or the solutions component', () => {
   const article = read('src/partials/article.hbs')
   const idx = article.indexOf('{{> solution-recommendations}}')
