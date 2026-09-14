@@ -905,6 +905,11 @@
           // Same show delay as the glossary and enterprise tooltips, so
           // dragging the cursor across a paragraph doesn't fire previews.
           delay: [200, 0],
+          // Only one tooltip open at a time. See 12-activate-tooltips.js for
+          // why this is per-config rather than a global default.
+          onShow: function (instance) {
+            window.tippy.hideAll({ exclude: instance })
+          },
           popperOptions: {
             modifiers: [
               { name: 'preventOverflow', options: { boundary: 'viewport' } },

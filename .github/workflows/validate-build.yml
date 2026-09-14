@@ -77,6 +77,8 @@ jobs:
         run: npm run test:toc-collapsible
       - name: Test tooltips on touch devices
         run: npm run test:tooltip-touch
+      - name: Test only one tooltip opens at a time
+        run: npm run test:tooltip-single-open
       - name: Cache generated files
         uses: actions/cache@v4
         with:

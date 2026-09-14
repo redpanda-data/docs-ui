@@ -25,6 +25,16 @@
       delay: [200, 0], // Instant show/hide for faster tooltips
       // Append to body to prevent overflow/clipping issues
       appendTo: () => document.body,
+      // Only one tooltip open at a time, across every tooltip on the page.
+      // tippy does not do this on its own, and on touch it is not cosmetic:
+      // the trigger is click and hideOnClick is 'toggle', so a tap outside
+      // does not dismiss anything and each term the reader taps leaves
+      // another popover on screen until they tap that same term again.
+      // hideAll reaches every mounted instance, so property and Bloblang
+      // tooltips close too, not just the ones created here.
+      onShow (instance) {
+        tippy.hideAll({ exclude: instance })
+      },
       // Configure popper to handle boundary detection
       popperOptions: {
         modifiers: [

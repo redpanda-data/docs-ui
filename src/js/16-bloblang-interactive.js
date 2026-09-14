@@ -495,12 +495,16 @@
           ],
         },
         onShow(instance) {
-          // Hide other tooltips
-          document.querySelectorAll('.tippy-box').forEach(box => {
-            if (box !== instance.popper) {
-              box._tippy && box._tippy.hide();
-            }
-          });
+          // Only one tooltip open at a time.
+          //
+          // This replaces a loop over .tippy-box elements that never hid
+          // anything: instance.popper is the [data-tippy-root] wrapper and
+          // .tippy-box is its child, so the "is this mine" check was always
+          // true, and tippy assigns _tippy to the reference element rather
+          // than the box, so box._tippy was always undefined and the guard
+          // swallowed it. hideAll is tippy's own API for this and reaches
+          // every mounted instance.
+          tippy.hideAll({ exclude: instance });
         }
       });
 
@@ -608,7 +612,11 @@
     if (window.tippy && !isTouchDevice()) {
       button.setAttribute('data-tippy-content', 'Execute this mapping in a mini-playground');
       tippy(button, {
-        delay: [200, 0]
+        delay: [200, 0],
+        // Only one tooltip open at a time, as everywhere else.
+        onShow (instance) {
+          tippy.hideAll({ exclude: instance });
+        },
       });
     }
   }
