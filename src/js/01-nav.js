@@ -285,8 +285,29 @@
     e.stopPropagation()
   }
 
+  // The sidebar scrolls inside .sb-scroll (nav.hbs), the nearest ancestor with
+  // overflow-y auto or scroll. The menu panel is the fallback for a layout where
+  // nothing above it scrolls. Never the document: scrolling that is the bug below.
+  function scrollContainerOf (el) {
+    var node = el.parentNode
+    while (node && node !== document.documentElement && node !== document.body) {
+      var overflowY = window.getComputedStyle(node).overflowY
+      if (overflowY === 'auto' || overflowY === 'scroll') return node
+      node = node.parentNode
+    }
+    return menuPanel
+  }
+
+  // Scroll only the sidebar. Element.scrollIntoView also scrolls the window, and
+  // on a cold cache this runs before the browser has jumped to the URL fragment;
+  // Chrome then drops that pending jump and the reader lands at the top of the
+  // page instead of the section they followed a link to (DOC-2513).
   function scrollItemToMidpoint (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    var container = scrollContainerOf(el)
+    var containerRect = container.getBoundingClientRect()
+    var elRect = el.getBoundingClientRect()
+    var elTop = elRect.top - containerRect.top + container.scrollTop
+    container.scrollTop = Math.max(0, elTop - container.clientHeight / 2 + elRect.height / 2)
   }
 
   function find (from, selector) {
