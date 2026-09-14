@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-assumes', 'relativize'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-assumes', 'format-release-date', 'format-verified-evidence', 'relativize'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
@@ -174,6 +174,15 @@ const SOLUTION = {
   platforms: ['cloud'],
   version: 'v1.0.0',
 }
+function stepRenderer () {
+  const stepHbs = Handlebars.create()
+  ;['eq', 'or', 'format-duration', 'format-assumes', 'format-release-date', 'relativize', 'get-solution-step'].forEach((name) => {
+    stepHbs.registerHelper(name, helper(name))
+  })
+  stepHbs.registerPartial('solution-step-header', read('src/partials/solution-step-header.hbs'))
+  return stepHbs.compile('{{> solution-step-header solution=solution}}')
+}
+
 const withAssumes = (assumes) => ({ solution: Object.assign({}, SOLUTION, assumes === undefined ? {} : { assumes }) })
 
 test('format-assumes joins the list, truncates past `max`, and returns nothing when it cannot fit', () => {
@@ -227,12 +236,7 @@ test('the catalog card renders one muted Assumes line, truncated past two items 
 // attribute to page-solution-step-id and the helper kept reading the old
 // page-solution-step, so both names are asserted here.
 test('the step header resolves the current step from page-solution-step-id (and the legacy name) and shows assumes', () => {
-  const stepHbs = Handlebars.create()
-  ;['eq', 'or', 'format-duration', 'format-assumes', 'relativize', 'get-solution-step'].forEach((name) => {
-    stepHbs.registerHelper(name, helper(name))
-  })
-  stepHbs.registerPartial('solution-step-header', read('src/partials/solution-step-header.hbs'))
-  const renderStep = stepHbs.compile('{{> solution-step-header solution=solution}}')
+  const renderStep = stepRenderer()
   const solution = Object.assign({}, SOLUTION, {
     assumes: ['topics', 'consumer groups', 'Protobuf basics', 'reading Go'],
     steps: [{ id: 'start-environment', title: 'Start the environment', url: '/solutions/gaming/start-environment/', order: 1, duration: 5 }],
@@ -273,6 +277,143 @@ test('the rail entries and the footer cards show assumes only when it fits on on
   assert.match(render(page({ 'related-solutions': recs(short) })), /Assumes Postgres, Iceberg tables/)
   assert.doesNotMatch(render(page({ 'related-solutions': recs([]) })), /Assumes/)
   assert.doesNotMatch(render(page({ 'related-solutions': JSON.stringify(RECS) })), /Assumes/, 'records without the field render nothing')
+})
+
+// ---- proof of the last test run (verified) ----
+
+const VERIFIED = {
+  suite: 'solutions/gaming',
+  specs: 11,
+  steps: 50,
+  commands: 34,
+  checks: 23,
+  media: 2,
+  verifyScript: { status: 'PASS', passed: 9, total: 9 },
+  redpandaVersion: '26.2.2',
+  runAt: '2026-09-13T02:14:07Z',
+}
+const withVerified = (verified) => ({ solution: Object.assign({}, SOLUTION, verified === undefined ? {} : { verified }) })
+
+test('format-release-date keeps its short form and gains a long one, both in UTC', () => {
+  const formatReleaseDate = helper('format-release-date')
+  assert.equal(formatReleaseDate('2026-03-14', { hash: {} }), 'Mar 2026', 'the release-page callers are unchanged')
+  assert.equal(formatReleaseDate('2026-03-14'), 'Mar 2026', 'called with no options at all')
+  assert.equal(formatReleaseDate('2026-09-13T02:14:07Z', { hash: { long: true } }), 'September 13, 2026')
+  assert.equal(formatReleaseDate('2026-09-13T23:50:00Z', { hash: { long: true } }), 'September 13, 2026', 'a late timestamp does not roll into the next day')
+  assert.equal(formatReleaseDate('', { hash: { long: true } }), '')
+  assert.equal(formatReleaseDate('not a date', { hash: { long: true } }), '')
+})
+
+// Antora's UI loader and build-preview-pages both evaluate each helper's
+// source with no module path of its own, so a helper that requires a sibling
+// dies with MODULE_NOT_FOUND at build time (and the preview build wipes public/
+// before it fails, which makes it look like a template error).
+test('no helper requires a sibling helper, because the UI loader evaluates each one standalone', () => {
+  const dir = path.join(ROOT, 'src/helpers')
+  for (const file of fs.readdirSync(dir).filter((name) => name.endsWith('.js'))) {
+    assert.doesNotMatch(
+      fs.readFileSync(path.join(dir, file), 'utf8'),
+      /require\(\s*['"]\.{1,2}\//,
+      file + ' requires a relative path; inline what it needs or compose the helpers in the template instead'
+    )
+  }
+})
+
+test('a run date that does not parse is silent, and never reaches the page as a raw string', () => {
+  // A manifest typo is published to the record as written (with a build
+  // warning) so the record never disagrees with the file, so it can arrive here.
+  for (const runAt of ['last Tuesday', 'yesterday', 'soon', '13/09/2026', 'null']) {
+    const html = renderMeta(withVerified(Object.assign({}, VERIFIED, { runAt })))
+    assert.doesNotMatch(html, /Last verified/, runAt + ': no row')
+    assert.doesNotMatch(html, new RegExp(runAt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), runAt + ': the raw value is never printed')
+    assert.match(html, /<dt>Version<\/dt>/, runAt + ': the rest of the strip is unaffected')
+  }
+})
+
+test('a good date with no recorded version renders without the version clause', () => {
+  const html = renderMeta(withVerified({ runAt: '2026-09-13T02:14:07Z', specs: 11 }))
+  assert.match(html, /<dd class="sol-verified" title="11 specs">September 13, 2026<\/dd>/)
+  assert.doesNotMatch(html, /against Redpanda/)
+
+  const step = stepRenderer()({
+    solution: Object.assign({}, SOLUTION, { steps: [{ id: 's1', title: 'One', url: '/s/1/', order: 1, duration: 5 }] }),
+    page: { title: 'One', attributes: { 'solution-step-id': 's1', 'solution-verified-at': '2026-09-13T02:14:07Z' } },
+  })
+  assert.match(step, /<span class="sol-fact sol-fact--verified">Last verified September 13, 2026<\/span>/)
+  assert.doesNotMatch(step, /against Redpanda/)
+})
+
+test('format-verified-evidence lists the run counts and the verify script result', () => {
+  const evidence = helper('format-verified-evidence')
+  const call = (verified) => evidence(verified, { hash: {} })
+  assert.equal(call(VERIFIED), '11 specs, 50 steps, 34 commands, 23 output checks, 2 media captures, verify script PASS (9/9)')
+  assert.equal(call({ specs: 1, steps: 1, commands: 1, checks: 1, media: 1 }), '1 spec, 1 step, 1 command, 1 output check, 1 media capture')
+  assert.equal(call({ specs: 3, media: 0 }), '3 specs, 0 media captures', 'a reported zero is evidence; an unreported count is left out')
+  assert.equal(call({ verifyScript: 'PASS (9/9)' }), 'verify script PASS (9/9)', 'a ready-made string passes through')
+  assert.equal(call({ verifyScript: { status: 'FAIL' } }), 'verify script FAIL', 'no pass counts recorded for the script')
+  assert.equal(call(undefined), '')
+  assert.equal(call({}), '')
+})
+
+test('the overview meta strip renders Last verified after Version, with the evidence in the title', () => {
+  const html = renderMeta(withVerified(VERIFIED))
+  assert.match(html, /<dt>Last verified<\/dt>/)
+  assert.match(
+    html,
+    /<dd class="sol-verified" title="11 specs, 50 steps, 34 commands, 23 output checks, 2 media captures, verify script PASS \(9\/9\)">September 13, 2026 against Redpanda 26\.2\.2<\/dd>/
+  )
+  assert.ok(html.indexOf('Last verified') > html.indexOf('<dt>Version</dt>'), 'sits after the Version row')
+})
+
+test('the overview renders nothing at all when a solution carries no verified record', () => {
+  for (const missing of [undefined, null, {}, { redpandaVersion: '26.2.2' }, { runAt: '' }, { runAt: 'nonsense' }]) {
+    const html = renderMeta(withVerified(missing))
+    const label = JSON.stringify(missing) + ': '
+    assert.doesNotMatch(html, /Last verified/, label + 'no row')
+    assert.doesNotMatch(html, /sol-verified/, label + 'no element')
+    assert.doesNotMatch(html, /not verified|unverified|never verified/i, label + 'absence is silence, not a placeholder or warning')
+    assert.match(html, /<dt>Version<\/dt>/, label + 'the rest of the strip is unaffected')
+  }
+})
+
+test('an old run date is shown exactly as it is, with no softening and no hiding', () => {
+  const stale = renderMeta(withVerified(Object.assign({}, VERIFIED, { runAt: '2024-01-05T02:00:00Z' })))
+  assert.match(stale, /January 5, 2024 against Redpanda 26\.2\.2/, 'a two-year-old run still states its date')
+  assert.doesNotMatch(stale, /stale|outdated|out of date|may no longer|warning/i)
+})
+
+test('the title attribute is omitted rather than left empty when CI recorded no evidence', () => {
+  const html = renderMeta(withVerified({ runAt: '2026-09-13T02:14:07Z', redpandaVersion: '26.2.2' }))
+  assert.match(html, /<dd class="sol-verified">September 13, 2026 against Redpanda 26\.2\.2<\/dd>/)
+  assert.doesNotMatch(html, /title=""/)
+})
+
+test('step pages render the verified line from the scalar mirrors, and nothing without them', () => {
+  const renderStep = stepRenderer()
+  const solution = Object.assign({}, SOLUTION, {
+    verified: VERIFIED,
+    steps: [{ id: 'start-environment', title: 'Start the environment', url: '/solutions/gaming/start-environment/', order: 1, duration: 5 }],
+  })
+  const at = (attributes) => renderStep({ solution, page: { title: 'Start the environment', attributes: Object.assign({ 'solution-step-id': 'start-environment', 'solution-difficulty': 'intermediate' }, attributes) } })
+
+  const html = at({ 'solution-verified-at': '2026-09-13T02:14:07Z', 'solution-verified-version': '26.2.2' })
+  assert.match(html, /<span class="sol-fact sol-fact--verified">Last verified September 13, 2026 against Redpanda 26\.2\.2<\/span>/)
+  assert.ok(html.indexOf('sol-fact--verified') > html.indexOf('sol-diff is-intermediate'), 'sits in the facts row after the difficulty')
+
+  assert.match(at({ 'solution-verified-at': '2026-09-13T02:14:07Z' }), /Last verified September 13, 2026<\/span>/, 'date mirror only')
+
+  for (const mirrors of [{}, { 'solution-verified-version': '26.2.2' }, { 'solution-verified-at': '' }]) {
+    const bare = at(mirrors)
+    assert.doesNotMatch(bare, /verified/i, JSON.stringify(mirrors) + ': the step page says nothing')
+    assert.match(bare, /About 5 min/, 'the rest of the facts row is unaffected')
+  }
+})
+
+test('the landing cards and the recommendation entries deliberately stay out of it', () => {
+  assert.doesNotMatch(renderCard(withVerified(VERIFIED)), /verified/i, 'the catalog card is already dense')
+  const recs = JSON.stringify([Object.assign({}, RECS[0], { verified: VERIFIED })])
+  assert.doesNotMatch(render(page({ 'related-solutions': recs })), /verified/i)
+  assert.doesNotMatch(renderRail(railPage({ 'related-solutions': recs })), /verified/i)
 })
 
 test('article.hbs hooks the partial in after the role chain, only for default/index layouts and never for home, component-home-v3 or the solutions component', () => {

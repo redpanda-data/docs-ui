@@ -217,6 +217,16 @@ site:
               difficulty: intermediate
               duration: 45
               assumes: [topics, consumer groups, Protobuf basics, reading Go]
+              verified:
+                suite: solutions/multiplayer-gaming
+                specs: 11
+                steps: 50
+                commands: 34
+                checks: 23
+                media: 2
+                verifyScript: {status: PASS, passed: 9, total: 9}
+                redpandaVersion: 26.2.2
+                runAt: '2026-09-13T02:14:07Z'
               featured: true
               platforms: [self-managed, cloud]
               technologies: [Go, Protobuf, Schema Registry, Redpanda Connect, Redis, Postgres]
@@ -237,6 +247,16 @@ site:
               difficulty: advanced
               duration: 60
               assumes: [Postgres, Iceberg tables]
+              verified:
+                suite: solutions/cdc-to-lakehouse
+                specs: 7
+                steps: 31
+                commands: 22
+                checks: 15
+                media: 1
+                verifyScript: {status: PASS, passed: 4, total: 4}
+                redpandaVersion: 26.2.2
+                runAt: '2026-09-12T02:11:44Z'
               featured: false
               platforms: [self-managed]
               technologies: [Redpanda Connect, Postgres, Iceberg]
@@ -256,6 +276,16 @@ site:
               difficulty: beginner
               duration: 30
               assumes: [schemas]
+              verified:
+                suite: solutions/schema-registry-migration
+                specs: 4
+                steps: 18
+                commands: 12
+                checks: 9
+                media: 0
+                verifyScript: {status: PASS, passed: 3, total: 3}
+                redpandaVersion: 26.2.2
+                runAt: '2026-07-02T02:09:58Z'
               featured: false
               platforms: [self-managed, cloud]
               technologies: [Schema Registry, Redpanda Connect]
