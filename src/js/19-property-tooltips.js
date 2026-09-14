@@ -901,7 +901,10 @@
           maxWidth: 450,
           appendTo: document.body,
           trigger: isTouch ? 'click' : 'mouseenter focus',
-          hideOnClick: isTouch ? 'toggle' : true,
+          // Always true, never 'toggle': tippy compares this with === true
+          // before hiding on an outside press, so 'toggle' leaves a touch
+          // reader unable to dismiss. See 12-activate-tooltips.js.
+          hideOnClick: true,
           // Same show delay as the glossary and enterprise tooltips, so
           // dragging the cursor across a paragraph doesn't fire previews.
           delay: [200, 0],

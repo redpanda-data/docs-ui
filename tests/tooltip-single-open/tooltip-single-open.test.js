@@ -116,6 +116,24 @@ test('every script that creates a tooltip also closes the others', () => {
   }
 })
 
+test('no tooltip script goes back to hideOnClick: toggle', () => {
+  // Lives here rather than in tooltip-touch.test.js because this is the file
+  // with the glob over every tooltip script; that one only exercises 12.
+  //
+  // tippy compares hideOnClick with === true before hiding on a press outside
+  // the tooltip, so 'toggle' leaves a reader on a touch device unable to
+  // dismiss at all: tapping the page does nothing, and tapping the term again
+  // does not close it either, because tippy's click trigger re-shows it.
+  for (const file of TOOLTIP_SCRIPTS) {
+    const src = read(file).replace(/\/\/.*$/gm, '')
+    assert.doesNotMatch(
+      src,
+      /hideOnClick:\s*(isTouch\s*\?\s*)?'toggle'/,
+      `${file} sets hideOnClick to 'toggle', which leaves touch readers unable to dismiss the tooltip`
+    )
+  }
+})
+
 test('nothing goes back to hiding tooltips through .tippy-box._tippy', () => {
   // What this replaced in 16-bloblang-interactive.js, which never hid
   // anything: instance.popper is the [data-tippy-root] wrapper and .tippy-box

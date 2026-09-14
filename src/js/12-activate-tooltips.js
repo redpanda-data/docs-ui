@@ -19,7 +19,16 @@
       theme: 'redpanda-term',
       touch: isTouch ? true : 'hold',
       trigger: isTouch ? 'click' : 'mouseenter focus',
-      hideOnClick: isTouch ? 'toggle' : true,
+      // Always true, never 'toggle'. tippy compares this with === true before
+      // hiding on a press outside the tooltip, so 'toggle' left a reader on a
+      // touch device with no way to dismiss a tooltip at all: not by tapping
+      // the page, and not by tapping the term again (tippy's click trigger
+      // re-shows it). Verified in a browser with real touch events, before
+      // and after. true keeps the opening tap from dismissing what it just
+      // opened, because tippy ignores a press on the reference itself while
+      // the input is touch, and interactive keeps a tap on the tooltip's own
+      // footer link from closing it before it can be followed.
+      hideOnClick: true,
       interactive: true,
       allowHTML: true,
       delay: [200, 0], // Instant show/hide for faster tooltips
@@ -27,11 +36,10 @@
       appendTo: () => document.body,
       // Only one tooltip open at a time, across every tooltip on the page.
       // tippy does not do this on its own, and on touch it is not cosmetic:
-      // the trigger is click and hideOnClick is 'toggle', so a tap outside
-      // does not dismiss anything and each term the reader taps leaves
-      // another popover on screen until they tap that same term again.
-      // hideAll reaches every mounted instance, so property and Bloblang
-      // tooltips close too, not just the ones created here.
+      // the trigger is click, so each term a reader taps opens another
+      // popover and the previous one stays on screen. hideAll reaches every
+      // mounted instance, so property and Bloblang tooltips close too, not
+      // just the ones created here.
       onShow (instance) {
         tippy.hideAll({ exclude: instance })
       },
@@ -84,8 +92,11 @@
     }
 
     // On touch, a tap on a tooltipped link opens the tooltip rather than
-    // navigating. Only the first tap: while the tooltip is open the footer link
-    // is the way through, and a second tap on the term closes it (hideOnClick).
+    // navigating. Only the first tap: while the tooltip is open the footer
+    // link is the way through, and tapping anywhere off the tooltip dismisses
+    // it (hideOnClick). Tapping the term a second time does NOT close it:
+    // tippy's click trigger re-shows it, which is why dismissal hangs on the
+    // outside press rather than on a toggle.
     function interceptTap (el) {
       if (!isTouch) return
       const anchor = linkedAnchor(el)

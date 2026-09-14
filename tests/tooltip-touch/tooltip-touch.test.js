@@ -88,7 +88,14 @@ test('touch: tap trigger, the first tap on a glossary term does not navigate', (
   const cfg = tippyCalls[0].cfg
   assert.equal(cfg.trigger, 'click')
   assert.equal(cfg.touch, true)
-  assert.equal(cfg.hideOnClick, 'toggle')
+  // true, not 'toggle'. tippy compares hideOnClick with === true before
+  // hiding on a press outside the tooltip, so 'toggle' left a reader on a
+  // touch device unable to dismiss a tooltip at all: tapping the page did
+  // nothing, and tapping the term again does not close it either because
+  // tippy's click trigger re-shows it. Verified in a browser with real touch
+  // events. The opening tap does not dismiss what it just opened, because
+  // tippy ignores a press on the reference while the input is touch.
+  assert.equal(cfg.hideOnClick, true)
   assert.equal(term.attrs['aria-haspopup'], 'dialog')
   let prevented = false
   term.listeners.click[0]({ preventDefault: () => { prevented = true }, target: { closest: () => null } })
