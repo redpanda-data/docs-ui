@@ -42,7 +42,10 @@
  *     contract (copied from docs-site).
  *   - Every code block the extension annotated with data-solution-file gets a
  *     download control in its toolbox (next to Copy), which serves that one
- *     file from the same endpoint as the bundle. Gated the same way, and the
+ *     file from the same endpoint as the bundle. It honours the solution's own
+ *     data-solution-download policy exactly as the bundle CTA does, so a
+ *     reader is never asked to sign in for one file while the whole zip is
+ *     free, and never sees a control where the CTA itself is absent. The
  *     download starts on return from sign-in.
  *   - Gates exist only on Save and on the authenticated download. Anonymous
  *     readers can start, mark steps, and see progress on this device.
@@ -380,6 +383,10 @@
   var isSolutionPage = !!solutionId && (isOverview || isStep)
   var stepId = attr(body, 'data-step-id') || null
   var pageVersion = attr(body, 'data-solution-version') || null
+  // 'authenticated' (gated), 'public' (ungated) or 'none' (no downloads at
+  // all), straight from the record. The bundle CTA is built from the same
+  // value, and the snippet controls follow it so the two can never disagree.
+  var downloadPolicy = attr(body, 'data-solution-download') || 'authenticated'
   var component = attr(body, 'data-component') || null
 
   function $ (selector, root) { return (root || document).querySelector(selector) }
@@ -986,6 +993,8 @@
       if (saveLabel) saveLabel.textContent = signedIn ? 'Save now' : 'Save progress'
     })
     if (!signedIn) setSyncState(available ? (record ? 'Saved on this device' : '') : (record ? 'Saved on this device' : ''))
+    // Snippet controls appear and disappear with the bundle CTA above.
+    decorateFileBlocks()
 
     // Version-changed notice.
     var mismatch = !!(record && record.solutionVersion && pageVersion && record.solutionVersion !== pageVersion)
@@ -1122,6 +1131,26 @@
     '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/>' +
     '<line x1="12" y1="15" x2="12" y2="3"/></svg>'
 
+  function fileDownloadsGated () {
+    return downloadPolicy !== 'public'
+  }
+
+  // Present only where the bundle CTA is present: never for 'none', always for
+  // 'public', and for 'authenticated' only while signing in is actually
+  // possible (authAvailable is what hides the CTA in render). A control a
+  // reader cannot complete is worse than no control.
+  function fileDownloadsAvailable () {
+    if (downloadPolicy === 'none') return false
+    if (!fileDownloadsGated()) return true
+    return authAvailable()
+  }
+
+  function removeFileControls () {
+    $$('[data-sol-file-download]').forEach(function (el) {
+      if (el.parentNode) el.parentNode.removeChild(el)
+    })
+  }
+
   // 06-copy-to-clipboard.js builds the toolbox for every block it can copy, so
   // one is normally already there; a block it skipped still gets a control.
   function toolboxFor (block) {
@@ -1139,6 +1168,10 @@
   // data-solution-file. A shell command is not a file, so command blocks have
   // no annotation and get no control.
   function decorateFileBlocks () {
+    if (!isSolutionPage || !fileDownloadsAvailable()) {
+      removeFileControls()
+      return
+    }
     $$('.listingblock[data-solution-file]').forEach(function (block) {
       var filePath = attr(block, 'data-solution-file')
       if (!filePath) return
@@ -1150,14 +1183,20 @@
       button.setAttribute('data-sol-file-download', filePath)
       button.setAttribute('data-analytics', 'solution_download')
       // The visible label is short because the toolbox is narrow; the file is
-      // named for screen readers and on hover.
-      button.setAttribute('aria-label', 'Download ' + filePath)
-      button.setAttribute('title', 'Download ' + filePath)
+      // named for screen readers and on hover. A block that showed only a
+      // tagged region says so: what downloads is the whole file, under the
+      // repo's own filename, and a reader looking at a ten-line excerpt should
+      // not have to guess that.
+      var label = attr(block, 'data-solution-tag')
+        ? 'Download the full file ' + filePath
+        : 'Download ' + filePath
+      button.setAttribute('aria-label', label)
+      button.setAttribute('title', label)
       button.innerHTML = DOWNLOAD_ICON + '<span class="sol-file-download-label">Download</span>'
       toolbox.appendChild(button)
       button.addEventListener('click', function (e) {
         if (e && e.preventDefault) e.preventDefault()
-        if (!hasAuthHint()) {
+        if (fileDownloadsGated() && !hasAuthHint()) {
           openSignin('download', filePath)
           return
         }
@@ -1226,7 +1265,6 @@
       el.addEventListener('click', function () { track('solution_start_click', baseProps()) })
     })
 
-    decorateFileBlocks()
     manageDetails('[data-sol-rail]')
     render()
     handleIntent()
