@@ -49,6 +49,35 @@ function response (status, body) {
   }
 }
 
+function listingBlock (attrs, o) {
+  o = o || {}
+  const content = []
+  const parts = []
+  if (o.title) parts.push(el('div', { class: 'title', text: o.title }))
+  if (o.toolbox !== false) {
+    content.push(el('div', { class: 'source-toolbox' }, [
+      el('span', { class: 'source-lang', text: 'go' }),
+      el('button', { class: 'copy-button' }),
+    ]))
+  }
+  content.push(el('pre', { class: 'highlight' }, [el('code', { 'data-lang': 'go', text: 'package main' })]))
+  parts.push(el('div', { class: 'content' }, content))
+  return el('div', Object.assign({ class: 'listingblock' }, attrs), parts)
+}
+
+// The article's code blocks: two the extension traced back to an
+// include::example$ (one of them a tagged region, one of them with no toolbox
+// yet), and one command block it left alone.
+function buildBlocks (els) {
+  els.fileBlock = listingBlock(
+    { 'data-solution-file': 'services/leaderboard/main.go', 'data-solution-tag': 'consumer' },
+    { title: 'services/leaderboard/main.go' })
+  els.fileBlockPlain = listingBlock({ 'data-solution-file': 'docker-compose.yml' })
+  els.fileBlockNoToolbox = listingBlock({ 'data-solution-file': 'services/leaderboard/go.mod' }, { toolbox: false })
+  els.commandBlock = listingBlock({})
+  return [els.fileBlock, els.fileBlockPlain, els.fileBlockNoToolbox, els.commandBlock]
+}
+
 function buildPage (o) {
   const stepIds = o.stepIds || ['s1', 's2', 's3']
   const stepUrl = (id) => '/solutions/' + o.solutionId + '/' + id + '/'
@@ -118,6 +147,7 @@ function buildPage (o) {
       el('li', { 'data-sol-step-id': id, 'data-sol-step-url': stepUrl(id) }, [el('a', { href: stepUrl(id) }, [el('span', { 'data-sol-step-status': '' })])])))
     main.push(els.start, els.heroProgress, els.stepList)
   }
+  if (o.blocks !== false) buildBlocks(els).forEach((b) => main.push(b))
 
   // DOM order as on the real page: sidebar nav, then the article, then the rail.
   els.body = el('body', bodyAttrs, [els.account, els.nav].concat(main, [els.rail]))
@@ -136,7 +166,21 @@ function run (options) {
     accountHidden: true,
   }, options || {})
 
-  const { els, stepIds, stepUrl } = o.page === 'none' ? { els: { body: el('body', {}) }, stepIds: [], stepUrl: null } : buildPage(o)
+  let els, stepIds, stepUrl
+  if (o.page === 'none') {
+    els = { body: el('body', {}) }
+    stepIds = []
+    stepUrl = null
+  } else if (o.page === 'article') {
+    // A normal docs page: same annotated blocks, no solution body attributes.
+    els = {}
+    const blocks = buildBlocks(els)
+    els.body = el('body', { class: 'article', 'data-component': 'streaming' }, blocks)
+    stepIds = []
+    stepUrl = null
+  } else {
+    ;({ els, stepIds, stepUrl } = buildPage(o))
+  }
   const document = makeDocument(els.body)
   document.cookie = o.signedIn ? 'rp_docs_auth=1' : ''
   // Every element the module creates (toasts). flush() also fires the toast's
@@ -252,6 +296,9 @@ function run (options) {
     storedStore: () => (STORE_KEY in local.data ? JSON.parse(local.data[STORE_KEY]) : null),
     toasts: () => created.filter((c) => c.classes.has('sol-toast')),
     signinEvents: () => calls.events.filter((e) => e.type === 'docs-account:open-signin'),
+    controls: () => els.body.querySelectorAll('[data-sol-file-download]'),
+    control: (file) => els.body.querySelector('[data-sol-file-download="' + file + '"]'),
+    downloads: () => calls.heap.filter((e) => e.name === 'solution_download'),
     puts: () => calls.fetch.filter((c) => c.url === '/solutions/progress' && c.method === 'PUT'),
     gets: () => calls.fetch.filter((c) => c.url === '/solutions/progress' && c.method === 'GET'),
   }

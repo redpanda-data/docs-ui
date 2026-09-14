@@ -38,6 +38,54 @@ rpk topic create game.achievements --partitions 3 --replicas 1 --topic-config re
 rpk topic create game.player-events.dlq --partitions 1 --replicas 1 --topic-config retention.ms=2592000000
 ----
 
+// The listing blocks below mirror exactly what the solutions-catalog extension
+// emits for a listing that came from an include::example$: the .listingblock
+// carries data-solution-file, plus data-solution-tag when the include used a
+// tag. They are written as passthrough HTML because AsciiDoc has no syntax for
+// data attributes on a block. The command blocks on this page deliberately
+// carry no annotation: a shell command is not a file, so 28-solution-progress.js
+// gives them no download control.
+
+The compose file is the one file you edit before starting, and the module file
+pins the two client libraries.
+
+++++
+<div class="listingblock" data-solution-file="docker-compose.yml" data-solution-tag="redpanda">
+<div class="title">docker-compose.yml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.2
+    command:
+      - redpanda start
+      - --smp 1
+    ports:
+      - 9092:9092
+      - 8081:8081
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 5s
+</code></pre>
+</div>
+</div>
+++++
+
+++++
+<div class="listingblock" data-solution-file="services/leaderboard/go.mod">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">module github.com/redpanda-data/solutions/multiplayer-gaming/leaderboard
+
+go 1.23
+
+require (
+	github.com/redis/go-redis/v9 v9.6.1
+	github.com/twmb/franz-go v1.17.1
+)
+</code></pre>
+</div>
+</div>
+++++
+
 == Why
 
 Everything downstream assumes a healthy broker and a reachable Schema Registry. Starting the platform first and verifying it means later failures are about your code, not the environment.

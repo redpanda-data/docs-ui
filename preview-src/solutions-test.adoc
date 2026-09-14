@@ -32,6 +32,29 @@ Run at least three brokers with replication factor 3, turn on TLS and SASL, and 
 * `rpk` 24.3 or later
 * Go 1.22 or later if you want to change the services
 
+// The listing blocks below mirror exactly what the solutions-catalog extension
+// emits for a listing that came from an include::example$: the .listingblock
+// carries data-solution-file, plus data-solution-tag when the include used a
+// tag. They are written as passthrough HTML because AsciiDoc has no syntax for
+// data attributes on a block. The command blocks on this page deliberately
+// carry no annotation: a shell command is not a file, so 28-solution-progress.js
+// gives them no download control.
+
+The environment file every service reads:
+
+++++
+<div class="listingblock" data-solution-file=".env.example">
+<div class="title">.env.example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">REDPANDA_BROKERS=localhost:9092
+SCHEMA_REGISTRY_URL=http://localhost:8081
+REDIS_ADDR=localhost:6379
+POSTGRES_DSN=postgres://solutions:solutions@localhost:5432/matches
+</code></pre>
+</div>
+</div>
+++++
+
 == Production considerations
 
 |===
