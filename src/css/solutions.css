@@ -222,27 +222,6 @@
   white-space: nowrap;
 }
 
-/* What a solution assumes the reader already knows, always shown with the
-   difficulty. The compact placements (catalog card, rail list, recommendation
-   card) keep it to one line: format-assumes skips the line when it is too long
-   and this clips anything that still overflows. */
-.sol-assumes {
-  color: var(--grey-700-new);
-}
-
-.sol-card-assumes,
-.sol-rec-assumes,
-.sol-rail-rec-assumes {
-  display: block;
-  margin: 0.25rem 0 0;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  line-height: 1.4;
-  color: var(--grey-500-new);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* Proof of the last test run. Muted: it is reassurance a reader looks for
    deliberately, not something to shout over the steps themselves. */
 .sol-verified[title] {
@@ -254,16 +233,6 @@
 }
 
 html[data-theme="dark"] .sol-fact--verified {
-  color: var(--grey-400-new);
-}
-
-html[data-theme="dark"] .sol-assumes {
-  color: var(--grey-300-new);
-}
-
-html[data-theme="dark"] .sol-card-assumes,
-html[data-theme="dark"] .sol-rec-assumes,
-html[data-theme="dark"] .sol-rail-rec-assumes {
   color: var(--grey-400-new);
 }
 

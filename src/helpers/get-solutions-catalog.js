@@ -91,7 +91,6 @@ function normalizeRecord (record) {
     platforms: toArray(record.platforms),
     technologies: toArray(record.technologies),
     categories: toArray(record.categories),
-    assumes: toArray(record.assumes),
     steps,
     stepCount: steps.length,
     attachments: toArray(record.attachments),

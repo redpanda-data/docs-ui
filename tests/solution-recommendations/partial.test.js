@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-assumes', 'format-release-date', 'format-verified-evidence', 'relativize'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
@@ -154,7 +154,7 @@ test('both placements exist, read the same attribute, and are distinguishable in
     'relocated before impressions are observed, so the observer sees its final position')
 })
 
-// ---- assumes: what a reader should already know, shown with the difficulty ----
+// ---- the meta strip, the catalog card, and the step header ----
 
 hbs.registerPartial('solution-meta', read('src/partials/solution-meta.hbs'))
 hbs.registerPartial('solution-card', read('src/partials/solution-card.hbs'))
@@ -176,69 +176,20 @@ const SOLUTION = {
 }
 function stepRenderer () {
   const stepHbs = Handlebars.create()
-  ;['eq', 'or', 'format-duration', 'format-assumes', 'format-release-date', 'relativize', 'get-solution-step'].forEach((name) => {
+  ;['eq', 'or', 'format-duration', 'format-release-date', 'relativize', 'get-solution-step'].forEach((name) => {
     stepHbs.registerHelper(name, helper(name))
   })
   stepHbs.registerPartial('solution-step-header', read('src/partials/solution-step-header.hbs'))
   return stepHbs.compile('{{> solution-step-header solution=solution}}')
 }
 
-const withAssumes = (assumes) => ({ solution: Object.assign({}, SOLUTION, assumes === undefined ? {} : { assumes }) })
-
-test('format-assumes joins the list, truncates past `max`, and returns nothing when it cannot fit', () => {
-  const formatAssumes = helper('format-assumes')
-  const call = (items, hash) => formatAssumes(items, { hash: hash || {} })
-
-  assert.equal(call(undefined), '')
-  assert.equal(call([]), '')
-  assert.equal(call(['', '  ', null]), '', 'blank entries are not content')
-  assert.equal(call(['topics']), 'topics')
-  assert.equal(call(['topics', 'consumer groups']), 'topics, consumer groups')
-  assert.equal(call(' topics , consumer groups '), 'topics, consumer groups', 'a comma string is accepted too')
-  assert.equal(call(['a', 'b', 'c', 'd'], { max: 2 }), 'a, b… +2 more')
-  assert.equal(call(['a', 'b'], { max: 2 }), 'a, b', 'no truncation at the limit')
-  assert.equal(call(['topics', 'consumer groups', 'x', 'y'], { max: 2, maxChars: 30 }), '', 'too long for one line')
-  assert.equal(call(['Postgres', 'Iceberg tables'], { max: 2, maxChars: 30 }), 'Postgres, Iceberg tables')
-})
-
-test('the meta strip renders an Assumes row next to the difficulty, and nothing without one', () => {
-  const html = renderMeta(withAssumes(['topics', 'consumer groups', 'Protobuf basics', 'reading Go']))
-  assert.match(html, /<dt>Assumes<\/dt>/)
-  assert.match(html, /<dd class="sol-assumes">topics, consumer groups, Protobuf basics, reading Go<\/dd>/, 'the full list, untruncated')
-  assert.ok(html.indexOf('Assumes') > html.indexOf('sol-diff is-intermediate'), 'sits after the difficulty chip')
-
-  for (const empty of [undefined, [], ['', ' ']]) {
-    assert.doesNotMatch(renderMeta(withAssumes(empty)), /Assumes/, 'nothing to show: no row')
-  }
-  assert.match(renderMeta(withAssumes(undefined)), /sol-diff is-intermediate/, 'the rest of the strip is unaffected')
-})
-
-test('the catalog card renders one muted Assumes line, truncated past two items with the full list in the title', () => {
-  const html = renderCard(withAssumes(['topics', 'consumer groups', 'Protobuf basics', 'reading Go']))
-  assert.equal((html.match(/sol-card-assumes/g) || []).length, 1, 'one line, not per item')
-  assert.match(html, /<p class="sol-card-assumes" title="Assumes topics, consumer groups, Protobuf basics, reading Go">Assumes topics, consumer groups… \+2 more<\/p>/)
-  assert.ok(html.indexOf('sol-card-assumes') > html.indexOf('sol-card-meta'), 'under the difficulty and duration meta')
-
-  const two = renderCard(withAssumes(['Postgres', 'Iceberg tables']))
-  assert.match(two, /Assumes Postgres, Iceberg tables<\/p>/, 'two items are not truncated')
-  assert.doesNotMatch(two, /\+\d+ more/)
-
-  for (const empty of [undefined, []]) {
-    const bare = renderCard(withAssumes(empty))
-    assert.doesNotMatch(bare, /Assumes/)
-    assert.doesNotMatch(bare, /sol-card-assumes/)
-    assert.match(bare, /sol-diff is-intermediate/, 'the card still renders')
-  }
-})
-
-// The step facts row (duration, difficulty, assumes, completed) hangs off
+// The step facts row (duration, difficulty, completed) hangs off
 // get-solution-step. It silently emptied once the extension renamed the
 // attribute to page-solution-step-id and the helper kept reading the old
 // page-solution-step, so both names are asserted here.
-test('the step header resolves the current step from page-solution-step-id (and the legacy name) and shows assumes', () => {
+test('the step header resolves the current step from page-solution-step-id (and the legacy name)', () => {
   const renderStep = stepRenderer()
   const solution = Object.assign({}, SOLUTION, {
-    assumes: ['topics', 'consumer groups', 'Protobuf basics', 'reading Go'],
     steps: [{ id: 'start-environment', title: 'Start the environment', url: '/solutions/gaming/start-environment/', order: 1, duration: 5 }],
   })
   const at = (attributes) => renderStep({ solution, page: { title: 'Start the environment', attributes } })
@@ -248,35 +199,10 @@ test('the step header resolves the current step from page-solution-step-id (and 
     assert.match(html, /class="sol-step-facts/, key + ': the facts row renders')
     assert.match(html, /About 5 min/, key + ': step duration')
     assert.match(html, /sol-diff is-intermediate/, key + ': difficulty chip')
-    assert.match(html, /<span class="sol-fact sol-fact--assumes" title="Assumes topics, consumer groups, Protobuf basics, reading Go">Assumes topics, consumer groups… \+2 more<\/span>/, key + ': assumes beside it')
   }
-
-  const bare = renderStep({
-    solution: Object.assign({}, solution, { assumes: [] }),
-    page: { title: 'Start the environment', attributes: { 'solution-step-id': 'start-environment', 'solution-difficulty': 'intermediate' } },
-  })
-  assert.doesNotMatch(bare, /Assumes/, 'nothing when the record has no assumes')
-  assert.match(bare, /sol-diff is-intermediate/, 'the difficulty chip still renders')
 
   const unknown = at({ 'solution-step-id': 'nope' })
   assert.doesNotMatch(unknown, /sol-step-facts/, 'an unknown step id falls back to the plain header')
-})
-
-test('the rail entries and the footer cards show assumes only when it fits on one line', () => {
-  const long = ['topics', 'consumer groups', 'Protobuf basics', 'reading Go'] // 32 chars truncated
-  const short = ['Postgres', 'Iceberg tables'] // 24 chars
-  const recs = (assumes) => JSON.stringify([Object.assign({}, RECS[0], { assumes })])
-
-  const railShort = renderRail(railPage({ 'related-solutions': recs(short) }))
-  assert.match(railShort, /<span class="sol-rail-rec-assumes" title="Assumes Postgres, Iceberg tables">Assumes Postgres, Iceberg tables<\/span>/)
-  assert.doesNotMatch(renderRail(railPage({ 'related-solutions': recs(long) })), /sol-rail-rec-assumes/, 'skipped rather than wrapped')
-  assert.doesNotMatch(renderRail(railPage({ 'related-solutions': recs([]) })), /Assumes/)
-
-  const cardLong = render(page({ 'related-solutions': recs(long) }))
-  assert.match(cardLong, /<span class="sol-rec-assumes" title="Assumes topics, consumer groups, Protobuf basics, reading Go">Assumes topics, consumer groups… \+2 more<\/span>/, 'the wider card still fits the truncated form')
-  assert.match(render(page({ 'related-solutions': recs(short) })), /Assumes Postgres, Iceberg tables/)
-  assert.doesNotMatch(render(page({ 'related-solutions': recs([]) })), /Assumes/)
-  assert.doesNotMatch(render(page({ 'related-solutions': JSON.stringify(RECS) })), /Assumes/, 'records without the field render nothing')
 })
 
 // ---- proof of the last test run (verified) ----

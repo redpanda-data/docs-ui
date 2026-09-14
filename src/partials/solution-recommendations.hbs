@@ -40,10 +40,6 @@
         {{#if duration}}<span class="sol-time">{{format-duration duration}}</span>{{/if}}
         {{#each technologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
       </span>
-      {{!-- Assumes, only when it fits the card on one line (see format-assumes). --}}
-      {{#with (format-assumes assumes max=2 maxChars=34) as |short|}}
-      <span class="sol-rec-assumes" title="Assumes {{format-assumes ../assumes}}">Assumes {{short}}</span>
-      {{/with}}
       {{#if reason}}<span class="sol-rec-why" data-sol-rec-why hidden>Why this? {{reason}}</span>{{/if}}
     </a>
     {{/if}}
