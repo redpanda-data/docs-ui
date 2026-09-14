@@ -1,0 +1,27 @@
+{{!--
+  Ordered step list on the overview. Context: `solution`.
+  Each item carries data-sol-step-id so 28-solution-progress.js can tick
+  completed steps and highlight the reader's current one.
+--}}
+{{#if solution.steps.length}}
+<section class="sol-steps" id="steps" aria-labelledby="sol-steps-title">
+  <h2 id="sol-steps-title" class="sol-section-title">Steps</h2>
+  <ol class="sol-step-list" data-sol-steps>
+    {{#each solution.steps}}
+    <li class="sol-step-item" data-sol-step-id="{{id}}" data-sol-step-url="{{url}}">
+      <a class="sol-step-link" href="{{{relativize url}}}">
+        <span class="sol-step-num" aria-hidden="true">{{order}}</span>
+        <span class="sol-step-body">
+          <span class="sol-step-title">{{title}}</span>
+          {{#if duration}}<span class="sol-step-time">{{format-duration duration}}</span>{{/if}}
+        </span>
+        <span class="sol-step-check" data-sol-step-check aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <span class="visually-hidden" data-sol-step-status></span>
+      </a>
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}

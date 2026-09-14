@@ -285,6 +285,14 @@
     {{{suggestedLabs}}}
   {{/with}}
 {{/if}}
+{{!-- "Build it in practice": Solutions recommended for this Product Docs page
+      (page-related-solutions from the solutions-catalog extension). Only on
+      plain default/index layouts; the home and component landing pages and
+      the solutions component itself have their own treatment. The partial
+      renders nothing when the attribute is absent or the page opts out. --}}
+{{#if (and (or (eq page.layout 'default') (eq page.layout 'index')) (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3') (ne page.component.name 'solutions'))}}
+{{> solution-recommendations}}
+{{/if}}
 {{#if (and (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3'))}}
 {{> back-to-top}}
 {{/if}}

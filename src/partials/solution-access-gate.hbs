@@ -1,0 +1,12 @@
+{{!--
+  Sign-in nudge under the authenticated download. Context: `solution`.
+  28-solution-progress.js hides it once the reader is signed in, swaps the text
+  for "Saved on this device" (and hides the download CTA) when the docs account
+  backend is unavailable, and opens the shared sign-in modal on click with a
+  download intent so the reader lands back here with the file starting.
+--}}
+<div class="sol-gate" data-sol-gate data-analytics="solution_login_cta_impression">
+  <svg class="sol-gate-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <span class="sol-gate-text" data-sol-gate-text>Sign in to save progress and download the complete example.</span>
+  <button type="button" class="sol-link-btn" data-sol-signin data-intent="download" data-analytics="solution_login_cta_click">Sign in</button>
+</div>

@@ -1,0 +1,126 @@
+{{!--
+  Sidebar for the solutions component. Derived entirely from build-time
+  metadata, never from a nav.adoc.
+
+  page-solution-nav is the object the solutions-catalog extension writes
+  (extensions/solutions-catalog/outputs.js buildNav):
+    { home:     {title, url},
+      overview: {title, url},
+      steps:    [{id, title, url, order, duration}] }
+  The current item is derived here: the overview when page.layout is
+  'solution', a step when its id equals page-solution-step-id (a `current`
+  flag on either is honoured too). 28-solution-progress.js ticks completed
+  steps by matching data-sol-nav-url against the progress store.
+
+  On a solution page: Solutions home, Overview, the ordered steps, then
+  Build-along files and Related docs from page-solution. On the landing page
+  (or any page without page-solution-nav): Solutions home plus every solution
+  in the catalog.
+--}}
+<ul class="nav-list sol-nav">
+  <li class="nav-item" data-depth="0">
+    <ul class="nav-list">
+      {{!-- is-current-page belongs on the li (01-nav.js scrolls
+            `.is-current-page .nav-link` into view). --}}
+      <li class="nav-item{{#if (eq page.layout 'solutions-home')}} is-current-page{{/if}}" data-depth="0">
+        <div class="item">
+          {{#with (find-component @root.site 'solutions')}}
+          <a class="nav-link sol-nav-home" href="{{{relativize this.url}}}"{{#if (eq @root.page.layout 'solutions-home')}} aria-current="page"{{/if}}>Solutions home</a>
+          {{else}}
+            {{#with (parse-json @root.page.attributes.solution-nav)}}
+              {{#if this.home.url}}
+          <a class="nav-link sol-nav-home" href="{{{relativize this.home.url}}}">Solutions home</a>
+              {{else}}
+          <a class="nav-link sol-nav-home" href="{{{relativize @root.page.component.url}}}">Solutions home</a>
+              {{/if}}
+            {{else}}
+          <a class="nav-link sol-nav-home" href="{{{relativize @root.page.component.url}}}"{{#if (eq @root.page.layout 'solutions-home')}} aria-current="page"{{/if}}>Solutions home</a>
+            {{/with}}
+          {{/with}}
+        </div>
+      </li>
+      {{#with (parse-json page.attributes.solution-nav) as |nav|}}
+      {{#if nav.overview}}
+      <li class="nav-item sol-nav-overview{{#if (or nav.overview.current (eq @root.page.layout 'solution'))}} is-current-page{{/if}}" data-depth="1">
+        <div class="item">
+          <a class="nav-link" href="{{{relativize nav.overview.url}}}"{{#if (or nav.overview.current (eq @root.page.layout 'solution'))}} aria-current="page"{{/if}}>Overview</a>
+        </div>
+      </li>
+      {{/if}}
+      {{#if nav.steps.length}}
+      <li class="nav-item" data-depth="1">
+        <div class="item"><span class="nav-text sol-nav-heading">Steps</span></div>
+        <ol class="nav-list sol-nav-steps" data-sol-nav-steps>
+          {{#each nav.steps}}
+          <li class="nav-item sol-nav-step{{#if (or current (eq id @root.page.attributes.solution-step-id))}} is-current-page{{/if}}" data-depth="2" data-sol-nav-url="{{url}}" data-sol-nav-step="{{id}}">
+            <div class="item">
+              <a class="nav-link" href="{{{relativize url}}}"{{#if (or current (eq id @root.page.attributes.solution-step-id))}} aria-current="page"{{/if}}>
+                <span class="sol-nav-step-num" aria-hidden="true">{{#if order}}{{order}}{{else}}{{increment @index}}{{/if}}</span>
+                <span class="sol-nav-step-title">{{title}}</span>
+                <span class="sol-nav-step-check" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+              </a>
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+      </li>
+      {{/if}}
+      {{/with}}
+      {{#with (parse-json page.attributes.solution) as |sol|}}
+      {{#if sol.attachments.length}}
+      <li class="nav-item" data-depth="1">
+        <div class="item dropdown">
+          <span class="nav-text">Build-along files</span>
+          <div role="button" tabindex="0" aria-label="Expand navigation" class="nav-item-toggle"><img src="{{{@root.uiRootPath}}}/img/nav-tree-chevron.svg" width="6" height="10" alt=""></div>
+        </div>
+        <ul class="nav-list">
+          {{#each sol.attachments}}
+          <li class="nav-item" data-depth="2">
+            <div class="item">
+              <a class="nav-link" href="{{{relativize url}}}">{{name}}</a>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </li>
+      {{/if}}
+      {{#if sol.relatedDocs.length}}
+      <li class="nav-item" data-depth="1">
+        <div class="item dropdown">
+          <span class="nav-text">Related docs</span>
+          <div role="button" tabindex="0" aria-label="Expand navigation" class="nav-item-toggle"><img src="{{{@root.uiRootPath}}}/img/nav-tree-chevron.svg" width="6" height="10" alt=""></div>
+        </div>
+        <ul class="nav-list">
+          {{#each sol.relatedDocs}}
+          <li class="nav-item" data-depth="2">
+            <div class="item">
+              <a class="nav-link" href="{{{relativize url}}}">{{title}}</a>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </li>
+      {{/if}}
+      {{else}}
+      {{#with (get-solutions-catalog) as |catalog|}}
+      {{#if catalog.all.length}}
+      <li class="nav-item" data-depth="1">
+        <div class="item"><span class="nav-text sol-nav-heading">All solutions</span></div>
+        <ul class="nav-list">
+          {{#each catalog.all}}
+          <li class="nav-item" data-depth="2">
+            <div class="item">
+              <a class="nav-link" href="{{{relativize url}}}">{{title}}</a>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </li>
+      {{/if}}
+      {{/with}}
+      {{/with}}
+    </ul>
+  </li>
+</ul>

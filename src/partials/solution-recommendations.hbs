@@ -1,0 +1,51 @@
+{{!--
+  "Build it in practice": Solutions recommended for a Product Docs page.
+
+  Data: page-related-solutions, a JSON array the solutions-catalog extension
+  writes only when there is at least one edge above threshold:
+    [{id, title, url, description, difficulty, duration, technologies,
+      provenance, score, reason}]
+
+  This is the full-card section at the end of the article. The same data also
+  renders as a compact list in the right rail (solution-recommendations-rail.hbs,
+  included from toc.hbs) with the same guards; data-placement tells the two
+  apart in analytics.
+
+  Guards, in order:
+    - :page-exclude-related-solutions: on the page opts out (any value, even
+      empty, since Antora stores a valueless attribute as '').
+    - parse-json returns [] for a missing or malformed attribute.
+    - An empty list renders nothing at all (no heading, no wrapper).
+  At most 3 cards render. Each carries data-provenance and its position for
+  analytics; the "Why this?" reason ships hidden and 28-solution-progress.js
+  reveals it when localStorage['docs-debug-recs']==='1' or ?debug=recs is set.
+--}}
+{{#if (eq page.attributes.exclude-related-solutions undefined)}}
+{{#with (parse-json page.attributes.related-solutions) as |recs|}}
+{{#if recs.length}}
+<section class="sol-recs" data-sol-recs data-component="{{@root.page.component.name}}" aria-labelledby="build-it-in-practice">
+  <div class="sol-recs-head">
+    <h2 id="build-it-in-practice" class="sol-recs-title">Build it in practice</h2>
+    <p class="sol-recs-sub">Complete, runnable solutions that use what this page covers.</p>
+  </div>
+  <div class="sol-recs-grid">
+    {{#each recs}}
+    {{#if (lt @index 3)}}
+    <a class="sol-rec-card" href="{{{relativize url}}}" data-sol-rec data-placement="article" data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
+      <span class="sol-rec-eyebrow">Solution</span>
+      <span class="sol-rec-title">{{title}}</span>
+      {{#if description}}<span class="sol-rec-desc">{{description}}</span>{{/if}}
+      <span class="sol-rec-meta">
+        {{#if difficulty}}<span class="sol-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
+        {{#if duration}}<span class="sol-time">{{format-duration duration}}</span>{{/if}}
+        {{#each technologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
+      </span>
+      {{#if reason}}<span class="sol-rec-why" data-sol-rec-why hidden>Why this? {{reason}}</span>{{/if}}
+    </a>
+    {{/if}}
+    {{/each}}
+  </div>
+</section>
+{{/if}}
+{{/with}}
+{{/if}}

@@ -1,9 +1,25 @@
 'use strict'
 
+// A page that carries Solutions recommendations (page-related-solutions, from
+// the solutions-catalog extension; rendered by solution-recommendations.hbs as
+// "Build it in practice") never also gets "Suggested labs" appended: one
+// recommendation section per page. Malformed JSON counts as "none".
+function hasRelatedSolutions (attributes) {
+  const raw = attributes && attributes['related-solutions']
+  if (!raw) return false
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+    return Array.isArray(parsed) && parsed.length > 0
+  } catch (e) {
+    return false
+  }
+}
+
 module.exports = (attributes, content, { data: { root } }) => {
   const { contentCatalog } = root
   if (attributes['component-name'] === 'labs') return content
   if (attributes['exclude-related-labs'] === 'true') return content
+  if (hasRelatedSolutions(attributes)) return content
   if (!contentCatalog) return content
 
   // Extract related labs from attributes

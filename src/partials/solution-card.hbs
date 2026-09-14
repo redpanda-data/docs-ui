@@ -1,0 +1,44 @@
+{{!--
+  One catalog card. Context: `solution` (a normalized catalog record).
+  The data-* attributes are what 29-solutions-home.js filters on, so they hold
+  the raw facet values joined with "|" rather than display labels.
+--}}
+<a class="sol-card{{#if solution.featured}} is-featured{{/if}}{{#if (eq solution.status 'deprecated')}} is-deprecated{{/if}}"
+   href="{{{relativize solution.url}}}"
+   data-sol-card
+   data-solution-id="{{solution.id}}"
+   data-title="{{solution.title}}"
+   data-difficulty="{{solution.difficulty}}"
+   data-status="{{solution.status}}"
+   data-categories="{{#each solution.categories}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
+   data-technologies="{{#each solution.technologies}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
+   data-platforms="{{#each solution.platforms}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
+   data-analytics="solution_card_click">
+  <div class="sol-card-head">
+    <span class="sol-card-eyebrow">{{#if solution.featured}}Featured Solution{{else}}Solution{{/if}}</span>
+    {{#if (eq solution.status 'deprecated')}}<span class="sol-chip sol-chip--status is-deprecated">Deprecated</span>{{else if (or (eq solution.status 'draft') solution.draft)}}<span class="sol-chip sol-chip--status is-draft">Draft</span>{{/if}}
+  </div>
+  <h3 class="sol-card-title">{{solution.title}}</h3>
+  {{#if solution.description}}<p class="sol-card-desc">{{solution.description}}</p>{{/if}}
+  <div class="sol-card-foot">
+    <div class="sol-card-meta">
+      {{#if solution.difficulty}}<span class="sol-diff is-{{solution.difficulty}}">{{solution.difficulty}}</span>{{/if}}
+      {{#if solution.duration}}
+      <span class="sol-time">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        {{format-duration solution.duration}}
+      </span>
+      {{/if}}
+      {{#if solution.stepCount}}<span class="sol-time">{{solution.stepCount}} steps</span>{{/if}}
+    </div>
+    {{#if solution.technologies.length}}
+    <div class="sol-card-tags">
+      {{#each solution.technologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
+    </div>
+    {{/if}}
+  </div>
+  <div class="sol-card-progress" data-sol-card-progress hidden>
+    <div class="sol-bar sol-bar--sm"><div class="sol-bar-fill" data-sol-card-progress-fill style="width: 0%"></div></div>
+    <span class="sol-card-progress-text" data-sol-card-progress-text></span>
+  </div>
+</a>

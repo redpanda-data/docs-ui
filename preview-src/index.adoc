@@ -7,6 +7,8 @@
 :page-pagination:
 :page-has-markdown:
 :page-agent-handoff:
+// Written at build time by the solutions-catalog extension; hand-written here so the preview shows both recommendation placements (rail + end of article).
+:page-related-solutions: [{"id":"multiplayer-gaming","title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html","description":"Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history.","difficulty":"intermediate","duration":45,"assumes":["topics","consumer groups","Protobuf basics","reading Go"],"technologies":["Go","Protobuf","Redis"],"provenance":"explicit","score":1,"reason":"Linked from this page"},{"id":"cdc-to-lakehouse","title":"CDC to a lakehouse","url":"/solutions/cdc-to-lakehouse/","description":"Capture Postgres changes with Redpanda Connect and land them in Iceberg tables.","difficulty":"advanced","duration":60,"assumes":["Postgres","Iceberg tables"],"technologies":["Redpanda Connect","Iceberg"],"provenance":"editor-approved","score":0.9,"reason":"Approved by the docs team"},{"id":"schema-registry-migration","title":"Migrate a Schema Registry with shadowing","url":"/solutions/schema-registry-migration/","description":"Move schemas from Confluent to Redpanda with zero downtime.","difficulty":"beginner","duration":30,"assumes":["schemas"],"technologies":["Schema Registry"],"provenance":"category","score":0.6,"reason":"Shares the Schema Registry category"}]
 
 {description}
 

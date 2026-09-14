@@ -1,0 +1,81 @@
+= Multiplayer game events and live leaderboard
+:description: Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.
+:page-layout: solution
+:page-topic-type: solution
+:page-solution-version: v1.0.0
+:page-solution-difficulty: intermediate
+:page-solution-duration: 45
+:page-solution-status: published
+:page-solution-download: authenticated
+:page-solution-step-count: 4
+// Everything below page-solution-* mirrors what the solutions-catalog extension (docs-extensions-and-macros) writes at build time. Hand-written here so the UI preview can render the layout without a real Antora build.
+:page-solution: {"id":"multiplayer-gaming","title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html","description":"Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.","status":"published","difficulty":"intermediate","duration":45,"assumes":["topics","consumer groups","Protobuf basics","reading Go"],"verified":{"suite":"solutions/multiplayer-gaming","specs":11,"steps":50,"commands":34,"checks":23,"media":2,"verifyScript":{"status":"PASS","passed":9,"total":9},"redpandaVersion":"26.2.2","runAt":"2026-09-13T02:14:07Z"},"featured":true,"platforms":["self-managed","cloud"],"technologies":["Go","Protobuf","Schema Registry","Redpanda Connect","Redis","Postgres"],"categories":["Stream Processing","Clients","Schema Registry","Integration"],"version":"v1.0.0","tag":"multiplayer-gaming/v1.0.0","asset":"multiplayer-gaming-v1.0.0.zip","download":"authenticated","steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"relatedDocs":[{"id":"streaming:develop:consume-data/consumer-offsets.adoc","title":"Consumer offsets","url":"/streaming/24.3/index.html","provenance":"explicit"},{"id":"streaming:manage:schema-reg/schema-reg-overview.adoc","title":"Schema Registry overview","url":"/streaming/24.3/index.html","provenance":"explicit"},{"id":"connect:components:outputs/sql_insert.adoc","title":"sql_insert output","url":"/connect-test.html","provenance":"editor-approved"}],"relatedSolutions":[{"id":"cdc-to-lakehouse","title":"CDC to a lakehouse","url":"/solutions/cdc-to-lakehouse/"}],"attachments":[{"name":"docker-compose.yml","url":"/solutions/multiplayer-gaming/_attachments/docker-compose.yml"},{"name":".env.example","url":"/solutions/multiplayer-gaming/_attachments/.env.example"},{"name":"proto/game_events.proto","url":"/solutions/multiplayer-gaming/_attachments/proto/game_events.proto"},{"name":"connect/match-history.yaml","url":"/solutions/multiplayer-gaming/_attachments/connect/match-history.yaml"},{"name":"scripts/verify.sh","url":"/solutions/multiplayer-gaming/_attachments/scripts/verify.sh"}],"lastModified":"2026-09-10T12:00:00Z"}
+:page-solution-nav: {"home":{"title":"Solutions","url":"/solutions-home-test.html"},"overview":{"title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html"},"steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}]}
+
+A game studio needs one event stream that feeds a live leaderboard, awards achievements, and keeps a queryable match history, without the services knowing about each other. This solution builds that system on Redpanda: a simulator produces Protobuf game events, three independent consumers read the same topics, and Redpanda Connect lands match history in Postgres with no code.
+
+== Architecture
+
+image::multirepo-ssg.svg[Architecture,600,300]
+
+Every service reads the same `game.player-events` and `game.match-events` topics through its own consumer group, so adding the achievements service later did not touch the leaderboard. Keys are `player_id` and `match_id`, which gives per-player and per-match ordering for free.
+
+[.production-note]
+.In production
+****
+Run at least three brokers with replication factor 3, turn on TLS and SASL, and size partitions for the peak burst rather than the average rate. Tiered Storage keeps the full event history replayable without growing local disks.
+****
+
+== Prerequisites
+
+* Docker Desktop 4.30 or later with 8 GB of memory available
+* `rpk` 24.3 or later
+* Go 1.22 or later if you want to change the services
+
+// The listing blocks below mirror exactly what the solutions-catalog extension
+// emits for a listing that came from an include::example$: the .listingblock
+// carries data-solution-file, plus data-solution-tag when the include used a
+// tag. They are written as passthrough HTML because AsciiDoc has no syntax for
+// data attributes on a block. The command blocks on this page deliberately
+// carry no annotation: a shell command is not a file, so 28-solution-progress.js
+// gives them no download control.
+
+The environment file every service reads:
+
+++++
+<div class="listingblock" data-solution-file=".env.example">
+<div class="title">.env.example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">REDPANDA_BROKERS=localhost:9092
+SCHEMA_REGISTRY_URL=http://localhost:8081
+REDIS_ADDR=localhost:6379
+POSTGRES_DSN=postgres://solutions:solutions@localhost:5432/matches
+</code></pre>
+</div>
+</div>
+++++
+
+== Production considerations
+
+|===
+| Concern | What this solution does | What to change for production
+
+| Brokers
+| One broker, replication factor 1
+| Three brokers, replication factor 3
+
+| Security
+| No TLS, no authentication
+| TLS, SASL/SCRAM, ACLs per service
+
+| Consumer scaling
+| One instance per service
+| Scale on consumer lag
+|===
+
+== Clean up
+
+[source,bash]
+----
+docker compose down -v
+----

@@ -1,0 +1,221 @@
+= Start the environment
+:description: Bring up Redpanda, Console, Redis, Postgres and Redpanda Connect with one command and confirm every service is healthy.
+:page-layout: solution-step
+:page-topic-type: solution
+:page-solution-step-id: start-environment
+:page-solution-step-index: 1
+:page-solution-step-count: 4
+:page-solution-next-url: /solutions/multiplayer-gaming/create-topics/
+:page-solution-next-title: Create the topics
+// Scalar mirrors of the overview attributes (set on every step page by the solutions-catalog extension).
+:page-solution-version: v1.0.0
+:page-solution-difficulty: intermediate
+:page-solution-duration: 45
+:page-solution-status: published
+:page-solution-download: authenticated
+:page-solution-verified-at: 2026-09-13T02:14:07Z
+:page-solution-verified-version: 26.2.2
+:page-solution: {"id":"multiplayer-gaming","title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html","description":"Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.","status":"published","difficulty":"intermediate","duration":45,"assumes":["topics","consumer groups","Protobuf basics","reading Go"],"verified":{"suite":"solutions/multiplayer-gaming","specs":11,"steps":50,"commands":34,"checks":23,"media":2,"verifyScript":{"status":"PASS","passed":9,"total":9},"redpandaVersion":"26.2.2","runAt":"2026-09-13T02:14:07Z"},"featured":true,"platforms":["self-managed","cloud"],"technologies":["Go","Protobuf","Schema Registry","Redpanda Connect","Redis","Postgres"],"categories":["Stream Processing","Clients","Schema Registry","Integration"],"version":"v1.0.0","tag":"multiplayer-gaming/v1.0.0","asset":"multiplayer-gaming-v1.0.0.zip","download":"authenticated","steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"relatedDocs":[{"id":"streaming:develop:consume-data/consumer-offsets.adoc","title":"Consumer offsets","url":"/streaming/24.3/index.html","provenance":"explicit"},{"id":"streaming:manage:schema-reg/schema-reg-overview.adoc","title":"Schema Registry overview","url":"/streaming/24.3/index.html","provenance":"explicit"}],"relatedSolutions":[],"attachments":[{"name":"docker-compose.yml","url":"/solutions/multiplayer-gaming/_attachments/docker-compose.yml"},{"name":".env.example","url":"/solutions/multiplayer-gaming/_attachments/.env.example"},{"name":"scripts/verify.sh","url":"/solutions/multiplayer-gaming/_attachments/scripts/verify.sh"}],"lastModified":"2026-09-10T12:00:00Z"}
+:page-solution-nav: {"home":{"title":"Solutions","url":"/solutions-home-test.html"},"overview":{"title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html"},"steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}]}
+
+== What you do
+
+Copy the example environment file and start every service with Docker Compose. Compose waits for the health checks, so the command returns only when Redpanda, Console, Redis, Postgres and Redpanda Connect are ready.
+
+[source,bash]
+----
+cp .env.example .env
+docker compose up -d --wait
+----
+
+If you prefer to create the topics by hand, these commands set the same partition counts and retention the compose file applies. The lines are long; on solution pages they scroll sideways instead of wrapping.
+
+[source,bash]
+----
+rpk topic create game.player-events --partitions 6 --replicas 1 --topic-config retention.ms=604800000 --topic-config cleanup.policy=delete --topic-config max.message.bytes=1048576
+rpk topic create game.match-events --partitions 3 --replicas 1 --topic-config retention.ms=604800000 --topic-config cleanup.policy=delete
+rpk topic create game.achievements --partitions 3 --replicas 1 --topic-config retention.ms=2592000000 --topic-config cleanup.policy=compact,delete
+rpk topic create game.player-events.dlq --partitions 1 --replicas 1 --topic-config retention.ms=2592000000
+----
+
+// The listing blocks below mirror exactly what the solutions-catalog extension
+// emits for a listing that came from an include::example$: the .listingblock
+// carries data-solution-file, plus data-solution-tag when the include used a
+// tag. They are written as passthrough HTML because AsciiDoc has no syntax for
+// data attributes on a block. The command blocks on this page deliberately
+// carry no annotation: a shell command is not a file, so 28-solution-progress.js
+// gives them no download control.
+
+The compose file is the one file you edit before starting, and the module file
+pins the two client libraries.
+
+++++
+<div class="listingblock" data-solution-file="docker-compose.yml" data-solution-tag="redpanda">
+<div class="title">docker-compose.yml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.2
+    command:
+      - redpanda start
+      - --smp 1
+    ports:
+      - 9092:9092
+      - 8081:8081
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 5s
+</code></pre>
+</div>
+</div>
+++++
+
+++++
+<div class="listingblock" data-solution-file="services/leaderboard/go.mod">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">module github.com/redpanda-data/solutions/multiplayer-gaming/leaderboard
+
+go 1.23
+
+require (
+	github.com/redis/go-redis/v9 v9.6.1
+	github.com/twmb/franz-go v1.17.1
+)
+</code></pre>
+</div>
+</div>
+++++
+
+== Why
+
+Everything downstream assumes a healthy broker and a reachable Schema Registry. Starting the platform first and verifying it means later failures are about your code, not the environment.
+
+== What happens inside
+
+Redpanda starts as a single broker with the Kafka API on `9092`, the Schema Registry on `8081` and the HTTP Proxy on `8082`. Console connects to all three and turns on Protobuf decoding for the `game.*` topics.
+
+== The leaderboard consumer
+
+The full service is short enough to read in one sitting. Long listings fold to a preview; use the button under the block to expand them.
+
+.services/leaderboard/main.go
+[source,go]
+----
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/twmb/franz-go/pkg/kgo"
+)
+
+func main() {
+	ctx := context.Background()
+	brokers := os.Getenv("REDPANDA_BROKERS")
+	rdb := redis.NewClient(&redis.Options{Addr: os.Getenv("REDIS_ADDR")})
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers(brokers),
+		kgo.ConsumerGroup("leaderboard"),
+		kgo.ConsumeTopics("game.player-events"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cl.Close()
+
+	go serve(rdb)
+
+	for {
+		fetches := cl.PollFetches(ctx)
+		fetches.EachRecord(func(r *kgo.Record) {
+			apply(ctx, rdb, r)
+		})
+	}
+}
+
+func serve(rdb *redis.Client) {
+	http.HandleFunc("/top", topHandler(rdb))
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+----
+
+.Complete source: services/leaderboard/main.go
+[%collapsible]
+====
+[source,go]
+----
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/redis/go-redis/v9"
+	"github.com/twmb/franz-go/pkg/kgo"
+)
+
+func main() {
+	ctx := context.Background()
+	brokers := os.Getenv("REDPANDA_BROKERS")
+	rdb := redis.NewClient(&redis.Options{Addr: os.Getenv("REDIS_ADDR")})
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers(brokers),
+		kgo.ConsumerGroup("leaderboard"),
+		kgo.ConsumeTopics("game.player-events"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cl.Close()
+
+	go serve(rdb)
+
+	for {
+		fetches := cl.PollFetches(ctx)
+		fetches.EachRecord(func(r *kgo.Record) {
+			apply(ctx, rdb, r)
+		})
+	}
+}
+
+func serve(rdb *redis.Client) {
+	http.HandleFunc("/top", topHandler(rdb))
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+----
+====
+
+[.solution-verify]
+.Verify
+****
+Check that the cluster is healthy and that Connect is ready to accept a pipeline:
+
+[source,bash]
+----
+rpk cluster health
+curl -s localhost:4195/ready
+----
+
+Expected output:
+
+[source]
+----
+CLUSTER HEALTH OVERVIEW
+=======================
+Healthy:                          true
+...
+OK
+----
+****
+
+[.production-note]
+.In production
+****
+Do not run Console on the same host as a broker, and put the Schema Registry behind TLS: every producer and consumer in this solution fetches schemas from it.
+****

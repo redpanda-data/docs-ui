@@ -160,6 +160,160 @@ site:
             icon: flask
             order: 10
     latestVersion: *latest_version_labs
+  # Solutions component. solutions-catalog mirrors what the solutions-catalog
+  # extension writes at build time (also published at /assets/data/solutions.json).
+  - &solutions_component
+    name: solutions
+    title: Solutions
+    url: /solutions-home-test.html
+    versions:
+    - &latest_version_solutions
+      url: /solutions-home-test.html
+      version: ''
+      displayVersion: ''
+      asciidoc:
+        attributes:
+          component-metadata:
+            title: Solutions
+            description: Complete, runnable systems built on Redpanda.
+            color: '#B45309'
+            icon: rocket
+            order: 11
+          solutions-catalog:
+            generatedAt: '2026-09-12T08:00:00Z'
+            siteUrl: https://docs.redpanda.com
+            # Facets are arrays of {value, count}, the shape the extension publishes.
+            facets:
+              categories:
+              - { value: Clients, count: 1 }
+              - { value: Integration, count: 2 }
+              - { value: Kubernetes, count: 1 }
+              - { value: Migration, count: 1 }
+              - { value: Schema Registry, count: 2 }
+              - { value: Stream Processing, count: 2 }
+              technologies:
+              - { value: Envoy, count: 1 }
+              - { value: Go, count: 1 }
+              - { value: Iceberg, count: 1 }
+              - { value: Kubernetes, count: 1 }
+              - { value: Postgres, count: 2 }
+              - { value: Protobuf, count: 1 }
+              - { value: Redis, count: 1 }
+              - { value: Redpanda Connect, count: 3 }
+              - { value: Schema Registry, count: 2 }
+              difficulty:
+              - { value: beginner, count: 1 }
+              - { value: intermediate, count: 1 }
+              - { value: advanced, count: 2 }
+              platforms:
+              - { value: self-managed, count: 4 }
+              - { value: cloud, count: 2 }
+            solutions:
+            - id: multiplayer-gaming
+              title: Multiplayer game events and live leaderboard
+              url: /solutions-test.html
+              description: Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.
+              status: published
+              difficulty: intermediate
+              duration: 45
+              assumes: [topics, consumer groups, Protobuf basics, reading Go]
+              verified:
+                suite: solutions/multiplayer-gaming
+                specs: 11
+                steps: 50
+                commands: 34
+                checks: 23
+                media: 2
+                verifyScript: {status: PASS, passed: 9, total: 9}
+                redpandaVersion: 26.2.2
+                runAt: '2026-09-13T02:14:07Z'
+              featured: true
+              platforms: [self-managed, cloud]
+              technologies: [Go, Protobuf, Schema Registry, Redpanda Connect, Redis, Postgres]
+              categories: [Stream Processing, Clients, Schema Registry, Integration]
+              version: v1.0.0
+              download: authenticated
+              lastModified: '2026-09-10T12:00:00Z'
+              steps:
+              - { id: start-environment, title: Start the environment, url: /solution-step-test.html, order: 1, duration: 5 }
+              - { id: create-topics, title: Create the topics, url: /solutions/multiplayer-gaming/create-topics/, order: 2, duration: 5 }
+              - { id: register-schemas, title: Register the Protobuf schemas, url: /solutions/multiplayer-gaming/register-schemas/, order: 3, duration: 5 }
+              - { id: build-leaderboard, title: Build the live leaderboard, url: /solutions/multiplayer-gaming/build-leaderboard/, order: 4, duration: 7 }
+            - id: cdc-to-lakehouse
+              title: CDC to a lakehouse
+              url: /solutions/cdc-to-lakehouse/
+              description: Capture Postgres changes with Redpanda Connect and land them in Iceberg tables you can query from any engine.
+              status: published
+              difficulty: advanced
+              duration: 60
+              assumes: [Postgres, Iceberg tables]
+              verified:
+                suite: solutions/cdc-to-lakehouse
+                specs: 7
+                steps: 31
+                commands: 22
+                checks: 15
+                media: 1
+                verifyScript: {status: PASS, passed: 4, total: 4}
+                redpandaVersion: 26.2.2
+                runAt: '2026-09-12T02:11:44Z'
+              featured: false
+              platforms: [self-managed]
+              technologies: [Redpanda Connect, Postgres, Iceberg]
+              categories: [Integration, Stream Processing]
+              version: v1.2.0
+              download: authenticated
+              lastModified: '2026-08-30T09:00:00Z'
+              steps:
+              - { id: start-environment, title: Start the environment, url: /solutions/cdc-to-lakehouse/start-environment/, order: 1, duration: 5 }
+              - { id: capture-changes, title: Capture changes, url: /solutions/cdc-to-lakehouse/capture-changes/, order: 2, duration: 15 }
+              - { id: write-iceberg, title: Write Iceberg tables, url: /solutions/cdc-to-lakehouse/write-iceberg/, order: 3, duration: 20 }
+            - id: schema-registry-migration
+              title: Migrate a Schema Registry with shadowing
+              url: /solutions/schema-registry-migration/
+              description: Move schemas from Confluent to Redpanda with zero downtime by shadowing the registry during the cut-over.
+              status: published
+              difficulty: beginner
+              duration: 30
+              assumes: [schemas]
+              verified:
+                suite: solutions/schema-registry-migration
+                specs: 4
+                steps: 18
+                commands: 12
+                checks: 9
+                media: 0
+                verifyScript: {status: PASS, passed: 3, total: 3}
+                redpandaVersion: 26.2.2
+                runAt: '2026-07-02T02:09:58Z'
+              featured: false
+              platforms: [self-managed, cloud]
+              technologies: [Schema Registry, Redpanda Connect]
+              categories: [Migration, Schema Registry]
+              version: v1.0.3
+              download: public
+              lastModified: '2026-09-01T10:00:00Z'
+              steps:
+              - { id: start-environment, title: Start the environment, url: /solutions/schema-registry-migration/start-environment/, order: 1, duration: 5 }
+              - { id: shadow-registry, title: Shadow the registry, url: /solutions/schema-registry-migration/shadow-registry/, order: 2, duration: 15 }
+            - id: disaster-recovery-shadowing
+              title: Disaster recovery with Shadowing
+              url: /solutions/disaster-recovery-shadowing/
+              description: Keep a warm standby cluster in another region with Shadowing, then fail over and back with Envoy in front.
+              status: deprecated
+              difficulty: advanced
+              duration: 90
+              assumes: [Kubernetes]
+              featured: false
+              platforms: [self-managed]
+              technologies: [Envoy, Kubernetes]
+              categories: [Kubernetes]
+              version: v0.9.0
+              download: none
+              lastModified: '2026-07-01T10:00:00Z'
+              steps:
+              - { id: deploy-clusters, title: Deploy both clusters, url: /solutions/disaster-recovery-shadowing/deploy-clusters/, order: 1, duration: 30 }
+    latestVersion: *latest_version_solutions
 page:
   url: *home_url
   home: true
@@ -487,5 +641,18 @@ page:
           urlType: internal
         - content: Data Platform (Landing)
           url: /data-platform-test.html
+          urlType: internal
+      - content: Solutions
+        url: '#'
+        urlType: internal
+        items:
+        - content: Solutions (Landing)
+          url: /solutions-home-test.html
+          urlType: internal
+        - content: Solution overview
+          url: /solutions-test.html
+          urlType: internal
+        - content: Solution step
+          url: /solution-step-test.html
           urlType: internal
 

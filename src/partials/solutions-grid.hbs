@@ -1,0 +1,21 @@
+{{!--
+  Landing page results. Context: `catalog` from get-solutions-catalog.
+  Every card is rendered at build time (SEO-visible, works without Algolia);
+  29-solutions-home.js only shows and hides them.
+--}}
+<div class="sol-results" data-sol-results>
+  <div class="sol-results-head">
+    <p class="sol-results-count" data-sol-count aria-live="polite">{{catalog.count}} {{#if (eq catalog.count 1)}}solution{{else}}solutions{{/if}}</p>
+  </div>
+  <div class="sol-grid" data-sol-grid>
+    {{#each catalog.all}}
+    {{> solution-card solution=this}}
+    {{/each}}
+  </div>
+  <div class="sol-empty" data-sol-empty hidden>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <h3>No solutions match your filters</h3>
+    <p>Try a different search term or clear the filters.</p>
+    <button type="button" class="sol-btn sol-btn--ghost sol-btn--sm" data-sol-filters-clear>Clear filters</button>
+  </div>
+</div>

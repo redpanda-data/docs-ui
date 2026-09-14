@@ -1,0 +1,68 @@
+{{!--
+  Solution metadata strip: difficulty, duration, step count, platforms,
+  technologies, version. Context: `solution`.
+--}}
+<dl class="sol-meta">
+  {{#if solution.difficulty}}
+  <div class="sol-meta-item">
+    <dt>Difficulty</dt>
+    <dd><span class="sol-diff is-{{solution.difficulty}}">{{solution.difficulty}}</span></dd>
+  </div>
+  {{/if}}
+  {{#if solution.duration}}
+  <div class="sol-meta-item">
+    <dt>Time</dt>
+    <dd>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      {{format-duration solution.duration}}
+    </dd>
+  </div>
+  {{/if}}
+  {{#if solution.steps.length}}
+  <div class="sol-meta-item">
+    <dt>Steps</dt>
+    <dd>{{solution.steps.length}}</dd>
+  </div>
+  {{/if}}
+  {{#if solution.platforms.length}}
+  <div class="sol-meta-item">
+    <dt>Runs on</dt>
+    <dd class="sol-chips">
+      {{#each solution.platforms}}
+      <span class="sol-chip sol-chip--platform">{{#if (eq this 'self-managed')}}Self-Managed{{else if (eq this 'cloud')}}Cloud{{else}}{{this}}{{/if}}</span>
+      {{/each}}
+    </dd>
+  </div>
+  {{/if}}
+  {{#if solution.technologies.length}}
+  <div class="sol-meta-item sol-meta-item--wide">
+    <dt>Technologies</dt>
+    <dd class="sol-chips">
+      {{#each solution.technologies}}
+      <span class="sol-chip sol-chip--tech">{{this}}</span>
+      {{/each}}
+    </dd>
+  </div>
+  {{/if}}
+  {{#if solution.version}}
+  <div class="sol-meta-item">
+    <dt>Version</dt>
+    <dd><code class="sol-version">{{solution.version}}</code></dd>
+  </div>
+  {{/if}}
+  {{!-- Proof of the test run behind these steps, written by CI from the real
+        Doc Detective run. The evidence (spec, step, command, check and media
+        counts, and the verify script result) goes in the title. The date is
+        shown exactly as it is: no staleness softening and no hiding, because a
+        stale date means the nightly run is broken and should look it.
+        Renders nothing at all when the record carries no `verified` block, or
+        when `runAt` does not parse as a date: a manifest typo is published to
+        the record as written, and a raw string like "last Tuesday" must never
+        reach the page. Absence and garbage are both silent. --}}
+  {{#with (format-release-date solution.verified.runAt long=true) as |verifiedAt|}}
+  <div class="sol-meta-item sol-meta-item--verified">
+    <dt>Last verified</dt>
+    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified)}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}</dd>
+  </div>
+  {{/with}}
+</dl>

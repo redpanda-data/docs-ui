@@ -1,0 +1,48 @@
+{{!--
+  Solution overview hero. Context: `solution` (parsed page-solution record).
+  The Start CTA points at the first step; 28-solution-progress.js turns it into
+  "Continue" (pointing at the reader's current step) when local progress exists.
+--}}
+<header class="sol-hero">
+  <div class="sol-eyebrow">
+    <span class="sol-eyebrow-label">Solution</span>
+    {{#if (eq solution.status 'deprecated')}}
+    <span class="sol-chip sol-chip--status is-deprecated">Deprecated</span>
+    {{else if (or (eq solution.status 'draft') solution.draft)}}
+    {{!-- status 'draft', or draft: true, which the extension adds when a
+          preview build includes drafts. --}}
+    <span class="sol-chip sol-chip--status is-draft">Draft</span>
+    {{/if}}
+    {{#if solution.featured}}
+    <span class="sol-chip sol-chip--status is-featured">Featured</span>
+    {{/if}}
+  </div>
+  {{#with @root.page.title}}
+  <h1 class="page sol-title">{{{this}}}</h1>
+  {{/with}}
+  {{#if solution.description}}
+  <p class="sol-lede is-before-toc">{{solution.description}}</p>
+  {{/if}}
+  {{#if (eq solution.status 'deprecated')}}
+  <div class="sol-banner sol-banner--deprecated is-before-toc" role="note">
+    This solution is no longer maintained.
+    {{#if solution.supersededBy}}
+    {{#if solution.supersededBy.url}}
+    See <a href="{{{relativize solution.supersededBy.url}}}">{{solution.supersededBy.title}}</a> instead.
+    {{/if}}
+    {{/if}}
+  </div>
+  {{/if}}
+  <div class="sol-hero-actions is-before-toc">
+    {{#with solution.steps.[0]}}
+    <a class="sol-btn sol-btn--primary" href="{{{relativize this.url}}}" data-sol-start data-analytics="solution_start">
+      <span data-sol-start-label>Start building</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+    {{/with}}
+    {{#if solution.steps.length}}
+    <a class="sol-btn sol-btn--ghost" href="#steps">See the steps</a>
+    {{/if}}
+    <span class="sol-hero-progress" data-sol-hero-progress hidden></span>
+  </div>
+</header>

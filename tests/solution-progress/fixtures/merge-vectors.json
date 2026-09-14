@@ -1,0 +1,2202 @@
+{
+  "note": "Canonical merge contract for Solutions progress. This file is the single source: docs-site tests/fixtures/solutions-progress-merge.json and docs-ui tests/solution-progress/fixtures/merge-vectors.json are byte-identical copies. Edit here, copy verbatim; both test suites run every vector.",
+  "rules": [
+    "Document shape: {v:1, updatedAt, solutions:{<id>:{completedSteps[], currentStep, startedAt, updatedAt, completedAt, solutionVersion}}}. Timestamps are epoch milliseconds (numbers) on the wire and in storage; ISO 8601 strings are accepted on input and normalized to numbers.",
+    "Each vector is merge(existing, incoming) evaluated at clock `now`. docs-site calls mergeAll(stored, clientBody); docs-ui calls merge(remote, local), so its local copy is `incoming`.",
+    "Normalization before merging: solution ids and step ids must match /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/ (invalid step ids dropped); completedSteps deduplicated in first-seen order and capped at the last 100; currentStep must be a valid step id else null; solutionVersion must match /^v\\d+\\.\\d+\\.\\d+$/ else null; unusable timestamps become null, except updatedAt which becomes 0; unknown keys are dropped.",
+    "Clamp: any timestamp later than now + 5 minutes becomes now + 5 minutes.",
+    "Per solution: the record with the greater updatedAt is `later`, the other `earlier`. On a tie the incoming record is `later`.",
+    "completedSteps = earlier.completedSteps followed by the later record steps not already present (ordered union), capped at the last 100.",
+    "updatedAt = max(a.updatedAt, b.updatedAt). startedAt = min of the non-null values (null only when both are null).",
+    "currentStep = later.currentStep, falling back to earlier.currentStep when null. solutionVersion follows the same rule.",
+    "completedAt = the earliest non-null value when the two solutionVersions are equal or either is null; when both are set and differ, completedAt = null (the completion no longer applies to the current step list).",
+    "Solutions present on only one side are kept unchanged after normalization.",
+    "Document updatedAt = max(existing.updatedAt, incoming.updatedAt, every merged record updatedAt); 0 for an empty document.",
+    "After merging, keep at most 50 solutions, evicting the smallest updatedAt first (ties by id), then keep evicting until the serialized document is at most 32768 bytes.",
+    "The `invalid` cases are client bodies the strict validator rejects (HTTP 400). The stored side is read leniently: bad keys and records are dropped, the rest kept."
+  ],
+  "vectors": [
+    {
+      "name": "ordered union: earlier record order first, later record additions appended",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "start-environment",
+              "create-topics"
+            ],
+            "updatedAt": 1789293600000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "register-schemas",
+              "start-environment"
+            ],
+            "updatedAt": 1789297200000,
+            "currentStep": "register-schemas",
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "start-environment",
+              "create-topics",
+              "register-schemas"
+            ],
+            "currentStep": "register-schemas",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "merge is commutative: swapping existing and incoming gives the same document",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "register-schemas",
+              "start-environment"
+            ],
+            "updatedAt": 1789297200000,
+            "currentStep": "register-schemas",
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "start-environment",
+              "create-topics"
+            ],
+            "updatedAt": 1789293600000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "start-environment",
+              "create-topics",
+              "register-schemas"
+            ],
+            "currentStep": "register-schemas",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "timestamps: updatedAt is the max, startedAt the earliest non-null",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "startedAt": null
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789291800000,
+            "startedAt": 1789290000000
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": 1789290000000,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "completedAt: earliest non-null when both records carry the same version",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "completedAt": 1789295400000,
+            "solutionVersion": "v1.0.0",
+            "completedSteps": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789297200000,
+            "completedAt": 1789296300000,
+            "solutionVersion": "v1.0.0",
+            "completedSteps": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a",
+              "b"
+            ],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": 1789295400000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "version change clears completedAt and takes the later record version",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "completedAt": 1789293600000,
+            "solutionVersion": "v1.0.0",
+            "completedSteps": [
+              "a"
+            ]
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789297200000,
+            "solutionVersion": "v1.1.0",
+            "completedSteps": [
+              "a"
+            ],
+            "currentStep": "a"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a"
+            ],
+            "currentStep": "a",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.1.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "version change clears completedAt even when the later record is the completed one",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "completedAt": 1789293600000,
+            "solutionVersion": "v1.0.0",
+            "completedSteps": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789297200000,
+            "completedAt": 1789297200000,
+            "solutionVersion": "v1.1.0",
+            "completedSteps": [
+              "a",
+              "b"
+            ],
+            "currentStep": "b"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a",
+              "b"
+            ],
+            "currentStep": "b",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.1.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "currentStep and solutionVersion come from the later record, falling back to the other when null",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "currentStep": "a",
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789297200000,
+            "currentStep": null,
+            "solutionVersion": null
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [],
+            "currentStep": "a",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "a tie on updatedAt lets the incoming record win currentStep",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "currentStep": "a"
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "currentStep": "b"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [],
+            "currentStep": "b",
+            "startedAt": null,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown keys are dropped at every level",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "v": 1,
+        "extra": true,
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "foo": 1,
+            "nested": {
+              "x": 1
+            }
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "timestamps ahead of now by more than 5 minutes are clamped to now + 5 minutes",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1893456000000,
+            "startedAt": 1924992000000,
+            "completedAt": 1789301040000
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789301100000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": 1789301100000,
+            "updatedAt": 1789301100000,
+            "completedAt": 1789301040000,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "invalid step ids are dropped and duplicates collapse, order preserved",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "completedSteps": [
+              "b",
+              "Not Valid",
+              "a",
+              "b",
+              "",
+              42,
+              "a"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "b",
+              "a"
+            ],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "an invalid currentStep or solutionVersion becomes null rather than failing the document",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "currentStep": "Bad Step",
+            "solutionVersion": "1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "unusable timestamps: updatedAt becomes 0, the others null",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": "not a date",
+            "startedAt": {},
+            "completedAt": "nope",
+            "completedSteps": [
+              "a"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 0,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a"
+            ],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 0,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "solutions on only one side are kept unchanged; document updatedAt is the max of both",
+      "now": 1789300800000,
+      "existing": {
+        "updatedAt": 1789286400000,
+        "solutions": {
+          "alpha": {
+            "updatedAt": 1789286400000,
+            "completedSteps": [
+              "x"
+            ]
+          }
+        }
+      },
+      "incoming": {
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "beta": {
+            "updatedAt": 1789290000000,
+            "completedSteps": [
+              "y"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "alpha": {
+            "completedSteps": [
+              "x"
+            ],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789286400000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "beta": {
+            "completedSteps": [
+              "y"
+            ],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789290000000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "both sides empty produce an empty document with updatedAt 0",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {},
+      "expected": {
+        "v": 1,
+        "updatedAt": 0,
+        "solutions": {}
+      }
+    },
+    {
+      "name": "ISO 8601 inputs on both sides normalize to epoch milliseconds",
+      "now": 1789300800000,
+      "existing": {
+        "updatedAt": "2026-09-13T08:00:00.000Z",
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a"
+            ],
+            "startedAt": "2026-09-13T07:00:00.000Z",
+            "updatedAt": "2026-09-13T08:00:00.000Z",
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "updatedAt": "2026-09-13T09:00:00.000Z",
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a",
+              "b"
+            ],
+            "currentStep": "b",
+            "updatedAt": "2026-09-13T09:00:00.000Z",
+            "completedAt": "2026-09-13T09:00:00.000Z",
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a",
+              "b"
+            ],
+            "currentStep": "b",
+            "startedAt": 1789282800000,
+            "updatedAt": 1789290000000,
+            "completedAt": 1789290000000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "an ISO stored document merges with a millisecond incoming one on the same clock",
+      "now": 1789300800000,
+      "existing": {
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a"
+            ],
+            "updatedAt": "2026-09-13T10:00:00.000Z",
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "b"
+            ],
+            "updatedAt": 1789290000000,
+            "startedAt": 1789286400000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "b",
+              "a"
+            ],
+            "currentStep": null,
+            "startedAt": 1789286400000,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "more than 50 solutions: the oldest by updatedAt are evicted",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "solutions": {
+          "sol-00": {
+            "updatedAt": 1789257600000
+          },
+          "sol-01": {
+            "updatedAt": 1789257660000
+          },
+          "sol-02": {
+            "updatedAt": 1789257720000
+          },
+          "sol-03": {
+            "updatedAt": 1789257780000
+          },
+          "sol-04": {
+            "updatedAt": 1789257840000
+          },
+          "sol-05": {
+            "updatedAt": 1789257900000
+          },
+          "sol-06": {
+            "updatedAt": 1789257960000
+          },
+          "sol-07": {
+            "updatedAt": 1789258020000
+          },
+          "sol-08": {
+            "updatedAt": 1789258080000
+          },
+          "sol-09": {
+            "updatedAt": 1789258140000
+          },
+          "sol-10": {
+            "updatedAt": 1789258200000
+          },
+          "sol-11": {
+            "updatedAt": 1789258260000
+          },
+          "sol-12": {
+            "updatedAt": 1789258320000
+          },
+          "sol-13": {
+            "updatedAt": 1789258380000
+          },
+          "sol-14": {
+            "updatedAt": 1789258440000
+          },
+          "sol-15": {
+            "updatedAt": 1789258500000
+          },
+          "sol-16": {
+            "updatedAt": 1789258560000
+          },
+          "sol-17": {
+            "updatedAt": 1789258620000
+          },
+          "sol-18": {
+            "updatedAt": 1789258680000
+          },
+          "sol-19": {
+            "updatedAt": 1789258740000
+          },
+          "sol-20": {
+            "updatedAt": 1789258800000
+          },
+          "sol-21": {
+            "updatedAt": 1789258860000
+          },
+          "sol-22": {
+            "updatedAt": 1789258920000
+          },
+          "sol-23": {
+            "updatedAt": 1789258980000
+          },
+          "sol-24": {
+            "updatedAt": 1789259040000
+          },
+          "sol-25": {
+            "updatedAt": 1789259100000
+          },
+          "sol-26": {
+            "updatedAt": 1789259160000
+          },
+          "sol-27": {
+            "updatedAt": 1789259220000
+          },
+          "sol-28": {
+            "updatedAt": 1789259280000
+          },
+          "sol-29": {
+            "updatedAt": 1789259340000
+          },
+          "sol-30": {
+            "updatedAt": 1789259400000
+          },
+          "sol-31": {
+            "updatedAt": 1789259460000
+          },
+          "sol-32": {
+            "updatedAt": 1789259520000
+          },
+          "sol-33": {
+            "updatedAt": 1789259580000
+          },
+          "sol-34": {
+            "updatedAt": 1789259640000
+          },
+          "sol-35": {
+            "updatedAt": 1789259700000
+          },
+          "sol-36": {
+            "updatedAt": 1789259760000
+          },
+          "sol-37": {
+            "updatedAt": 1789259820000
+          },
+          "sol-38": {
+            "updatedAt": 1789259880000
+          },
+          "sol-39": {
+            "updatedAt": 1789259940000
+          },
+          "sol-40": {
+            "updatedAt": 1789260000000
+          },
+          "sol-41": {
+            "updatedAt": 1789260060000
+          },
+          "sol-42": {
+            "updatedAt": 1789260120000
+          },
+          "sol-43": {
+            "updatedAt": 1789260180000
+          },
+          "sol-44": {
+            "updatedAt": 1789260240000
+          },
+          "sol-45": {
+            "updatedAt": 1789260300000
+          },
+          "sol-46": {
+            "updatedAt": 1789260360000
+          },
+          "sol-47": {
+            "updatedAt": 1789260420000
+          },
+          "sol-48": {
+            "updatedAt": 1789260480000
+          },
+          "sol-49": {
+            "updatedAt": 1789260540000
+          },
+          "sol-50": {
+            "updatedAt": 1789260600000
+          },
+          "sol-51": {
+            "updatedAt": 1789260660000
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789260660000,
+        "solutions": {
+          "sol-02": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789257720000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-03": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789257780000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-04": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789257840000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-05": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789257900000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-06": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789257960000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-07": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258020000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-08": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258080000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-09": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258140000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-10": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258200000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-11": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258260000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-12": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258320000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-13": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258380000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-14": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258440000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-15": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258500000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-16": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258560000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-17": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258620000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-18": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258680000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-19": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258740000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-20": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258800000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-21": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258860000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-22": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258920000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-23": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789258980000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-24": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259040000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-25": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259100000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-26": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259160000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-27": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259220000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-28": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259280000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-29": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259340000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-30": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259400000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-31": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259460000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-32": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259520000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-33": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259580000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-34": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259640000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-35": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259700000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-36": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259760000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-37": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259820000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-38": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259880000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-39": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789259940000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-40": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260000000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-41": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260060000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-42": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260120000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-43": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260180000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-44": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260240000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-45": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260300000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-46": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260360000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-47": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260420000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-48": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260480000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-49": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260540000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-50": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260600000,
+            "completedAt": null,
+            "solutionVersion": null
+          },
+          "sol-51": {
+            "completedSteps": [],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789260660000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "more than 100 completed steps: the earliest are dropped",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789293600000,
+            "completedSteps": [
+              "step-0",
+              "step-1",
+              "step-2",
+              "step-3",
+              "step-4",
+              "step-5",
+              "step-6",
+              "step-7",
+              "step-8",
+              "step-9",
+              "step-10",
+              "step-11",
+              "step-12",
+              "step-13",
+              "step-14",
+              "step-15",
+              "step-16",
+              "step-17",
+              "step-18",
+              "step-19",
+              "step-20",
+              "step-21",
+              "step-22",
+              "step-23",
+              "step-24",
+              "step-25",
+              "step-26",
+              "step-27",
+              "step-28",
+              "step-29",
+              "step-30",
+              "step-31",
+              "step-32",
+              "step-33",
+              "step-34",
+              "step-35",
+              "step-36",
+              "step-37",
+              "step-38",
+              "step-39",
+              "step-40",
+              "step-41",
+              "step-42",
+              "step-43",
+              "step-44",
+              "step-45",
+              "step-46",
+              "step-47",
+              "step-48",
+              "step-49",
+              "step-50",
+              "step-51",
+              "step-52",
+              "step-53",
+              "step-54",
+              "step-55",
+              "step-56",
+              "step-57",
+              "step-58",
+              "step-59",
+              "step-60",
+              "step-61",
+              "step-62",
+              "step-63",
+              "step-64",
+              "step-65",
+              "step-66",
+              "step-67",
+              "step-68",
+              "step-69",
+              "step-70",
+              "step-71",
+              "step-72",
+              "step-73",
+              "step-74",
+              "step-75",
+              "step-76",
+              "step-77",
+              "step-78",
+              "step-79",
+              "step-80",
+              "step-81",
+              "step-82",
+              "step-83",
+              "step-84",
+              "step-85",
+              "step-86",
+              "step-87",
+              "step-88",
+              "step-89",
+              "step-90",
+              "step-91",
+              "step-92",
+              "step-93",
+              "step-94",
+              "step-95",
+              "step-96",
+              "step-97",
+              "step-98",
+              "step-99",
+              "step-100",
+              "step-101",
+              "step-102",
+              "step-103",
+              "step-104"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "step-5",
+              "step-6",
+              "step-7",
+              "step-8",
+              "step-9",
+              "step-10",
+              "step-11",
+              "step-12",
+              "step-13",
+              "step-14",
+              "step-15",
+              "step-16",
+              "step-17",
+              "step-18",
+              "step-19",
+              "step-20",
+              "step-21",
+              "step-22",
+              "step-23",
+              "step-24",
+              "step-25",
+              "step-26",
+              "step-27",
+              "step-28",
+              "step-29",
+              "step-30",
+              "step-31",
+              "step-32",
+              "step-33",
+              "step-34",
+              "step-35",
+              "step-36",
+              "step-37",
+              "step-38",
+              "step-39",
+              "step-40",
+              "step-41",
+              "step-42",
+              "step-43",
+              "step-44",
+              "step-45",
+              "step-46",
+              "step-47",
+              "step-48",
+              "step-49",
+              "step-50",
+              "step-51",
+              "step-52",
+              "step-53",
+              "step-54",
+              "step-55",
+              "step-56",
+              "step-57",
+              "step-58",
+              "step-59",
+              "step-60",
+              "step-61",
+              "step-62",
+              "step-63",
+              "step-64",
+              "step-65",
+              "step-66",
+              "step-67",
+              "step-68",
+              "step-69",
+              "step-70",
+              "step-71",
+              "step-72",
+              "step-73",
+              "step-74",
+              "step-75",
+              "step-76",
+              "step-77",
+              "step-78",
+              "step-79",
+              "step-80",
+              "step-81",
+              "step-82",
+              "step-83",
+              "step-84",
+              "step-85",
+              "step-86",
+              "step-87",
+              "step-88",
+              "step-89",
+              "step-90",
+              "step-91",
+              "step-92",
+              "step-93",
+              "step-94",
+              "step-95",
+              "step-96",
+              "step-97",
+              "step-98",
+              "step-99",
+              "step-100",
+              "step-101",
+              "step-102",
+              "step-103",
+              "step-104"
+            ],
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: remote-empty-keeps-local",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 0,
+        "solutions": {}
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: local-empty-takes-remote",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 2500,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 2500,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 0,
+        "solutions": {}
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 2500,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 2500,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: ordered-union-earlier-record-first",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s3"
+            ],
+            "currentStep": "s3",
+            "startedAt": 1500,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 3000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 3000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 3000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s3",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 3000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: later-remote-wins-current-step",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 3000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1200,
+            "updatedAt": 3000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 3000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 3000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: tie-treats-local-as-later",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: completed-at-earliest-when-versions-match",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 4000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 4000,
+            "completedAt": 4000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 5000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 5000,
+            "completedAt": 5000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 5000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 5000,
+            "completedAt": 4000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: completed-at-from-later-record-when-versions-differ",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 6000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2",
+              "s3"
+            ],
+            "currentStep": "s3",
+            "startedAt": 1000,
+            "updatedAt": 6000,
+            "completedAt": null,
+            "solutionVersion": "v1.1.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 4000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 4000,
+            "completedAt": 4000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 6000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2",
+              "s3"
+            ],
+            "currentStep": "s3",
+            "startedAt": 1000,
+            "updatedAt": 6000,
+            "completedAt": null,
+            "solutionVersion": "v1.1.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: versions-differ-clears-completed-at-even-when-later-record-completed",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 4000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 4000,
+            "completedAt": 4000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 7000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 7000,
+            "completedAt": 7000,
+            "solutionVersion": "v1.1.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 7000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "s2"
+            ],
+            "currentStep": "s2",
+            "startedAt": 1000,
+            "updatedAt": 7000,
+            "completedAt": null,
+            "solutionVersion": "v1.1.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: current-step-falls-back-when-later-is-null",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 3000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": null,
+            "startedAt": 1000,
+            "updatedAt": 3000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 3000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 3000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: disjoint-solutions-are-both-kept",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 1500,
+        "solutions": {
+          "other": {
+            "completedSteps": [
+              "a1"
+            ],
+            "currentStep": "a1",
+            "startedAt": 500,
+            "updatedAt": 1500,
+            "completedAt": null,
+            "solutionVersion": "v2.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          },
+          "other": {
+            "completedSteps": [
+              "a1"
+            ],
+            "currentStep": "a1",
+            "startedAt": 500,
+            "updatedAt": 1500,
+            "completedAt": null,
+            "solutionVersion": "v2.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: unknown-and-duplicate-steps-normalized",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 1000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              5,
+              "s2",
+              ""
+            ],
+            "currentStep": "s2",
+            "startedAt": 900,
+            "updatedAt": 1000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1",
+              "ghost",
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s2",
+              "s1",
+              "ghost"
+            ],
+            "currentStep": "s1",
+            "startedAt": 900,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": null
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: store-updated-at-is-the-max",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": 0,
+        "solutions": {}
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 9000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 9000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "docs-ui: iso-timestamps-normalized-to-milliseconds",
+      "now": 1000000,
+      "existing": {
+        "v": 1,
+        "updatedAt": "1970-01-01T00:00:02.000Z",
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": "1970-01-01T00:00:01.000Z",
+            "updatedAt": "1970-01-01T00:00:02.000Z",
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 0,
+        "solutions": {}
+      },
+      "expected": {
+        "v": 1,
+        "updatedAt": 2000,
+        "solutions": {
+          "demo": {
+            "completedSteps": [
+              "s1"
+            ],
+            "currentStep": "s1",
+            "startedAt": 1000,
+            "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "not an object",
+      "body": "nope"
+    },
+    {
+      "name": "array body",
+      "body": []
+    },
+    {
+      "name": "unsupported schema version",
+      "body": {
+        "v": 2,
+        "solutions": {}
+      }
+    },
+    {
+      "name": "solutions is not an object",
+      "body": {
+        "solutions": []
+      }
+    },
+    {
+      "name": "solution id is not a slug",
+      "body": {
+        "solutions": {
+          "Not A Slug": {}
+        }
+      }
+    },
+    {
+      "name": "solution id too long",
+      "body": {
+        "solutions": {
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {}
+        }
+      }
+    },
+    {
+      "name": "solution record is not an object",
+      "body": {
+        "solutions": {
+          "gaming": "done"
+        }
+      }
+    },
+    {
+      "name": "reserved-looking but valid ids are still just ids (control: expected valid)",
+      "body": {
+        "solutions": {
+          "progress": {}
+        }
+      },
+      "valid": true
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{{!--
+  Related Product Docs and related Solutions from the content graph.
+  Context: `solution`. Each doc link carries its provenance (explicit,
+  editor-approved, category) so analytics can tell curated from derived edges.
+--}}
+{{#if solution.relatedDocs.length}}
+<section class="sol-related" id="related-docs" aria-labelledby="sol-related-title">
+  <h2 id="sol-related-title" class="sol-section-title">Related documentation</h2>
+  <ul class="sol-related-list">
+    {{#each solution.relatedDocs}}
+    <li>
+      <a class="sol-related-link" href="{{{relativize url}}}" data-provenance="{{provenance}}" data-analytics="solution_related_doc">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>{{title}}</span>
+      </a>
+    </li>
+    {{/each}}
+  </ul>
+</section>
+{{/if}}
+{{#if solution.relatedSolutions.length}}
+<section class="sol-related sol-related--solutions" aria-labelledby="sol-related-solutions-title">
+  <h2 id="sol-related-solutions-title" class="sol-section-title">Related solutions</h2>
+  <ul class="sol-related-list">
+    {{#each solution.relatedSolutions}}
+    <li>
+      <a class="sol-related-link" href="{{{relativize url}}}" data-analytics="solution_related_solution">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
+        <span>{{title}}</span>
+      </a>
+    </li>
+    {{/each}}
+  </ul>
+</section>
+{{/if}}

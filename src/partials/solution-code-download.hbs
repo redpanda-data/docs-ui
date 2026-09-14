@@ -1,0 +1,46 @@
+{{!--
+  "Get the code" panel for the rail. Context: `solution`.
+
+  Knowledge is never gated: the tutorial shows every snippet and the public
+  build-along files below are enough to complete every step. The download is a
+  shortcut to the complete bundle, served by the docs-site /solutions/download
+  function, which owns the sign-in redirect for `authenticated` solutions. The
+  repository itself is private and its URL is deliberately never rendered here.
+--}}
+{{#unless (eq solution.download 'none')}}
+<section class="sol-panel sol-download" data-sol-download-panel aria-labelledby="sol-download-title">
+  <h3 id="sol-download-title" class="sol-panel-title">Get the code</h3>
+  <p class="sol-panel-text">Build this solution yourself using the tutorial, or download the complete working example.</p>
+  <a class="sol-btn sol-btn--sm{{#if (eq solution.download 'authenticated')}} sol-btn--primary{{/if}}"
+     href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}"
+     data-sol-download
+     {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}}
+     data-analytics="solution_download"
+     rel="nofollow">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Download the complete example
+  </a>
+  {{#if solution.asset}}
+  <p class="sol-download-asset"><code>{{solution.asset}}</code></p>
+  {{/if}}
+  {{#if (eq solution.download 'authenticated')}}
+  {{> solution-access-gate}}
+  {{/if}}
+</section>
+{{/unless}}
+{{#if solution.attachments.length}}
+<section class="sol-panel sol-files" aria-labelledby="sol-files-title">
+  <h3 id="sol-files-title" class="sol-panel-title">Build-along files</h3>
+  <p class="sol-panel-text">Everything you need to follow the steps without the download.</p>
+  <ul class="sol-file-list">
+    {{#each solution.attachments}}
+    <li>
+      <a class="sol-file-link" href="{{{relativize url}}}" data-analytics="solution_attachment">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>{{name}}</span>
+      </a>
+    </li>
+    {{/each}}
+  </ul>
+</section>
+{{/if}}

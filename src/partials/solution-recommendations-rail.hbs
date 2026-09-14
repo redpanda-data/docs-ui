@@ -1,0 +1,49 @@
+{{!--
+  "Build it in practice" in the right rail of a Product Docs page, directly
+  under the On this page list (this partial is included from toc.hbs).
+
+  Why a second placement: solution-recommendations.hbs appends its cards after
+  the last section of the article, so a reader who skims, or who arrives at an
+  anchor, never sees them, and the section is not in the on-this-page list
+  either. This compact list is visible from the first screen.
+
+  Same data and guards as the full-card section (page-related-solutions, the
+  page-exclude-related-solutions opt-out, default/index layouts only, never
+  the home or component-home-v3 roles, never the solutions component itself),
+  so the two placements always agree about whether to render.
+
+  Entries are one line plus a muted difficulty/duration line: no descriptions,
+  no cards. data-placement="rail" separates these from the article cards in
+  analytics (28-solution-progress.js reads it for both events). On narrow
+  screens the whole block is moved into the embedded on-this-page region by
+  28-solution-progress.js, because aside.toc.sidebar is display:none there.
+--}}
+{{#if (and (or (eq page.layout 'default') (eq page.layout 'index')) (ne page.attributes.role 'home') (ne page.attributes.role 'component-home-v3') (ne page.component.name 'solutions'))}}
+{{#if (eq page.attributes.exclude-related-solutions undefined)}}
+{{#with (parse-json page.attributes.related-solutions) as |recs|}}
+{{#if recs.length}}
+<div class="sol-rail-recs" data-sol-rail-recs data-component="{{@root.page.component.name}}">
+  <h3 class="sol-rail-recs-title">Build it in practice</h3>
+  <ul class="sol-rail-recs-list">
+    {{#each recs}}
+    {{#if (lt @index 3)}}
+    <li>
+      <a class="sol-rail-rec" href="{{{relativize url}}}" data-sol-rec data-placement="rail" data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
+        <span class="sol-rail-rec-title">{{title}}</span>
+        {{#if (or difficulty duration)}}
+        <span class="sol-rail-rec-meta">
+          {{#if difficulty}}<span class="sol-rail-rec-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
+          {{#if duration}}{{#if difficulty}}<span class="sol-rail-rec-dot" aria-hidden="true">·</span>{{/if}}{{format-duration duration}}{{/if}}
+        </span>
+        {{/if}}
+        {{#if reason}}<span class="sol-rec-why" data-sol-rec-why hidden>Why this? {{reason}}</span>{{/if}}
+      </a>
+    </li>
+    {{/if}}
+    {{/each}}
+  </ul>
+</div>
+{{/if}}
+{{/with}}
+{{/if}}
+{{/if}}

@@ -45,16 +45,16 @@ const COMPONENT_NAME = `{{{page.component.title}}}`.trim();
  * Umbrella components (Data Platform, Self-Managed, Home) include broader result sets.
  */
 const TAGS_BY_COMPONENT = {
-  'Cloud': ['Labs', 'Connect', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
-  'Streaming': ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
-  'Connect': ['Labs', 'Streaming', 'Cloud', 'Schema Registry API'],
+  'Cloud': ['Labs', 'Solutions', 'Connect', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
+  'Streaming': ['Labs', 'Solutions', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
+  'Connect': ['Labs', 'Solutions', 'Streaming', 'Cloud', 'Schema Registry API'],
   // Umbrella components - broader result sets
-  'Data Platform': ['Cloud', 'Streaming', 'Connect', 'Labs', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
-  'Self-Managed': ['Streaming', 'Connect', 'Labs', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
-  'Home': ['Cloud', 'Streaming', 'Connect', 'Labs', 'Agentic Data Plane', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
-  'Agentic Data Plane': ['Labs', 'Cloud Control Plane API', 'Cloud Data Plane API'],
+  'Data Platform': ['Cloud', 'Streaming', 'Connect', 'Labs', 'Solutions', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
+  'Self-Managed': ['Streaming', 'Connect', 'Labs', 'Solutions', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
+  'Home': ['Cloud', 'Streaming', 'Connect', 'Labs', 'Solutions', 'Agentic Data Plane', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
+  'Agentic Data Plane': ['Labs', 'Solutions', 'Cloud Control Plane API', 'Cloud Data Plane API'],
 };
-const DEFAULT_TAGS = ['Labs', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
+const DEFAULT_TAGS = ['Labs', 'Solutions', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
 const INITIAL_TAGS = TAGS_BY_COMPONENT[COMPONENT_NAME] || DEFAULT_TAGS;
 
 /** Version added to the “View all” link to scope whole-site search. */
