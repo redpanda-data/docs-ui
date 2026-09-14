@@ -243,6 +243,20 @@
   text-overflow: ellipsis;
 }
 
+/* Proof of the last test run. Muted: it is reassurance a reader looks for
+   deliberately, not something to shout over the steps themselves. */
+.sol-verified[title] {
+  cursor: help;
+}
+
+.sol-fact--verified {
+  color: var(--grey-500-new);
+}
+
+html[data-theme="dark"] .sol-fact--verified {
+  color: var(--grey-400-new);
+}
+
 html[data-theme="dark"] .sol-assumes {
   color: var(--grey-300-new);
 }

@@ -59,4 +59,19 @@
     <dd><code class="sol-version">{{solution.version}}</code></dd>
   </div>
   {{/if}}
+  {{!-- Proof of the test run behind these steps, written by CI from the real
+        Doc Detective run. The evidence (spec, step, command, check and media
+        counts, and the verify script result) goes in the title. The date is
+        shown exactly as it is: no staleness softening and no hiding, because a
+        stale date means the nightly run is broken and should look it.
+        Renders nothing at all when the record carries no `verified` block, or
+        when `runAt` does not parse as a date: a manifest typo is published to
+        the record as written, and a raw string like "last Tuesday" must never
+        reach the page. Absence and garbage are both silent. --}}
+  {{#with (format-release-date solution.verified.runAt long=true) as |verifiedAt|}}
+  <div class="sol-meta-item sol-meta-item--verified">
+    <dt>Last verified</dt>
+    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified)}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}</dd>
+  </div>
+  {{/with}}
 </dl>

@@ -1,7 +1,8 @@
 {{!--
   Step page header. Context: `solution` plus the step-page attributes the
   solutions-catalog extension sets (page-solution-step-index/count, and the
-  scalar mirrors page-solution-difficulty/duration).
+  scalar mirrors page-solution-difficulty/duration and
+  page-solution-verified-at/version).
 --}}
 {{#with (get-solution-step solution) as |step|}}
 {{!-- Inside this block the context is the step; ../solution is the partial's own context. --}}
@@ -31,6 +32,11 @@
           needs, so it travels with what the solution assumes. --}}
     {{#with (format-assumes ../solution.assumes max=2) as |assumes|}}
     <span class="sol-fact sol-fact--assumes" title="Assumes {{format-assumes ../../solution.assumes}}">Assumes {{assumes}}</span>
+    {{/with}}
+    {{!-- Proof of the run, from the scalar mirrors the extension sets on every
+          step page. No evidence counts are mirrored, so there is no title. --}}
+    {{#with (format-release-date @root.page.attributes.solution-verified-at long=true) as |verifiedAt|}}
+    <span class="sol-fact sol-fact--verified">Last verified {{verifiedAt}}{{#with @root.page.attributes.solution-verified-version}} against Redpanda {{this}}{{/with}}</span>
     {{/with}}
     <span class="sol-fact sol-fact--status" data-sol-step-header-status hidden>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
