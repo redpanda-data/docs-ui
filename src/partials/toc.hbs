@@ -1,6 +1,10 @@
 {{#if (and (ne page.attributes.role 'two-column') (not page.attributes.no-toc))}}
 <aside class="toc sidebar" data-title="{{{page.attributes.toctitle}}}" data-levels="{{{or page.attributes.toclevels 2}}}"{{#if (eq page.attributes.toc-collapsible 'true')}} data-collapsible="true"{{/if}}>
   <div class="toc-menu"></div>
+  {{!-- "Build it in practice": compact Solutions recommendations under the On
+        this page list. Renders nothing unless the page carries
+        page-related-solutions (Product Docs pages only; see the partial). --}}
+  {{> solution-recommendations-rail}}
   {{!-- Configurable tools section - components can define toc-tools-title and toc-tools-links in antora.yml --}}
   {{#if page.componentVersion.asciidoc.attributes.toc-tools-title}}
   <div class="toc-tools is-visible" id="toc-tools">

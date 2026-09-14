@@ -6,6 +6,11 @@
     [{id, title, url, description, difficulty, duration, technologies,
       provenance, score, reason}]
 
+  This is the full-card section at the end of the article. The same data also
+  renders as a compact list in the right rail (solution-recommendations-rail.hbs,
+  included from toc.hbs) with the same guards; data-placement tells the two
+  apart in analytics.
+
   Guards, in order:
     - :page-exclude-related-solutions: on the page opts out (any value, even
       empty, since Antora stores a valueless attribute as '').
@@ -26,7 +31,7 @@
   <div class="sol-recs-grid">
     {{#each recs}}
     {{#if (lt @index 3)}}
-    <a class="sol-rec-card" href="{{{relativize url}}}" data-sol-rec data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
+    <a class="sol-rec-card" href="{{{relativize url}}}" data-sol-rec data-placement="article" data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
       <span class="sol-rec-eyebrow">Solution</span>
       <span class="sol-rec-title">{{title}}</span>
       {{#if description}}<span class="sol-rec-desc">{{description}}</span>{{/if}}

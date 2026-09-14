@@ -971,24 +971,22 @@
     $$('[data-sol-card]').forEach(function (el, i) {
       targets.push({ el: el, name: 'solution_card_impression', props: { solution_id: attr(el, 'data-solution-id'), position: i + 1 } })
     })
+    // Both recommendation placements: the cards after the article
+    // (data-placement="article") and the compact rail list under On this page
+    // (data-placement="rail"). `placement` is what makes them comparable.
     $$('[data-sol-rec]').forEach(function (el, i) {
-      targets.push({
-        el: el,
-        name: 'product_doc_solution_rec_impression',
-        props: {
+      var recProps = function () {
+        return {
           solution_id: attr(el, 'data-solution-id'),
           provenance: attr(el, 'data-provenance'),
           position: Number(attr(el, 'data-position')) || i + 1,
+          placement: attr(el, 'data-placement'),
           component: component,
-        },
-      })
+        }
+      }
+      targets.push({ el: el, name: 'product_doc_solution_rec_impression', props: recProps() })
       el.addEventListener('click', function () {
-        track('product_doc_solution_rec_click', {
-          solution_id: attr(el, 'data-solution-id'),
-          provenance: attr(el, 'data-provenance'),
-          position: Number(attr(el, 'data-position')) || i + 1,
-          component: component,
-        })
+        track('product_doc_solution_rec_click', recProps())
       })
     })
     $$('[data-sol-gate]').forEach(function (el) {
@@ -1016,6 +1014,32 @@
       byEl.push(t)
       observer.observe(t.el)
     })
+  }
+
+  // ---------------------------------------------------------------------------
+  // "Build it in practice" in the rail (solution-recommendations-rail.hbs) is
+  // rendered inside aside.toc.sidebar, which main.css hides below 1024px,
+  // where 02-on-this-page.js instead shows a cloned aside.toc.embedded in the
+  // article. Move the block there so it is not lost on narrow screens, and
+  // move it back (to its original position) above the breakpoint.
+  // ---------------------------------------------------------------------------
+
+  function placeRailRecs () {
+    var recs = $('[data-sol-rail-recs]')
+    var embedded = $('aside.toc.embedded')
+    if (!recs || !embedded || typeof window.matchMedia !== 'function') return
+    var home = recs.parentNode
+    var anchor = recs.nextSibling
+    var mq = window.matchMedia('(max-width: 1024px)')
+    var apply = function () {
+      var target = mq.matches ? embedded : home
+      if (recs.parentNode === target) return
+      if (target === home && anchor && anchor.parentNode === home) home.insertBefore(recs, anchor)
+      else target.appendChild(recs)
+    }
+    apply()
+    if (typeof mq.addEventListener === 'function') mq.addEventListener('change', apply)
+    else if (typeof mq.addListener === 'function') mq.addListener(apply)
   }
 
   // ---------------------------------------------------------------------------
@@ -1060,6 +1084,7 @@
     track: track,
     hasAuthHint: hasAuthHint,
     manageDetails: manageDetails,
+    placeRailRecs: placeRailRecs,
   }
 
   syncOnLoad()
@@ -1108,5 +1133,6 @@
     window.addEventListener('kapa-session', render)
   }
 
+  placeRailRecs()
   observeImpressions()
 })()
