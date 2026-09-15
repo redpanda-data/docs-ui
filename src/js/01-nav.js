@@ -64,7 +64,8 @@
     activateCurrentPath(currentPageItem)
     scrollItemToMidpoint(currentPageItem.querySelector('.nav-link'))
   } else {
-    menuPanel.scrollTop = 0
+    var sidebarScroller = scrollContainerOf(menuPanel)
+    if (sidebarScroller) sidebarScroller.scrollTop = 0
   }
 
   function findClosestChild (parent, selector) {
@@ -143,7 +144,7 @@
     if (e.detail > 1) e.preventDefault()
   })
 
-  function onHashChange () {
+  function onHashChange (smooth) {
     var navLink
     var hash = window.location.hash
     if (hash) {
@@ -180,12 +181,15 @@
     navItem.classList.add('is-current-page')
     currentPageItem = navItem
     activateCurrentPath(navItem)
-    scrollItemToMidpoint(navLink)
+    scrollItemToMidpoint(navLink, smooth)
   }
 
   if (menuPanel.querySelector('.nav-link[href^="#"]')) {
+    // The load-time call must not animate: it runs before the browser's own jump to the
+    // fragment. A later hashchange is the reader clicking an in-page link, where there is
+    // no pending jump to lose, so that one keeps the smooth scroll.
     if (window.location.hash) onHashChange()
-    window.addEventListener('hashchange', onHashChange)
+    window.addEventListener('hashchange', function () { onHashChange(true) })
   }
 
   function activateCurrentPath (navItem) {
@@ -201,10 +205,6 @@
   }
 
   function toggleActive (event) {
-    var padding = parseFloat(window.getComputedStyle(this).marginTop)
-    var rect = this.getBoundingClientRect()
-    var menuPanelRect = menuPanel.getBoundingClientRect()
-    var overflowY = (rect.bottom - menuPanelRect.top - menuPanelRect.height + padding).toFixed()
     if (
       event.target.classList.contains('nav-link') ||
       event.target.classList.contains('nav-text') ||
@@ -221,9 +221,7 @@
     } else {
       // Toggle 'is-active' class to open the dropdown
       this.classList.toggle('is-active')
-      if (overflowY > 0) {
-        menuPanel.scrollTop += Math.min((rect.top - menuPanelRect.top - padding).toFixed(), overflowY)
-      }
+      keepInView(this)
       event.stopPropagation()
     }
   }
@@ -285,29 +283,50 @@
     e.stopPropagation()
   }
 
-  // The sidebar scrolls inside .sb-scroll (nav.hbs), the nearest ancestor with
-  // overflow-y auto or scroll. The menu panel is the fallback for a layout where
-  // nothing above it scrolls. Never the document: scrolling that is the bug below.
+  // The sidebar scrolls inside .sb-scroll (nav.hbs and labs-home.hbs), the nearest
+  // self-or-ancestor with overflow-y auto or scroll. Stops at the document: scrolling
+  // that is the bug below. Returns null when nothing in the chain scrolls, because
+  // .nav-panel-menu is not a scroll box in any stylesheet, so a layout without
+  // .sb-scroll is better left alone than written to an element that cannot scroll.
   function scrollContainerOf (el) {
-    var node = el.parentNode
+    var node = el
     while (node && node !== document.documentElement && node !== document.body) {
       var overflowY = window.getComputedStyle(node).overflowY
       if (overflowY === 'auto' || overflowY === 'scroll') return node
       node = node.parentNode
     }
-    return menuPanel
+    return null
   }
 
   // Scroll only the sidebar. Element.scrollIntoView also scrolls the window, and
   // on a cold cache this runs before the browser has jumped to the URL fragment;
   // Chrome then drops that pending jump and the reader lands at the top of the
   // page instead of the section they followed a link to (DOC-2513).
-  function scrollItemToMidpoint (el) {
+  function scrollItemToMidpoint (el, smooth) {
     var container = scrollContainerOf(el)
+    if (!container) return
     var containerRect = container.getBoundingClientRect()
     var elRect = el.getBoundingClientRect()
     var elTop = elRect.top - containerRect.top + container.scrollTop
-    container.scrollTop = Math.max(0, elTop - container.clientHeight / 2 + elRect.height / 2)
+    var top = Math.max(0, elTop - container.clientHeight / 2 + elRect.height / 2)
+    if (smooth && container.scrollTo) {
+      container.scrollTo({ top: top, behavior: 'smooth' })
+    } else {
+      container.scrollTop = top
+    }
+  }
+
+  // An expanded dropdown's children can fall below the bottom of the sidebar. Scroll just
+  // enough to bring them back, and never so far that the item's own row leaves the top.
+  // Measured after the toggle, so the height that counts is the expanded one.
+  function keepInView (navItem) {
+    var container = scrollContainerOf(navItem)
+    if (!container) return
+    var containerRect = container.getBoundingClientRect()
+    var rect = navItem.getBoundingClientRect()
+    var overflow = rect.bottom - containerRect.bottom
+    if (overflow <= 0) return
+    container.scrollTop += Math.min(overflow, Math.max(0, rect.top - containerRect.top))
   }
 
   function find (from, selector) {
