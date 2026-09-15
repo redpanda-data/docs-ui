@@ -34,7 +34,10 @@
     </article>
     <aside class="sol-rail">
       <details class="sol-rail-details" data-sol-rail open>
-        <summary class="sol-rail-summary">Progress and files<span class="sol-rail-summary-meta"><span data-sol-progress-count>0 of {{(parse-json page.attributes.solution).steps.length}}</span> done</span></summary>
+        {{!-- #with, not a subexpression in a path: Handlebars parses
+             {{(helper x).y}} only when the template is rendered, and then
+             throws, which fails the whole site build. --}}
+        <summary class="sol-rail-summary">Progress and files{{#with (parse-json page.attributes.solution)}}<span class="sol-rail-summary-meta"><span data-sol-progress-count>0 of {{steps.length}}</span> done</span>{{/with}}</summary>
         <div class="sol-rail-body">
           {{> solution-progress solution=(parse-json page.attributes.solution)}}
           {{> toc}}
