@@ -18,7 +18,7 @@
     {{!-- Umbrella page: parent renders as a bucket with header, nav items and child buckets at same level --}}
     <div class="nav-bucket nav-bucket-parent" data-bucket="{{bucket.componentName}}" style="--bucket-color: {{bucket.color}};">
       {{> bucket-header bucket=bucket}}
-      <div class="nav-bucket-content{{#unless (or bucket.isCurrentBucket bucket.hasCurrentChild bucket.isExpandedByDefault)}} is-collapsed{{/unless}}" id="nav-bucket-{{bucket.componentName}}">
+      {{#*inline "parentBucketBody"}}
         {{!-- Show parent's nav items if they exist (nav-tree handles nested structures) --}}
         {{#if bucket.items.length}}
           {{> nav-tree navigation=bucket.items}}
@@ -27,7 +27,21 @@
         {{#each bucket.children}}
           {{> nav-bucket-recursive bucket=this}}
         {{/each}}
+      {{/inline}}
+      {{#if (or bucket.isCurrentBucket bucket.hasCurrentChild bucket.isExpandedByDefault)}}
+      <div class="nav-bucket-content" id="nav-bucket-{{bucket.componentName}}">
+        {{> parentBucketBody}}
       </div>
+      {{else}}
+      {{!-- Collapsed: the tree is parsed into an inert <template>, not the
+            document, and 23-nav-bucket.js moves it into place on first expand.
+            The unified nav renders every product's full tree on every page
+            (~2,000 links, ~7,500 elements on the home page), almost all of it
+            hidden, and that DOM was the biggest rendering cost on the site. --}}
+      <div class="nav-bucket-content is-collapsed" id="nav-bucket-{{bucket.componentName}}">
+        <template data-nav-lazy>{{> parentBucketBody}}</template>
+      </div>
+      {{/if}}
     </div>
   {{else}}
     {{!-- Nested page: parent unpacks completely - NO bucket header, just nav items + child buckets at top level --}}
@@ -51,9 +65,16 @@
     {{!-- Multiple nav items: show expandable bucket --}}
     <div class="nav-bucket" data-bucket="{{bucket.componentName}}" style="--bucket-color: {{bucket.color}};">
       {{> bucket-header bucket=bucket}}
-      <div class="nav-bucket-content{{#unless (or bucket.isCurrentBucket bucket.isExpandedByDefault)}} is-collapsed{{/unless}}" id="nav-bucket-{{bucket.componentName}}">
+      {{#if (or bucket.isCurrentBucket bucket.isExpandedByDefault)}}
+      <div class="nav-bucket-content" id="nav-bucket-{{bucket.componentName}}">
         {{> nav-tree navigation=bucket.items}}
       </div>
+      {{else}}
+      {{!-- Collapsed: inert <template>, hydrated on first expand (see above). --}}
+      <div class="nav-bucket-content is-collapsed" id="nav-bucket-{{bucket.componentName}}">
+        <template data-nav-lazy>{{> nav-tree navigation=bucket.items}}</template>
+      </div>
+      {{/if}}
     </div>
   {{/if}}
 {{/if}}

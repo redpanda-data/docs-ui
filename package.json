@@ -62,9 +62,11 @@
     "postcss-import": "~12.0",
     "postcss-url": "~8.0",
     "prettier-eslint": "~9.0",
+    "prismjs": "1.30.0",
     "puppeteer": "^21.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-syntax-highlighter": "15.6.6",
     "require-directory": "~2.1",
     "require-from-string": "~2.0",
     "stylelint": "~13.3",
@@ -89,12 +91,18 @@
     "test:tooltip-touch": "node --test tests/tooltip-touch/*.test.js",
     "test:tooltip-single-open": "node --test tests/tooltip-single-open/*.test.js",
     "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips && npm run test:signin-nudge && npm run test:chat-panel-navigation && npm run test:toc-collapsible && npm run test:nav-scroll && npm run test:kapa-source-groups && npm run test:tooltip-touch && npm run test:tooltip-single-open",
+    "test:lazy-askai": "node --test tests/lazy-askai/*.test.js",
+    "test:nav-lazy-buckets": "node --test tests/nav-lazy-buckets/*.test.js",
+    "test:has-code-blocks": "node --test tests/has-code-blocks/*.test.js",
+    "test:docs-page-weight": "node --test tests/docs-page-weight/*.test.js",
+    "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips && npm run test:signin-nudge && npm run test:chat-panel-navigation && npm run test:toc-collapsible && npm run test:nav-scroll && npm run test:kapa-source-groups && npm run test:lazy-askai && npm run test:nav-lazy-buckets && npm run test:has-code-blocks && npm run test:docs-page-weight",
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",
     "copy:wasm-exec": "cp \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" src/js/vendor/",
     "serve:playground": "npx serve ."
   },
   "dependencies": {
     "@kapaai/agent-react": "^1.0.1",
-    "@kapaai/react-sdk": "^0.9.10"
+    "@kapaai/react-sdk": "^0.9.10",
+    "refractor": "3.6.0"
   }
 }

@@ -58,7 +58,9 @@ const TEST_PAGE = `<!DOCTYPE html>
 <body>
   <article class="doc">
     <div class="listingblock"><pre><code class="language-bloblang">root = this</code></pre></div>
-    <p><code>log_retention_ms</code></p>
+    <!-- Marked the way the prop: macro marks it: 19-property-tooltips.js only
+         fetches the properties JSON when the article contains such a reference. -->
+    <p><code class="property-ref" data-property-name="log_retention_ms">log_retention_ms</code></p>
   </article>
   <script src="/js/16-bloblang-interactive.js"></script>
   <script src="/js/19-property-tooltips.js"></script>
