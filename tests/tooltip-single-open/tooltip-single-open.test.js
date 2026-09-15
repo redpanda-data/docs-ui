@@ -123,7 +123,8 @@ test('no tooltip script goes back to hideOnClick: toggle', () => {
   // tippy compares hideOnClick with === true before hiding on a press outside
   // the tooltip, so 'toggle' leaves a reader on a touch device unable to
   // dismiss at all: tapping the page does nothing, and tapping the term again
-  // does not close it either, because tippy's click trigger re-shows it.
+  // does not close it either, because the tap fires an emulated mouseenter
+  // that re-shows it.
   for (const file of TOOLTIP_SCRIPTS) {
     const src = read(file).replace(/\/\/.*$/gm, '')
     assert.doesNotMatch(
@@ -138,8 +139,8 @@ test('nothing goes back to hiding tooltips through .tippy-box._tippy', () => {
   // What this replaced in 16-bloblang-interactive.js, which never hid
   // anything: instance.popper is the [data-tippy-root] wrapper and .tippy-box
   // is its child, so the "is this mine" comparison was always true, and tippy
-  // assigns _tippy to the reference element rather than the box, so
-  // box._tippy was always undefined and the && swallowed the call.
+  // assigns _tippy to the reference element and to the popper root, never to
+  // the box, so box._tippy was always undefined and the && swallowed the call.
   for (const file of TOOLTIP_SCRIPTS) {
     const src = read(file)
     assert.doesNotMatch(
