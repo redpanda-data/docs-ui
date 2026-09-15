@@ -11,6 +11,8 @@
    data-difficulty="{{solution.difficulty}}"
    data-status="{{solution.status}}"
    data-categories="{{#each solution.categories}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
+   data-use-cases="{{#each solution.useCases}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
+   data-industries="{{#each solution.industries}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
    data-technologies="{{#each solution.technologies}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
    data-platforms="{{#each solution.platforms}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
    data-analytics="solution_card_click">

@@ -14,8 +14,20 @@
   var results = document.querySelector('[data-sol-results]')
   if (!results) return
 
-  var FACETS = ['category', 'difficulty', 'tech', 'platform']
-  var FACET_ATTR = { category: 'data-categories', difficulty: 'data-difficulty', tech: 'data-technologies', platform: 'data-platforms' }
+  // The one place a facet is declared: the URL parameter and checkbox name on
+  // the left, the card attribute it reads on the right. Adding an axis is this
+  // line plus a fieldset in solutions-filters.hbs and the attribute in
+  // solution-card.hbs; the state, the URL and the clear button all follow from
+  // here rather than repeating the list.
+  var FACET_ATTR = {
+    'use-case': 'data-use-cases',
+    industry: 'data-industries',
+    category: 'data-categories',
+    difficulty: 'data-difficulty',
+    tech: 'data-technologies',
+    platform: 'data-platforms',
+  }
+  var FACETS = Object.keys(FACET_ATTR)
 
   function toArray (list) {
     var out = []
@@ -53,10 +65,14 @@
       parts.push(record.description || '')
       parts.push((record.technologies || []).join(' '))
       parts.push((record.categories || []).join(' '))
+      parts.push((record.useCases || []).join(' '))
+      parts.push((record.industries || []).join(' '))
       parts.push(record.difficulty || '')
     } else {
       parts.push(card.getAttribute('data-technologies') || '')
       parts.push(card.getAttribute('data-categories') || '')
+      parts.push((card.getAttribute('data-use-cases') || '').replace(/\|/g, ' '))
+      parts.push((card.getAttribute('data-industries') || '').replace(/\|/g, ' '))
     }
     return parts.join(' ').toLowerCase()
   }
@@ -68,7 +84,13 @@
 
   // ---- state -----------------------------------------------------------------
 
-  var state = { q: '', category: [], difficulty: [], tech: [], platform: [] }
+  function emptyState () {
+    var blank = { q: '' }
+    FACETS.forEach(function (facet) { blank[facet] = [] })
+    return blank
+  }
+
+  var state = emptyState()
   var form = $('[data-sol-filters-form]')
   var qInput = $('[data-sol-filter-q]')
   var countEl = $('[data-sol-count]')
@@ -154,7 +176,7 @@
   }
 
   function clearAll () {
-    state = { q: '', category: [], difficulty: [], tech: [], platform: [] }
+    state = emptyState()
     applyInputs()
     writeUrl()
     apply()

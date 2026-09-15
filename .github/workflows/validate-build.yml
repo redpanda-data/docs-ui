@@ -81,6 +81,8 @@ jobs:
         run: npm run test:solution-recommendations
       - name: Test Solutions code folding
         run: npm run test:solution-code-fold
+      - name: Test Solutions industry and use-case filtering
+        run: npm run test:solution-facets
       - name: Cache generated files
         uses: actions/cache@v4
         with:

@@ -22,7 +22,8 @@
  *                deprecated records sort last
  *     featured:  published records flagged featured
  *     recent:    up to 6 published records by lastModified desc
- *     facets:    { categories, technologies, difficulty, platforms }, each an
+ *     facets:    { useCases, industries, categories, technologies, difficulty,
+ *                platforms }, each an
  *                array of {value, count} (the extension's shape; plain string
  *                arrays are accepted and counted from the records)
  *     count:     all.length
@@ -91,6 +92,8 @@ function normalizeRecord (record) {
     platforms: toArray(record.platforms),
     technologies: toArray(record.technologies),
     categories: toArray(record.categories),
+    useCases: toArray(record.useCases),
+    industries: toArray(record.industries),
     steps,
     stepCount: steps.length,
     attachments: toArray(record.attachments),
@@ -144,14 +147,29 @@ function normalizeFacet (input, records, key) {
     })
     .filter(Boolean)
   if (items.length) return items
+  // An empty array that the catalog actually carries is a decision, not a
+  // gap: the extension drops a facet whose values match every solution,
+  // because filtering on it narrows nothing. Recounting from the records here
+  // would put that group straight back. Only an absent facet is derived,
+  // which is the case a hand-written or older catalog has.
+  if (Array.isArray(input)) return []
   return Array.from(counts.keys())
     .sort((a, b) => a.localeCompare(b))
     .map((value) => ({ value, count: counts.get(value) }))
 }
 
+// Use case and industry have no natural order the way difficulty does, so the
+// busiest value goes first: it is the one most readers are looking for. Ties
+// fall back to alphabetical so the order is stable between builds.
+function byCountThenName (items) {
+  return items.slice().sort((a, b) => (b.count - a.count) || a.value.localeCompare(b.value))
+}
+
 function normalizeFacets (facets, records) {
   facets = facets && typeof facets === 'object' ? facets : {}
   return {
+    useCases: byCountThenName(normalizeFacet(facets.useCases, records, 'useCases')),
+    industries: byCountThenName(normalizeFacet(facets.industries, records, 'industries')),
     categories: normalizeFacet(facets.categories, records, 'categories'),
     technologies: normalizeFacet(facets.technologies, records, 'technologies'),
     difficulty: normalizeFacet(facets.difficulty, records, 'difficulty')
