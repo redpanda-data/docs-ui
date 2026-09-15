@@ -851,9 +851,14 @@
   }
 
   /**
-   * Check if device is touch-based
+   * Can this device take touch input at all? True on phones and tablets, but
+   * also on touch-capable laptops (Surface, most Windows laptops, Chromebooks,
+   * an iPad with a trackpad), so it says nothing about the input in use. Only
+   * ever used for hints that have to be set before anyone activates an
+   * element. Tooltip behaviour reads tippy.currentInput.isTouch instead; see
+   * 12-activate-tooltips.js.
    */
-  function isTouchDevice () {
+  function canTouchDevice () {
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0
   }
 
@@ -873,7 +878,7 @@
       var codeElements = article.querySelectorAll(
         'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
       )
-      var isTouch = isTouchDevice()
+      var canTouch = canTouchDevice()
 
       // Only the first mention of a property in a paragraph (or list item,
       // table cell, ...) gets a tooltip. Repeats render as plain code so a
@@ -900,7 +905,15 @@
           placement: 'top',
           maxWidth: 450,
           appendTo: document.body,
-          trigger: isTouch ? 'click' : 'mouseenter focus',
+          // touch: true on every device, so a tap opens the tooltip through
+          // the emulated mouseenter it fires instead of needing a long press,
+          // and hover and keyboard focus keep working for a reader on a
+          // touch-capable laptop who is using a mouse. Picking the trigger
+          // from a load-time capability sniff took hover away from those
+          // readers. A property reference is not a link, so there is no
+          // navigation to intercept the way 12-activate-tooltips.js has to.
+          touch: true,
+          trigger: 'mouseenter focus',
           // Always true, never 'toggle': tippy compares this with === true
           // before hiding on an outside press, so 'toggle' leaves a touch
           // reader unable to dismiss. See 12-activate-tooltips.js.
@@ -942,7 +955,7 @@
           codeEl.setAttribute('role', 'button')
           codeEl.setAttribute('aria-label', text + ' property documentation')
 
-          if (isTouch) {
+          if (canTouch) {
             codeEl.setAttribute('aria-haspopup', 'dialog')
           }
 

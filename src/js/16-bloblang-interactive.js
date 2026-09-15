@@ -452,9 +452,14 @@
   }
 
   /**
-   * Check if device is touch-based
+   * Can this device take touch input at all? True on phones and tablets, but
+   * also on touch-capable laptops (Surface, most Windows laptops, Chromebooks,
+   * an iPad with a trackpad), so it says nothing about the input in use. Only
+   * ever used for hints that have to be set before anyone activates an
+   * element. Tooltip behaviour reads tippy.currentInput.isTouch instead; see
+   * 12-activate-tooltips.js.
    */
-  function isTouchDevice() {
+  function canTouchDevice() {
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   }
 
@@ -462,7 +467,7 @@
    * Add tooltips to Bloblang tokens
    */
   function addDocumentationTooltips(codeBlock) {
-    const isTouch = isTouchDevice();
+    const canTouch = canTouchDevice();
 
     if (!window.tippy) {
       console.warn('Tippy.js not loaded, skipping Bloblang tooltips');
@@ -472,7 +477,8 @@
     loadBloblangDocs().then(docs => {
       if (!docs) return;
 
-      // Tippy configuration - different trigger for touch vs mouse
+      // Tippy configuration. One trigger for every device: see the touch
+      // note below.
       const getTippyConfig = (doc) => ({
         content: createDocTooltip(doc),
         allowHTML: true,
@@ -481,9 +487,15 @@
         placement: 'top',
         maxWidth: 450,
         appendTo: document.body,
-        // Touch devices: show on click/tap, hide on click outside
-        // Mouse devices: show on hover
-        trigger: isTouch ? 'click' : 'mouseenter focus',
+        // touch: true on every device, so a tap opens the tooltip through the
+        // emulated mouseenter it fires instead of needing a long press, and
+        // hover and keyboard focus keep working for a reader on a
+        // touch-capable laptop who is using a mouse. Picking the trigger from
+        // a load-time capability sniff took hover away from those readers.
+        // None of these tokens is a link, so there is no navigation to
+        // intercept the way 12-activate-tooltips.js has to.
+        touch: true,
+        trigger: 'mouseenter focus',
         // Always true, never 'toggle': tippy compares this with === true
         // before hiding on an outside press, so 'toggle' leaves a touch
         // reader unable to dismiss. See 12-activate-tooltips.js.
@@ -513,6 +525,15 @@
 
       // Add tooltips to functions
       codeBlock.querySelectorAll('.token.function').forEach(el => {
+        // Already decorated? Leave it alone. This function runs three times
+        // over the same block in the worst case: on DOMContentLoaded, from
+        // Prism's 'complete' hook, and from 17-bloblang-yaml.js through
+        // window.addBloblangTooltips. tippy() on an element that already has
+        // an instance adds another one rather than replacing it, so one tap
+        // opened three identical popovers, and the one-at-a-time rule could
+        // not help: each instance's onShow excludes only itself and hides the
+        // other two, which the same event then re-shows.
+        if (el._tippy) return;
         const functionName = el.textContent.trim();
         const doc = docs.functions[functionName];
 
@@ -522,7 +543,7 @@
           el.setAttribute('tabindex', '0');
           el.setAttribute('role', 'button');
           el.setAttribute('aria-label', `${functionName} function documentation`);
-          if (isTouch) {
+          if (canTouch) {
             el.setAttribute('aria-haspopup', 'dialog');
           }
 
@@ -532,6 +553,7 @@
 
       // Add tooltips to methods
       codeBlock.querySelectorAll('.token.method').forEach(el => {
+        if (el._tippy) return; // see the note on the function loop above
         const methodText = el.textContent.trim();
         const methodName = methodText.replace(/^\./, '').replace(/\(\)$/, '');
         const doc = docs.methods[methodName];
@@ -542,7 +564,7 @@
           el.setAttribute('tabindex', '0');
           el.setAttribute('role', 'button');
           el.setAttribute('aria-label', `${methodName} method documentation`);
-          if (isTouch) {
+          if (canTouch) {
             el.setAttribute('aria-haspopup', 'dialog');
           }
 
@@ -550,8 +572,11 @@
         }
       });
 
-      // Add keyboard accessibility
+      // Add keyboard accessibility. Bound once per element for the same
+      // reason as the tooltips above: this runs again for the same block.
       codeBlock.querySelectorAll('.has-documentation').forEach(el => {
+        if (el.dataset.bloblangKeysBound) return;
+        el.dataset.bloblangKeysBound = 'true';
         el.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -611,10 +636,15 @@
     // Add to toolbox
     toolbox.appendChild(button);
 
-    // Initialize tooltip if tippy is available (skip on touch devices)
-    if (window.tippy && !isTouchDevice()) {
+    // Initialize tooltip if tippy is available. touch: false rather than
+    // skipping the tooltip on any device that could take touch: a mouse user
+    // on a touch-capable laptop was losing the label, and on a real touch
+    // screen this button does something when you tap it, so a tooltip on tap
+    // would fire alongside the action. A long press still shows it there.
+    if (window.tippy) {
       button.setAttribute('data-tippy-content', 'Execute this mapping in a mini-playground');
       tippy(button, {
+        touch: false,
         delay: [200, 0],
         // Only one tooltip open at a time, as everywhere else.
         onShow (instance) {

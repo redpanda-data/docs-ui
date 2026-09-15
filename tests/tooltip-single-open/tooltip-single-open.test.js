@@ -1,9 +1,9 @@
 /**
  * Only one tooltip may be open at a time, across every tooltip on the page.
  *
- * tippy does not do this by itself. On touch it is not cosmetic: the trigger
- * is click and hideOnClick is 'toggle', so tapping elsewhere dismisses
- * nothing and every term a reader taps leaves another popover on screen.
+ * tippy does not do this by itself. On touch it is not cosmetic: a reader
+ * never hovers out, so every term they tap used to leave another popover on
+ * screen.
  *
  * Three scripts create tooltips (12-activate-tooltips, 19-property-tooltips,
  * 16-bloblang-interactive) and 16 defines its own onShow, which would
@@ -149,4 +149,46 @@ test('nothing goes back to hiding tooltips through .tippy-box._tippy', () => {
       `${file} hides tooltips via .tippy-box._tippy, which is always undefined; use tippy.hideAll`
     )
   }
+})
+
+test('no tooltip script picks its trigger from a touch capability sniff', () => {
+  // 'ontouchstart' in window is true on touch-capable laptops, so a script
+  // that chooses trigger: 'click' from it takes hover and keyboard focus away
+  // from every reader on one of those machines who is using a mouse. Opening
+  // on a tap is touch: true plus the hover trigger instead: the tap fires an
+  // emulated mouseenter. Where the input in use actually matters, read
+  // tippy.currentInput.isTouch at the moment of the event.
+  for (const file of TOOLTIP_SCRIPTS) {
+    const src = read(file).replace(/\/\/.*$/gm, '')
+    assert.doesNotMatch(
+      src,
+      /trigger:[^,\n]*(?:[Tt]ouch|maxTouchPoints|ontouchstart)[^,\n]*\?/,
+      `${file} picks its tippy trigger from a device capability sniff; use touch: true with 'mouseenter focus'`
+    )
+  }
+})
+
+test('the Bloblang attach path cannot decorate the same token twice', () => {
+  // addDocumentationTooltips runs up to three times over one code block: on
+  // DOMContentLoaded, from Prism's 'complete' hook, and from
+  // 17-bloblang-yaml.js through window.addBloblangTooltips. tippy() on an
+  // element that already has an instance adds a second one instead of
+  // replacing it, and then one tap opened three identical popovers: each
+  // instance's onShow excludes only itself, hides the other two, and the same
+  // event re-shows them. Verified in Chrome before and after the guard.
+  const src = read('16-bloblang-interactive.js')
+  const attachSites = src.match(/tippy\(el, getTippyConfig\(/g) || []
+  assert.ok(attachSites.length >= 2, 'expected the function and method attach sites')
+  const guards = src.match(/if \(el\._tippy\) return/g) || []
+  assert.equal(
+    guards.length,
+    attachSites.length,
+    'every tippy() attach site in 16-bloblang-interactive.js needs an `if (el._tippy) return` guard, ' +
+      'because the attach function runs again for the same code block'
+  )
+  assert.match(
+    src,
+    /dataset\.bloblangKeysBound/,
+    'the keydown binding needs a once-per-element guard for the same reason'
+  )
 })
