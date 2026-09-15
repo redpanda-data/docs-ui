@@ -861,18 +861,23 @@
    * Find and process all code elements that match property names
    */
   function processCodeElements () {
+    // Scope: only elements marked by the prop: macro are decorated. Look for
+    // them BEFORE fetching: the properties JSON is ~700 KB, and this used to
+    // download it on every page (the home page included) whether or not a
+    // single property was mentioned.
+    var article = document.querySelector('article.doc')
+    if (!article) return
+
+    var codeElements = article.querySelectorAll(
+      'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
+    )
+    if (!codeElements.length) return
+
     loadPropertiesData().then(function (properties) {
       if (!properties || Object.keys(properties).length === 0) {
         return
       }
 
-      // Scope: only elements marked by the prop: macro are decorated
-      var article = document.querySelector('article.doc')
-      if (!article) return
-
-      var codeElements = article.querySelectorAll(
-        'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
-      )
       var isTouch = isTouchDevice()
 
       // Only the first mention of a property in a paragraph (or list item,

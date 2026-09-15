@@ -216,6 +216,26 @@ export default function ChatSdkInterface ({ loginUrl }) {
     handleRetry(latestQA.question)
   }, [scopeDropped, queryFailed, conversation.length])
 
+  // The other silent failure is the SDK's bot protection not having a captcha
+  // token yet ("reCAPTCHA is not ready"). It happens when a question is
+  // submitted soon after the SDK mounts, and the drawer bundle now loads on
+  // demand (19-chat-panel.js), so a reader who lands, types into the hero input
+  // and hits Enter can hit it; a manual Try again a moment later succeeds. Do
+  // that first retry for them: once per failed exchange, after a short pause.
+  // Only a second failure shows the message and the manual Try again button.
+  //
+  // Keyed on the question text, not the exchange: the retry appends a new
+  // exchange, so a per-exchange key would treat a persistent failure as a fresh
+  // one and fire again every 1.5 s. One automatic attempt per question, ever.
+  const captchaRetried = useRef(new Set())
+  useEffect(() => {
+    if (scopeDropped || !queryFailed || !latestQA?.question) return
+    if (captchaRetried.current.has(latestQA.question)) return
+    captchaRetried.current.add(latestQA.question)
+    const timer = setTimeout(() => handleRetry(latestQA.question), 1500)
+    return () => clearTimeout(timer)
+  }, [scopeDropped, queryFailed, conversation.length])
+
   const handleReset = () => {
     clearConversation() // drop the cross-page copy too, or it reappears on nav
     resetConversation()
