@@ -75,6 +75,8 @@ jobs:
         run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
         run: npm run test:toc-collapsible
+      - name: Test nav positioning leaves the page scroll alone
+        run: npm run test:nav-scroll
       - name: Test tooltips on touch devices
         run: npm run test:tooltip-touch
       - name: Test only one tooltip opens at a time
