@@ -5,29 +5,46 @@
   document.addEventListener('DOMContentLoaded', function () {
     if (typeof tippy !== 'function') return
 
-    // Touch devices have no hover, so a term's tooltip used to need a long
+    // Touch readers have no hover, so a term's tooltip used to need a long
     // press, and a plain tap on a glossary term (an <a> to the glossary page)
-    // navigated away before the reader saw the definition. On touch the first
-    // tap now shows the tooltip and goes nowhere; the destination is offered
-    // as a link inside the tooltip instead. Same detection as
-    // 19-property-tooltips.js.
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    // navigated away before the reader saw the definition. Fixing that needs
+    // two different signals, one per question.
+    //
+    // Can the tooltip open without a long press? That is a tippy prop, fixed
+    // when the instance is created: touch: true replaces tippy's 'hold'
+    // behaviour, and a tap fires an emulated mouseenter, which is enough to
+    // trigger a hover tooltip. A mouse user loses nothing by it.
+    //
+    // Should a tap swallow the term's own navigation? Decided at click time
+    // from tippy.currentInput.isTouch, never from a capability sniff.
+    // 'ontouchstart' in window is true on touch-capable laptops (Surface,
+    // most Windows laptops, Chromebooks, an iPad with a trackpad), so
+    // swallowing clicks there would break the link for every reader on one of
+    // those machines who is using a mouse. tippy sets currentInput.isTouch on
+    // touchstart and clears it again after two mousemoves within 20 ms, so it
+    // reports the input in use rather than the input available.
+    //
+    // The capability sniff survives for one thing: the aria-haspopup hint,
+    // which has to be on the element before anyone activates it.
+    const canTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
 
     // Shared tooltip configuration
     const tooltipConfig = {
       animation: 'scale',
       theme: 'redpanda-term',
-      touch: isTouch ? true : 'hold',
-      trigger: isTouch ? 'click' : 'mouseenter focus',
+      // See the note above: touch: true on every device, so a tap opens the
+      // tooltip through the emulated mouseenter instead of needing a hold.
+      touch: true,
+      trigger: 'mouseenter focus',
       // Always true, never 'toggle'. tippy compares this with === true before
       // hiding on a press outside the tooltip, so 'toggle' left a reader on a
       // touch device with no way to dismiss a tooltip at all: not by tapping
-      // the page, and not by tapping the term again (tippy's click trigger
-      // re-shows it). Verified in a browser with real touch events, before
-      // and after. true keeps the opening tap from dismissing what it just
-      // opened, because tippy ignores a press on the reference itself while
-      // the input is touch, and interactive keeps a tap on the tooltip's own
-      // footer link from closing it before it can be followed.
+      // the page, and not by tapping the term again (the tap re-triggers it).
+      // Verified in a browser with real touch events, before and after. true
+      // keeps the opening tap from dismissing what it just opened, because
+      // tippy ignores a press on the reference itself while the input is
+      // touch, and interactive keeps a tap on the tooltip's own footer link
+      // from closing it before it can be followed.
       hideOnClick: true,
       interactive: true,
       allowHTML: true,
@@ -36,7 +53,7 @@
       appendTo: () => document.body,
       // Only one tooltip open at a time, across every tooltip on the page.
       // tippy does not do this on its own, and on touch it is not cosmetic:
-      // the trigger is click, so each term a reader taps opens another
+      // a touch reader never hovers out, so each term they tap opens another
       // popover and the previous one stays on screen. hideAll reaches every
       // mounted instance, so property and Bloblang tooltips close too, not
       // just the ones created here.
@@ -91,19 +108,22 @@
       return box
     }
 
-    // On touch, a tap on a tooltipped link opens the tooltip rather than
-    // navigating. Only the first tap: while the tooltip is open the footer
-    // link is the way through, and tapping anywhere off the tooltip dismisses
-    // it (hideOnClick). Tapping the term a second time does NOT close it:
-    // tippy's click trigger re-shows it, which is why dismissal hangs on the
-    // outside press rather than on a toggle.
+    // A tap on a tooltipped link opens the tooltip rather than navigating, but
+    // only while touch is the input in use: the same reader on a touch-capable
+    // laptop can pick up the mouse, and then a click has to follow the link
+    // the way it always has. While the tooltip is open the footer link is the
+    // way through, and tapping anywhere off the tooltip dismisses it
+    // (hideOnClick). Tapping the term a second time does NOT close it: the tap
+    // re-triggers the tooltip, which is why dismissal hangs on the outside
+    // press rather than on a toggle.
     function interceptTap (el) {
-      if (!isTouch) return
       const anchor = linkedAnchor(el)
       if (!anchor) return
-      el.setAttribute('aria-haspopup', 'dialog')
+      if (canTouch) el.setAttribute('aria-haspopup', 'dialog')
       el.addEventListener('click', function (e) {
-        if (e.target.closest('.tippy-box')) return
+        // currentInput is tippy 6 public API. If a future bundle drops it,
+        // let the click through rather than trapping the reader on the page.
+        if (!(tippy.currentInput && tippy.currentInput.isTouch)) return
         e.preventDefault()
       })
     }

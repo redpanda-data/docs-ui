@@ -9,7 +9,10 @@ On a desktop browser::
 Hover a term to see its tooltip. Glossary tooltips end with a *View in glossary* link; enterprise tooltips end with *Learn more*. Clicking the term still follows its link, as before.
 
 On a touch device (or DevTools device emulation with touch enabled)::
-Tap a term. The tooltip opens and the page does not navigate. Tap the term again to close it. The only way through to the glossary or licensing page is the link inside the tooltip. This used to need a long press, and a plain tap navigated before the definition could be read.
+Tap a term. The tooltip opens and the page does not navigate. Tap anywhere off the tooltip to close it: tapping the term again reopens it rather than closing it. The only way through to the glossary or licensing page is the link inside the tooltip. This used to need a long press, and a plain tap navigated before the definition could be read.
+
+On a touch-capable laptop::
+Whichever input you are actually using wins, and you can switch at any time without reloading. Move the mouse and terms hover and their links follow on click, exactly as on a desktop. Tap the screen and the next tap opens a tooltip instead of navigating.
 
 == Glossary terms
 

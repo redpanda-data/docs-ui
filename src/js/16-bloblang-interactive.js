@@ -503,10 +503,10 @@
           // This replaces a loop over .tippy-box elements that never hid
           // anything: instance.popper is the [data-tippy-root] wrapper and
           // .tippy-box is its child, so the "is this mine" check was always
-          // true, and tippy assigns _tippy to the reference element rather
-          // than the box, so box._tippy was always undefined and the guard
-          // swallowed it. hideAll is tippy's own API for this and reaches
-          // every mounted instance.
+          // true, and tippy assigns _tippy to the reference and to that
+          // wrapper, never to the box itself, so box._tippy was always
+          // undefined and the guard swallowed it. hideAll is tippy's own API
+          // for this and reaches every mounted instance.
           tippy.hideAll({ exclude: instance });
         }
       });
