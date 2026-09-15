@@ -1,4 +1,10 @@
 antoraVersion: '1.0.0'
+# Register Asciidoctor macros for the preview build (loaded by
+# gulp.d/tasks/build-preview-pages.js). The iceberg-explorer block is provided
+# by the docs-extensions-and-macros package (npm-linked locally for preview).
+asciidoc:
+  extensions:
+  - '@redpanda-data/docs-extensions-and-macros/macros/iceberg-explorer'
 site:
   url: https://deploy-preview-327--docs-ui.netlify.app
   title: UI Preview
