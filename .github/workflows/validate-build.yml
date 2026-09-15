@@ -75,6 +75,8 @@ jobs:
         run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
         run: npm run test:toc-collapsible
+      - name: Test nav positioning leaves the page scroll alone
+        run: npm run test:nav-scroll
       - name: Cache generated files
         uses: actions/cache@v4
         with:
