@@ -223,18 +223,14 @@
 {{/if}}
 {{#with site.keys.googleAnalytics}}
 <!-- Google Tag Manager -->
-<!-- Deferred: the container (and the gtag + OneTrust tags it loads) is ~340 KB
-     of third-party script and ~150 ms of main-thread work. Nothing on the page
-     depends on it, so it waits for the load event, or the first interaction if
-     that comes sooner, instead of competing with the article for bandwidth and
-     CPU during first paint. dataLayer is created immediately, so any pushes
-     made before the container arrives are queued and replayed as usual. -->
+<!-- Loads with the page, deliberately. The container carries the OneTrust
+     consent banner, so deferring it would delay the banner and undercount
+     visitors who leave before the load event. Nothing else in this PR depends
+     on moving it. -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var loaded=false;function load(){if(loaded)return;loaded=true;
-var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}
-if(d.readyState==='complete'){load();}else{w.addEventListener('load',function(){setTimeout(load,0);});}
-['pointerdown','keydown','touchstart','scroll'].forEach(function(ev){w.addEventListener(ev,load,{once:true,passive:true});});
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','{{{this}}}');</script>
 <!-- End Google Tag Manager -->
 {{/with}}
