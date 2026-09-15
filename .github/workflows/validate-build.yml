@@ -75,6 +75,8 @@ jobs:
         run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
         run: npm run test:toc-collapsible
+      - name: Test nav positioning leaves the page scroll alone
+        run: npm run test:nav-scroll
       - name: Test Ask AI bundle loads on demand
         run: npm run test:lazy-askai
       - name: Test collapsed nav buckets stay out of the DOM

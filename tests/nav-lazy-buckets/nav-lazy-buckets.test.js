@@ -161,11 +161,149 @@ test('the caret toggle is delegated in the capture phase (01-nav.js stops bubbli
   assert.ok(end > 0 && src.slice(start, end).includes('toggleBucket(caretBtn)'), 'registered with capture: true')
 })
 
-test('01-nav.js binds items in hydrated subtrees and never twice', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'src/js/01-nav.js'), 'utf8')
-  assert.match(src, /navContainer\.addEventListener\('nav:hydrated'/)
-  assert.match(src, /function bindNavItems \(root\)/)
-  assert.match(src, /element\.dataset\.navBound/)
+// Minimal DOM for the binding path in 01-nav.js: nav items, their .item row, a
+// direct-child <template data-nav-lazy>, and enough of replaceChild and
+// template.content to move a deferred subtree into the document. Handlers are
+// kept as a list per type so the test can count them and catch a double bind.
+function navEl (tag, attrs = {}, children = []) {
+  const classes = new Set((attrs.class || '').split(/\s+/).filter(Boolean))
+  const el = {
+    tagName: tag.toUpperCase(),
+    attrs: Object.assign({}, attrs),
+    children: [],
+    parentNode: null,
+    handlers: {},
+    style: {},
+    classList: {
+      add: (...cs) => cs.forEach((c) => classes.add(c)),
+      remove: (...cs) => cs.forEach((c) => classes.delete(c)),
+      contains: (c) => classes.has(c),
+      toggle: (c) => (classes.has(c) ? (classes.delete(c), false) : (classes.add(c), true)),
+    },
+    get href () { return el.attrs.href },
+    getAttribute: (k) => (k in el.attrs ? el.attrs[k] : null),
+    setAttribute (k, v) { el.attrs[k] = String(v) },
+    addEventListener (type, fn) { (el.handlers[type] = el.handlers[type] || []).push(fn) },
+    getBoundingClientRect: () => ({ top: 0, bottom: 0, height: 0 }),
+    querySelector: (s) => navFind(el, s)[0] || null,
+    querySelectorAll: (s) => navFind(el, s),
+    replaceChild (added, removed) {
+      const at = el.children.indexOf(removed)
+      const incoming = added.isFragment ? added.children : [added]
+      el.children.splice(at, 1, ...incoming)
+      incoming.forEach((c) => { c.parentNode = el })
+      removed.parentNode = null
+    },
+  }
+  children.forEach((child) => { child.parentNode = el; el.children.push(child) })
+  return el
+}
+
+// Selector support stops where 01-nav.js stops: a tag, classes, and the one
+// a[href^="https://"] test. No :scope, deliberately, so a reader of this test
+// sees the same constraint tests/nav-scroll imposes.
+function navMatches (el, selector) {
+  const m = selector.match(/^([a-z]*)((?:\.[\w-]+)*)(?:\[([\w-]+)\^?="?([^"\]]*)"?\])?$/i)
+  if (!m) throw new Error('selector not supported by the test DOM: ' + selector)
+  const [, tag, classPart, attr, value] = m
+  if (tag && el.tagName !== tag.toUpperCase()) return false
+  if (!(classPart ? classPart.split('.').filter(Boolean) : []).every((c) => el.classList.contains(c))) return false
+  if (!attr) return true
+  const actual = el.getAttribute(attr)
+  return actual !== null && (selector.includes('^=') ? actual.startsWith(value) : actual === value)
+}
+
+function navFind (el, selector, out = []) {
+  el.children.forEach((child) => {
+    if (navMatches(child, selector)) out.push(child)
+    navFind(child, selector, out)
+  })
+  return out
+}
+
+// One nav entry as nav-tree.hbs renders it. deferred adds the inert
+// <template data-nav-lazy> that a collapsed item ships its subtree in.
+function bindableEntry (href, { deferred = false } = {}) {
+  const row = navEl('div', { class: 'item' + (deferred ? ' dropdown' : '') }, [
+    navEl('a', { class: 'nav-link', href }),
+    ...(deferred ? [navEl('button', { class: 'nav-item-toggle' })] : []),
+  ])
+  const li = navEl('li', { class: 'nav-item' }, [row])
+  if (deferred) {
+    const childRow = navEl('div', { class: 'item' }, [navEl('a', { class: 'nav-link', href: href + 'deep/' })])
+    const child = navEl('li', { class: 'nav-item' }, [childRow])
+    child.row = childRow
+    const subtree = navEl('ul', { class: 'nav-list' }, [child])
+    const tpl = navEl('template', { 'data-nav-lazy': '' })
+    tpl.content = { cloneNode: () => ({ isFragment: true, children: [subtree] }) }
+    li.children.push(tpl)
+    tpl.parentNode = li
+    li.deferred = { tpl, child }
+  }
+  li.row = row
+  return li
+}
+
+// Run the IIFE against the stub and hand back the pieces the assertions need.
+function runNav (entries) {
+  const list = navEl('ul', { class: 'nav-list' }, entries)
+  const panel = navEl('div', { class: 'nav-panel-menu', 'data-panel': 'menu' }, [navEl('nav', { class: 'nav-menu' }, [list])])
+  const navContainer = navEl('div', { class: 'nav-container' }, [navEl('aside', { class: 'nav sidebar' }, [panel])])
+  const root = navEl('body', {}, [navContainer])
+  const context = {
+    console,
+    document: {
+      addEventListener () {},
+      getElementById: () => null,
+      documentElement: navEl('html'),
+      querySelector: (s) => root.querySelector(s),
+    },
+    window: {
+      addEventListener () {},
+      location: { hash: '', href: 'https://docs.example.com/page/' },
+      getComputedStyle: () => ({ overflowY: 'visible' }),
+    },
+  }
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'src/js/01-nav.js'), 'utf8'), context)
+  return { navContainer, panel }
+}
+
+const clickCount = (li) => (li.row.handlers.click || []).length
+
+test('01-nav.js binds the items rendered at load, exactly once each', () => {
+  const plain = bindableEntry('/x/overview/')
+  const dropdown = bindableEntry('/x/guides/', { deferred: true })
+  runNav([plain, dropdown])
+  assert.equal(clickCount(plain), 1)
+  assert.equal(clickCount(dropdown), 1)
+  assert.equal(plain.getAttribute('data-nav-bound'), 'true', 'bound items are marked with an attribute, not dataset')
+})
+
+test('expanding a collapsed item moves its direct-child template in and binds the new items', () => {
+  const dropdown = bindableEntry('/x/guides/', { deferred: true })
+  runNav([bindableEntry('/x/overview/'), dropdown])
+  const { tpl, child } = dropdown.deferred
+
+  assert.equal(clickCount(child), 0, 'an item inside the template is not in the document yet')
+  dropdown.row.querySelector('.nav-item-toggle').handlers.keydown[0]({ keyCode: 13, preventDefault () {} })
+
+  assert.equal(dropdown.children.indexOf(tpl), -1, 'the template is replaced by its content')
+  assert.equal(clickCount(child), 1, 'the hydrated item is bound')
+  assert.equal(child.getAttribute('data-nav-bound'), 'true')
+})
+
+test('a nav:hydrated subtree is bound, and re-binding never doubles a handler', () => {
+  const dropdown = bindableEntry('/x/guides/', { deferred: true })
+  const { navContainer, panel } = runNav([bindableEntry('/x/overview/'), dropdown])
+  dropdown.row.querySelector('.nav-item-toggle').handlers.keydown[0]({ keyCode: 13, preventDefault () {} })
+  const { child } = dropdown.deferred
+
+  // 23-nav-bucket.js fires this after swapping a bucket's template in.
+  navContainer.handlers['nav:hydrated'].forEach((fn) => fn({ target: panel }))
+  navContainer.handlers['nav:hydrated'].forEach((fn) => fn({ target: panel }))
+
+  assert.equal(clickCount(dropdown), 1, 'an already-bound item is skipped')
+  assert.equal(clickCount(child), 1)
 })
 
 // --- nav-tree.hbs: collapsed items inside an open bucket ---
