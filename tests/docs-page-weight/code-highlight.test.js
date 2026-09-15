@@ -23,7 +23,7 @@ function block (top, id) {
   }
 }
 
-function load ({ blocks, withObserver = true }) {
+function load ({ blocks, withObserver = true, window: customizeWindow }) {
   const highlighted = []
   const observed = []
   const listeners = {}
@@ -41,6 +41,7 @@ function load ({ blocks, withObserver = true }) {
     location: { hash: '' },
     addEventListener: (t, fn) => { listeners[t] = fn },
   }
+  if (customizeWindow) customizeWindow(context.window)
   if (withObserver) {
     context.window.IntersectionObserver = class {
       constructor (cb) { this.cb = cb }
@@ -120,4 +121,38 @@ test('11-editable-placeholders hands off to the on-demand pass instead of highli
   const src = fs.readFileSync(path.join(ROOT, 'src/js/11-editable-placeholders.js'), 'utf8')
   assert.match(src, /makePlaceholdersEditable\(\)\s*[\s\S]{0,400}window\.highlightCodeBlocks\(\)/)
   assert.ok(src.indexOf('makePlaceholdersEditable()') < src.indexOf('window.highlightCodeBlocks()'), 'placeholders first, then highlight')
+})
+
+test('printing tokenises every block, including the ones never scrolled to', () => {
+  const blocks = [block(0, 'visible'), block(9000, 'far'), block(20000, 'further')]
+  const { context, highlighted, observed, listeners } = load({ blocks })
+  context.window.highlightCodeBlocks()
+  assert.deepEqual(highlighted, ['visible'], 'only the visible block is tokenised while reading')
+  assert.deepEqual(observed, ['far', 'further'])
+
+  assert.equal(typeof listeners.beforeprint, 'function', 'the print hook is registered')
+  listeners.beforeprint()
+  assert.deepEqual(highlighted, ['visible', 'far', 'further'], 'the whole page prints highlighted')
+
+  listeners.beforeprint()
+  assert.deepEqual(highlighted, ['visible', 'far', 'further'], 'a second print does no repeat work')
+})
+
+test('Safari has no beforeprint, so the print media query drives the same pass', () => {
+  const blocks = [block(9000, 'far')]
+  let onChange = null
+  const { context, highlighted } = load({
+    blocks,
+    window: (win) => {
+      win.matchMedia = (q) => ({ media: q, matches: false, addEventListener: (t, fn) => { onChange = fn } })
+    },
+  })
+  context.window.highlightCodeBlocks()
+  assert.deepEqual(highlighted, [])
+
+  assert.equal(typeof onChange, 'function', 'change listener registered on the print query')
+  onChange({ matches: false })
+  assert.deepEqual(highlighted, [], 'leaving print mode tokenises nothing')
+  onChange({ matches: true })
+  assert.deepEqual(highlighted, ['far'])
 })

@@ -36,6 +36,7 @@ test('chat-panel.hbs no longer loads AskAI.bundle.js eagerly, only the session p
 function runPanel ({ storedOpen = false, askForm = false } = {}) {
   const store = storedOpen ? { 'redpanda-chat-panel-open': 'true' } : {}
   const appended = []
+  const removed = []
   const docListeners = {}
   const panelListeners = {}
   const openBtnListeners = []
@@ -67,7 +68,11 @@ function runPanel ({ storedOpen = false, askForm = false } = {}) {
       },
       querySelectorAll: (sel) => (String(sel).includes('open-chat') ? [openBtn] : []),
       addEventListener: (t, fn) => { docListeners[t] = fn },
-      createElement: (tag) => ({ tag, setAttribute () {} }),
+      createElement: (tag) => {
+        const el = { tag, setAttribute () {} }
+        el.remove = () => removed.push(el)
+        return el
+      },
       head: { appendChild: (el) => appended.push(el) },
     },
     window: {
@@ -78,7 +83,7 @@ function runPanel ({ storedOpen = false, askForm = false } = {}) {
     },
   }
   vm.runInNewContext(PANEL_JS, context)
-  return { appended, docListeners, openBtnListeners, root, panel, context }
+  return { appended, removed, docListeners, openBtnListeners, root, panel, context }
 }
 
 test('opening the drawer injects the bundle and its CSS exactly once', () => {
@@ -89,7 +94,7 @@ test('opening the drawer injects the bundle and its CSS exactly once', () => {
   const links = appended.filter((el) => el.tag === 'link')
   assert.equal(scripts.length, 1)
   assert.equal(scripts[0].src, '/_/js/AskAI.bundle.js')
-  assert.equal(scripts[0].defer, true)
+  assert.equal(scripts[0].defer, undefined, 'defer is ignored on a script element created this way, so it is not set')
   assert.equal(links.length, 1)
   assert.equal(links[0].href, '/_/js/AskAI.bundle.css')
   assert.equal(links[0].rel, 'stylesheet')
@@ -195,4 +200,19 @@ test('the probe runs once per page no matter how many bundles carry it', () => {
   assert.equal(posts.length, 1, 'one POST /kapa/session')
   assert.equal(warmListeners.length, 1, 'one docs-account:warm listener')
   assert.equal(context.window.__KAPA_SESSION_PROBE_INSTALLED, true)
+})
+
+test('a failed bundle download can be retried without a second stylesheet', () => {
+  const { appended, removed, root, openBtnListeners } = runPanel()
+  openBtnListeners.forEach((fn) => fn())
+  const firstScript = appended.find((el) => el.tag === 'script')
+  assert.equal(appended.filter((el) => el.tag === 'link').length, 1)
+
+  firstScript.onerror()
+  assert.deepEqual(removed, [firstScript], 'the dead script tag goes, rather than accumulating per attempt')
+  assert.match(root.innerHTML, /error-boundary/)
+
+  openBtnListeners.forEach((fn) => fn())
+  assert.equal(appended.filter((el) => el.tag === 'script').length, 2, 'the retry fetches the bundle again')
+  assert.equal(appended.filter((el) => el.tag === 'link').length, 1, 'but not its CSS a second time')
 })

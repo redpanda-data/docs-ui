@@ -118,4 +118,24 @@
   }
   document.addEventListener('DOMContentLoaded', highlightHashTarget)
   window.addEventListener('hashchange', highlightHashTarget)
+
+  // Printing lays out the whole page at once, but nothing scrolls, so blocks
+  // the reader never reached are still untokenised and print as plain text.
+  // Tokenise the lot before the print layout is taken. Chrome, Firefox and
+  // Edge fire beforeprint; Safari does not, but it does match the print media
+  // query, which reaches the same call.
+  function highlightEverything () {
+    var blocks = document.querySelectorAll(SELECTOR)
+    for (var i = 0; i < blocks.length; i++) {
+      if (observer) observer.unobserve(blocks[i])
+      highlight(blocks[i])
+    }
+  }
+  window.addEventListener('beforeprint', highlightEverything)
+  var printQuery = window.matchMedia && window.matchMedia('print')
+  if (printQuery) {
+    var onPrintQuery = function (q) { if (q.matches) highlightEverything() }
+    if (printQuery.addEventListener) printQuery.addEventListener('change', onPrintQuery)
+    else if (printQuery.addListener) printQuery.addListener(onPrintQuery)
+  }
 })()

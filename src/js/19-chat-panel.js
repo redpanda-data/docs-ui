@@ -34,6 +34,7 @@
   // not wait on this.
   var bundleSrc = chatPanel.getAttribute('data-askai-bundle')
   var bundleRequested = false
+  var bundleStyles = null
   var INTENT_SELECTOR = '[data-action="open-chat"], .custom-class-kapa, [data-kapa-trigger], ' +
     '#home-ask-form, .home-hero-chip, #dp-ask-form, .dp-hero-ask-chip, .ch3-hero-ask-input, .ch3-hero-ask-chip, ' +
     '[data-ask-ai], .ask-ai-btn'
@@ -45,15 +46,23 @@
   function loadAskAI () {
     if (bundleRequested || !bundleSrc) return
     bundleRequested = true
-    var link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = bundleSrc.replace(/\.js$/, '.css')
-    document.head.appendChild(link)
+    // The stylesheet survives a failed script: onerror clears bundleRequested
+    // so the next open can retry, and appending the link again would queue a
+    // second identical request for every attempt.
+    if (!bundleStyles) {
+      bundleStyles = document.createElement('link')
+      bundleStyles.rel = 'stylesheet'
+      bundleStyles.href = bundleSrc.replace(/\.js$/, '.css')
+      document.head.appendChild(bundleStyles)
+    }
     var script = document.createElement('script')
     script.src = bundleSrc
-    script.defer = true
+    // No defer: a script element created this way is async by definition, and
+    // defer is ignored on it. It executes as soon as it arrives, which is what
+    // an on-demand bundle wants anyway.
     script.onerror = function () {
       bundleRequested = false // allow a retry on the next open
+      if (script.remove) script.remove() // don't leave a dead tag per attempt
       var root = chatPanel.querySelector('#chat-panel-kapa-root')
       if (root && !root.dataset.mounted) {
         root.innerHTML = '<div class="chat-container"><div class="error-boundary">' +

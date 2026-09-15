@@ -4,9 +4,12 @@
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
-<!-- JetBrains Mono (code blocks) is self-hosted: see css/typeface-jetbrains-mono.css
-     and the preload in head.hbs. The Google Fonts stylesheet it replaced was the
-     single largest render-blocking request on every page (~290 ms). -->
+<!-- JetBrains Mono (code blocks) is self-hosted: see css/typeface-jetbrains-mono.css.
+     The Google Fonts stylesheet it replaced was the single largest render-blocking
+     request on every page (~290 ms). Deliberately not preloaded: a preload
+     downloads unconditionally, only pages with code use the face, and
+     font-display: swap keeps it off the critical path. head.hbs preloads the
+     three Inter faces the first paint actually needs, and nothing else. -->
 
 <!-- Critical CSS - loaded synchronously -->
 <link rel="stylesheet" href="{{{uiRootPath}}}/css/site.css">
