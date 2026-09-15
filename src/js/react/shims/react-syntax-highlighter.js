@@ -8,6 +8,19 @@
  * the same export name. bundle-react.js swaps this file in with an esbuild
  * resolve plugin, so the SDK source is untouched. Unregistered languages
  * render as plain text, not an error.
+ *
+ * react-syntax-highlighter and refractor are pinned as direct dependencies in
+ * package.json even though the SDK also pulls them in, because this file
+ * imports them by path. Left undeclared they resolved only through npm
+ * hoisting the SDK's copies, so a Kapa bump could have changed the grammar
+ * API under this shim, or removed it, without any change here.
+ *
+ * Note that the Prism this bundle runs is refractor's own, which refractor
+ * pins at ~1.27.0, and not the 1.30.0 that gulp.d/tasks/generate-prism.js
+ * builds the page-level prism-core.js from. The two are separate outputs: the
+ * page highlighter and the Ask AI drawer never share a Prism instance, and
+ * 10-code-highlight.js keeps a private reference precisely because the Kapa
+ * widget overwrites window.Prism.
  */
 import PrismLight from 'react-syntax-highlighter/dist/esm/prism-light'
 import bash from 'refractor/lang/bash.js'

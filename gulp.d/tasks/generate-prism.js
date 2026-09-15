@@ -12,7 +12,16 @@ const log = require('fancy-log')
  * prismjs.com download page produced, minus the 190 grammars nobody used.
  *
  * Runs as part of bundle:build and preview:build. The output is generated,
- * not tracked: bump prismjs or edit the language list and rebuild.
+ * not tracked: bump the prismjs pin in package.json or edit the language list
+ * and rebuild.
+ *
+ * prismjs is pinned as a direct devDependency because this task reads its
+ * files straight off disk. It is also a transitive dependency of
+ * react-syntax-highlighter, so before it was declared here it resolved only
+ * because npm happened to hoist that copy to the root, and a Kapa SDK bump
+ * that dropped or moved the highlighter would have broken this task with no
+ * change in this repo. The version also lands in the generated header below,
+ * so an unnoticed bump shows up as a diff in the bundle.
  *
  * @param {string} outFile - Path of the file to write.
  * @returns {Function} Gulp task.
