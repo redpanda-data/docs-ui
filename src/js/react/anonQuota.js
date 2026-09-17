@@ -55,7 +55,32 @@ let published = 0
 // to say nothing about counts it can't trust rather than render "3 left".
 const openVerdict = () => ({ allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null, blockedBy: null })
 
+// Which OneTrust group this feature's storage belongs to. Mirrors
+// DOCS_ANON_ASK_CONSENT_GROUP on the backend (docs-site lib/anon-quota.mjs),
+// which gates the cookie the same way. Unset means no gate, matching the
+// backend's own default, so neither half starts enforcing before the category
+// is known.
+const consentGroup = () => window.DOCS_ANON_ASK_CONSENT_GROUP || null
+
+// sessionStorage is storage on the reader's device under the same rule as the
+// cookie, so a reader who refused this category must not have verdicts cached
+// either: gating the cookie alone would keep the promise by halves.
+//
+// OnetrustActiveGroups is a string of the granted groups, ',C0001,C0003,'.
+// Absent means OneTrust has not answered yet, or was blocked from loading at
+// all, which is not a refusal: the backend takes the same view of a missing
+// signal, and the writes here are per-viewer conveniences that come back empty
+// on their own when storage is unavailable.
+function mayRemember () {
+  const group = consentGroup()
+  if (!group) return true
+  const active = window.OnetrustActiveGroups
+  if (typeof active !== 'string' || active === '') return true
+  return active.split(',').some((g) => g.trim() === group)
+}
+
 function markAbsent () {
+  if (!mayRemember()) return
   try { sessionStorage.setItem(ABSENT_KEY, '1') } catch (err) { /* private browsing */ }
 }
 
@@ -89,6 +114,7 @@ function readCachedVerdict () {
 // would suppress the next real check for the rest of the session; `unlimited`
 // belongs to a signed-in reader, who never renders this drawer at all.
 function cacheVerdict (verdict) {
+  if (!mayRemember()) return
   if (!verdict || verdict.degraded || verdict.unlimited || !verdict.resetAt) return
   try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(verdict)) } catch (err) { /* private browsing */ }
 }
@@ -98,6 +124,7 @@ function cacheVerdict (verdict) {
 // nothing to cache, that peek would come back on every pageview, which is the
 // cost this whole gate exists to remove.
 function canRemember () {
+  if (!mayRemember()) return false
   try {
     sessionStorage.setItem(CACHE_KEY + '-probe', '1')
     sessionStorage.removeItem(CACHE_KEY + '-probe')
@@ -170,11 +197,13 @@ async function ask (peek) {
     remaining: data.remaining ?? null,
     resetAt: data.reset_at ?? null,
     loginUrl: data.login_url ?? null,
-    // Which budget refused: 'visitor' or 'ip'. The counts above are ALWAYS the
-    // visitor's, deliberately (kapa-quota.mjs won't publish the shared
-    // ceiling's size), so a reader stopped by the ceiling arrives here with
-    // questions apparently left. Only this says so, and the wall words itself
-    // from it.
+    // Which budget refused: 'visitor', 'ip', or 'noconsent'. The latter two are
+    // both shared per network address, so the wall words itself for a network
+    // rather than for a person. For 'ip' the counts above are the visitor's,
+    // deliberately (kapa-quota.mjs won't publish the shared ceiling's size), so
+    // such a reader arrives here with questions apparently left and only this
+    // field says otherwise. For 'noconsent' the counts ARE that budget, since
+    // the reader has no per-visitor one.
     blockedBy: data.blocked_by ?? null,
   }, seq)
 }
@@ -195,6 +224,16 @@ export function forgetQuota () {
   snapshot = null
   window.__DOCS_ANON_QUOTA = undefined
   try { sessionStorage.removeItem(CACHE_KEY) } catch (err) { /* private browsing */ }
+}
+
+// A reader can change their mind without reloading, and anything we remembered
+// under the old answer is no longer ours to keep. OneTrust fires this on the
+// consent manager's own save, and forgetQuota clears the cached verdict; the
+// endpoint expires the cookie itself on the next request.
+if (typeof window !== 'undefined') {
+  window.addEventListener('OneTrustGroupsUpdated', () => {
+    if (!mayRemember()) forgetQuota()
+  })
 }
 
 /** Read the current state without spending a question. */

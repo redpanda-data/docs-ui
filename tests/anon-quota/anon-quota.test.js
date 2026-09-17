@@ -545,3 +545,78 @@ test('setting off to sign in forgets the remembered refusal', async () => {
   assert.equal(calls.length, 1)
   assert.equal(quota.quotaExhausted(quota.getQuota()), false)
 })
+
+// sessionStorage is storage on the reader's device under the same rule as the
+// cookie the backend gates (docs-site lib/anon-quota.mjs), so a reader who
+// refused this category must not have verdicts cached either. The group is
+// configured, matching DOCS_ANON_ASK_CONSENT_GROUP on the backend, so neither
+// half starts enforcing before the consent manager's category is known.
+function consentBrowser (activeGroups, opts = {}) {
+  browser = fakeBrowser(opts)
+  global.window.DOCS_ANON_ASK_CONSENT_GROUP = 'C0003'
+  if (activeGroups !== undefined) global.window.OnetrustActiveGroups = activeGroups
+  calls.length = 0
+  quota = loadEsm('src/js/react/anonQuota.js')
+  return browser
+}
+
+test('a refused category caches no verdict', async () => {
+  const b = consentBrowser(',C0001,C0002,')
+  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
+  await quota.consumeQuota()
+  assert.equal(b.store.size, 0, 'nothing may be written for a reader who refused')
+})
+
+test('a granted category caches as before', async () => {
+  const b = consentBrowser(',C0001,C0003,')
+  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
+  await quota.consumeQuota()
+  assert.ok(b.store.size > 0, 'a consenting reader still gets the session cache')
+})
+
+test('a refused category writes no absent-marker either', async () => {
+  // The 404 marker is a write too, and it is the one that would otherwise
+  // survive a consent change and suppress every later check.
+  const b = consentBrowser(',C0001,')
+  respond(404, {})
+  await quota.consumeQuota()
+  assert.equal(b.store.size, 0)
+})
+
+test('no OneTrust answer at all is not a refusal', async () => {
+  // OneTrust arrives through the tag manager, so a blocked extension means the
+  // global is simply absent. The backend takes the same view of a missing
+  // signal, and these writes are per-viewer conveniences.
+  const b = consentBrowser(undefined)
+  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
+  await quota.consumeQuota()
+  assert.ok(b.store.size > 0)
+})
+
+test('no configured group changes nothing', async () => {
+  browser = fakeBrowser()
+  global.window.OnetrustActiveGroups = ',C0001,'
+  quota = loadEsm('src/js/react/anonQuota.js')
+  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
+  await quota.consumeQuota()
+  assert.ok(browser.store.size > 0, 'the gate is inert until the category is known')
+})
+
+test('withdrawing consent mid-session drops what we remembered', async () => {
+  const b = consentBrowser(',C0001,C0003,')
+  respond(200, { allowed: false, limit: 3, used: 3, remaining: 0, reset_at: '2099-01-01T00:00:00Z' })
+  await quota.consumeQuota()
+  assert.ok(b.store.size > 0)
+
+  global.window.OnetrustActiveGroups = ',C0001,'
+  global.window.dispatchEvent(new global.CustomEvent('OneTrustGroupsUpdated'))
+  assert.equal(b.store.size, 0, 'a cached refusal must not outlive the answer it was cached under')
+  assert.equal(quota.getQuota(), null)
+})
+
+test('a network-shaped refusal covers the no-consent budget too', async () => {
+  respond(429, { allowed: false, limit: 10, used: 10, remaining: 0, reset_at: '2099-01-01T00:00:00Z', blocked_by: 'noconsent', login_url: '/login' })
+  const v = await quota.consumeQuota()
+  assert.equal(v.blockedBy, 'noconsent')
+  assert.equal(quota.quotaExhausted(v), true)
+})

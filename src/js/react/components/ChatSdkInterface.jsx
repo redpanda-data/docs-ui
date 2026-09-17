@@ -43,12 +43,14 @@ function resetLabel (resetAt) {
 // Both reuse .signin-badge / .signin-button / .signin-privacy-note so this and
 // the agent tier's wall (ChatInterface.jsx) read as one feature.
 function QuotaWall ({ quota, loginUrl, signingIn, setSigningIn, hero = false }) {
-  // Refused by the shared per-network ceiling rather than by this reader's own
-  // budget. The counts in the verdict are always the visitor's (kapa-quota.mjs
-  // does not publish the ceiling's size), so without this branch someone who
-  // has asked one question, or none, is told they have used all three. The
-  // sign-in pitch below still applies unchanged: signing in lifts both limits.
-  const byNetwork = quota?.blockedBy === 'ip'
+  // Refused by a budget shared per network address rather than by this reader's
+  // own. Two shapes reach here: the anti-reset ceiling ('ip'), where the counts
+  // in the verdict are still the visitor's (kapa-quota.mjs does not publish the
+  // ceiling's size), so without this branch someone who has asked one question
+  // or none is told they have used all three; and a reader whose cookie choice
+  // means they have no per-visitor budget at all ('noconsent'). The sign-in
+  // pitch below applies unchanged to both: signing in lifts every limit here.
+  const byNetwork = quota?.blockedBy === 'ip' || quota?.blockedBy === 'noconsent'
 
   const title = byNetwork
     ? 'Too many questions from this network today'
@@ -86,7 +88,7 @@ function QuotaWall ({ quota, loginUrl, signingIn, setSigningIn, hero = false }) 
       </span>
       <h2 className={hero ? 'welcome-title' : 'quota-wall-title'}>{title}</h2>
       <p className={hero ? 'welcome-description' : 'quota-wall-text'}>
-        {byNetwork && 'Anonymous questions are limited per network, and this one has reached today\'s. '}
+        {byNetwork && 'Anonymous questions are limited per network, and this network has reached today\'s limit. '}
         Sign in with a free Redpanda Cloud account to keep asking, and get the docs AI agent:
         saved conversations, Bloblang it can verify for you, and answers that open the exact page you need.
       </p>
@@ -461,8 +463,8 @@ export default function ChatSdkInterface ({ loginUrl }) {
           href={`${loginUrl}${loginUrl.includes('?') ? '&' : '?'}return_to=${encodeURIComponent(window.location.pathname + window.location.search)}`}
           onClick={(e) => {
             // Anything we remember about their allowance is about to be wrong.
-    forgetQuota()
-    if (document.querySelector('[data-signin-modal]')) {
+            forgetQuota()
+            if (document.querySelector('[data-signin-modal]')) {
               e.preventDefault()
               window.dispatchEvent(new CustomEvent('docs-account:open-signin'))
               return
