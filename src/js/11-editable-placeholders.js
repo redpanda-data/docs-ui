@@ -97,7 +97,15 @@ function unnestPlaceholders() {
     try {
       observeCodeBlocksForConumRestoration()
       makePlaceholdersEditable()
-      Prism && Prism.highlightAll()
+      // 10-code-highlight.js owns highlighting (visible blocks now, the rest
+      // on scroll) and runs it after the placeholders exist, which is the
+      // ordering keep-markup needs. Prism.highlightAll is the fallback if that
+      // module is ever absent.
+      if (typeof window.highlightCodeBlocks === 'function') {
+        window.highlightCodeBlocks()
+      } else {
+        Prism && Prism.highlightAll()
+      }
     } catch (error) {
       console.error('An error occurred while making placeholders editable:', error)
     }
