@@ -27,9 +27,15 @@ export const QUOTA_EVENT = 'docs-quota'
 // Set when the endpoint answers 404/405, i.e. this docs-ui build is running
 // against a site that doesn't have the quota function (a docs-ui preview, an
 // older deploy, local gulp against production). Without it every question pays
-// a doomed round trip before Kapa is called. Kept in sessionStorage, matching
-// the kapa-session-unavailable marker in AskAI.jsx.
-const ABSENT_KEY = 'docs-quota-absent'
+// a doomed round trip before Kapa is called.
+//
+// IN MEMORY, not sessionStorage, unlike the verdict cache below. A 404 means we
+// have no verdict, so we cannot know what the reader's cookie choice was, and
+// writing to their device on a guess is not something to justify for a
+// convenience this small. The cost of holding it in memory is one wasted
+// request per pageview on a deploy that has no endpoint at all, which is
+// previews and older builds; on a deploy that has the endpoint this never runs.
+let absent = false
 
 // Short: this sits in front of every question, so a hung endpoint must not add
 // a visible pause before the answer starts streaming.
@@ -83,14 +89,11 @@ const mayStore = (verdict) => verdict?.storageAllowed !== false
 const consentStamp = () => (typeof window.OnetrustActiveGroups === 'string' ? window.OnetrustActiveGroups : null)
 
 function markAbsent () {
-  // No verdict to consult: a 404/405 means the endpoint is not deployed here,
-  // so nothing is metering anyone and no cookie is being set. Treated as the
-  // no-signal case the endpoint also allows.
-  try { sessionStorage.setItem(ABSENT_KEY, '1') } catch (err) { /* private browsing */ }
+  absent = true
 }
 
 function isAbsent () {
-  try { return sessionStorage.getItem(ABSENT_KEY) === '1' } catch (err) { return false }
+  return absent
 }
 
 // Last real verdict, remembered for this tab session so a reader who browses
@@ -236,13 +239,10 @@ async function ask (peek) {
 export function forgetQuota () {
   snapshot = null
   window.__DOCS_ANON_QUOTA = undefined
-  try {
-    sessionStorage.removeItem(CACHE_KEY)
-    // The absent-marker too. It is the one that survives longest and does the
-    // most damage if it outlives its reason: while it is set, every question
-    // skips the endpoint entirely.
-    sessionStorage.removeItem(ABSENT_KEY)
-  } catch (err) { /* private browsing */ }
+  // The absent marker too. While it is set, every question skips the endpoint
+  // entirely, so it must not outlive its reason.
+  absent = false
+  try { sessionStorage.removeItem(CACHE_KEY) } catch (err) { /* private browsing */ }
 }
 
 // A reader can change their mind without reloading, and anything we remembered

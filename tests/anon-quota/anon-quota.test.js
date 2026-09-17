@@ -202,7 +202,9 @@ test('404/405 marks the endpoint absent for the session and publishes an open ve
   respond(404, null)
   const v = await quota.peekQuota()
   assert.deepEqual(v, { allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null, blockedBy: null })
-  assert.equal(browser.store.get('docs-quota-absent'), '1')
+  // Remembered in memory, never on the reader's device: with no verdict we
+  // cannot know their cookie choice.
+  assert.equal(browser.store.size, 0)
   assert.deepEqual(browser.events, [v], 'the open verdict is published, not just returned')
   // No further round trips this session.
   await quota.consumeQuota()
@@ -214,7 +216,10 @@ test('a network failure fails open without caching the failure', async () => {
   const v = await quota.consumeQuota()
   assert.equal(v.allowed, true)
   assert.equal(v.degraded, true)
-  assert.equal(browser.store.has('docs-quota-absent'), false)
+  // A blip must not stop us asking again, unlike a 404.
+  global.fetch = async () => ({ status: 200, json: async () => ({ allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' }) })
+  const again = await quota.consumeQuota()
+  assert.equal(again.degraded, false, 'the next question gets a real verdict')
   respond(200, { allowed: true, limit: 3, used: 0, remaining: 3 })
   await quota.consumeQuota()
   assert.equal(calls.length, 1, 'the next call asks again')
@@ -604,15 +609,34 @@ test('a verdict cached under an earlier answer is discarded, not republished', a
   assert.equal(b2.store.has('docs-quota-verdict'), false, 'and it is dropped on the way past')
 })
 
-test('forgetQuota clears the absent marker too, not just the verdict', async () => {
-  // The marker is the one that does the most damage if it outlives its reason:
-  // while it is set, every question skips the endpoint entirely.
+test('the absent marker never touches device storage', async () => {
+  // A 404 means we have no verdict, so we cannot know the reader's cookie
+  // choice, and writing to their device on a guess is not worth justifying for
+  // a convenience this small. In memory instead: the cost is one wasted request
+  // per pageview, and only on a deploy with no endpoint at all.
   const b = consentBrowser(',C0001,')
   respond(404, {})
   await quota.consumeQuota()
-  assert.equal(b.store.get('docs-quota-absent'), '1')
+  assert.equal(b.store.size, 0, 'nothing may be written for a 404')
+
+  // It still does its job within the page: no second round trip.
+  calls.length = 0
+  await quota.consumeQuota()
+  assert.equal(calls.length, 0, 'the endpoint is not asked again')
+})
+
+test('forgetQuota clears the absent marker too, not just the verdict', async () => {
+  // While it is set, every question skips the endpoint entirely, so it must not
+  // outlive its reason.
+  const b = consentBrowser(',C0001,')
+  respond(404, {})
+  await quota.consumeQuota()
+  calls.length = 0
   quota.forgetQuota()
-  assert.equal(b.store.size, 0)
+  respond(200, { ...ALLOWED, storage_allowed: true })
+  await quota.consumeQuota()
+  assert.equal(calls.length, 1, 'the endpoint is asked again after forgetting')
+  void b
 })
 
 test('withdrawing consent mid-session drops what we remembered and re-asks', async () => {
