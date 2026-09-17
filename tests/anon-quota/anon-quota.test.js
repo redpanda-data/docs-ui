@@ -183,7 +183,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve))
 test('a normal verdict is mapped from the wire shape and published everywhere', async () => {
   respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2026-09-10T10:00:00Z' })
   const v = await quota.consumeQuota()
-  assert.deepEqual(v, { allowed: true, degraded: false, limit: 3, used: 1, remaining: 2, resetAt: '2026-09-10T10:00:00Z', loginUrl: null, blockedBy: null })
+  assert.deepEqual(v, { allowed: true, degraded: false, limit: 3, used: 1, remaining: 2, resetAt: '2026-09-10T10:00:00Z', loginUrl: null, blockedBy: null, storageAllowed: true })
   assert.deepEqual(calls, [{ peek: false }])
   assert.equal(quota.getQuota(), v)
   assert.equal(global.window.__DOCS_ANON_QUOTA, v)
@@ -547,13 +547,15 @@ test('setting off to sign in forgets the remembered refusal', async () => {
 })
 
 // sessionStorage is storage on the reader's device under the same rule as the
-// cookie the backend gates (docs-site lib/anon-quota.mjs), so a reader who
-// refused this category must not have verdicts cached either. The group is
-// configured, matching DOCS_ANON_ASK_CONSENT_GROUP on the backend, so neither
-// half starts enforcing before the consent manager's category is known.
+// cookie the endpoint gates, so a refusing reader must not have verdicts cached
+// either. The decision arrives on the verdict as `storage_allowed`, because the
+// consent CATEGORY is configuration that lives with the endpoint: an earlier
+// version read a window global that nothing publishes, so the gate could not
+// engage at all.
+const ALLOWED = { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' }
+
 function consentBrowser (activeGroups, opts = {}) {
   browser = fakeBrowser(opts)
-  global.window.DOCS_ANON_ASK_CONSENT_GROUP = 'C0003'
   if (activeGroups !== undefined) global.window.OnetrustActiveGroups = activeGroups
   calls.length = 0
   quota = loadEsm('src/js/react/anonQuota.js')
@@ -561,61 +563,78 @@ function consentBrowser (activeGroups, opts = {}) {
 }
 
 test('a refused category caches no verdict', async () => {
-  const b = consentBrowser(',C0001,C0002,')
-  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
+  const b = consentBrowser(',C0001,')
+  respond(200, { ...ALLOWED, storage_allowed: false })
   await quota.consumeQuota()
   assert.equal(b.store.size, 0, 'nothing may be written for a reader who refused')
 })
 
 test('a granted category caches as before', async () => {
   const b = consentBrowser(',C0001,C0003,')
-  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
+  respond(200, { ...ALLOWED, storage_allowed: true })
   await quota.consumeQuota()
   assert.ok(b.store.size > 0, 'a consenting reader still gets the session cache')
 })
 
-test('a refused category writes no absent-marker either', async () => {
-  // The 404 marker is a write too, and it is the one that would otherwise
-  // survive a consent change and suppress every later check.
+test('a verdict with no storage_allowed at all is cached, matching the endpoint default', async () => {
+  // An older deploy, or one with no category configured. Neither half enforces
+  // until it is configured.
+  const b = consentBrowser(undefined)
+  respond(200, ALLOWED)
+  await quota.consumeQuota()
+  assert.ok(b.store.size > 0)
+})
+
+test('a verdict cached under an earlier answer is discarded, not republished', async () => {
+  // The listener below cannot help here: it only exists once this lazy bundle
+  // has loaded, and by then schedulePeek has already served the cache. So the
+  // cache carries the consent answer it was written under.
+  const b = consentBrowser(',C0001,C0003,')
+  respond(429, { allowed: false, limit: 3, used: 3, remaining: 0, reset_at: '2099-01-01T00:00:00Z', login_url: '/login', storage_allowed: true })
+  await quota.consumeQuota()
+  assert.ok(b.store.size > 0, 'cached while granted')
+
+  // Withdrawn, then a fresh pageview in the same tab session.
+  const kept = new Map(b.store)
+  const b2 = reload({}, kept)
+  global.window.OnetrustActiveGroups = ',C0001,'
+  b2.events.length = 0
+  quota.schedulePeek()
+  assert.equal(b2.events.length, 0, 'no stale wall may be republished from the cache')
+  assert.equal(b2.store.has('docs-quota-verdict'), false, 'and it is dropped on the way past')
+})
+
+test('forgetQuota clears the absent marker too, not just the verdict', async () => {
+  // The marker is the one that does the most damage if it outlives its reason:
+  // while it is set, every question skips the endpoint entirely.
   const b = consentBrowser(',C0001,')
   respond(404, {})
   await quota.consumeQuota()
+  assert.equal(b.store.get('docs-quota-absent'), '1')
+  quota.forgetQuota()
   assert.equal(b.store.size, 0)
 })
 
-test('no OneTrust answer at all is not a refusal', async () => {
-  // OneTrust arrives through the tag manager, so a blocked extension means the
-  // global is simply absent. The backend takes the same view of a missing
-  // signal, and these writes are per-viewer conveniences.
-  const b = consentBrowser(undefined)
-  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
-  await quota.consumeQuota()
-  assert.ok(b.store.size > 0)
-})
-
-test('no configured group changes nothing', async () => {
-  browser = fakeBrowser()
-  global.window.OnetrustActiveGroups = ',C0001,'
-  quota = loadEsm('src/js/react/anonQuota.js')
-  respond(200, { allowed: true, limit: 3, used: 1, remaining: 2, reset_at: '2099-01-01T00:00:00Z' })
-  await quota.consumeQuota()
-  assert.ok(browser.store.size > 0, 'the gate is inert until the category is known')
-})
-
-test('withdrawing consent mid-session drops what we remembered', async () => {
+test('withdrawing consent mid-session drops what we remembered and re-asks', async () => {
   const b = consentBrowser(',C0001,C0003,')
-  respond(200, { allowed: false, limit: 3, used: 3, remaining: 0, reset_at: '2099-01-01T00:00:00Z' })
+  respond(429, { allowed: false, limit: 3, used: 3, remaining: 0, reset_at: '2099-01-01T00:00:00Z', login_url: '/login', storage_allowed: true })
   await quota.consumeQuota()
   assert.ok(b.store.size > 0)
 
+  // Only forgetting would leave a walled reader holding the wall with no
+  // composer and no way to re-check until they navigated.
+  respond(200, { allowed: true, limit: 30, used: 1, remaining: 29, reset_at: '2099-01-01T00:00:00Z', blocked_by: null, storage_allowed: false })
   global.window.OnetrustActiveGroups = ',C0001,'
+  b.events.length = 0
   global.window.dispatchEvent(new global.CustomEvent('OneTrustGroupsUpdated'))
+  await settle()
   assert.equal(b.store.size, 0, 'a cached refusal must not outlive the answer it was cached under')
-  assert.equal(quota.getQuota(), null)
+  assert.equal(b.events.length, 1, 'and the reader gets a fresh verdict, not a stuck wall')
+  assert.equal(b.events[0].allowed, true)
 })
 
 test('a network-shaped refusal covers the no-consent budget too', async () => {
-  respond(429, { allowed: false, limit: 10, used: 10, remaining: 0, reset_at: '2099-01-01T00:00:00Z', blocked_by: 'noconsent', login_url: '/login' })
+  respond(429, { allowed: false, limit: 30, used: 30, remaining: 0, reset_at: '2099-01-01T00:00:00Z', blocked_by: 'noconsent', login_url: '/login' })
   const v = await quota.consumeQuota()
   assert.equal(v.blockedBy, 'noconsent')
   assert.equal(quota.quotaExhausted(v), true)

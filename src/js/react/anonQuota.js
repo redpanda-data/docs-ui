@@ -55,32 +55,37 @@ let published = 0
 // to say nothing about counts it can't trust rather than render "3 left".
 const openVerdict = () => ({ allowed: true, degraded: true, remaining: null, limit: null, used: null, resetAt: null, loginUrl: null, blockedBy: null })
 
-// Which OneTrust group this feature's storage belongs to. Mirrors
-// DOCS_ANON_ASK_CONSENT_GROUP on the backend (docs-site lib/anon-quota.mjs),
-// which gates the cookie the same way. Unset means no gate, matching the
-// backend's own default, so neither half starts enforcing before the category
-// is known.
-const consentGroup = () => window.DOCS_ANON_ASK_CONSENT_GROUP || null
-
 // sessionStorage is storage on the reader's device under the same rule as the
-// cookie, so a reader who refused this category must not have verdicts cached
-// either: gating the cookie alone would keep the promise by halves.
+// cookie the endpoint gates, so a reader who refused that category must not
+// have verdicts cached either: gating the cookie alone keeps the promise by
+// halves.
 //
-// OnetrustActiveGroups is a string of the granted groups, ',C0001,C0003,'.
-// Absent means OneTrust has not answered yet, or was blocked from loading at
-// all, which is not a refusal: the backend takes the same view of a missing
-// signal, and the writes here are per-viewer conveniences that come back empty
-// on their own when storage is unavailable.
-function mayRemember () {
-  const group = consentGroup()
-  if (!group) return true
-  const active = window.OnetrustActiveGroups
-  if (typeof active !== 'string' || active === '') return true
-  return active.split(',').some((g) => g.trim() === group)
-}
+// The decision comes from the SERVER, on every verdict (`storage_allowed`, see
+// docs-site kapa-quota.mjs). It cannot be made here: consent is per category,
+// and which category this cookie belongs to is configuration that lives with
+// the endpoint, not in this bundle. An earlier version of this file read a
+// `window.DOCS_ANON_ASK_CONSENT_GROUP` global that nothing has ever published,
+// so the gate could not engage at all -- a gate that looks fitted and holds
+// nothing, which is the failure this pair of modules keeps having to design
+// against.
+//
+// Absent from a verdict (an older deploy, or a fail-open answer) means allow,
+// matching the endpoint's own posture of not enforcing until it is configured.
+const mayStore = (verdict) => verdict?.storageAllowed !== false
+
+// A fingerprint of the reader's current consent answer, stamped into the cache
+// so a stored verdict can be discarded the moment that answer changes. This is
+// what makes the READ path safe without knowing the category: the listener
+// below cannot help on a fresh pageview, because it only exists once this lazy
+// bundle has loaded, and by then step 0 of schedulePeek has already served the
+// cache. Null when OneTrust has not loaded, which still compares equal to
+// itself, so nothing is invalidated needlessly.
+const consentStamp = () => (typeof window.OnetrustActiveGroups === 'string' ? window.OnetrustActiveGroups : null)
 
 function markAbsent () {
-  if (!mayRemember()) return
+  // No verdict to consult: a 404/405 means the endpoint is not deployed here,
+  // so nothing is metering anyone and no cookie is being set. Treated as the
+  // no-signal case the endpoint also allows.
   try { sessionStorage.setItem(ABSENT_KEY, '1') } catch (err) { /* private browsing */ }
 }
 
@@ -105,6 +110,10 @@ function readCachedVerdict () {
     if (!raw) return null
     const v = JSON.parse(raw)
     if (!v || typeof v !== 'object' || !v.resetAt) return null
+    // Written under a different consent answer, so it is not ours to read:
+    // without this a verdict cached while the category was granted is read back
+    // and republished on the next pageview after a refusal.
+    if ((v.ot ?? null) !== consentStamp()) { forgetQuota(); return null }
     return Date.parse(v.resetAt) > Date.now() ? v : null
   } catch (err) { return null }
 }
@@ -114,9 +123,11 @@ function readCachedVerdict () {
 // would suppress the next real check for the rest of the session; `unlimited`
 // belongs to a signed-in reader, who never renders this drawer at all.
 function cacheVerdict (verdict) {
-  if (!mayRemember()) return
+  if (!mayStore(verdict)) return
   if (!verdict || verdict.degraded || verdict.unlimited || !verdict.resetAt) return
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(verdict)) } catch (err) { /* private browsing */ }
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ...verdict, ot: consentStamp() }))
+  } catch (err) { /* private browsing */ }
 }
 
 // Whether we can remember anything at all. If sessionStorage is unavailable
@@ -124,7 +135,6 @@ function cacheVerdict (verdict) {
 // nothing to cache, that peek would come back on every pageview, which is the
 // cost this whole gate exists to remove.
 function canRemember () {
-  if (!mayRemember()) return false
   try {
     sessionStorage.setItem(CACHE_KEY + '-probe', '1')
     sessionStorage.removeItem(CACHE_KEY + '-probe')
@@ -205,6 +215,9 @@ async function ask (peek) {
     // field says otherwise. For 'noconsent' the counts ARE that budget, since
     // the reader has no per-visitor one.
     blockedBy: data.blocked_by ?? null,
+    // Whether this reader's cookie choice lets us keep anything of our own.
+    // Absent on an older deploy, which reads as permission (see mayStore).
+    storageAllowed: data.storage_allowed !== false,
   }, seq)
 }
 
@@ -223,16 +236,29 @@ async function ask (peek) {
 export function forgetQuota () {
   snapshot = null
   window.__DOCS_ANON_QUOTA = undefined
-  try { sessionStorage.removeItem(CACHE_KEY) } catch (err) { /* private browsing */ }
+  try {
+    sessionStorage.removeItem(CACHE_KEY)
+    // The absent-marker too. It is the one that survives longest and does the
+    // most damage if it outlives its reason: while it is set, every question
+    // skips the endpoint entirely.
+    sessionStorage.removeItem(ABSENT_KEY)
+  } catch (err) { /* private browsing */ }
 }
 
 // A reader can change their mind without reloading, and anything we remembered
-// under the old answer is no longer ours to keep. OneTrust fires this on the
-// consent manager's own save, and forgetQuota clears the cached verdict; the
-// endpoint expires the cookie itself on the next request.
+// under the old answer stops being ours to keep. OneTrust fires this on its own
+// save. Unconditional, because the new answer might be a grant as easily as a
+// refusal and either way what we hold was written under the old one.
+//
+// Then re-ask, rather than only forgetting. Forgetting alone publishes nothing,
+// so a walled reader kept the wall with no composer and no way to re-check
+// until they navigated, and a reader who had just consented kept a verdict from
+// the address-metered budget. The peek fails open like any other, and the
+// endpoint expires or mints the cookie itself on that same request.
 if (typeof window !== 'undefined') {
   window.addEventListener('OneTrustGroupsUpdated', () => {
-    if (!mayRemember()) forgetQuota()
+    forgetQuota()
+    peekQuota().catch(() => {})
   })
 }
 
