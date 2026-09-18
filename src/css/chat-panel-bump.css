@@ -1410,6 +1410,48 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-toast-error {
   color: inherit;
   text-decoration: underline;
 }
+/* Anonymous question limit reached, replaces the composer, so it has to read
+   as a footer panel rather than the full-height .signin-screen the agent tier
+   uses (that one owns the whole drawer body; this one sits under a
+   conversation the reader can still scroll). Reuses .signin-badge,
+   .signin-button and .signin-privacy-note as-is so both walls are visibly the
+   same feature. See docs-ui src/js/react/components/ChatSdkInterface.jsx. */
+#chat-panel-kapa-root .quota-wall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 24px 18px;
+  border-top: 1px solid var(--kapa-border, #e5e5e5);
+  background: var(--kapa-surface, #fff);
+  text-align: center;
+}
+
+#chat-panel-kapa-root .quota-wall .quota-wall-title {
+  margin: 0 0 6px;
+  font-size: calc(16 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--kapa-text, #181818);
+}
+
+#chat-panel-kapa-root .quota-wall .quota-wall-text {
+  margin: 0;
+  max-width: 42ch;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--kapa-text-muted, #79797d);
+}
+
+/* Tightened from .signin-button's 20px: the wall is a footer, not a hero. */
+#chat-panel-kapa-root .quota-wall .signin-button {
+  margin-top: 14px;
+}
+
+#chat-panel-kapa-root .quota-wall-reset {
+  margin: 10px 0 0;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--kapa-text-muted, #79797d);
+}
 
 #chat-panel-kapa-root button.signin-button {
   border: none;

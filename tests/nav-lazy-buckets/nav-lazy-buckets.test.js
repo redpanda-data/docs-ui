@@ -311,7 +311,7 @@ test('a nav:hydrated subtree is bound, and re-binding never doubles a handler', 
 function renderTree (navigation, pageUrl) {
   const hb = Handlebars.create()
   hb.registerPartial('nav-tree', fs.readFileSync(path.join(PARTIALS, 'nav-tree.hbs'), 'utf8'))
-  for (const h of ['or', 'eq', 'increment', 'nav-contains-current']) {
+  for (const h of ['or', 'and', 'not', 'eq', 'increment', 'nav-contains-current']) {
     hb.registerHelper(h, require(path.join(ROOT, 'src/helpers', `${h}.js`)))
   }
   hb.registerHelper('relativize', (u) => u)
@@ -358,6 +358,20 @@ test('a page outside the tree templates every subtree, and the toggle chevron st
   // inner templates stay inert until their own expand.
   assert.equal((html.match(/<template data-nav-lazy>/g) || []).length, 3)
   assert.equal((html.match(/nav-item-toggle/g) || []).length, 3, 'all three expandable items keep their toggle')
+})
+
+test('a titleless container renders its children directly: a template there could never be opened', () => {
+  // Antora roots each component's nav in an item with items but no content, so
+  // nav-tree renders no row and no .nav-item-toggle for it. Deferring its
+  // children put every bucket's whole tree behind a toggle that does not exist,
+  // and the sidebar came up empty on the home page.
+  const rooted = [{ items: tree }]
+  const html = renderTree(rooted, '/elsewhere/')
+  assert.match(html, /href="\/s\/get-started\/"/, 'the root item unpacks to its children')
+  const getStarted = html.indexOf('href="/s/get-started/"')
+  assert.equal(html.lastIndexOf('<template', getStarted), -1, 'nothing is deferred above the first real row')
+  // The rows below it still defer their own subtrees, so the saving stands.
+  assert.equal((html.match(/<template data-nav-lazy>/g) || []).length, 3)
 })
 
 test('nav-contains-current walks nested items and tolerates gaps', () => {

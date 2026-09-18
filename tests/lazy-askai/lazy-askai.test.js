@@ -42,6 +42,10 @@ function runPanel ({ storedOpen = false, askForm = false } = {}) {
   const openBtnListeners = []
   const root = { dataset: {}, innerHTML: '' }
   const panel = {
+    // Every real element has one, and openPanel stamps data-opened-by on it so
+    // a peek scheduled after the open can still tell who opened the drawer
+    // (src/js/react/anonQuota.js openedBeforeMount).
+    dataset: {},
     classList: { add () {}, remove () {}, toggle: () => false, contains: () => false },
     setAttribute () {},
     getAttribute: (name) => (name === 'data-askai-bundle' ? '/_/js/AskAI.bundle.js' : null),

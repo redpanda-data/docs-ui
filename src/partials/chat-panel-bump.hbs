@@ -160,10 +160,21 @@
     }, 100);
   };
 
-  function openPanel() {
+  // `restored` marks the page-load path below, which reopens a panel the reader
+  // left open on a previous page. Both kinds of open are announced to the
+  // drawer's React tree, and this flag says which: a deliberate open is worth a
+  // quota request, a restore leans on the verdict remembered from earlier in
+  // the session, so browsing with the panel open costs one request per session
+  // rather than one per pageview (react/anonQuota.js schedulePeek).
+  function openPanel(restored) {
     isOpen = true;
     chatPanel.classList.add('is-open');
     chatPanel.setAttribute('aria-hidden', 'false');
+
+    // Attribute as well as event: script order against the AskAI bundle is not
+    // guaranteed, and an event sent before anyone listens is lost.
+    chatPanel.dataset.openedBy = restored ? 'restore' : 'user';
+    window.dispatchEvent(new window.CustomEvent('docs-chat:open', { detail: { restored: Boolean(restored) } }));
 
     // Hide Ask AI buttons
     document.querySelectorAll('[data-action="open-chat"]').forEach(function(btn) {
@@ -196,7 +207,7 @@
       chatPanel.classList.add('is-fullscreen');
     }
     if (localStorage.getItem(STORAGE_KEY) === 'true') {
-      openPanel();
+      openPanel(true);
     }
   } catch (e) {}
 })();

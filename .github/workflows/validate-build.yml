@@ -75,6 +75,8 @@ jobs:
         run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
         run: npm run test:toc-collapsible
+      - name: Test anonymous Ask AI quota
+        run: npm run test:anon-quota
       - name: Test nav positioning leaves the page scroll alone
         run: npm run test:nav-scroll
       - name: Test tooltips on touch devices
