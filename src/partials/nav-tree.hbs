@@ -17,13 +17,17 @@
     </div>
     {{/if}}
     {{#if ./items.length}}
-      {{#if (or (eq ./url @root.page.url) (nav-contains-current ./items @root.page.url))}}
-{{> nav-tree navigation=./items level=(increment ../level)}}
-      {{else}}
+      {{!-- Defer only what the reader can open again: an item with no content
+            renders no row and no .nav-item-toggle, so a <template> here is a
+            dead end. Every bucket's tree is rooted in exactly such a titleless
+            item, which is how the whole sidebar came up empty. --}}
+      {{#if (and ./content (not (or (eq ./url @root.page.url) (nav-contains-current ./items @root.page.url))))}}
       {{!-- Collapsed at load (01-nav.js only opens the current path): keep the
             subtree out of the document until the reader expands it. On a long
             product tree this is most of the sidebar. --}}
       <template data-nav-lazy>{{> nav-tree navigation=./items level=(increment ../level)}}</template>
+      {{else}}
+{{> nav-tree navigation=./items level=(increment ../level)}}
       {{/if}}
     {{/if}}
   </li>
