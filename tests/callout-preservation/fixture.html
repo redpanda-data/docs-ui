@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>callout preservation fixture</title>
+<style>
+  .conum[data-value] { display: inline-block; width: 1.25em; height: 1.25em; border: 1px solid; border-radius: 100%; }
+  .conum[data-value]::after { content: attr(data-value); }
+  .conum[data-value] + b { display: none; }
+  pre { white-space: pre-wrap; font-family: monospace; }
+</style>
+</head>
+<body>
+<article class="doc">
+
+<!-- Block A: callouts inside "mapping: |" block scalars, as Antora emits them.
+     <1> and <3> sit inside a scalar, <2> and <4> on plain lines. -->
+<div class="listingblock" id="block-a">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">config:
+  input:
+    generate:
+      mapping: |
+        root.message = "Hello, Redpanda Connect!" <i class="conum" data-value="1"></i><b>(1)</b>
+      count: 1 <i class="conum" data-value="2"></i><b>(2)</b>
+  pipeline:
+    processors:
+      - mapping: |
+          root.message = this.message.uppercase() <i class="conum" data-value="3"></i><b>(3)</b>
+  output:
+    stdout: {} <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+
+<!-- Block B: a Connect config with a block scalar and NO callouts. The guard
+     must not switch Bloblang highlighting off for blocks like this. -->
+<div class="listingblock" id="block-b">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">pipeline:
+  processors:
+    - mapping: |
+        root.id = counter()
+        root.name = this.name.uppercase()
+        root.seen = now()</code></pre>
+</div>
+</div>
+
+<!-- Block C: callouts on plain scalar lines only, which already worked. -->
+<div class="listingblock" id="block-c">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">streams:
+  enabled: true <i class="conum" data-value="1"></i><b>(1)</b>
+  streamsConfigMap: "connect-streams" <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+
+<!-- Block D: the shape the Helm chart quickstart now uses - a single-line
+     plain scalar with the callout after it. The marker is a sibling of the
+     scalar token rather than inside it, so Bloblang highlighting must still
+     apply AND the callouts must stay put. -->
+<div class="listingblock" id="block-d">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">config:
+  input:
+    generate:
+      mapping: root.message = "Hello, Redpanda Connect!" <i class="conum" data-value="1"></i><b>(1)</b>
+      count: 1 <i class="conum" data-value="2"></i><b>(2)</b>
+  pipeline:
+    processors:
+      - mapping: root.message = this.message.uppercase() <i class="conum" data-value="3"></i><b>(3)</b>
+  output:
+    stdout: {} <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+</div>
+</div>
+
+<!-- Block E: a block scalar with a blank line in it. Prism splits such a
+     scalar into several siblings, and processMultilineMapping deletes the
+     continuation ones after folding their text into its wrapper. A callout in
+     the continuation part therefore has its recorded neighbours deleted too,
+     which is where position-restore-from-MutationRecord runs out of anchors. -->
+<div class="listingblock" id="block-e">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">pipeline:
+  processors:
+    - mapping: |
+        root.first = this.first.uppercase() <i class="conum" data-value="1"></i><b>(1)</b>
+
+        root.second = this.second.uppercase() <i class="conum" data-value="2"></i><b>(2)</b>
+output:
+  stdout: {} <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+
+</article>
+<script src="/src/js/vendor/prism/prism-core.js"></script>
+<script src="/src/js/vendor/prism/prism-bloblang.js"></script>
+<script src="/src/js/10-code-highlight.js"></script>
+<script src="/src/js/11-editable-placeholders.js"></script>
+<script src="/src/js/17-bloblang-yaml.js"></script>
+</body>
+</html>

@@ -53,6 +53,18 @@ function unnestPlaceholders() {
     return
   }
 
+  // Restore `node` to the position it was removed from within `target`,
+  // using the siblings MutationRecord captured at removal time.
+  function reinsertConum(target, node, previousSibling, nextSibling) {
+    if (nextSibling && nextSibling.parentNode === target) {
+      target.insertBefore(node, nextSibling)
+    } else if (previousSibling && previousSibling.parentNode === target) {
+      target.insertBefore(node, previousSibling.nextSibling)
+    } else {
+      target.appendChild(node)
+    }
+  }
+
   function observeCodeBlocksForConumRestoration() {
     const codeElems = document.querySelectorAll('code')
 
@@ -69,7 +81,13 @@ function unnestPlaceholders() {
             if (removedNode.nodeType === Node.ELEMENT_NODE && removedNode.classList.contains('conum')) {
               // Only reinsert if it was actually removed and not reinserted elsewhere
               if (!mutation.target.querySelector(`i.conum[data-value="${removedNode.getAttribute('data-value')}"]`)) {
-                mutation.target.appendChild(removedNode)
+                // Put it back where it was. A plain appendChild sends the
+                // marker to the end of the block, which is worse than losing
+                // it: a callout that renders against the wrong line is read as
+                // fact. MutationRecord keeps the removed node's siblings, so
+                // use them and only fall back to the end when neither is
+                // still in place.
+                reinsertConum(mutation.target, removedNode, mutation.previousSibling, mutation.nextSibling)
               }
             }
           })
@@ -191,6 +209,15 @@ function unnestPlaceholders() {
     if (!element || !element.textContent) {
       return
     }
+    // Drop Asciidoctor's "(N)" fallback <b> that trails a real conum. The
+    // stylesheet already hides it (.conum[data-value] + b { display: none }),
+    // but the regexes below see its text as a literal callout marker and mint
+    // a second, nested <i class="conum"> for every callout on the page. Those
+    // duplicates make the conum count wrong, which in turn confuses the
+    // duplicate check in the restoration observer above. Removing the element
+    // also keeps "(N)" out of what the copy button yields.
+    element.querySelectorAll('i.conum[data-value] + b').forEach((fallback) => fallback.remove())
+
     // Handle standalone numbers in parentheses, avoiding function-like patterns
     const standalonePattern = /(?<!\w)\((\d+)\)(?!\w)/g
     element.innerHTML = element.innerHTML.replace(standalonePattern, (match, num) => {
