@@ -44,7 +44,12 @@ html[data-theme="dark"] .data-platform.article {
 /* ---- Hero Section ---- */
 .dp-hero {
   position: relative;
+
+  /* clip, not hidden: see .home-hero in home.css. An overflowing overflow:hidden
+     hero eats the first swipe on a phone because WebKit latches the touch to a
+     box the user can't scroll. */
   overflow: hidden;
+  overflow: clip;
   background: linear-gradient(180deg, #0e1a33 0%, #1a2a52 100%);
   color: #fff;
   padding: 40px 56px 32px;
