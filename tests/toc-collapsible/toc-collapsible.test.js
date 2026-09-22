@@ -294,26 +294,29 @@ test('the load pass activates the entry on the activation line and opens its gro
 })
 
 test('arriving on a deep link opens the group of the target entry', () => {
-  // Browsers park a deep-linked heading at scroll-padding-top + scroll-margin-top, below the
-  // activation line, so the scroll pass marks the heading above it active. For the first entry of
-  // a group that heading belongs to the previous group and would leave the target's group
-  // collapsed. The load handler has to open it from the hash instead.
+  // A deep-linked heading can land below the activation line onScroll compares
+  // against, in which case the scroll pass would pick the heading above it. The
+  // load handler activates from the hash instead, so the target is active and
+  // its group opens. 165 is a landing below the line; see tests/toc-active-anchor
+  // for the activation contract on its own.
   const { list, listeners, headings } = run({ collapsible: true, hash: '#december-2025' })
   const [y2026, y2025, y2024] = list.children
   scrollTo(headings, 'december-2025', 165)
   listeners.load()
 
   const links = linksByHref(list)
-  assert.equal(links['#august-2026'].classList.contains('is-active'), true, 'the scroll pass picks the heading above')
-  assert.equal(y2025.classList.contains('is-expanded'), true, 'the hash opens the target group anyway')
+  assert.equal(links['#december-2025'].classList.contains('is-active'), true, 'the hash target is active, not the heading above it')
+  assert.equal(links['#august-2026'].classList.contains('is-active'), false, 'the heading above the target is not active')
+  assert.equal(y2025.classList.contains('is-expanded'), true, 'the target group is open')
   assert.equal(y2025.children[1].getAttribute('aria-expanded'), 'true')
   assert.equal(y2026.classList.contains('is-expanded'), true)
   assert.equal(y2024.classList.contains('is-expanded'), false)
 })
 
 test('changing the hash after load opens the group of the new target', () => {
-  // An in-page link or back/forward fires hashchange, not load. The scroll pass still picks the
-  // heading above the target, so the group has to be opened from the new hash.
+  // An in-page link or back/forward fires hashchange, not load, and the scroll
+  // pass may not run at all. The highlight and the group both come from the new
+  // hash.
   const { list, listeners, headings, win } = run({ collapsible: true })
   const [, y2025, y2024] = list.children
   scrollTo(headings, '2026')
@@ -327,8 +330,9 @@ test('changing the hash after load opens the group of the new target', () => {
   listeners.hashchange()
 
   const links = linksByHref(list)
-  assert.equal(links['#october-2025'].classList.contains('is-active'), true, 'the scroll pass picks the heading above')
-  assert.equal(y2024.classList.contains('is-expanded'), true, 'the hash opens the target group anyway')
+  assert.equal(links['#december-2024'].classList.contains('is-active'), true, 'the new hash target is active')
+  assert.equal(links['#october-2025'].classList.contains('is-active'), false, 'the heading above the target is not active')
+  assert.equal(y2024.classList.contains('is-expanded'), true, 'the target group is open')
   assert.equal(y2025.classList.contains('is-expanded'), true)
 })
 
