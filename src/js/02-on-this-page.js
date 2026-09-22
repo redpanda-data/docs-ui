@@ -69,27 +69,44 @@
 
   if (collapsible) buildCollapsibleGroups(list)
 
+  /**
+   * Make one fragment the active entry, clearing whatever was active before.
+   *
+   * The scroll pass can leave several entries active at the bottom of a page,
+   * so the previous value is either a fragment or an array of them.
+   *
+   * @param {string} fragment - The '#id' to activate. Ignored if no entry has it.
+   */
+  function setActive (fragment) {
+    if (!links[fragment]) return
+    if (lastActiveFragment && lastActiveFragment !== fragment) {
+      var previous = Array.isArray(lastActiveFragment) ? lastActiveFragment : [lastActiveFragment]
+      previous.forEach(function (f) {
+        if (links[f]) links[f].classList.remove('is-active')
+      })
+    }
+    links[fragment].classList.add('is-active')
+    revealGroup(links[fragment])
+    lastActiveFragment = fragment
+  }
+
+  /**
+   * Hold off the scroll pass for a moment, so it cannot overwrite an activation
+   * the user just caused. The browser is still settling on the target when a
+   * click or a hash change lands.
+   */
+  function holdScrollUpdates () {
+    skipScrollUpdate = true
+    setTimeout(function () {
+      skipScrollUpdate = false
+    }, 100)
+  }
+
   // Add click handlers to TOC links to immediately highlight clicked item
   Object.keys(links).forEach(function (fragment) {
     links[fragment].addEventListener('click', function () {
-      // Immediately update active state on click
-      if (lastActiveFragment && lastActiveFragment !== fragment) {
-        if (Array.isArray(lastActiveFragment)) {
-          lastActiveFragment.forEach(function (f) {
-            links[f].classList.remove('is-active')
-          })
-        } else {
-          links[lastActiveFragment].classList.remove('is-active')
-        }
-      }
-      links[fragment].classList.add('is-active')
-      revealGroup(links[fragment])
-      lastActiveFragment = fragment
-      // Skip scroll-based updates briefly to prevent flicker during scroll animation
-      skipScrollUpdate = true
-      setTimeout(function () {
-        skipScrollUpdate = false
-      }, 100)
+      setActive(fragment)
+      holdScrollUpdates()
     })
   })
 
@@ -144,22 +161,8 @@
         // Update sidebar TOC active state immediately
         var fragment = link.getAttribute('href')
         if (fragment && links[fragment]) {
-          if (lastActiveFragment && lastActiveFragment !== fragment) {
-            if (Array.isArray(lastActiveFragment)) {
-              lastActiveFragment.forEach(function (f) {
-                links[f].classList.remove('is-active')
-              })
-            } else {
-              links[lastActiveFragment].classList.remove('is-active')
-            }
-          }
-          links[fragment].classList.add('is-active')
-          revealGroup(links[fragment])
-          lastActiveFragment = fragment
-          skipScrollUpdate = true
-          setTimeout(function () {
-            skipScrollUpdate = false
-          }, 100)
+          setActive(fragment)
+          holdScrollUpdates()
         }
       })
     })
@@ -170,10 +173,12 @@
 
   window.addEventListener('load', function () {
     onScroll()
-    revealHashTarget()
+    syncToHashTarget()
     window.addEventListener('scroll', onScroll, { passive: true })
-    // In-page links and back/forward change the hash without a load, so reveal on those too
-    window.addEventListener('hashchange', revealHashTarget)
+    // In-page links and back/forward change the hash without a load, so the
+    // highlight has to follow on those too. onScroll alone cannot: it runs on
+    // scroll, and a hash change does not always produce one.
+    window.addEventListener('hashchange', syncToHashTarget)
     // On initial load, scroll active item into view (e.g., when navigating to a hash)
     scrollActiveIntoView()
   })
@@ -323,24 +328,37 @@
   }
 
   /**
-   * Open the group that holds the entry the URL hash points at, on load and on every hash change.
-   * Browsers park a linked heading at scroll-padding-top + scroll-margin-top, below the activation
-   * line onScroll uses, so the heading above it becomes active instead. For the first entry of a
-   * group that heading belongs to the previous group, which would leave the target's own group
-   * collapsed.
+   * Make the entry the URL hash names the active one, on load and on every hash
+   * change, and open the group holding it.
+   *
+   * The hash is authoritative here rather than the scroll position, because the
+   * two disagree. A browser parks a linked heading at scroll-padding-top plus
+   * any scroll-margin-top on the heading, and onScroll's activation line is
+   * scroll-padding-top alone; whenever the heading lands below that line the
+   * scroll pass picks the heading above it and highlights the wrong entry. The
+   * stylesheet now offsets once so the two line up, and this keeps the highlight
+   * correct even if that ever drifts again.
+   *
+   * It also covers the case onScroll cannot see at all: an in-page link fires
+   * hashchange, and a hash change does not always move the scroll position
+   * enough to produce a scroll event.
    */
-  function revealHashTarget () {
+  function syncToHashTarget () {
     var hash = window.location.hash
     if (!hash) return
-    var link = links[hash]
-    if (!link && ~hash.indexOf('%')) {
+    var fragment = links[hash] ? hash : null
+    if (!fragment && ~hash.indexOf('%')) {
       try {
-        link = links[decodeURIComponent(hash)]
+        var decoded = decodeURIComponent(hash)
+        if (links[decoded]) fragment = decoded
       } catch (e) {
         return
       }
     }
-    if (link) revealGroup(link)
+    if (!fragment) return
+    setActive(fragment)
+    holdScrollUpdates()
+    scrollActiveIntoView()
   }
 
   function find (selector, from) {
