@@ -94,13 +94,21 @@ function unnestPlaceholders() {
           // Optionally, check for added nodes to ensure conum elements were correctly reinserted
           mutation.addedNodes.forEach((addedNode) => {
             if (addedNode.nodeType === Node.ELEMENT_NODE && addedNode.classList.contains('conum')) {
+              // A genuine minting bug lands a duplicate directly beside its
+              // twin -- that was the shape the removed <b>(N)</b> fallback
+              // used to produce in addConumSpans. Repeating the same callout
+              // number on separate lines is valid AsciiDoc mixed numbering
+              // (https://docs.asciidoctor.org/asciidoc/latest/verbatim/callouts/#mixed-numbering),
+              // so only an ADJACENT sibling with the same value is a
+              // duplicate; a second marker elsewhere in the block is a
+              // second, intentional callout and must survive.
               const dataValue = addedNode.getAttribute('data-value')
-              const duplicates = mutation.target.querySelectorAll(`i.conum[data-value="${dataValue}"]`)
-              if (duplicates.length > 1) {
-                // Remove duplicates, keeping the first one
-                duplicates.forEach((dup, index) => {
-                  if (index > 0) dup.remove()
-                })
+              const isSameConum = (el) =>
+                el && el.nodeType === Node.ELEMENT_NODE && el.classList.contains('conum') && el.getAttribute('data-value') === dataValue
+              if (isSameConum(addedNode.previousElementSibling)) {
+                addedNode.remove()
+              } else if (isSameConum(addedNode.nextElementSibling)) {
+                addedNode.nextElementSibling.remove()
               }
             }
           })

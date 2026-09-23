@@ -85,13 +85,20 @@ async function main () {
           text: code.textContent,
         }
       }
-      return { a: read('block-a'), b: read('block-b'), c: read('block-c'), d: read('block-d'), e: read('block-e') }
+      return {
+        a: read('block-a'),
+        b: read('block-b'),
+        c: read('block-c'),
+        d: read('block-d'),
+        e: read('block-e'),
+        f: read('block-f'),
+      }
     })
 
     check('no uncaught page errors', pageErrors.length === 0, pageErrors.join('; '))
     console.log(
       '  INFO  bloblang-highlighted: ' +
-        ['a', 'b', 'c', 'd', 'e'].map((k) => k.toUpperCase() + '=' + result[k].bloblang).join(' ')
+        ['a', 'b', 'c', 'd', 'e', 'f'].map((k) => k.toUpperCase() + '=' + result[k].bloblang).join(' ')
     )
 
     // --- Block A: the regression ---
@@ -174,6 +181,21 @@ async function main () {
       `lines ${JSON.stringify(e.byLine)}`
     )
     check('E: no duplicate conum nodes', e.totalConums === 3, `${e.totalConums} nodes`)
+
+    // --- Block F: mixed numbering, a repeated callout number is legitimate ---
+    const f = result.f
+    check('F: Prism highlighted the block', f.highlighted)
+    check(
+      'F: callouts in source order, repeated number kept on both lines',
+      JSON.stringify(f.domOrder) === '[1,1,2]',
+      `got ${JSON.stringify(f.domOrder)}`
+    )
+    check(
+      'F: both <1> markers survive, one per line, not deduplicated away',
+      JSON.stringify(f.byLine) === '[[1],[1],[2]]',
+      `lines ${JSON.stringify(f.byLine)}`
+    )
+    check('F: no markers lost or spuriously added', f.totalConums === 3, `${f.totalConums} nodes`)
   } finally {
     await browser.close()
     server.close()

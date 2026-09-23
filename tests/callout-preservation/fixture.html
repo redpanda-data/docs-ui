@@ -91,6 +91,24 @@ output:
 </div>
 </div>
 
+<!-- Block F: mixed numbering (Asciidoctor's own term for repeating a callout
+     number: https://docs.asciidoctor.org/asciidoc/latest/verbatim/callouts/#mixed-numbering).
+     <1> appears twice inside the same block scalar, referencing one shared
+     annotation. The restoration observer's duplicate check must not mistake
+     the second, genuine <1> for the minting bug's adjacent-duplicate shape. -->
+<div class="listingblock" id="block-f">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">config:
+  input:
+    generate:
+      mapping: |
+        root.a = "x" <i class="conum" data-value="1"></i><b>(1)</b>
+        root.b = "y" <i class="conum" data-value="1"></i><b>(1)</b>
+  output:
+    stdout: {} <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+
 </article>
 <script src="/src/js/vendor/prism/prism-core.js"></script>
 <script src="/src/js/vendor/prism/prism-bloblang.js"></script>
