@@ -94,6 +94,7 @@
     "test:lazy-askai": "node --test tests/lazy-askai/*.test.js",
     "test:nav-lazy-buckets": "node --test tests/nav-lazy-buckets/*.test.js",
     "test:has-code-blocks": "node --test tests/has-code-blocks/*.test.js",
+    "test:hero-scroll": "node --test tests/hero-scroll/*.test.js",
     "test:docs-page-weight": "node --test tests/docs-page-weight/*.test.js",
     "test:all": "npm run test:playground && npm run test:interactive && npm run test:negative-cache && npm run test:head-meta && npm run test:property-tooltips && npm run test:signin-nudge && npm run test:chat-panel-navigation && npm run test:toc-collapsible && npm run test:toc-active-anchor && npm run test:nav-scroll && npm run test:kapa-source-groups && npm run test:tooltip-touch && npm run test:tooltip-single-open && npm run test:lazy-askai && npm run test:nav-lazy-buckets && npm run test:has-code-blocks && npm run test:docs-page-weight && npm run test:anon-quota",
     "build:wasm": "cd blobl-editor/wasm && GOOS=js GOARCH=wasm go build -o ../../src/static/blobl.wasm .",

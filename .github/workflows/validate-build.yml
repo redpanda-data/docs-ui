@@ -91,6 +91,8 @@ jobs:
         run: npm run test:nav-lazy-buckets
       - name: Test code runtime gating
         run: npm run test:has-code-blocks
+      - name: Test landing-page heroes clip without trapping the first swipe
+        run: npm run test:hero-scroll
       - name: Test docs page weight (lazy images, trimmed Prism, on-demand highlighting, head)
         run: npm run test:docs-page-weight
       - name: Cache generated files
