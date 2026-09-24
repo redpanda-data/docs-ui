@@ -1,1 +1,6 @@
+# DOC-2496: docs-team merge gate — inert until branch protection
+# enables "require review from Code Owners". The blanket rule comes
+# first; more specific rules below still win for their paths.
+*   @redpanda-data/documentation
+
 /src/js/13-agent-handoff.js @redpanda-data/documentation
