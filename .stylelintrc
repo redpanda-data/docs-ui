@@ -11,7 +11,8 @@
       {
         "ignoreProperties": [
           "contain",
-          "aspect-ratio"
+          "aspect-ratio",
+          "accent-color"
         ]
       }
     ]

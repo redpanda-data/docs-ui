@@ -4,7 +4,7 @@
 {{> head defaultPageTitle='Untitled'}}
 {{> head-component-color}}
   </head>
-  <body class="article{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}>
+  <body class="article{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}" data-version="{{page.version}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}>
 {{> header}}
 {{> body}}
   </body>
