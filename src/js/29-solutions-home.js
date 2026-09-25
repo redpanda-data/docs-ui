@@ -2,8 +2,16 @@
 /**
  * Solutions landing page: client-side filtering over the catalog the build
  * embedded (<script type="application/json" data-sol-catalog>), URL state
- * (?q=&category=&difficulty=&tech=&platform=), and the "Continue learning"
- * section filled from the progress store owned by 28-solution-progress.js.
+ * (?q= plus one parameter per facet in FACET_ATTR below: use-case, industry,
+ * category, difficulty, tech, platform), and the "Continue learning" section
+ * filled from the progress store owned by 28-solution-progress.js.
+ *
+ * Search matches every query word at the start of a word in the title,
+ * description, slug, technologies, categories, use cases, industries,
+ * platforms and difficulty ("cdc" finds cdc-to-lakehouse, "dr" does not find
+ * a description that merely contains "android"). Filter counts are live: each
+ * option shows how many cards would remain if it were ticked, given the
+ * search and the other groups, and an option that would leave none is dimmed.
  *
  * Every card is already in the DOM (rendered from the same catalog), so this
  * module only shows and hides them; without JS the full list is visible.
@@ -57,24 +65,46 @@
 
   var cards = $$('[data-sol-card]')
 
+  // Lowercase, and every run of punctuation becomes one space, so a word
+  // start is simply "after a space" and "event-driven" matches
+  // "event driven".
+  function normalize (text) {
+    return String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+  }
+
+  // Abbreviations readers type that the catalog spells out.
+  var ALIASES = { kubernetes: 'k8s' }
+
+  var haystackCache = {}
   function haystack (card) {
     var id = card.getAttribute('data-solution-id')
+    if (haystackCache[id] !== undefined) return haystackCache[id]
     var record = byId[id]
-    var parts = [card.getAttribute('data-title') || '']
+    var parts = [card.getAttribute('data-title') || '', id || '']
     if (record) {
       parts.push(record.description || '')
       parts.push((record.technologies || []).join(' '))
       parts.push((record.categories || []).join(' '))
       parts.push((record.useCases || []).join(' '))
       parts.push((record.industries || []).join(' '))
+      parts.push((record.platforms || []).join(' '))
       parts.push(record.difficulty || '')
     } else {
-      parts.push(card.getAttribute('data-technologies') || '')
-      parts.push(card.getAttribute('data-categories') || '')
-      parts.push((card.getAttribute('data-use-cases') || '').replace(/\|/g, ' '))
-      parts.push((card.getAttribute('data-industries') || '').replace(/\|/g, ' '))
+      ;['data-technologies', 'data-categories', 'data-use-cases', 'data-industries', 'data-platforms', 'data-difficulty'].forEach(function (name) {
+        parts.push((card.getAttribute(name) || '').replace(/\|/g, ' '))
+      })
     }
-    return parts.join(' ').toLowerCase()
+    var hay = ' ' + normalize(parts.join(' '))
+    Object.keys(ALIASES).forEach(function (word) {
+      if (hay.indexOf(' ' + word) !== -1) hay += ' ' + ALIASES[word]
+    })
+    haystackCache[id] = hay
+    return hay
+  }
+
+  function queryTokens (q) {
+    var text = normalize(q)
+    return text ? text.split(' ') : []
   }
 
   function values (card, facet) {
@@ -97,11 +127,29 @@
   var emptyEl = $('[data-sol-empty]')
   var activeEl = $('[data-sol-filters-active]')
 
+  // The values a facet can take on this page: its rendered checkboxes.
+  function optionsFor (facet) {
+    return form ? $$('input[name="' + facet + '"]', form) : []
+  }
+
+  // Returns true when the URL carried a facet value with no checkbox (a stale
+  // link, or a value the catalog has since gated out). Such a value would
+  // filter invisibly, with nothing ticked to explain the empty page, so it
+  // is dropped and the URL is rewritten without it.
   function readUrl () {
     var params
-    try { params = new URLSearchParams(window.location.search) } catch (e) { return }
+    try { params = new URLSearchParams(window.location.search) } catch (e) { return false }
+    var dropped = false
     state.q = params.get('q') || ''
-    FACETS.forEach(function (facet) { state[facet] = params.getAll(facet).filter(Boolean) })
+    FACETS.forEach(function (facet) {
+      var known = optionsFor(facet).map(function (el) { return el.value })
+      state[facet] = params.getAll(facet).filter(function (value) {
+        if (value && known.indexOf(value) !== -1) return true
+        dropped = true
+        return false
+      })
+    })
+    return dropped
   }
 
   function writeUrl () {
@@ -141,21 +189,37 @@
     return n
   }
 
-  function matches (card) {
+  // `skip` leaves one facet out, which is how the counts ask "how many would
+  // match if this group's selection were different".
+  function matches (card, skip) {
     if (state.q) {
       var hay = haystack(card)
-      var tokens = state.q.toLowerCase().split(/\s+/).filter(Boolean)
-      for (var i = 0; i < tokens.length; i++) if (hay.indexOf(tokens[i]) === -1) return false
+      var tokens = queryTokens(state.q)
+      for (var i = 0; i < tokens.length; i++) if (hay.indexOf(' ' + tokens[i]) === -1) return false
     }
     for (var f = 0; f < FACETS.length; f++) {
       var facet = FACETS[f]
-      if (!state[facet].length) continue
+      if (facet === skip || !state[facet].length) continue
       var have = values(card, facet)
       var any = false
       for (var j = 0; j < state[facet].length; j++) if (have.indexOf(state[facet][j]) !== -1) any = true
       if (!any) return false
     }
     return true
+  }
+
+  function updateCounts () {
+    FACETS.forEach(function (facet) {
+      var pool = cards.filter(function (card) { return matches(card, facet) })
+      optionsFor(facet).forEach(function (box) {
+        var n = 0
+        pool.forEach(function (card) { if (values(card, facet).indexOf(box.value) !== -1) n++ })
+        var row = box.parentNode
+        var count = row && row.querySelector ? $('.sol-filter-count', row) : null
+        if (count) count.textContent = String(n)
+        if (row && row.classList) row.classList[n === 0 && !box.checked ? 'add' : 'remove']('is-empty')
+      })
+    })
   }
 
   function apply () {
@@ -166,7 +230,10 @@
       if (ok) shown++
     })
     if (countEl) countEl.textContent = shown + (shown === 1 ? ' solution' : ' solutions')
-    if (emptyEl) emptyEl.hidden = shown !== 0
+    // With no cards at all the layout renders its own "none published yet"
+    // state; "no solutions match your filters" would be wrong there.
+    if (emptyEl) emptyEl.hidden = shown !== 0 || cards.length === 0
+    updateCounts()
     var active = activeCount()
     $$('[data-sol-filters-clear]').forEach(function (el) { el.hidden = active === 0 })
     if (activeEl) {
@@ -183,6 +250,21 @@
   }
 
   // ---- continue learning -------------------------------------------------------
+
+  // Where "Continue" goes: the first step, in the solution's order, that is
+  // not done. currentStep is the last step visited, which after finishing a
+  // step is the one just finished.
+  function firstIncompleteStep (record, progress) {
+    var steps = record.steps || []
+    var done = progress.completedSteps || []
+    for (var i = 0; i < steps.length; i++) {
+      var id = steps[i].id
+      var entry = progress.steps && progress.steps[id]
+      var isDone = entry && typeof entry === 'object' ? entry.done === true : done.indexOf(id) !== -1
+      if (!isDone) return id
+    }
+    return null
+  }
 
   function stepUrl (record, stepId) {
     var steps = record.steps || []
@@ -221,7 +303,8 @@
     var html = ''
     entries.forEach(function (entry) {
       var finished = entry.total > 0 && entry.done === entry.total
-      var href = (!finished && entry.progress.currentStep && stepUrl(entry.record, entry.progress.currentStep)) || entry.record.url
+      var next = !finished && firstIncompleteStep(entry.record, entry.progress)
+      var href = (next && stepUrl(entry.record, next)) || entry.record.url
       var pct = entry.total ? Math.round((entry.done / entry.total) * 100) : 0
       html += '<a class="sol-rec-card" href="' + escapeHtml(href) + '" data-sol-continue-card data-solution-id="' + escapeHtml(entry.record.id) + '">' +
         '<span class="sol-rec-eyebrow">' + (finished ? 'Completed' : 'In progress') + '</span>' +
@@ -251,8 +334,9 @@
 
   // ---- wire up ------------------------------------------------------------------
 
-  readUrl()
+  var droppedFromUrl = readUrl()
   applyInputs()
+  if (droppedFromUrl) writeUrl()
   apply()
 
   if (form) {

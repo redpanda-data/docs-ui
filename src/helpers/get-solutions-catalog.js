@@ -27,6 +27,9 @@
  *                array of {value, count} (the extension's shape; plain string
  *                arrays are accepted and counted from the records)
  *     count:     all.length
+ *     universalTechnologies: technologies every published record carries
+ *                (only with two or more published records). Card chips skip
+ *                them: "Redpanda" on every card tells the reader nothing.
  *     json:      the catalog serialized for a <script type="application/json">
  *                block (`</` is escaped so it cannot close the script tag)
  *   }
@@ -189,9 +192,14 @@ module.exports = function () {
   const published = all.filter((r) => r.status === 'published')
   const facets = normalizeFacets(catalog.facets, published)
 
+  const universalTechnologies = published.length < 2
+    ? []
+    : published[0].technologies.filter((tech) => published.every((r) => r.technologies.indexOf(tech) !== -1))
+
   return {
     generatedAt: catalog.generatedAt || null,
     siteUrl: catalog.siteUrl || null,
+    universalTechnologies,
     all,
     featured: published.filter((r) => r.featured),
     recent: published.slice().sort(byModifiedDesc).slice(0, 6),

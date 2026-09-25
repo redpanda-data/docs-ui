@@ -19,7 +19,17 @@
         <p class="sol-lede">{{#if page.attributes.hero-subtitle}}{{page.attributes.hero-subtitle}}{{else}}Complete, runnable systems built on Redpanda. Each solution walks you through a real architecture step by step, verifies the outcome, and shows what changes in production.{{/if}}</p>
       </header>
       {{{page.contents}}}
+      {{#*inline "sol-none-published"}}
+      <div class="sol-empty sol-empty--none" data-sol-none>
+        <h2>No solutions published yet</h2>
+        <p>Solutions appear here as soon as the first one is published.</p>
+      </div>
+      {{/inline}}
+      {{!-- A catalog with no records (before the first publish) gets the "none
+            published" state, not the grid, whose own empty state says "No
+            solutions match your filters". --}}
       {{#with (get-solutions-catalog) as |catalog|}}
+      {{#if catalog.count}}
       <section class="sol-continue" data-sol-continue hidden aria-labelledby="sol-continue-title">
         <div class="sol-recs-head">
           <h2 id="sol-continue-title" class="sol-section-title">Continue learning</h2>
@@ -33,10 +43,10 @@
       </div>
       <script type="application/json" data-sol-catalog>{{{catalog.json}}}</script>
       {{else}}
-      <div class="sol-empty" data-sol-empty>
-        <h3>No solutions published yet</h3>
-        <p>Solutions appear here as soon as the first one is published.</p>
-      </div>
+      {{> sol-none-published}}
+      {{/if}}
+      {{else}}
+      {{> sol-none-published}}
       {{/with}}
       {{> feedback-footer}}
       {{> tracking-pixel}}

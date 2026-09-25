@@ -4,6 +4,9 @@
   29-solutions-home.js only shows and hides them.
 --}}
 <div class="sol-results" data-sol-results>
+  {{!-- The cards are h3s, and "Continue learning" (the page's other h2) is
+        hidden for a first-time reader, so this keeps the outline h1 > h2 > h3. --}}
+  <h2 class="visually-hidden">All solutions</h2>
   <div class="sol-results-head">
     <p class="sol-results-count" data-sol-count aria-live="polite">{{catalog.count}} {{#if (eq catalog.count 1)}}solution{{else}}solutions{{/if}}</p>
   </div>

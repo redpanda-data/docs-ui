@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-card', read('src/partials/solution-card.hbs'))

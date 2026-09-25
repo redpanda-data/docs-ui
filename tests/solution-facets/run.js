@@ -27,6 +27,9 @@ function run (options) {
   const boxes = checkboxesOf(filtersHtml).map((box) =>
     el('input', { type: 'checkbox', name: box.name, value: box.value }))
   boxes.forEach((box) => { box.value = box.attrs.value })
+  // Each box sits in its label row with the count, as solutions-filters.hbs
+  // renders it, so the live counts have somewhere to go.
+  const rows = boxes.map((box) => el('label', { class: 'sol-filter-row' }, [box, el('span', { class: 'sol-filter-count', text: '?' })]))
   ;(o.checked || []).forEach(([name, value]) => {
     const box = boxes.find((b) => b.attrs.name === name && b.attrs.value === value)
     if (!box) throw new Error('no checkbox rendered for ' + name + '=' + value)
@@ -38,11 +41,17 @@ function run (options) {
   const clear = el('button', { type: 'button', 'data-sol-filters-clear': '', hidden: '' })
   const count = el('p', { 'data-sol-count': '' })
   const empty = el('div', { 'data-sol-empty': '', hidden: '' })
-  const form = el('form', { 'data-sol-filters-form': '' }, [q].concat(boxes, [clear]))
+  const form = el('form', { 'data-sol-filters-form': '' }, [q].concat(rows, [clear]))
+  // The catalog the layout embeds next to the grid, which search reads for
+  // the fields a card does not carry (description, platforms).
+  const embedded = el('script', { type: 'application/json', 'data-sol-catalog': '', text: JSON.stringify({ solutions: records }) })
+  const continueGrid = el('div', { 'data-sol-continue-grid': '' })
+  const continueSection = el('section', { 'data-sol-continue': '', hidden: '' }, [continueGrid])
   const body = el('body', {}, [
+    continueSection,
     el('details', { 'data-sol-filters': '', open: '' }, [el('summary', {}, [active]), form]),
     el('div', { 'data-sol-results': '' }, [count, el('div', { 'data-sol-grid': '' }, cards), empty]),
-  ])
+  ].concat(o.noCatalog ? [] : [embedded]))
 
   const document = makeDocument(body)
   const replaceState = []
@@ -54,7 +63,7 @@ function run (options) {
       location: { pathname: '/solutions/', search: o.search || '', hash: '' },
       history: { replaceState: (state, title, url) => replaceState.push(url) },
       addEventListener: () => {},
-      docsSolutions: null,
+      docsSolutions: o.api || null,
     },
   }
   context.window.window = context.window
@@ -70,7 +79,14 @@ function run (options) {
     active,
     count,
     empty,
+    continueSection,
+    continueGrid,
     filtersHtml,
+    // The live count and dimmed state of one option, as a reader sees it.
+    option: (name, value) => {
+      const box = run.find(boxes, name, value)
+      return { count: box.parentNode.querySelector('.sol-filter-count').textContent, dimmed: box.parentNode.classList.contains('is-empty') }
+    },
     replaceState,
     shown,
     // The URL the module last wrote, which is also the state it would restore.

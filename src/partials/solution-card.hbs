@@ -33,11 +33,15 @@
       {{/if}}
       {{#if solution.stepCount}}<span class="sol-time">{{solution.stepCount}} steps</span>{{/if}}
     </div>
-    {{#if solution.technologies.length}}
+    {{!-- Chips skip technologies every solution has (Redpanda), which would
+          otherwise take one of the three slots on every card. --}}
+    {{#with (without solution.technologies (lookup (get-solutions-catalog) 'universalTechnologies')) as |techs|}}
+    {{#if techs.length}}
     <div class="sol-card-tags">
-      {{#each solution.technologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
+      {{#each techs}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
     </div>
     {{/if}}
+    {{/with}}
   </div>
   <div class="sol-card-progress" data-sol-card-progress hidden>
     <div class="sol-bar sol-bar--sm"><div class="sol-bar-fill" data-sol-card-progress-fill style="width: 0%"></div></div>
