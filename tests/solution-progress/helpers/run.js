@@ -37,6 +37,13 @@ function storage (initial, throws) {
   }
 }
 
+// Done step ids of a stored or sent v2 record (the wire shape has no
+// completedSteps; getState() adds it as a derived view).
+function doneIds (record) {
+  const steps = (record && record.steps) || {}
+  return Object.keys(steps).filter((id) => steps[id].done === true).sort()
+}
+
 function plain (value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value))
 }
@@ -86,7 +93,7 @@ function buildPage (o) {
     'data-component': 'solutions',
     'data-solution-id': o.solutionId,
     'data-solution-version': o.version,
-    'data-solution-status': 'published',
+    'data-solution-status': o.status || 'published',
     'data-solution-download': o.download || 'authenticated',
     'data-solution-step-count': String(stepIds.length),
   }
@@ -139,6 +146,25 @@ function buildPage (o) {
   if (o.page === 'step') {
     els.headerStatus = el('span', { 'data-sol-step-header-status': '', hidden: '' })
     main.push(els.headerStatus)
+    // The step action row under the article (solution-step-actions.hbs): a
+    // second Mark step complete button, a second bar, and the inline done
+    // block. In the live DOM it comes BEFORE the rail card, so a
+    // querySelector for the button finds this copy first.
+    if (o.actionRow) {
+      els.rowCompleteLabel = el('span', { 'data-sol-complete-label': '', text: 'Mark step complete' })
+      els.rowComplete = el('button', { 'data-sol-complete': '', 'aria-pressed': 'false' }, [els.rowCompleteLabel])
+      els.rowFill = el('div', { 'data-sol-progress-fill': '' })
+      els.rowBar = el('div', { 'data-sol-progress-bar': '' }, [els.rowFill])
+      els.rowDownloadLabel = el('span', { 'data-sol-download-label': '', text: 'Download the complete example' })
+      els.rowDownload = el('a', { 'data-sol-download': '', 'data-requires-auth': '', href: '/solutions/download?solution=' + o.solutionId + '&version=' + o.version }, [els.rowDownloadLabel])
+      els.rowDone = el('div', { 'data-sol-done': '', 'data-sol-done-inline': '', hidden: '' }, [els.rowDownload])
+      els.actionRow = el('nav', { class: 'sol-step-actions' }, [els.rowBar, els.rowDone, els.rowComplete])
+      main.push(els.actionRow)
+      // The step header chip is rendered once per page today; a second copy
+      // must follow too.
+      els.headerStatus2 = el('span', { 'data-sol-step-header-status': '', hidden: '' })
+      main.push(els.headerStatus2)
+    }
   } else {
     els.startLabel = el('span', { 'data-sol-start-label': '', text: 'Start building' })
     els.start = el('a', { 'data-sol-start': '', href: stepUrl(stepIds[0]) }, [els.startLabel])
@@ -191,13 +217,13 @@ function run (options) {
   const createElement = document.createElement
   document.createElement = (tag) => { const node = createElement(tag); created.push(node); return node }
 
-  const local = storage(Object.assign(
+  const local = o.sharedLocal || storage(Object.assign(
     o.localStore ? { [STORE_KEY]: JSON.stringify(o.localStore) } : {},
     o.hint !== undefined ? { [HINT_KEY]: o.hint } : {},
     o.dirty ? { [DIRTY_KEY]: '1' } : {},
     o.localRaw || {}
   ), o.storageThrows)
-  const session = storage(Object.assign(
+  const session = o.sharedSession || storage(Object.assign(
     o.pending ? { [PENDING_KEY]: JSON.stringify(o.pending) } : {},
     o.sessionRaw || {}
   ), o.storageThrows)
@@ -258,6 +284,12 @@ function run (options) {
     },
   }
   context.window.window = context.window
+  // Chrome with site data blocked: merely reading the global throws.
+  if (o.storageGetterThrows) {
+    for (const name of ['localStorage', 'sessionStorage']) {
+      Object.defineProperty(context, name, { get () { throw new Error('SecurityError: The operation is insecure.') }, configurable: true })
+    }
+  }
 
   vm.runInNewContext(SCRIPT, context)
 
@@ -295,6 +327,8 @@ function run (options) {
     document,
     timers,
     flush,
+    // Fire a window event at the listeners the module registered.
+    fire: (type, event) => (context.window.listeners[type] || []).forEach((fn) => fn(Object.assign({ type }, event || {}))),
     storedStore: () => (STORE_KEY in local.data ? JSON.parse(local.data[STORE_KEY]) : null),
     toasts: () => created.filter((c) => c.classes.has('sol-toast')),
     signinEvents: () => calls.events.filter((e) => e.type === 'docs-account:open-signin'),
@@ -306,4 +340,4 @@ function run (options) {
   }
 }
 
-module.exports = { run, plain, STORE_KEY, HINT_KEY, DIRTY_KEY, PENDING_KEY }
+module.exports = { run, plain, doneIds, STORE_KEY, HINT_KEY, DIRTY_KEY, PENDING_KEY }

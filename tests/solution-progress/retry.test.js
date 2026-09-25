@@ -4,7 +4,7 @@
  */
 const assert = require('node:assert/strict')
 const test = require('node:test')
-const { run, DIRTY_KEY, HINT_KEY } = require('./helpers/run')
+const { run, doneIds, DIRTY_KEY, HINT_KEY } = require('./helpers/run')
 
 const LOCAL = { v: 1, updatedAt: 2000, solutions: { demo: { completedSteps: ['s1'], currentStep: 's1', startedAt: 1000, updatedAt: 2000, completedAt: null, solutionVersion: 'v1.0.0' } } }
 
@@ -27,7 +27,7 @@ for (const status of [409, 429, 503]) {
     const second = run({ page: 'none', signedIn: true, localRaw: first.local.data, sessionRaw: first.session.data })
     await second.flush()
     assert.equal(second.puts().length, 1, 'retried')
-    assert.deepEqual(second.puts()[0].body.solutions.demo.completedSteps, ['s1'])
+    assert.deepEqual(doneIds(second.puts()[0].body.solutions.demo), ['s1'])
     assert.equal(DIRTY_KEY in second.local.data, false, 'clean after success')
   })
 }

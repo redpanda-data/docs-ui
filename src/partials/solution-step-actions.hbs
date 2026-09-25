@@ -15,9 +15,20 @@
     <span class="sol-step-actions-count">
       <span data-sol-progress-count>0 of {{solution.steps.length}}</span> steps
     </span>
-    <div class="sol-bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" data-sol-progress-bar>
+    <div class="sol-bar" role="progressbar" aria-label="Your progress" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" aria-valuetext="0 of {{solution.steps.length}} steps complete" data-sol-progress-bar>
       <div class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></div>
     </div>
+  </div>
+  {{!-- The rail's "You finished" card is inside the collapsed rail on
+    narrow screens, so the same message and offer sit here too.
+    28-solution-progress.js shows this copy only at or below the rail
+    breakpoint, once every step is done. --}}
+  <div class="sol-done sol-done--inline" data-sol-done data-sol-done-inline role="status" hidden>
+    <p class="sol-done-title">You finished this solution.</p>
+    {{#unless (eq solution.download 'none')}}
+    <p class="sol-done-sub">Keep the complete example around for your own projects.</p>
+    <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow"><span data-sol-download-label>Download the complete example</span></a>
+    {{/unless}}
   </div>
   <div class="sol-step-actions-main">
     <button type="button" class="sol-btn sol-btn--primary" data-sol-complete data-analytics="solution_step_complete" aria-pressed="false">

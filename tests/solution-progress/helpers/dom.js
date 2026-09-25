@@ -86,6 +86,11 @@ class El {
     this.attrs[name] = String(value)
   }
 
+  removeAttribute (name) {
+    if (name === 'class') { this.classes = new Set(); return }
+    delete this.attrs[name]
+  }
+
   hasAttribute (name) {
     if (name === 'class') return this.classes.size > 0
     return Object.prototype.hasOwnProperty.call(this.attrs, name)

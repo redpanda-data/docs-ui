@@ -5,7 +5,8 @@
   steps", state text, the version-changed notice, Save progress with its
   status line, and on step pages the Mark step complete button (the same
   button also sits under the article for narrow screens, where the rail
-  collapses; CSS shows one or the other). Everything is driven by
+  collapses; CSS shows one or the other). The done block below is repeated in
+  the step action row (data-sol-done-inline) for the same reason. Everything is driven by
   28-solution-progress.js, which reads the step ids from the sidebar entries
   (data-sol-nav-step) or the overview's Steps list (data-sol-step-id).
 --}}
@@ -14,7 +15,7 @@
     <h3 id="sol-progress-title" class="sol-panel-title">Your progress</h3>
     <span class="sol-progress-count"><span data-sol-progress-count>0 of {{solution.steps.length}}</span> steps</span>
   </div>
-  <div class="sol-bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" data-sol-progress-bar>
+  <div class="sol-bar" role="progressbar" aria-labelledby="sol-progress-title" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" aria-valuetext="0 of {{solution.steps.length}} steps complete" data-sol-progress-bar>
     <div class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></div>
   </div>
   <p class="sol-progress-state" data-sol-progress-state>Not started</p>
@@ -41,7 +42,7 @@
     <p class="sol-done-title">You finished this solution.</p>
     <p class="sol-done-sub">Keep the complete example around for your own projects.</p>
     {{#unless (eq solution.download 'none')}}
-    <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow">Download the complete example</a>
+    <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow"><span data-sol-download-label>Download the complete example</span></a>
     {{/unless}}
   </div>
 </section>
