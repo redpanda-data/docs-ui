@@ -3,8 +3,8 @@ module blobl
 go 1.26.6
 
 require (
-	github.com/redpanda-data/benthos/v4 v4.80.0
-	github.com/redpanda-data/connect/v4 v4.108.0
+	github.com/redpanda-data/benthos/v4 v4.81.0
+	github.com/redpanda-data/connect/v4 v4.111.0
 )
 
 require (
