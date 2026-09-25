@@ -8,6 +8,28 @@
 {{/if}}
 {{#with (or site.components.streaming site.components.ROOT)}}
 <meta name="latest-redpanda-version" content="{{this.latest.version}}">
+{{!-- Latest releases resolved by the version-fetcher extension at build time,
+  for the Ask AI get_latest_version tool. latest-redpanda-release is the full
+  patch tag (for example v25.3.4), separate from latest-redpanda-tag below,
+  which is overloaded: it can hold the properties-JSON tag or the page's own
+  version tag. --}}
+{{#with this.latest.asciidoc.attributes}}
+{{#if latest-redpanda-tag}}
+<meta name="latest-redpanda-release" content="{{latest-redpanda-tag}}">
+{{/if}}
+{{#if latest-console-version}}
+<meta name="latest-console-release" content="{{latest-console-version}}">
+{{/if}}
+{{#if latest-connect-version}}
+<meta name="latest-connect-release" content="{{latest-connect-version}}">
+{{/if}}
+{{#if latest-operator-version}}
+<meta name="latest-operator-release" content="{{latest-operator-version}}">
+{{/if}}
+{{#if latest-redpanda-helm-chart-version}}
+<meta name="latest-helm-chart-release" content="{{latest-redpanda-helm-chart-version}}">
+{{/if}}
+{{/with}}
 {{/with}}
 {{!--
   Properties JSON URL for property tooltips
