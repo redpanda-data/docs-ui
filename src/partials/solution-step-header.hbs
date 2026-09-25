@@ -14,6 +14,7 @@
     </a>
     <span class="sol-eyebrow-sep" aria-hidden="true">/</span>
     <span class="sol-eyebrow-label">Step {{@root.page.attributes.solution-step-index}} of {{@root.page.attributes.solution-step-count}}</span>
+    {{#with ../solution as |solution|}}{{#if solution.id}}<div class="sol-page-options">{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}</div>{{/if}}{{/with}}
   </div>
   {{#with @root.page.title}}
   <h1 class="page sol-title">{{{this}}}</h1>
@@ -43,6 +44,7 @@
 <header class="sol-step-header">
   <div class="sol-eyebrow">
     <a class="sol-eyebrow-link" href="{{{relativize solution.url}}}">{{solution.title}}</a>
+    {{#if solution.id}}<div class="sol-page-options">{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}</div>{{/if}}
   </div>
   {{#with @root.page.title}}
   <h1 class="page sol-title">{{{this}}}</h1>

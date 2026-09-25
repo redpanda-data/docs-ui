@@ -16,6 +16,8 @@
       empty, since Antora stores a valueless attribute as '').
     - parse-json returns [] for a missing or malformed attribute.
     - An empty list renders nothing at all (no heading, no wrapper).
+  provenance is 'authored' (older catalogs: 'explicit', 'editor-approved')
+  or 'category' (inferred from shared categories); it picks the subtitle.
   At most 3 cards render. Each carries data-provenance and its position for
   analytics; the "Why this?" reason ships hidden and 28-solution-progress.js
   reveals it when localStorage['docs-debug-recs']==='1' or ?debug=recs is set.
@@ -26,7 +28,10 @@
 <section class="sol-recs" data-sol-recs data-component="{{@root.page.component.name}}" aria-labelledby="build-it-in-practice">
   <div class="sol-recs-head">
     <h2 id="build-it-in-practice" class="sol-recs-title">Build it in practice</h2>
-    <p class="sol-recs-sub">Complete, runnable solutions that use what this page covers.</p>
+    {{!-- "use what this page covers" is only true of an authored link. A
+          category-inferred card shares a category with the page and may never
+          touch it, so any such card softens the claim. --}}
+    <p class="sol-recs-sub">{{#if (recs-all-authored recs)}}Complete, runnable solutions that use what this page covers.{{else}}Complete, runnable solutions related to what this page covers.{{/if}}</p>
   </div>
   <div class="sol-recs-grid">
     {{#each recs}}
@@ -38,7 +43,7 @@
       <span class="sol-rec-meta">
         {{#if difficulty}}<span class="sol-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
         {{#if duration}}<span class="sol-time">{{format-duration duration}}</span>{{/if}}
-        {{#each technologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
+        {{#each (without technologies (lookup (get-solutions-catalog) 'universalTechnologies'))}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
       </span>
       {{#if reason}}<span class="sol-rec-why" data-sol-rec-why hidden>Why this? {{reason}}</span>{{/if}}
     </a>

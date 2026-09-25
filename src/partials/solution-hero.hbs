@@ -2,6 +2,9 @@
   Solution overview hero. Context: `solution` (parsed page-solution record).
   The Start CTA points at the first step; 28-solution-progress.js turns it into
   "Continue" (pointing at the reader's current step) when local progress exists.
+  The eyebrow row ends with the page options (Copy as Markdown and the link to
+  the solution's agent companion, from the record's agentCompanion URL, else
+  the path the solutions-catalog extension writes it to).
 --}}
 <header class="sol-hero">
   <div class="sol-eyebrow">
@@ -16,6 +19,7 @@
     {{#if solution.featured}}
     <span class="sol-chip sol-chip--status is-featured">Featured</span>
     {{/if}}
+    {{#if solution.id}}<div class="sol-page-options">{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}</div>{{/if}}
   </div>
   {{#with @root.page.title}}
   <h1 class="page sol-title">{{{this}}}</h1>

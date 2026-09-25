@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
@@ -176,10 +176,11 @@ const SOLUTION = {
 }
 function stepRenderer () {
   const stepHbs = Handlebars.create()
-  ;['eq', 'or', 'format-duration', 'format-release-date', 'relativize', 'get-solution-step'].forEach((name) => {
+  ;['eq', 'or', 'concat', 'format-duration', 'format-release-date', 'relativize', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode'].forEach((name) => {
     stepHbs.registerHelper(name, helper(name))
   })
   stepHbs.registerPartial('solution-step-header', read('src/partials/solution-step-header.hbs'))
+  stepHbs.registerPartial('markdown-dropdown', read('src/partials/markdown-dropdown.hbs'))
   return stepHbs.compile('{{> solution-step-header solution=solution}}')
 }
 
@@ -257,8 +258,8 @@ test('a run date that does not parse is silent, and never reaches the page as a 
 })
 
 test('a good date with no recorded version renders without the version clause', () => {
-  const html = renderMeta(withVerified({ runAt: '2026-09-13T02:14:07Z', specs: 11 }))
-  assert.match(html, /<dd class="sol-verified" title="11 specs">September 13, 2026<\/dd>/)
+  const html = renderMeta(withVerified({ runAt: '2026-09-13T02:14:07Z', commands: 11 }))
+  assert.match(html, /<dd class="sol-verified" title="11 commands run">September 13, 2026<\/dd>/)
   assert.doesNotMatch(html, /against Redpanda/)
 
   const step = stepRenderer()({
@@ -269,14 +270,17 @@ test('a good date with no recorded version renders without the version clause', 
   assert.doesNotMatch(step, /against Redpanda/)
 })
 
-test('format-verified-evidence lists the run counts and the verify script result', () => {
+test('format-verified-evidence lists the run counts and the verify script result in reader terms', () => {
   const evidence = helper('format-verified-evidence')
   const call = (verified) => evidence(verified, { hash: {} })
-  assert.equal(call(VERIFIED), '11 specs, 50 steps, 34 commands, 23 output checks, 2 media captures, verify script PASS (9/9)')
-  assert.equal(call({ specs: 1, steps: 1, commands: 1, checks: 1, media: 1 }), '1 spec, 1 step, 1 command, 1 output check, 1 media capture')
-  assert.equal(call({ specs: 3, media: 0 }), '3 specs, 0 media captures', 'a reported zero is evidence; an unreported count is left out')
-  assert.equal(call({ verifyScript: 'PASS (9/9)' }), 'verify script PASS (9/9)', 'a ready-made string passes through')
-  assert.equal(call({ verifyScript: { status: 'FAIL' } }), 'verify script FAIL', 'no pass counts recorded for the script')
+  assert.equal(call(VERIFIED), '34 commands run, 23 outputs checked, 2 screen captures, verify script passed 9 of 9')
+  assert.doesNotMatch(call(VERIFIED), /specs?\b|steps?\b/, "Doc Detective's specs and steps never reach the reader: '50 steps' contradicted 'Steps: 9'")
+  assert.equal(call({ specs: 1, steps: 1, commands: 1, checks: 1, media: 1 }), '1 command run, 1 output checked, 1 screen capture')
+  assert.equal(call({ specs: 3, media: 0 }), '0 screen captures', 'a reported zero is evidence; an unreported count is left out')
+  assert.equal(call({ verifyScript: 'PASS (9/9)' }), 'verify script passed 9 of 9', 'a ready-made string is reworded')
+  assert.equal(call({ verifyScript: { status: 'PASS', passed: 9, total: 9 } }), 'verify script passed 9 of 9')
+  assert.equal(call({ verifyScript: { status: 'FAIL' } }), 'verify script failed', 'no pass counts recorded for the script')
+  assert.equal(call({ verifyScript: 'SKIPPED' }), 'verify script SKIPPED', 'an unknown status passes through')
   assert.equal(call(undefined), '')
   assert.equal(call({}), '')
 })
@@ -286,7 +290,7 @@ test('the overview meta strip renders Last verified after Version, with the evid
   assert.match(html, /<dt>Last verified<\/dt>/)
   assert.match(
     html,
-    /<dd class="sol-verified" title="11 specs, 50 steps, 34 commands, 23 output checks, 2 media captures, verify script PASS \(9\/9\)">September 13, 2026 against Redpanda 26\.2\.2<\/dd>/
+    /<dd class="sol-verified" title="34 commands run, 23 outputs checked, 2 screen captures, verify script passed 9 of 9">September 13, 2026 against Redpanda 26\.2\.2<\/dd>/
   )
   assert.ok(html.indexOf('Last verified') > html.indexOf('<dt>Version</dt>'), 'sits after the Version row')
 })

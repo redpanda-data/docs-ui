@@ -2,9 +2,16 @@
   Related Product Docs and related Solutions from the content graph.
   Context: `solution`. Each doc link carries its provenance (explicit,
   editor-approved, category) so analytics can tell curated from derived edges.
+
+  One related-docs list per page: when the overview authored its own
+  `== Related docs` section (id="related-docs", with a sentence per link),
+  that section is the list and this generated one is skipped. The generated
+  section's id is sol-related-docs so it can never collide with the authored
+  heading's id.
 --}}
 {{#if solution.relatedDocs.length}}
-<section class="sol-related" id="related-docs" aria-labelledby="sol-related-title">
+{{#unless (html-has-id @root.page.contents 'related-docs')}}
+<section class="sol-related" id="sol-related-docs" aria-labelledby="sol-related-title">
   <h2 id="sol-related-title" class="sol-section-title">Related documentation</h2>
   <ul class="sol-related-list">
     {{#each solution.relatedDocs}}
@@ -17,6 +24,7 @@
     {{/each}}
   </ul>
 </section>
+{{/unless}}
 {{/if}}
 {{#if solution.relatedSolutions.length}}
 <section class="sol-related sol-related--solutions" aria-labelledby="sol-related-solutions-title">

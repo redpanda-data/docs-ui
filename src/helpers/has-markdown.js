@@ -23,7 +23,7 @@ module.exports = ({ data: { root } }) => {
   if (!page || !page.component || page.version === undefined) return false
 
   // Only show dropdown on specific page layouts
-  const allowedLayouts = ['default', 'index', 'lab']
+  const allowedLayouts = ['default', 'index', 'lab', 'solution', 'solution-step']
   if (!allowedLayouts.includes(page.layout)) return false
 
   // Exclude specific page roles
