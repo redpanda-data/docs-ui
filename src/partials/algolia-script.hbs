@@ -53,6 +53,9 @@ const TAGS_BY_COMPONENT = {
   'Self-Managed': ['Streaming', 'Connect', 'Labs', 'Solutions', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
   'Home': ['Cloud', 'Streaming', 'Connect', 'Labs', 'Solutions', 'Agentic Data Plane', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'],
   'Agentic Data Plane': ['Labs', 'Solutions', 'Cloud Control Plane API', 'Cloud Data Plane API'],
+  // Solutions build on product docs, so a search from a solution page has to
+  // reach them: Cloud and the latest Streaming, as the umbrella components do.
+  'Solutions': ['Solutions', 'Cloud', ...(LATEST_STREAMING ? [LATEST_STREAMING] : []), 'Connect', 'Labs', 'Admin API', 'Schema Registry API', 'HTTP Proxy API'],
 };
 const DEFAULT_TAGS = ['Labs', 'Solutions', 'Connect', 'Admin API', 'Schema Registry API', 'HTTP Proxy API', 'Cloud Control Plane API', 'Cloud Data Plane API'];
 const INITIAL_TAGS = TAGS_BY_COMPONENT[COMPONENT_NAME] || DEFAULT_TAGS;
@@ -67,7 +70,7 @@ const VERSION = PRERELEASE === 'true'
  * and shape them to the Tags plugin's expected structure: { label, facet }.
  * Tags plugin: https://www.algolia.com/doc/ui-libraries/autocomplete/api-reference/plugins/tags-plugin/
  */
-const UMBRELLA_COMPONENTS = ['Home', 'Labs', 'Data Platform', 'Self-Managed'];
+const UMBRELLA_COMPONENTS = ['Home', 'Labs', 'Solutions', 'Data Platform', 'Self-Managed'];
 const applyFilterTags = (initialTags, initialTag) => {
   if (!initialTag) return initialTags.map((tag) => ({ label: tag, facet: '_tags' }));
   let mergedTags;
@@ -102,6 +105,33 @@ function groupBy(items, predicate) {
     acc[key].push(item);
     return acc;
   }, {});
+}
+
+/**
+ * Records index every nav.breadcrumbs on the page, so a trail can arrive
+ * twice over ("Solutions > X > Step > Home > Solutions > X"). Keep the first
+ * crumb for each target.
+ */
+function dedupeCrumbs(crumbs) {
+  if (!Array.isArray(crumbs)) return crumbs;
+  const seen = new Set();
+  return crumbs.filter((crumb) => {
+    const key = (crumb && (crumb.u || crumb.t)) || '';
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/**
+ * Solution step hits share titles across solutions ("Start the environment"
+ * in five of them), so name the solution. `solutionTitle` is indexed on
+ * Solution records; it is skipped when it repeats the hit's own title (the
+ * overview record).
+ */
+function solutionTitleOf(hit) {
+  if (!hit || hit.type !== 'Solution' || !hit.solutionTitle) return '';
+  return hit.solutionTitle === hit.title ? '' : hit.solutionTitle;
 }
 
 /** Normalize to compare labels case/space-insensitively. */
@@ -560,7 +590,7 @@ function initAlgolia() {
                       preview.breadcrumbs
                         ? html`<div class="breadcrumbs">
                             <ul>
-                              ${preview.breadcrumbs.map(
+                              ${dedupeCrumbs(preview.breadcrumbs).map(
                                 (breadcrumb) =>
                                   html`<li>
                                     <a
@@ -834,6 +864,8 @@ function initAlgolia() {
             },
             item({ item, components, html }) {
               const matchingHeading = item.matchingHeading || '';
+              const crumbs = dedupeCrumbs(item.breadcrumbs);
+              const solutionTitle = solutionTitleOf(item);
 
               // Helper: render “product” as deduped badges
               const renderProduct = (product) => {
@@ -879,6 +911,7 @@ function initAlgolia() {
                         }
                         <div class="aa-ItemContentRow">
                           <div class="aa-ItemContentTitle result-type">${item.type}</div>
+                          ${solutionTitle ? html`<div class="aa-ItemContentTitle result-type result-solution-title">${solutionTitle}</div>` : ''}
                           ${renderProduct(item.product)}
                           ${item.api ? html`<div class="aa-ItemContentTitle result-type">${item.api}</div>` : ''}
                           ${item.version ? html`<div class="aa-ItemContentTitle result-type">${item.version}</div>` : ''}
@@ -900,19 +933,19 @@ function initAlgolia() {
                           </div>
                         </div>
                         ${
-                          item.breadcrumbs
+                          crumbs
                             ? html`<div class="aa-ItemContentRow">
                                 <div class="aa-Breadcrumbs">
                                   <ul>
                                     ${
-                                      item.breadcrumbs.length > 2 &&
-                                      item.breadcrumbs
-                                        .slice(1, item.breadcrumbs.length - 1)
+                                      crumbs.length > 2 &&
+                                      crumbs
+                                        .slice(1, crumbs.length - 1)
                                         .map((breadcrumb) => html`<li>${breadcrumb.t}</li>`)
                                     }
                                     ${
-                                      item.breadcrumbs.length === 2 &&
-                                      item.breadcrumbs.slice(1).map((breadcrumb) => html`<li>${breadcrumb.t}</li>`)
+                                      crumbs.length === 2 &&
+                                      crumbs.slice(1).map((breadcrumb) => html`<li>${breadcrumb.t}</li>`)
                                     }
                                   </ul>
                                 </div>
@@ -930,6 +963,7 @@ function initAlgolia() {
                         }</div>
                         <div class="aa-ItemContentRow">
                           <div class="aa-ItemContentTitle result-type">${item.type}</div>
+                          ${solutionTitle ? html`<div class="aa-ItemContentTitle result-type result-solution-title">${solutionTitle}</div>` : ''}
                           ${renderProduct(item.product)}
                           ${item.version ? html`<div class="aa-ItemContentTitle result-type">${item.version}</div>` : ''}
                         </div>

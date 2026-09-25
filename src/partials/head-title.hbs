@@ -1,1 +1,9 @@
-<title>{{{detag (or page.title defaultPageTitle)}}}{{#with page.component.title}} | Redpanda {{{this}}}{{/with}}</title>
+{{!--
+  "<page> | Redpanda <component>". Solution step pages add the solution between
+  the two ("Start the environment | Multiplayer game events | Redpanda
+  Solutions"), because five solutions share step titles and the tabs, history
+  and bookmarks were otherwise identical. A page whose own title already is
+  "Redpanda <component>" (the Solutions landing page) gets no suffix, rather
+  than "Redpanda Solutions | Redpanda Solutions".
+--}}
+<title>{{{detag (or page.title defaultPageTitle)}}}{{#if (eq page.layout 'solution-step')}}{{#if page.attributes.solution-title}} | {{{detag page.attributes.solution-title}}}{{/if}}{{/if}}{{#if page.component.title}}{{#unless (eq (detag (or page.title defaultPageTitle)) (concat 'Redpanda ' page.component.title))}} | Redpanda {{{page.component.title}}}{{/unless}}{{/if}}</title>
