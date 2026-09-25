@@ -8,7 +8,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const test = require('node:test')
-const { run, STORE_KEY, HINT_KEY, DIRTY_KEY } = require('./helpers/run')
+const { run, doneIds, STORE_KEY, HINT_KEY, DIRTY_KEY } = require('./helpers/run')
 
 const VECTORS = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/merge-vectors.json'), 'utf8'))
 
@@ -53,7 +53,7 @@ test('the incoming side wins ties on updatedAt, like the server', () => {
   const rec = (step) => ({ completedSteps: [step], currentStep: step, startedAt: 1000, updatedAt: 2000, completedAt: null, solutionVersion: 'v1.0.0' })
   const merged = api.merge({ v: 1, solutions: { demo: rec('s1') } }, { v: 1, solutions: { demo: rec('s2') } }, 5000)
   assert.equal(merged.solutions.demo.currentStep, 's2')
-  assert.deepEqual(merged.solutions.demo.completedSteps, ['s1', 's2'], 'existing (earlier) steps first, then incoming additions')
+  assert.deepEqual(doneIds(merged.solutions.demo), ['s1', 's2'], 'both sides\' steps are kept')
 })
 
 test('ids and versions are validated with the server regexes, and future timestamps are clamped', () => {
@@ -67,7 +67,7 @@ test('ids and versions are validated with the server regexes, and future timesta
     },
   }, { v: 1, solutions: {} }, now)
   assert.deepEqual(Object.keys(merged.solutions), ['demo'], 'invalid solution ids are dropped')
-  assert.deepEqual(merged.solutions.demo.completedSteps, ['ok-1', 's2'])
+  assert.deepEqual(doneIds(merged.solutions.demo), ['ok-1', 's2'])
   assert.equal(merged.solutions.demo.currentStep, null)
   assert.equal(merged.solutions.demo.solutionVersion, null, 'version must look like vX.Y.Z')
   assert.equal(merged.solutions.demo.updatedAt, now + 5 * 60 * 1000, 'clamped to now + 5 minutes')
@@ -92,7 +92,7 @@ test('the API is exposed on every page, not only solution pages', () => {
   assert.equal(typeof api.save, 'function')
   assert.equal(typeof api.merge, 'function')
   assert.equal(typeof api.track, 'function')
-  assert.deepEqual(api.getState(), { v: 1, updatedAt: 0, solutions: {} })
+  assert.deepEqual(api.getState(), { v: 2, updatedAt: 0, solutions: {} })
 })
 
 test('caps: more than 50 solutions evicts the least recently updated', () => {
@@ -118,13 +118,13 @@ test('caps: a record keeps at most the last 100 completed steps', () => {
   })
   const record = api.getState().solutions.demo
   assert.equal(record.completedSteps.length, 100)
-  assert.equal(record.completedSteps[0], 'step-21', 'the oldest 20 were dropped')
-  assert.equal(record.completedSteps[99], 'step-120')
+  assert.ok(!record.completedSteps.includes('step-20'), 'the oldest 20 of the v1 list were dropped')
+  assert.ok(record.completedSteps.includes('step-21') && record.completedSteps.includes('step-120'))
 })
 
 test('malformed storage is treated as empty rather than thrown', () => {
   const { api } = run({ page: 'none', localRaw: { [STORE_KEY]: '{not json' } })
-  assert.deepEqual(api.getState(), { v: 1, updatedAt: 0, solutions: {} })
+  assert.deepEqual(api.getState(), { v: 2, updatedAt: 0, solutions: {} })
   const { api: api2 } = run({ page: 'none', localRaw: { [STORE_KEY]: JSON.stringify({ v: 1, solutions: { demo: 'nope', ok: { completedSteps: 'x', updatedAt: 5 } } }) } })
   assert.deepEqual(Object.keys(api2.getState().solutions), ['ok'], 'bad records dropped, salvageable ones normalized')
   assert.deepEqual(api2.getState().solutions.ok.completedSteps, [])
@@ -132,7 +132,7 @@ test('malformed storage is treated as empty rather than thrown', () => {
 
 test('fails closed when storage throws: empty state, in-memory progress, no exception', () => {
   const overview = run({ page: 'overview', storageThrows: true })
-  assert.deepEqual(overview.api.getState(), { v: 1, updatedAt: 0, solutions: {} }, 'unreadable storage reads as empty')
+  assert.deepEqual(overview.api.getState(), { v: 2, updatedAt: 0, solutions: {} }, 'unreadable storage reads as empty')
   assert.equal(overview.els.count.textContent, '0 of 3')
 
   const step = run({ page: 'step', stepId: 's1', storageThrows: true })
@@ -220,7 +220,7 @@ test('version notice: shown once when the stored version differs from the page v
 test('sign-out (hint true -> false) clears local progress', () => {
   const stored = { v: 1, updatedAt: 5, solutions: { demo: { completedSteps: ['s1'], currentStep: 's1', startedAt: 1, updatedAt: 5, completedAt: null, solutionVersion: 'v1.0.0' } } }
   const { api, local } = run({ page: 'none', signedIn: false, hint: 'true', localStore: stored })
-  assert.deepEqual(api.getState(), { v: 1, updatedAt: 0, solutions: {} })
+  assert.deepEqual(api.getState(), { v: 2, updatedAt: 0, solutions: {} })
   assert.equal(STORE_KEY in local.data, false, 'storage key removed')
   assert.equal(local.data[HINT_KEY], 'false')
 })
@@ -250,8 +250,8 @@ test('first sign-in: GET, then PUT the merged store, and the server answer repla
   assert.equal(puts.length, 1, 'one PUT on first sign-in')
   // Same roles as the server: stored copy is existing, this device is incoming.
   const expected = r.api.merge(remote, local)
-  assert.deepEqual(puts[0].body, { v: 1, updatedAt: expected.updatedAt, solutions: expected.solutions }, 'PUT payload is the merged store')
-  assert.deepEqual(puts[0].body.solutions.demo.completedSteps, ['s1', 's2'], 'anonymous progress survives the first sign-in')
+  assert.deepEqual(puts[0].body, { v: 2, updatedAt: expected.updatedAt, solutions: expected.solutions }, 'PUT payload is the merged store')
+  assert.deepEqual(doneIds(puts[0].body.solutions.demo), ['s1', 's2'], 'anonymous progress survives the first sign-in')
   assert.equal(puts[0].init.credentials, 'include')
 
   assert.ok('extra' in r.api.getState().solutions, 'server response replaced local')
@@ -297,7 +297,7 @@ test('signed-in mutations are pushed after a debounce', async () => {
   assert.equal(r.puts().length, before, 'not sent synchronously')
   await r.flush()
   assert.equal(r.puts().length, before + 1, 'sent once the debounce timer fires')
-  assert.deepEqual(r.puts()[r.puts().length - 1].body.solutions.demo.completedSteps, ['s1'])
+  assert.deepEqual(doneIds(r.puts()[r.puts().length - 1].body.solutions.demo), ['s1'])
 })
 
 test('the remote GET is cached for 60 seconds in sessionStorage', async () => {

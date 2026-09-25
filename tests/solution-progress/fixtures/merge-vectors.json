@@ -1,15 +1,17 @@
 {
-  "note": "Canonical merge contract for Solutions progress. This file is the single source: docs-site tests/fixtures/solutions-progress-merge.json and docs-ui tests/solution-progress/fixtures/merge-vectors.json are byte-identical copies. Edit here, copy verbatim; both test suites run every vector.",
+  "note": "Canonical merge contract for solutions progress. This file is the single source: docs-site tests/fixtures/solutions-progress-merge.json and docs-ui tests/solution-progress/fixtures/merge-vectors.json are byte-identical copies. Edit here, copy verbatim; both test suites run every vector.",
   "rules": [
-    "Document shape: {v:1, updatedAt, solutions:{<id>:{completedSteps[], currentStep, startedAt, updatedAt, completedAt, solutionVersion}}}. Timestamps are epoch milliseconds (numbers) on the wire and in storage; ISO 8601 strings are accepted on input and normalized to numbers.",
+    "Document shape, v2: {v:2, updatedAt, solutions:{<id>:{steps:{<stepId>:{done, at}}, currentStep, startedAt, updatedAt, completedAt, solutionVersion}}}. Timestamps are epoch milliseconds (numbers) on the wire and in storage; ISO 8601 strings are accepted on input and normalized to numbers. Output is always v2.",
+    "v1 input is still accepted (migrate on read): a record with no `steps` object has its `completedSteps` list (deduplicated in first-seen order, invalid ids dropped, the last 100 kept) turned into {done:true, at:<that record updatedAt>} entries. When `steps` is an object, `completedSteps` is ignored.",
     "Each vector is merge(existing, incoming) evaluated at clock `now`. docs-site calls mergeAll(stored, clientBody); docs-ui calls merge(remote, local), so its local copy is `incoming`.",
-    "Normalization before merging: solution ids and step ids must match /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/ (invalid step ids dropped); completedSteps deduplicated in first-seen order and capped at the last 100; currentStep must be a valid step id else null; solutionVersion must match /^v\\d+\\.\\d+\\.\\d+$/ else null; unusable timestamps become null, except updatedAt which becomes 0; unknown keys are dropped.",
+    "Normalization before merging: solution ids and step ids must match /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/; a step entry must be an object with a boolean `done`, else it is dropped; an unusable step `at` becomes 0; currentStep must be a valid step id else null; solutionVersion must match /^v\\d+\\.\\d+\\.\\d+$/ else null; unusable timestamps become null, except updatedAt which becomes 0; unknown keys are dropped.",
     "Clamp: any timestamp later than now + 5 minutes becomes now + 5 minutes.",
+    "Steps: per step id over the union of both sides, the entry with the greater `at` wins; on equal `at`, done:true wins. An un-mark is {done:false, at} and is kept, never deleted. The rule ignores which side is existing or incoming, so it is commutative.",
+    "Step cap: at most 100 entries (done or not) per record, keeping the greatest `at` first, ties by id ascending. Step keys are emitted in id order.",
     "Per solution: the record with the greater updatedAt is `later`, the other `earlier`. On a tie the incoming record is `later`.",
-    "completedSteps = earlier.completedSteps followed by the later record steps not already present (ordered union), capped at the last 100.",
     "updatedAt = max(a.updatedAt, b.updatedAt). startedAt = min of the non-null values (null only when both are null).",
     "currentStep = later.currentStep, falling back to earlier.currentStep when null. solutionVersion follows the same rule.",
-    "completedAt = the earliest non-null value when the two solutionVersions are equal or either is null; when both are set and differ, completedAt = null (the completion no longer applies to the current step list).",
+    "completedAt = the earliest non-null value, except: null when both solutionVersions are set and differ (the completion no longer applies to the current step list), and null when any step in the merged record is {done:false} with `at` later than that completedAt (a step was un-marked after the completion). The same un-mark check applies when a single record is normalized.",
     "Solutions present on only one side are kept unchanged after normalization.",
     "Document updatedAt = max(existing.updatedAt, incoming.updatedAt, every merged record updatedAt); 0 for an empty document.",
     "After merging, keep at most 50 solutions, evicting the smallest updatedAt first (ties by id), then keep evicting until the serialized document is at most 32768 bytes.",
@@ -17,7 +19,7 @@
   ],
   "vectors": [
     {
-      "name": "ordered union: earlier record order first, later record additions appended",
+      "name": "v1 input: completedSteps from both sides migrate to done entries and union",
       "now": 1789300800000,
       "existing": {
         "solutions": {
@@ -45,15 +47,24 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789297200000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "start-environment",
-              "create-topics",
-              "register-schemas"
-            ],
+            "steps": {
+              "create-topics": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "register-schemas": {
+                "done": true,
+                "at": 1789297200000
+              },
+              "start-environment": {
+                "done": true,
+                "at": 1789297200000
+              }
+            },
             "currentStep": "register-schemas",
             "startedAt": null,
             "updatedAt": 1789297200000,
@@ -92,15 +103,24 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789297200000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "start-environment",
-              "create-topics",
-              "register-schemas"
-            ],
+            "steps": {
+              "create-topics": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "register-schemas": {
+                "done": true,
+                "at": 1789297200000
+              },
+              "start-environment": {
+                "done": true,
+                "at": 1789297200000
+              }
+            },
             "currentStep": "register-schemas",
             "startedAt": null,
             "updatedAt": 1789297200000,
@@ -130,11 +150,11 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789293600000,
         "solutions": {
           "gaming": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": 1789290000000,
             "updatedAt": 1789293600000,
@@ -174,14 +194,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789297200000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "a",
-              "b"
-            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789297200000
+              },
+              "b": {
+                "done": true,
+                "at": 1789297200000
+              }
+            },
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789297200000,
@@ -219,13 +245,16 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789297200000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "a"
-            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789297200000
+              }
+            },
             "currentStep": "a",
             "startedAt": null,
             "updatedAt": 1789297200000,
@@ -266,14 +295,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789297200000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "a",
-              "b"
-            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789297200000
+              },
+              "b": {
+                "done": true,
+                "at": 1789297200000
+              }
+            },
             "currentStep": "b",
             "startedAt": null,
             "updatedAt": 1789297200000,
@@ -305,11 +340,11 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789297200000,
         "solutions": {
           "gaming": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": "a",
             "startedAt": null,
             "updatedAt": 1789297200000,
@@ -339,11 +374,11 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789293600000,
         "solutions": {
           "gaming": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": "b",
             "startedAt": null,
             "updatedAt": 1789293600000,
@@ -371,11 +406,11 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789293600000,
         "solutions": {
           "gaming": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789293600000,
@@ -399,11 +434,11 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789301100000,
         "solutions": {
           "gaming": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": 1789301100000,
             "updatedAt": 1789301100000,
@@ -434,14 +469,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789293600000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "b",
-              "a"
-            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "b": {
+                "done": true,
+                "at": 1789293600000
+              }
+            },
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789293600000,
@@ -465,11 +506,11 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789293600000,
         "solutions": {
           "gaming": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789293600000,
@@ -496,13 +537,16 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 0,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "a"
-            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 0
+              }
+            },
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 0,
@@ -538,13 +582,16 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789290000000,
         "solutions": {
           "alpha": {
-            "completedSteps": [
-              "x"
-            ],
+            "steps": {
+              "x": {
+                "done": true,
+                "at": 1789286400000
+              }
+            },
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789286400000,
@@ -552,9 +599,12 @@
             "solutionVersion": null
           },
           "beta": {
-            "completedSteps": [
-              "y"
-            ],
+            "steps": {
+              "y": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789290000000,
@@ -570,7 +620,7 @@
       "existing": null,
       "incoming": {},
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 0,
         "solutions": {}
       }
@@ -608,14 +658,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789290000000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "a",
-              "b"
-            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "b": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
             "currentStep": "b",
             "startedAt": 1789282800000,
             "updatedAt": 1789290000000,
@@ -652,14 +708,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789293600000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "b",
-              "a"
-            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "b": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
             "currentStep": null,
             "startedAt": 1789286400000,
             "updatedAt": 1789293600000,
@@ -834,11 +896,11 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789260660000,
         "solutions": {
           "sol-02": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789257720000,
@@ -846,7 +908,7 @@
             "solutionVersion": null
           },
           "sol-03": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789257780000,
@@ -854,7 +916,7 @@
             "solutionVersion": null
           },
           "sol-04": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789257840000,
@@ -862,7 +924,7 @@
             "solutionVersion": null
           },
           "sol-05": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789257900000,
@@ -870,7 +932,7 @@
             "solutionVersion": null
           },
           "sol-06": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789257960000,
@@ -878,7 +940,7 @@
             "solutionVersion": null
           },
           "sol-07": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258020000,
@@ -886,7 +948,7 @@
             "solutionVersion": null
           },
           "sol-08": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258080000,
@@ -894,7 +956,7 @@
             "solutionVersion": null
           },
           "sol-09": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258140000,
@@ -902,7 +964,7 @@
             "solutionVersion": null
           },
           "sol-10": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258200000,
@@ -910,7 +972,7 @@
             "solutionVersion": null
           },
           "sol-11": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258260000,
@@ -918,7 +980,7 @@
             "solutionVersion": null
           },
           "sol-12": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258320000,
@@ -926,7 +988,7 @@
             "solutionVersion": null
           },
           "sol-13": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258380000,
@@ -934,7 +996,7 @@
             "solutionVersion": null
           },
           "sol-14": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258440000,
@@ -942,7 +1004,7 @@
             "solutionVersion": null
           },
           "sol-15": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258500000,
@@ -950,7 +1012,7 @@
             "solutionVersion": null
           },
           "sol-16": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258560000,
@@ -958,7 +1020,7 @@
             "solutionVersion": null
           },
           "sol-17": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258620000,
@@ -966,7 +1028,7 @@
             "solutionVersion": null
           },
           "sol-18": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258680000,
@@ -974,7 +1036,7 @@
             "solutionVersion": null
           },
           "sol-19": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258740000,
@@ -982,7 +1044,7 @@
             "solutionVersion": null
           },
           "sol-20": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258800000,
@@ -990,7 +1052,7 @@
             "solutionVersion": null
           },
           "sol-21": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258860000,
@@ -998,7 +1060,7 @@
             "solutionVersion": null
           },
           "sol-22": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258920000,
@@ -1006,7 +1068,7 @@
             "solutionVersion": null
           },
           "sol-23": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789258980000,
@@ -1014,7 +1076,7 @@
             "solutionVersion": null
           },
           "sol-24": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259040000,
@@ -1022,7 +1084,7 @@
             "solutionVersion": null
           },
           "sol-25": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259100000,
@@ -1030,7 +1092,7 @@
             "solutionVersion": null
           },
           "sol-26": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259160000,
@@ -1038,7 +1100,7 @@
             "solutionVersion": null
           },
           "sol-27": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259220000,
@@ -1046,7 +1108,7 @@
             "solutionVersion": null
           },
           "sol-28": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259280000,
@@ -1054,7 +1116,7 @@
             "solutionVersion": null
           },
           "sol-29": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259340000,
@@ -1062,7 +1124,7 @@
             "solutionVersion": null
           },
           "sol-30": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259400000,
@@ -1070,7 +1132,7 @@
             "solutionVersion": null
           },
           "sol-31": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259460000,
@@ -1078,7 +1140,7 @@
             "solutionVersion": null
           },
           "sol-32": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259520000,
@@ -1086,7 +1148,7 @@
             "solutionVersion": null
           },
           "sol-33": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259580000,
@@ -1094,7 +1156,7 @@
             "solutionVersion": null
           },
           "sol-34": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259640000,
@@ -1102,7 +1164,7 @@
             "solutionVersion": null
           },
           "sol-35": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259700000,
@@ -1110,7 +1172,7 @@
             "solutionVersion": null
           },
           "sol-36": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259760000,
@@ -1118,7 +1180,7 @@
             "solutionVersion": null
           },
           "sol-37": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259820000,
@@ -1126,7 +1188,7 @@
             "solutionVersion": null
           },
           "sol-38": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259880000,
@@ -1134,7 +1196,7 @@
             "solutionVersion": null
           },
           "sol-39": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789259940000,
@@ -1142,7 +1204,7 @@
             "solutionVersion": null
           },
           "sol-40": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260000000,
@@ -1150,7 +1212,7 @@
             "solutionVersion": null
           },
           "sol-41": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260060000,
@@ -1158,7 +1220,7 @@
             "solutionVersion": null
           },
           "sol-42": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260120000,
@@ -1166,7 +1228,7 @@
             "solutionVersion": null
           },
           "sol-43": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260180000,
@@ -1174,7 +1236,7 @@
             "solutionVersion": null
           },
           "sol-44": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260240000,
@@ -1182,7 +1244,7 @@
             "solutionVersion": null
           },
           "sol-45": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260300000,
@@ -1190,7 +1252,7 @@
             "solutionVersion": null
           },
           "sol-46": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260360000,
@@ -1198,7 +1260,7 @@
             "solutionVersion": null
           },
           "sol-47": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260420000,
@@ -1206,7 +1268,7 @@
             "solutionVersion": null
           },
           "sol-48": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260480000,
@@ -1214,7 +1276,7 @@
             "solutionVersion": null
           },
           "sol-49": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260540000,
@@ -1222,7 +1284,7 @@
             "solutionVersion": null
           },
           "sol-50": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260600000,
@@ -1230,7 +1292,7 @@
             "solutionVersion": null
           },
           "sol-51": {
-            "completedSteps": [],
+            "steps": {},
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789260660000,
@@ -1241,7 +1303,7 @@
       }
     },
     {
-      "name": "more than 100 completed steps: the earliest are dropped",
+      "name": "v1 input with more than 100 completed steps keeps the last 100",
       "now": 1789300800000,
       "existing": null,
       "incoming": {
@@ -1359,112 +1421,412 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 1789293600000,
         "solutions": {
           "gaming": {
-            "completedSteps": [
-              "step-5",
-              "step-6",
-              "step-7",
-              "step-8",
-              "step-9",
-              "step-10",
-              "step-11",
-              "step-12",
-              "step-13",
-              "step-14",
-              "step-15",
-              "step-16",
-              "step-17",
-              "step-18",
-              "step-19",
-              "step-20",
-              "step-21",
-              "step-22",
-              "step-23",
-              "step-24",
-              "step-25",
-              "step-26",
-              "step-27",
-              "step-28",
-              "step-29",
-              "step-30",
-              "step-31",
-              "step-32",
-              "step-33",
-              "step-34",
-              "step-35",
-              "step-36",
-              "step-37",
-              "step-38",
-              "step-39",
-              "step-40",
-              "step-41",
-              "step-42",
-              "step-43",
-              "step-44",
-              "step-45",
-              "step-46",
-              "step-47",
-              "step-48",
-              "step-49",
-              "step-50",
-              "step-51",
-              "step-52",
-              "step-53",
-              "step-54",
-              "step-55",
-              "step-56",
-              "step-57",
-              "step-58",
-              "step-59",
-              "step-60",
-              "step-61",
-              "step-62",
-              "step-63",
-              "step-64",
-              "step-65",
-              "step-66",
-              "step-67",
-              "step-68",
-              "step-69",
-              "step-70",
-              "step-71",
-              "step-72",
-              "step-73",
-              "step-74",
-              "step-75",
-              "step-76",
-              "step-77",
-              "step-78",
-              "step-79",
-              "step-80",
-              "step-81",
-              "step-82",
-              "step-83",
-              "step-84",
-              "step-85",
-              "step-86",
-              "step-87",
-              "step-88",
-              "step-89",
-              "step-90",
-              "step-91",
-              "step-92",
-              "step-93",
-              "step-94",
-              "step-95",
-              "step-96",
-              "step-97",
-              "step-98",
-              "step-99",
-              "step-100",
-              "step-101",
-              "step-102",
-              "step-103",
-              "step-104"
-            ],
+            "steps": {
+              "step-10": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-100": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-101": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-102": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-103": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-104": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-11": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-12": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-13": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-14": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-15": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-16": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-17": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-18": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-19": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-20": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-21": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-22": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-23": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-24": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-25": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-26": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-27": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-28": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-29": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-30": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-31": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-32": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-33": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-34": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-35": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-36": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-37": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-38": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-39": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-40": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-41": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-42": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-43": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-44": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-45": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-46": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-47": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-48": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-49": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-5": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-50": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-51": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-52": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-53": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-54": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-55": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-56": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-57": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-58": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-59": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-6": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-60": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-61": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-62": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-63": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-64": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-65": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-66": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-67": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-68": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-69": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-7": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-70": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-71": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-72": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-73": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-74": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-75": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-76": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-77": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-78": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-79": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-8": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-80": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-81": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-82": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-83": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-84": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-85": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-86": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-87": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-88": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-89": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-9": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-90": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-91": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-92": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-93": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-94": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-95": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-96": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-97": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-98": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-99": {
+                "done": true,
+                "at": 1789293600000
+              }
+            },
             "currentStep": null,
             "startedAt": null,
             "updatedAt": 1789293600000,
@@ -1499,13 +1861,16 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 2000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 2000
+              }
+            },
             "currentStep": "s1",
             "startedAt": 1000,
             "updatedAt": 2000,
@@ -1541,14 +1906,20 @@
         "solutions": {}
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 2500,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1",
-              "s2"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 2500
+              },
+              "s2": {
+                "done": true,
+                "at": 2500
+              }
+            },
             "currentStep": "s2",
             "startedAt": 1000,
             "updatedAt": 2500,
@@ -1559,7 +1930,7 @@
       }
     },
     {
-      "name": "docs-ui: ordered-union-earlier-record-first",
+      "name": "docs-ui: v1-union-of-both-sides",
       "now": 1000000,
       "existing": {
         "v": 1,
@@ -1596,15 +1967,24 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 3000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1",
-              "s3",
-              "s2"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 3000
+              },
+              "s2": {
+                "done": true,
+                "at": 3000
+              },
+              "s3": {
+                "done": true,
+                "at": 2000
+              }
+            },
             "currentStep": "s2",
             "startedAt": 1000,
             "updatedAt": 3000,
@@ -1651,14 +2031,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 3000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1",
-              "s2"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 3000
+              },
+              "s2": {
+                "done": true,
+                "at": 3000
+              }
+            },
             "currentStep": "s2",
             "startedAt": 1000,
             "updatedAt": 3000,
@@ -1704,14 +2090,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 2000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1",
-              "s2"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 2000
+              },
+              "s2": {
+                "done": true,
+                "at": 2000
+              }
+            },
             "currentStep": "s2",
             "startedAt": 1000,
             "updatedAt": 2000,
@@ -1759,14 +2151,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 5000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1",
-              "s2"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 5000
+              },
+              "s2": {
+                "done": true,
+                "at": 5000
+              }
+            },
             "currentStep": "s2",
             "startedAt": 1000,
             "updatedAt": 5000,
@@ -1815,15 +2213,24 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 6000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1",
-              "s2",
-              "s3"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 6000
+              },
+              "s2": {
+                "done": true,
+                "at": 6000
+              },
+              "s3": {
+                "done": true,
+                "at": 6000
+              }
+            },
             "currentStep": "s3",
             "startedAt": 1000,
             "updatedAt": 6000,
@@ -1871,14 +2278,20 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 7000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1",
-              "s2"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 7000
+              },
+              "s2": {
+                "done": true,
+                "at": 7000
+              }
+            },
             "currentStep": "s2",
             "startedAt": 1000,
             "updatedAt": 7000,
@@ -1924,13 +2337,16 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 3000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 3000
+              }
+            },
             "currentStep": "s1",
             "startedAt": 1000,
             "updatedAt": 3000,
@@ -1976,13 +2392,16 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 2000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 2000
+              }
+            },
             "currentStep": "s1",
             "startedAt": 1000,
             "updatedAt": 2000,
@@ -1990,9 +2409,12 @@
             "solutionVersion": "v1.0.0"
           },
           "other": {
-            "completedSteps": [
-              "a1"
-            ],
+            "steps": {
+              "a1": {
+                "done": true,
+                "at": 1500
+              }
+            },
             "currentStep": "a1",
             "startedAt": 500,
             "updatedAt": 1500,
@@ -2042,15 +2464,24 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 2000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s2",
-              "s1",
-              "ghost"
-            ],
+            "steps": {
+              "ghost": {
+                "done": true,
+                "at": 2000
+              },
+              "s1": {
+                "done": true,
+                "at": 2000
+              },
+              "s2": {
+                "done": true,
+                "at": 1000
+              }
+            },
             "currentStep": "s1",
             "startedAt": 900,
             "updatedAt": 2000,
@@ -2085,13 +2516,16 @@
         }
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 9000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 2000
+              }
+            },
             "currentStep": "s1",
             "startedAt": 1000,
             "updatedAt": 2000,
@@ -2126,16 +2560,1554 @@
         "solutions": {}
       },
       "expected": {
-        "v": 1,
+        "v": 2,
         "updatedAt": 2000,
         "solutions": {
           "demo": {
-            "completedSteps": [
-              "s1"
-            ],
+            "steps": {
+              "s1": {
+                "done": true,
+                "at": 2000
+              }
+            },
             "currentStep": "s1",
             "startedAt": 1000,
             "updatedAt": 2000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: an un-mark later than the mark wins (server union no longer brings a step back)",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789282800000,
+            "updatedAt": 1789290000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789282800000,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789282800000,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: the same un-mark wins with existing and incoming swapped",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789282800000,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789282800000,
+            "updatedAt": 1789290000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789282800000,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: a mark later than an un-mark wins, even from the record with the older updatedAt",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": false,
+                "at": 1789290000000
+              }
+            },
+            "currentStep": "c",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789293600000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000
+              }
+            },
+            "currentStep": "a",
+            "startedAt": null,
+            "updatedAt": 1789293600000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000
+              }
+            },
+            "currentStep": "c",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: equal step times resolve to done whichever side carries it",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": false,
+                "at": 1789293600000
+              },
+              "b": {
+                "done": true,
+                "at": 1789293600000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "b": {
+                "done": false,
+                "at": 1789293600000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "b": {
+                "done": true,
+                "at": 1789293600000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2 cross-device: phone un-marks, a stale laptop copy that still has the step done does not undo it",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789282800000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789279200000,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789299000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789282800000
+              },
+              "b": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "c": {
+                "done": true,
+                "at": 1789299000000
+              }
+            },
+            "currentStep": "c",
+            "startedAt": 1789279200000,
+            "updatedAt": 1789299000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789299000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789282800000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              },
+              "c": {
+                "done": true,
+                "at": 1789299000000
+              }
+            },
+            "currentStep": "c",
+            "startedAt": 1789279200000,
+            "updatedAt": 1789299000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2 cross-device: a v1 copy from an old tab merges into a v2 record without resurrecting an un-mark",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789282800000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 1,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a",
+              "b"
+            ],
+            "currentStep": "b",
+            "startedAt": 1789279200000,
+            "updatedAt": 1789290000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": "b",
+            "startedAt": 1789279200000,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: completedAt is cleared when a step was un-marked after the completion",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789290000000,
+            "completedAt": 1789290000000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "b": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: completedAt survives a stale later record without one, and an un-mark older than it",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "ghost": {
+                "done": false,
+                "at": 1789282800000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789290000000,
+            "completedAt": 1789290000000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
+            "currentStep": "a",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "ghost": {
+                "done": false,
+                "at": 1789282800000
+              }
+            },
+            "currentStep": "a",
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": 1789290000000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: a single record whose completedAt predates an un-mark normalizes to null",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": 1789293600000,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": false,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: steps wins over completedSteps, bad entries are dropped, a missing at is 0, future at is clamped",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "v": 2,
+        "solutions": {
+          "gaming": {
+            "updatedAt": 1789297200000,
+            "completedSteps": [
+              "legacy"
+            ],
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000,
+                "extra": 1
+              },
+              "b": {
+                "done": "yes",
+                "at": 1789300800000
+              },
+              "Bad Id": {
+                "done": true,
+                "at": 1789300800000
+              },
+              "c": true,
+              "d": {
+                "done": false
+              },
+              "e": {
+                "done": true,
+                "at": 1789387200000
+              }
+            },
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "d": {
+                "done": false,
+                "at": 0
+              },
+              "e": {
+                "done": true,
+                "at": 1789301100000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      }
+    },
+    {
+      "name": "v2: more than 100 step entries keeps the 100 most recently set",
+      "now": 1789300800000,
+      "existing": null,
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "step-000": {
+                "done": false,
+                "at": 1788922800000
+              },
+              "step-001": {
+                "done": true,
+                "at": 1788926400000
+              },
+              "step-002": {
+                "done": true,
+                "at": 1788930000000
+              },
+              "step-003": {
+                "done": true,
+                "at": 1788933600000
+              },
+              "step-004": {
+                "done": true,
+                "at": 1788937200000
+              },
+              "step-005": {
+                "done": true,
+                "at": 1788940800000
+              },
+              "step-006": {
+                "done": true,
+                "at": 1788944400000
+              },
+              "step-007": {
+                "done": false,
+                "at": 1788948000000
+              },
+              "step-008": {
+                "done": true,
+                "at": 1788951600000
+              },
+              "step-009": {
+                "done": true,
+                "at": 1788955200000
+              },
+              "step-010": {
+                "done": true,
+                "at": 1788958800000
+              },
+              "step-011": {
+                "done": true,
+                "at": 1788962400000
+              },
+              "step-012": {
+                "done": true,
+                "at": 1788966000000
+              },
+              "step-013": {
+                "done": true,
+                "at": 1788969600000
+              },
+              "step-014": {
+                "done": false,
+                "at": 1788973200000
+              },
+              "step-015": {
+                "done": true,
+                "at": 1788976800000
+              },
+              "step-016": {
+                "done": true,
+                "at": 1788980400000
+              },
+              "step-017": {
+                "done": true,
+                "at": 1788984000000
+              },
+              "step-018": {
+                "done": true,
+                "at": 1788987600000
+              },
+              "step-019": {
+                "done": true,
+                "at": 1788991200000
+              },
+              "step-020": {
+                "done": true,
+                "at": 1788994800000
+              },
+              "step-021": {
+                "done": false,
+                "at": 1788998400000
+              },
+              "step-022": {
+                "done": true,
+                "at": 1789002000000
+              },
+              "step-023": {
+                "done": true,
+                "at": 1789005600000
+              },
+              "step-024": {
+                "done": true,
+                "at": 1789009200000
+              },
+              "step-025": {
+                "done": true,
+                "at": 1789012800000
+              },
+              "step-026": {
+                "done": true,
+                "at": 1789016400000
+              },
+              "step-027": {
+                "done": true,
+                "at": 1789020000000
+              },
+              "step-028": {
+                "done": false,
+                "at": 1789023600000
+              },
+              "step-029": {
+                "done": true,
+                "at": 1789027200000
+              },
+              "step-030": {
+                "done": true,
+                "at": 1789030800000
+              },
+              "step-031": {
+                "done": true,
+                "at": 1789034400000
+              },
+              "step-032": {
+                "done": true,
+                "at": 1789038000000
+              },
+              "step-033": {
+                "done": true,
+                "at": 1789041600000
+              },
+              "step-034": {
+                "done": true,
+                "at": 1789045200000
+              },
+              "step-035": {
+                "done": false,
+                "at": 1789048800000
+              },
+              "step-036": {
+                "done": true,
+                "at": 1789052400000
+              },
+              "step-037": {
+                "done": true,
+                "at": 1789056000000
+              },
+              "step-038": {
+                "done": true,
+                "at": 1789059600000
+              },
+              "step-039": {
+                "done": true,
+                "at": 1789063200000
+              },
+              "step-040": {
+                "done": true,
+                "at": 1789066800000
+              },
+              "step-041": {
+                "done": true,
+                "at": 1789070400000
+              },
+              "step-042": {
+                "done": false,
+                "at": 1789074000000
+              },
+              "step-043": {
+                "done": true,
+                "at": 1789077600000
+              },
+              "step-044": {
+                "done": true,
+                "at": 1789081200000
+              },
+              "step-045": {
+                "done": true,
+                "at": 1789084800000
+              },
+              "step-046": {
+                "done": true,
+                "at": 1789088400000
+              },
+              "step-047": {
+                "done": true,
+                "at": 1789092000000
+              },
+              "step-048": {
+                "done": true,
+                "at": 1789095600000
+              },
+              "step-049": {
+                "done": false,
+                "at": 1789099200000
+              },
+              "step-050": {
+                "done": true,
+                "at": 1789102800000
+              },
+              "step-051": {
+                "done": true,
+                "at": 1789106400000
+              },
+              "step-052": {
+                "done": true,
+                "at": 1789110000000
+              },
+              "step-053": {
+                "done": true,
+                "at": 1789113600000
+              },
+              "step-054": {
+                "done": true,
+                "at": 1789117200000
+              },
+              "step-055": {
+                "done": true,
+                "at": 1789120800000
+              },
+              "step-056": {
+                "done": false,
+                "at": 1789124400000
+              },
+              "step-057": {
+                "done": true,
+                "at": 1789128000000
+              },
+              "step-058": {
+                "done": true,
+                "at": 1789131600000
+              },
+              "step-059": {
+                "done": true,
+                "at": 1789135200000
+              },
+              "step-060": {
+                "done": true,
+                "at": 1789138800000
+              },
+              "step-061": {
+                "done": true,
+                "at": 1789142400000
+              },
+              "step-062": {
+                "done": true,
+                "at": 1789146000000
+              },
+              "step-063": {
+                "done": false,
+                "at": 1789149600000
+              },
+              "step-064": {
+                "done": true,
+                "at": 1789153200000
+              },
+              "step-065": {
+                "done": true,
+                "at": 1789156800000
+              },
+              "step-066": {
+                "done": true,
+                "at": 1789160400000
+              },
+              "step-067": {
+                "done": true,
+                "at": 1789164000000
+              },
+              "step-068": {
+                "done": true,
+                "at": 1789167600000
+              },
+              "step-069": {
+                "done": true,
+                "at": 1789171200000
+              },
+              "step-070": {
+                "done": false,
+                "at": 1789174800000
+              },
+              "step-071": {
+                "done": true,
+                "at": 1789178400000
+              },
+              "step-072": {
+                "done": true,
+                "at": 1789182000000
+              },
+              "step-073": {
+                "done": true,
+                "at": 1789185600000
+              },
+              "step-074": {
+                "done": true,
+                "at": 1789189200000
+              },
+              "step-075": {
+                "done": true,
+                "at": 1789192800000
+              },
+              "step-076": {
+                "done": true,
+                "at": 1789196400000
+              },
+              "step-077": {
+                "done": false,
+                "at": 1789200000000
+              },
+              "step-078": {
+                "done": true,
+                "at": 1789203600000
+              },
+              "step-079": {
+                "done": true,
+                "at": 1789207200000
+              },
+              "step-080": {
+                "done": true,
+                "at": 1789210800000
+              },
+              "step-081": {
+                "done": true,
+                "at": 1789214400000
+              },
+              "step-082": {
+                "done": true,
+                "at": 1789218000000
+              },
+              "step-083": {
+                "done": true,
+                "at": 1789221600000
+              },
+              "step-084": {
+                "done": false,
+                "at": 1789225200000
+              },
+              "step-085": {
+                "done": true,
+                "at": 1789228800000
+              },
+              "step-086": {
+                "done": true,
+                "at": 1789232400000
+              },
+              "step-087": {
+                "done": true,
+                "at": 1789236000000
+              },
+              "step-088": {
+                "done": true,
+                "at": 1789239600000
+              },
+              "step-089": {
+                "done": true,
+                "at": 1789243200000
+              },
+              "step-090": {
+                "done": true,
+                "at": 1789246800000
+              },
+              "step-091": {
+                "done": false,
+                "at": 1789250400000
+              },
+              "step-092": {
+                "done": true,
+                "at": 1789254000000
+              },
+              "step-093": {
+                "done": true,
+                "at": 1789257600000
+              },
+              "step-094": {
+                "done": true,
+                "at": 1789261200000
+              },
+              "step-095": {
+                "done": true,
+                "at": 1789264800000
+              },
+              "step-096": {
+                "done": true,
+                "at": 1789268400000
+              },
+              "step-097": {
+                "done": true,
+                "at": 1789272000000
+              },
+              "step-098": {
+                "done": false,
+                "at": 1789275600000
+              },
+              "step-099": {
+                "done": true,
+                "at": 1789279200000
+              },
+              "step-100": {
+                "done": true,
+                "at": 1789282800000
+              },
+              "step-101": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "step-102": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "step-103": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-104": {
+                "done": true,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789297200000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "step-005": {
+                "done": true,
+                "at": 1788940800000
+              },
+              "step-006": {
+                "done": true,
+                "at": 1788944400000
+              },
+              "step-007": {
+                "done": false,
+                "at": 1788948000000
+              },
+              "step-008": {
+                "done": true,
+                "at": 1788951600000
+              },
+              "step-009": {
+                "done": true,
+                "at": 1788955200000
+              },
+              "step-010": {
+                "done": true,
+                "at": 1788958800000
+              },
+              "step-011": {
+                "done": true,
+                "at": 1788962400000
+              },
+              "step-012": {
+                "done": true,
+                "at": 1788966000000
+              },
+              "step-013": {
+                "done": true,
+                "at": 1788969600000
+              },
+              "step-014": {
+                "done": false,
+                "at": 1788973200000
+              },
+              "step-015": {
+                "done": true,
+                "at": 1788976800000
+              },
+              "step-016": {
+                "done": true,
+                "at": 1788980400000
+              },
+              "step-017": {
+                "done": true,
+                "at": 1788984000000
+              },
+              "step-018": {
+                "done": true,
+                "at": 1788987600000
+              },
+              "step-019": {
+                "done": true,
+                "at": 1788991200000
+              },
+              "step-020": {
+                "done": true,
+                "at": 1788994800000
+              },
+              "step-021": {
+                "done": false,
+                "at": 1788998400000
+              },
+              "step-022": {
+                "done": true,
+                "at": 1789002000000
+              },
+              "step-023": {
+                "done": true,
+                "at": 1789005600000
+              },
+              "step-024": {
+                "done": true,
+                "at": 1789009200000
+              },
+              "step-025": {
+                "done": true,
+                "at": 1789012800000
+              },
+              "step-026": {
+                "done": true,
+                "at": 1789016400000
+              },
+              "step-027": {
+                "done": true,
+                "at": 1789020000000
+              },
+              "step-028": {
+                "done": false,
+                "at": 1789023600000
+              },
+              "step-029": {
+                "done": true,
+                "at": 1789027200000
+              },
+              "step-030": {
+                "done": true,
+                "at": 1789030800000
+              },
+              "step-031": {
+                "done": true,
+                "at": 1789034400000
+              },
+              "step-032": {
+                "done": true,
+                "at": 1789038000000
+              },
+              "step-033": {
+                "done": true,
+                "at": 1789041600000
+              },
+              "step-034": {
+                "done": true,
+                "at": 1789045200000
+              },
+              "step-035": {
+                "done": false,
+                "at": 1789048800000
+              },
+              "step-036": {
+                "done": true,
+                "at": 1789052400000
+              },
+              "step-037": {
+                "done": true,
+                "at": 1789056000000
+              },
+              "step-038": {
+                "done": true,
+                "at": 1789059600000
+              },
+              "step-039": {
+                "done": true,
+                "at": 1789063200000
+              },
+              "step-040": {
+                "done": true,
+                "at": 1789066800000
+              },
+              "step-041": {
+                "done": true,
+                "at": 1789070400000
+              },
+              "step-042": {
+                "done": false,
+                "at": 1789074000000
+              },
+              "step-043": {
+                "done": true,
+                "at": 1789077600000
+              },
+              "step-044": {
+                "done": true,
+                "at": 1789081200000
+              },
+              "step-045": {
+                "done": true,
+                "at": 1789084800000
+              },
+              "step-046": {
+                "done": true,
+                "at": 1789088400000
+              },
+              "step-047": {
+                "done": true,
+                "at": 1789092000000
+              },
+              "step-048": {
+                "done": true,
+                "at": 1789095600000
+              },
+              "step-049": {
+                "done": false,
+                "at": 1789099200000
+              },
+              "step-050": {
+                "done": true,
+                "at": 1789102800000
+              },
+              "step-051": {
+                "done": true,
+                "at": 1789106400000
+              },
+              "step-052": {
+                "done": true,
+                "at": 1789110000000
+              },
+              "step-053": {
+                "done": true,
+                "at": 1789113600000
+              },
+              "step-054": {
+                "done": true,
+                "at": 1789117200000
+              },
+              "step-055": {
+                "done": true,
+                "at": 1789120800000
+              },
+              "step-056": {
+                "done": false,
+                "at": 1789124400000
+              },
+              "step-057": {
+                "done": true,
+                "at": 1789128000000
+              },
+              "step-058": {
+                "done": true,
+                "at": 1789131600000
+              },
+              "step-059": {
+                "done": true,
+                "at": 1789135200000
+              },
+              "step-060": {
+                "done": true,
+                "at": 1789138800000
+              },
+              "step-061": {
+                "done": true,
+                "at": 1789142400000
+              },
+              "step-062": {
+                "done": true,
+                "at": 1789146000000
+              },
+              "step-063": {
+                "done": false,
+                "at": 1789149600000
+              },
+              "step-064": {
+                "done": true,
+                "at": 1789153200000
+              },
+              "step-065": {
+                "done": true,
+                "at": 1789156800000
+              },
+              "step-066": {
+                "done": true,
+                "at": 1789160400000
+              },
+              "step-067": {
+                "done": true,
+                "at": 1789164000000
+              },
+              "step-068": {
+                "done": true,
+                "at": 1789167600000
+              },
+              "step-069": {
+                "done": true,
+                "at": 1789171200000
+              },
+              "step-070": {
+                "done": false,
+                "at": 1789174800000
+              },
+              "step-071": {
+                "done": true,
+                "at": 1789178400000
+              },
+              "step-072": {
+                "done": true,
+                "at": 1789182000000
+              },
+              "step-073": {
+                "done": true,
+                "at": 1789185600000
+              },
+              "step-074": {
+                "done": true,
+                "at": 1789189200000
+              },
+              "step-075": {
+                "done": true,
+                "at": 1789192800000
+              },
+              "step-076": {
+                "done": true,
+                "at": 1789196400000
+              },
+              "step-077": {
+                "done": false,
+                "at": 1789200000000
+              },
+              "step-078": {
+                "done": true,
+                "at": 1789203600000
+              },
+              "step-079": {
+                "done": true,
+                "at": 1789207200000
+              },
+              "step-080": {
+                "done": true,
+                "at": 1789210800000
+              },
+              "step-081": {
+                "done": true,
+                "at": 1789214400000
+              },
+              "step-082": {
+                "done": true,
+                "at": 1789218000000
+              },
+              "step-083": {
+                "done": true,
+                "at": 1789221600000
+              },
+              "step-084": {
+                "done": false,
+                "at": 1789225200000
+              },
+              "step-085": {
+                "done": true,
+                "at": 1789228800000
+              },
+              "step-086": {
+                "done": true,
+                "at": 1789232400000
+              },
+              "step-087": {
+                "done": true,
+                "at": 1789236000000
+              },
+              "step-088": {
+                "done": true,
+                "at": 1789239600000
+              },
+              "step-089": {
+                "done": true,
+                "at": 1789243200000
+              },
+              "step-090": {
+                "done": true,
+                "at": 1789246800000
+              },
+              "step-091": {
+                "done": false,
+                "at": 1789250400000
+              },
+              "step-092": {
+                "done": true,
+                "at": 1789254000000
+              },
+              "step-093": {
+                "done": true,
+                "at": 1789257600000
+              },
+              "step-094": {
+                "done": true,
+                "at": 1789261200000
+              },
+              "step-095": {
+                "done": true,
+                "at": 1789264800000
+              },
+              "step-096": {
+                "done": true,
+                "at": 1789268400000
+              },
+              "step-097": {
+                "done": true,
+                "at": 1789272000000
+              },
+              "step-098": {
+                "done": false,
+                "at": 1789275600000
+              },
+              "step-099": {
+                "done": true,
+                "at": 1789279200000
+              },
+              "step-100": {
+                "done": true,
+                "at": 1789282800000
+              },
+              "step-101": {
+                "done": true,
+                "at": 1789286400000
+              },
+              "step-102": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "step-103": {
+                "done": true,
+                "at": 1789293600000
+              },
+              "step-104": {
+                "done": true,
+                "at": 1789297200000
+              }
+            },
+            "currentStep": null,
+            "startedAt": null,
+            "updatedAt": 1789297200000,
             "completedAt": null,
             "solutionVersion": "v1.0.0"
           }
@@ -2155,7 +4127,7 @@
     {
       "name": "unsupported schema version",
       "body": {
-        "v": 2,
+        "v": 3,
         "solutions": {}
       }
     },
@@ -2194,6 +4166,37 @@
       "body": {
         "solutions": {
           "progress": {}
+        }
+      },
+      "valid": true
+    },
+    {
+      "name": "v1 bodies are still accepted (control: expected valid)",
+      "body": {
+        "v": 1,
+        "solutions": {
+          "gaming": {
+            "completedSteps": [
+              "a"
+            ]
+          }
+        }
+      },
+      "valid": true
+    },
+    {
+      "name": "v2 bodies are accepted (control: expected valid)",
+      "body": {
+        "v": 2,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "a": {
+                "done": false,
+                "at": 1
+              }
+            }
+          }
         }
       },
       "valid": true
