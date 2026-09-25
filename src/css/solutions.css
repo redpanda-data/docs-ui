@@ -82,6 +82,39 @@
   --sol-surface: #fff;
 }
 
+/* Muted meta text (durations, counts, verified dates, filter counts, nav
+   step numbers). grey-500 is 4.34:1 on white and 3.04:1 on a dark card, both
+   under AA for text this small. grey-600 on white is 6.19:1 (5.68:1 on
+   grey-50); grey-300 is 5.74:1 on a grey-800 card and 7.73:1 on the dark
+   page. Set on html so the sidebar and the product-page rail get it too. */
+html {
+  --sol-meta: var(--grey-600-new);
+}
+
+html[data-theme="dark"] {
+  --sol-meta: var(--grey-300-new);
+}
+
+/* head-component-color.hbs derives only --component-500/600/700 and the
+   tints from the component's metadata color, so on Solutions the light
+   shades (pressed buttons, and every eyebrow, ghost button and chip in dark
+   mode) fell back to the default indigo next to amber primaries. Derive
+   them from the same color here. Dark mode inverts the scale: the light
+   shades are text on dark surfaces, so they mix in less white. With the
+   amber #B45309: dark --component-200 is #ddb290, 6.80:1 on a grey-800 card
+   and 5.05:1 on the active tint. */
+body[data-component="solutions"][data-component-color] {
+  --component-50: color-mix(in sRGB, var(--component-color) 8%, white);
+  --component-100: color-mix(in sRGB, var(--component-color) 16%, white);
+  --component-200: color-mix(in sRGB, var(--component-color) 35%, white);
+}
+
+html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
+  --component-50: color-mix(in sRGB, var(--component-color) 20%, white);
+  --component-100: color-mix(in sRGB, var(--component-color) 30%, white);
+  --component-200: color-mix(in sRGB, var(--component-color) 45%, white);
+}
+
 .sol-doc .visually-hidden,
 .sol-filters .visually-hidden {
   position: absolute;
@@ -114,6 +147,21 @@
   text-transform: uppercase;
   color: var(--component-600);
   margin-bottom: 0.75rem;
+}
+
+/* Page options (markdown-dropdown.hbs) at the end of the eyebrow row, out of
+   the eyebrow's uppercase label styling. */
+.sol-page-options {
+  margin-left: auto;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.sol-page-options .markdown-dropdown {
+  position: relative;
+  display: inline-block;
 }
 
 .sol-eyebrow-link {
@@ -218,8 +266,14 @@
   align-items: center;
   gap: 0.25rem;
   font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
   white-space: nowrap;
+}
+
+/* display:inline-flex above beats the UA [hidden] rule, which showed the
+   "Completed" chip on every step before the reader completed anything. */
+.sol-fact[hidden] {
+  display: none;
 }
 
 /* Proof of the last test run. Muted: it is reassurance a reader looks for
@@ -229,11 +283,7 @@
 }
 
 .sol-fact--verified {
-  color: var(--grey-500-new);
-}
-
-html[data-theme="dark"] .sol-fact--verified {
-  color: var(--grey-400-new);
+  color: var(--sol-meta);
 }
 
 .sol-btn {
@@ -264,6 +314,33 @@ html[data-theme="dark"] .sol-fact--verified {
 .sol-btn:focus-visible {
   outline: 2px solid var(--component-500);
   outline-offset: 2px;
+}
+
+/* base.css sets summary { outline: none } site-wide, so the collapsed rail,
+   the filters and every collapsible block lost their focus indicator
+   (WCAG 2.4.7). :focus-visible keeps mouse clicks ring-free. */
+.sol-doc summary:focus-visible,
+.sol-rail summary:focus-visible,
+.sol-filters summary:focus-visible,
+.sol-rail a:focus-visible,
+.sol-rail button:focus-visible,
+.sol-rail-recs a:focus-visible,
+.sol-filters input:focus-visible,
+.sol-filters button:focus-visible,
+.sol-link-btn:focus-visible,
+.sol-card:focus-visible,
+.sol-rec-card:focus-visible,
+.sol-step-link:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: 2px;
+}
+
+/* Chrome renders a <details> body inside ::details-content, which does not
+   inherit the site's border-box, so the full-width rail buttons stuck out
+   about 9px past the card edge. */
+.sol-btn,
+.sol-rail-body {
+  box-sizing: border-box;
 }
 
 .sol-btn--primary {
@@ -453,7 +530,7 @@ html[data-theme="dark"] .sol-fact--verified {
 
 .sol-hero-progress {
   font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 .sol-meta {
@@ -479,7 +556,7 @@ html[data-theme="dark"] .sol-fact--verified {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
   margin: 0 0 0.25rem;
 }
 
@@ -655,7 +732,7 @@ html[data-theme="dark"] .sol-fact--verified {
 
 .sol-step-time {
   font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 .sol-step-check,
@@ -731,7 +808,7 @@ html[data-theme="dark"] .sol-fact--verified {
 
 .sol-progress-state {
   font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
   margin: 0.5rem 0 0;
 }
 
@@ -753,7 +830,7 @@ html[data-theme="dark"] .sol-fact--verified {
 
 .sol-sync-state {
   font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 .sol-sync-state.is-error {
@@ -794,6 +871,54 @@ html[data-theme="dark"] .sol-fact--verified {
   margin: 0 0 0.625rem;
 }
 
+/* The done block repeated in the step action row, for narrow screens where
+   the rail (and its done card) is collapsed. 28-solution-progress.js shows it
+   only at or below 1280px; the media query keeps it out of the desktop
+   layout even if the script's check and the CSS disagree. */
+.sol-step-actions .sol-done--inline {
+  margin-top: 0;
+}
+
+@media screen and (min-width: 1281px) {
+  .sol-step-actions .sol-done--inline {
+    display: none;
+  }
+}
+
+/* "Start again" confirm, inserted next to the hero button. */
+.sol-reset-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  flex-basis: 100%;
+  margin-top: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--grey-200-new);
+  border-radius: var(--radius-md-new);
+  background: var(--sol-surface);
+}
+
+.sol-reset-confirm-text {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--grey-800-new);
+}
+
+/* Drafts: "Download available at release", inert (no href). grey-600 on
+   grey-50 is 5.68:1; grey-300 on the dark card 5.74:1. */
+.sol-btn[data-sol-download][aria-disabled="true"],
+.sol-btn[data-sol-download].is-disabled,
+.sol-btn[data-sol-download][aria-disabled="true"]:hover,
+.sol-btn[data-sol-download].is-disabled:hover {
+  background: var(--grey-50-new);
+  border-color: var(--grey-200-new);
+  color: var(--grey-600-new);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 /* ---- download + files ----------------------------------------------------- */
 
 .sol-download .sol-btn {
@@ -803,7 +928,7 @@ html[data-theme="dark"] .sol-fact--verified {
 .sol-download-asset {
   margin: 0.5rem 0 0;
   font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 .sol-gate {
@@ -909,7 +1034,7 @@ html[data-theme="dark"] .sol-fact--verified {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 .sol-step-nav--next {
@@ -1114,7 +1239,7 @@ html[data-theme="dark"] .sol-fact--verified {
   font-family: var(--body-font-family-mono, monospace);
   font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 400;
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1274,7 +1399,7 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
 
 .sol-rec-why {
   font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
   font-style: italic;
   border-top: 1px dashed var(--grey-200-new);
   padding-top: 0.375rem;
@@ -1352,7 +1477,7 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
   display: block;
   margin-top: 0.125rem;
   font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 /* Only the difficulty word is capitalized: `capitalize` on the whole line
@@ -1408,10 +1533,6 @@ html[data-theme="dark"] .sol-rail-rec:hover {
 html[data-theme="dark"] .sol-rail-rec:hover .sol-rail-rec-title,
 html[data-theme="dark"] .doc .toc.embedded .sol-rail-rec:hover .sol-rail-rec-title {
   color: var(--component-200);
-}
-
-html[data-theme="dark"] .sol-rail-rec-meta {
-  color: var(--grey-400-new);
 }
 
 html[data-theme="dark"] .sol-rail-rec-diff.is-beginner {
@@ -1515,7 +1636,7 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
   padding: 0;
   margin-bottom: 0.5rem;
 }
@@ -1542,6 +1663,18 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
 .sol-filter-count {
   margin-left: auto;
   font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+/* An option that would leave no cards, given the search and the other
+   groups (29-solutions-home.js). Dimmed, not disabled: ticking it still
+   works and explains the empty state. Both colors keep AA on the page
+   background: grey-600 on white 6.19:1, grey-400 on the dark page 5.70:1. */
+.sol-filter-row.is-empty {
+  color: var(--grey-600-new);
+}
+
+html[data-theme="dark"] .sol-filter-row.is-empty {
   color: var(--grey-400-new);
 }
 
@@ -1556,7 +1689,7 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
 .sol-results-count {
   margin: 0;
   font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 .sol-grid {
@@ -1661,7 +1794,7 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
 
 .sol-card-progress-text {
   font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
   white-space: nowrap;
 }
 
@@ -1677,6 +1810,7 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   color: var(--grey-400-new);
 }
 
+.sol-empty h2,
 .sol-empty h3 {
   font-family: var(--font-display);
   font-size: calc(18 / var(--rem-base) * 1rem);
@@ -1767,14 +1901,30 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   opacity: 1;
 }
 
+/* An error toast (a download that failed): the accent turns red. */
+.sol-toast.is-error {
+  border-left-color: var(--brand-600-new);
+}
+
 /* ---- sidebar nav ----------------------------------------------------------- */
+
+/* Heading groups with no toggle: always open (see nav-tree-solution.hbs). */
+.sol-nav .nav-item.sol-nav-group > .nav-list {
+  display: block;
+}
+
+/* The tick's text equivalent, read with the link name: "Register schemas
+   (completed)". Empty until the step is complete. */
+.sol-nav-step.is-complete .sol-nav-step-status:empty::after {
+  content: "(completed)";
+}
 
 .sol-nav-heading {
   font-size: calc(11 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--grey-500-new);
+  color: var(--sol-meta);
 }
 
 .sol-nav-steps {
@@ -1794,7 +1944,7 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   width: 1.25rem;
   font-size: calc(11 / var(--rem-base) * 1rem);
   font-weight: 700;
-  color: var(--grey-400-new);
+  color: var(--sol-meta);
 }
 
 .sol-nav-step.is-complete .sol-nav-step-num {
@@ -1863,15 +2013,20 @@ html[data-theme="dark"] .sol-btn:hover {
   border-color: var(--grey-600-new);
 }
 
+/* Dark mode lightens --component-600 (and 500 further), which put grey-50
+   text at 3.54:1 (2.71:1 on hover) on the amber. --component-700 is the
+   unlightened metadata color in dark mode: 4.61:1 with grey-50 for #B45309,
+   and hover goes darker, not lighter (5.91:1). */
 html[data-theme="dark"] .sol-btn--primary {
-  background: var(--component-600);
-  border-color: var(--component-600);
+  background: var(--component-700);
+  border-color: var(--component-700);
   color: var(--grey-50-new);
 }
 
 html[data-theme="dark"] .sol-btn--primary:hover {
-  background: var(--component-500);
-  border-color: var(--component-500);
+  background: color-mix(in sRGB, var(--component-700) 85%, black);
+  border-color: color-mix(in sRGB, var(--component-700) 85%, black);
+  color: var(--grey-50-new);
 }
 
 html[data-theme="dark"] .sol-btn--ghost {
@@ -1916,6 +2071,7 @@ html[data-theme="dark"] .sol-panel-title,
 html[data-theme="dark"] .sol-step-title,
 html[data-theme="dark"] .sol-rec-title,
 html[data-theme="dark"] .sol-card-title,
+html[data-theme="dark"] .sol-empty h2,
 html[data-theme="dark"] .sol-empty h3,
 html[data-theme="dark"] .sol-related-link,
 html[data-theme="dark"] .sol-meta dd,
@@ -2042,12 +2198,37 @@ html[data-theme="dark"] .sol-chip--status.is-draft {
   color: #fbbf24;
 }
 
+html[data-theme="dark"] .sol-reset-confirm {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-reset-confirm-text {
+  color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .sol-btn[data-sol-download][aria-disabled="true"],
+html[data-theme="dark"] .sol-btn[data-sol-download].is-disabled {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+  color: var(--grey-300-new);
+}
+
 html[data-theme="dark"] .sol-toast {
   background: var(--grey-100-new);
   color: var(--grey-900-new);
 }
 
 /* ---- responsive ------------------------------------------------------------ */
+
+/* The article's right margin only makes sense beside a rail-width gap:
+   between 1024px and 1280px main.css still lays .content out as a row. On a
+   phone it cost about 12% of the text width. */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  main > .content.sol-content > .doc {
+    margin-right: 48px;
+  }
+}
 
 @media (max-width: 1280px) {
   /* Single column: the collapsed rail sits above the article. Specific enough
@@ -2060,7 +2241,6 @@ html[data-theme="dark"] .sol-toast {
 
   main > .content.sol-content > .doc {
     max-width: none;
-    margin-right: 48px;
   }
 
   .sol-rail {
@@ -2077,7 +2257,13 @@ html[data-theme="dark"] .sol-toast {
     position: static;
   }
 
-  .sol-rail-details > .sol-rail-summary,
+  /* The rail summary stays the flex row it is everywhere else: as a block,
+     its meta ran into the label ("Progress and filesStep 3 of 9") and the
+     ::after chevron, an inline box with no content, rendered at zero size. */
+  .sol-rail-details > .sol-rail-summary {
+    display: flex;
+  }
+
   .sol-filters-summary {
     display: block;
   }

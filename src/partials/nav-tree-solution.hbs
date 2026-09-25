@@ -12,6 +12,16 @@
   flag on either is honoured too). 28-solution-progress.js ticks completed
   steps by matching data-sol-nav-url against the progress store.
 
+  The Steps and All solutions groups carry sol-nav-group, which keeps their
+  lists open: nav.css hides the list of any .nav-item without is-active, and
+  01-nav.js only activates the current page's ancestors, so on the overview
+  and the landing page both headings rendered with nothing under them.
+
+  Each step's tick is visual only, so data-sol-nav-step-status holds the
+  screen-reader text. solutions.css fills it from the is-complete class
+  28-solution-progress.js already toggles (::after content, which is part of
+  the accessible name); the script can also write it directly.
+
   On a solution page: Solutions home, Overview, the ordered steps, then
   Build-along files and Related docs from page-solution. On the landing page
   (or any page without page-solution-nav): Solutions home plus every solution
@@ -48,7 +58,7 @@
       </li>
       {{/if}}
       {{#if nav.steps.length}}
-      <li class="nav-item" data-depth="1">
+      <li class="nav-item sol-nav-group" data-depth="1">
         <div class="item"><span class="nav-text sol-nav-heading">Steps</span></div>
         <ol class="nav-list sol-nav-steps" data-sol-nav-steps>
           {{#each nav.steps}}
@@ -60,6 +70,7 @@
                 <span class="sol-nav-step-check" aria-hidden="true">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </span>
+                <span class="visually-hidden sol-nav-step-status" data-sol-nav-step-status></span>
               </a>
             </div>
           </li>
@@ -72,7 +83,7 @@
       {{#if sol.attachments.length}}
       <li class="nav-item" data-depth="1">
         <div class="item dropdown">
-          <span class="nav-text">Build-along files</span>
+          <span class="nav-text">All build-along files</span>
           <div role="button" tabindex="0" aria-label="Expand navigation" class="nav-item-toggle"><img src="{{{@root.uiRootPath}}}/img/nav-tree-chevron.svg" width="6" height="10" alt=""></div>
         </div>
         <ul class="nav-list">
@@ -106,7 +117,7 @@
       {{else}}
       {{#with (get-solutions-catalog) as |catalog|}}
       {{#if catalog.all.length}}
-      <li class="nav-item" data-depth="1">
+      <li class="nav-item sol-nav-group" data-depth="1">
         <div class="item"><span class="nav-text sol-nav-heading">All solutions</span></div>
         <ul class="nav-list">
           {{#each catalog.all}}

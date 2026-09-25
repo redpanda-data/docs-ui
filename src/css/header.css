@@ -1434,6 +1434,12 @@ html[data-theme="dark"] .tb-signin-modal-sub { color: var(--grey-300, #d0d5dd); 
   gap: 14px;
 }
 
+/* 26-docs-account.js hides the Ask AI benefits for the Solutions download and
+   save-progress prompts; display:flex above would otherwise win over [hidden]. */
+.tb-signin-modal-features[hidden] {
+  display: none;
+}
+
 .tb-signin-modal-feature {
   display: flex;
   align-items: flex-start;
