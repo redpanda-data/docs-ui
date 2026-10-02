@@ -652,8 +652,8 @@ github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 h1:bsUq1dX0N8A
 github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/redpanda-data/benthos/v4 v4.81.0 h1:RxSIZYDF6C8vy9nbaiVet0c0cn2eUUkKMztasl1P4G0=
 github.com/redpanda-data/benthos/v4 v4.81.0/go.mod h1:3+ZgkW9gfnGwhfvckzIR6nVQvmvrrePPub0ECsw0kzc=
-github.com/redpanda-data/connect/v4 v4.111.1 h1:2xfDHdSIH9A6B/JS/Ve7EZU6OLxiJRv519PoslnohTk=
-github.com/redpanda-data/connect/v4 v4.111.1/go.mod h1:nUfXMLV4mkaFM1AQL8+u/mmwu7eUJSXPZf4oFVmoV/g=
+github.com/redpanda-data/connect/v4 v4.112.0 h1:0VF94RQzaNLpMiGNjsgvP4imaTFeLbtHL2tqIMR10gs=
+github.com/redpanda-data/connect/v4 v4.112.0/go.mod h1:nUfXMLV4mkaFM1AQL8+u/mmwu7eUJSXPZf4oFVmoV/g=
 github.com/rickb777/expect v1.3.4 h1:b51hSqdTDdH8xY2y6DgHRNkxKtsAAKIQFNZ7Lf0PbOA=
 github.com/rickb777/expect v1.3.4/go.mod h1:YQhUXHEeFrxMrH/NNwISBCgt+A82EC4Xvx3E5/2q+DE=
 github.com/rickb777/period v1.0.32 h1:Gus4CbTH3WCzJ+7nLxjV1r9DCYfRIxrYNYL8Nt6sIGQ=
