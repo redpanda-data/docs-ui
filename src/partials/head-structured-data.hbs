@@ -48,17 +48,17 @@
     {
       "@type": "TechArticle",
       "@id": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}#article",
-      "headline": "{{json-safe page.title}}",
+      "headline": "{{{json-safe page.title}}}",
       {{#with page.attributes.navtitle}}{{#unless (eq this ../page.title)}}
-      "alternativeHeadline": "{{json-safe this}}",
+      "alternativeHeadline": "{{{json-safe this}}}",
       {{/unless}}{{/with}}
       {{#with page.description}}
-      "description": "{{json-safe this}}",
+      "description": "{{{json-safe this}}}",
       {{/with}}
       {{#with page.keywords}}
-      "keywords": "{{json-safe this}}",
+      "keywords": "{{{json-safe this}}}",
       {{else}}{{#with page.attributes.categories}}
-      "keywords": "{{json-safe this}}",
+      "keywords": "{{{json-safe this}}}",
       {{/with}}{{/with}}
       "url": "{{#with site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{page.url}}",
       {{#with page.attributes.git-created-date}}
@@ -72,19 +72,19 @@
       "dateModified": "{{this}}",
       {{/with}}{{/with}}
       {{#with page.attributes.topic-type}}
-      "learningResourceType": "{{json-safe this}}",
+      "learningResourceType": "{{{json-safe this}}}",
       {{/with}}
       {{#with page.attributes.prerequisites}}
-      "dependencies": "{{json-safe this}}",
+      "dependencies": "{{{json-safe this}}}",
       {{/with}}
       {{#with (page-attribute "personas")}}
       "audience": {
         "@type": "Audience",
-        "audienceType": "{{json-safe this}}"
+        "audienceType": "{{{json-safe this}}}"
       },
       {{/with}}
       {{#with (page-attribute "learning-objective-1")}}
-      "teaches": "{{json-safe this}}{{#with (page-attribute "learning-objective-2")}}; {{json-safe this}}{{/with}}{{#with (page-attribute "learning-objective-3")}}; {{json-safe this}}{{/with}}",
+      "teaches": "{{{json-safe this}}}{{#with (page-attribute "learning-objective-2")}}; {{{json-safe this}}}{{/with}}{{#with (page-attribute "learning-objective-3")}}; {{{json-safe this}}}{{/with}}",
       {{/with}}
       {{#with page.version}}
       "version": "{{this}}",
@@ -105,7 +105,7 @@
       }{{#if page.component.title}},
       "about": {
         "@type": "SoftwareApplication",
-        "name": "{{json-safe page.component.title}}",
+        "name": "{{{json-safe page.component.title}}}",
         "applicationCategory": "Agentic Data Plane"
       }{{/if}}
     }{{/if}}{{#if page.attributes.has-faqs}},
@@ -114,11 +114,11 @@
       "mainEntity": [{{#each (obj page.attributes.faqs)}}{{#unless @first}},{{/unless}}
         {
           "@type": "Question",
-          "name": "{{json-safe this.question}}"{{#if this.anchor}},
+          "name": "{{{json-safe this.question}}}"{{#if this.anchor}},
           "url": "{{#with @root.site.url}}{{{this}}}{{else}}https://docs.redpanda.com{{/with}}{{@root.page.url}}{{#unless (starts-with this.anchor '#')}}#{{/unless}}{{this.anchor}}"{{/if}},
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "{{json-safe this.answer}}"
+            "text": "{{{json-safe this.answer}}}"
           }
         }{{/each}}
       ]
