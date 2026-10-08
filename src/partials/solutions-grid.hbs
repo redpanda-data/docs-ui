@@ -3,13 +3,22 @@
   Every card is rendered at build time (SEO-visible, works without Algolia);
   29-solutions-home.js only shows and hides them.
 --}}
-<div class="sol-results" data-sol-results>
+{{!-- id + tabindex: the "Skip to results" link at the top of the filters
+      lands here, past every filter control. --}}
+<div class="sol-results" id="sol-results" tabindex="-1" data-sol-results>
   {{!-- The cards are h3s, and "Continue learning" (the page's other h2) is
         hidden for a first-time reader, so this keeps the outline h1 > h2 > h3. --}}
   <h2 class="visually-hidden">All solutions</h2>
   <div class="sol-results-head">
     <p class="sol-results-count" data-sol-count aria-live="polite">{{catalog.count}} {{#if (eq catalog.count 1)}}solution{{else}}solutions{{/if}}</p>
+    {{!-- A second Clear next to the count, where a reader looking at a
+          filtered grid is, rather than only at the bottom of the sidebar. --}}
+    <button type="button" class="sol-link-btn sol-filters-clear" data-sol-filters-clear hidden>Clear filters</button>
   </div>
+  {{!-- A deep link whose value no filter offers (a typo, or a value the
+        catalog has since dropped) is ignored; this says so instead of
+        leaving the reader to wonder why the link shows everything. --}}
+  <p class="sol-results-note" data-sol-dropped hidden></p>
   <div class="sol-grid" data-sol-grid>
     {{#each catalog.all}}
     {{> solution-card solution=this}}

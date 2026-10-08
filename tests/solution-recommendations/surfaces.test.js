@@ -148,6 +148,34 @@ test('the sidebar groups stay open and each step has a place for its status text
   assert.match(css, /\.sol-nav-step\.is-complete \.sol-nav-step-status:empty::after \{\s*content: "\(completed\)";/)
 })
 
+test('on the landing page the sidebar holds the filters, not a second list of every solution', () => {
+  const navHbs = engine(['eq', 'ne', 'or', 'increment', 'parse-json', 'relativize', 'find-component', 'get-solutions-catalog'], ['nav-tree-solution', 'solutions-filters'])
+  const titles = ['Keep a live leaderboard current', 'Stream database changes into a lakehouse', 'Fail over to a standby cluster', 'Migrate from Apache Kafka', 'Fan one sports feed out']
+  const solutions = titles.map((title, i) => ({ id: 's' + i, title, url: '/solutions/s' + i + '/', status: 'published', useCases: [i ? 'Data fan-out' : 'Real-time analytics'] }))
+  const html = navHbs.compile('{{> nav-tree-solution}}')({
+    page: {
+      layout: 'solutions-home',
+      url: '/solutions/',
+      component: { name: 'solutions', url: '/solutions/' },
+      attributes: { 'solutions-catalog': JSON.stringify({ solutions, facets: { useCases: [{ value: 'Real-time analytics', count: 1 }, { value: 'Data fan-out', count: 4 }] } }) },
+    },
+    uiRootPath: '/_',
+  })
+  assert.match(html, /Solutions home/)
+  titles.forEach((title) => assert.ok(!html.includes(title), title + ' is in the grid, not the sidebar'))
+  assert.doesNotMatch(html, /All solutions/)
+  assert.match(html, /<div class="sol-nav-filters" data-sol-filters-home>\s*<details class="sol-filters" data-sol-filters open>/, 'the filters are in the sidebar')
+  assert.match(html, /<noscript>[\s\S]*Every solution is listed on this page/)
+
+  // A solution page keeps its own tree and gets no filters.
+  const nav = { overview: { title: 'G', url: '/solutions/g/' }, steps: [{ id: 's1', title: 'One', url: '/solutions/g/s1/', order: 1 }] }
+  const onSolution = navHbs.compile('{{> nav-tree-solution}}')({
+    page: { layout: 'solution', url: '/solutions/g/', component: { name: 'solutions', url: '/solutions/' }, attributes: { 'solution-nav': JSON.stringify(nav), solution: '{}' } },
+    uiRootPath: '/_',
+  })
+  assert.doesNotMatch(onSolution, /data-sol-filters/)
+})
+
 // ---- search from a solution page ---------------------------------------------
 
 // Renders the build-time block of algolia-script.hbs for a page and evaluates

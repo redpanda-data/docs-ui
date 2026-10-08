@@ -230,6 +230,8 @@ site:
               featured: true
               platforms: [self-managed, cloud]
               technologies: [Go, Protobuf, Schema Registry, Redpanda Connect, Redis, Postgres]
+              useCases: [Real-time analytics, Data fan-out]
+              industries: [Gaming]
               categories: [Stream Processing, Clients, Schema Registry, Integration]
               version: v1.0.0
               download: authenticated
@@ -260,6 +262,7 @@ site:
               featured: false
               platforms: [self-managed]
               technologies: [Redpanda Connect, Postgres, Iceberg]
+              useCases: [Change data capture, Data lakehouse]
               categories: [Integration, Stream Processing]
               version: v1.2.0
               download: authenticated
@@ -289,6 +292,7 @@ site:
               featured: false
               platforms: [self-managed, cloud]
               technologies: [Schema Registry, Redpanda Connect]
+              useCases: [Migration]
               categories: [Migration, Schema Registry]
               version: v1.0.3
               download: public
@@ -307,6 +311,8 @@ site:
               featured: false
               platforms: [self-managed]
               technologies: [Envoy, Kubernetes]
+              useCases: [Disaster recovery]
+              industries: [Financial services]
               categories: [Kubernetes]
               version: v0.9.0
               download: none

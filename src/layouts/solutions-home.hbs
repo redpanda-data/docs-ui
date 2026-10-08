@@ -14,9 +14,15 @@
     <article class="doc sol-doc sol-home">
       {{> breadcrumbs}}
       <header class="sol-hero sol-hero--home">
-        <div class="sol-eyebrow"><span class="sol-eyebrow-label">{{#if page.attributes.hero-eyebrow}}{{page.attributes.hero-eyebrow}}{{else}}Redpanda Solutions{{/if}}</span></div>
         <h1 class="page sol-title">{{#if page.attributes.hero-title}}{{{page.attributes.hero-title}}}{{else}}{{{page.title}}}{{/if}}</h1>
-        <p class="sol-lede">{{#if page.attributes.hero-subtitle}}{{page.attributes.hero-subtitle}}{{else}}Complete, runnable systems built on Redpanda. Each solution walks you through a real architecture step by step, verifies the outcome, and shows what changes in production.{{/if}}</p>
+        {{!-- One lede, and the same sentence as the meta description, so
+              search snippets and the page agree. No eyebrow: the breadcrumb
+              and the h1 already name the page. --}}
+        {{#if page.attributes.hero-subtitle}}
+        <p class="sol-lede">{{page.attributes.hero-subtitle}}</p>
+        {{else if page.description}}
+        <p class="sol-lede">{{{detag page.description}}}</p>
+        {{/if}}
       </header>
       {{{page.contents}}}
       {{#*inline "sol-none-published"}}
@@ -38,7 +44,22 @@
         <div class="sol-continue-grid" data-sol-continue-grid></div>
       </section>
       <div class="sol-home-layout">
-        {{> solutions-filters catalog=catalog}}
+        {{!-- The filters render in the sidebar (nav-tree-solution.hbs). Below
+              1024px the sidebar is a drawer behind the menu button, so this
+              script moves them into the slot above the grid, collapsed,
+              before first paint. 29-solutions-home.js keeps them in the right
+              place when the viewport changes afterwards. --}}
+        <div class="sol-filters-slot" data-sol-filters-slot></div>
+        <script>
+          (function () {
+            var filters = document.querySelector('[data-sol-filters]')
+            var slot = document.querySelector('[data-sol-filters-slot]')
+            if (!filters || !slot || typeof window.matchMedia !== 'function') return
+            if (!window.matchMedia('(max-width: 1023px)').matches) return
+            filters.removeAttribute('open')
+            slot.appendChild(filters)
+          })()
+        </script>
         {{> solutions-grid catalog=catalog}}
       </div>
       <script type="application/json" data-sol-catalog>{{{catalog.json}}}</script>

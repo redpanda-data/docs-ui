@@ -19,7 +19,9 @@ function run (options) {
   const catalog = { count: records.length, all: records, facets: o.facets || {} }
 
   // Cards, straight from solution-card.hbs.
-  const cards = records.map((solution) => el('a', attributesOf(renderCard({ solution }))))
+  // cardChildren lets a test put the progress slot inside each card, the way
+  // solution-card.hbs renders it.
+  const cards = records.map((solution) => el('a', attributesOf(renderCard({ solution })), o.cardChildren ? o.cardChildren(solution) : []))
 
   // Checkboxes, straight from solutions-filters.hbs, so the names under test
   // are the names a reader's browser would post.
@@ -29,7 +31,11 @@ function run (options) {
   boxes.forEach((box) => { box.value = box.attrs.value })
   // Each box sits in its label row with the count, as solutions-filters.hbs
   // renders it, so the live counts have somewhere to go.
-  const rows = boxes.map((box) => el('label', { class: 'sol-filter-row' }, [box, el('span', { class: 'sol-filter-count', text: '?' })]))
+  const rows = boxes.map((box) => el('label', { class: 'sol-filter-row' }, [
+    box,
+    el('span', { class: 'sol-filter-count', text: '?' }),
+    el('span', { class: 'visually-hidden', 'data-sol-filter-sr': '', text: '' }),
+  ]))
   ;(o.checked || []).forEach(([name, value]) => {
     const box = boxes.find((b) => b.attrs.name === name && b.attrs.value === value)
     if (!box) throw new Error('no checkbox rendered for ' + name + '=' + value)
@@ -40,6 +46,7 @@ function run (options) {
   const active = el('span', { 'data-sol-filters-active': '', hidden: '' })
   const clear = el('button', { type: 'button', 'data-sol-filters-clear': '', hidden: '' })
   const count = el('p', { 'data-sol-count': '' })
+  const dropped = el('p', { 'data-sol-dropped': '', hidden: '' })
   const empty = el('div', { 'data-sol-empty': '', hidden: '' })
   const form = el('form', { 'data-sol-filters-form': '' }, [q].concat(rows, [clear]))
   // The catalog the layout embeds next to the grid, which search reads for
@@ -50,7 +57,7 @@ function run (options) {
   const body = el('body', {}, [
     continueSection,
     el('details', { 'data-sol-filters': '', open: '' }, [el('summary', {}, [active]), form]),
-    el('div', { 'data-sol-results': '' }, [count, el('div', { 'data-sol-grid': '' }, cards), empty]),
+    el('div', { 'data-sol-results': '' }, [count, dropped, el('div', { 'data-sol-grid': '' }, cards), empty]),
   ].concat(o.noCatalog ? [] : [embedded]))
 
   const document = makeDocument(body)
@@ -78,6 +85,7 @@ function run (options) {
     clear,
     active,
     count,
+    dropped,
     empty,
     continueSection,
     continueGrid,
@@ -86,6 +94,11 @@ function run (options) {
     option: (name, value) => {
       const box = run.find(boxes, name, value)
       return { count: box.parentNode.querySelector('.sol-filter-count').textContent, dimmed: box.parentNode.classList.contains('is-empty') }
+    },
+    // What a screen reader hears after the option's label.
+    spoken: (name, value) => {
+      const box = run.find(boxes, name, value)
+      return box.parentNode.querySelector('[data-sol-filter-sr]').textContent
     },
     replaceState,
     shown,

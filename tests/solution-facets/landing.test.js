@@ -258,6 +258,145 @@ test('"Continue" goes to the first step not done, not the step last visited', ()
 })
 
 // ---------------------------------------------------------------------------
+// search: aliases, short words, step titles
+// ---------------------------------------------------------------------------
+
+const SEARCH_RECORDS = [
+  record('disaster-recovery', {
+    title: 'Fail over to a standby cluster',
+    description: 'Keep a disaster recovery copy of every topic with Shadowing.',
+    technologies: ['Kubernetes'],
+    steps: [{ id: 'verify-end-to-end', title: 'Verify the failover', url: '/s/dr/verify/' }],
+  }),
+  record('multiplayer-gaming', {
+    title: 'Keep a live leaderboard current',
+    description: 'Drive a leaderboard from game events that have scores.',
+    steps: [{ id: 'scale-and-replay', title: 'Scale out and replay the match', url: '/s/mpg/replay/' }],
+  }),
+  record('sports-data-fanout', {
+    title: 'Fan one sports feed out',
+    description: 'High availability is not the point here.',
+    steps: [{ id: 'replay-a-fixture', title: 'Replay a fixture', url: '/s/sports/replay/' }],
+  }),
+  record('kafka-migration', {
+    title: 'Migrate from Apache Kafka',
+    description: 'Move topics, groups and schemas.',
+    categories: ['Schema Registry'],
+    steps: [{ id: 'finish-cutover', title: 'Finish the cutover', url: '/s/kafka/cutover/' }],
+  }),
+  record('cdc-to-lakehouse', {
+    title: 'Stream database changes into a lakehouse',
+    description: 'Change data capture from Postgres into Iceberg.',
+  }),
+]
+
+test('"dr" and "ha" are whole words, found through the aliases, never as a prefix', () => {
+  const r = run({ records: SEARCH_RECORDS, facets: {} })
+  r.search('dr')
+  assert.deepEqual(r.shown(), ['disaster-recovery'], 'not "Drive" in the gaming description')
+  r.search('DR')
+  assert.deepEqual(r.shown(), ['disaster-recovery'], 'case-folded')
+  r.search('ha')
+  assert.deepEqual(r.shown(), ['sports-data-fanout'], 'from "High availability", not "have" or "Shadowing"')
+  r.search('sr')
+  assert.deepEqual(r.shown(), ['kafka-migration'], 'from the Schema Registry category')
+  r.search('cdc')
+  assert.deepEqual(r.shown(), ['cdc-to-lakehouse'])
+})
+
+test('step titles are searchable', () => {
+  const r = run({ records: SEARCH_RECORDS, facets: {} })
+  r.search('replay')
+  assert.deepEqual(r.shown(), ['multiplayer-gaming', 'sports-data-fanout'])
+  r.search('cutover')
+  assert.deepEqual(r.shown(), ['kafka-migration'])
+})
+
+test('the search box says what it searches, briefly', () => {
+  const { renderFilters } = require('./render')
+  assert.match(renderFilters({ catalog: { facets: {} } }), /placeholder="Search solutions"/)
+})
+
+// ---------------------------------------------------------------------------
+// deep links
+// ---------------------------------------------------------------------------
+
+test('a deep link matches a value regardless of case or punctuation, and the URL takes the real spelling', () => {
+  const r = run({ records: RECORDS, facets: FACETS, search: '?use-case=change-data-capture' })
+  assert.deepEqual(r.shown(), ['cdc-to-lakehouse'])
+  assert.equal(r.url(), '/solutions/?use-case=Change+data+capture')
+  assert.equal(r.dropped.hidden, true, 'nothing was ignored')
+})
+
+test('an unknown deep-link value is named in the results, and the note clears on the next change', () => {
+  const r = run({ records: RECORDS, facets: FACETS, search: '?industry=Retail&industry=Gaming' })
+  assert.deepEqual(r.shown(), ['multiplayer-gaming'])
+  assert.equal(r.dropped.hidden, false)
+  assert.equal(r.dropped.textContent, 'Ignored unknown filter: Retail')
+  r.check('platform', 'cloud')
+  assert.equal(r.dropped.hidden, true)
+
+  const cleared = run({ records: RECORDS, facets: FACETS, search: '?industry=Retail' })
+  assert.equal(cleared.dropped.hidden, false)
+  cleared.clickClear()
+  assert.equal(cleared.dropped.hidden, true, 'Clear filters clears it too')
+})
+
+// ---------------------------------------------------------------------------
+// screen-reader counts
+// ---------------------------------------------------------------------------
+
+test('each option speaks its live count as words, and "no matches" when it would empty the grid', () => {
+  const r = run({ records: RECORDS, facets: FACETS })
+  assert.equal(r.spoken('platform', 'cloud'), '(2 matching)')
+  r.check('use-case', 'Change data capture')
+  assert.equal(r.spoken('platform', 'cloud'), '(no matches)')
+  assert.equal(r.spoken('platform', 'self-managed'), '(1 matching)')
+})
+
+// ---------------------------------------------------------------------------
+// the landing layout
+// ---------------------------------------------------------------------------
+
+test('the hero is the h1 and one lede from the page description, with no eyebrow', () => {
+  const hbs = Handlebars.create()
+  ;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-duration', 'format-release-date', 'relativize', 'get-solutions-catalog', 'get-header-color', 'without', 'detag'].forEach((name) => {
+    hbs.registerHelper(name, helper(name))
+  })
+  ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'feedback-footer', 'tracking-pixel', 'footer', 'chat-panel', 'solutions-grid', 'solution-card'].forEach((name) => {
+    hbs.registerPartial(name, '')
+  })
+  const page = {
+    title: 'Redpanda Solutions',
+    description: 'Complete, runnable systems built on Redpanda, step by step.',
+    layout: 'solutions-home',
+    attributes: { 'solutions-catalog': JSON.stringify({ solutions: RECORDS, facets: FACETS }) },
+    contents: '',
+  }
+  const html = hbs.compile(read('src/layouts/solutions-home.hbs'))({ page })
+  assert.doesNotMatch(html, /sol-eyebrow/, 'the breadcrumb and h1 already name the page')
+  assert.equal((html.match(/class="sol-lede"/g) || []).length, 1)
+  assert.match(html, /<p class="sol-lede">Complete, runnable systems built on Redpanda, step by step.<\/p>/, 'the same sentence as the meta description')
+  assert.match(html, /data-sol-filters-slot/, 'the narrow-screen slot is there')
+  assert.doesNotMatch(html, /data-sol-filters-form/, 'the form itself is in the sidebar, not the main column')
+})
+
+test('the results can be skipped to, and both Clear buttons are there', () => {
+  const html = renderLanding({ solutions: RECORDS, facets: FACETS })
+  assert.match(html, /<div class="sol-results" id="sol-results" tabindex="-1" data-sol-results>/)
+  assert.equal((html.match(/data-sol-filters-clear/g) || []).length, 2, 'next to the count and in the empty state')
+  const { renderFilters } = require('./render')
+  const filters = renderFilters({ catalog: { facets: FACETS } })
+  assert.match(filters, /<form[^>]*>\s*<a class="sol-skip" href="#sol-results">Skip to results<\/a>/, 'the skip link is the first thing in the form')
+})
+
+test('hidden progress bars and the empty active-filter badge are really hidden', () => {
+  // Both carry display:flex or inline-flex, which beats the UA [hidden] rule.
+  const css = read('src/css/solutions.css')
+  assert.match(css, /\.sol-filters-active\[hidden\],\s*\n\.sol-card-progress\[hidden\],[\s\S]*?\{\s*display: none;/)
+})
+
+// ---------------------------------------------------------------------------
 // the embedded catalog and chips
 // ---------------------------------------------------------------------------
 

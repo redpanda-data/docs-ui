@@ -119,7 +119,8 @@ test('the filters render a group per non-empty facet, use case first', () => {
     { name: 'use-case', value: 'Real-time analytics' },
     { name: 'industry', value: 'Gaming' },
   ])
-  assert.match(html, /Change data capture<\/span><span class="sol-filter-count">2</, 'the count is shown')
+  assert.match(html, /Change data capture<\/span><span class="sol-filter-count" aria-hidden="true">2</, 'the count is shown')
+  assert.match(html, /<span class="visually-hidden" data-sol-filter-sr>\(2 matching\)<\/span>/, 'and spoken once, as words')
 })
 
 test('every facet group is gated, so an empty catalog renders no filter groups', () => {
@@ -221,7 +222,8 @@ test('every checkbox the filters render is a facet the engine knows', () => {
     const m = line.match(/^\s*'?([\w-]+)'?:\s*'([\w-]+)',?\s*$/)
     if (m) declared[m[1]] = m[2]
   })
-  assert.ok(Object.keys(declared).length >= 6, 'parsed the facet declarations: ' + JSON.stringify(declared))
+  assert.deepEqual(Object.keys(declared), ['use-case', 'industry', 'difficulty', 'platform'],
+    'parsed the facet declarations: ' + JSON.stringify(declared))
 
   const html = renderFilters({
     catalog: {
@@ -233,7 +235,8 @@ test('every checkbox the filters render is a facet the engine knows', () => {
     },
   })
   const names = Array.from(new Set(checkboxesOf(html).map((b) => b.name)))
-  assert.equal(names.length, 6, 'a group per facet: ' + names.join(', '))
+  assert.deepEqual(names, ['use-case', 'industry', 'difficulty', 'platform'],
+    'Category and Technology render no group even when the catalog has values for them')
   names.forEach((name) => {
     assert.ok(declared[name], 'the engine has no attribute mapped for name="' + name + '"')
   })
@@ -243,4 +246,47 @@ test('every checkbox the filters render is a facet the engine knows', () => {
   Object.keys(declared).forEach((facet) => {
     assert.ok(declared[facet] in attrs, 'solution-card.hbs has no ' + declared[facet] + ' for the ' + facet + ' facet')
   })
+})
+
+test('Category and Technology have no group, but search still finds what they name', () => {
+  const html = renderFilters({
+    catalog: {
+      facets: {
+        useCases: FACETS.useCases,
+        industries: FACETS.industries,
+        categories: [{ value: 'Stream Processing', count: 1 }],
+        technologies: [{ value: 'Debezium', count: 1 }],
+      },
+    },
+  })
+  assert.doesNotMatch(html, /name="category"|name="tech"/)
+  assert.doesNotMatch(html, /<legend class="sol-filter-title">(Category|Technology)<\/legend>/)
+  const r = run({ records: RECORDS, facets: FACETS })
+  r.search('debezium')
+  assert.deepEqual(r.shown(), ['cdc'], 'from the technology, which no filter offers')
+})
+
+test('an old ?category= or ?tech= link is tolerated: dropped from the URL, no note, nothing filtered', () => {
+  const r = run({ records: RECORDS, facets: FACETS, search: '?tech=Go&category=Clients&industry=Gaming' })
+  assert.deepEqual(r.shown(), ['gaming'], 'the live parameter still applies')
+  assert.equal(r.url(), '/solutions/?industry=Gaming', 'the retired ones are gone from the address bar')
+  assert.equal(r.dropped.hidden, true, 'and the reader is not told a filter was ignored')
+})
+
+test('a group with one value renders as a single labelled toggle, not a legend over one box', () => {
+  const html = renderFilters({
+    catalog: {
+      facets: {
+        useCases: FACETS.useCases,
+        platforms: [{ value: 'cloud', count: 2 }],
+        difficulty: [{ value: 'advanced', count: 1 }],
+      },
+    },
+  })
+  assert.deepEqual(legendsOf(html), ['Use case'], 'no Runs on or Difficulty legend')
+  assert.match(html, /<input type="checkbox" name="platform" value="cloud"><span class="sol-filter-label">Runs on Redpanda Cloud<\/span>/)
+  assert.match(html, /<input type="checkbox" name="difficulty" value="advanced"><span class="sol-filter-label">Only <span class="sol-diff is-advanced">advanced<\/span> solutions<\/span>/)
+  // Two or more values keep the group.
+  const both = renderFilters({ catalog: { facets: { platforms: [{ value: 'cloud', count: 2 }, { value: 'self-managed', count: 3 }] } } })
+  assert.deepEqual(legendsOf(both), ['Runs on'])
 })

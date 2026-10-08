@@ -3,15 +3,23 @@
  * Solutions landing page: client-side filtering over the catalog the build
  * embedded (<script type="application/json" data-sol-catalog>), URL state
  * (?q= plus one parameter per facet in FACET_ATTR below: use-case, industry,
- * category, difficulty, tech, platform), and the "Continue learning" section
- * filled from the progress store owned by 28-solution-progress.js.
+ * difficulty, platform), and the "Continue learning" section filled from the
+ * progress store owned by 28-solution-progress.js.
  *
  * Search matches every query word at the start of a word in the title,
- * description, slug, technologies, categories, use cases, industries,
- * platforms and difficulty ("cdc" finds cdc-to-lakehouse, "dr" does not find
- * a description that merely contains "android"). Filter counts are live: each
- * option shows how many cards would remain if it were ticked, given the
- * search and the other groups, and an option that would leave none is dimmed.
+ * description, slug, step titles, technologies, categories, use cases,
+ * industries, platforms and difficulty ("cdc" finds cdc-to-lakehouse,
+ * "replay" finds the solutions with a replay step). A query word of one or
+ * two letters must be a whole word ("dr" finds disaster recovery through
+ * ALIASES, not "drive"). Filter counts are live: each option shows how many
+ * cards would remain if it were ticked, given the search and the other
+ * groups, and an option that would leave none is dimmed.
+ *
+ * The filter form lives in the sidebar (nav-tree-solution.hbs). Below 1024px
+ * the sidebar is a drawer, so the form moves above the grid: an inline script
+ * in solutions-home.hbs does it before first paint, and placeFilters() below
+ * keeps it right when the viewport changes. Every selector here is
+ * document-wide for that reason.
  *
  * Every card is already in the DOM (rendered from the same catalog), so this
  * module only shows and hides them; without JS the full list is visible.
@@ -30,12 +38,15 @@
   var FACET_ATTR = {
     'use-case': 'data-use-cases',
     industry: 'data-industries',
-    category: 'data-categories',
     difficulty: 'data-difficulty',
-    tech: 'data-technologies',
     platform: 'data-platforms',
   }
   var FACETS = Object.keys(FACET_ATTR)
+
+  // Parameters older links carry for groups the page no longer offers.
+  // Search still covers what they named, so they are dropped from the URL
+  // without a note: the page is not ignoring anything the reader can set.
+  var RETIRED = ['category', 'tech']
 
   function toArray (list) {
     var out = []
@@ -72,8 +83,15 @@
     return String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
   }
 
-  // Abbreviations readers type that the catalog spells out.
-  var ALIASES = { kubernetes: 'k8s' }
+  // Abbreviations readers type that the catalog spells out: when the left
+  // side appears in a solution's text, the right side becomes searchable too.
+  var ALIASES = {
+    kubernetes: 'k8s',
+    'disaster recovery': 'dr',
+    'high availability': 'ha',
+    'change data capture': 'cdc',
+    'schema registry': 'sr',
+  }
 
   var haystackCache = {}
   function haystack (card) {
@@ -89,6 +107,9 @@
       parts.push((record.industries || []).join(' '))
       parts.push((record.platforms || []).join(' '))
       parts.push(record.difficulty || '')
+      ;(record.steps || []).forEach(function (step) {
+        if (step) parts.push((step.title || '') + ' ' + (step.id || ''))
+      })
     } else {
       ;['data-technologies', 'data-categories', 'data-use-cases', 'data-industries', 'data-platforms', 'data-difficulty'].forEach(function (name) {
         parts.push((card.getAttribute(name) || '').replace(/\|/g, ' '))
@@ -98,6 +119,7 @@
     Object.keys(ALIASES).forEach(function (word) {
       if (hay.indexOf(' ' + word) !== -1) hay += ' ' + ALIASES[word]
     })
+    hay += ' '
     haystackCache[id] = hay
     return hay
   }
@@ -105,6 +127,12 @@
   function queryTokens (q) {
     var text = normalize(q)
     return text ? text.split(' ') : []
+  }
+
+  // The haystack starts and ends with a space, so " dr " is a whole word and
+  // " repl" is a word start.
+  function hasToken (hay, token) {
+    return hay.indexOf(' ' + token + (token.length <= 2 ? ' ' : '')) !== -1
   }
 
   function values (card, facet) {
@@ -126,37 +154,61 @@
   var countEl = $('[data-sol-count]')
   var emptyEl = $('[data-sol-empty]')
   var activeEl = $('[data-sol-filters-active]')
+  var droppedEl = $('[data-sol-dropped]')
 
   // The values a facet can take on this page: its rendered checkboxes.
   function optionsFor (facet) {
     return form ? $$('input[name="' + facet + '"]', form) : []
   }
 
-  // Returns true when the URL carried a facet value with no checkbox (a stale
-  // link, or a value the catalog has since gated out). Such a value would
-  // filter invisibly, with nothing ticked to explain the empty page, so it
-  // is dropped and the URL is rewritten without it.
+  // Returns the raw values the URL carried that no checkbox offers (a typo,
+  // a stale link, or a value the catalog has since gated out), or null when
+  // the URL needs no rewrite. A value is matched without regard to case or
+  // punctuation (?use-case=change-data-capture is "Change data capture").
+  // An unknown value would filter invisibly, with nothing ticked to explain
+  // the empty page, so it is dropped, the URL is rewritten without it, and
+  // the results say which values were ignored.
   function readUrl () {
     var params
-    try { params = new URLSearchParams(window.location.search) } catch (e) { return false }
-    var dropped = false
+    try { params = new URLSearchParams(window.location.search) } catch (e) { return null }
+    var dropped = []
+    var rewrite = false
     state.q = params.get('q') || ''
     FACETS.forEach(function (facet) {
       var known = optionsFor(facet).map(function (el) { return el.value })
-      state[facet] = params.getAll(facet).filter(function (value) {
-        if (value && known.indexOf(value) !== -1) return true
-        dropped = true
-        return false
+      var picked = []
+      params.getAll(facet).forEach(function (value) {
+        var canonical = null
+        for (var i = 0; i < known.length; i++) {
+          if (normalize(known[i]) === normalize(value)) canonical = known[i]
+        }
+        if (canonical !== null) {
+          if (canonical !== value) rewrite = true
+          if (picked.indexOf(canonical) === -1) picked.push(canonical)
+        } else {
+          rewrite = true
+          if (value) dropped.push(value)
+        }
       })
+      state[facet] = picked
     })
-    return dropped
+    RETIRED.forEach(function (name) { if (params.has(name)) rewrite = true })
+    return rewrite ? dropped : null
+  }
+
+  function showDropped (values) {
+    if (!droppedEl) return
+    droppedEl.hidden = !values || !values.length
+    droppedEl.textContent = values && values.length
+      ? (values.length === 1 ? 'Ignored unknown filter: ' : 'Ignored unknown filters: ') + values.join(', ')
+      : ''
   }
 
   function writeUrl () {
     var params
     try { params = new URLSearchParams(window.location.search) } catch (e) { return }
     params.delete('q')
-    FACETS.forEach(function (facet) { params.delete(facet) })
+    FACETS.concat(RETIRED).forEach(function (facet) { params.delete(facet) })
     if (state.q) params.set('q', state.q)
     FACETS.forEach(function (facet) { state[facet].forEach(function (v) { params.append(facet, v) }) })
     var qs = params.toString()
@@ -195,7 +247,7 @@
     if (state.q) {
       var hay = haystack(card)
       var tokens = queryTokens(state.q)
-      for (var i = 0; i < tokens.length; i++) if (hay.indexOf(' ' + tokens[i]) === -1) return false
+      for (var i = 0; i < tokens.length; i++) if (!hasToken(hay, tokens[i])) return false
     }
     for (var f = 0; f < FACETS.length; f++) {
       var facet = FACETS[f]
@@ -217,7 +269,13 @@
         var row = box.parentNode
         var count = row && row.querySelector ? $('.sol-filter-count', row) : null
         if (count) count.textContent = String(n)
-        if (row && row.classList) row.classList[n === 0 && !box.checked ? 'add' : 'remove']('is-empty')
+        var empty = n === 0 && !box.checked
+        if (row && row.classList) row.classList[empty ? 'add' : 'remove']('is-empty')
+        // The visible count is aria-hidden; this is what a screen reader
+        // hears after the label, and it says "no matches" rather than leaving
+        // the dimmed color to say it.
+        var sr = row && row.querySelector ? $('[data-sol-filter-sr]', row) : null
+        if (sr) sr.textContent = empty ? '(no matches)' : '(' + n + ' matching)'
       })
     })
   }
@@ -246,6 +304,7 @@
     state = emptyState()
     applyInputs()
     writeUrl()
+    showDropped(null)
     apply()
   }
 
@@ -332,20 +391,54 @@
     })
   }
 
+  // ---- where the filters live -----------------------------------------------------
+
+  // Sidebar from 1024px, above the grid (collapsed) below it. The inline
+  // script in solutions-home.hbs made the first placement; this follows
+  // viewport changes. A reader who opened or closed the narrow copy keeps
+  // their choice while the viewport stays narrow.
+  function placeFilters () {
+    var filters = $('[data-sol-filters]')
+    var home = $('[data-sol-filters-home]')
+    var slot = $('[data-sol-filters-slot]')
+    if (!filters || !home || !slot || typeof window.matchMedia !== 'function') return
+    var mq = window.matchMedia('(max-width: 1023px)')
+    var toggled = false
+    filters.addEventListener('toggle', function () { if (mq.matches) toggled = true })
+    var place = function () {
+      if (mq.matches) {
+        if (filters.parentNode !== slot) {
+          if (!toggled) filters.open = false
+          slot.appendChild(filters)
+        }
+      } else {
+        filters.open = true
+        if (filters.parentNode !== home) home.insertBefore(filters, home.firstChild || null)
+      }
+    }
+    place()
+    if (typeof mq.addEventListener === 'function') mq.addEventListener('change', place)
+    else if (typeof mq.addListener === 'function') mq.addListener(place)
+  }
+
   // ---- wire up ------------------------------------------------------------------
 
   var droppedFromUrl = readUrl()
   applyInputs()
-  if (droppedFromUrl) writeUrl()
+  if (droppedFromUrl) {
+    writeUrl()
+    showDropped(droppedFromUrl)
+  }
   apply()
 
   if (form) {
-    form.addEventListener('input', function () { readInputs(); writeUrl(); apply() })
-    form.addEventListener('change', function () { readInputs(); writeUrl(); apply() })
+    var onEdit = function () { readInputs(); writeUrl(); showDropped(null); apply() }
+    form.addEventListener('input', onEdit)
+    form.addEventListener('change', onEdit)
   }
   $$('[data-sol-filters-clear]').forEach(function (el) { el.addEventListener('click', clearAll) })
 
-  if (api && api.manageDetails) api.manageDetails('[data-sol-filters]')
+  placeFilters()
 
   renderContinue()
   window.addEventListener('docs-solutions:change', renderContinue)

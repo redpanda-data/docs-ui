@@ -408,7 +408,10 @@ test('get-solutions-catalog normalizes facets to {value, count} from the extensi
   // The filters partial renders the value, never the object.
   const filters = hbs.compile(read('src/partials/solutions-filters.hbs'))({ catalog: fromExtension })
   assert.doesNotMatch(filters, /\[object Object\]/)
-  assert.match(filters, /<input type="checkbox" name="category" value="Clients"><span class="sol-filter-label">Clients<\/span><span class="sol-filter-count">2<\/span>/)
+  assert.match(filters, /<input type="checkbox" name="difficulty" value="beginner"><span class="sol-filter-label"><span class="sol-diff is-beginner">beginner<\/span><\/span><span class="sol-filter-count" aria-hidden="true">1<\/span>/)
+  // Category and Technology are normalized for search and the cards, but no
+  // filter group renders for them.
+  assert.doesNotMatch(filters, /name="category"|name="tech"/)
 })
 
 test('nav-tree-solution consumes the object shape the extension writes for page-solution-nav', () => {

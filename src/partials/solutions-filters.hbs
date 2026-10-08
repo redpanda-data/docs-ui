@@ -2,30 +2,42 @@
   Landing page filters. Context: `catalog` from get-solutions-catalog; each
   facet is an array of {value, count}. The checkbox value is the raw facet
   value, which is what 29-solutions-home.js matches against the cards'
-  data-* attributes and writes into the URL (?use-case=&industry=&category=&difficulty=&tech=&platform=).
-  Rendered as <details> so it can collapse on narrow screens; on desktop the
-  summary is hidden and 29-solutions-home.js keeps it open.
+  data-* attributes and writes into the URL (?q=&use-case=&industry=&difficulty=&platform=).
+
+  Rendered in the landing page's sidebar (nav-tree-solution.hbs). Below
+  1024px the sidebar is a drawer, so an inline script in solutions-home.hbs
+  moves this <details> above the grid and closes it before first paint, and
+  29-solutions-home.js moves it back when the viewport widens. In the sidebar
+  the summary is hidden and the body is always shown.
+
+  Category and Technology have no group: search matches both, and the cards
+  still carry data-categories and data-technologies.
+
+  A group with a single value renders as one labelled toggle instead of a
+  fieldset with one checkbox under a legend: "Runs on Redpanda Cloud" says
+  what ticking it does, "Runs on" over one box does not.
 --}}
 <details class="sol-filters" data-sol-filters open>
   <summary class="sol-filters-summary">
     <span>Filters</span>
     <span class="sol-filters-active" data-sol-filters-active hidden></span>
   </summary>
-  <form class="sol-filters-body" data-sol-filters-form role="search" onsubmit="return false">
+  <form class="sol-filters-body" data-sol-filters-form role="search" aria-label="Filter solutions" onsubmit="return false">
+    <a class="sol-skip" href="#sol-results">Skip to results</a>
     <label class="sol-search">
       <span class="visually-hidden">Search solutions</span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="search" name="q" placeholder="Search by title, technology, or category" autocomplete="off" data-sol-filter-q>
+      <input type="search" name="q" placeholder="Search solutions" autocomplete="off" data-sol-filter-q>
     </label>
     {{!-- Use case first: it is the axis the catalog is organised around, and
-          the one a reader arrives with ("I need change data capture"). Both
-          groups render only when the extension published values for them, and
+          the one a reader arrives with ("I need change data capture"). Every
+          group renders only when the extension published values for it, and
           it publishes none for a facet that matches every solution. --}}
     {{#if catalog.facets.useCases.length}}
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Use case</legend>
       {{#each catalog.facets.useCases}}
-      <label class="sol-filter-row"><input type="checkbox" name="use-case" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="use-case" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
       {{/each}}
     </fieldset>
     {{/if}}
@@ -33,39 +45,36 @@
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Industry</legend>
       {{#each catalog.facets.industries}}
-      <label class="sol-filter-row"><input type="checkbox" name="industry" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="industry" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
       {{/each}}
     </fieldset>
     {{/if}}
-    {{#if catalog.facets.difficulty.length}}
+    {{#if (eq catalog.facets.difficulty.length 1)}}
+    {{#each catalog.facets.difficulty}}
+    <div class="sol-filter-group sol-filter-group--single">
+      <label class="sol-filter-row sol-filter-toggle"><input type="checkbox" name="difficulty" value="{{value}}"><span class="sol-filter-label">Only <span class="sol-diff is-{{value}}">{{value}}</span> solutions</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
+    </div>
+    {{/each}}
+    {{else if catalog.facets.difficulty.length}}
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Difficulty</legend>
       {{#each catalog.facets.difficulty}}
-      <label class="sol-filter-row"><input type="checkbox" name="difficulty" value="{{value}}"><span class="sol-diff is-{{value}}">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="difficulty" value="{{value}}"><span class="sol-filter-label"><span class="sol-diff is-{{value}}">{{value}}</span></span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
       {{/each}}
     </fieldset>
     {{/if}}
-    {{#if catalog.facets.categories.length}}
-    <fieldset class="sol-filter-group">
-      <legend class="sol-filter-title">Category</legend>
-      {{#each catalog.facets.categories}}
-      <label class="sol-filter-row"><input type="checkbox" name="category" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
-      {{/each}}
-    </fieldset>
-    {{/if}}
-    {{#if catalog.facets.technologies.length}}
-    <fieldset class="sol-filter-group">
-      <legend class="sol-filter-title">Technology</legend>
-      {{#each catalog.facets.technologies}}
-      <label class="sol-filter-row"><input type="checkbox" name="tech" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count">{{count}}</span></label>
-      {{/each}}
-    </fieldset>
-    {{/if}}
-    {{#if catalog.facets.platforms.length}}
+    {{#*inline "sol-platform-name"}}{{#if (eq value 'self-managed')}}Self-Managed{{else if (eq value 'cloud')}}Cloud{{else}}{{value}}{{/if}}{{/inline}}
+    {{#if (eq catalog.facets.platforms.length 1)}}
+    {{#each catalog.facets.platforms}}
+    <div class="sol-filter-group sol-filter-group--single">
+      <label class="sol-filter-row sol-filter-toggle"><input type="checkbox" name="platform" value="{{value}}"><span class="sol-filter-label">Runs on Redpanda {{> sol-platform-name value=value}}</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
+    </div>
+    {{/each}}
+    {{else if catalog.facets.platforms.length}}
     <fieldset class="sol-filter-group">
       <legend class="sol-filter-title">Runs on</legend>
       {{#each catalog.facets.platforms}}
-      <label class="sol-filter-row"><input type="checkbox" name="platform" value="{{value}}"><span class="sol-filter-label">{{#if (eq value 'self-managed')}}Self-Managed{{else if (eq value 'cloud')}}Cloud{{else}}{{value}}{{/if}}</span><span class="sol-filter-count">{{count}}</span></label>
+      <label class="sol-filter-row"><input type="checkbox" name="platform" value="{{value}}"><span class="sol-filter-label">{{> sol-platform-name value=value}}</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
       {{/each}}
     </fieldset>
     {{/if}}

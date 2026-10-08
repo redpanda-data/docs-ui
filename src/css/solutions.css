@@ -1549,17 +1549,62 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
 
 /* ---- landing page ---------------------------------------------------------- */
 
+/* A catalogue page, not an article: the grid takes the whole main column
+   (the filters are in the sidebar), so .content drops the 1280px reading
+   width and most of its padding, and the grid below fits 3 or 4 cards
+   across at 1512px. */
+@media screen and (min-width: 1024px) {
+  main.solutions-home > .content {
+    max-width: none;
+    padding: 24px 32px 80px;
+    justify-content: flex-start;
+  }
+
+  main.solutions-home .doc.sol-home {
+    max-width: none;
+    margin-left: 0;
+  }
+}
+
 .sol-home-layout {
-  display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: 2rem;
-  align-items: start;
   margin-top: 1.5rem;
 }
 
-.sol-filters {
-  position: sticky;
-  top: calc(var(--body-top, 4rem) + 1rem);
+/* The filters in the landing page's sidebar (nav-tree-solution.hbs), under
+   "Solutions home": always open, no summary, the groups stacked the way the
+   Labs home stacked its filters. */
+.sol-nav-filters {
+  margin: 0.75rem 12px 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+.sol-nav-filters .sol-filters-summary {
+  display: none;
+}
+
+.sol-filters-noscript {
+  margin: 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+/* Below 1024px the sidebar is a drawer, so the filters move here, above the
+   grid, as a collapsed <details> (solutions-home.hbs, 29-solutions-home.js). */
+.sol-filters-slot:empty {
+  display: none;
+}
+
+.sol-filters-slot {
+  margin-bottom: 1.25rem;
+}
+
+.sol-filters-slot .sol-filters-summary {
+  display: block;
+}
+
+.sol-filters-slot .sol-filters-body {
+  margin-top: 0.75rem;
 }
 
 .sol-filters-summary {
@@ -1591,9 +1636,47 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   font-size: calc(11 / var(--rem-base) * 1rem);
 }
 
+.sol-filters-active[hidden],
+.sol-card-progress[hidden],
+.sol-card-progress .sol-bar[hidden] {
+  display: none;
+}
+
 .sol-filters-body {
   display: grid;
   gap: 1.25rem;
+}
+
+/* First stop in the form: jumps past every filter to the results. Hidden
+   until it has keyboard focus. */
+.sol-skip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.sol-skip:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  justify-self: start;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md-new);
+  background: var(--component-600);
+  color: var(--grey-50-new);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  text-decoration: none;
+}
+
+#sol-results:focus {
+  outline: none;
 }
 
 .sol-search {
@@ -1653,6 +1736,13 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
 
 .sol-filter-row input {
   margin: 0;
+  accent-color: var(--component-600); /* stylelint-disable-line property-no-unknown */
+}
+
+/* A group with a single value: one labelled toggle, no legend
+   (solutions-filters.hbs). */
+.sol-filter-toggle .sol-filter-label .sol-diff {
+  margin: 0 0.125rem;
 }
 
 .sol-filter-label {
@@ -1690,6 +1780,20 @@ html[data-theme="dark"] .sol-filter-row.is-empty {
   margin: 0;
   font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--sol-meta);
+}
+
+.sol-results-note {
+  margin: 0 0 0.75rem;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--grey-700-new);
+}
+
+.sol-results-note[hidden] {
+  display: none;
+}
+
+html[data-theme="dark"] .sol-results-note {
+  color: var(--grey-300-new);
 }
 
 .sol-grid {
@@ -2003,6 +2107,10 @@ html[data-theme="dark"] .sol-filters-summary {
   color: var(--grey-100-new);
 }
 
+html[data-theme="dark"] .sol-nav-filters {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
 html[data-theme="dark"] .sol-card.is-featured {
   background: linear-gradient(180deg, var(--component-bg-tint-hover), var(--grey-800-new) 40%);
   border-color: var(--component-700);
@@ -2249,14 +2357,6 @@ html[data-theme="dark"] .sol-toast {
     margin: 0 1rem 1rem;
   }
 
-  .sol-home-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sol-filters {
-    position: static;
-  }
-
   /* The rail summary stays the flex row it is everywhere else: as a block,
      its meta ran into the label ("Progress and filesStep 3 of 9") and the
      ::after chevron, an inline box with no content, rendered at zero size. */
@@ -2264,12 +2364,7 @@ html[data-theme="dark"] .sol-toast {
     display: flex;
   }
 
-  .sol-filters-summary {
-    display: block;
-  }
-
-  .sol-rail-body,
-  .sol-filters-body {
+  .sol-rail-body {
     margin-top: 0.75rem;
   }
 }
