@@ -1711,6 +1711,21 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   margin-bottom: 1.25rem;
 }
 
+/* In the slot the filters sit inside article.doc, whose accordion styling
+   for <details> (grey panel, padding, chevron at the far right) would frame
+   the summary button a second time. */
+.doc .sol-filters {
+  margin: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.doc .sol-filters > .sol-filters-summary::after {
+  content: none;
+}
+
 .sol-filters-slot .sol-filters-summary {
   display: block;
 }
