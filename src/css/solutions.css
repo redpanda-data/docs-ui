@@ -601,8 +601,10 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
     display: none;
   }
 
-  /* The article's own action row duplicates the rail's card on desktop. */
-  .sol-step-actions-main {
+  /* The action row under the article keeps Mark step complete, where a
+     reader who just finished the step is; only its Save repeats the rail
+     card's, so that one is hidden beside the rail. */
+  .sol-step-actions-main [data-sol-save] {
     display: none;
   }
 }
@@ -2396,6 +2398,15 @@ html[data-theme="dark"] .sol-toast {
     order: -1;
     position: static;
     margin: 0 1rem 1rem;
+  }
+
+  /* On a step page the article comes first: the step header already says
+     "Step n of M", and the rail's progress and files would push the step's
+     first command below the fold. The overview keeps the rail on top, where
+     its finish message and download live. */
+  main.solution-step .sol-rail {
+    order: 0;
+    margin: 1rem 1rem 0;
   }
 
   /* The rail summary stays the flex row it is everywhere else: as a block,

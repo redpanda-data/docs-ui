@@ -225,3 +225,13 @@ test('the overview CTA returns to the step last opened when nothing is marked ye
   assert.equal(going.els.start.getAttribute('href'), '/solutions/demo/s2/')
   assert.equal(going.els.heroProgress.textContent, '1 of 3 steps done')
 })
+
+test('Mark step complete under the article is shown at every width, and a step page puts the article before the rail when narrow', () => {
+  const fs = require('node:fs')
+  const path = require('node:path')
+  const css = fs.readFileSync(path.join(__dirname, '../../src/css/solutions.css'), 'utf8')
+  const wide = css.slice(css.indexOf('@media screen and (min-width: 1281px)'), css.indexOf('/* The on-this-page TOC'))
+  assert.doesNotMatch(wide, /\.sol-step-actions-main \{\s*display: none;/, 'the row is not hidden beside the rail')
+  assert.match(wide, /\.sol-step-actions-main \[data-sol-save\] \{\s*display: none;/, 'only its duplicate Save is')
+  assert.match(css, /main\.solution-step \.sol-rail \{\s*order: 0;/)
+})
