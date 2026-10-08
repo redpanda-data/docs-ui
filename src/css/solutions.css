@@ -1970,6 +1970,10 @@ html[data-theme="dark"] .sol-results-note {
   gap: 0.5rem;
 }
 
+/* .doc .sol-card-title: doc.css's `.doc h3` top margin would otherwise
+   push every title down, and a card with no eyebrow row would open on an
+   empty band. */
+.doc .sol-card-title,
 .sol-card-title {
   font-family: var(--font-display);
   font-size: calc(18 / var(--rem-base) * 1rem);
