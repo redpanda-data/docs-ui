@@ -290,3 +290,17 @@ test('a group with one value renders as a single labelled toggle, not a legend o
   const both = renderFilters({ catalog: { facets: { platforms: [{ value: 'cloud', count: 2 }, { value: 'self-managed', count: 3 }] } } })
   assert.deepEqual(legendsOf(both), ['Runs on'])
 })
+
+test('overview use case and industry chips link to the landing page filtered to that value', () => {
+  const nav = { home: { title: 'Solutions', url: '/solutions/' } }
+  const html = renderMeta({ solution: RECORDS[2], page: { url: '/solutions/gaming/', attributes: { 'solution-nav': JSON.stringify(nav) } } })
+  const hrefs = (html.match(/<a class="sol-chip sol-chip--link" href="([^"]+)"/g) || []).map((m) => m.match(/href="([^"]+)"/)[1])
+  assert.deepEqual(hrefs, ['../?use-case=Real-time%20analytics', '../?industry=Gaming'])
+  // The values survive the landing page's own URL reading.
+  const params = new URLSearchParams(hrefs[0].split('?')[1])
+  const r = run({ records: RECORDS, facets: FACETS, search: '?' + params.toString() })
+  assert.deepEqual(r.shown(), ['gaming'])
+  assert.equal(r.url(), null, 'a known value, so no rewrite')
+  // Without a landing URL the chips stay text.
+  assert.doesNotMatch(renderMeta({ solution: RECORDS[2] }), /sol-chip--link/)
+})

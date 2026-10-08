@@ -34,18 +34,26 @@
     </dd>
   </div>
   {{/if}}
-  {{!-- The two facets the landing page filters on. Plain chips rather than
-        links: they are here so a reader (and an author checking their own
-        attributes) can see which use case and industry this solution is
-        filed under. Industry is absent on most solutions and renders
+  {{!-- The two facets the landing page filters on. Each chip links to the
+        landing page filtered to that value (?use-case= and ?industry=, the
+        names 29-solutions-home.js reads), so "what else is like this" is one
+        click. The landing URL comes from page-solution-nav; without it the
+        chips are plain text. Industry is absent on most solutions and renders
         nothing. --}}
+  {{#*inline "sol-facet-chips"}}
+  {{#each values}}
+  {{#if ../home}}
+  <a class="sol-chip sol-chip--link" href="{{{relativize ../home}}}?{{../param}}={{encode-uri this}}" data-analytics="solution_facet_chip">{{this}}</a>
+  {{else}}
+  <span class="sol-chip">{{this}}</span>
+  {{/if}}
+  {{/each}}
+  {{/inline}}
   {{#if solution.useCases.length}}
   <div class="sol-meta-item sol-meta-item--wide">
     <dt>Use case</dt>
     <dd class="sol-chips">
-      {{#each solution.useCases}}
-      <span class="sol-chip">{{this}}</span>
-      {{/each}}
+      {{> sol-facet-chips values=solution.useCases param='use-case' home=(lookup (lookup (parse-json @root.page.attributes.solution-nav) 'home') 'url')}}
     </dd>
   </div>
   {{/if}}
@@ -53,9 +61,7 @@
   <div class="sol-meta-item">
     <dt>Industry</dt>
     <dd class="sol-chips">
-      {{#each solution.industries}}
-      <span class="sol-chip">{{this}}</span>
-      {{/each}}
+      {{> sol-facet-chips values=solution.industries param='industry' home=(lookup (lookup (parse-json @root.page.attributes.solution-nav) 'home') 'url')}}
     </dd>
   </div>
   {{/if}}
@@ -83,11 +89,13 @@
         Renders nothing at all when the record carries no `verified` block, or
         when `runAt` does not parse as a date: a manifest typo is published to
         the record as written, and a raw string like "last Tuesday" must never
-        reach the page. Absence and garbage are both silent. --}}
+        reach the page. Absence and garbage are both silent. `platforms` names
+        where the run happened ("on Self-Managed"), so a Cloud reader can tell
+        whether the evidence covers them; it is silent when absent. --}}
   {{#with (format-release-date solution.verified.runAt long=true) as |verifiedAt|}}
   <div class="sol-meta-item sol-meta-item--verified">
     <dt>Last verified</dt>
-    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified)}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}</dd>
+    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified)}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}{{#if ../solution.verified.platforms.length}} on {{#each ../solution.verified.platforms}}{{#if (eq this 'self-managed')}}Self-Managed{{else if (eq this 'cloud')}}Cloud{{else}}{{this}}{{/if}}{{#unless @last}} and {{/unless}}{{/each}}{{/if}}</dd>
   </div>
   {{/with}}
 </dl>

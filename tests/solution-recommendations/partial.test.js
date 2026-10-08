@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'encode-uri'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
@@ -477,4 +477,26 @@ test('the recommendation partial never renders a repository URL', () => {
   for (const partial of ['solution-code-download', 'solution-access-gate', 'solution-hero', 'solution-meta', 'solution-card', 'nav-tree-solution']) {
     assert.doesNotMatch(read('src/partials/' + partial + '.hbs'), /github\.com|solution\.repo|\.repo\b/, partial + ' must not render the repo')
   }
+})
+
+test('the Last verified line names where the run happened, and the evidence names the content it covered', () => {
+  const html = renderMeta(withVerified(Object.assign({}, VERIFIED, {
+    platforms: ['self-managed', 'cloud'],
+    content_rev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904', docs: 'abc' },
+    stack_sha256: 'f'.repeat(64),
+  })))
+  assert.match(html, /September 13, 2026 against Redpanda 26\.2\.2 on Self-Managed and Cloud<\/dd>/)
+  assert.match(html, /title="[^"]*, content 4b825dc"/)
+  // Absent: silent, as before.
+  assert.match(renderMeta(withVerified(VERIFIED)), /against Redpanda 26\.2\.2<\/dd>/)
+  assert.equal(helper('format-verified-evidence')({ commands: 1, content_rev: { solution: 'not a hash' } }), '1 command run')
+
+  const step = stepRenderer()({
+    solution: Object.assign({}, SOLUTION, {
+      steps: [{ id: 's1', title: 'One', url: '/s/1/', order: 1, duration: 5 }],
+      verified: { platforms: ['self-managed'] },
+    }),
+    page: { title: 'One', attributes: { 'solution-step-id': 's1', 'solution-verified-at': '2026-09-13T02:14:07Z', 'solution-verified-version': '26.2.2' } },
+  })
+  assert.match(step, /Last verified September 13, 2026 against Redpanda 26\.2\.2 on Self-Managed<\/span>/)
 })

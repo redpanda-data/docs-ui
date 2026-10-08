@@ -28,7 +28,10 @@
 .doc .sol-btn,
 .doc .sol-btn:hover,
 .doc .sol-step-nav,
-.doc .sol-continue .sol-rec-card {
+.doc .sol-continue .sol-rec-card,
+.doc .sol-chip--link,
+.doc .sol-chip--link:hover,
+.doc .sol-recs-all {
   text-decoration: none;
 }
 
@@ -61,6 +64,31 @@
 .doc .sol-related-link:hover,
 .doc .sol-file-link:hover {
   color: var(--component-700);
+}
+
+/* Overview Use case and Industry chips link to the filtered landing page. */
+.doc .sol-chip--link {
+  color: var(--grey-700-new);
+}
+
+.doc .sol-chip--link:hover {
+  color: var(--component-700);
+  border-color: var(--component-200);
+  background: var(--component-bg-tint);
+}
+
+.doc .sol-chip--link:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: 2px;
+}
+
+html[data-theme="dark"] .doc .sol-chip--link {
+  color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .doc .sol-chip--link:hover {
+  color: var(--component-200);
+  border-color: var(--component-500);
 }
 
 .doc .sol-btn--primary,
