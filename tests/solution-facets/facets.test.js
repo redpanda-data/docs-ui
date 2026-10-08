@@ -273,7 +273,7 @@ test('an old ?category= or ?tech= link is tolerated: dropped from the URL, no no
   assert.equal(r.dropped.hidden, true, 'and the reader is not told a filter was ignored')
 })
 
-test('a group with one value renders as a single labelled toggle, not a legend over one box', () => {
+test('a group with one value renders as a single labeled toggle, not a legend over one box', () => {
   const html = renderFilters({
     catalog: {
       facets: {

@@ -1866,7 +1866,7 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   accent-color: var(--component-600); /* stylelint-disable-line property-no-unknown */
 }
 
-/* A group with a single value: one labelled toggle, no legend
+/* A group with a single value: one labeled toggle, no legend
    (solutions-filters.hbs). */
 .sol-filter-toggle .sol-filter-label .sol-diff {
   margin: 0 0.125rem;
