@@ -109,7 +109,10 @@ function buildPage (o) {
   // Sidebar entries (nav-tree-solution): the only source of step ids on a
   // step page. The rail card itself lists no steps.
   els.nav = el('ol', { 'data-sol-nav-steps': '' }, stepIds.map((id) =>
-    el('li', { 'data-sol-nav-step': id, 'data-sol-nav-url': stepUrl(id) })))
+    el('li', { 'data-sol-nav-step': id, 'data-sol-nav-url': stepUrl(id) }, [
+      el('span', { class: 'sol-nav-step-title', text: 'Title of ' + id }),
+      el('span', { class: 'visually-hidden sol-nav-step-status', 'data-sol-nav-step-status': '' }),
+    ])))
   els.count = el('span', { 'data-sol-progress-count': '', text: '0 of ' + stepIds.length })
   els.fill = el('div', { 'data-sol-progress-fill': '' })
   els.bar = el('div', { 'data-sol-progress-bar': '' }, [els.fill])
@@ -136,10 +139,11 @@ function buildPage (o) {
   // download: 'none' renders no CTA at all (solution-progress.hbs wraps it in
   // {{#unless (eq solution.download 'none')}}).
   if (o.download !== 'none') els.download = el('a', downloadAttrs)
+  els.asset = el('p', { class: 'sol-download-asset' })
   els.gateText = el('span', { 'data-sol-gate-text': '', text: 'Sign in to save progress and download the complete example.' })
   els.signin = el('button', { 'data-sol-signin': '', 'data-intent': 'download' })
   els.gate = el('div', { 'data-sol-gate': '' }, [els.gateText, els.signin])
-  els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat([els.gate]))
+  els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat([els.asset, els.gate]))
   els.rail = el('details', { 'data-sol-rail': '', open: '' }, [els.progress, els.downloadPanel])
 
   const main = []

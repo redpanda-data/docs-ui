@@ -59,7 +59,38 @@ test('signed-in Save PUTs immediately, toasts, and never opens the modal', async
   assert.equal(r.puts().length, before + 1)
   assert.equal(r.toasts()[0].textContent, 'Progress saved')
   assert.equal(r.els.gate.hidden, true, 'gate hidden for signed-in readers')
-  assert.equal(r.els.saveLabel.textContent, 'Save now')
+  assert.equal(r.els.save.hidden, true, 'progress syncs on its own, so there is nothing to press')
+})
+
+test('anonymous, Save says what it does; signed in, it appears only to retry a failed sync', async () => {
+  const anon = run({ signedIn: false, accountHidden: false })
+  assert.equal(anon.els.save.hidden, false)
+  assert.equal(anon.els.saveLabel.textContent, 'Sign in to sync', 'not "Save progress" next to "Saved on this device"')
+
+  const failPut = (url, init, fallback) => ((init && init.method) === 'PUT'
+    ? { status: 503, ok: false, json: () => Promise.resolve({ error: 'nope' }) }
+    : fallback(url, init))
+  const failing = run({ signedIn: true, hint: 'true', fetch: failPut })
+  await failing.flush()
+  failing.els.complete.dispatch('click')
+  await failing.flush()
+  assert.equal(failing.els.save.hidden, false, 'shown once a sync failed')
+  assert.equal(failing.els.saveLabel.textContent, 'Retry sync')
+})
+
+test('a draft gate offers saving only: no download to promise', () => {
+  const r = run({ signedIn: false, accountHidden: false, status: 'draft' })
+  assert.equal(r.els.gateText.textContent, 'Sign in to keep your progress across devices.')
+  assert.equal(r.els.signin.getAttribute('data-intent'), 'save')
+  assert.equal(r.els.asset.hidden, true, 'the asset name of a file that does not exist yet is hidden')
+  r.els.signin.dispatch('click')
+  const detail = r.signinEvents()[0].detail
+  assert.equal(detail.cta, 'Sign in and save')
+  assert.match(detail.returnTo, /intent=save/)
+
+  // Coming back with intent=download on a draft starts nothing.
+  const back = run({ signedIn: true, hint: 'true', status: 'draft', search: '?intent=download' })
+  assert.equal(back.toasts().length, 0)
 })
 
 test('signed-in download click navigates normally and is tracked', () => {

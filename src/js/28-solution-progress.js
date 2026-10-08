@@ -566,6 +566,7 @@
     if (stepIndex) return stepIndex
     var ids = []
     var urls = {}
+    var titles = {}
     var seen = {}
     // Step ids and urls come from the sidebar entries (nav-tree-solution:
     // data-sol-nav-step + data-sol-nav-url, present on every solution page)
@@ -581,8 +582,10 @@
       }
       var url = attr(el, 'data-sol-step-url') || attr(el, 'data-sol-nav-url')
       if (url && !urls[id]) urls[id] = url
+      var title = $('.sol-nav-step-title', el) || $('.sol-step-title', el)
+      if (title && !titles[id] && title.textContent) titles[id] = String(title.textContent).trim()
     })
-    stepIndex = { ids: ids, urls: urls }
+    stepIndex = { ids: ids, urls: urls, titles: titles }
     return stepIndex
   }
 
@@ -664,7 +667,12 @@
     }, isError ? 10000 : 4000)
   }
 
+  // Whether the last sync status was a failure. A signed-in reader's Save
+  // button exists only to retry one (render).
+  var syncError = false
+
   function setSyncState (text, isError) {
+    syncError = !!isError
     $$('[data-sol-sync-state]').forEach(function (el) {
       el.textContent = text || ''
       if (el.classList) el.classList[isError ? 'add' : 'remove']('is-error')
@@ -1014,7 +1022,8 @@
   }
 
   function openSignin (intent, filePath) {
-    intent = intent === 'download' ? 'download' : 'save'
+    // A draft has nothing to download, so signing in can only be for saving.
+    intent = intent === 'download' && !isDraft ? 'download' : 'save'
     if (intent !== 'download') filePath = null
     if (!authAvailable()) {
       toast(lastWriteOk === false
@@ -1105,6 +1114,7 @@
       return
     }
     if (intent === 'download') {
+      if (isDraft) return
       // The pending record is the replay guard: a bookmarked or shared URL with
       // intent=download must not start a download on its own, with or without
       // a path. That also covers a sign-in trip docs-site started itself (a
@@ -1189,6 +1199,8 @@
 
   function disableDraftDownloads () {
     if (!isDraft) return
+    // The asset name describes a file that does not exist yet.
+    $$('.sol-download-asset').forEach(function (el) { el.hidden = true })
     $$('[data-sol-download]').forEach(function (el) {
       if (el.getAttribute('aria-disabled') === 'true') return
       el.removeAttribute('href')
@@ -1253,6 +1265,9 @@
         }
       }
       if (el.classList) el.classList[complete ? 'add' : 'remove']('is-complete')
+      // The tick is visual only; this is its text, read with the link name.
+      var navStatus = $('[data-sol-nav-step-status]', el)
+      if (navStatus) navStatus.textContent = complete ? '(completed)' : ''
     })
 
     // Hero CTA: Continue at the first step not done yet (not the step the
@@ -1262,6 +1277,13 @@
     if (start) {
       var label = $('[data-sol-start-label]', start)
       var next = record && !finished ? firstIncomplete(record, ids) : null
+      // Nothing marked yet, but a step was opened: go back to that one. It is
+      // where the reader stopped reading, and step 1 would send them back to
+      // the start of a solution they had already got into.
+      var lastOpened = record && !finished && !done && record.currentStep && urls[record.currentStep]
+        ? record.currentStep
+        : null
+      if (lastOpened) next = lastOpened
       if (next && urls[next]) {
         start.setAttribute('href', urls[next])
         if (label) label.textContent = 'Continue'
@@ -1271,8 +1293,11 @@
       }
       var heroProgress = $('[data-sol-hero-progress]')
       if (heroProgress) {
-        heroProgress.hidden = !record || !done
-        heroProgress.textContent = record && done ? done + ' of ' + total + ' steps done' : ''
+        var openedTitle = lastOpened ? steps().titles[lastOpened] : ''
+        heroProgress.hidden = !record || (!done && !openedTitle)
+        heroProgress.textContent = record && done
+          ? done + ' of ' + total + ' steps done'
+          : openedTitle ? 'Last opened: ' + openedTitle : ''
       }
     }
 
@@ -1281,10 +1306,13 @@
     // has to agree, and so does every header chip.
     if (stepId) {
       var isStepDone = isDone(record, stepId)
+      // The label stays "Mark step complete": aria-pressed carries the state
+      // (a toggle whose name also flips is announced as the opposite of what
+      // it does), and the Completed chips beside it say it visually.
       $$('[data-sol-complete]').forEach(function (button) {
         button.setAttribute('aria-pressed', isStepDone ? 'true' : 'false')
         var completeLabel = $('[data-sol-complete-label]', button)
-        if (completeLabel) completeLabel.textContent = isStepDone ? 'Completed' : 'Mark step complete'
+        if (completeLabel) completeLabel.textContent = 'Mark step complete'
       })
       $$('[data-sol-step-header-status]').forEach(function (el) { el.hidden = !isStepDone })
     }
@@ -1305,8 +1333,17 @@
         if (text) text.textContent = 'Progress is saved on this device.'
         if (button) button.hidden = true
       } else {
-        if (text) text.textContent = 'Sign in to save progress and download the complete example.'
-        if (button) button.hidden = false
+        // A draft has no release to download, so the gate offers only what
+        // signing in does for it: progress on every device.
+        if (text) {
+          text.textContent = isDraft
+            ? 'Sign in to keep your progress across devices.'
+            : 'Sign in to save progress and download the complete example.'
+        }
+        if (button) {
+          button.hidden = false
+          button.setAttribute('data-intent', isDraft ? 'save' : 'download')
+        }
       }
     })
     $$('[data-sol-download][data-requires-auth]').forEach(function (el) { el.hidden = !available })
@@ -1315,10 +1352,12 @@
       el.hidden = authOnly && !available
     })
     disableDraftDownloads()
+    // Signed in, progress syncs on its own, so Save is only there to retry
+    // a sync that failed. Anonymous, it is the way to start syncing.
     $$('[data-sol-save]').forEach(function (el) {
-      el.hidden = !available
+      el.hidden = !available || (signedIn && !syncError)
       var saveLabel = $('[data-sol-save-label]', el)
-      if (saveLabel) saveLabel.textContent = signedIn ? 'Save now' : 'Save progress'
+      if (saveLabel) saveLabel.textContent = signedIn ? 'Retry sync' : 'Sign in to sync'
     })
     // Only claim "saved" when the last write actually landed.
     if (!signedIn) {

@@ -22,7 +22,7 @@ test('both Mark step complete buttons, in live DOM order, and every header chip 
   r.els.complete.dispatch('click')
   for (const [button, label] of [[r.els.complete, r.els.completeLabel], [r.els.rowComplete, r.els.rowCompleteLabel]]) {
     assert.equal(button.getAttribute('aria-pressed'), 'true')
-    assert.equal(label.textContent, 'Completed')
+    assert.equal(label.textContent, 'Mark step complete', 'the name stays put; aria-pressed and the chips carry the state')
   }
   assert.equal(r.els.headerStatus.hidden, false)
   assert.equal(r.els.headerStatus2.hidden, false)
@@ -199,4 +199,29 @@ test('the stored document never carries the derived completedSteps list', () => 
   assert.equal(stored.v, 2)
   assert.equal('completedSteps' in stored.solutions.demo, false)
   assert.deepEqual(r.api.getRecord('demo').completedSteps, ['s1'], 'but readers of the API still get it')
+})
+
+test('the sidebar tick has text: "(completed)" is written into the step entry', () => {
+  const r = run({ page: 'step', stepId: 's1' })
+  const status = (i) => r.els.nav.children[i].querySelector('[data-sol-nav-step-status]').textContent
+  assert.equal(status(0), '')
+  r.els.complete.dispatch('click')
+  assert.equal(status(0), '(completed)')
+  assert.equal(status(1), '')
+  r.clock.now += 1
+  r.els.complete.dispatch('click')
+  assert.equal(status(0), '', 'and cleared when un-marked')
+})
+
+test('the overview CTA returns to the step last opened when nothing is marked yet', () => {
+  const r = run({ page: 'overview', localStore: storeOf(rec({}, { currentStep: 's2' })) })
+  assert.equal(r.els.startLabel.textContent, 'Continue')
+  assert.equal(r.els.start.getAttribute('href'), '/solutions/demo/s2/', 'not step 1')
+  assert.equal(r.els.heroProgress.hidden, false)
+  assert.equal(r.els.heroProgress.textContent, 'Last opened: Title of s2')
+  assert.equal(r.els.state.textContent, 'Started')
+  // Once something is done, the first step not done wins again.
+  const going = run({ page: 'overview', localStore: storeOf(rec({ s1: { done: true, at: 10 } }, { currentStep: 's3' })) })
+  assert.equal(going.els.start.getAttribute('href'), '/solutions/demo/s2/')
+  assert.equal(going.els.heroProgress.textContent, '1 of 3 steps done')
 })

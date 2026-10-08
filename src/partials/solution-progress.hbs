@@ -4,9 +4,10 @@
   the left nav (nav-tree-solution); this card only shows state: bar, "n of M
   steps", state text, the version-changed notice, Save progress with its
   status line, and on step pages the Mark step complete button (the same
-  button also sits under the article for narrow screens, where the rail
-  collapses; CSS shows one or the other). The done block below is repeated in
-  the step action row (data-sol-done-inline) for the same reason. Everything is driven by
+  button also sits under the article, at every width, where a reader who just
+  finished the step is; both copies stay in sync). The done block below is
+  repeated in the step action row (data-sol-done-inline) because the rail
+  collapses on narrow screens. Everything is driven by
   28-solution-progress.js, which reads the step ids from the sidebar entries
   (data-sol-nav-step) or the overview's Steps list (data-sol-step-id).
 --}}
@@ -34,7 +35,7 @@
   <div class="sol-progress-actions">
     <button type="button" class="sol-btn sol-btn--ghost sol-btn--sm" data-sol-save data-intent="save" data-analytics="solution_save_progress">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      <span data-sol-save-label>Save progress</span>
+      <span data-sol-save-label>Sign in to sync</span>
     </button>
     <span class="sol-sync-state" data-sol-sync-state aria-live="polite"></span>
   </div>

@@ -30,13 +30,20 @@
     <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow"><span data-sol-download-label>Download the complete example</span></a>
     {{/unless}}
   </div>
+  {{!-- Shown at every width: the end of the article is where a reader who
+        just finished the step is. The button's name never changes
+        (aria-pressed carries the state), so the Completed chip says it. --}}
   <div class="sol-step-actions-main">
     <button type="button" class="sol-btn sol-btn--primary" data-sol-complete data-analytics="solution_step_complete" aria-pressed="false">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       <span data-sol-complete-label>Mark step complete</span>
     </button>
+    <span class="sol-fact sol-fact--status" data-sol-step-header-status hidden>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      Completed
+    </span>
     <button type="button" class="sol-btn sol-btn--ghost" data-sol-save data-intent="save" data-analytics="solution_save_progress">
-      <span data-sol-save-label>Save progress</span>
+      <span data-sol-save-label>Sign in to sync</span>
     </button>
   </div>
   <div class="sol-step-actions-nav">
