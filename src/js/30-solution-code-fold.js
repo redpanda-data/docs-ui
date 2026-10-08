@@ -12,6 +12,9 @@
  *  - Blocks are measured on load, again on window load (fonts) and on window
  *    resize (debounced), because wrapping changes height: an undecided block
  *    can fold later and a folded block that now fits unfolds.
+ *  - A Verify block (.listingblock.solution-verify) never folds, and a
+ *    plain-text listing (data-lang="text": expected output, logs) folds only
+ *    above 40 rendered lines: the line a reader checks is usually the last.
  *  - A block inside a <details> that is not open is left alone (it cannot be
  *    measured and is already collapsed once). When that details opens
  *    (toggle event) the block is measured and folded if it is long.
@@ -35,6 +38,9 @@
   var VISIBLE_LINES = 14
   // Fold only when at least a couple of lines would be hidden.
   var FOLD_AT_LINES = 16
+  // Plain-text listings (expected output, logs) fold only when much longer:
+  // the line a reader checks (PASS, the final count) is usually the last.
+  var TEXT_FOLD_AT_LINES = 40
   var DEFAULT_LINE_HEIGHT = 24
   var DEFAULT_PADDING = 16
   var RESIZE_DEBOUNCE_MS = 150
@@ -118,11 +124,22 @@
     return typeof h === 'number' && isFinite(h) && h > 0 ? h : 0
   }
 
-  function isTall (pre) {
+  function isTall (pre, foldAt) {
     var h = renderedHeight(pre)
     if (!h) return null
     var m = metrics(pre)
-    return h > FOLD_AT_LINES * m.lineHeight + m.padding
+    return h > (foldAt || FOLD_AT_LINES) * m.lineHeight + m.padding
+  }
+
+  // Verify blocks ([.solution-verify]) are never folded: the result the
+  // reader is checking is at the bottom, and a clipped block hides it.
+  function neverFolds (block) {
+    return hasClass(block, 'solution-verify')
+  }
+
+  function isText (code) {
+    var lang = code && code.getAttribute ? code.getAttribute('data-lang') : null
+    return lang === 'text' || lang === 'txt' || lang === 'plaintext'
   }
 
   function insideClosedDetails (block) {
@@ -202,11 +219,12 @@
     if (title && !hasClass(block, 'sol-code-titled')) decorateTitle(block, title, content)
 
     var result = { block: block, lines: lines, folded: hasClass(block, 'sol-code-fold'), deferred: false }
+    if (neverFolds(block)) return result
     if (insideClosedDetails(block)) {
       result.deferred = true
       return result
     }
-    var tall = isTall(pre)
+    var tall = isTall(pre, isText(code) ? TEXT_FOLD_AT_LINES : FOLD_AT_LINES)
     if (tall === null) {
       result.deferred = true
       return result

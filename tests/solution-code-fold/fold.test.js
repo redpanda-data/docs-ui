@@ -32,7 +32,8 @@ function codeText (lines) {
 // lines the browser laid out (wrapping makes it larger than the source count).
 function listing (lines, opts) {
   const o = opts || {}
-  const code = el('code', { class: 'language-go', 'data-lang': 'go', text: codeText(lines) })
+  const lang = o.lang || 'go'
+  const code = el('code', { class: 'language-' + lang, 'data-lang': lang, text: codeText(lines) })
   const pre = el('pre', { class: 'highlight' }, [code])
   pre.scrollHeight = (o.renderedLines === undefined ? lines : o.renderedLines) * LINE + PAD
   const toolbox = el('div', { class: 'source-toolbox' }, [el('button', { class: 'copy-button' })])
@@ -40,7 +41,7 @@ function listing (lines, opts) {
   const children = []
   if (o.title) children.push(el('div', { class: 'title' }, [el('code', { text: o.title })]))
   children.push(content)
-  const block = el('div', { class: 'listingblock' }, children)
+  const block = el('div', { class: 'listingblock' + (o.cls ? ' ' + o.cls : '') }, children)
   return { block, content, pre, code, toolbox }
 }
 
@@ -263,4 +264,26 @@ test('reduced motion: collapsing scrolls without smooth behavior', () => {
   b2.dispatch('click')
   b2.dispatch('click')
   assert.deepEqual(JSON.parse(JSON.stringify(smooth)), { behavior: 'smooth', block: 'start' })
+})
+
+test('a Verify block never folds, however long: the PASS line is at the bottom', () => {
+  const verify = listing(60, { lang: 'text', cls: 'solution-verify', title: 'Expected output' })
+  const verifyShell = listing(25, { lang: 'bash', cls: 'solution-verify' })
+  run({ blocks: [verify.block, verifyShell.block] })
+  for (const b of [verify, verifyShell]) {
+    assert.ok(!b.block.classes.has('sol-code-fold'))
+    assert.equal(b.block.querySelector('[data-sol-code-fold]'), null)
+    assert.equal(b.content.style.maxHeight, undefined)
+  }
+  assert.ok(verify.block.classes.has('sol-code-titled'), 'the title still becomes a header bar')
+})
+
+test('plain-text output folds only when it is much longer than code', () => {
+  const output = listing(25, { lang: 'text', title: 'Expected output' })
+  const longLog = listing(45, { lang: 'text' })
+  const code = listing(45, { lang: 'go' })
+  run({ blocks: [output.block, longLog.block, code.block] })
+  assert.ok(!output.block.classes.has('sol-code-fold'), '25 lines of expected output stay whole')
+  assert.ok(longLog.block.classes.has('is-folded'), '45 lines of log still fold')
+  assert.ok(code.block.classes.has('is-folded'), '45 lines of Go fold as before')
 })
