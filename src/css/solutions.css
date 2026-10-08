@@ -1100,12 +1100,12 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   background: var(--component-bg-tint);
 }
 
-/* Asciidoctor puts a sidebar block's title inside .content; an open block's
-   title sits directly under the block. Match both. */
+/* The label. Content marks a Verify block as a titled listing
+   (.Expected output + [.solution-verify] + [source,text]) and a production
+   note as a titled open block ([.production-note] + .In production + --),
+   so the title is always a direct child: div.title under the block. */
 .sol-doc .solution-verify > .title,
-.sol-doc .production-note > .title,
-.sol-doc .solution-verify > .content > .title,
-.sol-doc .production-note > .content > .title {
+.sol-doc .production-note > .title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1119,9 +1119,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
 }
 
 .sol-doc .solution-verify > .title::before,
-.sol-doc .production-note > .title::before,
-.sol-doc .solution-verify > .content > .title::before,
-.sol-doc .production-note > .content > .title::before {
+.sol-doc .production-note > .title::before {
   content: "";
   width: 0.5rem;
   height: 0.5rem;
@@ -1134,14 +1132,28 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   background: var(--grey-50-new);
 }
 
-.sol-doc .production-note > .title,
-.sol-doc .production-note > .content > .title {
+.sol-doc .production-note > .title {
   color: var(--grey-700-new);
 }
 
-.sol-doc .production-note > .title::before,
-.sol-doc .production-note > .content > .title::before {
+.sol-doc .production-note > .title::before {
   background: var(--grey-500-new);
+}
+
+/* A Verify listing is already framed by the role above; the listing's own
+   code frame inside it made a box in a box. position stays relative for the
+   copy toolbox. */
+.sol-doc .listingblock.solution-verify > .content,
+html[data-theme="dark"] .sol-doc .listingblock.solution-verify > .content {
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.sol-doc .listingblock.solution-verify > .content > pre {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .sol-doc .solution-verify > :last-child,
@@ -1152,6 +1164,19 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
 }
 
 /* ---- code blocks (30-solution-code-fold.js) --------------------------------- */
+
+/* The listing frame's own colors (doc.css .listingblock > .content), so the
+   fold fade ends in the code background and the header bar, fold button and
+   collapsible summaries share its border in both themes. */
+.sol-doc {
+  --sol-code-bg: var(--grey-50-new, #f9fafb);
+  --sol-code-border: var(--grey-200-new, #e5e7eb);
+}
+
+html[data-theme="dark"] .sol-doc {
+  --sol-code-bg: #0f1727;
+  --sol-code-border: #1c2638;
+}
 
 /* File header bar from a listing title (`.services/leaderboard/main.go`).
    The block's toolbox (copy / Ask AI) is moved into it by the script. */
@@ -1168,7 +1193,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   font-weight: 500;
   color: var(--component-700);
   background: var(--component-bg-tint);
-  border: 1px solid var(--grey-200-new);
+  border: 1px solid var(--sol-code-border);
   border-bottom: 0;
   border-radius: 10px 10px 0 0;
 }
@@ -1209,7 +1234,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   bottom: 0;
   height: 4.5rem;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(245, 245, 245, 0), var(--grey-50-new));
+  background: linear-gradient(180deg, transparent, var(--sol-code-bg));
 }
 
 .sol-doc .sol-code-fold-btn {
@@ -1225,7 +1250,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   font-weight: 600;
   color: var(--component-700);
   background: var(--sol-surface);
-  border: 1px solid var(--grey-200-new);
+  border: 1px solid var(--sol-code-border);
   border-top: 0;
   border-radius: 0 0 10px 10px;
   cursor: pointer;
@@ -1265,7 +1290,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--component-700);
   background: var(--component-bg-tint);
-  border: 1px solid var(--grey-200-new);
+  border: 1px solid var(--sol-code-border);
   border-radius: 10px;
 }
 
@@ -1292,22 +1317,18 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   }
 }
 
-html[data-theme="dark"] .sol-doc .listingblock.sol-code-fold.is-folded > .content::after {
-  background: linear-gradient(180deg, rgba(24, 24, 24, 0), var(--grey-900-new));
-}
-
 html[data-theme="dark"] .sol-doc .listingblock.sol-code-titled > .title.sol-code-title,
 html[data-theme="dark"] .sol-doc details > summary.title,
 html[data-theme="dark"] .sol-doc details.sol-details > summary {
   color: var(--component-200);
   background: var(--component-bg-tint-hover);
-  border-color: var(--grey-700-new);
+  border-color: var(--sol-code-border);
 }
 
 html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
   color: var(--component-200);
-  background: var(--grey-800-new);
-  border-color: var(--grey-700-new);
+  background: var(--sol-code-bg);
+  border-color: var(--sol-code-border);
 }
 
 /* ---- related --------------------------------------------------------------- */
@@ -2273,6 +2294,10 @@ html[data-theme="dark"] .sol-doc .solution-verify > .title {
 
 html[data-theme="dark"] .sol-doc .production-note > .title {
   color: var(--grey-300-new);
+}
+
+html[data-theme="dark"] .sol-doc .production-note > .title::before {
+  background: var(--grey-400-new);
 }
 
 html[data-theme="dark"] .sol-bar,

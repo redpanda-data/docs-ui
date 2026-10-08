@@ -275,7 +275,8 @@ test('a Verify block never folds, however long: the PASS line is at the bottom',
     assert.equal(b.block.querySelector('[data-sol-code-fold]'), null)
     assert.equal(b.content.style.maxHeight, undefined)
   }
-  assert.ok(verify.block.classes.has('sol-code-titled'), 'the title still becomes a header bar')
+  assert.ok(!verify.block.classes.has('sol-code-titled'), 'its title stays the Expected output label, not a file bar')
+  assert.ok(verify.content.querySelector('.source-toolbox'), 'and the copy button stays in the block')
 })
 
 test('plain-text output folds only when it is much longer than code', () => {
@@ -286,4 +287,22 @@ test('plain-text output folds only when it is much longer than code', () => {
   assert.ok(!output.block.classes.has('sol-code-fold'), '25 lines of expected output stay whole')
   assert.ok(longLog.block.classes.has('is-folded'), '45 lines of log still fold')
   assert.ok(code.block.classes.has('is-folded'), '45 lines of Go fold as before')
+})
+
+test('the role labels are reachable for the blocks content now uses, in light and dark', () => {
+  const css = fs.readFileSync(path.join(__dirname, '../../src/css/solutions.css'), 'utf8')
+  // div.openblock.production-note > div.title and div.listingblock.solution-verify > div.title
+  assert.match(css, /\.sol-doc \.production-note > \.title \{/)
+  assert.match(css, /html\[data-theme="dark"\] \.sol-doc \.production-note > \.title \{/)
+  assert.match(css, /html\[data-theme="dark"\] \.sol-doc \.solution-verify > \.title \{/)
+  assert.doesNotMatch(css, /> \.content > \.title/, 'no selectors for the sidebar-block form content no longer uses')
+  // A Verify listing is framed once.
+  assert.match(css, /\.sol-doc \.listingblock\.solution-verify > \.content,\s*\nhtml\[data-theme="dark"\] \.sol-doc \.listingblock\.solution-verify > \.content \{[^}]*background: transparent;[^}]*border: 0;/)
+})
+
+test('the fold fade and its button use the code frame colors in both themes', () => {
+  const css = fs.readFileSync(path.join(__dirname, '../../src/css/solutions.css'), 'utf8')
+  assert.match(css, /html\[data-theme="dark"\] \.sol-doc \{\s*--sol-code-bg: #0f1727;\s*--sol-code-border: #1c2638;/, 'the dark listing frame from doc.css')
+  assert.match(css, /is-folded > \.content::after \{[^}]*linear-gradient\(180deg, transparent, var\(--sol-code-bg\)\)/)
+  assert.doesNotMatch(css, /rgba\(24, 24, 24, 0\)/, 'no neutral grey fade left over')
 })

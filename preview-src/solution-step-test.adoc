@@ -191,9 +191,8 @@ func serve(rdb *redis.Client) {
 ----
 ====
 
-[.solution-verify]
-.Verify
-****
+== Verify
+
 Check that the cluster is healthy and that Connect is ready to accept a pipeline:
 
 [source,bash]
@@ -202,20 +201,40 @@ rpk cluster health
 curl -s localhost:4195/ready
 ----
 
-Expected output:
-
-[source]
+.Expected output
+[.solution-verify]
+[source,text]
 ----
 CLUSTER HEALTH OVERVIEW
 =======================
 Healthy:                          true
-...
+Unhealthy reasons:                []
+Controller ID:                    0
+All nodes:                        [0]
+Nodes down:                       []
+Leaderless partitions (0):        []
+Under-replicated partitions (0):  []
+Topics:                           6
+Partitions:                       18
+Replicas:                         18
+Nodes with high disk usage:       []
+Nodes in maintenance mode:        []
+Unavailable nodes:                []
+Cluster UUID:                     5c4f7d2e
+Last update:                      2026-09-13T02:14:07Z
 OK
+PASS 9/9 checks
 ----
-****
+
+== Files for this step
+
+The files this step uses are in the *All build-along files* panel.
+
+== In production
 
 [.production-note]
 .In production
-****
+--
 Do not run Console on the same host as a broker, and put the Schema Registry behind TLS: every producer and consumer in this solution fetches schemas from it.
-****
+For the full picture, see xref:verify-end-to-end.adoc#prod-security[Production considerations: security].
+--

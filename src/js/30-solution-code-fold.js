@@ -12,7 +12,8 @@
  *  - Blocks are measured on load, again on window load (fonts) and on window
  *    resize (debounced), because wrapping changes height: an undecided block
  *    can fold later and a folded block that now fits unfolds.
- *  - A Verify block (.listingblock.solution-verify) never folds, and a
+ *  - A Verify block (.listingblock.solution-verify) never folds and keeps
+ *    its title as the role's label rather than a file header bar, and a
  *    plain-text listing (data-lang="text": expected output, logs) folds only
  *    above 40 rendered lines: the line a reader checks is usually the last.
  *  - A block inside a <details> that is not open is left alone (it cannot be
@@ -215,11 +216,13 @@
     if (!pre) return null
     var code = pre.querySelector('code') || pre
     var lines = countLines(code.textContent)
+    var result = { block: block, lines: lines, folded: hasClass(block, 'sol-code-fold'), deferred: false }
+    // A Verify block keeps its title as the role's label (Expected output),
+    // not a file header bar, and is never folded.
+    if (neverFolds(block)) return result
     var title = childWithClass(block, 'title')
     if (title && !hasClass(block, 'sol-code-titled')) decorateTitle(block, title, content)
 
-    var result = { block: block, lines: lines, folded: hasClass(block, 'sol-code-fold'), deferred: false }
-    if (neverFolds(block)) return result
     if (insideClosedDetails(block)) {
       result.deferred = true
       return result
