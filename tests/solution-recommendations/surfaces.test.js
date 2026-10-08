@@ -216,3 +216,14 @@ test('dedupeCrumbs and solutionTitleOf', () => {
   assert.equal(sandbox.solutionTitleOf({ type: 'Doc', title: 'X', solutionTitle: 'G' }), '')
   assert.match(read('src/layouts/search.hbs'), /hit\.solutionTitle/, '/search renders it too')
 })
+
+// ---- breadcrumbs ---------------------------------------------------------------
+
+test('the topbar breadcrumb truncates the page title, never the middle crumb', () => {
+  // "Home > Solutions > title" has three crumbs, which the collapse script
+  // leaves alone, so the CSS decides which one gives way.
+  const css = read('src/css/header.css')
+  assert.match(css, /\.topbar-crumbs \.breadcrumbs li:not\(:first-child\):not\(:last-child\):not\(\.bc-ellipsis-li\) \{\s*flex-shrink: 0;\s*\}/)
+  assert.match(css, /\.topbar-crumbs \.breadcrumbs li:last-child:not\(:first-child\) \{\s*flex-shrink: 1;\s*min-width: 0;\s*overflow: hidden;/)
+  assert.match(css, /li:last-child:not\(:first-child\) a,[\s\S]*?text-overflow: ellipsis;/)
+})

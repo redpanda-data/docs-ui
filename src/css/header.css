@@ -131,17 +131,27 @@ html.is-clipped--navbar {
   flex-shrink: 0;
 }
 
-/* Middle items can shrink and show ellipsis (but not the ellipsis li itself) */
+/* The last crumb (the page) is the one that gives way. Middle crumbs keep
+   their width: with only three crumbs 21-breadcrumb-collapse.js never
+   collapses them, and a shrinking middle crumb ended up as one letter
+   ("Home > S > Page title") while the long page title kept its full width.
+   Longer trails still collapse their middle into the ellipsis menu. */
 .topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li) {
+  flex-shrink: 0;
+}
+
+.topbar-crumbs .breadcrumbs li:last-child:not(:first-child) {
   flex-shrink: 1;
   min-width: 0;
   overflow: hidden;
 }
 
-.topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li) a,
-.topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li) span {
+.topbar-crumbs .breadcrumbs li:last-child:not(:first-child) a,
+.topbar-crumbs .breadcrumbs li:last-child:not(:first-child) span {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Collapsed state - hide middle items */
@@ -149,15 +159,16 @@ html.is-clipped--navbar {
   display: none;
 }
 
-/* In collapsed state, ensure visible items don't truncate */
-.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li) {
+/* In collapsed state, the visible middle items don't truncate; the last
+   crumb still can, if even the collapsed trail does not fit. */
+.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li):not(:last-child) {
   flex-shrink: 0;
   min-width: auto;
   overflow: visible;
 }
 
-.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li) a,
-.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li) span {
+.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li):not(:last-child) a,
+.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li):not(:last-child) span {
   overflow: visible;
   text-overflow: unset;
 }
