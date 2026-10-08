@@ -180,6 +180,12 @@ function buildPage (o) {
     main.push(els.start, els.heroProgress, els.stepList)
   }
   if (o.blocks !== false) buildBlocks(els).forEach((b) => main.push(b))
+  // A block the extension annotated from the step's own single source
+  // (steps/<id>/commands.sh), which is not a file of the solution.
+  if (o.stepsBlock) {
+    els.stepsBlock = listingBlock({ 'data-solution-file': 'steps/create-topics/commands.sh', 'data-solution-tag': 'create' })
+    main.push(els.stepsBlock)
+  }
 
   // DOM order as on the real page: sidebar nav, then the article, then the rail.
   els.body = el('body', bodyAttrs, [els.account, els.nav].concat(main, [els.rail]))

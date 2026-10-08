@@ -270,3 +270,9 @@ test('the overview page serves files too, returning to the overview', () => {
   r.control(MAIN_GO).dispatch('click')
   assert.deepEqual(r.calls.assign, [fileUrl(MAIN_GO, { return: '/solutions/demo/' })])
 })
+
+test('a block included from steps/<id>/ gets no download: it is the page source, not a solution file', () => {
+  const r = run({ signedIn: true, stepsBlock: true })
+  assert.equal(r.els.stepsBlock.querySelector('[data-sol-file-download]'), null)
+  assert.equal(r.controls().length, 3, 'the three real files still get one')
+})

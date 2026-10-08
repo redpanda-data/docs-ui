@@ -1637,7 +1637,9 @@
     }
     $$('.listingblock[data-solution-file]').forEach(function (block) {
       var filePath = attr(block, 'data-solution-file')
-      if (!filePath) return
+      // steps/<id>/ holds each step's commands.sh and captured output: the
+      // single source the page includes from, not a file of the solution.
+      if (!filePath || /^steps\//.test(filePath)) return
       var toolbox = toolboxFor(block)
       if (!toolbox || $('[data-sol-file-download]', toolbox)) return
       var button = document.createElement('button')
