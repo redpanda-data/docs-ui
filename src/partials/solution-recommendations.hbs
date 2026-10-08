@@ -4,7 +4,11 @@
   Data: page-related-solutions, a JSON array the solutions-catalog extension
   writes only when there is at least one edge above threshold:
     [{id, title, url, description, difficulty, duration, technologies,
-      provenance, score, reason}]
+      provenance, score, reason, why}]
+  `why` is the reader-facing sentence (from the overview's Related docs
+  sentence, or "Uses X, Y" for a category edge). When present it is the card's
+  secondary line, since it says why this solution is here; otherwise the
+  description is. `reason` stays the hidden debug text.
 
   This is the full-card section at the end of the article. The same data also
   renders as a compact list in the right rail (solution-recommendations-rail.hbs,
@@ -39,7 +43,7 @@
     <a class="sol-rec-card" href="{{{relativize url}}}" data-sol-rec data-placement="article" data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
       <span class="sol-rec-eyebrow">Solution</span>
       <span class="sol-rec-title">{{title}}</span>
-      {{#if description}}<span class="sol-rec-desc">{{description}}</span>{{/if}}
+      {{#if why}}<span class="sol-rec-desc sol-rec-desc--why">{{why}}</span>{{else if description}}<span class="sol-rec-desc">{{description}}</span>{{/if}}
       <span class="sol-rec-meta">
         {{#if difficulty}}<span class="sol-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
         {{#if duration}}<span class="sol-time">{{format-duration duration}}</span>{{/if}}
@@ -50,6 +54,9 @@
     {{/if}}
     {{/each}}
   </div>
+  {{#with (find-component @root.site 'solutions')}}
+  <p class="sol-recs-foot"><a class="sol-recs-all" href="{{{relativize this.url}}}" data-analytics="product_doc_solution_rec_all">All solutions</a></p>
+  {{/with}}
 </section>
 {{/if}}
 {{/with}}

@@ -13,7 +13,7 @@
   so the two placements always agree about whether to render.
 
   Entries are one line plus a muted difficulty/duration line: no descriptions,
-  no cards. data-placement="rail" separates these from the article cards in
+  no cards. The reader-facing `why` is the link's tooltip. data-placement="rail" separates these from the article cards in
   analytics (28-solution-progress.js reads it for both events). On narrow
   screens the whole block is moved into the embedded on-this-page region by
   28-solution-progress.js, because aside.toc.sidebar is display:none there.
@@ -28,7 +28,7 @@
     {{#each recs}}
     {{#if (lt @index 3)}}
     <li>
-      <a class="sol-rail-rec" href="{{{relativize url}}}" data-sol-rec data-placement="rail" data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
+      <a class="sol-rail-rec" href="{{{relativize url}}}"{{#if why}} title="{{why}}"{{/if}} data-sol-rec data-placement="rail" data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
         <span class="sol-rail-rec-title">{{title}}</span>
         {{#if (or difficulty duration)}}
         <span class="sol-rail-rec-meta">

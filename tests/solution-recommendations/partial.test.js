@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'encode-uri'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'encode-uri', 'find-component'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
@@ -499,4 +499,46 @@ test('the Last verified line names where the run happened, and the evidence name
     page: { title: 'One', attributes: { 'solution-step-id': 's1', 'solution-verified-at': '2026-09-13T02:14:07Z', 'solution-verified-version': '26.2.2' } },
   })
   assert.match(step, /Last verified September 13, 2026 against Redpanda 26\.2\.2 on Self-Managed<\/span>/)
+})
+
+test('a component home with no solution slots falls back to catalog solutions that run on that product', () => {
+  const src = read('src/partials/component-home-v3.hbs')
+  const block = src.slice(src.indexOf('{{!-- Build it in practice'), src.indexOf('{{!-- Pathway cards'))
+  const homeHbs = Handlebars.create()
+  ;['eq', 'ne', 'lt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'find-component', 'solutions-for-component', 'is-external-url', 'resolve-resource'].forEach((name) => {
+    homeHbs.registerHelper(name, helper(name))
+  })
+  homeHbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
+  const renderHome = homeHbs.compile(block)
+  const records = [
+    { id: 'gaming', title: 'Gaming', url: '/solutions/gaming/', status: 'published', featured: true, platforms: ['self-managed', 'cloud'], technologies: ['Redpanda', 'Go'] },
+    { id: 'cdc', title: 'CDC', url: '/solutions/cdc/', status: 'published', platforms: ['self-managed'], technologies: ['Redpanda', 'Redpanda Connect'] },
+    { id: 'dr', title: 'DR', url: '/solutions/dr/', status: 'published', platforms: ['self-managed'], technologies: ['Redpanda'] },
+    { id: 'old', title: 'Old', url: '/solutions/old/', status: 'deprecated', platforms: ['cloud'], technologies: ['Redpanda Connect'] },
+  ]
+  const site = { components: { solutions: { name: 'solutions', url: '/solutions/', latest: { asciidoc: { attributes: { 'solutions-catalog': JSON.stringify({ solutions: records }) } } } } } }
+  const at = (name, attributes) => renderHome({ site, page: { url: '/' + name + '/', component: { name, title: name }, attributes: attributes || {} } })
+  const ids = (html) => (html.match(/data-solution-id="([^"]+)"/g) || []).map((m) => m.slice(18, -1))
+
+  assert.deepEqual(ids(at('ROOT')), ['gaming', 'cdc', 'dr'], 'Self-Managed: featured first, at most three')
+  assert.deepEqual(ids(at('cloud-data-platform')), ['gaming'], 'Cloud: the deprecated one is skipped')
+  assert.deepEqual(ids(at('connect')), ['cdc'], 'Connect: solutions that use Redpanda Connect')
+  assert.match(at('connect'), /data-provenance="catalog"/)
+  assert.match(at('connect'), /class="sol-recs-all" href="[^"]*solutions\/"[^>]*>All solutions<\/a>/)
+  assert.equal(ids(at('api')).length, 0, 'a product no solution runs on gets nothing')
+  assert.doesNotMatch(at('api'), /Build it in practice/)
+  assert.equal(ids(at('ROOT', { 'exclude-related-solutions': '' })).length, 0, 'the opt-out covers the fallback')
+  // Authored recommendations still win over the catalog.
+  const authored = at('ROOT', { 'related-solutions': JSON.stringify([{ id: 'x', title: 'X', url: '/solutions/x/', provenance: 'authored' }]) })
+  assert.deepEqual(ids(authored), ['x'])
+})
+
+test('a recommendation card leads with why it is recommended, and the block links to every solution', () => {
+  const recs = [Object.assign({}, RECS[0], { why: 'Uses consumer groups to fan one feed out.' }), RECS[1]]
+  const site = { components: { solutions: { name: 'solutions', url: '/solutions/', versions: [{}] } } }
+  const html = render(Object.assign(page({ 'related-solutions': JSON.stringify(recs) }), { site }))
+  assert.match(html, /<span class="sol-rec-desc sol-rec-desc--why">Uses consumer groups to fan one feed out\.<\/span>/)
+  assert.doesNotMatch(html, />First</, 'the description gives way to why')
+  assert.match(html, />Second</, 'a card with no why keeps its description')
+  assert.match(html, /class="sol-recs-all" href="[^"]*solutions\/"[^>]*>All solutions<\/a>/)
 })

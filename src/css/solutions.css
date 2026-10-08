@@ -1480,6 +1480,26 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
   overflow: hidden;
 }
 
+.sol-recs-foot {
+  margin: 0.75rem 0 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+}
+
+.doc .sol-recs-all,
+.sol-recs-all {
+  font-weight: 600;
+  color: var(--component-700);
+}
+
+.doc .sol-recs-all:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html[data-theme="dark"] .sol-recs-all {
+  color: var(--component-200);
+}
+
 .sol-rec-meta {
   display: flex;
   flex-wrap: wrap;
