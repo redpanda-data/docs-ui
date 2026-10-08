@@ -68,6 +68,17 @@ class El {
     return child
   }
 
+  insertBefore (child, ref) {
+    if (!ref) return this.appendChild(child)
+    if (child.parentNode) child.parentNode.removeChild(child)
+    child.parentNode = this
+    const i = this.children.indexOf(ref)
+    this.children.splice(i === -1 ? this.children.length : i, 0, child)
+    return child
+  }
+
+  get firstChild () { return this.children[0] || null }
+
   removeChild (child) {
     const i = this.children.indexOf(child)
     if (i !== -1) { this.children.splice(i, 1); child.parentNode = null }

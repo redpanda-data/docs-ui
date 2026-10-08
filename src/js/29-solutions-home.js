@@ -448,8 +448,12 @@
     var slot = $('[data-sol-filters-slot]')
     if (!filters || !home || !slot || typeof window.matchMedia !== 'function') return
     var mq = window.matchMedia('(max-width: 1023px)')
+    // Only a reader's own click counts as a choice. The toggle event also
+    // fires for the script's own open/close (the inline script's, and the
+    // ones below), so it cannot tell the two apart.
     var toggled = false
-    filters.addEventListener('toggle', function () { if (mq.matches) toggled = true })
+    var summary = $('summary', filters)
+    if (summary) summary.addEventListener('click', function () { if (mq.matches) toggled = true })
     var place = function () {
       if (mq.matches) {
         if (filters.parentNode !== slot) {

@@ -54,11 +54,28 @@ function run (options) {
   const embedded = el('script', { type: 'application/json', 'data-sol-catalog': '', text: JSON.stringify({ solutions: records }) })
   const continueGrid = el('div', { 'data-sol-continue-grid': '' })
   const continueSection = el('section', { 'data-sol-continue': '', hidden: '' }, [continueGrid])
+  // The filters start in the sidebar wrapper (nav-tree-solution.hbs), with
+  // the narrow-screen slot above the grid (solutions-home.hbs).
+  const summary = el('summary', {}, [active])
+  const filters = el('details', { 'data-sol-filters': '', open: '' }, [summary, form])
+  const filtersHome = el('div', { 'data-sol-filters-home': '' }, [filters])
+  const filtersSlot = el('div', { 'data-sol-filters-slot': '' })
   const body = el('body', {}, [
+    filtersHome,
     continueSection,
-    el('details', { 'data-sol-filters': '', open: '' }, [el('summary', {}, [active]), form]),
+    filtersSlot,
     el('div', { 'data-sol-results': '' }, [count, dropped, el('div', { 'data-sol-grid': '' }, cards), empty]),
   ].concat(o.noCatalog ? [] : [embedded]))
+
+  // o.narrow: a viewport below 1024px. Omitted, the window has no
+  // matchMedia, as in the tests that predate the sidebar filters.
+  // setNarrow(bool) changes the viewport and fires the media query listeners.
+  let mq = null
+  if (typeof o.narrow === 'boolean') {
+    mq = { matches: o.narrow, listeners: [], addEventListener (type, fn) { this.listeners.push(fn) } }
+    // The inline script in solutions-home.hbs runs before this module.
+    if (o.narrow) { filters.open = false; filtersSlot.appendChild(filters) }
+  }
 
   const document = makeDocument(body)
   const replaceState = []
@@ -73,6 +90,7 @@ function run (options) {
       docsSolutions: o.api || null,
     },
   }
+  if (mq) context.window.matchMedia = () => mq
   context.window.window = context.window
   vm.runInNewContext(SCRIPT, context)
 
@@ -90,6 +108,17 @@ function run (options) {
     continueSection,
     continueGrid,
     filtersHtml,
+    filters,
+    filtersHome,
+    filtersSlot,
+    // A reader clicking the Filters summary: the browser toggles it, and
+    // the module sees the click.
+    clickSummary: () => { summary.dispatch('click', {}); filters.open = !filters.open },
+    setNarrow: (narrow) => {
+      if (!mq) throw new Error('run({ narrow }) was not set')
+      mq.matches = narrow
+      mq.listeners.forEach((fn) => fn({ matches: narrow }))
+    },
     // The live count and dimmed state of one option, as a reader sees it.
     option: (name, value) => {
       const box = run.find(boxes, name, value)

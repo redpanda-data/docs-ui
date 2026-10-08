@@ -460,3 +460,31 @@ test('a card has an eyebrow only when it is featured', () => {
   assert.match(draft, /is-draft">Draft</)
   assert.doesNotMatch(draft, /sol-card-eyebrow/)
 })
+
+test('the filters sit in the sidebar when wide and above the grid, closed, when narrow', () => {
+  const wide = run({ records: [], narrow: false })
+  assert.equal(wide.filters.parentNode, wide.filtersHome, 'wide: in the sidebar')
+  assert.equal(wide.filters.open, true)
+
+  const page = run({ records: [], narrow: true })
+  assert.equal(page.filters.parentNode, page.filtersSlot, 'narrow: above the grid')
+  assert.equal(page.filters.open, false, 'narrow: closed')
+
+  page.setNarrow(false)
+  assert.equal(page.filters.parentNode, page.filtersHome, 'widened: back in the sidebar')
+  assert.equal(page.filters.open, true, 'widened: open, since the sidebar has no summary')
+
+  page.setNarrow(true)
+  assert.equal(page.filters.parentNode, page.filtersSlot)
+  assert.equal(page.filters.open, false, 'narrowed again with no reader choice: closed')
+})
+
+test('a reader who opened the narrow filters keeps them open across a resize', () => {
+  const page = run({ records: [], narrow: true })
+  page.clickSummary()
+  assert.equal(page.filters.open, true)
+  page.setNarrow(false)
+  page.setNarrow(true)
+  assert.equal(page.filters.parentNode, page.filtersSlot)
+  assert.equal(page.filters.open, true, 'the reader opened them, so they stay open')
+})
