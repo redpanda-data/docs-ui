@@ -325,10 +325,44 @@
     return null
   }
 
-  function stepUrl (record, stepId) {
+  function stepById (record, stepId) {
     var steps = record.steps || []
-    for (var i = 0; i < steps.length; i++) if (steps[i].id === stepId) return steps[i].url
+    for (var i = 0; i < steps.length; i++) if (steps[i] && steps[i].id === stepId) return steps[i]
     return null
+  }
+
+  // One rule for the Continue learning cards and the grid cards alike:
+  //   Completed    every step done; bar full
+  //   In progress  some steps done; bar and "n of M steps"
+  //   Started      opened, nothing marked done yet; "Next: <step>" and no
+  //                bar (a 0% bar reads as "you did nothing", which is not
+  //                what visiting a step means)
+  // "Next" is the step the reader last had open when nothing is done yet
+  // (that is where they stopped reading), otherwise the first step not done.
+  function describe (record, progress) {
+    var ids = (record.steps || []).map(function (s) { return s.id })
+    var done = 0
+    ids.forEach(function (stepId) { if (progress.completedSteps.indexOf(stepId) !== -1) done++ })
+    var total = ids.length
+    var finished = total > 0 && done === total
+    var nextId = null
+    if (!finished) {
+      nextId = !done && progress.currentStep && stepById(record, progress.currentStep)
+        ? progress.currentStep
+        : firstIncompleteStep(record, progress)
+    }
+    var next = nextId ? stepById(record, nextId) : null
+    return {
+      record: record,
+      progress: progress,
+      done: done,
+      total: total,
+      finished: finished,
+      state: finished ? 'Completed' : done ? 'In progress' : 'Started',
+      next: next,
+      href: (next && next.url) || record.url,
+      pct: total ? Math.round((done / total) * 100) : 0,
+    }
   }
 
   function escapeHtml (value) {
@@ -347,11 +381,9 @@
       var progress = store.solutions[id]
       var record = byId[id]
       if (!record) continue
-      var ids = (record.steps || []).map(function (s) { return s.id })
-      var done = 0
-      ids.forEach(function (stepId) { if (progress.completedSteps.indexOf(stepId) !== -1) done++ })
-      if (!done && !progress.currentStep) continue
-      entries.push({ record: record, progress: progress, done: done, total: ids.length })
+      var entry = describe(record, progress)
+      if (!entry.done && !progress.currentStep) continue
+      entries.push(entry)
     }
     entries.sort(function (a, b) { return (b.progress.updatedAt || 0) - (a.progress.updatedAt || 0) })
     entries = entries.slice(0, 6)
@@ -361,21 +393,27 @@
     }
     var html = ''
     entries.forEach(function (entry) {
-      var finished = entry.total > 0 && entry.done === entry.total
-      var next = !finished && firstIncompleteStep(entry.record, entry.progress)
-      var href = (next && stepUrl(entry.record, next)) || entry.record.url
-      var pct = entry.total ? Math.round((entry.done / entry.total) * 100) : 0
-      html += '<a class="sol-rec-card" href="' + escapeHtml(href) + '" data-sol-continue-card data-solution-id="' + escapeHtml(entry.record.id) + '">' +
-        '<span class="sol-rec-eyebrow">' + (finished ? 'Completed' : 'In progress') + '</span>' +
+      var progressHtml
+      if (entry.state === 'Started') {
+        progressHtml = entry.next
+          ? '<span class="sol-card-progress-text">Next: ' + escapeHtml(entry.next.title || entry.next.id) + '</span>'
+          : ''
+      } else {
+        progressHtml = '<span class="sol-card-progress">' +
+          '<span class="sol-bar sol-bar--sm"><span class="sol-bar-fill" style="width:' + entry.pct + '%"></span></span>' +
+          '<span class="sol-card-progress-text">' + entry.done + ' of ' + entry.total + ' steps</span></span>'
+      }
+      html += '<a class="sol-rec-card" href="' + escapeHtml(entry.href) + '" data-sol-continue-card' +
+        ' data-solution-id="' + escapeHtml(entry.record.id) + '">' +
+        '<span class="sol-rec-eyebrow">' + entry.state + '</span>' +
         '<span class="sol-rec-title">' + escapeHtml(entry.record.title) + '</span>' +
-        '<span class="sol-card-progress"><span class="sol-bar sol-bar--sm"><span class="sol-bar-fill" style="width:' + pct + '%"></span></span>' +
-        '<span class="sol-card-progress-text">' + entry.done + ' of ' + entry.total + ' steps</span></span>' +
+        progressHtml +
         '</a>'
     })
     grid.innerHTML = html
     section.hidden = false
 
-    // Per-card progress in the main grid too.
+    // Per-card progress in the main grid too, under the same rule.
     cards.forEach(function (card) {
       var id = card.getAttribute('data-solution-id')
       var slot = $('[data-sol-card-progress]', card)
@@ -384,10 +422,17 @@
       entries.forEach(function (entry) { if (entry.record.id === id) match = entry })
       if (!match) { slot.hidden = true; return }
       slot.hidden = false
+      var bar = $('.sol-bar', slot)
       var fill = $('[data-sol-card-progress-fill]', slot)
       var text = $('[data-sol-card-progress-text]', slot)
-      if (fill) fill.style.width = (match.total ? Math.round((match.done / match.total) * 100) : 0) + '%'
-      if (text) text.textContent = match.done + ' of ' + match.total + ' steps'
+      var started = match.state === 'Started'
+      if (bar) bar.hidden = started
+      if (fill) fill.style.width = match.pct + '%'
+      if (text) {
+        text.textContent = started
+          ? (match.next ? 'Next: ' + (match.next.title || match.next.id) : 'Started')
+          : match.done + ' of ' + match.total + ' steps'
+      }
     })
   }
 

@@ -151,7 +151,7 @@ test('loading a step only records it as current; nothing is marked complete impl
   assert.deepEqual(record.completedSteps, [])
   assert.ok(record.startedAt > 0, 'first view starts the solution')
   assert.equal(els.count.textContent, '0 of 3')
-  assert.equal(els.state.textContent, 'In progress')
+  assert.equal(els.state.textContent, 'Started', 'opened, nothing done: the landing page says the same')
 })
 
 test('an explicit mark-complete click updates the record, the count and the ticks; a second click undoes it', () => {

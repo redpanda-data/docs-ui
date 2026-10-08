@@ -1218,7 +1218,10 @@
       el.setAttribute('aria-valuenow', String(done))
       el.setAttribute('aria-valuetext', done + ' of ' + total + ' steps complete')
     })
-    setText('[data-sol-progress-state]', !record ? 'Not started' : finished ? 'Completed' : 'In progress')
+    // Same words as the landing page's Continue learning cards: opening a
+    // step creates the record (setCurrent), so a record with nothing done is
+    // "Started", not "In progress".
+    setText('[data-sol-progress-state]', !record ? 'Not started' : finished ? 'Completed' : done ? 'In progress' : 'Started')
 
     // Step ticks (overview list, rail list) and the current marker.
     $$('[data-sol-step-id]').forEach(function (el) {
