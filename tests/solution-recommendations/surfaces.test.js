@@ -113,9 +113,9 @@ const WITH_DOCS = { relatedDocs: [{ title: 'Consumer Offsets', url: '/streaming/
 
 test('the generated related-docs list is skipped when the page authored its own', () => {
   const authored = renderRelated({ solution: WITH_DOCS, page: { url: '/solutions/g/', contents: Buffer.from('<div class="sect1"><h2 id="related-docs">Related docs</h2></div>') } })
-  assert.doesNotMatch(authored, /Related documentation/)
+  assert.doesNotMatch(authored, /id="sol-related-title"/)
   const generated = renderRelated({ solution: WITH_DOCS, page: { url: '/solutions/g/', contents: '<h2 id="steps">Steps</h2>' } })
-  assert.match(generated, /Related documentation/)
+  assert.match(generated, /<h2 id="sol-related-title" class="sol-section-title">Related docs<\/h2>/, 'the same heading an authored section uses')
   assert.match(generated, /id="sol-related-docs"/, 'its id cannot collide with an authored #related-docs')
   assert.doesNotMatch(generated, /id="related-docs"/)
 })
@@ -240,4 +240,34 @@ test('Ask AI on a solutions page suggests solution questions, not the agent defa
   // Authored attributes still win.
   const authored = { component: { name: 'solutions', asciidoc: { attributes: { 'ai-suggestion-1': 'Mine' } } } }
   assert.deepEqual(helper('get-ai-suggestions')({ data: { root: { page: authored } } }), ['Mine'])
+})
+
+// ---- overview layout ----------------------------------------------------------------
+
+test('the overview puts Steps after the introduction and before the first section, as an On this page section', () => {
+  const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'format-duration', 'get-header-color', 'split-at-first-section', 'html-has-id'], ['solution-steps', 'solution-related-docs'])
+  ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
+  const solution = {
+    id: 'g',
+    steps: [{ id: 's1', title: 'One', url: '/solutions/g/s1/', order: 1 }],
+    relatedSolutions: [{ title: 'Other', url: '/solutions/o/' }],
+  }
+  const contents = '<div id="preamble"><div class="sectionbody"><p>Intro.</p></div></div>\n' +
+    '<div class="sect1"><h2 id="what-you-build">What you build</h2><div class="sectionbody"></div></div>\n' +
+    '<div class="sect1"><h2 id="prerequisites">Prerequisites</h2><div class="sectionbody"></div></div>'
+  const html = hbs.compile(read('src/layouts/solution.hbs'))({
+    page: { layout: 'solution', url: '/solutions/g/', attributes: { solution: JSON.stringify(solution) }, contents: Buffer.from(contents) },
+  })
+  const at = (needle) => { const i = html.indexOf(needle); assert.ok(i !== -1, needle); return i }
+  assert.ok(at('Intro.') < at('id="steps"'), 'preamble first')
+  assert.ok(at('id="steps"') < at('id="what-you-build"'), 'Steps before the first authored section')
+  assert.match(html, /<div class="sect1 sol-steps" id="steps">\s*<h2 id="sol-steps-title" class="sol-section-title">Steps<\/h2>\s*<div class="sectionbody">/,
+    'matches the TOC selector article.doc>.sect1>h2[id]')
+  assert.match(html, /<div class="sect1 sol-related sol-related--solutions" id="sol-related-solutions">\s*<h2 id="sol-related-solutions-title"/)
+  assert.equal((html.match(/id="what-you-build"/g) || []).length, 1, 'no section is rendered twice')
+
+  const split = helper('split-at-first-section')
+  assert.deepEqual(split('<p>only</p>'), { before: '<p>only</p>', after: '' }, 'no sections: all before')
+  assert.deepEqual(split(undefined), { before: '', after: '' })
+  assert.equal(split('<p>a</p><div class="sect1 x"><h2>').after, '<div class="sect1 x"><h2>')
 })

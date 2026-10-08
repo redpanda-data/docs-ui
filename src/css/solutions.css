@@ -672,7 +672,9 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
 
 /* ---- steps (overview) ----------------------------------------------------- */
 
-.sol-steps {
+/* .doc .sol-steps and .doc .sol-related: both are div.sect1 now (so On this
+   page lists them), and doc.css's `.doc .sect1` margin would otherwise win. */
+.doc .sol-steps {
   margin: 2.5rem 0;
 }
 
@@ -1269,7 +1271,7 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
 
 /* ---- related --------------------------------------------------------------- */
 
-.sol-related {
+.doc .sol-related {
   margin: 2.5rem 0;
 }
 

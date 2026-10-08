@@ -2,10 +2,16 @@
   Ordered step list on the overview. Context: `solution`.
   Each item carries data-sol-step-id so 28-solution-progress.js can tick
   completed steps and highlight the reader's current one.
+
+  Marked up as an Asciidoctor section (div.sect1 > h2[id] + div.sectionbody)
+  so the on-this-page TOC, which reads `article.doc > .sect1 > h2[id]`, lists
+  it like any authored section. solution.hbs renders it before the first
+  authored section.
 --}}
 {{#if solution.steps.length}}
-<section class="sol-steps" id="steps" aria-labelledby="sol-steps-title">
+<div class="sect1 sol-steps" id="steps">
   <h2 id="sol-steps-title" class="sol-section-title">Steps</h2>
+  <div class="sectionbody">
   <ol class="sol-step-list" data-sol-steps>
     {{#each solution.steps}}
     <li class="sol-step-item" data-sol-step-id="{{id}}" data-sol-step-url="{{url}}">
@@ -23,5 +29,6 @@
     </li>
     {{/each}}
   </ol>
-</section>
+  </div>
+</div>
 {{/if}}

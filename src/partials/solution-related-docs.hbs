@@ -7,12 +7,15 @@
   `== Related docs` section (id="related-docs", with a sentence per link),
   that section is the list and this generated one is skipped. The generated
   section's id is sol-related-docs so it can never collide with the authored
-  heading's id.
+  heading's id. Both blocks are marked up as Asciidoctor sections (div.sect1
+  > h2[id]) so On this page lists them; the heading matches the authored
+  "Related docs".
 --}}
 {{#if solution.relatedDocs.length}}
 {{#unless (html-has-id @root.page.contents 'related-docs')}}
-<section class="sol-related" id="sol-related-docs" aria-labelledby="sol-related-title">
-  <h2 id="sol-related-title" class="sol-section-title">Related documentation</h2>
+<div class="sect1 sol-related" id="sol-related-docs">
+  <h2 id="sol-related-title" class="sol-section-title">Related docs</h2>
+  <div class="sectionbody">
   <ul class="sol-related-list">
     {{#each solution.relatedDocs}}
     <li>
@@ -23,12 +26,14 @@
     </li>
     {{/each}}
   </ul>
-</section>
+  </div>
+</div>
 {{/unless}}
 {{/if}}
 {{#if solution.relatedSolutions.length}}
-<section class="sol-related sol-related--solutions" aria-labelledby="sol-related-solutions-title">
+<div class="sect1 sol-related sol-related--solutions" id="sol-related-solutions">
   <h2 id="sol-related-solutions-title" class="sol-section-title">Related solutions</h2>
+  <div class="sectionbody">
   <ul class="sol-related-list">
     {{#each solution.relatedSolutions}}
     <li>
@@ -39,5 +44,6 @@
     </li>
     {{/each}}
   </ul>
-</section>
+  </div>
+</div>
 {{/if}}

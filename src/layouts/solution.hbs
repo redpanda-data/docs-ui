@@ -26,8 +26,15 @@
       {{> breadcrumbs}}
       {{> solution-hero solution=(parse-json page.attributes.solution)}}
       {{> solution-meta solution=(parse-json page.attributes.solution)}}
-      {{{page.contents}}}
-      {{> solution-steps solution=(parse-json page.attributes.solution)}}
+      {{!-- The Steps list goes right after the introduction, before the
+            first authored section: it is what the reader came to start, and
+            Architecture or Prerequisites should not push it below the fold.
+            It is a sect1 with an h2, so On this page lists it. --}}
+      {{#with (split-at-first-section page.contents) as |parts|}}
+      {{{parts.before}}}
+      {{> solution-steps solution=(parse-json @root.page.attributes.solution)}}
+      {{{parts.after}}}
+      {{/with}}
       {{> solution-related-docs solution=(parse-json page.attributes.solution)}}
       {{> feedback-footer}}
       {{> tracking-pixel}}
