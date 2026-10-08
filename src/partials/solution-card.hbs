@@ -16,10 +16,15 @@
    data-technologies="{{#each solution.technologies}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
    data-platforms="{{#each solution.platforms}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
    data-analytics="solution_card_click">
+  {{!-- Every card on this page is a solution, so the eyebrow only appears
+        when it says something: Featured. The row renders only when it has
+        an eyebrow or a status chip, so a plain card starts at its title. --}}
+  {{#if (or solution.featured (eq solution.status 'deprecated') (eq solution.status 'draft') solution.draft)}}
   <div class="sol-card-head">
-    <span class="sol-card-eyebrow">{{#if solution.featured}}Featured Solution{{else}}Solution{{/if}}</span>
+    {{#if solution.featured}}<span class="sol-card-eyebrow">Featured</span>{{/if}}
     {{#if (eq solution.status 'deprecated')}}<span class="sol-chip sol-chip--status is-deprecated">Deprecated</span>{{else if (or (eq solution.status 'draft') solution.draft)}}<span class="sol-chip sol-chip--status is-draft">Draft</span>{{/if}}
   </div>
+  {{/if}}
   <h3 class="sol-card-title">{{solution.title}}</h3>
   {{#if solution.description}}<p class="sol-card-desc">{{solution.description}}</p>{{/if}}
   <div class="sol-card-foot">
@@ -33,9 +38,11 @@
       {{/if}}
       {{#if solution.stepCount}}<span class="sol-time">{{solution.stepCount}} steps</span>{{/if}}
     </div>
-    {{!-- Chips skip technologies every solution has (Redpanda), which would
-          otherwise take one of the three slots on every card. --}}
-    {{#with (without solution.technologies (lookup (get-solutions-catalog) 'universalTechnologies')) as |techs|}}
+    {{!-- chipTechnologies (get-solutions-catalog) skips technologies every
+          solution has and puts the rarest first, so the three slots show what
+          sets this solution apart. A record from outside the catalog falls
+          back to its technologies minus the universal ones, authored order. --}}
+    {{#with (or solution.chipTechnologies (without solution.technologies (lookup (get-solutions-catalog) 'universalTechnologies'))) as |techs|}}
     {{#if techs.length}}
     <div class="sol-card-tags">
       {{#each techs}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}

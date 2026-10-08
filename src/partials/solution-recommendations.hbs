@@ -43,7 +43,7 @@
       <span class="sol-rec-meta">
         {{#if difficulty}}<span class="sol-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
         {{#if duration}}<span class="sol-time">{{format-duration duration}}</span>{{/if}}
-        {{#each (without technologies (lookup (get-solutions-catalog) 'universalTechnologies'))}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
+        {{#each (or (lookup (lookup (get-solutions-catalog) 'chipsById') id) (without technologies (lookup (get-solutions-catalog) 'universalTechnologies')))}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
       </span>
       {{#if reason}}<span class="sol-rec-why" data-sol-rec-why hidden>Why this? {{reason}}</span>{{/if}}
     </a>

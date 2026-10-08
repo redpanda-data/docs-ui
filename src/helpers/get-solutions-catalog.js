@@ -27,11 +27,17 @@
  *                array of {value, count} (the extension's shape; plain string
  *                arrays are accepted and counted from the records)
  *     count:     all.length
- *     universalTechnologies: technologies every published record carries
- *                (only with two or more published records). Card chips skip
- *                them: "Redpanda" on every card tells the reader nothing.
- *     json:      the catalog serialized for a <script type="application/json">
- *                block (`</` is escaped so it cannot close the script tag)
+ *     universalTechnologies: technologies every record carries (only with
+ *                two or more records). Card chips skip them: "Redpanda" on
+ *                every card tells the reader nothing.
+ *     all[].chipTechnologies: the record's technologies minus the universal
+ *                ones, rarest first; what card chips show
+ *     chipsById: the same lists by solution id, for recommendation entries,
+ *                which come from page-related-solutions rather than the
+ *                catalog
+ *     json:      the records projected to the fields 29-solutions-home.js
+ *                reads, for a <script type="application/json"> block (`</`
+ *                is escaped so it cannot close the script tag)
  *   }
  */
 
@@ -182,29 +188,96 @@ function normalizeFacets (facets, records) {
   }
 }
 
-module.exports = function () {
-  const options = arguments[arguments.length - 1]
-  const root = options && options.data && options.data.root
-  const catalog = parseCatalog(findRawCatalog(root))
-  if (!catalog) return null
+// Technologies a card chip should skip: the ones every record carries. When
+// the catalog publishes a technologies facet, that list already left out
+// every value held by all records (outputs.js discriminating()), so a value
+// on a record but absent from the facet is universal. Otherwise intersect
+// over every record. Computed over `all`, not only published records: a
+// catalog whose records are all drafts (a preview) still has a Redpanda on
+// every card that says nothing.
+function universalOf (all, publishedFacet) {
+  if (all.length < 2) return []
+  const seen = []
+  all.forEach((r) => r.technologies.forEach((t) => { if (seen.indexOf(t) === -1) seen.push(t) }))
+  if (Array.isArray(publishedFacet) && publishedFacet.length) {
+    const listed = publishedFacet.map((item) => String(item && typeof item === 'object' ? item.value : item))
+    return seen.filter((t) => listed.indexOf(t) === -1)
+  }
+  return seen.filter((t) => all.every((r) => r.technologies.indexOf(t) !== -1))
+}
 
+// The fields 29-solutions-home.js reads from the embedded catalog, and
+// nothing else: attachments, related docs, verification and the facets
+// themselves are already on the page or unused there.
+function projectForPage (record) {
+  return {
+    id: record.id,
+    title: record.title,
+    description: record.description,
+    url: record.url,
+    difficulty: record.difficulty,
+    technologies: record.technologies,
+    categories: record.categories,
+    useCases: record.useCases,
+    industries: record.industries,
+    platforms: record.platforms,
+    steps: record.steps.map((step) => ({ id: step.id, title: step.title, url: step.url })),
+  }
+}
+
+// Card and recommendation chips: technologies minus the universal ones,
+// rarest first (ties keep the authored order), so two solutions that share
+// most of a stack still look different at a glance.
+function chipsFor (technologies, universal, counts) {
+  return toArray(technologies)
+    .filter((t) => (universal || []).indexOf(t) === -1)
+    .map((t, i) => ({ t, i, n: (counts && counts[t]) || 0 }))
+    .sort((a, b) => (a.n - b.n) || (a.i - b.i))
+    .map((x) => x.t)
+}
+
+let memo = { raw: undefined, result: null }
+
+function build (catalog) {
   const all = toArray(catalog.solutions).filter((r) => r && r.id).map(normalizeRecord).sort(sortAll)
   const published = all.filter((r) => r.status === 'published')
   const facets = normalizeFacets(catalog.facets, published)
+  const universalTechnologies = universalOf(all, catalog.facets && catalog.facets.technologies)
+  const techCounts = countValues(all, 'technologies')
 
-  const universalTechnologies = published.length < 2
-    ? []
-    : published[0].technologies.filter((tech) => published.every((r) => r.technologies.indexOf(tech) !== -1))
+  const technologyCounts = {}
+  techCounts.forEach((n, t) => { technologyCounts[t] = n })
+  const chipsById = {}
+  all.forEach((record) => {
+    record.chipTechnologies = chipsFor(record.technologies, universalTechnologies, technologyCounts)
+    chipsById[record.id] = record.chipTechnologies
+  })
 
   return {
     generatedAt: catalog.generatedAt || null,
     siteUrl: catalog.siteUrl || null,
     universalTechnologies,
+    chipsById,
     all,
     featured: published.filter((r) => r.featured),
     recent: published.slice().sort(byModifiedDesc).slice(0, 6),
     facets,
     count: all.length,
-    json: JSON.stringify({ generatedAt: catalog.generatedAt || null, solutions: all, facets }).replace(/<\//g, '<\\/'),
+    json: JSON.stringify({ generatedAt: catalog.generatedAt || null, solutions: all.map(projectForPage) })
+      .replace(/<\//g, '<\\/'),
   }
+}
+
+module.exports = function () {
+  const options = arguments[arguments.length - 1]
+  const root = options && options.data && options.data.root
+  const raw = findRawCatalog(root)
+  // Every card and recommendation asks for the catalog, so a page would
+  // otherwise parse the same JSON once per card. Only a string attribute is
+  // memoized; an object (the preview's YAML) is cheap to rebuild.
+  if (typeof raw === 'string' && raw === memo.raw) return memo.result
+  const catalog = parseCatalog(raw)
+  const result = catalog ? build(catalog) : null
+  if (typeof raw === 'string') memo = { raw, result }
+  return result
 }

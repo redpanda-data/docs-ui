@@ -256,3 +256,68 @@ test('"Continue" goes to the first step not done, not the step last visited', ()
   const r2 = run({ records, facets: {}, api: { getState: () => ({ solutions: { g: gap } }) } })
   assert.match(r2.continueGrid.innerHTML, /href="\/solutions\/g\/one\/"/)
 })
+
+// ---------------------------------------------------------------------------
+// the embedded catalog and chips
+// ---------------------------------------------------------------------------
+
+function catalogOf (data) {
+  const root = { page: { attributes: { 'solutions-catalog': JSON.stringify(data) } } }
+  return helper('get-solutions-catalog')({ data: { root } })
+}
+
+test('the embedded catalog carries only what the landing script reads', () => {
+  const withExtras = RECORDS.map((r) => Object.assign({}, r, {
+    attachments: [{ name: 'a', url: '/a' }],
+    relatedDocs: [{ title: 'd', url: '/d' }],
+    verified: { runAt: '2026-09-13T02:14:07Z' },
+    steps: [{ id: 's1', title: 'Step one', url: '/s1/', order: 1, duration: 5, files: ['x'] }],
+  }))
+  const json = JSON.parse(catalogOf({ solutions: withExtras, facets: FACETS }).json)
+  assert.equal(json.facets, undefined)
+  const first = json.solutions[0]
+  assert.deepEqual(Object.keys(first).sort(), ['categories', 'description', 'difficulty', 'id', 'industries', 'platforms', 'steps', 'technologies', 'title', 'url', 'useCases'])
+  assert.deepEqual(first.steps, [{ id: 's1', title: 'Step one', url: '/s1/' }])
+})
+
+test('universal technologies are computed over every record, drafts included', () => {
+  const drafts = RECORDS.map((r) => Object.assign({}, r, { status: 'draft' }))
+  const catalog = catalogOf({ solutions: drafts })
+  assert.deepEqual(catalog.universalTechnologies, ['Redpanda'])
+  catalog.all.forEach((r) => assert.equal(r.chipTechnologies.indexOf('Redpanda'), -1, r.id + ' shows no Redpanda chip'))
+})
+
+test('a published technologies facet decides what is universal', () => {
+  // The extension leaves out of the facet every value all records carry.
+  const catalog = catalogOf({
+    solutions: RECORDS,
+    facets: Object.assign({}, FACETS, { technologies: [{ value: 'Debezium', count: 1 }, { value: 'Go', count: 1 }, { value: 'Kubernetes', count: 1 }] }),
+  })
+  assert.deepEqual(catalog.universalTechnologies, ['Redpanda'])
+})
+
+test('card chips put the rarest technology first, so similar stacks look different', () => {
+  const records = [
+    record('gaming', { technologies: ['Redpanda', 'Go', 'Postgres', 'Protobuf'] }),
+    record('sports', { technologies: ['Redpanda', 'Go', 'Postgres', 'Avro'] }),
+    record('cdc', { technologies: ['Redpanda', 'MySQL', 'Iceberg'] }),
+  ]
+  const catalog = catalogOf({ solutions: records })
+  const chips = {}
+  catalog.all.forEach((r) => { chips[r.id] = r.chipTechnologies })
+  // Counts: Protobuf, Avro, MySQL and Iceberg 1; Go and Postgres 2.
+  assert.deepEqual(chips.gaming, ['Protobuf', 'Go', 'Postgres'])
+  assert.deepEqual(chips.sports, ['Avro', 'Go', 'Postgres'])
+  assert.deepEqual(chips.cdc, ['MySQL', 'Iceberg'], 'ties keep the authored order')
+  const html = renderCard({ solution: catalog.all.find((r) => r.id === 'gaming') })
+  assert.deepEqual(chipsOf(html), ['Protobuf', 'Go', 'Postgres'])
+})
+
+test('a card has an eyebrow only when it is featured', () => {
+  const plain = renderCard({ solution: record('plain') })
+  assert.doesNotMatch(plain, /sol-card-head/, 'a published, unfeatured card starts at its title')
+  assert.match(renderCard({ solution: record('f', { featured: true }) }), /<span class="sol-card-eyebrow">Featured<\/span>/)
+  const draft = renderCard({ solution: record('d', { status: 'draft' }) })
+  assert.match(draft, /is-draft">Draft</)
+  assert.doesNotMatch(draft, /sol-card-eyebrow/)
+})

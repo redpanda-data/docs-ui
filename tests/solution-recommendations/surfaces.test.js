@@ -24,7 +24,7 @@ function engine (helpers, partials) {
 
 // ---- "Build it in practice" subtitle ----------------------------------------
 
-const recsHbs = engine(['eq', 'lt', 'increment', 'parse-json', 'format-duration', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored'], ['solution-recommendations'])
+const recsHbs = engine(['eq', 'lt', 'or', 'increment', 'parse-json', 'format-duration', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored'], ['solution-recommendations'])
 const renderRecs = recsHbs.compile('{{> solution-recommendations}}')
 const recsPage = (recs) => ({ page: { attributes: { 'related-solutions': JSON.stringify(recs) }, component: { name: 'streaming' }, url: '/streaming/current/x/' } })
 const rec = (id, provenance) => ({ id, title: id, url: '/solutions/' + id + '/', provenance })
