@@ -141,7 +141,7 @@ test('the sidebar groups stay open and each step has a place for its status text
   })
   assert.match(html, /nav-item sol-nav-group" data-depth="1">\s*<div class="item"><span class="nav-text sol-nav-heading">Steps/)
   assert.match(html, /<span class="visually-hidden sol-nav-step-status" data-sol-nav-step-status><\/span>/)
-  assert.match(html, />All build-along files</)
+  assert.doesNotMatch(html, /All build-along files/, 'the files are in the rail, not repeated in the sidebar')
 
   const css = read('src/css/solutions.css')
   assert.match(css, /\.sol-nav \.nav-item\.sol-nav-group > \.nav-list \{\s*display: block;/, 'overrides nav.css hiding lists of inactive items')
@@ -270,4 +270,17 @@ test('the overview puts Steps after the introduction and before the first sectio
   assert.deepEqual(split('<p>only</p>'), { before: '<p>only</p>', after: '' }, 'no sections: all before')
   assert.deepEqual(split(undefined), { before: '', after: '' })
   assert.equal(split('<p>a</p><div class="sect1 x"><h2>').after, '<div class="sect1 x"><h2>')
+})
+
+test('the rail file list is open on the overview and collapsed on a step page', () => {
+  const hbs = engine(['eq', 'relativize'], ['solution-code-download', 'solution-access-gate'])
+  const render = hbs.compile('{{> solution-code-download solution=solution}}')
+  const solution = { id: 'g', download: 'public', attachments: [{ name: 'Makefile', url: '/m' }, { name: 'compose.yaml', url: '/c' }] }
+  const overview = render({ solution, page: { layout: 'solution', url: '/solutions/g/' } })
+  assert.match(overview, /<details class="sol-files-details" open>/)
+  assert.match(overview, /All build-along files \(2\)/)
+  assert.match(overview, /Build it yourself from the steps, or download the complete working example\./)
+  const step = render({ solution, page: { layout: 'solution-step', url: '/solutions/g/s1/' } })
+  assert.match(step, /<details class="sol-files-details">/)
+  assert.match(step, /<span>Makefile<\/span>/, 'the links are there, just collapsed')
 })

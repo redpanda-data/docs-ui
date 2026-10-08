@@ -955,6 +955,45 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   flex: 1 1 12rem;
 }
 
+/* All build-along files: collapsible (open on the overview, closed on step
+   pages; solution-code-download.hbs). The heading is the summary. */
+.sol-files-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.sol-files-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sol-files-summary .sol-panel-title {
+  margin: 0;
+}
+
+.sol-files-summary::after {
+  content: "";
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  color: var(--sol-meta);
+  transition: transform 0.15s ease;
+}
+
+.sol-files-details[open] > .sol-files-summary::after {
+  transform: rotate(-135deg);
+}
+
+.sol-files-details[open] > .sol-files-summary {
+  margin-bottom: 0.5rem;
+}
+
 .sol-file-list {
   list-style: none;
   margin: 0;

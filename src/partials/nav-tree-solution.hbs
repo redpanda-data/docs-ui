@@ -22,8 +22,9 @@
   28-solution-progress.js already toggles (::after content, which is part of
   the accessible name); the script can also write it directly.
 
-  On a solution page: Solutions home, Overview, the ordered steps, then
-  Build-along files and Related docs from page-solution. On the landing page:
+  On a solution page: Solutions home, Overview, and the ordered steps. The
+  build-along files and related docs are in the right rail and the overview,
+  so the sidebar does not repeat them. On the landing page:
   Solutions home, then the filter form (solutions-filters.hbs). The grid is
   the list of solutions, so the sidebar does not repeat it.
 --}}
@@ -76,42 +77,6 @@
           </li>
           {{/each}}
         </ol>
-      </li>
-      {{/if}}
-      {{/with}}
-      {{#with (parse-json page.attributes.solution) as |sol|}}
-      {{#if sol.attachments.length}}
-      <li class="nav-item" data-depth="1">
-        <div class="item dropdown">
-          <span class="nav-text">All build-along files</span>
-          <div role="button" tabindex="0" aria-label="Expand navigation" class="nav-item-toggle"><img src="{{{@root.uiRootPath}}}/img/nav-tree-chevron.svg" width="6" height="10" alt=""></div>
-        </div>
-        <ul class="nav-list">
-          {{#each sol.attachments}}
-          <li class="nav-item" data-depth="2">
-            <div class="item">
-              <a class="nav-link" href="{{{relativize url}}}">{{name}}</a>
-            </div>
-          </li>
-          {{/each}}
-        </ul>
-      </li>
-      {{/if}}
-      {{#if sol.relatedDocs.length}}
-      <li class="nav-item" data-depth="1">
-        <div class="item dropdown">
-          <span class="nav-text">Related docs</span>
-          <div role="button" tabindex="0" aria-label="Expand navigation" class="nav-item-toggle"><img src="{{{@root.uiRootPath}}}/img/nav-tree-chevron.svg" width="6" height="10" alt=""></div>
-        </div>
-        <ul class="nav-list">
-          {{#each sol.relatedDocs}}
-          <li class="nav-item" data-depth="2">
-            <div class="item">
-              <a class="nav-link" href="{{{relativize url}}}">{{title}}</a>
-            </div>
-          </li>
-          {{/each}}
-        </ul>
       </li>
       {{/if}}
       {{/with}}

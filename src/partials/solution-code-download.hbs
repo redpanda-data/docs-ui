@@ -1,7 +1,7 @@
 {{!--
   "Get the code" panel for the rail. Context: `solution`.
 
-  Knowledge is never gated: the tutorial shows every snippet and the public
+  Knowledge is never gated: the steps show every snippet and the public
   build-along files below are enough to complete every step. The download is a
   shortcut to the complete bundle, served by the docs-site /solutions/download
   function, which owns the sign-in redirect for `authenticated` solutions. The
@@ -10,7 +10,7 @@
 {{#unless (eq solution.download 'none')}}
 <section class="sol-panel sol-download" data-sol-download-panel aria-labelledby="sol-download-title">
   <h3 id="sol-download-title" class="sol-panel-title">Get the code</h3>
-  <p class="sol-panel-text">Build this solution yourself using the tutorial, or download the complete working example.</p>
+  <p class="sol-panel-text">Build it yourself from the steps, or download the complete working example.</p>
   <a class="sol-btn sol-btn--sm{{#if (eq solution.download 'authenticated')}} sol-btn--primary{{/if}}"
      href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}"
      data-sol-download
@@ -28,9 +28,14 @@
   {{/if}}
 </section>
 {{/unless}}
+{{!-- The full file list is open on the overview, where it is the point of
+      the panel. On a step page each step lists its own files under Files for
+      this step, so the list starts collapsed rather than pushing the rest of
+      the rail below the fold. Every link stays ungated either way. --}}
 {{#if solution.attachments.length}}
 <section class="sol-panel sol-files" aria-labelledby="sol-files-title">
-  <h3 id="sol-files-title" class="sol-panel-title">All build-along files</h3>
+  <details class="sol-files-details"{{#if (eq @root.page.layout 'solution')}} open{{/if}}>
+  <summary class="sol-files-summary"><h3 id="sol-files-title" class="sol-panel-title">All build-along files ({{solution.attachments.length}})</h3></summary>
   <p class="sol-panel-text">Everything you need to follow the steps without the download.</p>
   <ul class="sol-file-list">
     {{#each solution.attachments}}
@@ -42,5 +47,6 @@
     </li>
     {{/each}}
   </ul>
+  </details>
 </section>
 {{/if}}

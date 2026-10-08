@@ -1136,7 +1136,8 @@
     not_found: 'This download is not available for this version of the solution. Reload the page and try again.',
     file_too_large: 'That file is too large to download here.',
   }
-  var DOWNLOAD_FALLBACK = ' Every file you need is also on the step pages, under Files, to build along.'
+  var DOWNLOAD_FALLBACK = ' Every file you need is also in the All build-along files panel on this page,' +
+    ' and each step lists its files under Files for this step.'
 
   function handleDownloadError () {
     var params
