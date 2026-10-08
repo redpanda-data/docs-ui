@@ -63,6 +63,14 @@
             }
           }
         }
+      },
+      "solutions": {
+        "name": "solutions",
+        "title": "Solutions",
+        "url": "/solutions/",
+        "latestVersion": {
+          "version": ""
+        }
       }
     }
   },

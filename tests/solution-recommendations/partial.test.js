@@ -462,6 +462,10 @@ test('entry points render only when the solutions component exists', () => {
   }
   assert.equal((header.match(/>Solutions<\/a>/g) || []).length, 2, 'top bar and overflow menu links')
   assert.match(switcher, /data-product-id="solutions"/)
+  // Labs is linked only while the site has the component; after retirement
+  // /labs redirects to /solutions/, so the link would only repeat Solutions.
+  assert.doesNotMatch(header, /href="\/labs"/, 'no hard-coded Labs link')
+  assert.equal((header.match(/\(has-component site 'labs'\)/g) || []).length, 2, 'top bar and overflow menu Labs links are both gated')
   for (const attr of ['intent-solutions-title', 'intent-solutions-desc', 'intent-solutions-link', 'intent-solutions-cta']) {
     assert.match(home, new RegExp('page\\.attributes\\.' + attr.replace(/-/g, '\\-')), attr)
   }
