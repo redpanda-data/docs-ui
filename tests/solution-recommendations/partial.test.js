@@ -482,14 +482,14 @@ test('the recommendation partial never renders a repository URL', () => {
 test('the Last verified line names where the run happened, and the evidence names the content it covered', () => {
   const html = renderMeta(withVerified(Object.assign({}, VERIFIED, {
     platforms: ['self-managed', 'cloud'],
-    content_rev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904', docs: 'abc' },
-    stack_sha256: 'f'.repeat(64),
+    contentRev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904', docs: 'abc' },
+    stackSha256: 'f'.repeat(64),
   })))
   assert.match(html, /September 13, 2026 against Redpanda 26\.2\.2 on Self-Managed and Cloud<\/dd>/)
   assert.match(html, /title="[^"]*, content 4b825dc"/)
   // Absent: silent, as before.
   assert.match(renderMeta(withVerified(VERIFIED)), /against Redpanda 26\.2\.2<\/dd>/)
-  assert.equal(helper('format-verified-evidence')({ commands: 1, content_rev: { solution: 'not a hash' } }), '1 command run')
+  assert.equal(helper('format-verified-evidence')({ commands: 1, contentRev: { solution: 'not a hash' } }), '1 command run')
 
   const step = stepRenderer()({
     solution: Object.assign({}, SOLUTION, {

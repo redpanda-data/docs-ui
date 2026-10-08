@@ -11,7 +11,7 @@
  * the actual Doc Detective run, never by hand:
  *
  *   { suite, specs, steps, commands, checks, media, verifyScript,
- *     redpandaVersion, runAt, platforms, content_rev, stack_sha256 }
+ *     redpandaVersion, runAt, platforms, contentRev, stackSha256 }
  *
  * `specs` and `steps` are Doc Detective's own units, and "50 steps" beside a
  * solution's "Steps: 9" read as a contradiction, so they are not shown.
@@ -69,7 +69,9 @@ module.exports = function (verified) {
   if (script) parts.push(script)
   // Which content the run covered: the git tree hash of the solution, so a
   // maintainer can tell a run of the current pages from a run of older ones.
-  const rev = verified.content_rev && verified.content_rev.solution
+  // DEM maps verification.json onto the record in camelCase (contentRev).
+  const contentRev = verified.contentRev || verified.content_rev
+  const rev = contentRev && contentRev.solution
   if (typeof rev === 'string' && /^[0-9a-f]{7,64}$/i.test(rev)) parts.push('content ' + rev.slice(0, 7))
   return parts.join(', ')
 }
