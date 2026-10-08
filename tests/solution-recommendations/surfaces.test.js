@@ -227,3 +227,17 @@ test('the topbar breadcrumb truncates the page title, never the middle crumb', (
   assert.match(css, /\.topbar-crumbs \.breadcrumbs li:last-child:not\(:first-child\) \{\s*flex-shrink: 1;\s*min-width: 0;\s*overflow: hidden;/)
   assert.match(css, /li:last-child:not\(:first-child\) a,[\s\S]*?text-overflow: ellipsis;/)
 })
+
+// ---- Ask AI suggestions ------------------------------------------------------------
+
+test('Ask AI on a solutions page suggests solution questions, not the agent defaults', () => {
+  const page = { component: { name: 'solutions', asciidoc: { attributes: {} } } }
+  const ai = helper('get-ai-suggestions')({ data: { root: { page } } })
+  assert.ok(ai.length > 0)
+  assert.ok(ai.every((q) => !/agent|MCP|token budget/i.test(q)), ai.join(' | '))
+  const agent = helper('get-agent-suggestions')({ data: { root: { page } } })
+  assert.match(agent.join(' | '), /solution/i)
+  // Authored attributes still win.
+  const authored = { component: { name: 'solutions', asciidoc: { attributes: { 'ai-suggestion-1': 'Mine' } } } }
+  assert.deepEqual(helper('get-ai-suggestions')({ data: { root: { page: authored } } }), ['Mine'])
+})

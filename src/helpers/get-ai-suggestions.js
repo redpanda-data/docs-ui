@@ -27,9 +27,21 @@ module.exports = function (options) {
     "What's a token budget?",
   ]
 
+  // Components whose readers the agent-centric defaults do not fit, used
+  // when the component sets no ai-suggestion-* attributes of its own.
+  const byComponent = {
+    solutions: [
+      'Which solution should I start with?',
+      'How do I run a solution on Redpanda Cloud?',
+      'What changes when I take a solution to production?',
+      'Which Redpanda features does each solution use?',
+    ],
+  }
+  const fallback = (page && page.component && byComponent[page.component.name]) || defaults
+
   // Try to get component-specific suggestions
   if (!page || !page.component || !page.component.asciidoc || !page.component.asciidoc.attributes) {
-    return defaults
+    return fallback
   }
 
   const attrs = page.component.asciidoc.attributes
@@ -43,6 +55,6 @@ module.exports = function (options) {
     }
   }
 
-  // Return component suggestions if any were found, otherwise defaults
-  return suggestions.length > 0 ? suggestions : defaults
+  // Return component suggestions if any were found, otherwise the fallback
+  return suggestions.length > 0 ? suggestions : fallback
 }
