@@ -617,12 +617,31 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
     flex: 0 0 280px;
     max-width: 280px;
     order: 1;
+    /* --body-top--desktop is the navbar plus the announcement bar, which JS
+       sets while the bar is shown. With only the navbar height, the top of
+       the rail sat under the header whenever the bar was up. */
     position: sticky;
-    top: calc(var(--navbar-height, 4rem) + 1rem);
+    top: calc(var(--body-top--desktop, var(--navbar-height, 4rem)) + 1rem + var(--sol-rail-shift, 0px));
     align-self: flex-start;
-    max-height: calc(100vh - var(--navbar-height, 4rem) - 2rem);
+  }
+
+  /* No-JS fallback only. 31-solution-rail.js adds .is-tracked and moves the
+     rail with the page instead, because a sticky column with its own
+     scrollbar traps wheel and trackpad gestures (see that file). */
+  .sol-rail:not(.is-tracked) {
+    max-height: calc(100vh - var(--body-top--desktop, var(--navbar-height, 4rem)) - 2rem);
     overflow-y: auto;
     scrollbar-width: thin;
+  }
+
+  /* No scroll containers inside the rail. The TOC menu and the
+     recommendations block scroll on their own elsewhere, but nested here a
+     wheel or trackpad gesture that starts over them latches onto them and
+     stops at their edge instead of moving the page. */
+  .sol-rail .toc.sidebar .toc-menu,
+  .sol-rail .sol-rail-recs {
+    max-height: none;
+    overflow: visible;
   }
 
   .sol-rail-details > .sol-rail-summary {
@@ -652,14 +671,11 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   padding: 0;
 }
 
-.sol-rail .toc.sidebar .toc-menu {
-  max-height: 40vh;
-  overflow-y: auto;
-}
-
+/* The page feedback script sets display inline on .thumbs, so this needs
+   !important; the same control is at the end of the article. */
 .sol-rail .toc.sidebar .thumbs,
 .sol-rail .toc.sidebar .feedback-success {
-  display: none;
+  display: none !important;
 }
 
 .sol-rail-summary {
