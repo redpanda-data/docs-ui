@@ -36,6 +36,24 @@
             solutions match your filters". --}}
       {{#with (get-solutions-catalog) as |catalog|}}
       {{#if catalog.count}}
+      {{!-- The filters render in the sidebar (nav-tree-solution.hbs). Below
+            1024px the sidebar is a drawer behind the menu button, so this
+            script moves them into the slot, collapsed, before first paint.
+            29-solutions-home.js keeps them in the right place when the
+            viewport changes afterwards. The slot comes before Continue
+            learning, so a returning reader reaches the filters without
+            scrolling past their in-progress solutions. --}}
+      <div class="sol-filters-slot" data-sol-filters-slot></div>
+      <script>
+        (function () {
+          var filters = document.querySelector('[data-sol-filters]')
+          var slot = document.querySelector('[data-sol-filters-slot]')
+          if (!filters || !slot || typeof window.matchMedia !== 'function') return
+          if (!window.matchMedia('(max-width: 1023px)').matches) return
+          filters.removeAttribute('open')
+          slot.appendChild(filters)
+        })()
+      </script>
       <section class="sol-continue" data-sol-continue hidden aria-labelledby="sol-continue-title">
         <div class="sol-recs-head">
           <h2 id="sol-continue-title" class="sol-section-title">Continue learning</h2>
@@ -44,22 +62,6 @@
         <div class="sol-continue-grid" data-sol-continue-grid></div>
       </section>
       <div class="sol-home-layout">
-        {{!-- The filters render in the sidebar (nav-tree-solution.hbs). Below
-              1024px the sidebar is a drawer behind the menu button, so this
-              script moves them into the slot above the grid, collapsed,
-              before first paint. 29-solutions-home.js keeps them in the right
-              place when the viewport changes afterwards. --}}
-        <div class="sol-filters-slot" data-sol-filters-slot></div>
-        <script>
-          (function () {
-            var filters = document.querySelector('[data-sol-filters]')
-            var slot = document.querySelector('[data-sol-filters-slot]')
-            if (!filters || !slot || typeof window.matchMedia !== 'function') return
-            if (!window.matchMedia('(max-width: 1023px)').matches) return
-            filters.removeAttribute('open')
-            slot.appendChild(filters)
-          })()
-        </script>
         {{> solutions-grid catalog=catalog}}
       </div>
       <script type="application/json" data-sol-catalog>{{{catalog.json}}}</script>

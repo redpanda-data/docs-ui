@@ -1717,14 +1717,16 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   color: var(--sol-meta);
 }
 
-/* Below 1024px the sidebar is a drawer, so the filters move here, above the
-   grid, as a collapsed <details> (solutions-home.hbs, 29-solutions-home.js). */
+/* Below 1024px the sidebar is a drawer, so the filters move here, above
+   Continue learning and the grid, as a collapsed <details>
+   (solutions-home.hbs, 29-solutions-home.js). The next section's top margin
+   spaces it from what follows. */
 .sol-filters-slot:empty {
   display: none;
 }
 
 .sol-filters-slot {
-  margin-bottom: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 /* In the slot the filters sit inside article.doc, whose accordion styling

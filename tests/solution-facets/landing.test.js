@@ -378,6 +378,10 @@ test('the hero is the h1 and one lede from the page description, with no eyebrow
   assert.equal((html.match(/class="sol-lede"/g) || []).length, 1)
   assert.match(html, /<p class="sol-lede">Complete, runnable systems built on Redpanda, step by step.<\/p>/, 'the same sentence as the meta description')
   assert.match(html, /data-sol-filters-slot/, 'the narrow-screen slot is there')
+  assert.ok(html.indexOf('data-sol-filters-slot') < html.indexOf('data-sol-continue'),
+    'on a narrow screen the filters come before Continue learning')
+  assert.ok(html.indexOf('data-sol-filters-slot></div>') < html.indexOf("matchMedia('(max-width: 1023px)')"),
+    'the slot exists before the inline script that fills it runs')
   assert.doesNotMatch(html, /data-sol-filters-form/, 'the form itself is in the sidebar, not the main column')
 })
 

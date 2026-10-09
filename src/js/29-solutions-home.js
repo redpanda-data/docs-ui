@@ -16,8 +16,9 @@
  * groups, and an option that would leave none is dimmed.
  *
  * The filter form lives in the sidebar (nav-tree-solution.hbs). Below 1024px
- * the sidebar is a drawer, so the form moves above the grid: an inline script
- * in solutions-home.hbs does it before first paint, and placeFilters() below
+ * the sidebar is a drawer, so the form moves to the top of the main column,
+ * above Continue learning and the grid: an inline script in
+ * solutions-home.hbs does it before first paint, and placeFilters() below
  * keeps it right when the viewport changes. Every selector here is
  * document-wide for that reason.
  *
@@ -438,9 +439,9 @@
 
   // ---- where the filters live -----------------------------------------------------
 
-  // Sidebar from 1024px, above the grid (collapsed) below it. The inline
-  // script in solutions-home.hbs made the first placement; this follows
-  // viewport changes. A reader who opened or closed the narrow copy keeps
+  // Sidebar from 1024px, above Continue learning and the grid (collapsed)
+  // below it. The inline script in solutions-home.hbs made the first
+  // placement; this follows viewport changes. A reader who opened or closed the narrow copy keeps
   // their choice while the viewport stays narrow.
   function placeFilters () {
     var filters = $('[data-sol-filters]')
