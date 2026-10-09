@@ -156,13 +156,13 @@ test('"Saved on this device" only when the write landed', () => {
   assert.match(blocked.els.sync.textContent, /Not saved/)
 })
 
-test('a download error sent back by docs-site becomes a message that points at the build-along files', () => {
+test('a download error sent back by docs-site becomes a message that points at the files on the steps', () => {
   const r = run({ page: 'step', stepId: 's1', search: '?download_error=bundle_not_ready&x=1' })
   const toast = r.toasts()[0]
   assert.ok(toast, 'message shown')
   assert.equal(toast.getAttribute('role'), 'alert')
   assert.match(toast.textContent, /not ready to download yet/)
-  assert.match(toast.textContent, /All build-along files panel on this page/, 'names the panel that exists')
+  assert.match(toast.textContent, /shown in full on the steps/, 'points at the pages, which work whether or not a download does')
   assert.match(toast.textContent, /under Files for this step/, 'and the section each step has')
   assert.deepEqual(r.calls.replaceState, ['/solutions/demo/s1/?x=1'], 'the code is stripped from the URL')
   const unknown = run({ page: 'step', stepId: 's1', search: '?download_error=<script>' })

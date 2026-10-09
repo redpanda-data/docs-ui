@@ -273,9 +273,9 @@ test('the overview puts Steps after the introduction and before the first sectio
 })
 
 test('the rail file list is open on the overview and collapsed on a step page', () => {
-  const hbs = engine(['eq', 'relativize'], ['solution-code-download', 'solution-access-gate'])
+  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-access-gate'])
   const render = hbs.compile('{{> solution-code-download solution=solution}}')
-  const solution = { id: 'g', download: 'public', attachments: [{ name: 'Makefile', url: '/m' }, { name: 'compose.yaml', url: '/c' }] }
+  const solution = { id: 'g', version: 'v1.0.0', download: 'public', files: ['Makefile', 'compose.yaml'] }
   const overview = render({ solution, page: { layout: 'solution', url: '/solutions/g/' } })
   assert.match(overview, /<details class="sol-files-details" open>/)
   assert.match(overview, /All build-along files \(2\)/)
@@ -283,4 +283,38 @@ test('the rail file list is open on the overview and collapsed on a step page', 
   const step = render({ solution, page: { layout: 'solution-step', url: '/solutions/g/s1/' } })
   assert.match(step, /<details class="sol-files-details">/)
   assert.match(step, /<span>Makefile<\/span>/, 'the links are there, just collapsed')
+})
+
+test('the rail file list is record.files as gated download links, never public attachment links', () => {
+  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-access-gate'])
+  const render = hbs.compile('{{> solution-code-download solution=solution}}')
+  const attachments = [{ name: 'verification.json', url: '/solutions/g/_attachments/verification.json' }]
+  const files = ['docker-compose.yml', 'services/leaderboard/main.go', 'scripts/verify-lib.sh']
+  const page = { layout: 'solution', url: '/solutions/g/' }
+  const gated = render({ solution: { id: 'g', version: 'v1.2.0', status: 'published', download: 'authenticated', files, attachments }, page })
+  assert.doesNotMatch(gated, /_attachments/, 'attachments are evidence, not the build-along list')
+  assert.match(gated, /All build-along files \(3\)/, 'the count is record.files')
+  const links = gated.match(/<a class="sol-file-link"[^>]*>/g)
+  assert.equal(links.length, 3)
+  assert.match(links[1], /href="\/solutions\/download\?solution=g&amp;version=v1\.2\.0&amp;path=services%2Fleaderboard%2Fmain\.go&amp;return=%2Fsolutions%2Fg%2F"/)
+  assert.match(links[1], /data-sol-file-link="services\/leaderboard\/main\.go"/)
+  links.forEach((a) => assert.match(a, /data-requires-auth/))
+  assert.match(gated, /Sign in to download any of them\./)
+  assert.doesNotMatch(gated, /without the download/, 'no promise of public files')
+
+  const pub = render({ solution: { id: 'g', version: 'v1.2.0', download: 'public', files }, page })
+  assert.doesNotMatch(pub, /data-requires-auth/)
+  assert.match(pub, /path=scripts%2Fverify-lib\.sh/)
+
+  const draft = render({ solution: { id: 'g', version: 'v0.1.0', status: 'draft', download: 'authenticated', files }, page })
+  const draftLinks = draft.match(/<a class="sol-file-link[^"]*"[^>]*>/g)
+  assert.equal(draftLinks.length, 3)
+  draftLinks.forEach((a) => {
+    assert.doesNotMatch(a, /href=/, 'a draft has no link, public or gated')
+    assert.match(a, /aria-disabled="true"/)
+  })
+  assert.match(draft, /Download available at release\./)
+
+  assert.doesNotMatch(render({ solution: { id: 'g', download: 'none', files }, page }), /sol-files/, 'no downloads, no download list')
+  assert.doesNotMatch(render({ solution: { id: 'g', download: 'authenticated', files: [], attachments }, page }), /sol-files/)
 })

@@ -18,6 +18,7 @@ const STORE_KEY = 'docs-solutions-progress'
 const HINT_KEY = 'docs-solutions-progress-hint'
 const DIRTY_KEY = 'docs-solutions-progress-dirty'
 const PENDING_KEY = 'docs-solutions-pending-intent'
+const RAIL_FILES = ['docker-compose.yml', 'services/leaderboard/main.go', 'scripts/verify-lib.sh']
 
 function storage (initial, throws) {
   const data = Object.assign({}, initial || {})
@@ -144,7 +145,30 @@ function buildPage (o) {
   els.signin = el('button', { 'data-sol-signin': '', 'data-intent': 'download' })
   els.gate = el('div', { 'data-sol-gate': '' }, [els.gateText, els.signin])
   els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat([els.asset, els.gate]))
-  els.rail = el('details', { 'data-sol-rail': '', open: '' }, [els.progress, els.downloadPanel])
+  // All build-along files (solution-code-download.hbs): record.files as gated
+  // download links, rendered with no href for a draft and not at all for
+  // download: 'none'.
+  const railPanel = []
+  if (o.download !== 'none' && o.railFiles !== false) {
+    const policy = o.download || 'authenticated'
+    els.fileLinks = (o.railFiles || RAIL_FILES).map((file) => {
+      const attrs = { class: 'sol-file-link', 'data-sol-file-link': file }
+      if (o.status === 'draft' && !o.draftHref) {
+        attrs['aria-disabled'] = 'true'
+        attrs.class += ' is-disabled'
+      } else {
+        attrs.href = '/solutions/download?solution=' + o.solutionId + '&version=' + o.version +
+          '&path=' + encodeURIComponent(file) + '&return=' + encodeURIComponent('/solutions/' + o.solutionId + '/')
+        if (policy === 'authenticated') attrs['data-requires-auth'] = ''
+      }
+      return el('a', attrs, [el('span', { text: file })])
+    })
+    els.filesPanel = el('section', { 'data-sol-files-panel': '' }, [
+      el('details', { class: 'sol-files-details' }, [el('ul', { class: 'sol-file-list' }, els.fileLinks.map((a) => el('li', {}, [a])))]),
+    ])
+    railPanel.push(els.filesPanel)
+  }
+  els.rail = el('details', { 'data-sol-rail': '', open: '' }, [els.progress, els.downloadPanel].concat(railPanel))
 
   const main = []
   if (o.page === 'step') {
@@ -343,6 +367,7 @@ function run (options) {
     toasts: () => created.filter((c) => c.classes.has('sol-toast')),
     signinEvents: () => calls.events.filter((e) => e.type === 'docs-account:open-signin'),
     controls: () => els.body.querySelectorAll('[data-sol-file-download]'),
+    fileLink: (file) => els.body.querySelector('[data-sol-file-link="' + file + '"]'),
     control: (file) => els.body.querySelector('[data-sol-file-download="' + file + '"]'),
     downloads: () => calls.heap.filter((e) => e.name === 'solution_download'),
     puts: () => calls.fetch.filter((c) => c.url === '/solutions/progress' && c.method === 'PUT'),
@@ -350,4 +375,4 @@ function run (options) {
   }
 }
 
-module.exports = { run, plain, doneIds, STORE_KEY, HINT_KEY, DIRTY_KEY, PENDING_KEY }
+module.exports = { run, plain, doneIds, STORE_KEY, HINT_KEY, DIRTY_KEY, PENDING_KEY, RAIL_FILES }

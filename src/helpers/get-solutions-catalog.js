@@ -105,6 +105,7 @@ function normalizeRecord (record) {
     industries: toArray(record.industries),
     steps,
     stepCount: steps.length,
+    files: toArray(record.files),
     attachments: toArray(record.attachments),
     relatedDocs: toArray(record.relatedDocs),
     relatedSolutions: toArray(record.relatedSolutions),

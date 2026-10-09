@@ -59,7 +59,8 @@
  *     tests/fixtures/solutions-progress-merge.json).
  *   - Download errors: docs-site sends a failed download navigation back to
  *     the page as ?download_error=<code>; the page says what happened and
- *     points at the build-along files. Draft solutions have no release yet, so
+ *     points at the steps, which show every file in full. Draft solutions have
+ *     no release yet, so
  *     their download CTA reads "Download available at release" and does
  *     nothing.
  *   - Every code block the extension annotated with data-solution-file gets a
@@ -69,6 +70,11 @@
  *     reader is never asked to sign in for one file while the whole zip is
  *     free, and never sees a control where the CTA itself is absent. The
  *     download starts on return from sign-in.
+ *   - The rail's All build-along files panel lists the same files (the
+ *     catalog record's `files` allowlist) as data-sol-file-link entries. Each
+ *     one goes through the very same handler as the code-block control: same
+ *     URL builder, same sign-in gate and intent=download&path= round trip,
+ *     inert for a draft. No file of a solution has a public download link.
  *   - Gates exist only on Save and on the authenticated download. Anonymous
  *     readers can start, mark steps, and see progress on this device.
  *   - Analytics: track(name, props) -> window.heap.track when present, and
@@ -1122,7 +1128,7 @@
       // in this tab): say what to do next rather than nothing.
       if (!fresh) {
         toast(filePath
-          ? 'You are signed in. Select Download on the snippet to get ' + filePath + '.'
+          ? 'You are signed in. Select Download on its code block or in All build-along files to get ' + filePath + '.'
           : 'You are signed in. Select Download to get the complete example.')
         return
       }
@@ -1139,14 +1145,14 @@
 
   // docs-site sends a failed download navigation back here with a fixed code
   // (solutions-download.mjs `fail`). Say what happened, and point at the
-  // build-along files, which are never gated.
+  // steps, which show every file in full whether or not a download works.
   var DOWNLOAD_ERRORS = {
     bundle_not_ready: 'The complete example is not ready to download yet.',
     rate_limited: 'Too many downloads in a short time. Try again in a few minutes.',
     not_found: 'This download is not available for this version of the solution. Reload the page and try again.',
     file_too_large: 'That file is too large to download here.',
   }
-  var DOWNLOAD_FALLBACK = ' Every file you need is also in the All build-along files panel on this page,' +
+  var DOWNLOAD_FALLBACK = ' Every file you need is also shown in full on the steps,' +
     ' and each step lists its files under Files for this step.'
 
   function handleDownloadError () {
@@ -1209,6 +1215,15 @@
       var label = $('[data-sol-download-label]', el)
       if (label) label.textContent = DRAFT_DOWNLOAD_LABEL
       else el.textContent = DRAFT_DOWNLOAD_LABEL
+    })
+    // The rail's file entries keep their names (they are still the list of
+    // files to build along with) and lose only the link.
+    $$('[data-sol-file-link]').forEach(function (el) {
+      el.removeAttribute('href')
+      el.removeAttribute('aria-label')
+      el.setAttribute('aria-disabled', 'true')
+      el.setAttribute('title', attr(el, 'data-sol-file-link') + ': ' + DRAFT_DOWNLOAD_LABEL)
+      if (el.classList) el.classList.add('is-disabled')
     })
   }
 
@@ -1354,6 +1369,12 @@
     $$('[data-sol-download-panel]').forEach(function (el) {
       var authOnly = !!$('[data-sol-download][data-requires-auth]', el)
       el.hidden = authOnly && !available
+    })
+    // Every entry is a gated download, so the panel follows the bundle panel:
+    // a list of links no reader here can complete is worse than none. The
+    // files themselves are on the steps either way.
+    $$('[data-sol-files-panel]').forEach(function (el) {
+      el.hidden = downloadPolicy === 'none' || (fileDownloadsGated() && !available)
     })
     disableDraftDownloads()
     // Signed in, progress syncs on its own, so Save is only there to retry
@@ -1663,14 +1684,39 @@
       button.setAttribute('title', label)
       button.innerHTML = DOWNLOAD_ICON + '<span class="sol-file-download-label">Download</span>'
       toolbox.appendChild(button)
-      button.addEventListener('click', function (e) {
-        if (e && e.preventDefault) e.preventDefault()
-        if (fileDownloadsGated() && !hasAuthHint()) {
-          openSignin('download', filePath)
+      button.addEventListener('click', function (e) { requestFileDownload(e, filePath) })
+    })
+  }
+
+  // One file, from a code block's control or the rail's file list: the same
+  // gate, the same URL, the same return trip after sign-in.
+  function requestFileDownload (e, filePath, placement) {
+    if (e && e.preventDefault) e.preventDefault()
+    if (!filePath || isDraft || downloadPolicy === 'none') return
+    if (fileDownloadsGated() && !hasAuthHint()) {
+      openSignin('download', filePath)
+      return
+    }
+    var props = { source: 'click', kind: 'file', path: filePath }
+    if (placement) props.placement = placement
+    track('solution_download', baseProps(props))
+    startDownload(fileDownloadUrl(filePath, pageVersion))
+  }
+
+  // The rail's All build-along files entries. The partial renders a working
+  // href for readers without this script (docs-site gates it server side);
+  // here it is rebuilt with fileDownloadUrl so the two controls can never
+  // point at different URLs. A draft entry has no href to rebuild.
+  function wireFileLinks () {
+    $$('[data-sol-file-link]').forEach(function (el) {
+      var filePath = attr(el, 'data-sol-file-link')
+      if (!isDraft && filePath && el.hasAttribute('href')) el.setAttribute('href', fileDownloadUrl(filePath, pageVersion))
+      el.addEventListener('click', function (e) {
+        if (isDraft || !filePath) {
+          if (e && e.preventDefault) e.preventDefault()
           return
         }
-        track('solution_download', baseProps({ source: 'click', kind: 'file', path: filePath }))
-        startDownload(fileDownloadUrl(filePath, pageVersion))
+        requestFileDownload(e, filePath, 'rail')
       })
     })
   }
@@ -1756,6 +1802,7 @@
         track('solution_download', baseProps({ source: 'click', kind: 'bundle' }))
       })
     })
+    wireFileLinks()
     $$('[data-sol-version-dismiss]').forEach(function (el) {
       el.addEventListener('click', dismissVersionNotice)
     })

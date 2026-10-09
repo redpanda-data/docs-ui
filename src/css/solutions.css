@@ -1075,6 +1075,13 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   flex: none;
 }
 
+/* A draft has no release: the entry names the file but downloads nothing. */
+.sol-file-link.is-disabled,
+.sol-file-link.is-disabled:hover {
+  color: var(--grey-500-new);
+  cursor: default;
+}
+
 /* ---- step page ------------------------------------------------------------ */
 
 .sol-step-header {
