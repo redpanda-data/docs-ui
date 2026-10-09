@@ -1,6 +1,18 @@
-# DOC-2496: docs-team merge gate — inert until branch protection
-# enables "require review from Code Owners". The blanket rule comes
-# first; more specific rules below still win for their paths.
-*   @redpanda-data/documentation
+# DOC-2496: the blanket rule comes first; more specific rules below
+# still win for their paths. The default-branch ruleset requires a
+# code-owner review (DEVPROD-5038).
+#
+# @vbotbuildovich on a line enables Owner Merge there:
+# .github/workflows/owner-merge.yml approves a PR as that bot when the
+# author is in the owning team for every path the PR touches. Lines
+# without the bot always need a human approval from the listed owner.
+#
+# Keep patterns to `*` or anchored (leading /) exact files and
+# directory prefixes ending in /: the workflow approves nothing if it
+# meets any other form.
+*   @redpanda-data/documentation @vbotbuildovich
 
 /src/js/13-agent-handoff.js @redpanda-data/documentation
+
+# CI, automation, and this file always need a second docs reviewer.
+/.github/ @redpanda-data/documentation
