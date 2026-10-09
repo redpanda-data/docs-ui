@@ -777,9 +777,12 @@ html[data-theme=dark] {
   margin-top: 0;
 }
 
+/* Mirrors the doc.css rule; see the note there for why anywhere and not break-word. */
 .aa-DetachedOverlay .doc .tableblock pre,
+.aa-DetachedOverlay .doc .tableblock pre code,
 .aa-DetachedOverlay .doc .listingblock.wrap pre {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .aa-DetachedOverlay .doc div.no-wrap pre code {

@@ -20,7 +20,17 @@ main.article.home > .content {
 /* Dark Hero Section */
 .home-hero {
   position: relative;
+
+  /* The glows are bigger than the hero and sit partly outside it, so the hero
+     has to clip. It must not become a SCROLL CONTAINER while doing it: this
+     section is the whole first screen on a phone, and in WebKit a touch that
+     starts inside an overflow:hidden box with overflowing content is latched to
+     that box. Because the box can't be scrolled by the user, the swipe did
+     nothing and the home page looked frozen until you tapped first. clip does
+     the same clipping without a scroll container, so the swipe reaches the page.
+     hidden stays first as the fallback for Safari < 16, which ignores clip. */
   overflow: hidden;
+  overflow: clip;
   background: #0b1430;
   color: #fff;
   padding: 80px 40px 72px;

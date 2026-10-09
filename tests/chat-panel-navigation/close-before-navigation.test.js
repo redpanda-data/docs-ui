@@ -112,6 +112,7 @@ function runPanel ({ storedOpen }) {
   const panel = {
     classList: { add () {}, remove () {}, toggle: () => false, contains: () => false },
     setAttribute () {},
+    getAttribute: () => null, // no data-askai-bundle: the lazy loader stays inert here
     querySelectorAll: () => [],
     querySelector: () => null,
     inert: false,

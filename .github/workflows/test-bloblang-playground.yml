@@ -8,6 +8,7 @@ on:
       - 'src/js/vendor/wasm_exec.js'
       - 'src/js/16-bloblang-interactive.js'
       - 'src/js/17-bloblang-yaml.js'
+      - 'src/js/11-editable-placeholders.js'
       - 'src/js/19-property-tooltips.js'
       - 'src/css/bloblang-interactive.css'
       - 'src/static/bloblang-docs.json'
@@ -15,6 +16,7 @@ on:
       - 'tests/bloblang-interactive/**'
       - 'tests/negative-cache/**'
       - 'tests/property-tooltips/**'
+      - 'tests/callout-preservation/**'
       - 'package.json'
       - 'package-lock.json'
       - 'gulpfile.js'
@@ -27,6 +29,7 @@ on:
       - 'src/js/vendor/wasm_exec.js'
       - 'src/js/16-bloblang-interactive.js'
       - 'src/js/17-bloblang-yaml.js'
+      - 'src/js/11-editable-placeholders.js'
       - 'src/js/19-property-tooltips.js'
       - 'src/css/bloblang-interactive.css'
       - 'src/static/bloblang-docs.json'
@@ -34,6 +37,7 @@ on:
       - 'tests/bloblang-interactive/**'
       - 'tests/negative-cache/**'
       - 'tests/property-tooltips/**'
+      - 'tests/callout-preservation/**'
       - 'package.json'
       - 'package-lock.json'
       - 'gulpfile.js'
@@ -119,6 +123,8 @@ jobs:
       run: npm run test:negative-cache
     - name: Test Property Tooltips
       run: npm run test:property-tooltips
+    - name: Test callout markers survive the Bloblang pass
+      run: npm run test:callout-preservation
     - name: Upload playground test results
       uses: actions/upload-artifact@v4
       if: always()

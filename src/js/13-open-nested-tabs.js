@@ -36,14 +36,20 @@
    * @param {HTMLElement[]} codeElements - Array of code elements to highlight.
    */
   const debouncedHighlight = debounce((codeElements) => {
-    if (typeof Prism !== 'undefined' && Prism.highlightElement) {
+    // 10-code-highlight.js keeps a reference to the real Prism: the stock Kapa
+    // widget replaces window.Prism with its own object once it loads.
+    const highlightElement = window.highlightCodeElement ||
+      (typeof Prism !== 'undefined' && Prism.highlightElement ? (code, async) => Prism.highlightElement(code, async) : null)
+    const resizeLineNumbers = window.prismLineNumbersResize ||
+      ((code) => { if (typeof Prism !== 'undefined' && Prism.plugins && Prism.plugins.lineNumbers) Prism.plugins.lineNumbers.resize(code) })
+    if (highlightElement) {
       requestAnimationFrame(() => {
         codeElements.forEach((pre) => {
           const code = pre.querySelector('code')
           if (code) {
             // https://prismjs.com/docs/Prism.html#.highlightElement
-            Prism.highlightElement(code, true)
-            Prism.plugins.lineNumbers.resize(code)
+            highlightElement(code, true)
+            resizeLineNumbers(code)
           }
         })
       })

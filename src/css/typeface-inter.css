@@ -24,6 +24,7 @@
   src:
     local("Inter Regular"),
     local("Inter-Regular"),
+    url(../font/Inter-Regular.woff2) format("woff2"),
     url(../font/Inter-Regular.ttf) format("truetype");
 }
 
@@ -36,6 +37,7 @@
   src:
     local("Inter Medium"),
     local("Inter-Medium"),
+    url(../font/Inter-Medium.woff2) format("woff2"),
     url(../font/Inter-Medium.ttf) format("truetype");
 }
 
@@ -48,6 +50,7 @@
   src:
     local("Inter SemiBold"),
     local("Inter-SemiBold"),
+    url(../font/Inter-SemiBold.woff2) format("woff2"),
     url(../font/Inter-SemiBold.ttf) format("truetype");
 }
 
@@ -60,6 +63,7 @@
   src:
     local("Inter Bold"),
     local("Inter-Bold"),
+    url(../font/Inter-Bold.woff2) format("woff2"),
     url(../font/Inter-Bold.ttf) format("truetype");
 }
 

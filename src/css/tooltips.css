@@ -19,6 +19,18 @@
   font-size: 1em;
 }
 
+/* Footer link inside a term tooltip (12-activate-tooltips.js): the glossary
+   entry, or the licensing page for enterprise terms. On touch it is the only
+   way through, since a tap on the term opens the tooltip instead. */
+.tippy-box[data-theme~='redpanda-term'] .tippy-footer-link {
+  display: block;
+  margin-top: 0.5em;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 a.glossary-term {
   border-bottom: 2px dotted var(--link-highlight-color);
   text-decoration: none !important;

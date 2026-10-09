@@ -6,6 +6,22 @@ const path = require('path')
 const log = require('fancy-log')
 const fs = require('fs')
 
+const isDev = process.env.NODE_ENV === 'development'
+
+// @kapaai/agent-react does `import { Prism } from 'react-syntax-highlighter'`,
+// which is the build that bundles every refractor grammar (~780 KB minified).
+// Point that one bare import at our shim, which registers a curated grammar
+// set on PrismLight instead. Only the exact specifier is redirected; the
+// package's own subpath imports (styles, prism-light) resolve normally.
+const lightSyntaxHighlighterPlugin = {
+  name: 'light-syntax-highlighter',
+  setup (build) {
+    build.onResolve({ filter: /^react-syntax-highlighter$/ }, () => ({
+      path: path.join(__dirname, '..', '..', 'src', 'js', 'react', 'shims', 'react-syntax-highlighter.js'),
+    }))
+  },
+}
+
 /**
  * Bundles all React component files in the specified source directory using esbuild and outputs the bundled files
  * to the destination directory.
@@ -20,7 +36,9 @@ const fs = require('fs')
  */
 async function bundleAllReactTask ({ srcDir, destDir }) {
   // Find all JS and JSX files in the source directory
-  const entries = glob.sync(path.join(srcDir, '**/*.{js,jsx}'))
+  // shims/ holds drop-in replacements for third-party modules (see the resolve
+  // plugin above); they are bundled into their importers, never on their own.
+  const entries = glob.sync(path.join(srcDir, '**/*.{js,jsx}'), { ignore: ['**/shims/**'] })
 
   if (entries.length === 0) {
     log.warn(`No React modules found in ${srcDir}`)
@@ -43,7 +61,12 @@ async function bundleAllReactTask ({ srcDir, destDir }) {
       await esbuild.build({
         entryPoints: [entryFile],
         bundle: true,
-        minify: process.env.NODE_ENV === 'production',
+        // Production by default. The release workflow never set NODE_ENV, so
+        // every published AskAI.bundle.js shipped unminified with React's
+        // development build (4.8 MB raw, 940 KB compressed, and dev-mode
+        // rendering on the main thread). Opt into the dev build explicitly
+        // with NODE_ENV=development when debugging the drawer.
+        minify: !isDev,
         sourcemap: true,
         outfile: outPath,
         format: 'iife', // Immediately Invoked Function Expression format
@@ -54,11 +77,12 @@ async function bundleAllReactTask ({ srcDir, destDir }) {
           '.jsx': 'jsx',
         },
         define: {
-          'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+          'process.env.NODE_ENV': JSON.stringify(isDev ? 'development' : 'production'),
         },
         // @kapaai/agent-core lazily imports zod-to-json-schema only when a tool
         // defines Zod-schema parameters; we register no tools, so leave it unresolved
         external: ['zod-to-json-schema'],
+        plugins: [lightSyntaxHighlighterPlugin],
       })
       log.info(`Built ${outName}`)
     } catch (error) {

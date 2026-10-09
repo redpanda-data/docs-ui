@@ -1,5 +1,10 @@
 html {
-  scroll-padding-top: calc(var(--navbar-height) + var(--toolbar-height)); /* 114px */
+  /* The one place an anchor jump is offset. The "On this page" scroll-spy reads
+     this same value as its activation line (see src/js/02-on-this-page.js), so
+     any second offset elsewhere puts a linked heading below the line and
+     highlights the entry above it. The trailing 16px is the breathing room that
+     used to live on the headings as scroll-margin-top. */
+  scroll-padding-top: calc(var(--navbar-height) + var(--toolbar-height) + 16px);
 }
 
 .doc {
@@ -26,7 +31,7 @@ html {
 
 @media screen and (min-width: 1024px) {
   html {
-    scroll-padding-top: calc(var(--navbar-height) + 32px); /* 88px */
+    scroll-padding-top: calc(var(--navbar-height) + 32px + 24px);
   }
 
   .doc {
@@ -59,24 +64,11 @@ html {
   font-weight: var(--heading-font-weight);
 }
 
-/* Offset anchor links to account for sticky bar (navbar + component indicator) */
-.doc h2[id],
-.doc h3[id],
-.doc h4[id],
-.doc h5[id],
-.doc h6[id] {
-  scroll-margin-top: calc(var(--navbar-height) + 16px);
-}
-
-@media screen and (min-width: 1024px) {
-  .doc h2[id],
-  .doc h3[id],
-  .doc h4[id],
-  .doc h5[id],
-  .doc h6[id] {
-    scroll-margin-top: calc(var(--navbar-height) + 24px);
-  }
-}
+/* Anchor-link offset lives on html as scroll-padding-top, not here. A
+   scroll-margin-top on the headings stacked on top of it: the browser parks a
+   linked heading at the sum of the two, which is below the scroll-spy's
+   activation line, so clicking an in-page link highlighted the preceding
+   entry. See tests/toc-active-anchor. */
 
 .doc h1 {
   font-size: calc(36 / var(--rem-base) * 1rem);
@@ -1713,10 +1705,19 @@ details[open] > summary {
   display: block;
 }
 
-/* NEEDS REVIEW prevent pre in table from causing article to exceed bounds */
+/* A code block in a table cell must not set the table's width.
+   pre-wrap alone was not enough: it wraps between tokens but cannot break
+   inside one, so a single long identifier still sets the cell's min-content
+   width and the table outgrows the page. The property reference pages hit this
+   with `cloud_storage_inventory_hash_path_directory:` at 44 characters, which
+   is wider than a phone on its own and squeezed the label column to nothing.
+   overflow-wrap: anywhere is the keyword that lowers min-content, so the token
+   breaks only when there is genuinely no room; break-word does not. */
 .doc .tableblock pre,
+.doc .tableblock pre code,
 .doc .listingblock.wrap pre {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .doc pre.highlight code,

@@ -14,13 +14,20 @@ span.editable {
   z-index: 1;
 }
 
-/* stylelint-disable font-family-no-missing-generic-family-keyword */
+/* Pencil marker. An inline SVG masked with the text colour: this used to be
+   Font Awesome's \f040 glyph, the one thing on the site that needed that
+   stylesheet, so the whole font is gone and the icon lives here. */
 span.editable::after {
-  content: "\f040";
-  font-family: 'FontAwesome';
+  content: "";
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
   margin-left: 5px;
+  vertical-align: -0.08em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
-/* stylelint-enable font-family-no-missing-generic-family-keyword */
 
 span.editable span.token {
   position: relative;
