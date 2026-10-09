@@ -234,17 +234,22 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
 }
 
 /* Status and difficulty colors. vars.css has no green or yellow scale, so the
-   beginner/intermediate/draft pairs keep the labs-card-diff recipe's raw
-   values; the red pairs use the brand scale (brand-600 is rgb(226, 67, 40)). */
+   beginner/intermediate/draft pairs use raw Tailwind values (the labs-card-diff
+   recipe's tints with its text one shade darker); the red pairs use the brand
+   scale (brand-600 is rgb(226, 67, 40)). The text is the 800 shade: the labs
+   recipe's 700 shades measure 4.55 to 4.88:1 on their tint over white and
+   4.21 to 4.5:1 over the grey-50 sidebar, under AA's 4.5:1 for 12px text.
+   The 800 shades are 6.3:1 or more over white and 5.86:1 or more over
+   grey-50. */
 .sol-chip--status.is-deprecated {
   background: rgba(226, 67, 40, 0.1);
-  color: var(--brand-700-new);
+  color: var(--brand-800-new);
   border-color: transparent;
 }
 
 .sol-chip--status.is-draft {
   background: rgba(234, 179, 8, 0.12);
-  color: #a16207;
+  color: #854d0e;
   border-color: transparent;
 }
 
@@ -275,17 +280,17 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
 
 .sol-diff.is-beginner {
   background: rgba(34, 197, 94, 0.1);
-  color: #15803d;
+  color: #166534;
 }
 
 .sol-diff.is-intermediate {
   background: rgba(234, 179, 8, 0.12);
-  color: #a16207;
+  color: #854d0e;
 }
 
 .sol-diff.is-advanced {
   background: rgba(226, 67, 40, 0.1);
-  color: var(--brand-700-new);
+  color: var(--brand-800-new);
 }
 
 .sol-time,
@@ -1615,15 +1620,15 @@ html[data-theme="dark"] .sol-recs-all {
 }
 
 .sol-rail-rec-diff.is-beginner {
-  color: #15803d;
+  color: #166534;
 }
 
 .sol-rail-rec-diff.is-intermediate {
-  color: #a16207;
+  color: #854d0e;
 }
 
 .sol-rail-rec-diff.is-advanced {
-  color: var(--brand-700-new);
+  color: var(--brand-800-new);
 }
 
 .sol-rail-rec-dot {
@@ -1973,8 +1978,12 @@ html[data-theme="dark"] .sol-results-note {
   background: linear-gradient(180deg, var(--component-bg-tint), var(--sol-surface) 40%);
 }
 
+/* A deprecated card recedes through a flat grey surface, not opacity:
+   opacity 0.75 also faded every chip and line of text in the card, taking
+   the Deprecated chip to about 3.3:1 and the difficulty chips to about 3:1. */
 .sol-card.is-deprecated {
-  opacity: 0.75;
+  background: var(--grey-50-new);
+  box-shadow: none;
 }
 
 .sol-card[hidden] {
@@ -2268,6 +2277,10 @@ html[data-theme="dark"] .sol-filters-summary {
 
 html[data-theme="dark"] .sol-nav-filters {
   border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .sol-card.is-deprecated {
+  background: var(--grey-900-new);
 }
 
 html[data-theme="dark"] .sol-card.is-featured {
