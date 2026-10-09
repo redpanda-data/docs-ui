@@ -2085,6 +2085,16 @@ html[data-theme="dark"] .sol-results-note {
   gap: 0.5rem;
 }
 
+/* doc.css's `.doc h2` top margin and `.doc h2:not(.discrete)` padding and
+   negative side margins (0,2,1) otherwise beat .sol-section-title, which
+   left a tall empty band above the heading and pulled it toward the panel
+   edge. The panel's own padding is the only space around it. */
+.doc .sol-continue .sol-section-title {
+  font-size: calc(22 / var(--rem-base) * 1rem);
+  margin: 0;
+  padding: 0;
+}
+
 /* ---- home page intent card ------------------------------------------------- */
 
 /* Third card under the two intent cards (home.hbs): spans both columns as a
