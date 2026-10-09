@@ -176,7 +176,7 @@ function buildPage (o) {
     // The overview's body Steps list (solution-steps.hbs) carries id + url
     // and its own ticks.
     els.stepList = el('ol', { 'data-sol-steps': '' }, stepIds.map((id) =>
-      el('li', { 'data-sol-step-id': id, 'data-sol-step-url': stepUrl(id) }, [el('a', { href: stepUrl(id) }, [el('span', { 'data-sol-step-status': '' })])])))
+      el('li', { 'data-sol-step-id': id, 'data-sol-step-url': stepUrl(id) }, [el('a', { href: stepUrl(id) }, [el('span', { 'data-sol-step-resume': '', hidden: '' }), el('span', { 'data-sol-step-status': '' })])])))
     main.push(els.start, els.heroProgress, els.stepList)
   }
   if (o.blocks !== false) buildBlocks(els).forEach((b) => main.push(b))

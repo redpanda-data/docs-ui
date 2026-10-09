@@ -235,3 +235,16 @@ test('Mark step complete under the article is shown at every width, and a step p
   assert.match(wide, /\.sol-step-actions-main \[data-sol-save\] \{\s*display: none;/, 'only its duplicate Save is')
   assert.match(css, /main\.solution-step \.sol-rail \{\s*order: 0;/)
 })
+
+test('the overview labels the step the reader last opened, and never marks it like a selection', () => {
+  const r = run({ page: 'overview', localStore: storeOf(rec({}, { currentStep: 's2' })) })
+  const parts = (i) => {
+    const link = r.els.stepList.children[i].children[0]
+    return { item: r.els.stepList.children[i], resume: link.children[0], status: link.children[1] }
+  }
+  assert.equal(parts(1).resume.hidden, false, 'the step last opened shows "Last opened"')
+  assert.ok(parts(1).item.classes.has('is-current'))
+  for (const i of [0, 2]) assert.equal(parts(i).resume.hidden, true, 'no other step carries the label')
+  // The label is part of the link text, so the hidden status must not repeat it.
+  assert.equal(parts(1).status.textContent, '')
+})

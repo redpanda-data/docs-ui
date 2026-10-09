@@ -808,13 +808,17 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   color: var(--grey-50-new);
 }
 
+/* The step the reader last opened: a light outline and a "Last opened" label.
+   It marks where they left off, so it must not look like a selection (a
+   filled number did, on an overview where nothing is selected). */
 .is-current > .sol-step-link {
-  border-color: var(--component-500);
+  border-color: var(--component-200);
 }
 
-.is-current > .sol-step-link .sol-step-num {
-  background: var(--component-600);
-  color: #fff;
+.sol-step-resume {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--component-700);
 }
 
 /* ---- progress panel ------------------------------------------------------- */
@@ -2417,6 +2421,14 @@ html[data-theme="dark"] .sol-empty {
 
 html[data-theme="dark"] .sol-bar {
   background: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-step-resume {
+  color: var(--component-200);
+}
+
+html[data-theme="dark"] .is-current > .sol-step-link {
+  border-color: var(--grey-600-new);
 }
 
 html[data-theme="dark"] .sol-step-num {

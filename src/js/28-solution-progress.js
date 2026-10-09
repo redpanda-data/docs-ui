@@ -1245,8 +1245,12 @@
         el.classList[complete ? 'add' : 'remove']('is-complete')
         el.classList[current ? 'add' : 'remove']('is-current')
       }
+      // The visible "Last opened" label is part of the link text, so the
+      // hidden status only carries completion: saying both would read twice.
+      var resume = $('[data-sol-step-resume]', el)
+      if (resume) resume.hidden = !current
       var status = $('[data-sol-step-status]', el)
-      if (status) status.textContent = complete ? '(completed)' : current ? '(current)' : ''
+      if (status) status.textContent = complete ? '(completed)' : ''
     })
     // Sidebar nav items: match on step id, falling back to url.
     $$('[data-sol-nav-url], [data-sol-nav-step]').forEach(function (el) {
