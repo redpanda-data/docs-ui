@@ -272,17 +272,17 @@ test('the overview puts Steps after the introduction and before the first sectio
   assert.equal(split('<p>a</p><div class="sect1 x"><h2>').after, '<div class="sect1 x"><h2>')
 })
 
-test('the rail file list is open on the overview and collapsed on a step page', () => {
+test('the rail file list is collapsed on every page, inside the progress card', () => {
   const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-access-gate'])
   const render = hbs.compile('{{> solution-code-download solution=solution}}')
   const solution = { id: 'g', version: 'v1.0.0', download: 'public', files: ['Makefile', 'compose.yaml'] }
-  const overview = render({ solution, page: { layout: 'solution', url: '/solutions/g/' } })
-  assert.match(overview, /<details class="sol-files-details" open>/)
-  assert.match(overview, /All build-along files \(2\)/)
-  assert.match(overview, /Build it yourself from the steps, or download the complete working example\./)
-  const step = render({ solution, page: { layout: 'solution-step', url: '/solutions/g/s1/' } })
-  assert.match(step, /<details class="sol-files-details">/)
-  assert.match(step, /<span>Makefile<\/span>/, 'the links are there, just collapsed')
+  for (const page of [{ layout: 'solution', url: '/solutions/g/' }, { layout: 'solution-step', url: '/solutions/g/s1/' }]) {
+    const html = render({ solution, page })
+    assert.match(html, /<details class="sol-files-details">/, page.layout + ': collapsed')
+    assert.match(html, /All build-along files \(2\)/)
+    assert.match(html, /<span>Makefile<\/span>/, 'the links are there, just collapsed')
+    assert.doesNotMatch(html, /class="sol-panel[ "]/, page.layout + ': a section of the card, not a second panel')
+  }
 })
 
 test('the rail file list is record.files as gated download links, never public attachment links', () => {

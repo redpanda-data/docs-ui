@@ -676,6 +676,12 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   padding: 0;
 }
 
+/* The TOC script writes the toctitle into an h3, and solutions pages set
+   none: the empty heading left a 40px gap under the progress card. */
+.sol-rail .toc.sidebar > h3:empty {
+  display: none;
+}
+
 /* The page feedback script sets display inline on .thumbs, so this needs
    !important; the same control is at the end of the article. */
 .sol-rail .toc.sidebar .thumbs,
@@ -978,40 +984,75 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
 
 /* ---- download + files ----------------------------------------------------- */
 
+/* Get the code and the file list are sections of the progress card
+   (solution-progress.hbs), divided from the progress block by a rule rather
+   than drawn as a second panel under the TOC. */
+.sol-card-section {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+.sol-card-label {
+  font-family: var(--font-display);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sol-meta);
+  margin: 0 0 0.5rem;
+}
+
 .sol-download .sol-btn {
   width: 100%;
 }
 
 .sol-download-asset {
-  margin: 0.5rem 0 0;
+  margin: 0.375rem 0 0;
   font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--sol-meta);
+  overflow-wrap: anywhere;
 }
 
+/* One line: the lock, why, and the Sign in link. */
 .sol-gate {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.375rem 0.5rem;
-  margin-top: 0.75rem;
-  padding: 0.5rem 0.625rem;
-  border-radius: var(--radius-md-new);
-  background: var(--grey-50-new);
+  align-items: baseline;
+  gap: 0.25rem 0.375rem;
+  margin-top: 0.5rem;
   font-size: calc(12 / var(--rem-base) * 1rem);
+  line-height: 1.45;
   color: var(--grey-600-new);
 }
 
 .sol-gate-icon {
   color: var(--grey-500-new);
   flex: none;
+  align-self: center;
 }
 
 .sol-gate-text {
-  flex: 1 1 12rem;
+  flex: 1 1 10rem;
 }
 
-/* All build-along files: collapsible (open on the overview, closed on step
-   pages; solution-code-download.hbs). The heading is the summary. */
+.sol-files {
+  margin-top: 0.625rem;
+}
+
+.sol-files-label {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--grey-700-new);
+}
+
+.sol-files .sol-panel-text {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  margin: 0 0 0.375rem;
+}
+
+/* All build-along files: collapsed on every page (solution-code-download.hbs).
+   The label is the summary. */
 .sol-files-summary {
   display: flex;
   align-items: center;
@@ -1025,7 +1066,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   display: none;
 }
 
-.sol-files-summary .sol-panel-title {
+.sol-files-summary .sol-files-label {
   margin: 0;
 }
 

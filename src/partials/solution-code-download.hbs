@@ -1,5 +1,7 @@
 {{!--
-  "Get the code" panel for the rail. Context: `solution`.
+  "Get the code" section of the rail's progress card (solution-progress.hbs
+  includes it, so progress, download and sign-in are one box at the top of
+  the rail). Context: `solution`.
 
   Knowledge is never gated: every file a reader needs is shown in full on a
   page of the solution. Downloads are the shortcut, and they are gated alike:
@@ -9,9 +11,8 @@
   deliberately never rendered here.
 --}}
 {{#unless (eq solution.download 'none')}}
-<section class="sol-panel sol-download" data-sol-download-panel aria-labelledby="sol-download-title">
-  <h3 id="sol-download-title" class="sol-panel-title">Get the code</h3>
-  <p class="sol-panel-text">Build it yourself from the steps, or download the complete working example.</p>
+<div class="sol-card-section sol-download" data-sol-download-panel role="group" aria-labelledby="sol-download-title">
+  <h3 id="sol-download-title" class="sol-card-label">Get the code</h3>
   <a class="sol-btn sol-btn--sm{{#if (eq solution.download 'authenticated')}} sol-btn--primary{{/if}}"
      href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}"
      data-sol-download
@@ -27,7 +28,7 @@
   {{#if (eq solution.download 'authenticated')}}
   {{> solution-access-gate}}
   {{/if}}
-</section>
+</div>
 {{/unless}}
 {{!-- All build-along files: `solution.files`, the download allowlist, which
       is every file the pages show in full. Each entry downloads that one file
@@ -37,15 +38,14 @@
       its entries render with no href at all. Nothing here links to a public
       copy of a file: there is none.
 
-      The list is open on the overview, where it is the point of the panel. On
-      a step page each step lists its own files under Files for this step, so
-      the list starts collapsed rather than pushing the rest of the rail below
-      the fold. --}}
+      Collapsed on every page: each step lists its own files under Files for
+      this step, and an open list of every file pushed the rest of the rail
+      below the fold. --}}
 {{#if solution.files.length}}
 {{#unless (eq solution.download 'none')}}
-<section class="sol-panel sol-files" data-sol-files-panel aria-labelledby="sol-files-title">
-  <details class="sol-files-details"{{#if (eq @root.page.layout 'solution')}} open{{/if}}>
-  <summary class="sol-files-summary"><h3 id="sol-files-title" class="sol-panel-title">All build-along files ({{solution.files.length}})</h3></summary>
+<div class="sol-files" data-sol-files-panel>
+  <details class="sol-files-details">
+  <summary class="sol-files-summary"><span id="sol-files-title" class="sol-files-label">All build-along files ({{solution.files.length}})</span></summary>
   <p class="sol-panel-text" data-sol-files-text>{{#if (eq solution.status 'draft')}}Every file is shown in full on the steps. Download available at release.{{else if (eq solution.download 'authenticated')}}Every file is shown in full on the steps. Sign in to download any of them.{{else}}Every file is shown in full on the steps. Download any of them here.{{/if}}</p>
   <ul class="sol-file-list">
     {{#each solution.files}}
@@ -68,6 +68,6 @@
     {{/each}}
   </ul>
   </details>
-</section>
+</div>
 {{/unless}}
 {{/if}}

@@ -123,7 +123,11 @@ function buildPage (o) {
   ])
   els.versionDismiss = els.versionNotice.children[0]
   els.saveLabel = el('span', { 'data-sol-save-label': '', text: 'Save progress' })
-  els.save = el('button', { 'data-sol-save': '', 'data-intent': 'save' }, [els.saveLabel])
+  // cardSave: the rail card's copy (data-sol-save-card), which steps aside
+  // for the card's own gated-download sign-in line.
+  const saveAttrs = { 'data-sol-save': '', 'data-intent': 'save' }
+  if (o.cardSave) saveAttrs['data-sol-save-card'] = ''
+  els.save = el('button', saveAttrs, [els.saveLabel])
   els.sync = el('span', { 'data-sol-sync-state': '' })
   els.done = el('div', { 'data-sol-done': '', hidden: '' })
   const cardParts = [els.count, els.bar, els.state, els.versionNotice]
@@ -144,7 +148,9 @@ function buildPage (o) {
   els.gateText = el('span', { 'data-sol-gate-text': '', text: 'Sign in to save progress and download the complete example.' })
   els.signin = el('button', { 'data-sol-signin': '', 'data-intent': 'download' })
   els.gate = el('div', { 'data-sol-gate': '' }, [els.gateText, els.signin])
-  els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat([els.asset, els.gate]))
+  // gate: false mirrors solution-code-download.hbs for a non-authenticated
+  // download, which renders no gate.
+  els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat(o.gate === false ? [els.asset] : [els.asset, els.gate]))
   // All build-along files (solution-code-download.hbs): record.files as gated
   // download links, rendered with no href for a draft and not at all for
   // download: 'none'.

@@ -33,13 +33,12 @@
       <details class="sol-rail-details" data-sol-rail open>
         {{!-- The position belongs in the summary: below 1280px
              28-solution-progress.js closes this details, and a
-             collapsed "Progress and files" told the reader nothing
+             collapsed "Progress and code" told the reader nothing
              about where they were. --}}
-        <summary class="sol-rail-summary">Progress and files<span class="sol-rail-summary-meta">Step {{page.attributes.solution-step-index}} of {{page.attributes.solution-step-count}}</span></summary>
+        <summary class="sol-rail-summary">Progress and code<span class="sol-rail-summary-meta">Step {{page.attributes.solution-step-index}} of {{page.attributes.solution-step-count}}</span></summary>
         <div class="sol-rail-body">
           {{> solution-progress solution=(parse-json page.attributes.solution)}}
           {{> toc}}
-          {{> solution-code-download solution=(parse-json page.attributes.solution)}}
         </div>
       </details>
     </aside>

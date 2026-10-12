@@ -1379,8 +1379,12 @@
     disableDraftDownloads()
     // Signed in, progress syncs on its own, so Save is only there to retry
     // a sync that failed. Anonymous, it is the way to start syncing.
+    // The rail card's gated download carries its own sign-in line, so its
+    // Save button would ask for the same sign-in a second time.
+    var cardGate = !!$('[data-sol-gate]')
     $$('[data-sol-save]').forEach(function (el) {
-      el.hidden = !available || (signedIn && !syncError)
+      var gated = !signedIn && cardGate && el.hasAttribute('data-sol-save-card')
+      el.hidden = !available || (signedIn && !syncError) || gated
       var saveLabel = $('[data-sol-save-label]', el)
       if (saveLabel) saveLabel.textContent = signedIn ? 'Retry sync' : 'Sign in to sync'
     })

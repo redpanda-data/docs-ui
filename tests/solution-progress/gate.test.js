@@ -156,3 +156,27 @@ test('the rail <details> collapses on narrow screens and stays open otherwise', 
   const narrow = run({ mobile: true })
   assert.equal(narrow.els.rail.open, false)
 })
+
+test('the rail card asks for sign-in once: its gated download line replaces Sign in to sync', async () => {
+  const card = run({ signedIn: false, accountHidden: false, cardSave: true })
+  assert.equal(card.els.gate.hidden, false, 'the download sign-in line is the one ask')
+  assert.equal(card.els.save.hidden, true, 'no second "Sign in to sync" in the same card')
+
+  // Controls: the step row's copy keeps Save, and a card with no gate (a
+  // public download) still needs it, since nothing else offers sign-in.
+  const row = run({ signedIn: false, accountHidden: false })
+  assert.equal(row.els.save.hidden, false)
+  const ungated = run({ signedIn: false, accountHidden: false, cardSave: true, gate: false, download: 'public' })
+  assert.equal(ungated.els.save.hidden, false)
+  assert.equal(ungated.els.saveLabel.textContent, 'Sign in to sync')
+
+  // Signed in with a failed sync, the card's Retry sync comes back.
+  const failPut = (url, init, fallback) => ((init && init.method) === 'PUT'
+    ? { status: 503, ok: false, json: () => Promise.resolve({ error: 'nope' }) }
+    : fallback(url, init))
+  const failing = run({ signedIn: true, hint: 'true', fetch: failPut, cardSave: true })
+  await failing.flush()
+  failing.els.complete.dispatch('click')
+  await failing.flush()
+  assert.equal(failing.els.save.hidden, false, 'Retry sync is not a sign-in')
+})
