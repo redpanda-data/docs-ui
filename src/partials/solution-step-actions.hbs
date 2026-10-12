@@ -33,11 +33,23 @@
   {{!-- Shown at every width: the end of the article is where a reader who
         just finished the step is. The button's name never changes
         (aria-pressed carries the state), so the Completed chip says it. --}}
+  {{!-- One action at the end of a step: Complete and continue marks the
+        step and opens the next one. Once the step is done it hides and Next
+        is the primary link. The last step has no next, so it keeps the Mark
+        step complete toggle, which finishes the solution. Un-marking a step
+        is the rail card's toggle. --}}
   <div class="sol-step-actions-main">
+    {{#if @root.page.attributes.solution-next-url}}
+    <a class="sol-btn sol-btn--primary" data-sol-complete-continue href="{{{relativize @root.page.attributes.solution-next-url}}}" data-analytics="solution_step_complete">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Complete and continue</span>
+    </a>
+    {{else}}
     <button type="button" class="sol-btn sol-btn--primary" data-sol-complete data-analytics="solution_step_complete" aria-pressed="false">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       <span data-sol-complete-label>Mark step complete</span>
     </button>
+    {{/if}}
     <span class="sol-fact sol-fact--status" data-sol-step-header-status hidden>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       Completed

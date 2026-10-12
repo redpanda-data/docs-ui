@@ -4,8 +4,8 @@
  *
  *   Completed    every step done; bar full
  *   In progress  some steps done; bar and "n of M steps"
- *   Started      a step was opened, nothing marked done; "Next: <step>" and
- *                no bar
+ *   (opened)     a step was opened, nothing marked done: not listed at all;
+ *                a visit is browsing, not starting
  *
  * Opening a step creates the progress record (28-solution-progress.js
  * setCurrent), so "In progress, 0 of 9" was what every reader who had only
@@ -64,16 +64,10 @@ function landingWithSlot (store) {
   return { r, slot, bar: slot.querySelector('.sol-bar'), text: slot.querySelector('[data-sol-card-progress-text]') }
 }
 
-test('a visited solution with nothing done is "Started", names the next step, and draws no bar', () => {
+test('a solution only opened, nothing done, is not listed: browsing is not starting', () => {
   const { r } = landing({ g: progress([], 'create-topics') })
-  assert.equal(r.continueSection.hidden, false)
-  const html = r.continueGrid.innerHTML
-  assert.match(html, /<span class="sol-rec-eyebrow">Started<\/span>/)
-  assert.doesNotMatch(html, /In progress/)
-  assert.match(html, /Next: Step 2 create-topics/, 'where the reader stopped reading')
-  assert.match(html, /href="\/solutions\/g\/create-topics\/"/)
-  assert.doesNotMatch(html, /sol-bar/, 'no 0% bar')
-  assert.doesNotMatch(html, /0 of 3/)
+  assert.equal(r.continueSection.hidden, true, 'no Continue learning section for a visit alone')
+  assert.doesNotMatch(r.continueGrid.innerHTML, /Started/)
 })
 
 test('some steps done is "In progress" with a bar and the count', () => {
@@ -98,13 +92,12 @@ test('no record means no section at all', () => {
   assert.equal(r.continueSection.hidden, true)
 })
 
-test('the grid card follows the same rule: "Started" hides the bar, "In progress" shows it', () => {
-  const started = landingWithSlot({ g: progress([], 'build') })
-  assert.equal(started.slot.hidden, false)
-  assert.equal(started.bar.hidden, true)
-  assert.equal(started.text.textContent, 'Next: Step 3 build')
+test('the grid card follows the same rule: a visit alone shows nothing, "In progress" shows the bar', () => {
+  const visited = landingWithSlot({ g: progress([], 'build') })
+  assert.equal(visited.slot.hidden, true, 'opened, nothing done: no progress row')
 
   const going = landingWithSlot({ g: progress(['start', 'create-topics'], 'create-topics') })
+  assert.equal(going.slot.hidden, false)
   assert.equal(going.bar.hidden, false)
   assert.equal(going.text.textContent, '2 of 3 steps')
 

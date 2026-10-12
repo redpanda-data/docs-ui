@@ -1334,6 +1334,10 @@
         if (completeLabel) completeLabel.textContent = 'Mark step complete'
       })
       $$('[data-sol-step-header-status]').forEach(function (el) { el.hidden = !isStepDone })
+      // Complete and continue has done its job once the step is done; Next
+      // then becomes the primary action.
+      $$('[data-sol-complete-continue]').forEach(function (el) { el.hidden = isStepDone })
+      $$('[data-sol-next]').forEach(function (el) { el.classList[isStepDone ? 'add' : 'remove']('sol-btn--primary') })
     }
 
     // Done panel. The rail copy collapses with the rail on narrow screens, so
@@ -1784,6 +1788,14 @@
       el.addEventListener('click', function () {
         if (isDone(rawRecord(solutionId), stepId)) unmarkComplete(solutionId, stepId)
         else markComplete(solutionId, stepId, pageVersion)
+      })
+    })
+    // A link, so the browser navigates as usual (new tab, keyboard, no JS);
+    // the mark is written to storage first and syncs from the next page if
+    // this one unloads before its PUT goes out.
+    $$('[data-sol-complete-continue]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        if (!isDone(rawRecord(solutionId), stepId)) markComplete(solutionId, stepId, pageVersion)
       })
     })
     $$('[data-sol-save]').forEach(function (el) {

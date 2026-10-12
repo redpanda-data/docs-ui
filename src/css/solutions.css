@@ -315,8 +315,12 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   cursor: help;
 }
 
+/* "Last verified ... on Self-Managed and Cloud" wraps on a phone instead of
+   running off the edge. */
 .sol-fact--verified {
   color: var(--sol-meta);
+  white-space: normal;
+  min-width: 0;
 }
 
 .sol-btn {
@@ -1802,7 +1806,8 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
 }
 
 .sol-filters-slot .sol-filters-summary {
-  display: block;
+  display: flex;
+  align-items: center;
 }
 
 .sol-filters-slot .sol-filters-body {
@@ -2593,13 +2598,37 @@ html[data-theme="dark"] .sol-toast {
     margin: 0 1rem 1rem;
   }
 
-  /* On a step page the article comes first: the step header already says
-     "Step n of M", and the rail's progress and files would push the step's
-     first command below the fold. The overview keeps the rail on top, where
-     its finish message and download live. */
+  /* On a step page the collapsed rail is a sticky bar above the article:
+     "Step n of M", the progress bar, and the way into the progress card, the
+     code and On this page. Collapsed it is one line, so the step's first
+     command stays above the fold; at the end of the article it was where no
+     reader looked. Open, the card and contents scroll inside it rather than
+     pushing the article away. */
   main.solution-step .sol-rail {
-    order: 0;
-    margin: 1rem 1rem 0;
+    order: -1;
+    position: sticky;
+    top: var(--body-top, var(--navbar-height));
+    z-index: 5;
+    margin: 0 0 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--body-background, #fff);
+    border-bottom: 1px solid var(--grey-100-new);
+  }
+
+  main.solution-step .sol-rail-details[open] > .sol-rail-body {
+    max-height: calc(100vh - var(--body-top, var(--navbar-height)) - 5rem);
+    overflow-y: auto;
+  }
+
+  main.solution-step .sol-rail-summary {
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .sol-rail-summary-bar {
+    flex: 1 1 auto;
+    min-width: 3rem;
+    max-width: 12rem;
   }
 
   /* The rail summary stays the flex row it is everywhere else: as a block,
@@ -2666,5 +2695,111 @@ html[data-theme="dark"] .sol-toast {
     left: 16px;
     right: 16px;
     max-width: none;
+  }
+}
+
+/* ---- reading fixes from the UX review -------------------------------------- */
+
+/* Shell commands wrap at spaces instead of hiding their tail behind a
+   scrollbar macOS does not draw: a command cut at "game.leaderbo" read as
+   broken. Never mid-token (the reason for the no-wrap rule above, which this
+   overrides for shell only): a token longer than the line still scrolls.
+   Copy still copies the command as written. Other languages keep their line
+   structure and scroll, with a fade on the edge that has more
+   (32-solution-page.js sets .has-overflow and .is-scrolled-end). */
+.solution .doc .listingblock:not(.wrap) pre > code:is([data-lang="bash"], [data-lang="console"], [data-lang="shell"], [data-lang="sh"]),
+.solution-step .doc .listingblock:not(.wrap) pre > code:is([data-lang="bash"], [data-lang="console"], [data-lang="shell"], [data-lang="sh"]) {
+  white-space: pre-wrap !important;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.sol-doc .listingblock.has-overflow > .content {
+  position: relative;
+}
+
+.sol-doc .listingblock.has-overflow:not(.is-scrolled-end) > .content::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2.5rem;
+  pointer-events: none;
+  border-radius: 0 10px 10px 0;
+  background: linear-gradient(to right, transparent, var(--sol-code-bg, var(--grey-50-new)));
+}
+
+/* A captured output is something to compare against, not to run or ask
+   about: no language label, no Ask AI. Copy stays. */
+.sol-doc .listingblock.sol-expected .source-lang,
+.sol-doc .listingblock.sol-expected .ask-ai-button {
+  display: none;
+}
+
+/* Outcomes ("After completing this solution, you will be able to") are not a
+   to-do list: a check mark, not an empty box that looks clickable. */
+.doc.sol-doc ul.checklist i.fa-square-o::before {
+  content: "\2713";
+  color: var(--component-500);
+  font-weight: 700;
+}
+
+/* Figures open full size on click (07-expand-images.js); say so. */
+.sol-doc .imageblock img {
+  cursor: zoom-in;
+}
+
+/* Under == In production each note repeats the section's own heading as its
+   label. The label stays where a note stands alone. */
+.sol-doc .sect1:has(> h2#in-production) .production-note > .title {
+  display: none;
+}
+
+/* Complete source bars: the file name is what a reader scans for. */
+.sol-doc details.sol-details > summary,
+.sol-doc details.collapsible > summary {
+  font-size: calc(14 / var(--rem-base) * 1rem);
+}
+
+/* The solution crumb gives way before the page's own crumb does. Both
+   shrink with an ellipsis, so the trail fits without collapsing the middle
+   into "…" and dropping the step. */
+.topbar-crumbs .breadcrumbs li:has(> .breadcrumb-solution) {
+  flex-shrink: 1;
+  min-width: 4rem;
+  overflow: hidden;
+}
+
+.topbar-crumbs .breadcrumbs .breadcrumb-solution {
+  display: block;
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The filters toggle on narrow screens shows that it opens. */
+.doc .sol-filters-slot .sol-filters > .sol-filters-summary::after {
+  content: "";
+  margin-left: auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  color: var(--sol-meta);
+  transition: transform 0.15s ease;
+}
+
+.doc .sol-filters-slot .sol-filters[open] > .sol-filters-summary::after {
+  transform: rotate(-135deg);
+}
+
+@media (max-width: 1024px) {
+  /* A step page's header already links back to the solution and says
+     "Step n of M"; the article breadcrumb repeated it in three lines. */
+  main.solution-step .sol-step-doc > .breadcrumbs {
+    display: none;
   }
 }

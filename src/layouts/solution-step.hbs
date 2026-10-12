@@ -35,7 +35,10 @@
              28-solution-progress.js closes this details, and a
              collapsed "Progress and code" told the reader nothing
              about where they were. --}}
-        <summary class="sol-rail-summary">Progress and code<span class="sol-rail-summary-meta">Step {{page.attributes.solution-step-index}} of {{page.attributes.solution-step-count}}</span></summary>
+        {{!-- Below 1281px this summary is the step page's sticky bar: where
+              you are, how far through, and the way into the progress card,
+              the code, and On this page. --}}
+        <summary class="sol-rail-summary"><span class="sol-rail-summary-label">Step {{page.attributes.solution-step-index}} of {{page.attributes.solution-step-count}}</span><span class="sol-bar sol-bar--sm sol-rail-summary-bar" aria-hidden="true"><span class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></span></span><span class="sol-rail-summary-meta">Progress, code, contents</span></summary>
         <div class="sol-rail-body">
           {{> solution-progress solution=(parse-json page.attributes.solution)}}
           {{> toc}}

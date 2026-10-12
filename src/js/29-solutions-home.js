@@ -77,6 +77,14 @@
 
   var cards = $$('[data-sol-card]')
 
+  // "Featured" picks one out of many. In a catalog this small every card is
+  // on the first screen, so the label is noise; the featured card still
+  // sorts first and keeps its tint.
+  var FEATURED_LABEL_MIN = 7
+  if (cards.length < FEATURED_LABEL_MIN) {
+    $$('.sol-card-eyebrow').forEach(function (el) { el.hidden = true })
+  }
+
   // Lowercase, and every run of punctuation becomes one space, so a word
   // start is simply "after a space" and "event-driven" matches
   // "event driven".
@@ -337,7 +345,9 @@
   //   In progress  some steps done; bar and "n of M steps"
   //   Started      opened, nothing marked done yet; "Next: <step>" and no
   //                bar (a 0% bar reads as "you did nothing", which is not
-  //                what visiting a step means)
+  //                what visiting a step means). Never listed under Continue
+  //                learning or on a grid card: opening a page is browsing,
+  //                and listing it pushed the catalog below the fold.
   // "Next" is the step the reader last had open when nothing is done yet
   // (that is where they stopped reading), otherwise the first step not done.
   function describe (record, progress) {
@@ -383,7 +393,7 @@
       var record = byId[id]
       if (!record) continue
       var entry = describe(record, progress)
-      if (!entry.done && !progress.currentStep) continue
+      if (!entry.done) continue
       entries.push(entry)
     }
     entries.sort(function (a, b) { return (b.progress.updatedAt || 0) - (a.progress.updatedAt || 0) })

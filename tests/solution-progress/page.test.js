@@ -226,14 +226,14 @@ test('the overview CTA returns to the step last opened when nothing is marked ye
   assert.equal(going.els.heroProgress.textContent, '1 of 3 steps done')
 })
 
-test('Mark step complete under the article is shown at every width, and a step page puts the article before the rail when narrow', () => {
+test('the step action row is shown at every width, and a narrow step page pins the collapsed rail above the article', () => {
   const fs = require('node:fs')
   const path = require('node:path')
   const css = fs.readFileSync(path.join(__dirname, '../../src/css/solutions.css'), 'utf8')
   const wide = css.slice(css.indexOf('@media screen and (min-width: 1281px)'), css.indexOf('/* The on-this-page TOC'))
   assert.doesNotMatch(wide, /\.sol-step-actions-main \{\s*display: none;/, 'the row is not hidden beside the rail')
   assert.match(wide, /\.sol-step-actions-main \[data-sol-save\] \{\s*display: none;/, 'only its duplicate Save is')
-  assert.match(css, /main\.solution-step \.sol-rail \{\s*order: 0;/)
+  assert.match(css, /main\.solution-step \.sol-rail \{\s*order: -1;\s*position: sticky;/, 'a sticky bar above the article')
 })
 
 test('the overview labels the step the reader last opened, and never marks it like a selection', () => {
@@ -247,4 +247,21 @@ test('the overview labels the step the reader last opened, and never marks it li
   for (const i of [0, 2]) assert.equal(parts(i).resume.hidden, true, 'no other step carries the label')
   // The label is part of the link text, so the hidden status must not repeat it.
   assert.equal(parts(1).status.textContent, '')
+})
+
+test('Complete and continue marks the step once and hands the primary action to Next', () => {
+  const r = run({ page: 'step', stepId: 's1', actionRow: true, continueRow: true })
+  assert.equal(r.els.rowContinue.hidden, false, 'offered while the step is not done')
+  assert.equal(r.els.rowNext.classList.contains('sol-btn--primary'), false)
+
+  r.els.rowContinue.dispatch('click')
+  assert.deepEqual(doneIds(JSON.parse(r.local.data[STORE_KEY]).solutions.demo), ['s1'], 'the click marks the step before the link navigates')
+  assert.equal(r.els.rowContinue.hidden, true, 'done: nothing left to complete')
+  assert.equal(r.els.rowNext.classList.contains('sol-btn--primary'), true, 'Next is the primary action now')
+  assert.equal(r.els.complete.getAttribute('aria-pressed'), 'true', 'the rail toggle agrees')
+
+  // Control: a second click on a done step never un-marks it (unlike the toggle).
+  r.clock.now += 1
+  r.els.rowContinue.dispatch('click')
+  assert.deepEqual(doneIds(JSON.parse(r.local.data[STORE_KEY]).solutions.demo), ['s1'])
 })

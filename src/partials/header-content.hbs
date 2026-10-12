@@ -93,7 +93,7 @@
           {{!-- Solutions and Labs entry points; each renders only when the
                 site has the component. Once Labs retires, /labs redirects to
                 /solutions/, and a second link to the same place is noise. --}}
-          {{#if (has-component site 'solutions')}}
+          {{#if (and (has-component site 'solutions') (ne page.component.name 'solutions'))}}
           {{#with (find-component site 'solutions')}}
           <a class="tb-link tb-link-solutions" href="{{{relativize this.url}}}">Solutions</a>
           {{/with}}
@@ -115,7 +115,7 @@
             </svg>
           </button>
           <div class="tb-dropdown-menu tb-overflow-dropdown" role="menu">
-            {{#if (has-component site 'solutions')}}
+            {{#if (and (has-component site 'solutions') (ne page.component.name 'solutions'))}}
             {{#with (find-component site 'solutions')}}
             <a class="tb-dropdown-item" href="{{{relativize this.url}}}">Solutions</a>
             {{/with}}

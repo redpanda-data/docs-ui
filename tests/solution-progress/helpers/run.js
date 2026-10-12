@@ -192,7 +192,15 @@ function buildPage (o) {
       els.rowDownloadLabel = el('span', { 'data-sol-download-label': '', text: 'Download the complete example' })
       els.rowDownload = el('a', { 'data-sol-download': '', 'data-requires-auth': '', href: '/solutions/download?solution=' + o.solutionId + '&version=' + o.version }, [els.rowDownloadLabel])
       els.rowDone = el('div', { 'data-sol-done': '', 'data-sol-done-inline': '', hidden: '' }, [els.rowDownload])
-      els.actionRow = el('nav', { class: 'sol-step-actions' }, [els.rowBar, els.rowDone, els.rowComplete])
+      // continueRow: a step with a next step renders Complete and continue
+      // (a link to the next step) and the Next link instead of the toggle.
+      const rowMain = [els.rowBar, els.rowDone, els.rowComplete]
+      if (o.continueRow) {
+        els.rowContinue = el('a', { 'data-sol-complete-continue': '', href: '/solutions/' + o.solutionId + '/next/' })
+        els.rowNext = el('a', { 'data-sol-next': '', class: 'sol-btn sol-step-nav', href: '/solutions/' + o.solutionId + '/next/' })
+        rowMain.push(els.rowContinue, els.rowNext)
+      }
+      els.actionRow = el('nav', { class: 'sol-step-actions' }, rowMain)
       main.push(els.actionRow)
       // The step header chip is rendered once per page today; a second copy
       // must follow too.

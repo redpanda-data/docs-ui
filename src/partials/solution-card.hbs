@@ -37,6 +37,7 @@
       </span>
       {{/if}}
       {{#if solution.stepCount}}<span class="sol-time">{{solution.stepCount}} steps</span>{{/if}}
+      {{#each solution.platforms}}{{#if (eq this 'cloud')}}<span class="sol-time sol-card-cloud">Runs on Cloud</span>{{/if}}{{/each}}
     </div>
     {{!-- chipTechnologies (get-solutions-catalog) skips technologies every
           solution has and puts the rarest first, so the three slots show what
