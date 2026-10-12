@@ -2615,6 +2615,13 @@ html[data-theme="dark"] .sol-toast {
     border-bottom: 1px solid var(--grey-100-new);
   }
 
+  /* main.css makes .content a scroll container on small screens
+     (overflow: auto), which pins a sticky child to a box that never
+     scrolls. clip still clips but is not a scroll container. */
+  main.solution-step > .content.sol-content {
+    overflow: clip;
+  }
+
   main.solution-step .sol-rail-details[open] > .sol-rail-body {
     max-height: calc(100vh - var(--body-top, var(--navbar-height)) - 5rem);
     overflow-y: auto;
@@ -2756,6 +2763,11 @@ html[data-theme="dark"] .sol-toast {
   display: none;
 }
 
+.sol-doc .production-note > .content > :first-child,
+.sol-doc .production-note > .content > .paragraph:first-child > p {
+  margin-top: 0;
+}
+
 /* Complete source bars: the file name is what a reader scans for. */
 .sol-doc details.sol-details > summary,
 .sol-doc details.collapsible > summary {
@@ -2765,7 +2777,7 @@ html[data-theme="dark"] .sol-toast {
 /* The solution crumb gives way before the page's own crumb does. Both
    shrink with an ellipsis, so the trail fits without collapsing the middle
    into "…" and dropping the step. */
-.topbar-crumbs .breadcrumbs li:has(> .breadcrumb-solution) {
+.topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li):has(> .breadcrumb-solution) {
   flex-shrink: 1;
   min-width: 4rem;
   overflow: hidden;
@@ -2773,7 +2785,7 @@ html[data-theme="dark"] .sol-toast {
 
 .topbar-crumbs .breadcrumbs .breadcrumb-solution {
   display: block;
-  max-width: 22rem;
+  max-width: 11rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
