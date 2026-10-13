@@ -989,6 +989,21 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   border-top: 1px solid var(--grey-100-new);
 }
 
+/* Get the code opens the card, so it has no rule above it; the rule moves
+   to the progress head that follows it. With download 'none' the partial
+   renders nothing and the head is first, with no rule, as before. */
+.sol-progress > .sol-download:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.sol-progress > .sol-download:first-child + .sol-panel-head {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
 .sol-card-label {
   font-family: var(--font-display);
   font-size: calc(12 / var(--rem-base) * 1rem);

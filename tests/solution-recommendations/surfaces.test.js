@@ -246,7 +246,7 @@ test('Ask AI on a solutions page suggests solution questions, not the agent defa
 
 test('the overview puts Steps after the introduction and before the first section, as an On this page section', () => {
   const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'format-duration', 'get-header-color', 'split-at-first-section', 'html-has-id'], ['solution-steps', 'solution-related-docs'])
-  ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
+  ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'solution-files', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
   const solution = {
     id: 'g',
     steps: [{ id: 's1', title: 'One', url: '/solutions/g/s1/', order: 1 }],
@@ -273,8 +273,8 @@ test('the overview puts Steps after the introduction and before the first sectio
 })
 
 test('the rail file list is collapsed on every page, inside the progress card', () => {
-  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-access-gate'])
-  const render = hbs.compile('{{> solution-code-download solution=solution}}')
+  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
+  const render = hbs.compile('{{> solution-code-download solution=solution}}{{> solution-files solution=solution}}')
   const solution = { id: 'g', version: 'v1.0.0', download: 'public', files: ['Makefile', 'compose.yaml'] }
   for (const page of [{ layout: 'solution', url: '/solutions/g/' }, { layout: 'solution-step', url: '/solutions/g/s1/' }]) {
     const html = render({ solution, page })
@@ -286,8 +286,8 @@ test('the rail file list is collapsed on every page, inside the progress card', 
 })
 
 test('the rail file list is record.files as gated download links, never public attachment links', () => {
-  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-access-gate'])
-  const render = hbs.compile('{{> solution-code-download solution=solution}}')
+  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
+  const render = hbs.compile('{{> solution-code-download solution=solution}}{{> solution-files solution=solution}}')
   const attachments = [{ name: 'verification.json', url: '/solutions/g/_attachments/verification.json' }]
   const files = ['docker-compose.yml', 'services/leaderboard/main.go', 'scripts/verify-lib.sh']
   const page = { layout: 'solution', url: '/solutions/g/' }

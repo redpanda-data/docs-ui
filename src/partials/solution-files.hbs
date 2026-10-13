@@ -1,0 +1,42 @@
+{{!-- All build-along files, the last section of the rail's progress card
+      (solution-progress.hbs). `solution.files` is the download allowlist, which
+      is every file the pages show in full. Each entry downloads that one file
+      through the same endpoint, sign-in gate and intent round trip as the
+      Download control on a code block (28-solution-progress.js wires both, and
+      rewrites each href with the same URL builder). A draft has no release, so
+      its entries render with no href at all. Nothing here links to a public
+      copy of a file: there is none.
+
+      Collapsed on every page: each step lists its own files under Files for
+      this step, and an open list of every file pushed the rest of the rail
+      below the fold. --}}
+{{#if solution.files.length}}
+{{#unless (eq solution.download 'none')}}
+<div class="sol-files" data-sol-files-panel>
+  <details class="sol-files-details">
+  <summary class="sol-files-summary"><span id="sol-files-title" class="sol-files-label">All build-along files ({{solution.files.length}})</span></summary>
+  <p class="sol-panel-text" data-sol-files-text>{{#if (eq solution.status 'draft')}}Every file is shown in full on the steps. Download available at release.{{else if (eq solution.download 'authenticated')}}Every file is shown in full on the steps. Sign in to download any of them.{{else}}Every file is shown in full on the steps. Download any of them here.{{/if}}</p>
+  <ul class="sol-file-list">
+    {{#each solution.files}}
+    <li>
+      {{#if (eq ../solution.status 'draft')}}
+      <a class="sol-file-link is-disabled" aria-disabled="true" data-sol-file-link="{{this}}" title="{{this}}: Download available at release">
+      {{else}}
+      <a class="sol-file-link" href="/solutions/download?solution={{encode-uri ../solution.id}}&amp;version={{encode-uri ../solution.version}}&amp;path={{encode-uri this}}&amp;return={{encode-uri @root.page.url}}"
+         data-sol-file-link="{{this}}"
+         {{#if (eq ../solution.download 'authenticated')}}data-requires-auth{{/if}}
+         data-analytics="solution_download"
+         aria-label="Download {{this}}"
+         title="Download {{this}}"
+         rel="nofollow">
+      {{/if}}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>{{this}}</span>
+      </a>
+    </li>
+    {{/each}}
+  </ul>
+  </details>
+</div>
+{{/unless}}
+{{/if}}
