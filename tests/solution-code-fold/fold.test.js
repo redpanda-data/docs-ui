@@ -306,3 +306,16 @@ test('the fold fade and its button use the code frame colors in both themes', ()
   assert.match(css, /is-folded > \.content::after \{[^}]*linear-gradient\(180deg, transparent, var\(--sol-code-bg\)\)/)
   assert.doesNotMatch(css, /rgba\(24, 24, 24, 0\)/, 'no neutral grey fade left over')
 })
+
+test('the overflow edge fade never shares the fold fade pseudo-element', () => {
+  const fs = require('node:fs')
+  const path = require('node:path')
+  const css = fs.readFileSync(path.join(__dirname, '../../src/css/solutions.css'), 'utf8')
+  // The fold draws its bottom fade with .content::after and left: 0. A second
+  // rule on the same pseudo-element moved the edge fade to the left edge.
+  assert.doesNotMatch(css, /\.has-overflow[^{]*>\s*\.content::after/, 'the edge fade is not on ::after')
+  const rule = css.match(/\.has-overflow:not\(\.is-scrolled-end\) > \.content::before \{([^}]*)\}/)
+  assert.ok(rule, 'the edge fade is on ::before')
+  assert.match(rule[1], /right: 0;/)
+  assert.match(rule[1], /left: auto;/)
+})

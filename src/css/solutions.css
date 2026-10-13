@@ -2820,12 +2820,18 @@ html[data-theme="dark"] .sol-toast {
   position: relative;
 }
 
-.sol-doc .listingblock.has-overflow:not(.is-scrolled-end) > .content::after {
+/* ::before, not ::after: the fold (.sol-code-fold.is-folded) draws its
+   bottom fade with .content::after and left: 0, and sharing the pseudo-element
+   put this fade on the LEFT edge, over the start of every line, and replaced
+   the fold's own fade. left: auto keeps it on the right. */
+.sol-doc .listingblock.has-overflow:not(.is-scrolled-end) > .content::before {
   content: "";
   position: absolute;
+  z-index: 1;
   top: 0;
   right: 0;
   bottom: 0;
+  left: auto;
   width: 2.5rem;
   pointer-events: none;
   border-radius: 0 10px 10px 0;
