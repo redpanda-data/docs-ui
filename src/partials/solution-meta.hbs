@@ -90,7 +90,7 @@
         when `runAt` does not parse as a date: a manifest typo is published to
         the record as written, and a raw string like "last Tuesday" must never
         reach the page. Absence and garbage are both silent. `platforms` names
-        where the run happened ("on Self-Managed"), so a Cloud reader can tell
+        where the run happened ("on Docker Compose and Kubernetes"), so a Cloud reader can tell
         whether the evidence covers them; it is silent when absent. --}}
   {{#with (format-release-date solution.verified.runAt long=true) as |verifiedAt|}}
   <div class="sol-meta-item sol-meta-item--verified">

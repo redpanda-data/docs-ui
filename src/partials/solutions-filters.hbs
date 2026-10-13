@@ -64,7 +64,7 @@
       {{/each}}
     </fieldset>
     {{/if}}
-    {{#*inline "sol-platform-name"}}{{#if (eq value 'cloud')}}Redpanda Cloud{{else}}{{platform-name value}}{{/if}}{{/inline}}
+    {{#*inline "sol-platform-name"}}{{platform-name value}}{{/inline}}
     {{#if (eq catalog.facets.platforms.length 1)}}
     {{#each catalog.facets.platforms}}
     <div class="sol-filter-group sol-filter-group--single">

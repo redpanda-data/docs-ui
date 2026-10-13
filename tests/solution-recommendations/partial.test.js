@@ -485,7 +485,7 @@ test('the Last verified line names where the run happened, and the evidence name
     contentRev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904', docs: 'abc' },
     stackSha256: 'f'.repeat(64),
   })))
-  assert.match(html, /September 13, 2026 against Redpanda 26\.2\.2 on Self-Managed and Cloud<\/dd>/)
+  assert.match(html, /September 13, 2026 against Redpanda 26\.2\.2 on Docker Compose and Redpanda Cloud<\/dd>/)
   assert.match(html, /title="[^"]*, content 4b825dc"/)
   // Absent: silent, as before.
   assert.match(renderMeta(withVerified(VERIFIED)), /against Redpanda 26\.2\.2<\/dd>/)
@@ -498,7 +498,7 @@ test('the Last verified line names where the run happened, and the evidence name
     }),
     page: { title: 'One', attributes: { 'solution-step-id': 's1', 'solution-verified-at': '2026-09-13T02:14:07Z', 'solution-verified-version': '26.2.2' } },
   })
-  assert.match(step, /Last verified September 13, 2026 against Redpanda 26\.2\.2 on Self-Managed<\/span>/)
+  assert.match(step, /Last verified September 13, 2026 against Redpanda 26\.2\.2 on Docker Compose<\/span>/)
 })
 
 test('a component home with no solution slots falls back to catalog solutions that run on that product', () => {
@@ -547,10 +547,10 @@ test('platform names agree everywhere, and a list of three reads as a sentence',
   const name = helper('platform-name')
   const list = helper('platform-list')
   assert.equal(name('kubernetes'), 'Kubernetes')
-  assert.equal(name('self-managed'), 'Self-Managed')
-  assert.equal(list(['self-managed']), 'Self-Managed')
-  assert.equal(list(['self-managed', 'cloud']), 'Self-Managed and Cloud')
-  assert.equal(list(['self-managed', 'cloud', 'kubernetes']), 'Self-Managed, Cloud, and Kubernetes')
+  assert.equal(name('self-managed'), 'Docker Compose', 'what was run: Kubernetes is self-managed too')
+  assert.equal(list(['self-managed']), 'Docker Compose')
+  assert.equal(list(['self-managed', 'kubernetes']), 'Docker Compose and Kubernetes')
+  assert.equal(list(['self-managed', 'kubernetes', 'cloud']), 'Docker Compose, Kubernetes, and Redpanda Cloud')
   // The two helpers keep their own copies of the names (each is loaded alone); they must agree.
   for (const p of ['self-managed', 'cloud', 'kubernetes']) assert.equal(list([p]), name(p))
 })
