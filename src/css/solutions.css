@@ -1485,6 +1485,52 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
   border-color: var(--sol-code-border);
 }
 
+/* == Files for this step: a bullet whose path is in the download allowlist is
+   wrapped by 28-solution-progress.js in the same gated download link as the
+   rail's All build-along files entry, with the same tray icon after the name.
+   The path keeps its inline-code look; hover underlines it like a link. */
+.doc .sol-step-file-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.doc .sol-step-file-link:hover code {
+  color: var(--component-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.doc .sol-step-file-icon {
+  display: inline-block;
+  margin-left: 0.35em;
+  color: var(--sol-meta);
+  vertical-align: -0.1em;
+}
+
+.doc .sol-step-file-icon svg {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+}
+
+.doc .sol-step-file-link:hover .sol-step-file-icon {
+  color: var(--component-700);
+}
+
+.doc .sol-step-file-link.is-disabled {
+  cursor: default;
+}
+
+.doc .sol-step-file-link.is-disabled:hover code {
+  color: inherit;
+  text-decoration: none;
+}
+
+.doc .sol-step-file-link.is-disabled .sol-step-file-icon {
+  opacity: 0.5;
+}
+
 /* ---- related --------------------------------------------------------------- */
 
 .doc .sol-related {
