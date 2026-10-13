@@ -318,3 +318,15 @@ test('the rail file list is record.files as gated download links, never public a
   assert.doesNotMatch(render({ solution: { id: 'g', download: 'none', files }, page }), /sol-files/, 'no downloads, no download list')
   assert.doesNotMatch(render({ solution: { id: 'g', download: 'authenticated', files: [], attachments }, page }), /sol-files/)
 })
+
+test('every step page carries a Mark step complete toggle; a step with a next step adds Complete and continue', () => {
+  const hbs = engine(['eq', 'relativize'], ['solution-step-actions'])
+  const render = hbs.compile('{{> solution-step-actions solution=solution}}')
+  const solution = { id: 'g', version: 'v1.0.0', url: '/solutions/g/', download: 'public', steps: [{ id: 's1' }, { id: 's2' }] }
+  const middle = render({ solution, page: { url: '/solutions/g/s1/', attributes: { 'solution-next-url': '/solutions/g/s2/', 'solution-next-title': 'Two' } } })
+  assert.match(middle, /data-sol-complete-continue/)
+  assert.match(middle, /data-sol-complete data-analytics/, 'the toggle stays: the only way to mark without leaving, or to un-mark')
+  const last = render({ solution, page: { url: '/solutions/g/s2/', attributes: { 'solution-prev-url': '/solutions/g/s1/', 'solution-prev-title': 'One' } } })
+  assert.doesNotMatch(last, /data-sol-complete-continue/, 'nothing to continue to')
+  assert.match(last, /class="sol-btn sol-btn--primary" data-sol-complete /, 'the toggle is the last step\'s primary action')
+})
