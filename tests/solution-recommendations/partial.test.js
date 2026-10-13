@@ -285,6 +285,26 @@ test('format-verified-evidence lists the run counts and the verify script result
   assert.equal(call({}), '')
 })
 
+test('format-verified-evidence adds one clause per extra platform run', () => {
+  const call = (verified) => helper('format-verified-evidence')(verified, { hash: {} })
+  const kubernetes = {
+    verifyScript: 'PASS (10/10)',
+    runAt: '2026-10-13T18:00:00Z',
+    environment: { kind: 'v0.32.0', kubernetes: 'v1.35.0', redpanda_operator: 'v26.2.3', cert_manager: 'v1.21.2', redpanda: 'v26.2.2' },
+  }
+  assert.equal(
+    call({ verifyScript: 'PASS (10/10)', runs: { kubernetes } }),
+    'verify script passed 10 of 10; Kubernetes: verify script passed 10 of 10 on October 13, 2026, kind v0.32.0, Kubernetes v1.35.0, Redpanda Operator v26.2.3'
+  )
+  assert.equal(call({ runs: { cloud: { verifyScript: 'PASS (9/9)' } } }), 'Redpanda Cloud: verify script passed 9 of 9')
+  assert.equal(
+    call({ runs: { kubernetes: { environment: { kind: '<script>', kubernetes: 'v1.35.0' } } } }),
+    'Kubernetes: Kubernetes v1.35.0',
+    'a value that is not a version never reaches the title'
+  )
+  assert.equal(call({ runs: { kubernetes: {} } }), '', 'an empty run adds nothing')
+})
+
 test('the overview meta strip renders Last verified after Version, with the evidence in the title', () => {
   const html = renderMeta(withVerified(VERIFIED))
   assert.match(html, /<dt>Last verified<\/dt>/)

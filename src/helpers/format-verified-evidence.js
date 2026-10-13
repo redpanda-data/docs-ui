@@ -11,7 +11,16 @@
  * the actual Doc Detective run, never by hand:
  *
  *   { suite, specs, steps, commands, checks, media, verifyScript,
- *     redpandaVersion, runAt, platforms, contentRev, stackSha256 }
+ *     redpandaVersion, runAt, platforms, contentRev, stackSha256, runs }
+ *
+ * `runs` holds the other platforms the same walkthrough also passed on, keyed
+ * by platform: { kubernetes: { verifyScript, runAt, environment } }, where
+ * environment is what the recorder read from the live cluster ({ kind,
+ * kubernetes, redpanda_operator, cert_manager, redpanda }). Each run adds one
+ * "; "-separated clause:
+ *
+ *   "Kubernetes: verify script passed 10 of 10 on October 13, 2026, kind
+ *    v0.32.0, Kubernetes v1.35.0, Redpanda Operator v26.2.3"
  *
  * `specs` and `steps` are Doc Detective's own units, and "50 steps" beside a
  * solution's "Steps: 9" read as a contradiction, so they are not shown.
@@ -55,6 +64,39 @@ function formatScript (script) {
   return describeScript(status, passed, total)
 }
 
+// Inlined rather than required: the UI loader registers each helper file on
+// its own and cannot resolve siblings (platform-name.js has the same map).
+const PLATFORM_NAMES = { 'self-managed': 'Docker Compose', cloud: 'Redpanda Cloud', kubernetes: 'Kubernetes' }
+const ENVIRONMENT = [
+  ['kind', 'kind'],
+  ['kubernetes', 'Kubernetes'],
+  ['redpanda_operator', 'Redpanda Operator'],
+]
+const VERSION_RX = /^v?\d+(\.\d+)*([-+][\w.]+)?$/
+
+function formatDate (value) {
+  if (typeof value !== 'string') return ''
+  const date = new Date(value)
+  if (isNaN(date)) return ''
+  return date.toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+function formatRun (platform, run) {
+  if (!run || typeof run !== 'object') return ''
+  const parts = []
+  const script = formatScript(run.verifyScript)
+  const date = formatDate(run.runAt)
+  if (script) parts.push(script + (date ? ' on ' + date : ''))
+  else if (date) parts.push('run on ' + date)
+  const env = run.environment && typeof run.environment === 'object' ? run.environment : {}
+  for (const [key, label] of ENVIRONMENT) {
+    const version = env[key]
+    if (typeof version === 'string' && VERSION_RX.test(version)) parts.push(label + ' ' + version)
+  }
+  if (!parts.length) return ''
+  return (PLATFORM_NAMES[platform] || platform) + ': ' + parts.join(', ')
+}
+
 module.exports = function (verified) {
   if (!verified || typeof verified !== 'object') return ''
   const parts = []
@@ -73,5 +115,11 @@ module.exports = function (verified) {
   const contentRev = verified.contentRev || verified.content_rev
   const rev = contentRev && contentRev.solution
   if (typeof rev === 'string' && /^[0-9a-f]{7,64}$/i.test(rev)) parts.push('content ' + rev.slice(0, 7))
-  return parts.join(', ')
+  const clauses = parts.length ? [parts.join(', ')] : []
+  const runs = verified.runs && typeof verified.runs === 'object' ? verified.runs : {}
+  for (const platform of Object.keys(runs).sort()) {
+    const clause = formatRun(platform, runs[platform])
+    if (clause) clauses.push(clause)
+  }
+  return clauses.join('; ')
 }
