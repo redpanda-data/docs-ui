@@ -879,14 +879,6 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   margin: 0.5rem 0 0;
 }
 
-.sol-progress-complete {
-  margin-top: 0.875rem;
-}
-
-.sol-btn--block {
-  width: 100%;
-}
-
 .sol-progress-actions {
   display: flex;
   align-items: center;
@@ -1387,28 +1379,70 @@ html[data-theme="dark"] .sol-doc {
 /* [%collapsible] blocks on solution pages (Asciidoctor emits
    <details><summary class="title">, no extra class), styled like the file
    header. .sol-details is added by the script; the summary selector covers
-   the no-JS render too. */
+   the no-JS render too.
+
+   The generic .doc details rule wraps every details in a grey padded panel
+   and zeroes the summary padding, which is right for a plain "Expected
+   output:" accordion but wrong here: the bordered summary ended up as a
+   22px pill with its text against the border, floating inside a second
+   box. The details itself is the box on solution pages, and the summary
+   gets the same padding as the file header so the two read as one family. */
+.sol-doc details.sol-details,
+.sol-doc details.collapsible {
+  margin: 1rem 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
 .sol-doc details > summary.title,
 .sol-doc details.sol-details > summary,
 .sol-doc details.collapsible > summary {
+  gap: 0.75rem;
+  padding: 0.45rem 2.25rem 0.45rem 0.875rem;
   font-family: var(--body-font-family-mono, monospace);
   font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
   color: var(--component-700);
   background: var(--component-bg-tint);
   border: 1px solid var(--sol-code-border);
   border-radius: 10px;
 }
 
+/* The chevron is absolutely positioned at right: 0 by doc.css, which put it
+   on top of the border. Bring it inside the padding. */
+.sol-doc details > summary.title::after,
+.sol-doc details.sol-details > summary::after,
+.sol-doc details.collapsible > summary::after {
+  right: 0.875rem;
+}
+
 .sol-doc details[open] > summary.title,
 .sol-doc details.sol-details[open] > summary,
 .sol-doc details.collapsible[open] > summary {
+  padding-bottom: 0.45rem;
   border-radius: 10px 10px 0 0;
   border-bottom: 0;
 }
 
+/* The body sits flush under the header: the summary has no bottom border
+   when open, so the first code block's top corners square off to meet it. */
+.sol-doc details.sol-details > .content,
+.sol-doc details.collapsible > .content {
+  margin: 0;
+}
+
+.sol-doc details.sol-details[open] > .content > .listingblock:first-child > .content,
+.sol-doc details.sol-details[open] > .content > .listingblock:first-child pre,
+.sol-doc details.collapsible[open] > .content > .listingblock:first-child > .content,
+.sol-doc details.collapsible[open] > .content > .listingblock:first-child pre {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 .sol-doc .sol-details-lines {
   margin-left: auto;
-  margin-right: 1.5em;
   font-family: var(--body-font-family-mono, monospace);
   font-size: calc(12 / var(--rem-base) * 1rem);
   font-weight: 400;

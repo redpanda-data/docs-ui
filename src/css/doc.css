@@ -1585,8 +1585,16 @@ html[data-theme="dark"] .listingblock .title {
   display: none;
 }
 
+/* The .doc summary.title rule above zeroes padding-bottom with a more
+   specific selector, so this bare rule never applied inside an article and
+   an open collapsible's title sat directly on its content. The second rule
+   restores the gap there. */
 details[open] > summary {
   padding-bottom: 16px;
+}
+
+.doc details[open] > summary.title {
+  padding-bottom: 0.75rem;
 }
 
 .doc details > summary::after {
