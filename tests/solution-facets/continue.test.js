@@ -27,7 +27,6 @@ function record (id) {
     title: id.toUpperCase(),
     url: '/solutions/' + id + '/',
     status: 'published',
-    difficulty: 'beginner',
     categories: [],
     technologies: [],
     platforms: [],

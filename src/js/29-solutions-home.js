@@ -3,12 +3,12 @@
  * Solutions landing page: client-side filtering over the catalog the build
  * embedded (<script type="application/json" data-sol-catalog>), URL state
  * (?q= plus one parameter per facet in FACET_ATTR below: use-case, industry,
- * difficulty, platform), and the "Continue learning" section filled from the
+ * platform), and the "Continue learning" section filled from the
  * progress store owned by 28-solution-progress.js.
  *
  * Search matches every query word at the start of a word in the title,
  * description, slug, step titles, technologies, categories, use cases,
- * industries, platforms and difficulty ("cdc" finds cdc-to-lakehouse,
+ * industries and platforms ("cdc" finds cdc-to-lakehouse,
  * "replay" finds the solutions with a replay step). A query word of one or
  * two letters must be a whole word ("dr" finds disaster recovery through
  * ALIASES, not "drive"). Filter counts are live: each option shows how many
@@ -39,7 +39,6 @@
   var FACET_ATTR = {
     'use-case': 'data-use-cases',
     industry: 'data-industries',
-    difficulty: 'data-difficulty',
     platform: 'data-platforms',
   }
   var FACETS = Object.keys(FACET_ATTR)
@@ -47,7 +46,7 @@
   // Parameters older links carry for groups the page no longer offers.
   // Search still covers what they named, so they are dropped from the URL
   // without a note: the page is not ignoring anything the reader can set.
-  var RETIRED = ['category', 'tech']
+  var RETIRED = ['category', 'tech', 'difficulty']
 
   function toArray (list) {
     var out = []
@@ -115,12 +114,11 @@
       parts.push((record.useCases || []).join(' '))
       parts.push((record.industries || []).join(' '))
       parts.push((record.platforms || []).join(' '))
-      parts.push(record.difficulty || '')
       ;(record.steps || []).forEach(function (step) {
         if (step) parts.push((step.title || '') + ' ' + (step.id || ''))
       })
     } else {
-      ;['data-technologies', 'data-categories', 'data-use-cases', 'data-industries', 'data-platforms', 'data-difficulty'].forEach(function (name) {
+      ;['data-technologies', 'data-categories', 'data-use-cases', 'data-industries', 'data-platforms'].forEach(function (name) {
         parts.push((card.getAttribute(name) || '').replace(/\|/g, ' '))
       })
     }

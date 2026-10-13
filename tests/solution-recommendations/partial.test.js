@@ -100,7 +100,8 @@ test('the rail partial renders up to 3 one-line entries with placement, provenan
   assert.doesNotMatch(html, /Delta|Echo/, 'capped at 3')
   assert.match(html, /data-provenance="explicit"[^>]*data-position="1"/)
   assert.match(html, /<span class="sol-rail-rec-title">Alpha<\/span>/)
-  assert.match(html, /<span class="sol-rail-rec-diff is-beginner">beginner<\/span>/)
+  assert.match(html, /<span class="sol-rail-rec-meta">30 min<\/span>/, 'the meta line is the duration alone')
+  assert.doesNotMatch(html, /sol-rail-rec-diff|sol-diff|beginner/, 'no difficulty')
   assert.match(html, /30 min/)
   assert.match(html, /1 hr 15 min/)
   assert.match(html, /<span class="sol-rec-why" data-sol-rec-why hidden>Why this\? Linked from this page<\/span>/)
@@ -166,7 +167,6 @@ const SOLUTION = {
   title: 'Gaming',
   url: '/solutions/gaming/',
   status: 'published',
-  difficulty: 'intermediate',
   duration: 45,
   stepCount: 4,
   technologies: ['Go'],
@@ -184,7 +184,16 @@ function stepRenderer () {
   return stepHbs.compile('{{> solution-step-header solution=solution}}')
 }
 
-// The step facts row (duration, difficulty, completed) hangs off
+test('a record that still carries difficulty renders no difficulty on the card or the meta strip', () => {
+  // An older catalog extension still writes the field; the UI ignores it.
+  const solution = Object.assign({}, SOLUTION, { difficulty: 'advanced' })
+  for (const html of [renderMeta({ solution }), renderCard({ solution })]) {
+    assert.doesNotMatch(html, /sol-diff|Difficulty|data-difficulty|advanced/)
+  }
+  assert.match(renderMeta({ solution }), /45 min/, 'the strip still renders')
+})
+
+// The step facts row (duration, verified, completed) hangs off
 // get-solution-step. It silently emptied once the extension renamed the
 // attribute to page-solution-step-id and the helper kept reading the old
 // page-solution-step, so both names are asserted here.
@@ -196,10 +205,10 @@ test('the step header resolves the current step from page-solution-step-id (and 
   const at = (attributes) => renderStep({ solution, page: { title: 'Start the environment', attributes } })
 
   for (const key of ['solution-step-id', 'solution-step']) {
-    const html = at({ [key]: 'start-environment', 'solution-difficulty': 'intermediate', 'solution-step-index': '1', 'solution-step-count': '4' })
+    const html = at({ [key]: 'start-environment', 'solution-step-index': '1', 'solution-step-count': '4' })
     assert.match(html, /class="sol-step-facts/, key + ': the facts row renders')
     assert.match(html, /About 5 min/, key + ': step duration')
-    assert.match(html, /sol-diff is-intermediate/, key + ': difficulty chip')
+    assert.doesNotMatch(html, /sol-diff/, key + ': no difficulty chip')
   }
 
   const unknown = at({ 'solution-step-id': 'nope' })
@@ -344,11 +353,11 @@ test('step pages render the verified line from the scalar mirrors, and nothing w
     verified: VERIFIED,
     steps: [{ id: 'start-environment', title: 'Start the environment', url: '/solutions/gaming/start-environment/', order: 1, duration: 5 }],
   })
-  const at = (attributes) => renderStep({ solution, page: { title: 'Start the environment', attributes: Object.assign({ 'solution-step-id': 'start-environment', 'solution-difficulty': 'intermediate' }, attributes) } })
+  const at = (attributes) => renderStep({ solution, page: { title: 'Start the environment', attributes: Object.assign({ 'solution-step-id': 'start-environment' }, attributes) } })
 
   const html = at({ 'solution-verified-at': '2026-09-13T02:14:07Z', 'solution-verified-version': '26.2.2' })
   assert.match(html, /<span class="sol-fact sol-fact--verified">Last verified September 13, 2026 against Redpanda 26\.2\.2<\/span>/)
-  assert.ok(html.indexOf('sol-fact--verified') > html.indexOf('sol-diff is-intermediate'), 'sits in the facts row after the difficulty')
+  assert.ok(html.indexOf('sol-fact--verified') > html.indexOf('class="sol-step-facts'), 'sits in the facts row')
 
   assert.match(at({ 'solution-verified-at': '2026-09-13T02:14:07Z' }), /Last verified September 13, 2026<\/span>/, 'date mirror only')
 
@@ -411,14 +420,14 @@ test('add-suggested-labs.js returns the content unchanged when related-solutions
 test('get-solutions-catalog normalizes facets to {value, count} from the extension shape and from plain strings', () => {
   const getCatalog = helper('get-solutions-catalog')
   const records = [
-    { id: 'a', title: 'A', url: '/solutions/a/', status: 'published', difficulty: 'advanced', categories: ['Clients', 'Integration'], technologies: ['Go'], platforms: ['cloud'] },
-    { id: 'b', title: 'B', url: '/solutions/b/', status: 'published', difficulty: 'beginner', categories: ['Clients'], technologies: ['Go', 'Redis'], platforms: ['self-managed', 'cloud'] },
+    { id: 'a', title: 'A', url: '/solutions/a/', status: 'published', categories: ['Clients', 'Integration'], technologies: ['Go'], platforms: ['cloud'] },
+    { id: 'b', title: 'B', url: '/solutions/b/', status: 'published', categories: ['Clients'], technologies: ['Go', 'Redis'], platforms: ['self-managed', 'cloud'] },
   ]
   const call = (facets) => getCatalog({ data: { root: { page: { attributes: { 'solutions-catalog': JSON.stringify({ solutions: records, facets }) } } } } })
 
-  const fromExtension = call({ categories: [{ value: 'Clients', count: 2 }, { value: 'Integration', count: 1 }], difficulty: [{ value: 'advanced', count: 1 }, { value: 'beginner', count: 1 }] })
+  const fromExtension = call({ categories: [{ value: 'Clients', count: 2 }, { value: 'Integration', count: 1 }] })
   assert.deepEqual(fromExtension.facets.categories, [{ value: 'Clients', count: 2 }, { value: 'Integration', count: 1 }])
-  assert.deepEqual(fromExtension.facets.difficulty.map((f) => f.value), ['beginner', 'advanced'], 'difficulty sorted by level')
+  assert.equal(fromExtension.facets.difficulty, undefined, 'difficulty is no longer a facet')
   assert.deepEqual(fromExtension.facets.technologies, [{ value: 'Go', count: 2 }, { value: 'Redis', count: 1 }], 'missing facets are derived from the records')
 
   const fromStrings = call({ categories: ['Integration', 'Clients'], platforms: ['cloud', 'self-managed'] })
@@ -428,7 +437,8 @@ test('get-solutions-catalog normalizes facets to {value, count} from the extensi
   // The filters partial renders the value, never the object.
   const filters = hbs.compile(read('src/partials/solutions-filters.hbs'))({ catalog: fromExtension })
   assert.doesNotMatch(filters, /\[object Object\]/)
-  assert.match(filters, /<input type="checkbox" name="difficulty" value="beginner"><span class="sol-filter-label"><span class="sol-diff is-beginner">beginner<\/span><\/span><span class="sol-filter-count" aria-hidden="true">1<\/span>/)
+  assert.match(filters, /<input type="checkbox" name="platform" value="self-managed"><span class="sol-filter-label">Docker Compose<\/span><span class="sol-filter-count" aria-hidden="true">1<\/span>/)
+  assert.doesNotMatch(filters, /sol-diff|Difficulty|name="difficulty"/)
   // Category and Technology are normalized for search and the cards, but no
   // filter group renders for them.
   assert.doesNotMatch(filters, /name="category"|name="tech"/)

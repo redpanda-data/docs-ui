@@ -233,9 +233,9 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   color: var(--component-700);
 }
 
-/* Status and difficulty colors. vars.css has no green or yellow scale, so the
-   beginner/intermediate/draft pairs use raw Tailwind values (the labs-card-diff
-   recipe's tints with its text one shade darker); the red pairs use the brand
+/* Status colors. vars.css has no yellow scale, so the draft pair uses raw
+   Tailwind values (the labs-card-diff recipe's tint with its text one shade
+   darker); the red pair uses the brand
    scale (brand-600 is rgb(226, 67, 40)). The text is the 800 shade: the labs
    recipe's 700 shades measure 4.55 to 4.88:1 on their tint over white and
    4.21 to 4.5:1 over the grey-50 sidebar, under AA's 4.5:1 for 12px text.
@@ -263,34 +263,6 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   display: flex;
   flex-wrap: wrap;
   gap: 0.375rem;
-}
-
-/* Difficulty chip: the labs-card-diff recipe. */
-.sol-diff {
-  display: inline-block;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  line-height: 1.4;
-  text-transform: capitalize;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: var(--grey-100-new);
-  color: var(--grey-600-new);
-}
-
-.sol-diff.is-beginner {
-  background: rgba(34, 197, 94, 0.1);
-  color: #166534;
-}
-
-.sol-diff.is-intermediate {
-  background: rgba(234, 179, 8, 0.12);
-  color: #854d0e;
-}
-
-.sol-diff.is-advanced {
-  background: rgba(226, 67, 40, 0.1);
-  color: var(--brand-800-new);
 }
 
 .sol-time,
@@ -1772,29 +1744,6 @@ html[data-theme="dark"] .sol-recs-all {
   color: var(--sol-meta);
 }
 
-/* Only the difficulty word is capitalized: `capitalize` on the whole line
-   would also turn "45 min" into "45 Min". */
-.sol-rail-rec-diff {
-  text-transform: capitalize;
-}
-
-.sol-rail-rec-diff.is-beginner {
-  color: #166534;
-}
-
-.sol-rail-rec-diff.is-intermediate {
-  color: #854d0e;
-}
-
-.sol-rail-rec-diff.is-advanced {
-  color: var(--brand-800-new);
-}
-
-.sol-rail-rec-dot {
-  margin: 0 0.25rem;
-  color: var(--grey-300-new);
-}
-
 /* Relocated into the embedded on-this-page region (inside .doc) on narrow
    screens by 28-solution-progress.js: .doc's link rules apply there. */
 .toc.embedded .sol-rail-recs {
@@ -1825,18 +1774,6 @@ html[data-theme="dark"] .sol-rail-rec:hover {
 html[data-theme="dark"] .sol-rail-rec:hover .sol-rail-rec-title,
 html[data-theme="dark"] .doc .toc.embedded .sol-rail-rec:hover .sol-rail-rec-title {
   color: var(--component-200);
-}
-
-html[data-theme="dark"] .sol-rail-rec-diff.is-beginner {
-  color: #4ade80;
-}
-
-html[data-theme="dark"] .sol-rail-rec-diff.is-intermediate {
-  color: #fbbf24;
-}
-
-html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
-  color: var(--brand-400-new);
 }
 
 /* ---- landing page ---------------------------------------------------------- */
@@ -2049,12 +1986,6 @@ html[data-theme="dark"] .sol-rail-rec-diff.is-advanced {
   accent-color: var(--component-600); /* stylelint-disable-line property-no-unknown */
 }
 
-/* A group with a single value: one labeled toggle, no legend
-   (solutions-filters.hbs). */
-.sol-filter-toggle .sol-filter-label .sol-diff {
-  margin: 0 0.125rem;
-}
-
 .sol-filter-label {
   flex: 1;
   min-width: 0;
@@ -2140,7 +2071,7 @@ html[data-theme="dark"] .sol-results-note {
 
 /* A deprecated card recedes through a flat grey surface, not opacity:
    opacity 0.75 also faded every chip and line of text in the card, taking
-   the Deprecated chip to about 3.3:1 and the difficulty chips to about 3:1. */
+   the Deprecated chip to about 3.3:1. */
 .sol-card.is-deprecated {
   background: var(--grey-50-new);
   box-shadow: none;
@@ -2617,26 +2548,6 @@ html[data-theme="dark"] .sol-version-notice {
 html[data-theme="dark"] .sol-banner--deprecated {
   background: rgba(226, 67, 40, 0.15);
   border-color: rgba(226, 67, 40, 0.4);
-  color: var(--brand-400-new);
-}
-
-html[data-theme="dark"] .sol-diff {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.7);
-}
-
-html[data-theme="dark"] .sol-diff.is-beginner {
-  background: rgba(34, 197, 94, 0.15);
-  color: #4ade80;
-}
-
-html[data-theme="dark"] .sol-diff.is-intermediate {
-  background: rgba(234, 179, 8, 0.15);
-  color: #fbbf24;
-}
-
-html[data-theme="dark"] .sol-diff.is-advanced {
-  background: rgba(226, 67, 40, 0.15);
   color: var(--brand-400-new);
 }
 

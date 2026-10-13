@@ -201,10 +201,6 @@ site:
               - { value: Redis, count: 1 }
               - { value: Redpanda Connect, count: 3 }
               - { value: Schema Registry, count: 2 }
-              difficulty:
-              - { value: beginner, count: 1 }
-              - { value: intermediate, count: 1 }
-              - { value: advanced, count: 2 }
               platforms:
               - { value: self-managed, count: 4 }
               - { value: cloud, count: 2 }
@@ -214,7 +210,6 @@ site:
               url: /solutions-test.html
               description: Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.
               status: published
-              difficulty: intermediate
               duration: 45
               assumes: [topics, consumer groups, Protobuf basics, reading Go]
               verified:
@@ -246,7 +241,6 @@ site:
               url: /solutions/cdc-to-lakehouse/
               description: Capture Postgres changes with Redpanda Connect and land them in Iceberg tables you can query from any engine.
               status: published
-              difficulty: advanced
               duration: 60
               assumes: [Postgres, Iceberg tables]
               verified:
@@ -276,7 +270,6 @@ site:
               url: /solutions/schema-registry-migration/
               description: Move schemas from Confluent to Redpanda with zero downtime by shadowing the registry during the cut-over.
               status: published
-              difficulty: beginner
               duration: 30
               assumes: [schemas]
               verified:
@@ -305,7 +298,6 @@ site:
               url: /solutions/disaster-recovery-shadowing/
               description: Keep a warm standby cluster in another region with Shadowing, then fail over and back with Envoy in front.
               status: deprecated
-              difficulty: advanced
               duration: 90
               assumes: [Kubernetes]
               featured: false

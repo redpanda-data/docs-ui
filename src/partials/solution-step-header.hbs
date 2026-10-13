@@ -1,7 +1,7 @@
 {{!--
   Step page header. Context: `solution` plus the step-page attributes the
   solutions-catalog extension sets (page-solution-step-index/count, and the
-  scalar mirrors page-solution-difficulty/duration and
+  scalar mirrors page-solution-duration and
   page-solution-verified-at/version).
 --}}
 {{#with (get-solution-step solution) as |step|}}
@@ -25,9 +25,6 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       About {{format-duration step.duration}}
     </span>
-    {{/if}}
-    {{#if @root.page.attributes.solution-difficulty}}
-    <span class="sol-diff is-{{@root.page.attributes.solution-difficulty}}">{{@root.page.attributes.solution-difficulty}}</span>
     {{/if}}
     {{!-- Proof of the run, from the scalar mirrors the extension sets on every
           step page. No evidence counts are mirrored, so there is no title. --}}

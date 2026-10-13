@@ -22,7 +22,6 @@ function record (id, extra) {
     title: id.toUpperCase(),
     url: '/solutions/' + id + '/',
     status: 'published',
-    difficulty: 'intermediate',
     description: '',
     categories: [],
     technologies: [],
@@ -67,7 +66,6 @@ const FACETS = {
   platforms: [{ value: 'cloud', count: 2 }, { value: 'self-managed', count: 2 }],
   categories: [],
   technologies: [],
-  difficulty: [],
 }
 
 // ---------------------------------------------------------------------------
@@ -419,7 +417,7 @@ test('the embedded catalog carries only what the landing script reads', () => {
   const json = JSON.parse(catalogOf({ solutions: withExtras, facets: FACETS }).json)
   assert.equal(json.facets, undefined)
   const first = json.solutions[0]
-  assert.deepEqual(Object.keys(first).sort(), ['categories', 'description', 'difficulty', 'id', 'industries', 'platforms', 'steps', 'technologies', 'title', 'url', 'useCases'])
+  assert.deepEqual(Object.keys(first).sort(), ['categories', 'description', 'id', 'industries', 'platforms', 'steps', 'technologies', 'title', 'url', 'useCases'])
   assert.deepEqual(first.steps, [{ id: 's1', title: 'Step one', url: '/s1/' }])
 })
 

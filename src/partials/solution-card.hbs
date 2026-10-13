@@ -8,7 +8,6 @@
    data-sol-card
    data-solution-id="{{solution.id}}"
    data-title="{{solution.title}}"
-   data-difficulty="{{solution.difficulty}}"
    data-status="{{solution.status}}"
    data-categories="{{#each solution.categories}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
    data-use-cases="{{#each solution.useCases}}{{this}}{{#unless @last}}|{{/unless}}{{/each}}"
@@ -29,7 +28,6 @@
   {{#if solution.description}}<p class="sol-card-desc">{{solution.description}}</p>{{/if}}
   <div class="sol-card-foot">
     <div class="sol-card-meta">
-      {{#if solution.difficulty}}<span class="sol-diff is-{{solution.difficulty}}">{{solution.difficulty}}</span>{{/if}}
       {{#if solution.duration}}
       <span class="sol-time">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>

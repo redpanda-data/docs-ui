@@ -1,14 +1,8 @@
 {{!--
-  Solution metadata strip: difficulty, duration, step count, platforms,
+  Solution metadata strip: duration, step count, platforms,
   use case, industry, technologies, version. Context: `solution`.
 --}}
 <dl class="sol-meta">
-  {{#if solution.difficulty}}
-  <div class="sol-meta-item">
-    <dt>Difficulty</dt>
-    <dd><span class="sol-diff is-{{solution.difficulty}}">{{solution.difficulty}}</span></dd>
-  </div>
-  {{/if}}
   {{#if solution.duration}}
   <div class="sol-meta-item">
     <dt>Time</dt>

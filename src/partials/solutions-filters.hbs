@@ -2,7 +2,7 @@
   Landing page filters. Context: `catalog` from get-solutions-catalog; each
   facet is an array of {value, count}. The checkbox value is the raw facet
   value, which is what 29-solutions-home.js matches against the cards'
-  data-* attributes and writes into the URL (?q=&use-case=&industry=&difficulty=&platform=).
+  data-* attributes and writes into the URL (?q=&use-case=&industry=&platform=).
 
   Rendered in the landing page's sidebar (nav-tree-solution.hbs). Below
   1024px the sidebar is a drawer, so an inline script in solutions-home.hbs
@@ -47,20 +47,6 @@
       <legend class="sol-filter-title">Industry</legend>
       {{#each catalog.facets.industries}}
       <label class="sol-filter-row"><input type="checkbox" name="industry" value="{{value}}"><span class="sol-filter-label">{{value}}</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
-      {{/each}}
-    </fieldset>
-    {{/if}}
-    {{#if (eq catalog.facets.difficulty.length 1)}}
-    {{#each catalog.facets.difficulty}}
-    <div class="sol-filter-group sol-filter-group--single">
-      <label class="sol-filter-row sol-filter-toggle"><input type="checkbox" name="difficulty" value="{{value}}"><span class="sol-filter-label">Only <span class="sol-diff is-{{value}}">{{value}}</span> solutions</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
-    </div>
-    {{/each}}
-    {{else if catalog.facets.difficulty.length}}
-    <fieldset class="sol-filter-group">
-      <legend class="sol-filter-title">Difficulty</legend>
-      {{#each catalog.facets.difficulty}}
-      <label class="sol-filter-row"><input type="checkbox" name="difficulty" value="{{value}}"><span class="sol-filter-label"><span class="sol-diff is-{{value}}">{{value}}</span></span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
       {{/each}}
     </fieldset>
     {{/if}}

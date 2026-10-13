@@ -27,7 +27,6 @@ function record (id, extra) {
     title: id.toUpperCase(),
     url: '/solutions/' + id + '/',
     status: 'published',
-    difficulty: 'beginner',
     categories: [],
     technologies: [],
     platforms: [],
@@ -53,7 +52,6 @@ const FACETS = {
   industries: [{ value: 'Gaming', count: 1 }],
   categories: [],
   technologies: [],
-  difficulty: [],
   platforms: [],
 }
 
@@ -70,15 +68,16 @@ function helper (catalog) {
 
 test('an empty facet stays empty, because the extension dropped it on purpose', () => {
   const catalog = helper({ solutions: RECORDS, facets: FACETS })
-  // difficulty is 'beginner' on all three, so it narrows nothing and the
-  // extension published []. Deriving it back from the records here is exactly
-  // the bug this asserts against.
-  assert.deepEqual(catalog.facets.difficulty, [])
+  // The extension published technologies as [] (a value held by only one
+  // record narrows nothing worth a group). Deriving it back from the records
+  // here is exactly the bug this asserts against.
+  assert.deepEqual(catalog.facets.technologies, [])
   assert.deepEqual(catalog.facets.categories, [])
   // Sanity: the same records with the facet absent instead of empty DO get it
   // derived, which is what keeps a hand-written catalog working.
   const derived = helper({ solutions: RECORDS, facets: { useCases: FACETS.useCases } })
-  assert.deepEqual(derived.facets.difficulty, [{ value: 'beginner', count: 3 }])
+  assert.deepEqual(derived.facets.technologies, [{ value: 'Debezium', count: 1 }])
+  assert.equal(catalog.facets.difficulty, undefined, 'difficulty is no longer a facet')
 })
 
 test('use case and industry come through, busiest value first', () => {
@@ -112,7 +111,7 @@ test('a record that omits the axes entirely still normalizes', () => {
 test('the filters render a group per non-empty facet, use case first', () => {
   const html = renderFilters({ catalog: { facets: FACETS } })
   assert.deepEqual(legendsOf(html), ['Use case', 'Industry'],
-    'difficulty, category, technology and platform are empty here and render nothing')
+    'category, technology and platform are empty here and render nothing')
   assert.deepEqual(checkboxesOf(html), [
     { name: 'use-case', value: 'Change data capture' },
     { name: 'use-case', value: 'Data lakehouse' },
@@ -124,7 +123,7 @@ test('the filters render a group per non-empty facet, use case first', () => {
 })
 
 test('every facet group is gated, so an empty catalog renders no filter groups', () => {
-  const html = renderFilters({ catalog: { facets: { useCases: [], industries: [], categories: [], technologies: [], difficulty: [], platforms: [] } } })
+  const html = renderFilters({ catalog: { facets: { useCases: [], industries: [], categories: [], technologies: [], platforms: [] } } })
   assert.deepEqual(legendsOf(html), [])
   assert.deepEqual(checkboxesOf(html), [])
   assert.match(html, /data-sol-filter-q/, 'the search box is not a facet and stays')
@@ -222,7 +221,7 @@ test('every checkbox the filters render is a facet the engine knows', () => {
     const m = line.match(/^\s*'?([\w-]+)'?:\s*'([\w-]+)',?\s*$/)
     if (m) declared[m[1]] = m[2]
   })
-  assert.deepEqual(Object.keys(declared), ['use-case', 'industry', 'difficulty', 'platform'],
+  assert.deepEqual(Object.keys(declared), ['use-case', 'industry', 'platform'],
     'parsed the facet declarations: ' + JSON.stringify(declared))
 
   const html = renderFilters({
@@ -235,8 +234,9 @@ test('every checkbox the filters render is a facet the engine knows', () => {
     },
   })
   const names = Array.from(new Set(checkboxesOf(html).map((b) => b.name)))
-  assert.deepEqual(names, ['use-case', 'industry', 'difficulty', 'platform'],
-    'Category and Technology render no group even when the catalog has values for them')
+  assert.deepEqual(names, ['use-case', 'industry', 'platform'],
+    'Category, Technology and Difficulty render no group even when the catalog has values for them')
+  assert.doesNotMatch(html, /sol-diff|Difficulty/)
   names.forEach((name) => {
     assert.ok(declared[name], 'the engine has no attribute mapped for name="' + name + '"')
   })
@@ -266,8 +266,8 @@ test('Category and Technology have no group, but search still finds what they na
   assert.deepEqual(r.shown(), ['cdc'], 'from the technology, which no filter offers')
 })
 
-test('an old ?category= or ?tech= link is tolerated: dropped from the URL, no note, nothing filtered', () => {
-  const r = run({ records: RECORDS, facets: FACETS, search: '?tech=Go&category=Clients&industry=Gaming' })
+test('an old ?category=, ?tech= or ?difficulty= link is tolerated: dropped from the URL, no note, nothing filtered', () => {
+  const r = run({ records: RECORDS, facets: FACETS, search: '?tech=Go&category=Clients&difficulty=advanced&industry=Gaming' })
   assert.deepEqual(r.shown(), ['gaming'], 'the live parameter still applies')
   assert.equal(r.url(), '/solutions/?industry=Gaming', 'the retired ones are gone from the address bar')
   assert.equal(r.dropped.hidden, true, 'and the reader is not told a filter was ignored')
@@ -279,13 +279,11 @@ test('a group with one value renders as a single labeled toggle, not a legend ov
       facets: {
         useCases: FACETS.useCases,
         platforms: [{ value: 'cloud', count: 2 }],
-        difficulty: [{ value: 'advanced', count: 1 }],
       },
     },
   })
-  assert.deepEqual(legendsOf(html), ['Use case'], 'no Runs on or Difficulty legend')
+  assert.deepEqual(legendsOf(html), ['Use case'], 'no Runs on legend')
   assert.match(html, /<input type="checkbox" name="platform" value="cloud"><span class="sol-filter-label">Runs on Redpanda Cloud<\/span>/)
-  assert.match(html, /<input type="checkbox" name="difficulty" value="advanced"><span class="sol-filter-label">Only <span class="sol-diff is-advanced">advanced<\/span> solutions<\/span>/)
   // Two or more values keep the group.
   const both = renderFilters({ catalog: { facets: { platforms: [{ value: 'cloud', count: 2 }, { value: 'self-managed', count: 3 }] } } })
   assert.deepEqual(legendsOf(both), ['Runs on'])

@@ -3,7 +3,7 @@
 
   Data: page-related-solutions, a JSON array the solutions-catalog extension
   writes only when there is at least one edge above threshold:
-    [{id, title, url, description, difficulty, duration, technologies,
+    [{id, title, url, description, duration, technologies,
       provenance, score, reason, why}]
   `why` is the reader-facing sentence (from the overview's Related docs
   sentence, or "Uses X, Y" for a category edge). When present it is the card's
@@ -45,7 +45,6 @@
       <span class="sol-rec-title">{{title}}</span>
       {{#if why}}<span class="sol-rec-desc sol-rec-desc--why">{{why}}</span>{{else if description}}<span class="sol-rec-desc">{{description}}</span>{{/if}}
       <span class="sol-rec-meta">
-        {{#if difficulty}}<span class="sol-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
         {{#if duration}}<span class="sol-time">{{format-duration duration}}</span>{{/if}}
         {{#each (or (lookup (lookup (get-solutions-catalog) 'chipsById') id) (without technologies (lookup (get-solutions-catalog) 'universalTechnologies')))}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
       </span>

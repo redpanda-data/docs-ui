@@ -22,7 +22,7 @@
  *                deprecated records sort last
  *     featured:  published records flagged featured
  *     recent:    up to 6 published records by lastModified desc
- *     facets:    { useCases, industries, categories, technologies, difficulty,
+ *     facets:    { useCases, industries, categories, technologies,
  *                platforms }, each an
  *                array of {value, count} (the extension's shape; plain string
  *                arrays are accepted and counted from the records)
@@ -42,7 +42,6 @@
  */
 
 const ATTRIBUTE = 'solutions-catalog'
-const DIFFICULTY_ORDER = ['beginner', 'intermediate', 'advanced']
 
 function versionAttributes (version) {
   return version && version.asciidoc && version.asciidoc.attributes
@@ -168,7 +167,7 @@ function normalizeFacet (input, records, key) {
     .map((value) => ({ value, count: counts.get(value) }))
 }
 
-// Use case and industry have no natural order the way difficulty does, so the
+// Use case and industry have no natural order, so the
 // busiest value goes first: it is the one most readers are looking for. Ties
 // fall back to alphabetical so the order is stable between builds.
 function byCountThenName (items) {
@@ -182,9 +181,6 @@ function normalizeFacets (facets, records) {
     industries: byCountThenName(normalizeFacet(facets.industries, records, 'industries')),
     categories: normalizeFacet(facets.categories, records, 'categories'),
     technologies: normalizeFacet(facets.technologies, records, 'technologies'),
-    difficulty: normalizeFacet(facets.difficulty, records, 'difficulty')
-      .slice()
-      .sort((a, b) => DIFFICULTY_ORDER.indexOf(a.value) - DIFFICULTY_ORDER.indexOf(b.value)),
     platforms: normalizeFacet(facets.platforms, records, 'platforms'),
   }
 }
@@ -216,7 +212,6 @@ function projectForPage (record) {
     title: record.title,
     description: record.description,
     url: record.url,
-    difficulty: record.difficulty,
     technologies: record.technologies,
     categories: record.categories,
     useCases: record.useCases,

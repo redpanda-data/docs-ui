@@ -774,7 +774,6 @@
         <span class="sol-rec-title">{{title}}</span>
         {{#if description}}<span class="sol-rec-desc">{{description}}</span>{{/if}}
         <span class="sol-rec-meta">
-          {{#if difficulty}}<span class="sol-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
           {{#if duration}}<span class="sol-time">{{format-duration duration}}</span>{{/if}}
           {{#each chipTechnologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
         </span>

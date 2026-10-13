@@ -12,7 +12,7 @@
   the home or component-home-v3 roles, never the solutions component itself),
   so the two placements always agree about whether to render.
 
-  Entries are one line plus a muted difficulty/duration line: no descriptions,
+  Entries are one line plus a muted duration line: no descriptions,
   no cards. The reader-facing `why` is the link's tooltip. data-placement="rail" separates these from the article cards in
   analytics (28-solution-progress.js reads it for both events). On narrow
   screens the whole block is moved into the embedded on-this-page region by
@@ -30,11 +30,8 @@
     <li>
       <a class="sol-rail-rec" href="{{{relativize url}}}"{{#if why}} title="{{why}}"{{/if}} data-sol-rec data-placement="rail" data-solution-id="{{id}}" data-provenance="{{provenance}}" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
         <span class="sol-rail-rec-title">{{title}}</span>
-        {{#if (or difficulty duration)}}
-        <span class="sol-rail-rec-meta">
-          {{#if difficulty}}<span class="sol-rail-rec-diff is-{{difficulty}}">{{difficulty}}</span>{{/if}}
-          {{#if duration}}{{#if difficulty}}<span class="sol-rail-rec-dot" aria-hidden="true">·</span>{{/if}}{{format-duration duration}}{{/if}}
-        </span>
+        {{#if duration}}
+        <span class="sol-rail-rec-meta">{{format-duration duration}}</span>
         {{/if}}
         {{#if reason}}<span class="sol-rec-why" data-sol-rec-why hidden>Why this? {{reason}}</span>{{/if}}
       </a>
