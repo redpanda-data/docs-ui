@@ -133,7 +133,7 @@ function buildPage (o) {
   const cardParts = [els.count, els.bar, els.state, els.versionNotice]
   if (o.page === 'step') {
     els.completeLabel = el('span', { 'data-sol-complete-label': '', text: 'Mark step complete' })
-    els.complete = el('button', { 'data-sol-complete': '', 'aria-pressed': 'false' }, [els.completeLabel])
+    els.complete = el('button', { 'data-sol-complete': '' }, [els.completeLabel])
     cardParts.push(els.complete)
   }
   els.progress = el('section', { 'data-sol-progress': '' }, cardParts.concat([els.save, els.sync, els.done]))
@@ -186,7 +186,11 @@ function buildPage (o) {
     // querySelector for the button finds this copy first.
     if (o.actionRow) {
       els.rowCompleteLabel = el('span', { 'data-sol-complete-label': '', text: 'Mark step complete' })
-      els.rowComplete = el('button', { 'data-sol-complete': '', 'aria-pressed': 'false' }, [els.rowCompleteLabel])
+      // primaryToggle: the last step's copy (data-sol-complete-primary), which
+      // is the primary action until the step is done.
+      els.rowComplete = el('button', o.primaryToggle
+        ? { 'data-sol-complete': '', 'data-sol-complete-primary': '', class: 'sol-btn sol-btn--primary' }
+        : { 'data-sol-complete': '' }, [els.rowCompleteLabel])
       els.rowFill = el('div', { 'data-sol-progress-fill': '' })
       els.rowBar = el('div', { 'data-sol-progress-bar': '' }, [els.rowFill])
       els.rowDownloadLabel = el('span', { 'data-sol-download-label': '', text: 'Download the complete example' })

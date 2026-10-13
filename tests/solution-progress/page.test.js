@@ -20,18 +20,17 @@ test('both Mark step complete buttons, in live DOM order, and every header chip 
   // The action row copy comes first in the DOM; the reader at >=1281px clicks
   // the rail copy.
   r.els.complete.dispatch('click')
-  for (const [button, label] of [[r.els.complete, r.els.completeLabel], [r.els.rowComplete, r.els.rowCompleteLabel]]) {
-    assert.equal(button.getAttribute('aria-pressed'), 'true')
-    assert.equal(label.textContent, 'Mark step complete', 'the name stays put; aria-pressed and the chips carry the state')
+  for (const label of [r.els.completeLabel, r.els.rowCompleteLabel]) {
+    assert.equal(label.textContent, 'Mark step not complete')
   }
   assert.equal(r.els.headerStatus.hidden, false)
   assert.equal(r.els.headerStatus2.hidden, false)
+  assert.equal(r.els.complete.getAttribute('aria-pressed'), null, 'an action button, not a toggle: its name says the state')
 
   // A second click (from the other copy) undoes it, and both copies say so.
   r.clock.now += 1
   r.els.rowComplete.dispatch('click')
-  for (const [button, label] of [[r.els.complete, r.els.completeLabel], [r.els.rowComplete, r.els.rowCompleteLabel]]) {
-    assert.equal(button.getAttribute('aria-pressed'), 'false')
+  for (const label of [r.els.completeLabel, r.els.rowCompleteLabel]) {
     assert.equal(label.textContent, 'Mark step complete')
   }
   assert.equal(r.els.headerStatus.hidden, true)
@@ -258,10 +257,22 @@ test('Complete and continue marks the step once and hands the primary action to 
   assert.deepEqual(doneIds(JSON.parse(r.local.data[STORE_KEY]).solutions.demo), ['s1'], 'the click marks the step before the link navigates')
   assert.equal(r.els.rowContinue.hidden, true, 'done: nothing left to complete')
   assert.equal(r.els.rowNext.classList.contains('sol-btn--primary'), true, 'Next is the primary action now')
-  assert.equal(r.els.complete.getAttribute('aria-pressed'), 'true', 'the rail toggle agrees')
+  assert.equal(r.els.completeLabel.textContent, 'Mark step not complete', 'the rail toggle agrees')
 
   // Control: a second click on a done step never un-marks it (unlike the toggle).
   r.clock.now += 1
   r.els.rowContinue.dispatch('click')
   assert.deepEqual(doneIds(JSON.parse(r.local.data[STORE_KEY]).solutions.demo), ['s1'])
+})
+
+test('the last step\'s Mark step complete is the primary action until done, then a ghost undo', () => {
+  const r = run({ page: 'step', stepId: 's1', actionRow: true, primaryToggle: true })
+  assert.equal(r.els.rowComplete.classList.contains('sol-btn--primary'), true)
+  r.els.rowComplete.dispatch('click')
+  assert.equal(r.els.rowCompleteLabel.textContent, 'Mark step not complete')
+  assert.equal(r.els.rowComplete.classList.contains('sol-btn--primary'), false, 'undo is never the main action')
+  assert.equal(r.els.rowComplete.classList.contains('sol-btn--ghost'), true)
+  r.clock.now += 1
+  r.els.rowComplete.dispatch('click')
+  assert.equal(r.els.rowComplete.classList.contains('sol-btn--primary'), true)
 })

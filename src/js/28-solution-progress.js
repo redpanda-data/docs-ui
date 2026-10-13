@@ -1325,13 +1325,20 @@
     // has to agree, and so does every header chip.
     if (stepId) {
       var isStepDone = isDone(record, stepId)
-      // The label stays "Mark step complete": aria-pressed carries the state
-      // (a toggle whose name also flips is announced as the opposite of what
-      // it does), and the Completed chips beside it say it visually.
+      // A plain action button whose name is what a click does: once the step
+      // is done it offers to undo that, so it never offers to complete a step
+      // that is complete. (It used to keep "Mark step complete" with
+      // aria-pressed carrying the state, which read as an offer to do it
+      // again.) The last step's copy is the primary action until the step is
+      // done, then steps back to a ghost button: undo is never the main action.
       $$('[data-sol-complete]').forEach(function (button) {
-        button.setAttribute('aria-pressed', isStepDone ? 'true' : 'false')
+        button.removeAttribute('aria-pressed')
         var completeLabel = $('[data-sol-complete-label]', button)
-        if (completeLabel) completeLabel.textContent = 'Mark step complete'
+        if (completeLabel) completeLabel.textContent = isStepDone ? 'Mark step not complete' : 'Mark step complete'
+        if (button.hasAttribute('data-sol-complete-primary')) {
+          button.classList[isStepDone ? 'remove' : 'add']('sol-btn--primary')
+          button.classList[isStepDone ? 'add' : 'remove']('sol-btn--ghost')
+        }
       })
       $$('[data-sol-step-header-status]').forEach(function (el) { el.hidden = !isStepDone })
       // Complete and continue has done its job once the step is done; Next

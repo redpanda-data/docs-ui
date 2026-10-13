@@ -47,7 +47,7 @@ test('signed in: an un-mark is not brought back by the server merge', async () =
   assert.deepEqual(doneIds(server.doc.solutions.demo), [], 'the un-mark reached the server')
   assert.equal(server.doc.solutions.demo.steps.s1.done, false, 'stored as an un-mark, not dropped')
   assert.deepEqual(r.api.getState().solutions.demo.completedSteps, [], 'and the PUT answer did not re-mark it locally')
-  assert.equal(r.els.complete.getAttribute('aria-pressed'), 'false')
+  assert.equal(r.els.completeLabel.textContent, 'Mark step complete')
 })
 
 test('cross-device: a stale device that still has the step done does not undo an un-mark, and a later re-mark wins', async () => {
@@ -67,7 +67,7 @@ test('cross-device: a stale device that still has the step done does not undo an
   // Phone signs in (first sign-in on this device), opens s1, un-marks it.
   const phone = device(server, { stepId: 's1', hint: undefined, now: 1005000 })
   await phone.flush()
-  assert.equal(phone.els.complete.getAttribute('aria-pressed'), 'true', 'the phone sees the laptop progress')
+  assert.equal(phone.els.completeLabel.textContent, 'Mark step not complete', 'the phone sees the laptop progress')
   phone.clock.now += 1000
   phone.els.complete.dispatch('click')
   await phone.flush()

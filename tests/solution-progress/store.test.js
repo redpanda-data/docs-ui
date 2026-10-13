@@ -161,8 +161,7 @@ test('an explicit mark-complete click updates the record, the count and the tick
   assert.deepEqual(record.completedSteps, ['s1'])
   assert.equal(record.solutionVersion, 'v1.0.0')
   assert.equal(els.count.textContent, '1 of 3')
-  assert.equal(els.complete.getAttribute('aria-pressed'), 'true')
-  assert.equal(els.completeLabel.textContent, 'Mark step complete', 'aria-pressed carries the state')
+  assert.equal(els.completeLabel.textContent, 'Mark step not complete')
   assert.ok(els.nav.children[0].classes.has('is-complete'), 'sidebar entry ticked by step id')
   assert.ok(!els.nav.children[1].classes.has('is-complete'))
   assert.equal(els.fill.style.width, '33%')
@@ -170,7 +169,7 @@ test('an explicit mark-complete click updates the record, the count and the tick
   els.complete.dispatch('click')
   record = api.getState().solutions.demo
   assert.deepEqual(record.completedSteps, [])
-  assert.equal(els.complete.getAttribute('aria-pressed'), 'false')
+  assert.equal(els.completeLabel.textContent, 'Mark step complete')
 })
 
 test('unknown step ids are kept but never counted', () => {

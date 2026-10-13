@@ -33,8 +33,9 @@
     {{/unless}}
   </div>
   {{!-- Shown at every width: the end of the article is where a reader who
-        just finished the step is. The button's name never changes
-        (aria-pressed carries the state), so the Completed chip says it. --}}
+        just finished the step is. The button names what a click does: Mark
+        step complete, or Mark step not complete once the step is done
+        (28-solution-progress.js); the Completed chip shows the state too. --}}
   {{!-- One primary action at the end of a step: Complete and continue marks
         the step and opens the next one. Once the step is done it hides and
         Next is the primary link. Beside it, the Mark step complete toggle
@@ -48,11 +49,11 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       <span>Complete and continue</span>
     </a>
-    <button type="button" class="sol-btn sol-btn--ghost" data-sol-complete data-analytics="solution_step_complete" aria-pressed="false">
+    <button type="button" class="sol-btn sol-btn--ghost" data-sol-complete data-analytics="solution_step_complete">
       <span data-sol-complete-label>Mark step complete</span>
     </button>
     {{else}}
-    <button type="button" class="sol-btn sol-btn--primary" data-sol-complete data-analytics="solution_step_complete" aria-pressed="false">
+    <button type="button" class="sol-btn sol-btn--primary" data-sol-complete data-sol-complete-primary data-analytics="solution_step_complete">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       <span data-sol-complete-label>Mark step complete</span>
     </button>

@@ -1201,6 +1201,14 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   align-items: flex-end;
 }
 
+/* On a filled button (Next is always one) the grey kicker measured 1.23:1
+   against the orange. It takes the button's own text color, 4.6:1, and keeps
+   its size and caps to read as the label. */
+.sol-btn--primary .sol-step-nav-kicker,
+.sol-step-nav--next .sol-step-nav-kicker {
+  color: inherit;
+}
+
 /* Authoring roles */
 .sol-doc .solution-verify,
 .sol-doc .production-note {
