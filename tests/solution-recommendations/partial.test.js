@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'encode-uri', 'find-component'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'encode-uri', 'find-component', 'platform-name', 'platform-list'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
@@ -176,7 +176,7 @@ const SOLUTION = {
 }
 function stepRenderer () {
   const stepHbs = Handlebars.create()
-  ;['eq', 'or', 'concat', 'format-duration', 'format-release-date', 'relativize', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode'].forEach((name) => {
+  ;['eq', 'or', 'concat', 'format-duration', 'format-release-date', 'relativize', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode', 'platform-name', 'platform-list'].forEach((name) => {
     stepHbs.registerHelper(name, helper(name))
   })
   stepHbs.registerPartial('solution-step-header', read('src/partials/solution-step-header.hbs'))
@@ -416,7 +416,7 @@ test('get-solutions-catalog normalizes facets to {value, count} from the extensi
 
 test('nav-tree-solution consumes the object shape the extension writes for page-solution-nav', () => {
   const navHbs = Handlebars.create()
-  ;['eq', 'ne', 'or', 'gt', 'increment', 'parse-json', 'relativize', 'find-component', 'get-solutions-catalog'].forEach((name) => {
+  ;['eq', 'ne', 'or', 'gt', 'increment', 'parse-json', 'relativize', 'find-component', 'get-solutions-catalog', 'platform-name', 'platform-list'].forEach((name) => {
     navHbs.registerHelper(name, helper(name))
   })
   navHbs.registerPartial('nav-tree-solution', read('src/partials/nav-tree-solution.hbs'))
@@ -541,4 +541,16 @@ test('a recommendation card leads with why it is recommended, and the block link
   assert.doesNotMatch(html, />First</, 'the description gives way to why')
   assert.match(html, />Second</, 'a card with no why keeps its description')
   assert.match(html, /class="sol-recs-all" href="[^"]*solutions\/"[^>]*>All solutions<\/a>/)
+})
+
+test('platform names agree everywhere, and a list of three reads as a sentence', () => {
+  const name = helper('platform-name')
+  const list = helper('platform-list')
+  assert.equal(name('kubernetes'), 'Kubernetes')
+  assert.equal(name('self-managed'), 'Self-Managed')
+  assert.equal(list(['self-managed']), 'Self-Managed')
+  assert.equal(list(['self-managed', 'cloud']), 'Self-Managed and Cloud')
+  assert.equal(list(['self-managed', 'cloud', 'kubernetes']), 'Self-Managed, Cloud, and Kubernetes')
+  // The two helpers keep their own copies of the names (each is loaded alone); they must agree.
+  for (const p of ['self-managed', 'cloud', 'kubernetes']) assert.equal(list([p]), name(p))
 })

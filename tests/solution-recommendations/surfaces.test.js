@@ -17,7 +17,8 @@ const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 function engine (helpers, partials) {
   const hbs = Handlebars.create()
-  helpers.forEach((name) => hbs.registerHelper(name, helper(name)))
+  // Every partial that shows a platform uses these two, so every engine has them.
+  ;[...helpers, 'platform-name', 'platform-list'].forEach((name) => hbs.registerHelper(name, helper(name)))
   partials.forEach((name) => hbs.registerPartial(name, read('src/partials/' + name + '.hbs')))
   return hbs
 }

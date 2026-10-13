@@ -64,11 +64,11 @@
       {{/each}}
     </fieldset>
     {{/if}}
-    {{#*inline "sol-platform-name"}}{{#if (eq value 'self-managed')}}Self-Managed{{else if (eq value 'cloud')}}Cloud{{else}}{{value}}{{/if}}{{/inline}}
+    {{#*inline "sol-platform-name"}}{{#if (eq value 'cloud')}}Redpanda Cloud{{else}}{{platform-name value}}{{/if}}{{/inline}}
     {{#if (eq catalog.facets.platforms.length 1)}}
     {{#each catalog.facets.platforms}}
     <div class="sol-filter-group sol-filter-group--single">
-      <label class="sol-filter-row sol-filter-toggle"><input type="checkbox" name="platform" value="{{value}}"><span class="sol-filter-label">Runs on Redpanda {{> sol-platform-name value=value}}</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
+      <label class="sol-filter-row sol-filter-toggle"><input type="checkbox" name="platform" value="{{value}}"><span class="sol-filter-label">Runs on {{> sol-platform-name value=value}}</span><span class="sol-filter-count" aria-hidden="true">{{count}}</span><span class="visually-hidden" data-sol-filter-sr>({{count}} matching)</span></label>
     </div>
     {{/each}}
     {{else if catalog.facets.platforms.length}}

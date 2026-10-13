@@ -29,7 +29,7 @@
     <dt>Runs on</dt>
     <dd class="sol-chips">
       {{#each solution.platforms}}
-      <span class="sol-chip sol-chip--platform">{{#if (eq this 'self-managed')}}Self-Managed{{else if (eq this 'cloud')}}Cloud{{else}}{{this}}{{/if}}</span>
+      <span class="sol-chip sol-chip--platform">{{platform-name this}}</span>
       {{/each}}
     </dd>
   </div>
@@ -95,7 +95,7 @@
   {{#with (format-release-date solution.verified.runAt long=true) as |verifiedAt|}}
   <div class="sol-meta-item sol-meta-item--verified">
     <dt>Last verified</dt>
-    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified)}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}{{#if ../solution.verified.platforms.length}} on {{#each ../solution.verified.platforms}}{{#if (eq this 'self-managed')}}Self-Managed{{else if (eq this 'cloud')}}Cloud{{else}}{{this}}{{/if}}{{#unless @last}} and {{/unless}}{{/each}}{{/if}}</dd>
+    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified)}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}{{#if ../solution.verified.platforms.length}} on {{platform-list ../solution.verified.platforms}}{{/if}}</dd>
   </div>
   {{/with}}
 </dl>

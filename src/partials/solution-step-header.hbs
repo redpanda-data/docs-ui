@@ -32,7 +32,7 @@
     {{!-- Proof of the run, from the scalar mirrors the extension sets on every
           step page. No evidence counts are mirrored, so there is no title. --}}
     {{#with (format-release-date @root.page.attributes.solution-verified-at long=true) as |verifiedAt|}}
-    <span class="sol-fact sol-fact--verified">Last verified {{verifiedAt}}{{#with @root.page.attributes.solution-verified-version}} against Redpanda {{this}}{{/with}}{{#with ../../solution.verified.platforms}}{{#if this.length}} on {{#each this}}{{#if (eq this 'self-managed')}}Self-Managed{{else if (eq this 'cloud')}}Cloud{{else}}{{this}}{{/if}}{{#unless @last}} and {{/unless}}{{/each}}{{/if}}{{/with}}</span>
+    <span class="sol-fact sol-fact--verified">Last verified {{verifiedAt}}{{#with @root.page.attributes.solution-verified-version}} against Redpanda {{this}}{{/with}}{{#with ../../solution.verified.platforms}}{{#if this.length}} on {{platform-list this}}{{/if}}{{/with}}</span>
     {{/with}}
     <span class="sol-fact sol-fact--status" data-sol-step-header-status hidden>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
