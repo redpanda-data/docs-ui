@@ -303,7 +303,7 @@ test('format-verified-evidence adds one clause per extra platform run', () => {
   }
   assert.equal(
     call({ verifyScript: 'PASS (10/10)', runs: { kubernetes } }),
-    'verify script passed 10 of 10; Kubernetes: verify script passed 10 of 10 on October 13, 2026, kind v0.32.0, Kubernetes v1.35.0, Redpanda Operator v26.2.3'
+    'Docker Compose: verify script passed 10 of 10; Kubernetes: verify script passed 10 of 10 on October 13, 2026, kind v0.32.0, Kubernetes v1.35.0, Redpanda Operator v26.2.3'
   )
   assert.equal(call({ runs: { cloud: { verifyScript: 'PASS (9/9)' } } }), 'Redpanda Cloud: verify script passed 9 of 9')
   assert.equal(
@@ -509,17 +509,18 @@ test('the recommendation partial never renders a repository URL', () => {
   }
 })
 
-test('the Last verified line names where the run happened, and the evidence names the content it covered', () => {
+test('the Last verified line names where the run happened, and the evidence never shows the content hash', () => {
   const html = renderMeta(withVerified(Object.assign({}, VERIFIED, {
     platforms: ['self-managed', 'cloud'],
     contentRev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904', docs: 'abc' },
     stackSha256: 'f'.repeat(64),
   })))
   assert.match(html, /September 13, 2026 against Redpanda 26\.2\.2 on Docker Compose and Redpanda Cloud<\/dd>/)
-  assert.match(html, /title="[^"]*, content 4b825dc"/)
+  assert.doesNotMatch(html, /4b825dc|content [0-9a-f]{7}/, 'the content hash is maintainer evidence, not reader text')
+  assert.match(html, /title="[^"]*verify script passed 9 of 9"/)
   // Absent: silent, as before.
   assert.match(renderMeta(withVerified(VERIFIED)), /against Redpanda 26\.2\.2<\/dd>/)
-  assert.equal(helper('format-verified-evidence')({ commands: 1, contentRev: { solution: 'not a hash' } }), '1 command run')
+  assert.equal(helper('format-verified-evidence')({ commands: 1, contentRev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904' } }), '1 command run')
 
   const step = stepRenderer()({
     solution: Object.assign({}, SOLUTION, {

@@ -109,17 +109,13 @@ module.exports = function (verified) {
   }
   const script = formatScript(verified.verifyScript)
   if (script) parts.push(script)
-  // Which content the run covered: the git tree hash of the solution, so a
-  // maintainer can tell a run of the current pages from a run of older ones.
-  // DEM maps verification.json onto the record in camelCase (contentRev).
-  const contentRev = verified.contentRev || verified.content_rev
-  const rev = contentRev && contentRev.solution
-  if (typeof rev === 'string' && /^[0-9a-f]{7,64}$/i.test(rev)) parts.push('content ' + rev.slice(0, 7))
-  const clauses = parts.length ? [parts.join(', ')] : []
+  // The content hash (contentRev) is maintainer evidence, read from
+  // verification.json, and means nothing to a reader, so it is not shown.
   const runs = verified.runs && typeof verified.runs === 'object' ? verified.runs : {}
-  for (const platform of Object.keys(runs).sort()) {
-    const clause = formatRun(platform, runs[platform])
-    if (clause) clauses.push(clause)
-  }
+  const others = Object.keys(runs).sort().map((platform) => formatRun(platform, runs[platform])).filter(Boolean)
+  const clauses = []
+  // Once another platform's clause follows, the base run needs its own name.
+  if (parts.length) clauses.push((others.length ? PLATFORM_NAMES['self-managed'] + ': ' : '') + parts.join(', '))
+  clauses.push(...others)
   return clauses.join('; ')
 }
