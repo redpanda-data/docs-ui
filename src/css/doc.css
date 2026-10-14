@@ -511,6 +511,19 @@ html[data-theme="dark"] .status-badge--cloud {
   border-color: rgba(14, 165, 233, 0.3);
 }
 
+.status-badge--since {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .status-badge--since {
+  background: rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
 /* Availability badges: links to the other platform's version of this page */
 a.status-badge--cloud-link,
 a.status-badge--self-managed-link {
