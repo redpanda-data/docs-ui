@@ -1,0 +1,2 @@
+# Build outputs (objects, node test module, wasm) — reproducible via build.sh
+build/
