@@ -22,7 +22,38 @@
   var modal = container.querySelector('[data-signin-modal]')
   var modalCta = container.querySelector('[data-signin-modal-continue]')
   var modalSignup = container.querySelector('[data-signin-modal-signup]')
+  var modalTitle = modal && modal.querySelector('[data-signin-modal-title]')
+  var modalLead = modal && modal.querySelector('[data-signin-modal-sub]')
+  var modalFeatures = modal && modal.querySelector('[data-signin-modal-features]')
   var nudge = container.querySelector('[data-signin-nudge]')
+
+  // Default modal copy, restored on close after another surface (the Solutions
+  // progress/download gates) opened the modal with its own title, lead, CTA
+  // label and return_to via the docs-account:open-signin event detail.
+  var modalDefaults = {
+    title: modalTitle ? modalTitle.textContent : '',
+    lead: modalLead ? modalLead.textContent : '',
+    cta: modalCta ? modalCta.textContent : '',
+  }
+  var customReturnTo = null
+
+  function applyModalDetail (detail) {
+    var custom = !!(detail && (detail.title || detail.lead || detail.cta || detail.returnTo))
+    if (modalTitle) modalTitle.textContent = (custom && detail.title) || modalDefaults.title
+    if (modalLead) modalLead.textContent = (custom && detail.lead) || modalDefaults.lead
+    if (modalCta && !modalCta.classList.contains('is-loading')) {
+      modalCta.textContent = (custom && detail.cta) || modalDefaults.cta
+    }
+    // The feature list pitches the AI agent; it is noise under a task-specific
+    // title like "Sign in to save your progress".
+    if (modalFeatures) modalFeatures.hidden = custom
+    // Same-origin paths only: one leading slash, and not a protocol-relative
+    // `//host` or `/\host` form that browsers treat as another origin.
+    customReturnTo = custom && typeof detail.returnTo === 'string' && /^\/(?![/\\])/.test(detail.returnTo)
+      ? detail.returnTo
+      : null
+    applyHrefs()
+  }
 
   var CACHE_KEY = 'docs-account-me'
   // First-view nudge, shown once. localStorage (not session) so it doesn't
@@ -55,6 +86,31 @@
     return encodeURIComponent(window.location.pathname + window.location.search)
   }
 
+  // Where the modal's own CTA sends the reader back to: a same-origin path a
+  // caller supplied through the open-signin detail (for example a Solutions
+  // step with ?intent=save), else the current page.
+  function modalReturnTo () {
+    return customReturnTo ? encodeURIComponent(customReturnTo) : returnTo()
+  }
+
+  function applyHrefs () {
+    signinLink.href = '/login?return_to=' + returnTo()
+    signoutLink.href = '/logout?return_to=' + returnTo()
+    // disclosed=1: the modal shows the privacy/data-collection note itself, so
+    // /login can skip the server interstitial (which exists to show that note)
+    // and go straight to Auth0. The bare signinLink href (middle-click, or no
+    // modal markup) stays undisclosed and gets the interstitial.
+    if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + modalReturnTo()
+    // "Create a free account" — a same-origin path instead of a hardcoded
+    // cloud.redpanda.com URL, since docs-ui has no way to know which Cloud
+    // environment a given deploy (prod vs integration preview) should point
+    // at. docs-login.mjs's own /signup already resolves that per context and
+    // 302s straight to the right signup URL. Its own path rather than a
+    // /login query flag: unlike modalCta above, it shares no state with
+    // sign-in (no CSRF nonce, no PKCE, no auth-request write).
+    if (modalSignup) modalSignup.href = '/signup?return_to=' + modalReturnTo()
+  }
+
   // Feature modal shown before sending the user to /login.
   // It is an aria-modal dialog, so manage focus: move focus in on open, trap
   // Tab within it, and restore focus to the opener on close (WCAG 2.4.3).
@@ -68,12 +124,16 @@
       .filter(function (el) { return el.offsetParent !== null }) // visible only
   }
 
-  function openModal () {
+  // `e` is the docs-account:open-signin CustomEvent when another surface opened
+  // the modal; its detail {title, lead, cta, returnTo} customises the copy and
+  // the sign-in return path. The header link calls this with no argument.
+  function openModal (e) {
     if (!modal) return
     // Covers every entry point, including docs-account:open-signin from the Ask
     // AI panel, not just the header link's own click handler.
     retireNudge()
     warm()
+    applyModalDetail(e && e.detail)
     lastFocused = document.activeElement
     modal.hidden = false
     document.addEventListener('keydown', onModalKey)
@@ -91,6 +151,9 @@
     if (!modal) return
     modal.hidden = true
     document.removeEventListener('keydown', onModalKey)
+    // Back to the default pitch and the current-page return path, so a later
+    // open from the header link doesn't inherit a Solutions intent.
+    applyModalDetail(null)
     // Restore focus to whatever opened the modal (the Sign in trigger).
     if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus()
     lastFocused = null
@@ -248,21 +311,7 @@
         nudge.hidden = signinLink.hidden || nudgeAlreadySeen()
       }
     }
-    signinLink.href = '/login?return_to=' + returnTo()
-    signoutLink.href = '/logout?return_to=' + returnTo()
-    // disclosed=1: the modal shows the privacy/data-collection note itself, so
-    // /login can skip the server interstitial (which exists to show that note)
-    // and go straight to Auth0. The bare signinLink href (middle-click, or no
-    // modal markup) stays undisclosed and gets the interstitial.
-    if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo()
-    // "Create a free account" — a same-origin path instead of a hardcoded
-    // cloud.redpanda.com URL, since docs-ui has no way to know which Cloud
-    // environment a given deploy (prod vs integration preview) should point
-    // at. docs-login.mjs's own /signup already resolves that per context and
-    // 302s straight to the right signup URL. Its own path rather than a
-    // /login query flag: unlike modalCta above, it shares no state with
-    // sign-in (no CSRF nonce, no PKCE, no auth-request write).
-    if (modalSignup) modalSignup.href = '/signup?return_to=' + returnTo()
+    applyHrefs()
 
     // Signed in: the console link lives in the account dropdown, so hide the
     // standalone toolbar/overflow Cloud Console links (avoid two paths)

@@ -1,0 +1,103 @@
+{{!--
+  Sidebar for the solutions component. Derived entirely from build-time
+  metadata, never from a nav.adoc.
+
+  page-solution-nav is the object the solutions-catalog extension writes
+  (extensions/solutions-catalog/outputs.js buildNav):
+    { home:     {title, url},
+      overview: {title, url},
+      steps:    [{id, title, url, order, duration}] }
+  The current item is derived here: the overview when page.layout is
+  'solution', a step when its id equals page-solution-step-id (a `current`
+  flag on either is honoured too). 28-solution-progress.js ticks completed
+  steps by matching data-sol-nav-url against the progress store.
+
+  The Steps and All solutions groups carry sol-nav-group, which keeps their
+  lists open: nav.css hides the list of any .nav-item without is-active, and
+  01-nav.js only activates the current page's ancestors, so on the overview
+  and the landing page both headings rendered with nothing under them.
+
+  Each step's tick is visual only, so data-sol-nav-step-status holds the
+  screen-reader text. solutions.css fills it from the is-complete class
+  28-solution-progress.js already toggles (::after content, which is part of
+  the accessible name); the script can also write it directly.
+
+  On a solution page: Solutions home, Overview, and the ordered steps. The
+  build-along files and related docs are in the right rail and the overview,
+  so the sidebar does not repeat them. On the landing page:
+  Solutions home, then the filter form (solutions-filters.hbs). The grid is
+  the list of solutions, so the sidebar does not repeat it.
+--}}
+<ul class="nav-list sol-nav">
+  <li class="nav-item" data-depth="0">
+    <ul class="nav-list">
+      {{!-- is-current-page belongs on the li (01-nav.js scrolls
+            `.is-current-page .nav-link` into view). --}}
+      <li class="nav-item{{#if (eq page.layout 'solutions-home')}} is-current-page{{/if}}" data-depth="0">
+        <div class="item">
+          {{#with (find-component @root.site 'solutions')}}
+          <a class="nav-link sol-nav-home" href="{{{relativize this.url}}}"{{#if (eq @root.page.layout 'solutions-home')}} aria-current="page"{{/if}}>Solutions home</a>
+          {{else}}
+            {{#with (parse-json @root.page.attributes.solution-nav)}}
+              {{#if this.home.url}}
+          <a class="nav-link sol-nav-home" href="{{{relativize this.home.url}}}">Solutions home</a>
+              {{else}}
+          <a class="nav-link sol-nav-home" href="{{{relativize @root.page.component.url}}}">Solutions home</a>
+              {{/if}}
+            {{else}}
+          <a class="nav-link sol-nav-home" href="{{{relativize @root.page.component.url}}}"{{#if (eq @root.page.layout 'solutions-home')}} aria-current="page"{{/if}}>Solutions home</a>
+            {{/with}}
+          {{/with}}
+        </div>
+      </li>
+      {{#with (parse-json page.attributes.solution-nav) as |nav|}}
+      {{#if nav.overview}}
+      <li class="nav-item sol-nav-overview{{#if (or nav.overview.current (eq @root.page.layout 'solution'))}} is-current-page{{/if}}" data-depth="1">
+        <div class="item">
+          <a class="nav-link" href="{{{relativize nav.overview.url}}}"{{#if (or nav.overview.current (eq @root.page.layout 'solution'))}} aria-current="page"{{/if}}>Overview</a>
+        </div>
+      </li>
+      {{/if}}
+      {{#if nav.steps.length}}
+      <li class="nav-item sol-nav-group" data-depth="1">
+        <div class="item"><span class="nav-text sol-nav-heading">Steps</span></div>
+        <ol class="nav-list sol-nav-steps" data-sol-nav-steps>
+          {{#each nav.steps}}
+          <li class="nav-item sol-nav-step{{#if (or current (eq id @root.page.attributes.solution-step-id))}} is-current-page{{/if}}" data-depth="2" data-sol-nav-url="{{url}}" data-sol-nav-step="{{id}}">
+            <div class="item">
+              <a class="nav-link" href="{{{relativize url}}}"{{#if (or current (eq id @root.page.attributes.solution-step-id))}} aria-current="page"{{/if}}>
+                <span class="sol-nav-step-num" aria-hidden="true">{{#if order}}{{order}}{{else}}{{increment @index}}{{/if}}</span>
+                <span class="sol-nav-step-title">{{title}}</span>
+                <span class="sol-nav-step-check" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="visually-hidden sol-nav-step-status" data-sol-nav-step-status></span>
+              </a>
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+      </li>
+      {{/if}}
+      {{/with}}
+    </ul>
+  </li>
+</ul>
+{{!-- The landing page lists every solution in its grid, so the sidebar does
+      not repeat them: it hosts the filters instead (the Labs home precedent).
+      The wrapper is where 29-solutions-home.js returns the filters to when the
+      viewport widens again after the inline script in solutions-home.hbs moved
+      them above Continue learning and the grid on a narrow screen. --}}
+{{#if (eq page.layout 'solutions-home')}}
+{{#with (get-solutions-catalog) as |catalog|}}
+{{#if catalog.count}}
+<div class="sol-nav-filters" data-sol-filters-home>
+  {{> solutions-filters catalog=catalog}}
+  <noscript>
+    <p class="sol-filters-noscript">Filtering needs JavaScript. Every solution is listed on this page.</p>
+    <style>[data-sol-filters] { display: none; }</style>
+  </noscript>
+</div>
+{{/if}}
+{{/with}}
+{{/if}}

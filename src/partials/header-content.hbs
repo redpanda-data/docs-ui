@@ -90,7 +90,19 @@
             </svg>
           </a>
           {{/if}}
-          <a class="tb-link tb-link-labs" href="/labs">Labs</a>
+          {{!-- Solutions and Labs entry points; each renders only when the
+                site has the component. Once Labs retires, /labs redirects to
+                /solutions/, and a second link to the same place is noise. --}}
+          {{#if (and (has-component site 'solutions') (ne page.component.name 'solutions'))}}
+          {{#with (find-component site 'solutions')}}
+          <a class="tb-link tb-link-solutions" href="{{{relativize this.url}}}">Solutions</a>
+          {{/with}}
+          {{/if}}
+          {{#if (has-component site 'labs')}}
+          {{#with (find-component site 'labs')}}
+          <a class="tb-link tb-link-labs" href="{{{relativize this.url}}}">Labs</a>
+          {{/with}}
+          {{/if}}
         </div>
 
         {{!-- Mobile: Overflow menu with ellipsis --}}
@@ -103,7 +115,16 @@
             </svg>
           </button>
           <div class="tb-dropdown-menu tb-overflow-dropdown" role="menu">
-            <a class="tb-dropdown-item" href="/labs">Labs</a>
+            {{#if (and (has-component site 'solutions') (ne page.component.name 'solutions'))}}
+            {{#with (find-component site 'solutions')}}
+            <a class="tb-dropdown-item" href="{{{relativize this.url}}}">Solutions</a>
+            {{/with}}
+            {{/if}}
+            {{#if (has-component site 'labs')}}
+            {{#with (find-component site 'labs')}}
+            <a class="tb-dropdown-item" href="{{{relativize this.url}}}">Labs</a>
+            {{/with}}
+            {{/if}}
             {{#if (or (eq page.component.name 'cloud-data-platform') (eq page.component.name 'data-platform'))}}
             <a class="tb-dropdown-item" data-cloud-link href="https://cloud.redpanda.com/?utm_source=docs" target="_blank" rel="noopener noreferrer">Cloud Console</a>
             {{/if}}
@@ -149,9 +170,14 @@
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
                 Free with Redpanda Cloud
               </span>
-              <h2 class="tb-signin-modal-title" id="tb-signin-modal-title">Sign in to unlock the docs AI agent</h2>
-              <p class="tb-signin-modal-sub">Your personal assistant for Redpanda docs. Sign in and it can:</p>
-              <ul class="tb-signin-modal-features">
+              {{!-- data-signin-modal-title/sub/features: other surfaces (the
+                    Solutions progress and download gates) open this modal via
+                    docs-account:open-signin with a detail {title, lead, cta,
+                    returnTo}; 26-docs-account.js swaps the copy in and restores
+                    these defaults on close. --}}
+              <h2 class="tb-signin-modal-title" id="tb-signin-modal-title" data-signin-modal-title>Sign in to unlock the docs AI agent</h2>
+              <p class="tb-signin-modal-sub" data-signin-modal-sub>Your personal assistant for Redpanda docs. Sign in and it can:</p>
+              <ul class="tb-signin-modal-features" data-signin-modal-features>
                 <li class="tb-signin-modal-feature">
                   <span class="tb-signin-modal-ficon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span>
                   <span class="tb-signin-modal-ftext">

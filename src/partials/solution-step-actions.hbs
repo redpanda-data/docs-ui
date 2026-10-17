@@ -1,0 +1,93 @@
+{{!--
+  Step page footer actions: explicit mark-complete (the only way a step is
+  ever marked, and the only copy of the button: the rail card shows progress
+  but does not offer to change it), save, and prev/next from
+  page-solution-prev/next-url/title.
+  Context: `solution`.
+
+  It also carries a compact copy of the progress bar and the step counter,
+  shown only where the right rail collapses. The rail's progress card is the
+  only place either appears otherwise, so on a phone the reader could mark
+  steps complete with nothing telling them how far through they were.
+  28-solution-progress.js drives both copies: every selector it renders
+  through uses querySelectorAll, so the duplicate needs no JavaScript change.
+--}}
+<nav class="sol-step-actions" aria-label="Step actions">
+  <div class="sol-step-actions-progress">
+    <span class="sol-step-actions-count">
+      <span data-sol-progress-count>0 of {{solution.steps.length}}</span> steps
+    </span>
+    <div class="sol-bar" role="progressbar" aria-label="Your progress" aria-valuemin="0" aria-valuemax="{{solution.steps.length}}" aria-valuenow="0" aria-valuetext="0 of {{solution.steps.length}} steps complete" data-sol-progress-bar>
+      <div class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></div>
+    </div>
+  </div>
+  {{!-- The rail's "You finished" card is inside the collapsed rail on
+    narrow screens, so the same message and offer sit here too.
+    28-solution-progress.js shows this copy only at or below the rail
+    breakpoint, once every step is done. --}}
+  <div class="sol-done sol-done--inline" data-sol-done data-sol-done-inline role="status" hidden>
+    <p class="sol-done-title">You finished this solution.</p>
+    {{#unless (eq solution.download 'none')}}
+    <p class="sol-done-sub">Keep the complete example around for your own projects.</p>
+    <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow"><span data-sol-download-label>Download the complete example</span></a>
+    {{/unless}}
+  </div>
+  {{!-- Shown at every width: the end of the article is where a reader who
+        just finished the step is. The button names what a click does: Mark
+        step complete, or Mark step not complete once the step is done
+        (28-solution-progress.js); the Completed chip shows the state too. --}}
+  {{!-- One primary action at the end of a step: Complete and continue marks
+        the step and opens the next one. Once the step is done it hides and
+        Next is the primary link. Beside it, the Mark step complete toggle
+        (ghost) marks the step without leaving the page and is the only way to
+        un-mark it: this row holds the page's only copy, since the rail card
+        shows progress but does not change it. The last step has no next, so
+        the toggle is its primary action and finishes the solution. --}}
+  <div class="sol-step-actions-main">
+    {{#if @root.page.attributes.solution-next-url}}
+    <a class="sol-btn sol-btn--primary" data-sol-complete-continue href="{{{relativize @root.page.attributes.solution-next-url}}}" data-analytics="solution_step_complete">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Complete and continue</span>
+    </a>
+    <button type="button" class="sol-btn sol-btn--ghost" data-sol-complete data-analytics="solution_step_complete">
+      <span data-sol-complete-label>Mark step complete</span>
+    </button>
+    {{else}}
+    <button type="button" class="sol-btn sol-btn--primary" data-sol-complete data-sol-complete-primary data-analytics="solution_step_complete">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <span data-sol-complete-label>Mark step complete</span>
+    </button>
+    {{/if}}
+    <span class="sol-fact sol-fact--status" data-sol-step-header-status hidden>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      Completed
+    </span>
+    <button type="button" class="sol-btn sol-btn--ghost" data-sol-save data-intent="save" data-analytics="solution_save_progress">
+      <span data-sol-save-label>Sign in to sync</span>
+    </button>
+  </div>
+  <div class="sol-step-actions-nav">
+    {{#if @root.page.attributes.solution-prev-url}}
+    <a class="sol-btn sol-btn--ghost sol-step-nav" data-sol-prev href="{{{relativize @root.page.attributes.solution-prev-url}}}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      <span class="sol-step-nav-text"><span class="sol-step-nav-kicker">Previous</span>{{@root.page.attributes.solution-prev-title}}</span>
+    </a>
+    {{else}}
+    <a class="sol-btn sol-btn--ghost sol-step-nav" data-sol-prev href="{{{relativize solution.url}}}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      <span class="sol-step-nav-text"><span class="sol-step-nav-kicker">Back to</span>Overview</span>
+    </a>
+    {{/if}}
+    {{#if @root.page.attributes.solution-next-url}}
+    <a class="sol-btn sol-step-nav sol-step-nav--next" data-sol-next href="{{{relativize @root.page.attributes.solution-next-url}}}">
+      <span class="sol-step-nav-text"><span class="sol-step-nav-kicker">Next</span>{{@root.page.attributes.solution-next-title}}</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </a>
+    {{else}}
+    <a class="sol-btn sol-step-nav sol-step-nav--next" data-sol-finish href="{{{relativize solution.url}}}">
+      <span class="sol-step-nav-text"><span class="sol-step-nav-kicker">Last step</span>Back to overview</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </a>
+    {{/if}}
+  </div>
+</nav>

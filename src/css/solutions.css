@@ -1,0 +1,2837 @@
+/* =============================================================================
+   Solutions (component `solutions`): landing page, overview, step pages, the
+   progress rail, and the "Build it in practice" recommendations that render
+   on Product Docs pages.
+
+   Prefix: sol-. Tokens only, from vars.css: --component-* (the component's
+   signature hue, remapped per product by body[data-component-color]),
+   --grey-*-new, --radius-*-new, --shadow-*-new, --font-display. Dark mode via
+   html[data-theme=dark]. Narrow screens: the rail and the filters are
+   <details> that collapse, and every grid drops to one column.
+   ============================================================================= */
+
+/* ---- shared primitives ---------------------------------------------------- */
+
+/* doc.css underlines every `.doc a` (0,1,1) and recolors it. The Solutions
+   surfaces are anchors wrapping cards and chips, so beat that specificity
+   here: no underline on the anchor (which is what propagates to the chips),
+   and a hover treatment that underlines only the title. */
+.doc .sol-card,
+.doc .sol-card:hover,
+.doc .sol-rec-card,
+.doc .sol-rec-card:hover,
+.doc .sol-step-link,
+.doc .sol-step-link:hover,
+.doc .sol-eyebrow-link,
+.doc .sol-related-link,
+.doc .sol-file-link,
+.doc .sol-btn,
+.doc .sol-btn:hover,
+.doc .sol-step-nav,
+.doc .sol-continue .sol-rec-card,
+.doc .sol-chip--link,
+.doc .sol-chip--link:hover,
+.doc .sol-recs-all {
+  text-decoration: none;
+}
+
+.doc .sol-card:hover .sol-card-title,
+.doc .sol-rec-card:hover .sol-rec-title,
+.doc .sol-step-link:hover .sol-step-title,
+.doc .sol-eyebrow-link:hover,
+.doc .sol-related-link:hover span,
+.doc .sol-file-link:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.doc .sol-card,
+.doc .sol-rec-card,
+.doc .sol-step-link {
+  color: inherit;
+}
+
+.doc .sol-eyebrow-link,
+.doc .sol-eyebrow-link:hover {
+  color: var(--component-600);
+}
+
+.doc .sol-related-link,
+.doc .sol-file-link {
+  color: var(--grey-700-new);
+}
+
+.doc .sol-related-link:hover,
+.doc .sol-file-link:hover {
+  color: var(--component-700);
+}
+
+/* Overview Use case and Industry chips link to the filtered landing page. */
+.doc .sol-chip--link {
+  color: var(--grey-700-new);
+}
+
+.doc .sol-chip--link:hover {
+  color: var(--component-700);
+  border-color: var(--component-200);
+  background: var(--component-bg-tint);
+}
+
+.doc .sol-chip--link:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: 2px;
+}
+
+html[data-theme="dark"] .doc .sol-chip--link {
+  color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .doc .sol-chip--link:hover {
+  color: var(--component-200);
+  border-color: var(--component-500);
+}
+
+.doc .sol-btn--primary,
+.doc .sol-btn--primary:hover {
+  color: var(--grey-50-new);
+}
+
+.doc .sol-btn--ghost,
+.doc .sol-btn--ghost:hover {
+  color: var(--component-700);
+}
+
+/* Surface color. vars.css has no white token (grey-50-new is off-white), so
+   panels, cards and buttons use one local custom property for it. */
+.sol-doc,
+.sol-recs,
+.sol-nav,
+.sol-toast {
+  --sol-surface: #fff;
+}
+
+/* Muted meta text (durations, counts, verified dates, filter counts, nav
+   step numbers). grey-500 is 4.34:1 on white and 3.04:1 on a dark card, both
+   under AA for text this small. grey-600 on white is 6.19:1 (5.68:1 on
+   grey-50); grey-300 is 5.74:1 on a grey-800 card and 7.73:1 on the dark
+   page. Set on html so the sidebar and the product-page rail get it too. */
+html {
+  --sol-meta: var(--grey-600-new);
+}
+
+html[data-theme="dark"] {
+  --sol-meta: var(--grey-300-new);
+}
+
+/* head-component-color.hbs derives only --component-500/600/700 and the
+   tints from the component's metadata color, so on Solutions the light
+   shades (pressed buttons, and every eyebrow, ghost button and chip in dark
+   mode) fell back to the default indigo next to amber primaries. Derive
+   them from the same color here. Dark mode inverts the scale: the light
+   shades are text on dark surfaces, so they mix in less white. With the
+   amber #B45309: dark --component-200 is #ddb290, 6.80:1 on a grey-800 card
+   and 5.05:1 on the active tint. */
+body[data-component="solutions"][data-component-color] {
+  --component-50: color-mix(in sRGB, var(--component-color) 8%, white);
+  --component-100: color-mix(in sRGB, var(--component-color) 16%, white);
+  --component-200: color-mix(in sRGB, var(--component-color) 35%, white);
+}
+
+html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
+  --component-50: color-mix(in sRGB, var(--component-color) 20%, white);
+  --component-100: color-mix(in sRGB, var(--component-color) 30%, white);
+  --component-200: color-mix(in sRGB, var(--component-color) 45%, white);
+}
+
+.sol-doc .visually-hidden,
+.sol-filters .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sol-section-title {
+  font-family: var(--font-display);
+  font-size: calc(22 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.75rem;
+}
+
+.sol-eyebrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--component-600);
+  margin-bottom: 0.75rem;
+}
+
+/* Page options (markdown-dropdown.hbs) at the end of the eyebrow row, out of
+   the eyebrow's uppercase label styling. */
+.sol-page-options {
+  margin-left: auto;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.sol-page-options .markdown-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.sol-eyebrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--component-600);
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.sol-eyebrow-link:hover {
+  text-decoration: underline;
+}
+
+.sol-eyebrow-sep {
+  color: var(--grey-300-new);
+}
+
+.sol-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 2px 8px;
+  border-radius: var(--radius-full-new);
+  background: var(--grey-50-new);
+  color: var(--grey-700-new);
+  border: 1px solid var(--grey-100-new);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.sol-chip--tech {
+  background: var(--component-bg-tint);
+  border-color: transparent;
+  color: var(--component-700);
+}
+
+/* Status colors. vars.css has no yellow scale, so the draft pair uses raw
+   Tailwind values (the labs-card-diff recipe's tint with its text one shade
+   darker); the red pair uses the brand
+   scale (brand-600 is rgb(226, 67, 40)). The text is the 800 shade: the labs
+   recipe's 700 shades measure 4.55 to 4.88:1 on their tint over white and
+   4.21 to 4.5:1 over the grey-50 sidebar, under AA's 4.5:1 for 12px text.
+   The 800 shades are 6.3:1 or more over white and 5.86:1 or more over
+   grey-50. */
+.sol-chip--status.is-deprecated {
+  background: rgba(226, 67, 40, 0.1);
+  color: var(--brand-800-new);
+  border-color: transparent;
+}
+
+.sol-chip--status.is-draft {
+  background: rgba(234, 179, 8, 0.12);
+  color: #854d0e;
+  border-color: transparent;
+}
+
+.sol-chip--status.is-featured {
+  background: var(--component-600);
+  color: var(--grey-50-new);
+  border-color: transparent;
+}
+
+.sol-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.sol-time,
+.sol-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+  white-space: nowrap;
+}
+
+/* display:inline-flex above beats the UA [hidden] rule, which showed the
+   "Completed" chip on every step before the reader completed anything. */
+.sol-fact[hidden] {
+  display: none;
+}
+
+/* Proof of the last test run. Muted: it is reassurance a reader looks for
+   deliberately, not something to shout over the steps themselves. */
+.sol-verified[title] {
+  cursor: help;
+}
+
+/* "Last verified ... on Self-Managed and Cloud" wraps on a phone instead of
+   running off the edge. */
+.sol-fact--verified {
+  color: var(--sol-meta);
+  white-space: normal;
+  min-width: 0;
+}
+
+.sol-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-md-new);
+  border: 1px solid var(--grey-200-new);
+  background: var(--sol-surface);
+  color: var(--grey-800-new);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sol-btn:hover {
+  background: var(--grey-50-new);
+  border-color: var(--grey-300-new);
+  text-decoration: none;
+}
+
+.sol-btn:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: 2px;
+}
+
+/* base.css sets summary { outline: none } site-wide, so the collapsed rail,
+   the filters and every collapsible block lost their focus indicator
+   (WCAG 2.4.7). :focus-visible keeps mouse clicks ring-free. */
+.sol-doc summary:focus-visible,
+.sol-rail summary:focus-visible,
+.sol-filters summary:focus-visible,
+.sol-rail a:focus-visible,
+.sol-rail button:focus-visible,
+.sol-rail-recs a:focus-visible,
+.sol-filters input:focus-visible,
+.sol-filters button:focus-visible,
+.sol-link-btn:focus-visible,
+.sol-card:focus-visible,
+.sol-rec-card:focus-visible,
+.sol-step-link:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: 2px;
+}
+
+/* Chrome renders a <details> body inside ::details-content, which does not
+   inherit the site's border-box, so the full-width rail buttons stuck out
+   about 9px past the card edge. */
+.sol-btn,
+.sol-rail-body {
+  box-sizing: border-box;
+}
+
+.sol-btn--primary {
+  background: var(--component-600);
+  border-color: var(--component-600);
+  color: var(--grey-50-new);
+}
+
+.sol-btn--primary:hover {
+  background: var(--component-700);
+  border-color: var(--component-700);
+  color: var(--grey-50-new);
+}
+
+.sol-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--component-700);
+}
+
+.sol-btn--ghost:hover {
+  background: var(--component-bg-tint);
+  border-color: transparent;
+}
+
+.sol-btn--sm {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  padding: 0.5rem 0.75rem;
+}
+
+.sol-btn[aria-pressed="true"] {
+  background: var(--component-50);
+  border-color: var(--component-200);
+  color: var(--component-700);
+}
+
+.sol-btn[hidden] {
+  display: none;
+}
+
+.sol-link-btn {
+  font-family: inherit;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--component-700);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sol-bar {
+  height: 6px;
+  border-radius: var(--radius-full-new);
+  background: var(--grey-100-new);
+  overflow: hidden;
+}
+
+.sol-bar--sm {
+  height: 4px;
+}
+
+.sol-bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--component-500);
+  transition: width 0.3s ease;
+}
+
+.sol-panel {
+  padding: 1rem;
+  border: 1px solid var(--grey-100-new);
+  border-radius: var(--radius-lg-new);
+  background: var(--sol-surface);
+  box-shadow: var(--shadow-sm-new);
+}
+
+.sol-panel + .sol-panel {
+  margin-top: 0.75rem;
+}
+
+.sol-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sol-panel-title {
+  font-family: var(--font-display);
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  margin: 0 0 0.375rem;
+  color: var(--grey-900-new);
+}
+
+.sol-panel-head .sol-panel-title {
+  margin: 0;
+}
+
+.sol-panel-text {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--grey-600-new);
+  margin: 0 0 0.75rem;
+}
+
+/* ---- overview + step page shell ------------------------------------------- */
+
+.doc.sol-doc {
+  hyphens: manual;
+}
+
+/* Long lines scroll instead of wrapping mid-token. doc.css wraps site-wide in
+   two places, `.doc pre > code { white-space: pre-wrap }` and
+   `pre[class*=language-] { white-space: pre-wrap !important }`, so this needs
+   !important too. `.listingblock.wrap` (the explicit opt-in role) keeps
+   wrapping. The copy button reads the code text, not the visible box, and the
+   fold clips .content, so both keep working with horizontal scroll. */
+.solution .doc .listingblock:not(.wrap) pre,
+.solution-step .doc .listingblock:not(.wrap) pre,
+.solution .doc .listingblock:not(.wrap) pre > code,
+.solution-step .doc .listingblock:not(.wrap) pre > code,
+.solution .doc .literalblock pre,
+.solution-step .doc .literalblock pre {
+  white-space: pre !important;
+}
+
+.solution .doc .listingblock:not(.wrap) pre,
+.solution-step .doc .listingblock:not(.wrap) pre,
+.solution .doc .literalblock pre,
+.solution-step .doc .literalblock pre {
+  overflow-x: auto;
+}
+
+.sol-hero {
+  padding: 0.5rem 0 1.25rem;
+  border-bottom: 1px solid var(--grey-100-new);
+  margin-bottom: 1.25rem;
+}
+
+.sol-hero .sol-title,
+.sol-step-header .sol-title {
+  font-family: var(--font-display);
+  font-size: calc(36 / var(--rem-base) * 1rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 0.75rem;
+}
+
+.sol-lede {
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  line-height: 1.55;
+  color: var(--grey-600-new);
+  max-width: 52rem;
+  margin: 0 0 1.25rem;
+}
+
+.sol-hero--home .sol-lede {
+  margin-bottom: 0.5rem;
+}
+
+.sol-banner {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md-new);
+  margin: 0 0 1.25rem;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+}
+
+.sol-banner--deprecated {
+  background: rgba(226, 67, 40, 0.08);
+  border: 1px solid rgba(226, 67, 40, 0.25);
+  color: var(--brand-800-new);
+}
+
+.sol-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sol-hero-progress {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+.sol-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg-new);
+  background: var(--component-bg-tint);
+}
+
+.sol-meta-item {
+  min-width: 0;
+}
+
+.sol-meta-item--wide {
+  flex: 1 1 100%;
+}
+
+.sol-meta dt {
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sol-meta);
+  margin: 0 0 0.25rem;
+}
+
+.sol-meta dd {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--grey-800-new);
+}
+
+.sol-version {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+}
+
+/* Shell: main > .content is the default-page flex row on desktop (main.css),
+   with article.doc first and the rail as the sidebar column, so the
+   on-this-page TOC script finds the article's headings. */
+.sol-rail {
+  min-width: 0;
+}
+
+/* Two columns only from 1281px: the standard TOC-width rail (280px) plus the
+   left sidebar must still leave the article at least ~640px, otherwise code
+   reads as broken. Below that the rail collapses into its <details> above
+   the article (28-solution-progress.js uses the same 1280px query). */
+@media screen and (min-width: 1281px) {
+  .sol-rail {
+    flex: 0 0 280px;
+    max-width: 280px;
+    order: 1;
+    /* --body-top--desktop is the navbar plus the announcement bar, which JS
+       sets while the bar is shown. With only the navbar height, the top of
+       the rail sat under the header whenever the bar was up. */
+    position: sticky;
+    top: calc(var(--body-top--desktop, var(--navbar-height, 4rem)) + 1rem + var(--sol-rail-shift, 0px));
+    align-self: flex-start;
+  }
+
+  /* No-JS fallback only. 31-solution-rail.js adds .is-tracked and moves the
+     rail with the page instead, because a sticky column with its own
+     scrollbar traps wheel and trackpad gestures (see that file). */
+  .sol-rail:not(.is-tracked) {
+    max-height: calc(100vh - var(--body-top--desktop, var(--navbar-height, 4rem)) - 2rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* No scroll containers inside the rail. The TOC menu and the
+     recommendations block scroll on their own elsewhere, but nested here a
+     wheel or trackpad gesture that starts over them latches onto them and
+     stops at their edge instead of moving the page. */
+  .sol-rail .toc.sidebar .toc-menu,
+  .sol-rail .sol-rail-recs {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .sol-rail-details > .sol-rail-summary {
+    display: none;
+  }
+
+  /* The action row under the article keeps Mark step complete, where a
+     reader who just finished the step is; only its Save repeats the rail
+     card's, so that one is hidden beside the rail. */
+  .sol-step-actions-main [data-sol-save] {
+    display: none;
+  }
+}
+
+/* The on-this-page TOC (toc.hbs) inside the rail: static, full width, and
+   visible on narrow screens too (main.css hides aside.toc.sidebar there). */
+.sol-rail .toc.sidebar {
+  display: block;
+  position: static;
+  top: auto;
+  flex: none;
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  max-height: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+/* The TOC script writes the toctitle into an h3, and solutions pages set
+   none: the empty heading left a 40px gap under the progress card. */
+.sol-rail .toc.sidebar > h3:empty {
+  display: none;
+}
+
+/* The page feedback script sets display inline on .thumbs, so this needs
+   !important; the same control is at the end of the article. */
+.sol-rail .toc.sidebar .thumbs,
+.sol-rail .toc.sidebar .feedback-success {
+  display: none !important;
+}
+
+.sol-rail-summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--grey-100-new);
+  border-radius: var(--radius-lg-new);
+  background: var(--sol-surface);
+  list-style: none;
+  /* A flex row so the position/count can sit right-aligned before the
+     chevron. Previously a block with a float-right chevron, which left no way
+     to push a second label to the right edge. */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sol-rail-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sol-rail-summary::after {
+  content: "";
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  /* Nudged down so the rotated square reads as a chevron on the text
+     baseline, not centred on its own box. */
+  margin-top: -0.2rem;
+  border-right: 2px solid var(--grey-500-new);
+  border-bottom: 2px solid var(--grey-500-new);
+  transform: rotate(45deg);
+}
+
+.sol-rail-details[open] > .sol-rail-summary::after {
+  transform: rotate(-135deg);
+  margin-top: 0.2rem;
+}
+
+/* ---- steps (overview) ----------------------------------------------------- */
+
+/* .doc .sol-steps and .doc .sol-related: both are div.sect1 now (so On this
+   page lists them), and doc.css's `.doc .sect1` margin would otherwise win. */
+.doc .sol-steps {
+  margin: 2.5rem 0;
+}
+
+.sol-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sol-step-link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--grey-100-new);
+  border-radius: var(--radius-lg-new);
+  background: var(--sol-surface);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sol-step-link:hover {
+  border-color: var(--component-200);
+  box-shadow: var(--shadow-sm-new);
+  text-decoration: none;
+}
+
+.sol-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full-new);
+  background: var(--component-bg-tint);
+  color: var(--component-700);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 700;
+}
+
+.sol-step-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  min-width: 0;
+}
+
+.sol-step-title {
+  font-weight: 600;
+  color: var(--grey-900-new);
+}
+
+.sol-step-time {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+.sol-step-check,
+.sol-nav-step-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full-new);
+  border: 1.5px solid var(--grey-200-new);
+  color: transparent;
+  flex: none;
+}
+
+.is-complete > .sol-step-link .sol-step-check,
+.is-complete .sol-nav-step-check {
+  background: var(--component-600);
+  border-color: var(--component-600);
+  color: var(--grey-50-new);
+}
+
+/* The step the reader last opened: a light outline and a "Last opened" label.
+   It marks where they left off, so it must not look like a selection (a
+   filled number did, on an overview where nothing is selected). */
+.is-current > .sol-step-link {
+  border-color: var(--component-200);
+}
+
+.sol-step-resume {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--component-700);
+}
+
+/* ---- progress panel ------------------------------------------------------- */
+
+/* Position and completion in the collapsed rail summary. Below 1281px the
+   details is closed by script, so this is the only place either shows without
+   the reader opening a disclosure first. */
+.sol-rail-summary-meta {
+  margin-left: auto;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 400;
+  color: var(--grey-600-new);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The footer's copy of the progress bar and counter, shown only where the
+   rail collapses; above that the rail's own card already has both. */
+.sol-step-actions-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+@media screen and (min-width: 1281px) {
+  .sol-step-actions-progress {
+    display: none;
+  }
+}
+
+.sol-step-actions-count {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--grey-600-new);
+  font-variant-numeric: tabular-nums;
+}
+
+.sol-progress-count {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--grey-700-new);
+  white-space: nowrap;
+}
+
+.sol-progress-state {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+  margin: 0.5rem 0 0;
+}
+
+.sol-progress-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.sol-sync-state {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+.sol-sync-state.is-error {
+  color: var(--brand-700-new);
+}
+
+.sol-version-notice {
+  margin-top: 0.875rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-md-new);
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--grey-800-new);
+}
+
+.sol-version-notice p {
+  margin: 0 0 0.375rem;
+}
+
+.sol-done {
+  margin-top: 0.875rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md-new);
+  background: var(--component-50);
+  border: 1px solid var(--component-200);
+}
+
+.sol-done-title {
+  font-weight: 700;
+  color: var(--component-700);
+  margin: 0 0 0.25rem;
+}
+
+.sol-done-sub {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--grey-600-new);
+  margin: 0 0 0.625rem;
+}
+
+/* The done block repeated in the step action row, for narrow screens where
+   the rail (and its done card) is collapsed. 28-solution-progress.js shows it
+   only at or below 1280px; the media query keeps it out of the desktop
+   layout even if the script's check and the CSS disagree. */
+.sol-step-actions .sol-done--inline {
+  margin-top: 0;
+}
+
+@media screen and (min-width: 1281px) {
+  .sol-step-actions .sol-done--inline {
+    display: none;
+  }
+}
+
+/* "Start again" confirm, inserted next to the hero button. */
+.sol-reset-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  flex-basis: 100%;
+  margin-top: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--grey-200-new);
+  border-radius: var(--radius-md-new);
+  background: var(--sol-surface);
+}
+
+.sol-reset-confirm-text {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--grey-800-new);
+}
+
+/* Drafts: "Download available at release", inert (no href). grey-600 on
+   grey-50 is 5.68:1; grey-300 on the dark card 5.74:1. */
+.sol-btn[data-sol-download][aria-disabled="true"],
+.sol-btn[data-sol-download].is-disabled,
+.sol-btn[data-sol-download][aria-disabled="true"]:hover,
+.sol-btn[data-sol-download].is-disabled:hover {
+  background: var(--grey-50-new);
+  border-color: var(--grey-200-new);
+  color: var(--grey-600-new);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ---- download + files ----------------------------------------------------- */
+
+/* Get the code and the file list are sections of the progress card
+   (solution-progress.hbs), divided from the progress block by a rule rather
+   than drawn as a second panel under the TOC. */
+.sol-card-section {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+/* Get the code opens the card, so it has no rule above it; the rule moves
+   to the progress head that follows it. With download 'none' the partial
+   renders nothing and the head is first, with no rule, as before. */
+.sol-progress > .sol-download:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.sol-progress > .sol-download:first-child + .sol-panel-head {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+.sol-card-label {
+  font-family: var(--font-display);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sol-meta);
+  margin: 0 0 0.5rem;
+}
+
+.sol-download .sol-btn {
+  width: 100%;
+}
+
+.sol-download-asset {
+  margin: 0.375rem 0 0;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+  overflow-wrap: anywhere;
+}
+
+/* One line: the lock, why, and the Sign in link. */
+.sol-gate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.375rem;
+  margin-top: 0.5rem;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  line-height: 1.45;
+  color: var(--grey-600-new);
+}
+
+.sol-gate-icon {
+  color: var(--grey-500-new);
+  flex: none;
+  align-self: center;
+}
+
+.sol-gate-text {
+  flex: 1 1 10rem;
+}
+
+.sol-files {
+  margin-top: 0.625rem;
+}
+
+.sol-files-label {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--grey-700-new);
+}
+
+.sol-files .sol-panel-text {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  margin: 0 0 0.375rem;
+}
+
+/* All build-along files: collapsed on every page (solution-code-download.hbs).
+   The label is the summary. */
+.sol-files-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.sol-files-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sol-files-summary .sol-files-label {
+  margin: 0;
+}
+
+.sol-files-summary::after {
+  content: "";
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  color: var(--sol-meta);
+  transition: transform 0.15s ease;
+}
+
+.sol-files-details[open] > .sol-files-summary::after {
+  transform: rotate(-135deg);
+}
+
+.sol-files-details[open] > .sol-files-summary {
+  margin-bottom: 0.5rem;
+}
+
+.sol-file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sol-file-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--grey-700-new);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.sol-file-link:hover {
+  color: var(--component-700);
+}
+
+.sol-file-link svg {
+  color: var(--grey-400-new);
+  flex: none;
+}
+
+/* A draft has no release: the entry names the file but downloads nothing. */
+.sol-file-link.is-disabled,
+.sol-file-link.is-disabled:hover {
+  color: var(--grey-500-new);
+  cursor: default;
+}
+
+/* ---- step page ------------------------------------------------------------ */
+
+.sol-step-header {
+  padding: 0.5rem 0 1rem;
+  border-bottom: 1px solid var(--grey-100-new);
+  margin-bottom: 1.5rem;
+}
+
+.sol-step-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sol-fact--status {
+  color: var(--component-700);
+  font-weight: 600;
+}
+
+.sol-step-actions {
+  margin: 2.5rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--grey-100-new);
+  display: grid;
+  gap: 1rem;
+}
+
+.sol-step-actions-main,
+.sol-step-actions-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sol-step-actions-nav {
+  justify-content: space-between;
+}
+
+.sol-step-nav {
+  text-align: left;
+}
+
+.sol-step-nav-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sol-step-nav-kicker {
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sol-meta);
+}
+
+.sol-step-nav--next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.sol-step-nav--next .sol-step-nav-text {
+  align-items: flex-end;
+}
+
+/* On a filled button (Next is always one) the grey kicker measured 1.23:1
+   against the orange. It takes the button's own text color, 4.6:1, and keeps
+   its size and caps to read as the label. */
+.sol-btn--primary .sol-step-nav-kicker,
+.sol-step-nav--next .sol-step-nav-kicker {
+  color: inherit;
+}
+
+/* Authoring roles */
+.sol-doc .solution-verify,
+.sol-doc .production-note {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+  border-radius: var(--radius-lg-new);
+  border: 1px solid var(--grey-100-new);
+  border-left: 4px solid var(--component-500);
+  background: var(--component-bg-tint);
+}
+
+/* The label. Content marks a Verify block as a titled listing
+   (.Expected output + [.solution-verify] + [source,text]) and a production
+   note as a titled open block ([.production-note] + .In production + --),
+   so the title is always a direct child: div.title under the block. */
+.sol-doc .solution-verify > .title,
+.sol-doc .production-note > .title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--component-700);
+  margin-bottom: 0.5rem;
+}
+
+.sol-doc .solution-verify > .title::before,
+.sol-doc .production-note > .title::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full-new);
+  background: var(--component-500);
+}
+
+.sol-doc .production-note {
+  border-left-color: var(--grey-500-new);
+  background: var(--grey-50-new);
+}
+
+.sol-doc .production-note > .title {
+  color: var(--grey-700-new);
+}
+
+.sol-doc .production-note > .title::before {
+  background: var(--grey-500-new);
+}
+
+/* A Verify listing is already framed by the role above; the listing's own
+   code frame inside it made a box in a box. position stays relative for the
+   copy toolbox. */
+.sol-doc .listingblock.solution-verify > .content,
+html[data-theme="dark"] .sol-doc .listingblock.solution-verify > .content {
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.sol-doc .listingblock.solution-verify > .content > pre {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sol-doc .solution-verify > :last-child,
+.sol-doc .production-note > :last-child,
+.sol-doc .solution-verify > .content > :last-child,
+.sol-doc .production-note > .content > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---- code blocks (30-solution-code-fold.js) --------------------------------- */
+
+/* The listing frame's own colors (doc.css .listingblock > .content), so the
+   fold fade ends in the code background and the header bar, fold button and
+   collapsible summaries share its border in both themes. */
+.sol-doc {
+  --sol-code-bg: var(--grey-50-new, #f9fafb);
+  --sol-code-border: var(--grey-200-new, #e5e7eb);
+}
+
+html[data-theme="dark"] .sol-doc {
+  --sol-code-bg: #0f1727;
+  --sol-code-border: #1c2638;
+}
+
+/* File header bar from a listing title (`.services/leaderboard/main.go`).
+   The block's toolbox (copy / Ask AI) is moved into it by the script. */
+.sol-doc .listingblock.sol-code-titled > .title.sol-code-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.45rem 0.875rem;
+  font-family: var(--body-font-family-mono, monospace);
+  font-size: calc(12.5 / var(--rem-base) * 1rem);
+  font-style: normal;
+  font-weight: 500;
+  color: var(--component-700);
+  background: var(--component-bg-tint);
+  border: 1px solid var(--sol-code-border);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+
+.sol-doc .listingblock.sol-code-titled > .title.sol-code-title code {
+  font: inherit;
+  color: inherit;
+  background: none;
+  padding: 0;
+  border: 0;
+}
+
+.sol-doc .listingblock.sol-code-titled > .content {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.sol-doc .sol-code-title .source-toolbox {
+  position: static;
+  visibility: visible;
+  margin-left: auto;
+}
+
+/* Folded listing: clipped, faded at the bottom, with a toggle underneath. */
+.sol-doc .listingblock.sol-code-fold > .content {
+  position: relative;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.sol-doc .listingblock.sol-code-fold.is-folded > .content::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4.5rem;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--sol-code-bg));
+}
+
+.sol-doc .sol-code-fold-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.5rem 0.875rem;
+  font-family: inherit;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--component-700);
+  background: var(--sol-surface);
+  border: 1px solid var(--sol-code-border);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  cursor: pointer;
+}
+
+.sol-doc .sol-code-fold-btn::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+.sol-doc .listingblock.sol-code-fold:not(.is-folded) .sol-code-fold-btn::before {
+  transform: rotate(-135deg) translateY(-2px);
+}
+
+.sol-doc .sol-code-fold-btn:hover {
+  background: var(--component-bg-tint);
+}
+
+.sol-doc .sol-code-fold-btn:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: -2px;
+}
+
+/* [%collapsible] blocks on solution pages (Asciidoctor emits
+   <details><summary class="title">, no extra class), styled like the file
+   header. .sol-details is added by the script; the summary selector covers
+   the no-JS render too.
+
+   The generic .doc details rule wraps every details in a grey padded panel
+   and zeroes the summary padding, which is right for a plain "Expected
+   output:" accordion but wrong here: the bordered summary ended up as a
+   22px pill with its text against the border, floating inside a second
+   box. The details itself is the box on solution pages, and the summary
+   gets the same padding as the file header so the two read as one family. */
+.sol-doc details.sol-details,
+.sol-doc details.collapsible {
+  margin: 1rem 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 10px;
+}
+
+.sol-doc details > summary.title,
+.sol-doc details.sol-details > summary,
+.sol-doc details.collapsible > summary {
+  gap: 0.75rem;
+  padding: 0.45rem 2.25rem 0.45rem 0.875rem;
+  font-family: var(--body-font-family-mono, monospace);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--component-700);
+  background: var(--component-bg-tint);
+  border: 1px solid var(--sol-code-border);
+  border-radius: 10px;
+}
+
+/* The chevron is absolutely positioned at right: 0 by doc.css, which put it
+   on top of the border. Bring it inside the padding. */
+.sol-doc details > summary.title::after,
+.sol-doc details.sol-details > summary::after,
+.sol-doc details.collapsible > summary::after {
+  right: 0.875rem;
+}
+
+.sol-doc details[open] > summary.title,
+.sol-doc details.sol-details[open] > summary,
+.sol-doc details.collapsible[open] > summary {
+  padding-bottom: 0.45rem;
+  border-radius: 10px 10px 0 0;
+  border-bottom: 0;
+}
+
+/* The body sits flush under the header: the summary has no bottom border
+   when open, so the first code block's top corners square off to meet it. */
+.sol-doc details.sol-details > .content,
+.sol-doc details.collapsible > .content {
+  margin: 0;
+}
+
+.sol-doc details.sol-details[open] > .content > .listingblock:first-child > .content,
+.sol-doc details.sol-details[open] > .content > .listingblock:first-child pre,
+.sol-doc details.collapsible[open] > .content > .listingblock:first-child > .content,
+.sol-doc details.collapsible[open] > .content > .listingblock:first-child pre {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.sol-doc .sol-details-lines {
+  margin-left: auto;
+  font-family: var(--body-font-family-mono, monospace);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-weight: 400;
+  color: var(--sol-meta);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sol-doc .listingblock.sol-code-fold > .content,
+  .sol-doc .sol-code-fold-btn::before {
+    transition: none;
+  }
+}
+
+html[data-theme="dark"] .sol-doc .listingblock.sol-code-titled > .title.sol-code-title,
+html[data-theme="dark"] .sol-doc details > summary.title,
+html[data-theme="dark"] .sol-doc details.sol-details > summary {
+  color: var(--component-200);
+  background: var(--component-bg-tint-hover);
+  border-color: var(--sol-code-border);
+}
+
+html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
+  color: var(--component-200);
+  background: var(--sol-code-bg);
+  border-color: var(--sol-code-border);
+}
+
+/* == Files for this step: a bullet whose path is in the download allowlist is
+   wrapped by 28-solution-progress.js in the same gated download link as the
+   rail's All build-along files entry, with the same tray icon after the name.
+   The path keeps its inline-code look; hover underlines it like a link. */
+.doc .sol-step-file-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.doc .sol-step-file-link:hover code {
+  color: var(--component-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.doc .sol-step-file-icon {
+  display: inline-block;
+  margin-left: 0.35em;
+  color: var(--sol-meta);
+  vertical-align: -0.1em;
+}
+
+.doc .sol-step-file-icon svg {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+}
+
+.doc .sol-step-file-link:hover .sol-step-file-icon {
+  color: var(--component-700);
+}
+
+.doc .sol-step-file-link.is-disabled {
+  cursor: default;
+}
+
+.doc .sol-step-file-link.is-disabled:hover code {
+  color: inherit;
+  text-decoration: none;
+}
+
+.doc .sol-step-file-link.is-disabled .sol-step-file-icon {
+  opacity: 0.5;
+}
+
+/* ---- related --------------------------------------------------------------- */
+
+.doc .sol-related {
+  margin: 2.5rem 0;
+}
+
+.sol-related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.375rem;
+}
+
+.sol-related-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--grey-800-new);
+  text-decoration: none;
+  padding: 0.25rem 0;
+}
+
+.sol-related-link svg {
+  color: var(--component-600);
+  flex: none;
+}
+
+.sol-related-link:hover {
+  color: var(--component-700);
+  text-decoration: underline;
+}
+
+/* ---- recommendations on Product Docs -------------------------------------- */
+
+.sol-recs {
+  margin: 3rem 0 1rem;
+  padding: 1.5rem;
+  border-radius: var(--radius-xl-new);
+  border: 1px solid var(--grey-100-new);
+  background: var(--component-bg-tint);
+}
+
+.sol-recs-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.sol-recs-title {
+  font-family: var(--font-display);
+  font-size: calc(20 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sol-recs-sub {
+  flex: 1 1 100%;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--grey-600-new);
+  margin: 0;
+}
+
+.sol-recs-grid,
+.sol-continue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.sol-rec-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg-new);
+  border: 1px solid var(--grey-100-new);
+  background: var(--sol-surface);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.sol-rec-card:hover {
+  border-color: var(--component-200);
+  box-shadow: var(--shadow-md-new);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.sol-rec-eyebrow,
+.sol-card-eyebrow {
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--component-600);
+}
+
+.sol-rec-title {
+  font-family: var(--font-display);
+  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--grey-900-new);
+  line-height: 1.35;
+}
+
+.sol-rec-desc {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--grey-600-new);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sol-recs-foot {
+  margin: 0.75rem 0 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+}
+
+.doc .sol-recs-all,
+.sol-recs-all {
+  font-weight: 600;
+  color: var(--component-700);
+}
+
+.doc .sol-recs-all:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html[data-theme="dark"] .sol-recs-all {
+  color: var(--component-200);
+}
+
+.sol-rec-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.sol-rec-why {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+  font-style: italic;
+  border-top: 1px dashed var(--grey-200-new);
+  padding-top: 0.375rem;
+}
+
+.sol-recs--home {
+  margin-top: 0;
+}
+
+/* ---- recommendations in the right rail (under On this page) ---------------- */
+
+/* The block lives in aside.toc.sidebar, a flex column with overflow:hidden and
+   a scrolling .toc-menu, so it must not grow: capped height with its own
+   scrollbar in case a page ever gets three long titles. */
+.toc.sidebar .sol-rail-recs {
+  flex: 0 0 auto;
+  max-height: 12rem;
+  overflow-y: auto;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--toc-border-color, var(--grey-100-new));
+  scrollbar-width: thin;
+}
+
+/* Matches the "On this page" heading, minus its fixed 2.5rem header height. */
+.toc.sidebar .sol-rail-recs-title,
+.toc.embedded .sol-rail-recs-title {
+  display: block;
+  height: auto;
+  margin: 0 0 0.5rem;
+  color: var(--toc-heading-font-color);
+  font-family: var(--body-font-family-bold);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.sol-rail-recs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sol-rail-recs-list > li + li {
+  margin-top: 0.5rem;
+}
+
+.sol-rail-rec {
+  display: block;
+  padding: 0.25rem 0 0.25rem 0.75rem;
+  border-left: 2px solid var(--component-200);
+  color: var(--toc-font-color);
+  text-decoration: none;
+}
+
+.sol-rail-rec:hover {
+  border-left-color: var(--component-600);
+}
+
+.sol-rail-rec-title {
+  display: block;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  line-height: 1.35;
+}
+
+.sol-rail-rec:hover .sol-rail-rec-title {
+  color: var(--component-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sol-rail-rec-meta {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+/* Relocated into the embedded on-this-page region (inside .doc) on narrow
+   screens by 28-solution-progress.js: .doc's link rules apply there. */
+.toc.embedded .sol-rail-recs {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0.4rem 0;
+  border-top: 1px solid var(--toc-border-color, var(--grey-100-new));
+}
+
+.doc .toc.embedded .sol-rail-rec,
+.doc .toc.embedded .sol-rail-rec:hover {
+  text-decoration: none;
+  color: var(--toc-font-color);
+}
+
+.doc .toc.embedded .sol-rail-rec:hover .sol-rail-rec-title {
+  color: var(--component-700);
+  text-decoration: underline;
+}
+
+html[data-theme="dark"] .sol-rail-rec {
+  border-left-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-rail-rec:hover {
+  border-left-color: var(--component-500);
+}
+
+html[data-theme="dark"] .sol-rail-rec:hover .sol-rail-rec-title,
+html[data-theme="dark"] .doc .toc.embedded .sol-rail-rec:hover .sol-rail-rec-title {
+  color: var(--component-200);
+}
+
+/* ---- landing page ---------------------------------------------------------- */
+
+/* A catalogue page, not an article: the grid takes the whole main column
+   (the filters are in the sidebar), so .content drops the 1280px reading
+   width and most of its padding, and the grid below fits 3 or 4 cards
+   across at 1512px. */
+@media screen and (min-width: 1024px) {
+  main.solutions-home > .content {
+    max-width: none;
+    padding: 24px 32px 80px;
+    justify-content: flex-start;
+  }
+
+  main.solutions-home .doc.sol-home {
+    max-width: none;
+    margin-left: 0;
+  }
+}
+
+.sol-home-layout {
+  margin-top: 1.5rem;
+}
+
+/* The filters in the landing page's sidebar (nav-tree-solution.hbs), under
+   "Solutions home": always open, no summary, the groups stacked the way the
+   Labs home stacked its filters. */
+.sol-nav-filters {
+  margin: 0.75rem 12px 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+.sol-nav-filters .sol-filters-summary {
+  display: none;
+}
+
+.sol-filters-noscript {
+  margin: 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+/* Below 1024px the sidebar is a drawer, so the filters move here, above
+   Continue learning and the grid, as a collapsed <details>
+   (solutions-home.hbs, 29-solutions-home.js). The next section's top margin
+   spaces it from what follows. */
+.sol-filters-slot:empty {
+  display: none;
+}
+
+.sol-filters-slot {
+  margin-top: 1.5rem;
+}
+
+/* In the slot the filters sit inside article.doc, whose accordion styling
+   for <details> (grey panel, padding, chevron at the far right) would frame
+   the summary button a second time. */
+.doc .sol-filters {
+  margin: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.doc .sol-filters > .sol-filters-summary::after {
+  content: none;
+}
+
+.sol-filters-slot .sol-filters-summary {
+  display: flex;
+  align-items: center;
+}
+
+.sol-filters-slot .sol-filters-body {
+  margin-top: 0.75rem;
+}
+
+.sol-filters-summary {
+  display: none;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--grey-100-new);
+  border-radius: var(--radius-lg-new);
+  background: var(--sol-surface);
+  list-style: none;
+}
+
+.sol-filters-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sol-filters-active {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.5rem;
+  padding: 0 0.375rem;
+  border-radius: var(--radius-full-new);
+  background: var(--component-600);
+  color: var(--grey-50-new);
+  font-size: calc(11 / var(--rem-base) * 1rem);
+}
+
+.sol-filters-active[hidden],
+.sol-card-progress[hidden],
+.sol-card-progress .sol-bar[hidden] {
+  display: none;
+}
+
+.sol-filters-body {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* First stop in the form: jumps past every filter to the results. Hidden
+   until it has keyboard focus. */
+.sol-skip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.sol-skip:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  justify-self: start;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md-new);
+  background: var(--component-600);
+  color: var(--grey-50-new);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  text-decoration: none;
+}
+
+#sol-results:focus {
+  outline: none;
+}
+
+.sol-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--grey-200-new);
+  border-radius: var(--radius-md-new);
+  background: var(--sol-surface);
+  color: var(--grey-500-new);
+}
+
+.sol-search:focus-within {
+  border-color: var(--component-500);
+  box-shadow: 0 0 0 3px var(--component-bg-tint-active);
+}
+
+.sol-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0.625rem 0;
+  font: inherit;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--grey-900-new);
+  outline: none;
+}
+
+.sol-filter-group {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.sol-filter-title {
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sol-meta);
+  padding: 0;
+  margin-bottom: 0.5rem;
+}
+
+.sol-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--grey-700-new);
+  cursor: pointer;
+}
+
+.sol-filter-row input {
+  margin: 0;
+  accent-color: var(--component-600); /* stylelint-disable-line property-no-unknown */
+}
+
+.sol-filter-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.sol-filter-count {
+  margin-left: auto;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+/* An option that would leave no cards, given the search and the other
+   groups (29-solutions-home.js). Dimmed, not disabled: ticking it still
+   works and explains the empty state. Both colors keep AA on the page
+   background: grey-600 on white 6.19:1, grey-400 on the dark page 5.70:1. */
+.sol-filter-row.is-empty {
+  color: var(--grey-600-new);
+}
+
+html[data-theme="dark"] .sol-filter-row.is-empty {
+  color: var(--grey-400-new);
+}
+
+.sol-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.sol-results-count {
+  margin: 0;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+.sol-results-note {
+  margin: 0 0 0.75rem;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--grey-700-new);
+}
+
+.sol-results-note[hidden] {
+  display: none;
+}
+
+html[data-theme="dark"] .sol-results-note {
+  color: var(--grey-300-new);
+}
+
+.sol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.sol-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-xl-new);
+  border: 1px solid var(--grey-100-new);
+  background: var(--sol-surface);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm-new);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.sol-card:hover {
+  border-color: var(--component-200);
+  box-shadow: var(--shadow-lg-new);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.sol-card.is-featured {
+  border-color: var(--component-200);
+  background: linear-gradient(180deg, var(--component-bg-tint), var(--sol-surface) 40%);
+}
+
+/* A deprecated card recedes through a flat grey surface, not opacity:
+   opacity 0.75 also faded every chip and line of text in the card, taking
+   the Deprecated chip to about 3.3:1. */
+.sol-card.is-deprecated {
+  background: var(--grey-50-new);
+  box-shadow: none;
+}
+
+.sol-card[hidden] {
+  display: none;
+}
+
+.sol-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* .doc .sol-card-title: doc.css's `.doc h3` top margin would otherwise
+   push every title down, and a card with no eyebrow row would open on an
+   empty band. */
+.doc .sol-card-title,
+.sol-card-title {
+  font-family: var(--font-display);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--grey-900-new);
+}
+
+.sol-card-desc {
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--grey-600-new);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sol-card-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.sol-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sol-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.sol-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.sol-card-progress .sol-bar {
+  flex: 1;
+}
+
+.sol-card-progress-text {
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+  white-space: nowrap;
+}
+
+.sol-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  border: 1px dashed var(--grey-200-new);
+  border-radius: var(--radius-xl-new);
+  color: var(--grey-600-new);
+}
+
+.sol-empty svg {
+  color: var(--grey-400-new);
+}
+
+.sol-empty h2,
+.sol-empty h3 {
+  font-family: var(--font-display);
+  font-size: calc(18 / var(--rem-base) * 1rem);
+  margin: 0.5rem 0 0.25rem;
+  color: var(--grey-800-new);
+}
+
+.sol-empty p {
+  margin: 0 0 1rem;
+}
+
+.sol-continue {
+  margin: 1.5rem 0 0;
+  padding: 1.25rem;
+  border-radius: var(--radius-xl-new);
+  border: 1px solid var(--component-200);
+  background: var(--component-bg-tint);
+}
+
+.sol-continue .sol-rec-card {
+  gap: 0.5rem;
+}
+
+/* doc.css's `.doc h2` top margin and `.doc h2:not(.discrete)` padding and
+   negative side margins (0,2,1) otherwise beat .sol-section-title, which
+   left a tall empty band above the heading and pulled it toward the panel
+   edge. The panel's own padding is the only space around it. */
+.doc .sol-continue .sol-section-title {
+  font-size: calc(22 / var(--rem-base) * 1rem);
+  margin: 0;
+  padding: 0;
+}
+
+/* ---- home page intent card ------------------------------------------------- */
+
+/* Third card under the two intent cards (home.hbs): spans both columns as a
+   compact banner rather than a third tall column. --product-color is the
+   component's signature hue from component-metadata. */
+.home-intent-card--solutions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  min-height: 0;
+  padding: 1.25rem 1.5rem;
+  border-color: var(--product-color, var(--component-600));
+  background: linear-gradient(90deg, rgba(180, 83, 9, 0.06), transparent 60%);
+}
+
+.home-intent-card--solutions .home-intent-card-header-row {
+  flex: 1 1 24rem;
+  min-width: 0;
+}
+
+.home-intent-card-icon--solutions {
+  color: var(--product-color, var(--component-600));
+  border-color: var(--product-color, var(--component-600));
+}
+
+.home-intent-card--solutions .home-intent-card-links {
+  margin: 0;
+  flex: none;
+}
+
+.home-intent-card--solutions .home-intent-card-cta {
+  color: var(--product-color, var(--component-700));
+}
+
+@media (max-width: 768px) {
+  .home-intent-card--solutions {
+    padding: 1rem;
+  }
+}
+
+/* ---- toast ----------------------------------------------------------------- */
+
+.sol-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  max-width: 340px;
+  padding: 12px 14px;
+  border-radius: var(--radius-lg-new);
+  border-left: 3px solid var(--component-500);
+  background: var(--grey-900-new);
+  color: var(--grey-50-new);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  line-height: 1.45;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sol-toast.is-visible {
+  opacity: 1;
+}
+
+/* An error toast (a download that failed): the accent turns red. */
+.sol-toast.is-error {
+  border-left-color: var(--brand-600-new);
+}
+
+/* ---- sidebar nav ----------------------------------------------------------- */
+
+/* Heading groups with no toggle: always open (see nav-tree-solution.hbs). */
+.sol-nav .nav-item.sol-nav-group > .nav-list {
+  display: block;
+}
+
+/* The tick's text equivalent, read with the link name: "Register schemas
+   (completed)". Empty until the step is complete. */
+.sol-nav-step.is-complete .sol-nav-step-status:empty::after {
+  content: "(completed)";
+}
+
+.sol-nav-heading {
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sol-meta);
+}
+
+.sol-nav-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sol-nav-step .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sol-nav-step-num {
+  flex: none;
+  width: 1.25rem;
+  font-size: calc(11 / var(--rem-base) * 1rem);
+  font-weight: 700;
+  color: var(--sol-meta);
+}
+
+.sol-nav-step.is-complete .sol-nav-step-num {
+  color: var(--component-600);
+}
+
+/* The step you are on. Without this the marker is identical to a step you
+   have not reached, so the sidebar shows progress but not position. A current
+   step that is also complete keeps the filled tick below: that says more. */
+.sol-nav-step.is-current-page .sol-nav-step-num {
+  color: var(--component-600);
+  font-weight: 800;
+}
+
+.sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check {
+  border-color: var(--component-600);
+}
+
+/* A dot rather than a tick: the step is where you are, not finished. */
+.sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check::after {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--radius-full-new);
+  background: var(--component-600);
+}
+
+.sol-nav-step-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.sol-nav-step-check {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ---- search result meta ---------------------------------------------------- */
+
+.result-solution-meta {
+  text-transform: capitalize;
+}
+
+/* ---- dark mode ------------------------------------------------------------- */
+
+html[data-theme="dark"] .sol-panel,
+html[data-theme="dark"] .sol-btn,
+html[data-theme="dark"] .sol-step-link,
+html[data-theme="dark"] .sol-rec-card,
+html[data-theme="dark"] .sol-card,
+html[data-theme="dark"] .sol-search,
+html[data-theme="dark"] .sol-rail-summary,
+html[data-theme="dark"] .sol-filters-summary {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+  color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .sol-nav-filters {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .sol-card.is-deprecated {
+  background: var(--grey-900-new);
+}
+
+html[data-theme="dark"] .sol-card.is-featured {
+  background: linear-gradient(180deg, var(--component-bg-tint-hover), var(--grey-800-new) 40%);
+  border-color: var(--component-700);
+}
+
+html[data-theme="dark"] .sol-btn:hover {
+  background: var(--grey-700-new);
+  border-color: var(--grey-600-new);
+}
+
+/* Dark mode lightens --component-600 (and 500 further), which put grey-50
+   text at 3.54:1 (2.71:1 on hover) on the amber. --component-700 is the
+   unlightened metadata color in dark mode: 4.61:1 with grey-50 for #B45309,
+   and hover goes darker, not lighter (5.91:1). */
+html[data-theme="dark"] .sol-btn--primary {
+  background: var(--component-700);
+  border-color: var(--component-700);
+  color: var(--grey-50-new);
+}
+
+html[data-theme="dark"] .sol-btn--primary:hover {
+  background: color-mix(in sRGB, var(--component-700) 85%, black);
+  border-color: color-mix(in sRGB, var(--component-700) 85%, black);
+  color: var(--grey-50-new);
+}
+
+html[data-theme="dark"] .sol-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-btn--ghost:hover {
+  background: var(--component-bg-tint-hover);
+}
+
+html[data-theme="dark"] .sol-btn[aria-pressed="true"] {
+  background: var(--component-bg-tint-active);
+  border-color: var(--component-700);
+  color: var(--component-100);
+}
+
+html[data-theme="dark"] .sol-eyebrow,
+html[data-theme="dark"] .sol-eyebrow-link,
+html[data-theme="dark"] .sol-rec-eyebrow,
+html[data-theme="dark"] .sol-card-eyebrow,
+html[data-theme="dark"] .sol-link-btn,
+html[data-theme="dark"] .sol-done-title,
+html[data-theme="dark"] .sol-fact--status,
+html[data-theme="dark"] .sol-nav-step.is-complete .sol-nav-step-num,
+html[data-theme="dark"] .sol-nav-step.is-current-page .sol-nav-step-num,
+html[data-theme="dark"] .sol-related-link svg {
+  color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check {
+  border-color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-nav-step.is-current-page:not(.is-complete) .sol-nav-step-check::after {
+  background: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-title,
+html[data-theme="dark"] .sol-panel-title,
+html[data-theme="dark"] .sol-step-title,
+html[data-theme="dark"] .sol-rec-title,
+html[data-theme="dark"] .sol-card-title,
+html[data-theme="dark"] .sol-empty h2,
+html[data-theme="dark"] .sol-empty h3,
+html[data-theme="dark"] .sol-related-link,
+html[data-theme="dark"] .sol-meta dd,
+html[data-theme="dark"] .sol-search input,
+html[data-theme="dark"] .sol-version-notice {
+  color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .sol-lede,
+html[data-theme="dark"] .sol-panel-text,
+html[data-theme="dark"] .sol-rec-desc,
+html[data-theme="dark"] .sol-card-desc,
+html[data-theme="dark"] .sol-recs-sub,
+html[data-theme="dark"] .sol-done-sub,
+html[data-theme="dark"] .sol-rail-summary-meta,
+html[data-theme="dark"] .sol-step-actions-count,
+html[data-theme="dark"] .sol-progress-count,
+html[data-theme="dark"] .sol-filter-row,
+html[data-theme="dark"] .sol-file-link,
+html[data-theme="dark"] .sol-empty,
+html[data-theme="dark"] .sol-gate {
+  color: var(--grey-300-new);
+}
+
+html[data-theme="dark"] .sol-hero,
+html[data-theme="dark"] .sol-step-header,
+html[data-theme="dark"] .sol-step-actions {
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-meta,
+html[data-theme="dark"] .sol-recs,
+html[data-theme="dark"] .sol-continue,
+html[data-theme="dark"] .sol-doc .solution-verify {
+  background: var(--component-bg-tint-hover);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-doc .production-note,
+html[data-theme="dark"] .sol-gate {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-doc .solution-verify > .title {
+  color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-doc .production-note > .title {
+  color: var(--grey-300-new);
+}
+
+html[data-theme="dark"] .sol-doc .production-note > .title::before {
+  background: var(--grey-400-new);
+}
+
+html[data-theme="dark"] .sol-bar,
+html[data-theme="dark"] .sol-step-check,
+html[data-theme="dark"] .sol-nav-step-check,
+html[data-theme="dark"] .sol-empty {
+  border-color: var(--grey-600-new);
+}
+
+html[data-theme="dark"] .sol-bar {
+  background: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-step-resume {
+  color: var(--component-200);
+}
+
+html[data-theme="dark"] .is-current > .sol-step-link {
+  border-color: var(--grey-600-new);
+}
+
+html[data-theme="dark"] .sol-step-num {
+  background: var(--component-bg-tint-active);
+  color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-chip {
+  background: var(--grey-700-new);
+  border-color: var(--grey-600-new);
+  color: var(--grey-200-new);
+}
+
+html[data-theme="dark"] .sol-chip--tech {
+  background: var(--component-bg-tint-active);
+  border-color: transparent;
+  color: var(--component-200);
+}
+
+html[data-theme="dark"] .sol-done {
+  background: var(--component-bg-tint-active);
+  border-color: var(--component-700);
+}
+
+html[data-theme="dark"] .sol-version-notice {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.4);
+}
+
+html[data-theme="dark"] .sol-banner--deprecated {
+  background: rgba(226, 67, 40, 0.15);
+  border-color: rgba(226, 67, 40, 0.4);
+  color: var(--brand-400-new);
+}
+
+html[data-theme="dark"] .sol-chip--status.is-deprecated {
+  background: rgba(226, 67, 40, 0.15);
+  color: var(--brand-400-new);
+}
+
+html[data-theme="dark"] .sol-chip--status.is-draft {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fbbf24;
+}
+
+html[data-theme="dark"] .sol-reset-confirm {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-reset-confirm-text {
+  color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .sol-btn[data-sol-download][aria-disabled="true"],
+html[data-theme="dark"] .sol-btn[data-sol-download].is-disabled {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+  color: var(--grey-300-new);
+}
+
+html[data-theme="dark"] .sol-toast {
+  background: var(--grey-100-new);
+  color: var(--grey-900-new);
+}
+
+/* ---- responsive ------------------------------------------------------------ */
+
+/* The article's right margin only makes sense beside a rail-width gap:
+   between 1024px and 1280px main.css still lays .content out as a row. On a
+   phone it cost about 12% of the text width. */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  main > .content.sol-content > .doc {
+    margin-right: 48px;
+  }
+}
+
+@media (max-width: 1280px) {
+  /* Single column: the collapsed rail sits above the article. Specific enough
+     to override main.css's `main > .content` flex row between 1024 and 1280. */
+  main > .content.sol-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  main > .content.sol-content > .doc {
+    max-width: none;
+  }
+
+  .sol-rail {
+    order: -1;
+    position: static;
+    margin: 0 1rem 1rem;
+  }
+
+  /* On a step page the collapsed rail is a sticky bar above the article:
+     "Step n of M", the progress bar, and the way into the progress card, the
+     code and On this page. Collapsed it is one line, so the step's first
+     command stays above the fold; at the end of the article it was where no
+     reader looked. Open, the card and contents scroll inside it rather than
+     pushing the article away. */
+  main.solution-step .sol-rail {
+    order: -1;
+    position: sticky;
+    top: var(--body-top, var(--navbar-height));
+    z-index: 5;
+    margin: 0 0 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--body-background, #fff);
+    border-bottom: 1px solid var(--grey-100-new);
+  }
+
+  /* main.css makes .content a scroll container on small screens
+     (overflow: auto), which pins a sticky child to a box that never
+     scrolls. clip still clips but is not a scroll container. */
+  main.solution-step > .content.sol-content {
+    overflow: clip;
+  }
+
+  main.solution-step .sol-rail-details[open] > .sol-rail-body {
+    max-height: calc(100vh - var(--body-top, var(--navbar-height)) - 5rem);
+    overflow-y: auto;
+  }
+
+  main.solution-step .sol-rail-summary {
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .sol-rail-summary-bar {
+    flex: 1 1 auto;
+    min-width: 3rem;
+    max-width: 12rem;
+  }
+
+  /* The rail summary stays the flex row it is everywhere else: as a block,
+     its meta ran into the label ("Progress and filesStep 3 of 9") and the
+     ::after chevron, an inline box with no content, rendered at zero size. */
+  .sol-rail-details > .sol-rail-summary {
+    display: flex;
+  }
+
+  .sol-rail-body {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sol-hero .sol-title,
+  .sol-step-header .sol-title {
+    font-size: calc(28 / var(--rem-base) * 1rem);
+  }
+
+  .sol-lede {
+    font-size: calc(16 / var(--rem-base) * 1rem);
+  }
+
+  .sol-recs-grid,
+  .sol-continue-grid,
+  .sol-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sol-recs {
+    padding: 1rem;
+  }
+
+  .sol-step-actions-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sol-step-nav--next {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .sol-meta {
+    gap: 0.75rem 1.25rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .sol-hero-actions .sol-btn {
+    width: 100%;
+  }
+
+  .sol-step-link {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .sol-step-link .sol-step-check {
+    display: none;
+  }
+
+  .sol-toast {
+    left: 16px;
+    right: 16px;
+    max-width: none;
+  }
+}
+
+/* ---- reading fixes from the UX review -------------------------------------- */
+
+/* Shell commands wrap at spaces instead of hiding their tail behind a
+   scrollbar macOS does not draw: a command cut at "game.leaderbo" read as
+   broken. Never mid-token (the reason for the no-wrap rule above, which this
+   overrides for shell only): a token longer than the line still scrolls.
+   Copy still copies the command as written. Other languages keep their line
+   structure and scroll, with a fade on the edge that has more
+   (32-solution-page.js sets .has-overflow and .is-scrolled-end). */
+.solution .doc .listingblock:not(.wrap) pre > code:is([data-lang="bash"], [data-lang="console"], [data-lang="shell"], [data-lang="sh"]),
+.solution-step .doc .listingblock:not(.wrap) pre > code:is([data-lang="bash"], [data-lang="console"], [data-lang="shell"], [data-lang="sh"]) {
+  white-space: pre-wrap !important;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.sol-doc .listingblock.has-overflow > .content {
+  position: relative;
+}
+
+/* ::before, not ::after: the fold (.sol-code-fold.is-folded) draws its
+   bottom fade with .content::after and left: 0, and sharing the pseudo-element
+   put this fade on the LEFT edge, over the start of every line, and replaced
+   the fold's own fade. left: auto keeps it on the right. */
+.sol-doc .listingblock.has-overflow:not(.is-scrolled-end) > .content::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: 2.5rem;
+  pointer-events: none;
+  border-radius: 0 10px 10px 0;
+  background: linear-gradient(to right, transparent, var(--sol-code-bg, var(--grey-50-new)));
+}
+
+/* A captured output is something to compare against, not to run or ask
+   about: no language label, no Ask AI. Copy stays. */
+.sol-doc .listingblock.sol-expected .source-lang,
+.sol-doc .listingblock.sol-expected .ask-ai-button {
+  display: none;
+}
+
+/* Outcomes ("After completing this solution, you will be able to") are not a
+   to-do list: a check mark, not an empty box that looks clickable. */
+.doc.sol-doc ul.checklist i.fa-square-o::before {
+  content: "\2713";
+  color: var(--component-500);
+  font-weight: 700;
+}
+
+/* Figures open full size on click (07-expand-images.js); say so. */
+.sol-doc .imageblock img {
+  cursor: zoom-in;
+}
+
+/* Under == In production each note repeats the section's own heading as its
+   label. The label stays where a note stands alone. */
+.sol-doc .sect1:has(> h2#in-production) .production-note > .title {
+  display: none;
+}
+
+.sol-doc .production-note > .content > :first-child,
+.sol-doc .production-note > .content > .paragraph:first-child > p {
+  margin-top: 0;
+}
+
+/* Complete source bars: the file name is what a reader scans for. */
+.sol-doc details.sol-details > summary,
+.sol-doc details.collapsible > summary {
+  font-size: calc(14 / var(--rem-base) * 1rem);
+}
+
+/* The solution crumb gives way before the page's own crumb does. Both
+   shrink with an ellipsis, so the trail fits without collapsing the middle
+   into "…" and dropping the step. */
+.topbar-crumbs .breadcrumbs li:not(:first-child):not(:last-child):not(.bc-ellipsis-li):has(> .breadcrumb-solution) {
+  flex-shrink: 1;
+  min-width: 4rem;
+  overflow: hidden;
+}
+
+.topbar-crumbs .breadcrumbs .breadcrumb-solution {
+  display: block;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The filters toggle on narrow screens shows that it opens. */
+.doc .sol-filters-slot .sol-filters > .sol-filters-summary::after {
+  content: "";
+  margin-left: auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  color: var(--sol-meta);
+  transition: transform 0.15s ease;
+}
+
+.doc .sol-filters-slot .sol-filters[open] > .sol-filters-summary::after {
+  transform: rotate(-135deg);
+}
+
+@media (max-width: 1024px) {
+  /* A step page's header already links back to the solution and says
+     "Step n of M"; the article breadcrumb repeated it in three lines. */
+  main.solution-step .sol-step-doc > .breadcrumbs {
+    display: none;
+  }
+}
