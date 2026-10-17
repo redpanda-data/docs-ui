@@ -39,6 +39,11 @@
       Limited Availability
     </span>
     {{/if}}
+    {{!-- Version badge: the release that introduced the page's feature. Generated
+         Connect reference pages set :page-introduced-in: only on self-managed. --}}
+    {{#if page.attributes.introduced-in}}
+    <span class="status-badge status-badge--since" data-tippy-content="Introduced in version {{page.attributes.introduced-in}}.">Since {{page.attributes.introduced-in}}</span>
+    {{/if}}
     {{!-- ADP platform badges: only show when limited to one platform --}}
     {{#if page.attributes.adp}}
     {{#if page.attributes.byoc-only}}
