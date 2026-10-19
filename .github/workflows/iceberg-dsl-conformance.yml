@@ -15,6 +15,7 @@ on:
     paths:
       - 'src/js/27-iceberg-explorer.js'
       - 'tests/iceberg-dsl/**'
+      - 'tests/iceberg-explorer/**'
   workflow_dispatch:
     inputs:
       redpanda_ref:
@@ -41,6 +42,9 @@ jobs:
 
       - name: Run DSL conformance vectors
         run: npm run test:iceberg-dsl
+
+      - name: Check the engine-base guard
+        run: npm run test:iceberg-explorer
 
       - name: Cross-check vectors against upstream iceberg_mode_test.cc
         if: github.event_name != 'pull_request'

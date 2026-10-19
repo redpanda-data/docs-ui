@@ -109,9 +109,24 @@
     if (s) return s.src.replace(/\/js\/site\.js.*$/, '')
     return '/_'
   }
+  // data-engine-base comes from page source, and the engine is loaded as a
+  // script, so only a same-origin root-relative path is trusted. The macro
+  // that emits the attribute applies the same rule; this is the second check.
+  function isSafeEngineBase (base) {
+    if (typeof base !== 'string' || !base) return false
+    if (!/^\/(?![/\\])/.test(base)) return false
+    // eslint-disable-next-line no-control-regex
+    if (/[\\\s\x00-\x1f\x7f]/.test(base)) return false
+    if (/%(?:[01][0-9a-f]|7f|5c)/i.test(base)) return false
+    return true
+  }
   function engineCandidates (version, overrideBase) {
     var root = uiRoot()
     var list = []
+    if (overrideBase && !isSafeEngineBase(overrideBase)) {
+      if (window.console) console.warn('iceberg-explorer: ignoring data-engine-base that is not a root-relative path: ' + overrideBase)
+      overrideBase = ''
+    }
     if (overrideBase && version) {
       list.push({ dir: overrideBase, file: 'iceberg-engine-' + version + '.js' })
     }
@@ -584,6 +599,6 @@
   // Export the pure DSL logic for conformance testing under Node. No effect in
   // the browser (module is undefined there).
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { buildConfigString: buildConfigString, isSchemaMode: isSchemaMode, init: init, MOUNT_SELECTOR: MOUNT_SELECTOR }
+    module.exports = { buildConfigString: buildConfigString, isSchemaMode: isSchemaMode, init: init, MOUNT_SELECTOR: MOUNT_SELECTOR, isSafeEngineBase: isSafeEngineBase }
   }
 })()
