@@ -10,6 +10,14 @@
    <details> that collapse, and every grid drops to one column.
    ============================================================================= */
 
+/* [hidden] always wins on solution UI. Any class here that sets display
+   (flex, grid, inline-flex) otherwise beats the UA [hidden] rule, and the
+   scripts toggle visibility with the hidden attribute: the sign-in gate kept
+   showing to signed-in readers this way. One rule, so no new class repeats it. */
+[class*="sol-"][hidden] {
+  display: none !important;
+}
+
 /* ---- shared primitives ---------------------------------------------------- */
 
 /* doc.css underlines every `.doc a` (0,1,1) and recolors it. The Solutions
