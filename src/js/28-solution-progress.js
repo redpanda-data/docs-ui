@@ -1223,6 +1223,30 @@
   // make it inert rather than send the reader to an error.
   var DRAFT_DOWNLOAD_LABEL = 'Download available at release'
 
+  // Open Ask AI in quiz mode for this step. The drawer bundle may not be loaded
+  // yet, so the quiz is also left on window for it to read when it mounts. The
+  // nonce gives every click its own fresh quiz thread; dropping submitChatQuery
+  // makes openChatWithQuery wait for the quiz interface rather than send the
+  // first message to the one being replaced.
+  function startQuiz (el) {
+    var title = attr(el, 'data-quiz-title') || (steps().titles[stepId] || '')
+    var detail = {
+      title: title,
+      rule: attr(el, 'data-quiz-rule') || '',
+      url: window.location.pathname,
+      solution: solutionId,
+      step: stepId,
+      nonce: now(),
+    }
+    window.__docsChatQuiz = detail
+    try { delete window.submitChatQuery } catch (e) { window.submitChatQuery = undefined }
+    dispatch('docs-chat:quiz', detail)
+    track('solution_quiz_start', baseProps())
+    if (typeof window.openChatWithQuery === 'function') {
+      window.openChatWithQuery('Quiz me on this step' + (title ? ': ' + title : '') + '.', true)
+    }
+  }
+
   function disableDraftDownloads () {
     if (!isDraft) return
     // The asset name describes a file that does not exist yet.
@@ -1379,6 +1403,12 @@
     var narrow = isNarrow()
     $$('[data-sol-done]').forEach(function (el) {
       el.hidden = !finished || (el.hasAttribute('data-sol-done-inline') && !narrow)
+    })
+
+    // Quiz pilot: only for a signed-in reader, and only when the drawer has a
+    // quiz integration to run on.
+    $$('[data-sol-quiz]').forEach(function (el) {
+      el.hidden = !signedIn || !window.KAPA_QUIZ_INTEGRATION_ID
     })
 
     // Gate + download visibility.
@@ -1900,6 +1930,9 @@
     })
     $$('[data-sol-signin]').forEach(function (el) {
       el.addEventListener('click', function () { openSignin(attr(el, 'data-intent') || 'download') })
+    })
+    $$('[data-sol-quiz]').forEach(function (el) {
+      el.addEventListener('click', function () { startQuiz(el) })
     })
     $$('[data-sol-download]').forEach(function (el) {
       el.addEventListener('click', function (e) {

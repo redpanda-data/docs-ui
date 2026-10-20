@@ -181,6 +181,55 @@ function useKapaScopeIds () {
   return ids
 }
 
+// Quiz mode (pilot). A solution step's "Quiz me on this step" button sets
+// window.__docsChatQuiz and dispatches QUIZ_EVENT; the drawer then runs on its
+// own Kapa integration (KAPA_QUIZ_INTEGRATION_ID), so quiz chats stay out of the
+// Ask AI analytics the docs team reads for friction, with the instructions below
+// and the step as context. Closing the drawer returns it to normal Ask AI.
+export const QUIZ_EVENT = 'docs-chat:quiz'
+
+const QUIZ_INSTRUCTIONS = `
+
+## Quiz mode
+The reader is working through a Redpanda Solutions step and asked to be quizzed on it.
+- Ask three questions, ONE at a time, and wait for the reader's answer before the next.
+- Every question must be answerable from the step described below and the docs it links to.
+  Search the knowledge base for the step's page first, and base each question on what you find.
+- Prefer questions about why the step works (the rule it establishes, what breaks without it,
+  what a command's output shows) over recall of exact commands or flags.
+- Mix multiple choice (four options, labelled A to D) and short answers.
+- After each answer, say whether it is right, explain in one or two sentences, and cite the
+  page that supports it. If the reader is partly right, say which part.
+- If you cannot support a question or an answer from the sources, do not ask it.
+- After the third answer, give a one-line score and suggest what to reread for anything missed.
+- If the reader asks something unrelated, answer it briefly, then offer to continue the quiz.`
+
+function quizContext (quiz) {
+  const lines = ['\n\n## Step to quiz on']
+  if (quiz.title) lines.push(`- Step: ${quiz.title}`)
+  if (quiz.solution) lines.push(`- Solution: ${quiz.solution}`)
+  if (quiz.url) lines.push(`- Page: ${quiz.url}`)
+  if (quiz.rule) lines.push(`- The rule this step establishes: ${quiz.rule}`)
+  return lines.join('\n')
+}
+
+// The quiz the reader asked for, or null. Read once at mount too, because the
+// button can fire before this bundle has loaded (it loads when the drawer opens).
+function useQuiz () {
+  const [quiz, setQuiz] = useState(() => window.__docsChatQuiz || null)
+  useEffect(() => {
+    const onQuiz = (e) => setQuiz(e.detail || window.__docsChatQuiz || null)
+    const onClose = () => { window.__docsChatQuiz = null; setQuiz(null) }
+    window.addEventListener(QUIZ_EVENT, onQuiz)
+    window.addEventListener('docs-chat:close', onClose)
+    return () => {
+      window.removeEventListener(QUIZ_EVENT, onQuiz)
+      window.removeEventListener('docs-chat:close', onClose)
+    }
+  }, [])
+  return quiz
+}
+
 function currentPageContext () {
   try {
     const path = window.location.pathname
@@ -335,6 +384,7 @@ function App () {
   const scopeIds = useKapaScopeIds()
   const colorScheme = useSiteColorScheme()
   const { authenticated, user, loginUrl } = useSession()
+  const quiz = useQuiz()
 
   // Signed-in: full Agent SDK experience (tools, history, email attribution).
   // NOTE on identity: the `user={{ email }}` prop below is EMAIL ATTRIBUTION — it's
@@ -343,17 +393,24 @@ function App () {
   // external_owner_id (docs-site lib/kapa-owner.mjs) and never carries the email.
   // So the email is searchable while the history key stays opaque.
   if (authenticated === true) {
+    // Quiz mode needs its integration; without one the drawer stays normal Ask AI.
+    // The key remounts the provider for each quiz (the nonce changes on every
+    // click), so each one starts a fresh thread and registers submitChatQuery anew.
+    const quizOn = Boolean(quiz && window.KAPA_QUIZ_INTEGRATION_ID)
     return (
       <AgentProvider
+        key={quizOn ? `quiz:${quiz.nonce || ''}` : 'chat'}
         projectId={window.KAPA_PROJECT_ID}
-        integrationId={window.UI_INTEGRATION_ID}
+        integrationId={quizOn ? window.KAPA_QUIZ_INTEGRATION_ID : window.UI_INTEGRATION_ID}
         model="kapa-agent-1.0"
         getSessionToken={getSessionToken}
         tools={agentTools}
-        customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext()}
+        customInstructions={quizOn
+          ? CUSTOM_INSTRUCTIONS + QUIZ_INSTRUCTIONS + quizContext(quiz)
+          : CUSTOM_INSTRUCTIONS + currentPageContext()}
         user={user?.email ? { email: user.email } : undefined}
         {...sourceGroupProps('agent', scopeIds)}
-        enableHistory
+        enableHistory={!quizOn}
         onEvent={handleAgentEvent}
         theme={{ accentColor: '#444ce7', colorScheme }}
       >

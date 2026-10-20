@@ -202,7 +202,8 @@ function buildPage (o) {
       els.rowDone = el('div', { 'data-sol-done': '', 'data-sol-done-inline': '', hidden: '' }, [els.rowDownload])
       // continueRow: a step with a next step renders Complete and continue
       // (a link to the next step) and the Next link instead of the toggle.
-      const rowMain = [els.rowBar, els.rowDone, els.rowComplete]
+      els.rowQuiz = el('button', Object.assign({ 'data-sol-quiz': '', 'data-quiz-title': 'Create the topics', hidden: '' }, o.quizRule ? { 'data-quiz-rule': o.quizRule } : {}))
+      const rowMain = [els.rowBar, els.rowDone, els.rowComplete, els.rowQuiz]
       if (o.continueRow) {
         els.rowContinue = el('a', { 'data-sol-complete-continue': '', href: '/solutions/' + o.solutionId + '/next/' })
         els.rowNext = el('a', { 'data-sol-next': '', class: 'sol-btn sol-step-nav', href: '/solutions/' + o.solutionId + '/next/' })
@@ -299,7 +300,7 @@ function run (options) {
     o.sessionRaw || {}
   ), o.storageThrows)
 
-  const calls = { fetch: [], events: [], replaceState: [], assign: [], heap: [] }
+  const calls = { fetch: [], events: [], replaceState: [], assign: [], heap: [], chatQueries: [] }
   const clock = { now: o.now }
   class FakeDate extends Date {
     static now () { return clock.now }
@@ -352,6 +353,9 @@ function run (options) {
       matchMedia: () => ({ matches: !!o.mobile, addEventListener () {}, addListener () {} }),
       heap: o.heap === false ? undefined : { track: (name, props) => calls.heap.push(plain({ name, props })) },
       dataLayer: [],
+      KAPA_QUIZ_INTEGRATION_ID: o.quizIntegration === false ? undefined : 'quiz-integration',
+      submitChatQuery: () => {},
+      openChatWithQuery: (query, autoSubmit) => calls.chatQueries.push({ query, autoSubmit }),
     },
   }
   context.window.window = context.window
@@ -403,6 +407,9 @@ function run (options) {
     storedStore: () => (STORE_KEY in local.data ? JSON.parse(local.data[STORE_KEY]) : null),
     toasts: () => created.filter((c) => c.classes.has('sol-toast')),
     signinEvents: () => calls.events.filter((e) => e.type === 'docs-account:open-signin'),
+    quizEvents: () => calls.events.filter((e) => e.type === 'docs-chat:quiz').map((e) => plain(e.detail)),
+    chatQueries: () => plain(calls.chatQueries),
+    win: () => context.window,
     controls: () => els.body.querySelectorAll('[data-sol-file-download]'),
     fileLink: (file) => els.body.querySelector('[data-sol-file-link="' + file + '"]'),
     stepFileLink: (file) => (els.filesSection ? els.filesSection.querySelector('[data-sol-file-link="' + file + '"]') : null),
