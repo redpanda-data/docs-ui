@@ -25,7 +25,7 @@ function engine (helpers, partials) {
 
 // ---- "Build it in practice" subtitle ----------------------------------------
 
-const recsHbs = engine(['eq', 'lt', 'or', 'find-component', 'increment', 'parse-json', 'format-duration', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored'], ['solution-recommendations'])
+const recsHbs = engine(['eq', 'lt', 'or', 'find-component', 'increment', 'parse-json', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored'], ['solution-recommendations'])
 const renderRecs = recsHbs.compile('{{> solution-recommendations}}')
 const recsPage = (recs) => ({ page: { attributes: { 'related-solutions': JSON.stringify(recs) }, component: { name: 'streaming' }, url: '/streaming/current/x/' } })
 const rec = (id, provenance) => ({ id, title: id, url: '/solutions/' + id + '/', provenance })
@@ -53,7 +53,7 @@ test('only the cards that render decide the subtitle', () => {
 // ---- page options on solution pages ---------------------------------------
 
 const PARTIALS = ['solution-hero', 'solution-step-header', 'markdown-dropdown']
-const HELPERS = ['eq', 'or', 'concat', 'relativize', 'format-duration', 'format-release-date', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode']
+const HELPERS = ['eq', 'or', 'concat', 'relativize', 'format-release-date', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode']
 const surfaceHbs = engine(HELPERS, PARTIALS)
 const renderHero = surfaceHbs.compile('{{> solution-hero solution=solution}}')
 const renderStep = surfaceHbs.compile('{{> solution-step-header solution=solution}}')
@@ -246,7 +246,7 @@ test('Ask AI on a solutions page suggests solution questions, not the agent defa
 // ---- overview layout ----------------------------------------------------------------
 
 test('the overview puts Steps after the introduction and before the first section, as an On this page section', () => {
-  const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'format-duration', 'get-header-color', 'split-at-first-section', 'html-has-id'], ['solution-steps', 'solution-related-docs', 'solution-overview-next'])
+  const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'get-header-color', 'split-at-first-section', 'html-has-id'], ['solution-steps', 'solution-related-docs', 'solution-overview-next'])
   ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'solution-files', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
   const solution = {
     id: 'g',

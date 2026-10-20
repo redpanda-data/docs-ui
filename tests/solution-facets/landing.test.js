@@ -174,7 +174,7 @@ test('with no cards at all, the "no solutions match your filters" state stays hi
 
 function renderLanding (catalog) {
   const hbs = Handlebars.create()
-  ;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-duration', 'format-release-date', 'relativize', 'get-solutions-catalog', 'get-header-color', 'without'].forEach((name) => {
+  ;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-release-date', 'relativize', 'get-solutions-catalog', 'get-header-color', 'without'].forEach((name) => {
     hbs.registerHelper(name, helper(name))
   })
   // The page chrome is not under test.
@@ -358,7 +358,7 @@ test('each option speaks its live count as words, and "no matches" when it would
 
 test('the hero is the h1 and one lede from the page description, with no eyebrow', () => {
   const hbs = Handlebars.create()
-  ;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-duration', 'format-release-date', 'relativize', 'get-solutions-catalog', 'get-header-color', 'without', 'detag'].forEach((name) => {
+  ;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-release-date', 'relativize', 'get-solutions-catalog', 'get-header-color', 'without', 'detag'].forEach((name) => {
     hbs.registerHelper(name, helper(name))
   })
   ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'feedback-footer', 'tracking-pixel', 'footer', 'chat-panel', 'solutions-grid', 'solution-card'].forEach((name) => {

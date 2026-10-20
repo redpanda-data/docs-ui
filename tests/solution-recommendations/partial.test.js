@@ -14,7 +14,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const helper = (name) => require(path.join(ROOT, 'src/helpers', name + '.js'))
 
 const hbs = Handlebars.create()
-;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'encode-uri', 'find-component', 'platform-name', 'platform-list'].forEach((name) => {
+;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'increment', 'parse-json', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'encode-uri', 'find-component', 'platform-name', 'platform-list'].forEach((name) => {
   hbs.registerHelper(name, helper(name))
 })
 hbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))
@@ -46,7 +46,7 @@ test('page-exclude-related-solutions opts out, whether valueless or true', () =>
   assert.equal(render(page(Object.assign({ 'exclude-related-solutions': 'true' }, attrs))).trim(), '')
 })
 
-test('renders at most 3 cards with provenance, position, duration and a hidden reason', () => {
+test('renders at most 3 cards with provenance, position and a hidden reason', () => {
   const html = render(page({ 'related-solutions': JSON.stringify(RECS) }))
   assert.equal((html.match(/class="sol-rec-card"/g) || []).length, 3)
   assert.match(html, /<h2 id="build-it-in-practice"[^>]*>Build it in practice<\/h2>/)
@@ -57,7 +57,7 @@ test('renders at most 3 cards with provenance, position, duration and a hidden r
   assert.match(html, /data-position="3"/)
   assert.doesNotMatch(html, /data-position="4"/)
   assert.doesNotMatch(html, /Delta|Echo/)
-  assert.match(html, /1 hr 15 min/, 'duration formatted')
+  assert.doesNotMatch(html, /\d+ (min|hr)\b/, 'no duration')
   assert.match(html, /<span class="sol-rec-why" data-sol-rec-why hidden>Why this\? Linked from this page<\/span>/)
   assert.match(html, /data-component="streaming"/)
   assert.match(html, /href="\.\.\/\.\.\/\.\.\/\.\.\/solutions\/a\/"/, 'urls are relativized against the page (/streaming/current/develop/x/ is four levels deep)')
@@ -100,10 +100,8 @@ test('the rail partial renders up to 3 one-line entries with placement, provenan
   assert.doesNotMatch(html, /Delta|Echo/, 'capped at 3')
   assert.match(html, /data-provenance="explicit"[^>]*data-position="1"/)
   assert.match(html, /<span class="sol-rail-rec-title">Alpha<\/span>/)
-  assert.match(html, /<span class="sol-rail-rec-meta">30 min<\/span>/, 'the meta line is the duration alone')
+  assert.doesNotMatch(html, /sol-rail-rec-meta|\d+ min/, 'one line: no duration')
   assert.doesNotMatch(html, /sol-rail-rec-diff|sol-diff|beginner/, 'no difficulty')
-  assert.match(html, /30 min/)
-  assert.match(html, /1 hr 15 min/)
   assert.match(html, /<span class="sol-rec-why" data-sol-rec-why hidden>Why this\? Linked from this page<\/span>/)
   // Compact: no descriptions and no card markup.
   assert.doesNotMatch(html, /sol-rec-card|sol-rec-desc/)
@@ -176,7 +174,7 @@ const SOLUTION = {
 }
 function stepRenderer () {
   const stepHbs = Handlebars.create()
-  ;['eq', 'or', 'concat', 'format-duration', 'format-release-date', 'relativize', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode', 'platform-name', 'platform-list'].forEach((name) => {
+  ;['eq', 'or', 'concat', 'format-release-date', 'relativize', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode', 'platform-name', 'platform-list'].forEach((name) => {
     stepHbs.registerHelper(name, helper(name))
   })
   stepHbs.registerPartial('solution-step-header', read('src/partials/solution-step-header.hbs'))
@@ -190,10 +188,11 @@ test('a record that still carries difficulty renders no difficulty on the card o
   for (const html of [renderMeta({ solution }), renderCard({ solution })]) {
     assert.doesNotMatch(html, /sol-diff|Difficulty|data-difficulty|advanced/)
   }
-  assert.match(renderMeta({ solution }), /45 min/, 'the strip still renders')
+  assert.match(renderMeta({ solution }), /<dl class="sol-meta">/, 'the strip still renders')
+  assert.doesNotMatch(renderMeta({ solution }), /\d+ min|<dt>Time<\/dt>/, 'with no time')
 })
 
-// The step facts row (duration, verified, completed) hangs off
+// The step facts row (verified, completed) hangs off
 // get-solution-step. It silently emptied once the extension renamed the
 // attribute to page-solution-step-id and the helper kept reading the old
 // page-solution-step, so both names are asserted here.
@@ -207,7 +206,7 @@ test('the step header resolves the current step from page-solution-step-id (and 
   for (const key of ['solution-step-id', 'solution-step']) {
     const html = at({ [key]: 'start-environment', 'solution-step-index': '1', 'solution-step-count': '4' })
     assert.match(html, /class="sol-step-facts/, key + ': the facts row renders')
-    assert.match(html, /About 5 min/, key + ': step duration')
+    assert.doesNotMatch(html, /About \d+ min/, key + ': no step duration')
     assert.doesNotMatch(html, /sol-diff/, key + ': no difficulty chip')
   }
 
@@ -364,7 +363,7 @@ test('step pages render the verified line from the scalar mirrors, and nothing w
   for (const mirrors of [{}, { 'solution-verified-version': '26.2.2' }, { 'solution-verified-at': '' }]) {
     const bare = at(mirrors)
     assert.doesNotMatch(bare, /verified/i, JSON.stringify(mirrors) + ': the step page says nothing')
-    assert.match(bare, /About 5 min/, 'the rest of the facts row is unaffected')
+    assert.match(bare, /class="sol-step-facts/, 'the facts row still renders')
   }
 })
 
@@ -536,7 +535,7 @@ test('a component home with no solution slots falls back to catalog solutions th
   const src = read('src/partials/component-home-v3.hbs')
   const block = src.slice(src.indexOf('{{!-- Build it in practice'), src.indexOf('{{!-- Pathway cards'))
   const homeHbs = Handlebars.create()
-  ;['eq', 'ne', 'lt', 'and', 'or', 'increment', 'parse-json', 'format-duration', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'find-component', 'solutions-for-component', 'is-external-url', 'resolve-resource'].forEach((name) => {
+  ;['eq', 'ne', 'lt', 'and', 'or', 'increment', 'parse-json', 'relativize', 'without', 'get-solutions-catalog', 'recs-all-authored', 'find-component', 'solutions-for-component', 'is-external-url', 'resolve-resource'].forEach((name) => {
     homeHbs.registerHelper(name, helper(name))
   })
   homeHbs.registerPartial('solution-recommendations', read('src/partials/solution-recommendations.hbs'))

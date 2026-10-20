@@ -193,9 +193,6 @@
                       ${hit.type === 'Solution' && hit.solutionTitle && hit.solutionTitle !== hit.title
                         ? html`<div class="aa-ItemContentTitle result-type result-solution-title">${hit.solutionTitle}</div>`
                         : ''}
-                      ${hit.type === 'Solution' && hit.duration
-                        ? html`<div class="aa-ItemContentTitle result-type result-solution-meta">${hit.duration} min</div>`
-                        : ''}
                       ${hit.product && Array.isArray(hit.product)
                         ? (() => {
                             const seen = new Set();

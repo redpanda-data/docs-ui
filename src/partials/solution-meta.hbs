@@ -1,17 +1,8 @@
 {{!--
-  Solution metadata strip: duration, step count, platforms,
+  Solution metadata strip: step count, platforms,
   use case, industry, technologies, version. Context: `solution`.
 --}}
 <dl class="sol-meta">
-  {{#if solution.duration}}
-  <div class="sol-meta-item">
-    <dt>Time</dt>
-    <dd>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      {{format-duration solution.duration}}
-    </dd>
-  </div>
-  {{/if}}
   {{#if solution.steps.length}}
   <div class="sol-meta-item">
     <dt>Steps</dt>

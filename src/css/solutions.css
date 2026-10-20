@@ -765,11 +765,6 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   color: var(--grey-900-new);
 }
 
-.sol-step-time {
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--sol-meta);
-}
-
 .sol-step-check,
 .sol-nav-step-check {
   display: inline-flex;
@@ -1737,13 +1732,6 @@ html[data-theme="dark"] .sol-recs-all {
   text-underline-offset: 2px;
 }
 
-.sol-rail-rec-meta {
-  display: block;
-  margin-top: 0.125rem;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  color: var(--sol-meta);
-}
-
 /* Relocated into the embedded on-this-page region (inside .doc) on narrow
    screens by 28-solution-progress.js: .doc's link rules apply there. */
 .toc.embedded .sol-rail-recs {
@@ -2343,12 +2331,6 @@ html[data-theme="dark"] .sol-results-note {
 .sol-nav-step-check {
   width: 1rem;
   height: 1rem;
-}
-
-/* ---- search result meta ---------------------------------------------------- */
-
-.result-solution-meta {
-  text-transform: capitalize;
 }
 
 /* ---- dark mode ------------------------------------------------------------- */

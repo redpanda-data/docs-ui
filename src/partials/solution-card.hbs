@@ -28,12 +28,6 @@
   {{#if solution.description}}<p class="sol-card-desc">{{solution.description}}</p>{{/if}}
   <div class="sol-card-foot">
     <div class="sol-card-meta">
-      {{#if solution.duration}}
-      <span class="sol-time">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        {{format-duration solution.duration}}
-      </span>
-      {{/if}}
       {{#if solution.stepCount}}<span class="sol-time">{{solution.stepCount}} steps</span>{{/if}}
       {{#each solution.platforms}}{{#if (eq this 'cloud')}}<span class="sol-time sol-card-cloud">Runs on Redpanda Cloud</span>{{else if (eq this 'kubernetes')}}<span class="sol-time sol-card-kubernetes">Runs on Kubernetes</span>{{/if}}{{/each}}
     </div>
