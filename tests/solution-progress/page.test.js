@@ -276,3 +276,29 @@ test('the last step\'s Mark step complete is the primary action until done, then
   r.els.rowComplete.dispatch('click')
   assert.equal(r.els.rowComplete.classList.contains('sol-btn--primary'), true)
 })
+
+test('the closing Start at the end of the overview follows the hero: same href, label, and the step it opens', () => {
+  const fresh = run({ page: 'overview' })
+  assert.equal(fresh.els.endLabel.textContent, 'Start building')
+  assert.equal(fresh.els.endStart.getAttribute('href'), '/solutions/demo/s1/')
+  assert.equal(fresh.els.endStep.textContent, 'Step 1: Title of s1')
+
+  const mid = run({ page: 'overview', localStore: storeOf(rec({ s1: { done: true, at: 10 }, s2: { done: true, at: 20 } }, { currentStep: 's2' })) })
+  assert.equal(mid.els.endLabel.textContent, 'Continue')
+  assert.equal(mid.els.endStart.getAttribute('href'), mid.els.start.getAttribute('href'))
+  assert.equal(mid.els.endStart.getAttribute('href'), '/solutions/demo/s3/')
+  assert.equal(mid.els.endStep.textContent, 'Step 3: Title of s3')
+})
+
+test('Start again from the closing copy asks first, and Keep my progress returns focus to it', async () => {
+  const r = run({ page: 'overview', signedIn: true, hint: 'true', localStore: storeOf(rec(ALL_DONE, { completedAt: 30 })) })
+  await r.flush()
+  assert.equal(r.els.endLabel.textContent, 'Start again')
+  assert.equal(r.els.endStep.textContent, 'Step 1: Title of s1')
+  const ev = r.els.endStart.dispatch('click')
+  assert.equal(ev.defaultPrevented, true)
+  assert.ok(r.els.body.querySelector('[data-sol-reset-confirm]'))
+  r.els.body.querySelector('[data-sol-reset-no]').dispatch('click')
+  assert.equal(r.els.body.querySelector('[data-sol-reset-confirm]'), null)
+  assert.equal(r.api.getState().solutions.demo.completedSteps.length, 3)
+})

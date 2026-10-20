@@ -1307,9 +1307,9 @@
     // Hero CTA: Continue at the first step not done yet (not the step the
     // reader last had open, which is usually the one they just finished), or
     // Start again once everything is done.
-    var start = $('[data-sol-start]')
-    if (start) {
-      var label = $('[data-sol-start-label]', start)
+    // Every copy: the hero's and the one closing the overview.
+    var starts = $$('[data-sol-start]')
+    if (starts.length) {
       var next = record && !finished ? firstIncomplete(record, ids) : null
       // Nothing marked yet, but a step was opened: go back to that one. It is
       // where the reader stopped reading, and step 1 would send them back to
@@ -1318,13 +1318,20 @@
         ? record.currentStep
         : null
       if (lastOpened) next = lastOpened
-      if (next && urls[next]) {
-        start.setAttribute('href', urls[next])
-        if (label) label.textContent = 'Continue'
-      } else if (record && finished && ids.length && urls[ids[0]]) {
-        start.setAttribute('href', urls[ids[0]])
-        if (label) label.textContent = 'Start again'
-      }
+      var startHref = next && urls[next] ? urls[next]
+        : record && finished && ids.length && urls[ids[0]] ? urls[ids[0]] : null
+      var startLabel = next && urls[next] ? 'Continue' : startHref ? 'Start again' : null
+      // The closing copy names the step it opens, so it follows the href.
+      var startIndex = startHref ? ids.indexOf(next && urls[next] ? next : ids[0]) : -1
+      starts.forEach(function (start) {
+        if (!startHref) return
+        start.setAttribute('href', startHref)
+        var label = $('[data-sol-start-label]', start)
+        if (label) label.textContent = startLabel
+        var stepName = start.parentNode && $('.sol-overview-next-step', start.parentNode)
+        var stepTitle = startIndex >= 0 ? steps().titles[ids[startIndex]] : ''
+        if (stepName && stepTitle) stepName.textContent = 'Step ' + (startIndex + 1) + ': ' + stepTitle
+      })
       var heroProgress = $('[data-sol-hero-progress]')
       if (heroProgress) {
         var openedTitle = lastOpened ? steps().titles[lastOpened] : ''
@@ -1459,12 +1466,15 @@
   }
 
   var resetConfirm = null
+  // The Start copy that opened the confirm, so focus returns to it.
+  var resetConfirmFor = null
 
   function closeResetConfirm (focusStart) {
     if (!resetConfirm) return
     if (resetConfirm.parentNode) resetConfirm.parentNode.removeChild(resetConfirm)
     resetConfirm = null
-    var start = $('[data-sol-start]')
+    var start = resetConfirmFor || $('[data-sol-start]')
+    resetConfirmFor = null
     if (focusStart && start && start.focus) start.focus()
   }
 
@@ -1472,6 +1482,7 @@
   // choices as real buttons.
   function openResetConfirm (start) {
     if (resetConfirm || !document.createElement || !start.parentNode) return
+    resetConfirmFor = start
     var ids = steps().ids
     var box = document.createElement('div')
     box.className = 'sol-reset-confirm'

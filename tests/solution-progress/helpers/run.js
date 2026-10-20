@@ -222,7 +222,12 @@ function buildPage (o) {
     // and its own ticks.
     els.stepList = el('ol', { 'data-sol-steps': '' }, stepIds.map((id) =>
       el('li', { 'data-sol-step-id': id, 'data-sol-step-url': stepUrl(id) }, [el('a', { href: stepUrl(id) }, [el('span', { 'data-sol-step-resume': '', hidden: '' }), el('span', { 'data-sol-step-status': '' })])])))
-    main.push(els.start, els.heroProgress, els.stepList)
+    // The closing copy at the end of the overview (solution-overview-next.hbs).
+    els.endLabel = el('span', { 'data-sol-start-label': '', text: 'Start building' })
+    els.endStart = el('a', { 'data-sol-start': '', href: stepUrl(stepIds[0]) }, [els.endLabel])
+    els.endStep = el('span', { class: 'sol-overview-next-step', text: 'Step 1: Title of ' + stepIds[0] })
+    els.endNav = el('nav', { class: 'sol-overview-next' }, [els.endStart, els.endStep])
+    main.push(els.start, els.heroProgress, els.stepList, els.endNav)
   }
   if (o.blocks !== false) buildBlocks(els).forEach((b) => main.push(b))
   // == Files for this step, the article's own list (opt in): the path is the

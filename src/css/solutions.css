@@ -2835,3 +2835,20 @@ html[data-theme="dark"] .sol-toast {
     display: none;
   }
 }
+
+/* The overview's closing Start CTA: the hero's action again, at the end of
+   the article, with the step it opens named beside it. */
+.sol-overview-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 2.5rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+.sol-overview-next-step {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}

@@ -246,7 +246,7 @@ test('Ask AI on a solutions page suggests solution questions, not the agent defa
 // ---- overview layout ----------------------------------------------------------------
 
 test('the overview puts Steps after the introduction and before the first section, as an On this page section', () => {
-  const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'format-duration', 'get-header-color', 'split-at-first-section', 'html-has-id'], ['solution-steps', 'solution-related-docs'])
+  const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'format-duration', 'get-header-color', 'split-at-first-section', 'html-has-id'], ['solution-steps', 'solution-related-docs', 'solution-overview-next'])
   ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'solution-files', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
   const solution = {
     id: 'g',
@@ -266,6 +266,11 @@ test('the overview puts Steps after the introduction and before the first sectio
     'matches the TOC selector article.doc>.sect1>h2[id]')
   assert.match(html, /<div class="sect1 sol-related sol-related--solutions" id="sol-related-solutions">\s*<h2 id="sol-related-solutions-title"/)
   assert.equal((html.match(/id="what-you-build"/g) || []).length, 1, 'no section is rendered twice')
+  // The overview closes with the hero's Start CTA, after every section.
+  assert.ok(at('id="prerequisites"') < at('class="sol-overview-next"'), 'the closing Start is last')
+  assert.ok(at('id="sol-related-solutions"') < at('class="sol-overview-next"'))
+  assert.match(html, /<nav class="sol-overview-next" aria-label="Start this solution">\s*<a class="sol-btn sol-btn--primary" href="[^"]*s1\/" data-sol-start data-analytics="solution_start">/)
+  assert.match(html, /<span class="sol-overview-next-step">Step 1: One<\/span>/)
 
   const split = helper('split-at-first-section')
   assert.deepEqual(split('<p>only</p>'), { before: '<p>only</p>', after: '' }, 'no sections: all before')
