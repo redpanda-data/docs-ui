@@ -159,7 +159,7 @@ function unnestPlaceholders() {
 
       codeElement.classList.add('keep-markup')
       preprocessParentheses(codeElement)
-      addConumSpans(codeElement)
+      addConumSpans(codeElement, hasCalloutList(listingBlockElement))
 
       if (!['xml', 'html', 'rust', 'coffeescript', 'text', 'bloblang', 'blobl'].includes(codeElement.dataset.lang)) {
         addEditableSpan(/&lt;.[^&A-Z]+&gt;/g, codeElement)
@@ -178,7 +178,19 @@ function unnestPlaceholders() {
       return
     }
 
+    // Placeholders are for values the reader types in. A <topic> inside a
+    // comment is prose, so comments are masked before the scan and put back
+    // after: highlighter comment tokens, and whole lines that start with a
+    // comment marker (the block may not be highlighted yet). A leading `--` is
+    // left alone: on a continuation line it is a flag (`--set key=<value>`).
+    const masked = []
+    const mask = (match) => {
+      masked.push(match)
+      return `\u0000${masked.length - 1}\u0000`
+    }
     const text = element.innerHTML
+      .replace(/<span class="(?:token comment|hljs-comment)"[^>]*>[\s\S]*?<\/span>/g, mask)
+      .replace(/^(?:\s|<[^>]+>)*(?:\/\/|#|\/\*|\*(?=\s|$)).*$/gm, mask)
     const placeholders = text.match(regex) || []
     const processed = new Set()
     let newHTML = text
@@ -199,7 +211,7 @@ function unnestPlaceholders() {
         processed.add(placeholder)
       })
 
-    element.innerHTML = newHTML
+    element.innerHTML = newHTML.replace(/\u0000(\d+)\u0000/g, (m, i) => masked[Number(i)])
   }
 
   function preprocessParentheses(element) {
@@ -213,7 +225,15 @@ function unnestPlaceholders() {
     })
   }
 
-  function addConumSpans(element) {
+  // A callout marker only means something when a callout list explains it,
+  // and Asciidoctor renders that list as the block's next sibling. Without
+  // one, a "(169)" in command output is a count, not a callout.
+  function hasCalloutList(listingBlockElement) {
+    let next = listingBlockElement && listingBlockElement.nextElementSibling
+    return !!(next && next.classList && next.classList.contains('colist'))
+  }
+
+  function addConumSpans(element, mintFromText) {
     if (!element || !element.textContent) {
       return
     }
@@ -225,6 +245,8 @@ function unnestPlaceholders() {
     // duplicate check in the restoration observer above. Removing the element
     // also keeps "(N)" out of what the copy button yields.
     element.querySelectorAll('i.conum[data-value] + b').forEach((fallback) => fallback.remove())
+
+    if (!mintFromText) return
 
     // Handle standalone numbers in parentheses, avoiding function-like patterns
     const standalonePattern = /(?<!\w)\((\d+)\)(?!\w)/g
