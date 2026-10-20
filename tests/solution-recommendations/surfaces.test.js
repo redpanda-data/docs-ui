@@ -162,7 +162,7 @@ test('on the landing page the sidebar holds the filters, not a second list of ev
     },
     uiRootPath: '/_',
   })
-  assert.match(html, /Solutions home/)
+  assert.doesNotMatch(html, /Solutions home/, 'no link to the page the reader is on')
   titles.forEach((title) => assert.ok(!html.includes(title), title + ' is in the grid, not the sidebar'))
   assert.doesNotMatch(html, /All solutions/)
   assert.match(html, /<div class="sol-nav-filters" data-sol-filters-home>\s*<details class="sol-filters" data-sol-filters open>/, 'the filters are in the sidebar')
