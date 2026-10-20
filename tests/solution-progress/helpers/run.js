@@ -99,6 +99,7 @@ function buildPage (o) {
     'data-solution-step-count': String(stepIds.length),
   }
   if (o.title) bodyAttrs['data-solution-title'] = o.title
+  if (o.draftDownloads) bodyAttrs['data-solution-draft-downloads'] = 'true'
   if (o.fileCount !== undefined) bodyAttrs['data-solution-file-count'] = String(o.fileCount)
   if (o.testedOn) bodyAttrs['data-solution-tested-on'] = o.testedOn
   if (o.page === 'step') {

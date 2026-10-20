@@ -84,6 +84,14 @@ test('a draft keeps the name and loses the link', () => {
   assert.equal(r.signinEvents().length, 0)
 })
 
+test('a draft marked draftDownloads keeps its link (preview only)', () => {
+  const r = run({ filesSection: true, status: 'draft', draftDownloads: true, signedIn: true, accountHidden: false })
+  const a = r.stepFileLink(FILE)
+  assert.ok(a)
+  assert.match(a.getAttribute('href') || '', /\/solutions\/download\?solution=demo&version=v1\.0\.0&path=/)
+  assert.equal(a.getAttribute('aria-disabled'), null)
+})
+
 test('no links where the bundle CTA is absent', () => {
   assert.equal(run({ filesSection: true, download: 'none' }).stepFileLink(FILE), null, 'download: none')
   const gated = run({ filesSection: true, signedIn: false, accountHidden: true })

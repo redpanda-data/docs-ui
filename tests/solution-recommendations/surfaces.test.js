@@ -279,7 +279,7 @@ test('the overview puts Steps after the introduction and before the first sectio
 })
 
 test('the rail file list is collapsed on every page, inside the progress card', () => {
-  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
+  const hbs = engine(['eq', 'and', 'not', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
   const render = hbs.compile('{{> solution-code-download solution=solution}}{{> solution-files solution=solution}}')
   const solution = { id: 'g', version: 'v1.0.0', download: 'public', files: ['Makefile', 'compose.yaml'] }
   for (const page of [{ layout: 'solution', url: '/solutions/g/' }, { layout: 'solution-step', url: '/solutions/g/s1/' }]) {
@@ -292,7 +292,7 @@ test('the rail file list is collapsed on every page, inside the progress card', 
 })
 
 test('the rail file list is record.files as gated download links, never public attachment links', () => {
-  const hbs = engine(['eq', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
+  const hbs = engine(['eq', 'and', 'not', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
   const render = hbs.compile('{{> solution-code-download solution=solution}}{{> solution-files solution=solution}}')
   const attachments = [{ name: 'verification.json', url: '/solutions/g/_attachments/verification.json' }]
   const files = ['docker-compose.yml', 'services/leaderboard/main.go', 'scripts/verify-lib.sh']
@@ -320,6 +320,14 @@ test('the rail file list is record.files as gated download links, never public a
     assert.match(a, /aria-disabled="true"/)
   })
   assert.match(draft, /Download available at release\./)
+
+  // TEMPORARY, preview only: draftDownloads gives a draft the gated links.
+  const previewDraft = render({ solution: { id: 'g', version: 'v0.1.0', status: 'draft', download: 'authenticated', draftDownloads: true, files }, page })
+  const previewLinks = previewDraft.match(/<a class="sol-file-link[^"]*"[^>]*>/g)
+  assert.equal(previewLinks.length, 3)
+  previewLinks.forEach((a) => assert.doesNotMatch(a, /aria-disabled/))
+  assert.match(previewDraft, /data-requires-auth/)
+  assert.doesNotMatch(previewDraft, /Download available at release/)
 
   assert.doesNotMatch(render({ solution: { id: 'g', download: 'none', files }, page }), /sol-files/, 'no downloads, no download list')
   assert.doesNotMatch(render({ solution: { id: 'g', download: 'authenticated', files: [], attachments }, page }), /sol-files/)

@@ -560,7 +560,12 @@
   // all), straight from the record. The bundle CTA is built from the same
   // value, and the snippet controls follow it so the two can never disagree.
   var downloadPolicy = attr(body, 'data-solution-download') || 'authenticated'
-  var isDraft = attr(body, 'data-solution-status') === 'draft'
+  // A draft has no release, so its downloads are locked. TEMPORARY, preview
+  // only: a draft the catalog marks draftDownloads (draft_downloads) serves
+  // from its draft release, so every signed-in flow can be tested before
+  // anything is published. Remove the second clause at go-live.
+  var isDraft = attr(body, 'data-solution-status') === 'draft' &&
+    attr(body, 'data-solution-draft-downloads') !== 'true'
   var component = attr(body, 'data-component') || null
 
   function $ (selector, root) { return (root || document).querySelector(selector) }

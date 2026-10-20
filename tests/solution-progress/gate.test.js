@@ -108,6 +108,17 @@ test('a draft gate offers saving only: no download to promise', () => {
   assert.equal(back.toasts().length, 0)
 })
 
+// TEMPORARY, preview only: a draft the catalog marks draftDownloads behaves
+// like a released solution for every signed-in flow.
+test('a draft marked draftDownloads offers the download, like a release', () => {
+  const r = run({ signedIn: false, accountHidden: false, status: 'draft', draftDownloads: true })
+  assert.equal(r.els.signin.getAttribute('data-intent'), 'download')
+  r.els.download.dispatch('click')
+  const detail = r.signinEvents()[0].detail
+  assert.equal(detail.title, 'Download the tested build')
+  assert.match(detail.returnTo, /intent=download/)
+})
+
 test('signed-in download click navigates normally and is tracked', () => {
   const r = run({ signedIn: true, hint: 'true' })
   const ev = r.els.download.dispatch('click')
