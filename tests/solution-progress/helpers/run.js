@@ -98,6 +98,9 @@ function buildPage (o) {
     'data-solution-download': o.download || 'authenticated',
     'data-solution-step-count': String(stepIds.length),
   }
+  if (o.title) bodyAttrs['data-solution-title'] = o.title
+  if (o.fileCount !== undefined) bodyAttrs['data-solution-file-count'] = String(o.fileCount)
+  if (o.testedOn) bodyAttrs['data-solution-tested-on'] = o.testedOn
   if (o.page === 'step') {
     bodyAttrs['data-step-id'] = o.stepId
     bodyAttrs['data-step-index'] = String(stepIds.indexOf(o.stepId) + 1)

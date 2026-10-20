@@ -300,7 +300,7 @@ test('the rail file list is record.files as gated download links, never public a
   assert.match(links[1], /href="\/solutions\/download\?solution=g&amp;version=v1\.2\.0&amp;path=services%2Fleaderboard%2Fmain\.go&amp;return=%2Fsolutions%2Fg%2F"/)
   assert.match(links[1], /data-sol-file-link="services\/leaderboard\/main\.go"/)
   links.forEach((a) => assert.match(a, /data-requires-auth/))
-  assert.match(gated, /Sign in to download any of them\./)
+  assert.match(gated, /Sign in to download all 3 as one zip, tested at v1\.2\.0\./)
   assert.doesNotMatch(gated, /without the download/, 'no promise of public files')
 
   const pub = render({ solution: { id: 'g', version: 'v1.2.0', download: 'public', files }, page })

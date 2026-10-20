@@ -244,7 +244,7 @@ test('the bundle flow is unchanged, and is now separable in analytics', () => {
   const anon = run({ signedIn: false, accountHidden: false })
   anon.els.download.dispatch('click')
   const detail = anon.signinEvents()[0].detail
-  assert.equal(detail.title, 'Sign in to download the complete example', 'the bundle copy is untouched')
+  assert.equal(detail.title, 'Download the tested build', 'the bundle keeps its own copy')
   assert.equal(detail.returnTo, '/solutions/demo/s1/?intent=download&step=s1&version=v1.0.0', 'and carries no path')
   assert.equal(JSON.parse(anon.session.data[PENDING_KEY]).path, undefined)
 

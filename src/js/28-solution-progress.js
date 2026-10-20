@@ -1003,10 +1003,25 @@
       cta: 'Sign in and save',
     },
     download: {
-      title: 'Sign in to download the complete example',
-      lead: 'Get the full working code for this solution, and keep your progress across devices.',
+      title: 'Download the tested build',
+      lead: downloadLead(),
       cta: 'Sign in and download',
     },
+  }
+
+  // What the zip gives that the pages do not: the whole tree at the version
+  // that passed its recorded test run. Each fact is named only when the record
+  // carries it, so a missing count or platform list never leaves a gap.
+  function downloadLead () {
+    var count = parseInt(attr(body, 'data-solution-file-count'), 10)
+    var title = attr(body, 'data-solution-title')
+    var testedOn = attr(body, 'data-solution-tested-on')
+    var what = (count > 0 ? 'all ' + count + ' files' : 'every file') +
+      (title ? ' for ' + title : ' for this solution') + (pageVersion ? ' ' + pageVersion : '')
+    var tested = testedOn
+      ? ': the same file tree that passed its recorded test run on ' + testedOn
+      : ': the same file tree that passed its recorded test run'
+    return 'Get ' + what + ' in one zip' + tested + '. Signing in also keeps your progress across devices.'
   }
 
   // One file from the solution rather than the whole bundle: the copy names it,
@@ -1014,7 +1029,7 @@
   function fileSigninCopy (filePath) {
     return {
       title: 'Sign in to download ' + filePath,
-      lead: 'Get the file behind this snippet, and keep your progress across devices.',
+      lead: 'Get this file, or the whole tested build in one zip, and keep your progress across devices.',
       cta: 'Sign in and download',
     }
   }

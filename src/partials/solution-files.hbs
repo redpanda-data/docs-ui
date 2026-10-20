@@ -15,7 +15,7 @@
 <div class="sol-files" data-sol-files-panel>
   <details class="sol-files-details">
   <summary class="sol-files-summary"><span id="sol-files-title" class="sol-files-label">All build-along files ({{solution.files.length}})</span></summary>
-  <p class="sol-panel-text" data-sol-files-text>{{#if (eq solution.status 'draft')}}Every file is shown in full on the steps. Download available at release.{{else if (eq solution.download 'authenticated')}}Every file is shown in full on the steps. Sign in to download any of them.{{else}}Every file is shown in full on the steps. Download any of them here.{{/if}}</p>
+  <p class="sol-panel-text" data-sol-files-text>{{#if (eq solution.status 'draft')}}Every file is shown in full on the steps. Download available at release.{{else if (eq solution.download 'authenticated')}}Every file is shown in full on the steps. Sign in to download all {{solution.files.length}} as one zip, tested at {{solution.version}}.{{else}}Every file is shown in full on the steps. Download any of them here.{{/if}}</p>
   <ul class="sol-file-list">
     {{#each solution.files}}
     <li>

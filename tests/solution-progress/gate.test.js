@@ -29,9 +29,24 @@ test('anonymous click on the authenticated download is intercepted and opens the
   const ev = r.els.download.dispatch('click')
   assert.equal(ev.defaultPrevented, true, 'the link does not navigate')
   const detail = r.signinEvents()[0].detail
-  assert.equal(detail.title, 'Sign in to download the complete example')
+  assert.equal(detail.title, 'Download the tested build')
   assert.equal(detail.cta, 'Sign in and download')
   assert.equal(detail.returnTo, '/solutions/demo/s1/?intent=download&step=s1&version=v1.0.0')
+})
+
+test('the download lead names the file count, title, version, and tested platforms from the record', () => {
+  const r = run({ signedIn: false, accountHidden: false, title: 'Demo', fileCount: 12, testedOn: 'Docker Compose and Kubernetes' })
+  r.els.download.dispatch('click')
+  assert.equal(r.signinEvents()[0].detail.lead,
+    'Get all 12 files for Demo v1.0.0 in one zip: the same file tree that passed its recorded test run on Docker Compose and Kubernetes. Signing in also keeps your progress across devices.')
+})
+
+test('the download lead leaves out any fact the record does not carry', () => {
+  const r = run({ signedIn: false, accountHidden: false, fileCount: 0 })
+  r.els.download.dispatch('click')
+  const lead = r.signinEvents()[0].detail.lead
+  assert.equal(lead, 'Get every file for this solution v1.0.0 in one zip: the same file tree that passed its recorded test run. Signing in also keeps your progress across devices.')
+  assert.doesNotMatch(lead, /undefined|null|NaN| on \./)
 })
 
 test('the gate\'s own Sign in button carries the download intent', () => {
