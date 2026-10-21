@@ -4,7 +4,7 @@ import { AgentProvider } from '@kapaai/agent-react'
 import { KapaProvider } from '@kapaai/react-sdk'
 import ChatInterface from './components/ChatInterface.jsx'
 import ChatSdkInterface from './components/ChatSdkInterface.jsx'
-import { agentTools } from './agentTools.js'
+import { agentTools, modeTools } from './agentTools.js'
 import { safeHeap } from './heap.js'
 import { saveConversation } from './chatPersistence.js'
 import { createPersistentApiService } from './persistentApiService.js'
@@ -260,7 +260,9 @@ function useChatMode () {
   return mode
 }
 
-const AGENT_TOOL_NAMES = agentTools.map((t) => t.name)
+// Every tool name the prompt might mention, so a mode's base blocks drop the
+// lines about tools it does not pass.
+const AGENT_TOOL_NAMES = modeTools.map((t) => t.name)
 
 // The prompt for a mode: the CUSTOM_INSTRUCTIONS sections it keeps, then its
 // own instructions. currentPageContext() is left out on purpose; the mode's
@@ -426,7 +428,8 @@ function App () {
         integrationId={cfg ? cfg.integrationId : window.UI_INTEGRATION_ID}
         model="kapa-agent-1.0"
         getSessionToken={getSessionToken}
-        tools={cfg ? agentTools.filter((t) => cfg.tools.includes(t.name)) : agentTools}
+        tools={cfg ? modeTools.filter((t) => cfg.tools.includes(t.name)) : agentTools}
+        {...(cfg && cfg.toolContext ? { context: cfg.toolContext(cfg.detail) } : {})}
         customInstructions={cfg
           ? modeInstructions(cfg)
           : CUSTOM_INSTRUCTIONS + currentPageContext()}

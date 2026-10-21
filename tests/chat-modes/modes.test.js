@@ -31,7 +31,9 @@ function loadEsm (relPath) {
 }
 
 const modes = loadEsm('src/js/react/chatModes.js')
-const TOOL_NAMES = loadEsm('src/js/react/agentTools.js').agentTools.map((t) => t.name)
+const tools = loadEsm('src/js/react/agentTools.js')
+const TOOL_NAMES = tools.agentTools.map((t) => t.name)
+const MODE_TOOL_NAMES = tools.modeTools.map((t) => t.name)
 
 const ASKAI = read('src/js/react/AskAI.jsx')
 const CHAT = read('src/js/react/components/ChatInterface.jsx')
@@ -200,6 +202,64 @@ test('quizProgress counts questions, answers and Correct. grades', () => {
   assert.equal(again.result, null)
 })
 
+// ——— Productionize ———————————————————————————————————————————————————————
+
+test('productionize runs on its own integration, with the planner tools and no history', () => {
+  const w = { KAPA_PRODUCTIONIZE_INTEGRATION_ID: 'prod-id', KAPA_QUIZ_INTEGRATION_ID: 'quiz-id' }
+  const cfg = modes.resolveMode({ mode: 'productionize', nonce: 1, title: 'T' }, w, ['page-grp'])
+  assert.equal(cfg.integrationId, 'prod-id')
+  assert.equal(cfg.enableHistory, false)
+  assert.equal(cfg.persistThread, false)
+  assert.equal(cfg.showSources, true)
+  assert.deepEqual(cfg.sourceGroupIds, ['page-grp'])
+  assert.deepEqual(modes.resolveMode({ mode: 'productionize' }, { ...w, KAPA_PRODUCTIONIZE_SOURCE_GROUP_IDS: ['p'] }, ['page-grp']).sourceGroupIds, ['p'])
+  assert.equal(modes.resolveMode({ mode: 'productionize' }, { ...w, KAPA_PRODUCTIONIZE_INTEGRATION_ID: '' }, []), null)
+})
+
+test('productionize passes exactly the tools agentTools lists for it', () => {
+  const names = modes.MODES.productionize.tools
+  assert.deepEqual(tools.productionizeTools.map((t) => t.name), names)
+  for (const name of names) assert.ok(MODE_TOOL_NAMES.includes(name), name)
+  // The guide tool is the mode's own: plain Ask AI never gets it.
+  assert.ok(!TOOL_NAMES.includes('get_solution_guide'))
+  for (const gone of ['navigate_to_page', 'switch_product', 'open_bloblang_playground', 'submit_docs_feedback']) {
+    assert.ok(!names.includes(gone), gone)
+  }
+})
+
+test('productionize keeps the citing, choices and tool blocks, minus tools it does not pass', () => {
+  const def = modes.MODES.productionize
+  const base = modes.buildBaseInstructions(CUSTOM_INSTRUCTIONS, def.baseBlocks, def.tools, MODE_TOOL_NAMES)
+  for (const kept of ['## Domain context', '## Offering choices', '## Citing sources', '## Writing style', '## Tool strategy', '## Do not']) {
+    assert.ok(base.includes(kept), kept)
+  }
+  // It asks up to three questions of its own; the one-question block and its
+  // pointer at a Current page block the mode does not send stay out.
+  assert.ok(!base.includes('## Clarifying'))
+  assert.ok(!base.includes('Current page'))
+  assert.ok(!base.includes('submit_docs_feedback'), 'feedback tool line dropped')
+  assert.match(base, /ALWAYS verify a mapping with run_bloblang/, 'run_bloblang is passed, so its line stays')
+  const prompt = def.instructions({ title: 'T', guide: { sections: [{ section: 'Security', text: 'x' }], topics: ['Security'], steps: 0, rules: '1. R' } })
+  assert.match(prompt, /^\n\n## Productionize mode\n/)
+  assert.match(prompt, /- Production gaps topics: Security/)
+})
+
+test('the guide reaches get_solution_guide through the provider context, not the prompt', () => {
+  const guide = { sections: [{ section: 'Rollback', guide_url: 'u', text: 'SECRET GAP TEXT' }], topics: ['Rollback'], steps: 0, rules: '' }
+  const def = modes.MODES.productionize
+  assert.equal(def.toolContext({ guide }).solutionGuide, guide)
+  assert.ok(!def.instructions({ guide }).includes('SECRET GAP TEXT'))
+  assert.match(ASKAI, /cfg && cfg\.toolContext \? \{ context: cfg\.toolContext\(cfg\.detail\) \}/)
+  // Without a guide the prompt says so, rather than promising a tool result.
+  assert.match(modes.productionizeContext({ title: 'T' }), /could not be loaded/)
+})
+
+test('only the quiz reports quiz progress', () => {
+  assert.match(CHAT, /modeDef && modeDef\.events\.question \? quizProgress\(messages\) : null/)
+  assert.ok(!modes.MODES.productionize.events.question)
+  assert.ok(modes.MODES.quiz.events.question)
+})
+
 // ——— History and resume pointer ———————————————————————————————————————————
 
 test('the history filter hides every mode thread and nothing else', () => {
@@ -212,6 +272,17 @@ test('the history filter hides every mode thread and nothing else', () => {
     assert.equal(modes.isModeThread(def.firstMessage({ title: 'A title' })), true, name)
   }
 })
+
+for (const name of ['quiz', 'productionize']) {
+  test(`a ${name} run leaves the reader's Ask AI resume pointer alone`, () => {
+    const s = storage({ [modes.ACTIVE_THREAD_KEY]: 'X' })
+    const def = modes.MODES[name]
+    assert.equal(modes.threadToResume(s, def.persistThread), null)
+    modes.rememberThread(s, name + '-thread', def.persistThread)
+    modes.forgetThread(s, def.persistThread)
+    assert.equal(s.data[modes.ACTIVE_THREAD_KEY], 'X')
+  })
+}
 
 test('a quiz leaves the reader\'s Ask AI resume pointer alone', () => {
   const s = storage({ [modes.ACTIVE_THREAD_KEY]: 'X' })

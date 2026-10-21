@@ -1090,7 +1090,7 @@
   display: none !important;
 }
 
-/* ——— Chat mode banner (quiz) ——— */
+/* ——— Chat mode banner (quiz, productionize) ——— */
 #chat-panel-kapa-root .chat-mode-banner {
   display: flex;
   flex-wrap: wrap;
@@ -1115,6 +1115,16 @@
 
 #chat-panel-kapa-root .chat-mode-banner-label {
   color: var(--kapa-accent, #444ce7);
+}
+
+/* A mode's note (productionize: what not to paste) runs under the title and
+   actions, across the whole banner. */
+#chat-panel-kapa-root .chat-mode-banner-note {
+  flex: 1 0 100%;
+  order: 1;
+  margin: 0;
+  color: var(--kapa-text-muted, #6b7280);
+  font-size: calc(12 / var(--rem-base) * 1rem);
 }
 
 #chat-panel-kapa-root .chat-mode-banner-actions {

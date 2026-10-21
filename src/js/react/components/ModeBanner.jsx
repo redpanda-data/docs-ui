@@ -7,7 +7,8 @@ import { MODES, endChatMode, startChatMode } from '../chatModes.js'
 // knows the drawer is not plain Ask AI and has a way back.
 //
 // View step closes the drawer and keeps the mode, so a reader on a phone can
-// read the step and reopen the drawer from the header to answer. Restart is a
+// read the step and reopen the drawer from the header to answer. A mode's
+// note (productionize: what not to paste) sits under the title. Restart is a
 // new nonce: a fresh thread with the same opener. `onRestart` runs first so
 // the outgoing interface can report how far the reader got.
 export function ModeBanner ({ mode, detail, onRestart }) {
@@ -32,6 +33,7 @@ export function ModeBanner ({ mode, detail, onRestart }) {
       <p className="chat-mode-banner-title">
         <span className="chat-mode-banner-label">{def.label}:</span> {detail.title}
       </p>
+      {def.note && <p className="chat-mode-banner-note">{def.note}</p>}
       <div className="chat-mode-banner-actions">
         {detail.url && def.viewLabel && (
           <a className="chat-mode-banner-action" href={detail.url} onClick={viewStep}>

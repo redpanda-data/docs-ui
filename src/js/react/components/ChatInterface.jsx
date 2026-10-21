@@ -468,15 +468,26 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
   // The Agent SDK's response_completed event carries only the thread id and a
   // tool count, so a mode's progress is read from the conversation itself, once
   // each answer has finished streaming.
-  const modeProgress = modeDef ? quizProgress(messages) : null
+  // Only a mode with question events (the quiz) has progress to read.
+  const modeProgress = modeDef && modeDef.events.question ? quizProgress(messages) : null
   const modeProgressRef = useRef(modeProgress)
   modeProgressRef.current = modeProgress
   const reportedRef = useRef({ question: 0, complete: false, error: false })
   useEffect(() => {
-    if (!modeDef || isStreaming || !modeProgress) return
+    if (!modeDef || isStreaming) return
     const events = modeDef.events
     const seen = reportedRef.current
     const last = messages[messages.length - 1]
+    // The first answer failed: in the quiz, before any question; in a mode
+    // without questions, before any answer that worked.
+    const firstTurn = modeProgress
+      ? modeProgress.questionsSeen === 0
+      : !messages.some((m) => m.role === 'assistant' && !m.isError)
+    if (last && last.isError && firstTurn && !seen.error) {
+      seen.error = true
+      safeHeap(events.error, { ...modeProps, stage: 'first_turn' })
+    }
+    if (!modeProgress) return
     // A new run of questions in the same thread ("New questions").
     if (modeProgress.questionsSeen < seen.question) Object.assign(seen, { question: 0, complete: false })
     if (modeProgress.questionsSeen > seen.question) {
@@ -497,20 +508,14 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
         detail: { mode, nonce: modeDetail && modeDetail.nonce, score: modeProgress.result.score },
       }))
     }
-    if (last && last.isError && modeProgress.questionsSeen === 0 && !seen.error) {
-      seen.error = true
-      safeHeap(events.error, { ...modeProps, stage: 'first_turn' })
-    }
   }, [modeDef, isStreaming, messages, threadId])
 
   // Report how far the reader got when the mode ends, whatever ended it.
   const reportModeEnd = (reason) => {
     if (!modeDef) return
-    safeHeap(modeDef.events.end, {
-      ...modeProps,
-      reason,
-      questions_seen: modeProgressRef.current ? modeProgressRef.current.questionsSeen : 0,
-    })
+    const props = { ...modeProps, reason }
+    if (modeProgressRef.current) props.questions_seen = modeProgressRef.current.questionsSeen
+    safeHeap(modeDef.events.end, props)
   }
   useEffect(() => {
     if (!modeDef) return
