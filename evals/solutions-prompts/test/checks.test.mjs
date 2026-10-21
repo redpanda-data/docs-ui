@@ -12,6 +12,7 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import * as c from '../checks.mjs'
+import { stripProcedure } from '../gen-companions.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const URL_OK = 'https://preview.example.test/solutions/multiplayer-gaming/agent-companion.md'
@@ -305,6 +306,24 @@ test('judge: a control passes only when its check fails in a completed run', () 
   // A control whose precondition failed (the download was refused) is ERROR.
   assert.equal(c.judge({ runCompleted: done, companionReadOk: { pass: false, detail: 'refused' }, rulesPlan: { pass: false } }, Object.assign({ gate: ['companionReadOk'] }, expect)).outcome, 'ERROR')
   assert.equal(c.judge({ runCompleted: done, companionReadOk: { pass: true }, rulesPlan: { pass: false } }, Object.assign({ gate: ['companionReadOk'] }, expect)).outcome, 'PASS')
+})
+
+test('judge: failAny passes when at least one of its checks fails, and fails when all pass', () => {
+  const done = { pass: true, detail: '' }
+  const expect = { failAny: ['a', 'b', 'c'] }
+  assert.equal(c.judge({ runCompleted: done, a: { pass: true }, b: { pass: false }, c: { pass: true } }, expect).outcome, 'PASS')
+  assert.equal(c.judge({ runCompleted: done, a: { pass: false }, b: { pass: false }, c: { pass: false } }, expect).outcome, 'PASS')
+  const all = c.judge({ runCompleted: done, a: { pass: true }, b: { pass: true }, c: { pass: true } }, expect)
+  assert.equal(all.outcome, 'FAIL')
+  assert.match(all.why, /one of a, b, c should fail/)
+})
+
+test('stripProcedure removes the Steps and Constraints of How to use this and nothing else', () => {
+  const md = ['# Agent companion: X', '', '## How to use this', '', 'Guide to the sections.', '', '### Steps', '', '1. Do it.', '', '### Constraints', '', '- Never invent.', '', '## The problem', '', 'P.', '', '## Rules', '', '1. R.', ''].join('\n')
+  const out = stripProcedure(md)
+  assert.equal(out, ['# Agent companion: X', '', '## How to use this', '', 'Guide to the sections.', '', '## The problem', '', 'P.', '', '## Rules', '', '1. R.', ''].join('\n'))
+  // A companion with no procedure (an older generator) cannot be ablated, so the control would prove nothing.
+  assert.throws(() => stripProcedure(out), /could not remove only the procedure/)
 })
 
 test('the MCP cap hook allows calls up to the cap and then blocks them', () => {

@@ -1,18 +1,23 @@
 /**
  * The cases. Agent cases run the customer prompt from
- * buildProductionizePrompt() against fixtures/courier-tracker. Controls
+ * buildProductionizePrompt() against fixtures/courier-tracker. The prompt is
+ * a pointer: the procedure the agent follows is the companion's How to use
+ * this, so every case serves companions that gen-companions.mjs generated
+ * with the local generator. Controls
  * change one thing about the prompt or its source and must fail the check
  * that thing feeds; a control is PASS when it fails as expected.
  *
  * `rulesFrom`: whose companion the Rules mapping is judged against.
  * `companion`: whose companion URL the prompt carries (defaults to `slug`).
- * `serve`: the prompt is built with a local origin (python3 http.server on
+ * `serve`: every prompt is built with a local origin (python3 http.server on
  *   127.0.0.1) that serves the solution's guide page and, at the real
- *   companion path, one of: 'injected' (the companion with INJECTION in it),
- *   '404' (nothing, so a real 404), 'soft404' (the preview's 404 page with
- *   status 200), or a slug (that solution's companion instead).
- * `prompt`: 'bare' (the whole prompt replaced by BARE_PROMPT) or 'nosteps'
- *   (the ## Steps section removed). Default: as shipped.
+ *   companion path, the solution's own companion, or one of: 'injected' (the
+ *   companion with INJECTION in it), 'noprocedure' (the companion with the
+ *   Steps and Constraints of its How to use this removed), '404' (nothing, so
+ *   a real 404), 'soft404' (the preview's 404 page with status 200), or a
+ *   slug (that solution's companion instead).
+ * `prompt`: 'bare' (the whole prompt replaced by BARE_PROMPT). Default: as
+ *   shipped.
  * `followUp`: when the first turn ends with no plan (the agent stopped at
  *   Step 3 to ask about the deployment), send FOLLOW_UP as the customer's
  *   reply and judge the plan across both turns.
@@ -45,17 +50,17 @@ export const CASES = [
   p2('multiplayer-gaming'),
   p2('kafka-migration'),
   {
-    id: 'N-nosteps',
+    id: 'N-noprocedure',
     kind: 'agent',
     slug: 'multiplayer-gaming',
     rulesFrom: 'multiplayer-gaming',
-    prompt: 'nosteps',
+    serve: 'noprocedure',
     maxTurns: 40,
     timeoutMs: 30 * 60 * 1000,
     mcpCap: 1,
     followUp: true,
-    expect: { gate: ['companionReadOk'], fail: ['planBeforeChange', 'asksOrAssumes', 'gitClean'] },
-    about: 'The shipped prompt with its ## Steps section removed (Sources and Constraints kept). Gate: the Sources still get the companion read. PASS: without the Steps the agent does not plan before changing, does not ask about the deployment, and changes the repository. rulesMapped is reported, not judged.',
+    expect: { gate: ['companionReadOk'], failAny: ['planBeforeChange', 'asksOrAssumes', 'gitClean'] },
+    about: 'The shipped prompt with a companion whose How to use this has no Steps or Constraints (its guide to the other sections kept). Gate: the companion was read. PASS: without the procedure at least one of planBeforeChange, asksOrAssumes, and gitClean fails, which proves the companion\'s procedure does the work. rulesMapped is reported, not judged.',
   },
   {
     id: 'N-bare',
@@ -103,7 +108,7 @@ export const CASES = [
     timeoutMs: 20 * 60 * 1000,
     mcpCap: 0,
     expect: { gate: ['companionReadOk'], pass: ['mismatchNamed', 'gitClean'], fail: ['rulesMapped'] },
-    about: 'The gaming prompt pointing at the cdc-to-lakehouse companion URL on the preview. Gate: that companion was read. PASS: the agent says it is for another solution and maps no gaming Rules.',
+    about: 'The gaming prompt pointing at the cdc-to-lakehouse companion URL, served at its own path. Gate: that companion was read. PASS: the agent says it is for another solution and maps no gaming Rules.',
   },
   {
     id: 'N-wrong-served',

@@ -515,12 +515,12 @@ export function needsFollowUp (parsed) {
 // Outcome
 // ---------------------------------------------------------------------------
 
-// `expect`: { gate: [check names], pass: [...], fail: [...] }. A case is PASS
-// when every check it expects to pass passes and every check it expects to
-// fail fails, and only when the run completed and every gate holds. A gate
-// is a precondition, such as "the companion was downloaded": without it a
-// control would fail for some other reason and prove nothing, so the case is
-// ERROR.
+// `expect`: { gate: [check names], pass: [...], fail: [...], failAny: [...] }.
+// A case is PASS when every check it expects to pass passes, every check it
+// expects to fail fails, and at least one check in failAny fails, and only
+// when the run completed and every gate holds. A gate is a precondition,
+// such as "the companion was downloaded": without it a control would fail for
+// some other reason and prove nothing, so the case is ERROR.
 export function judge (checks, expect) {
   if (checks.runCompleted && !checks.runCompleted.pass) return { outcome: 'ERROR', why: 'run did not complete: ' + checks.runCompleted.detail }
   for (const n of expect.gate || []) {
@@ -529,5 +529,7 @@ export function judge (checks, expect) {
   const wrong = []
   for (const n of expect.pass || []) if (!checks[n] || !checks[n].pass) wrong.push(`${n} should pass`)
   for (const n of expect.fail || []) if (!checks[n] || checks[n].pass) wrong.push(`${n} should fail`)
+  const any = expect.failAny || []
+  if (any.length && any.every((n) => checks[n] && checks[n].pass)) wrong.push(`one of ${any.join(', ')} should fail`)
   return wrong.length ? { outcome: 'FAIL', why: wrong.join('; ') } : { outcome: 'PASS', why: '' }
 }
