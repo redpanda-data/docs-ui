@@ -19,3 +19,5 @@ test-results-*.*
 !/src/img/*.png
 # Solutions quiz test corpus (tests/solution-quiz/build-corpus.mjs)
 tests/solution-quiz/.corpus/
+# Solutions productionize test corpus (tests/solution-productionize/fetch-companions.mjs)
+tests/solution-productionize/.corpus/
