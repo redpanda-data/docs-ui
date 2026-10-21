@@ -12,10 +12,12 @@
     note below says the prompt still works.
   - Copy prompt and Preview prompt need the script (the prompt is built from
     the page's origin), so both ship hidden.
-  - Connect the docs MCP server is static. Only the server URL, the Claude
-    Code command and the VS Code one-click link are written here; the other
-    clients are on How to use these docs, so this card never keeps its own
-    copy of their setup.
+  - Connect the docs MCP server is static, and written here: the server URL,
+    the Claude Code add, list and /mcp sign-in steps, the VS Code one-click
+    link and version, and the anonymous allowance. They follow How to use
+    these docs (docs-site), so check them when that page changes. Other
+    clients are only on that page, so this card never keeps its own copy of
+    their setup.
 --}}
 <section class="sol-panel sol-productionize" id="take-to-production" data-sol-productionize data-sol-companion-url="{{or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md')}}"{{#with @root.page.attributes.solution-verified-version}} data-sol-verified-version="{{this}}"{{/with}} aria-labelledby="sol-productionize-title">
   <h2 id="sol-productionize-title" class="sol-productionize-title">Take this to production</h2>
@@ -42,7 +44,7 @@
       <p>Claude Code:</p>
       <pre class="sol-productionize-command"><code>claude mcp add --scope user --transport http redpanda https://docs.redpanda.com/mcp</code></pre>
       <p>Check it with: <code>claude mcp list</code><br>
-      Sign in for unlimited use: run <code>/mcp</code> and authenticate the <code>redpanda</code> server.</p>
+      Sign in for a higher allowance: run <code>/mcp</code> and authenticate the <code>redpanda</code> server.</p>
       {{!-- The same install URI as Page options > Add MCP server to VS Code
             (14-markdown-dropdown.js): the server config as URI-encoded JSON. --}}
       <p>VS Code (1.102 or later, with GitHub Copilot): <a href="vscode:mcp/install?%7B%22name%22%3A%22Redpanda%20Documentation%22%2C%22url%22%3A%22https%3A%2F%2Fdocs.redpanda.com%2Fmcp%22%7D" data-sol-mcp-vscode>Add to VS Code</a> (one-click)</p>
