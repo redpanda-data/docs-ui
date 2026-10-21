@@ -239,7 +239,7 @@ test('signed in: a click fetches the companion from this origin and starts the p
   assert.equal(url('step:2'), `${ORIGIN}${stepUrl(STEPS[1])}`)
   assert.ok(mode.guide.rules.includes(`${ORIGIN}/solutions/${SLUG}/start-environment/`), 'rules rewritten to this origin')
   assert.deepEqual(JSON.parse(JSON.stringify(page.calls.open)), [{
-    query: `Help me take ${TITLE} to production.`,
+    query: `Help me take this design to production: ${TITLE}.`,
     autoSubmit: true,
     modeOpts: { mode: 'productionize', nonce: mode.nonce },
   }])
@@ -347,7 +347,7 @@ for (const [name, fetch] of [
 test('the prompt is shown in Preview prompt and copied as it is', { skip }, async () => {
   const page = load({ signedIn: false })
   const shown = page.$('[data-sol-productionize-prompt]').textContent
-  assert.ok(shown.startsWith(`# Take the ${TITLE} design to production`))
+  assert.ok(shown.startsWith(`# Take this design to production: ${TITLE}`))
   assert.ok(shown.includes(`curl -sf ${ORIGIN}/solutions/${SLUG}/agent-companion.md`))
   page.copy.click()
   await flush()

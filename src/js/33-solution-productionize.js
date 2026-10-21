@@ -195,7 +195,7 @@
     var companion = origin + '/solutions/' + m.slug + '/agent-companion.md'
     var built = '(version ' + m.version + (m.verifiedVersion ? ', verified against Redpanda ' + m.verifiedVersion : '') + ')'
     return [
-      '# Take the ' + m.title + ' design to production',
+      '# Take this design to production: ' + m.title,
       '',
       'I built the Redpanda Solutions reference "' + m.title + '" ' + built + '. Help me apply its design to this repository and my production environment. Do not copy the reference system.',
       '',
@@ -373,7 +373,7 @@
         props: baseProps(),
       }
       // Same opener as the drawer's productionizeOpener.
-      detail.firstMessage = 'Help me take ' + (meta.title || 'this solution') + ' to production.'
+      detail.firstMessage = meta.title ? 'Help me take this design to production: ' + meta.title + '.' : 'Help me take this solution to production.'
       state = 'active'
       nonce = detail.nonce
       window.__docsChatMode = detail

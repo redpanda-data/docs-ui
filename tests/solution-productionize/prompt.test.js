@@ -37,7 +37,7 @@ const COMPANION = `${META.origin}/solutions/${META.slug}/agent-companion.md`
 
 test('the prompt points at this origin\'s companion and guide', () => {
   const prompt = prod.buildProductionizePrompt(META)
-  assert.ok(prompt.startsWith(`# Take the ${META.title} design to production\n`))
+  assert.ok(prompt.startsWith(`# Take this design to production: ${META.title}\n`))
   assert.ok(prompt.includes(`- Agent companion, the spec for this work: ${COMPANION}\n`))
   assert.ok(prompt.includes(`- Human guide: ${META.origin}/solutions/${META.slug}/\n`))
   assert.ok(prompt.includes(`"${META.title}" (version v1.0.0, verified against Redpanda 26.2.1)`))
@@ -95,7 +95,8 @@ test('no em dashes in the prompt, the mode prompt, or the card', () => {
 
 test('the drawer and the page send the same opener', () => {
   const page = fs.readFileSync(path.join(ROOT, 'src/js/33-solution-productionize.js'), 'utf8')
-  assert.equal(modes.productionizeOpener({ title: META.title }), `Help me take ${META.title} to production.`)
-  assert.ok(page.includes("'Help me take ' + (meta.title || 'this solution') + ' to production.'"))
+  assert.equal(modes.productionizeOpener({ title: META.title }), `Help me take this design to production: ${META.title}.`)
+  assert.equal(modes.productionizeOpener({}), 'Help me take this solution to production.')
+  assert.ok(page.includes("'Help me take this design to production: ' + meta.title + '.'"))
   assert.ok(modes.isModeThread(modes.productionizeOpener({ title: META.title })))
 })

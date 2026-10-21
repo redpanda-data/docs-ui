@@ -570,7 +570,8 @@ test('a recap that names a question neither restarts nor advances the quiz', () 
 })
 
 test('the history filter matches whole openers, so a reader\'s own question stays', () => {
-  assert.equal(modes.isModeThread('Help me take Multiplayer gaming to production.'), true)
+  assert.equal(modes.isModeThread('Help me take this design to production: Multiplayer gaming.'), true)
+  assert.equal(modes.isModeThread('Help me take Multiplayer gaming to production.'), true, 'the earlier opener')
   assert.equal(modes.isModeThread('Help me take a backup of my cluster'), false)
   assert.equal(modes.isModeThread('Quiz me on this step: Create the topics (demo/s1).'), true)
   assert.equal(modes.isModeThread('Quiz me on this step please, on tabs'), false)

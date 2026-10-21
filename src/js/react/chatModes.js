@@ -169,7 +169,7 @@ export function productionizeContext (detail) {
 // The planner's first message.
 export function productionizeOpener (detail) {
   const d = detail || {}
-  return `Help me take ${d.title || 'this solution'} to production.`
+  return d.title ? `Help me take this design to production: ${d.title}.` : 'Help me take this solution to production.'
 }
 
 // Top-level companion sections get_solution_guide returns whole.
@@ -253,7 +253,9 @@ export const MODES = {
     persistThread: false,
     showSources: true,
     controls: ['OPTIONS'],
-    threadPattern: /^Help me take .+ to production\.$/,
+    // The second form is the opener before titles moved after a colon; keep
+    // matching it so older threads stay out of the Ask AI history.
+    threadPattern: /^Help me take (?:this design to production: .+|.+ to production)\.$/,
     firstMessage: productionizeOpener,
     placeholder: 'Tell Ask AI about your system',
     inputLabel: 'Your reply',
