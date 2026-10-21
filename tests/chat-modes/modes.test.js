@@ -368,7 +368,7 @@ test('both chat-panel partials default the mode ids only when the global is abse
 
 // The panel script in a vm: a stub panel, a window whose events reach real
 // listeners, and interval timers that only run on tick().
-function runPanel () {
+function runPanel (opts = {}) {
   const listeners = {}
   const events = []
   const sent = []
@@ -377,11 +377,20 @@ function runPanel () {
   const node = (name, extra) => Object.assign({ name, focus () { focused.push(name) } }, extra)
   const input = node('input', { disabled: false })
   const close = node('close')
+  const classes = new Set(opts.classes || [])
+  const expand = { handlers: [], addEventListener (t, fn) { if (t === 'click') this.handlers.push(fn) }, click () { this.handlers.forEach((fn) => fn()) } }
   const panel = {
-    classList: { add () {}, remove () {}, toggle: () => false, contains: () => false },
+    classes,
+    expand,
+    classList: {
+      add: (c) => { classes.add(c) },
+      remove: (c) => { classes.delete(c) },
+      toggle: (c) => { if (classes.has(c)) { classes.delete(c); return false } classes.add(c); return true },
+      contains: (c) => classes.has(c),
+    },
     setAttribute () {},
     getAttribute: () => null,
-    querySelectorAll: () => [],
+    querySelectorAll: (sel) => (String(sel).includes('data-chat-action="expand"') ? [expand] : []),
     querySelector: (sel) => (sel === '#chat-message' ? (panel.hasInput ? input : null) : sel.includes('close') ? close : null),
     dataset: {},
     inert: false,
@@ -416,7 +425,7 @@ function runPanel () {
     win.__docsChatMode = { mode: 'quiz', nonce }
     return win.openChatWithQuery('Quiz me on this step: T.', true, { mode: 'quiz', nonce })
   }
-  return { win, events, sent, focused, panel, register, tick, startQuiz, pending: () => timers.length }
+  return { win, events, sent, focused, panel, register, tick, startQuiz, storage: context.localStorage, pending: () => timers.length }
 }
 
 test('a quiz opener waits for the quiz interface, not the Ask AI one being replaced', () => {
@@ -743,4 +752,32 @@ test('signing in from a productionize drawer returns to the card', () => {
   assert.equal(modes.MODES.productionize.returnHash, '#take-to-production')
   assert.match(read('src/js/33-solution-productionize.js'), /var CARD_ID = 'take-to-production'/)
   assert.match(read('src/js/react/components/ModeBanner.jsx'), /window\.location\.search \+ \(def\.returnHash \|\| ''\)/)
+})
+
+test('a chat mode opens the drawer full screen and ending it restores the size', () => {
+  const p = runPanel()
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode', { detail: { mode: 'quiz', nonce: 1 } }))
+  assert.equal(p.panel.classes.has('is-fullscreen'), true)
+  // Restart starts the mode again without changing what ending restores.
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode', { detail: { mode: 'quiz', nonce: 2 } }))
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode-end', { detail: { reason: 'ask_instead', mode: 'quiz' } }))
+  assert.equal(p.panel.classes.has('is-fullscreen'), false)
+  assert.equal(p.storage.getItem('redpanda-chat-panel-fullscreen'), null, 'the mode never saves a size')
+})
+
+test('a reader who already uses full screen keeps it after the mode', () => {
+  const p = runPanel({ classes: ['is-fullscreen'] })
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode', { detail: { mode: 'quiz', nonce: 1 } }))
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode-end', { detail: { reason: 'ask_instead', mode: 'quiz' } }))
+  assert.equal(p.panel.classes.has('is-fullscreen'), true)
+})
+
+test('a size the reader picks during the mode survives its end', () => {
+  const p = runPanel()
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode', { detail: { mode: 'productionize', nonce: 1 } }))
+  p.panel.expand.click() // back to the side drawer
+  p.panel.expand.click() // and full screen again, by choice
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode-end', { detail: { reason: 'ask_instead', mode: 'productionize' } }))
+  assert.equal(p.panel.classes.has('is-fullscreen'), true)
+  assert.equal(p.storage.getItem('redpanda-chat-panel-fullscreen'), 'true')
 })

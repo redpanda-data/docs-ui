@@ -95,8 +95,26 @@
     })
   })
 
+  // A quiz or production plan is a focused task, so a chat mode opens the
+  // drawer full screen. The reader's own setting is untouched: the mode is not
+  // saved, and ending it restores the size the drawer had, unless the reader
+  // changed the size themselves during the mode.
+  var modeFullscreen = null // { restore: boolean } while a mode set the size
+  window.addEventListener('docs-chat:mode', function () {
+    if (modeFullscreen) return
+    modeFullscreen = { restore: chatPanel.classList.contains('is-fullscreen') }
+    chatPanel.classList.add('is-fullscreen')
+  })
+  window.addEventListener('docs-chat:mode-end', function () {
+    if (!modeFullscreen) return
+    if (!modeFullscreen.restore) chatPanel.classList.remove('is-fullscreen')
+    modeFullscreen = null
+  })
+
   chatPanel.querySelectorAll('[data-chat-action="expand"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
+      // The reader chose a size, so ending the mode leaves it alone.
+      modeFullscreen = null
       var fullscreen = chatPanel.classList.toggle('is-fullscreen')
       try {
         localStorage.setItem(FULLSCREEN_KEY, String(fullscreen))
