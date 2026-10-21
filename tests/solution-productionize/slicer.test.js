@@ -228,6 +228,12 @@ test('every gap topic links to its own heading on the rendered last step', { ski
       if (id === 'prod-' + topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) bySlug++
     }
     assert.ok(document.getElementById('production-considerations'), `${slug} has the fallback anchor`)
+    // The two corpora come from different builds (a published companion, a
+    // pinned redpanda-solutions commit), so check they describe the same
+    // solution: the same version, and a topic for every heading on the page.
+    assert.equal(guide.version, document.body.getAttribute('data-solution-version'), `${slug}: companion and pages are different versions`)
+    const linked = new Set(guide.topics.map((topic) => guide.sections.find((s) => s.section === topic).guide_url.split('#')[1]))
+    for (const id of ids) assert.ok(linked.has(id), `${slug}: #${id} on the page has no topic in the companion`)
   }
   assert.ok(bySlug < total, 'some heading ids differ from the slug of their text, so the text match is what finds them')
 })

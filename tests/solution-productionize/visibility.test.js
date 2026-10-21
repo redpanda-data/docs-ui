@@ -72,6 +72,7 @@ function render (o) {
     if (i > 0) attributes['solution-prev-url'] = stepUrl(STEPS[i - 1])
     if (i < STEPS.length - 1) attributes['solution-next-url'] = stepUrl(STEPS[i + 1])
   }
+  Object.assign(attributes, o.attributes)
   return PAGE({ solution: SOLUTION, bodyClass: o.step ? 'solution-step' : 'solution', page: { url, title: 'T', attributes }, site: { path: '' } }, {
     data: { root: { page: { url, attributes }, site: { path: '' } } },
   })
@@ -244,6 +245,39 @@ test('signed in: a click fetches the companion from this origin and starts the p
   }])
   assert.ok(page.calls.events.some((e) => e.name === 'docs-chat:mode' && e.detail.nonce === mode.nonce))
   assert.ok(page.calls.tracked.some((t) => t.name === 'solution_productionize_start' && t.props.topics === 3))
+  // The prompt's Human guide line comes from this.
+  assert.equal(mode.guideUrl, `${ORIGIN}/solutions/${SLUG}/`)
+  assert.equal(mode.companionUrl, `${ORIGIN}/solutions/${SLUG}/agent-companion.md`)
+})
+
+test('a second click before the companion arrives starts one plan, not two', { skip }, async () => {
+  const page = load({})
+  page.plan.click()
+  assert.equal(page.plan.disabled, true, 'the button is disabled while the companion loads')
+  page.plan.click()
+  await flush()
+  await flush()
+  assert.equal(page.calls.fetch.length, 1)
+  assert.equal(page.calls.open.length, 1, 'one opener')
+  assert.equal(page.calls.events.filter((e) => e.name === 'docs-chat:mode').length, 1, 'one mode start')
+  assert.equal(page.plan.disabled, false)
+})
+
+test('sign-in, copy and opening the MCP block are tracked', { skip }, async () => {
+  const out = load({ signedIn: false })
+  out.plan.click()
+  assert.ok(out.calls.tracked.some((t) => t.name === 'solution_productionize_signin'))
+  const page = load({})
+  page.copy.click()
+  await flush()
+  const copied = page.calls.tracked.find((t) => t.name === 'solution_productionize_copy')
+  assert.ok(copied && copied.props.chars === page.calls.copied[0].length)
+  const mcp = page.$('[data-sol-productionize-mcp]')
+  mcp.open = true
+  const Event = page.document.defaultView.Event
+  mcp.dispatchEvent(new Event('toggle'))
+  mcp.dispatchEvent(new Event('toggle'))
+  assert.equal(page.calls.tracked.filter((t) => t.name === 'solution_productionize_mcp_open').length, 1, 'once per page')
 })
 
 test('a second click while the plan runs only reopens the drawer', { skip }, async () => {
@@ -358,4 +392,17 @@ test('done panels link to the card: a scroll on the last step, the last step els
     assert.equal(a.textContent, 'Take this to production')
     assert.ok(a.closest('[data-sol-done]'), 'inside a done panel')
   }
+})
+
+test('the quiz button carries the step\'s rule and adapt line from the page attributes', { skip }, () => {
+  const html = render({ step: STEPS[1], attributes: { 'solution-rule': 'Key by player.', 'solution-adapt': 'Find each topic key.' } })
+  const { document } = parseHTML(html)
+  const button = document.querySelector('[data-sol-quiz]')
+  assert.ok(button, 'the quiz button renders')
+  assert.equal(button.getAttribute('data-quiz-rule'), 'Key by player.')
+  assert.equal(button.getAttribute('data-quiz-adapt'), 'Find each topic key.')
+  // Without the attributes the button leaves them off rather than sending empty lines.
+  const bare = parseHTML(render({ step: STEPS[1] })).document.querySelector('[data-sol-quiz]')
+  assert.equal(bare.hasAttribute('data-quiz-rule'), false)
+  assert.equal(bare.hasAttribute('data-quiz-adapt'), false)
 })
