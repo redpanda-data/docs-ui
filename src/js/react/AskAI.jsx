@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Component } from 'react'
+import React, { useEffect, useRef, useState, Component } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AgentProvider } from '@kapaai/agent-react'
 import { KapaProvider } from '@kapaai/react-sdk'
@@ -10,6 +10,11 @@ import { saveConversation } from './chatPersistence.js'
 import { createPersistentApiService } from './persistentApiService.js'
 import { readScopeIds, dropScope, isScopeRejection, SCOPE_DROPPED_EVENT } from './kapaScope.js'
 import { getSessionToken, installSessionProbe } from './kapaSession.js'
+import {
+  MODE_EVENT, MODE_END_EVENT, LEGACY_QUIZ_EVENT, readMode, normalizeMode, resolveMode,
+  buildBaseInstructions, endChatMode, MODES,
+} from './chatModes.js'
+import { ModeSignIn } from './components/ModeBanner.jsx'
 
 // Singleton Chat SDK api service for the anonymous tier: injects the saved
 // threadId so a conversation survives page navigation. The signed-in tier gets
@@ -181,55 +186,6 @@ function useKapaScopeIds () {
   return ids
 }
 
-// Quiz mode (pilot). A solution step's "Quiz me on this step" button sets
-// window.__docsChatQuiz and dispatches QUIZ_EVENT; the drawer then runs on its
-// own Kapa integration (KAPA_QUIZ_INTEGRATION_ID), so quiz chats stay out of the
-// Ask AI analytics the docs team reads for friction, with the instructions below
-// and the step as context. Closing the drawer returns it to normal Ask AI.
-export const QUIZ_EVENT = 'docs-chat:quiz'
-
-const QUIZ_INSTRUCTIONS = `
-
-## Quiz mode
-The reader is working through a Redpanda Solutions step and asked to be quizzed on it.
-- Ask three questions, ONE at a time, and wait for the reader's answer before the next.
-- Every question must be answerable from the step described below and the docs it links to.
-  Search the knowledge base for the step's page first, and base each question on what you find.
-- Prefer questions about why the step works (the rule it establishes, what breaks without it,
-  what a command's output shows) over recall of exact commands or flags.
-- Mix multiple choice (four options, labelled A to D) and short answers.
-- After each answer, say whether it is right, explain in one or two sentences, and cite the
-  page that supports it. If the reader is partly right, say which part.
-- If you cannot support a question or an answer from the sources, do not ask it.
-- After the third answer, give a one-line score and suggest what to reread for anything missed.
-- If the reader asks something unrelated, answer it briefly, then offer to continue the quiz.`
-
-function quizContext (quiz) {
-  const lines = ['\n\n## Step to quiz on']
-  if (quiz.title) lines.push(`- Step: ${quiz.title}`)
-  if (quiz.solution) lines.push(`- Solution: ${quiz.solution}`)
-  if (quiz.url) lines.push(`- Page: ${quiz.url}`)
-  if (quiz.rule) lines.push(`- The rule this step establishes: ${quiz.rule}`)
-  return lines.join('\n')
-}
-
-// The quiz the reader asked for, or null. Read once at mount too, because the
-// button can fire before this bundle has loaded (it loads when the drawer opens).
-function useQuiz () {
-  const [quiz, setQuiz] = useState(() => window.__docsChatQuiz || null)
-  useEffect(() => {
-    const onQuiz = (e) => setQuiz(e.detail || window.__docsChatQuiz || null)
-    const onClose = () => { window.__docsChatQuiz = null; setQuiz(null) }
-    window.addEventListener(QUIZ_EVENT, onQuiz)
-    window.addEventListener('docs-chat:close', onClose)
-    return () => {
-      window.removeEventListener(QUIZ_EVENT, onQuiz)
-      window.removeEventListener('docs-chat:close', onClose)
-    }
-  }, [])
-  return quiz
-}
-
 function currentPageContext () {
   try {
     const path = window.location.pathname
@@ -277,9 +233,73 @@ function currentPageContext () {
   }
 }
 
-function handleAgentEvent (event) {
+// Chat modes (chatModes.js). A solution step's "Quiz me on this step" button
+// sets window.__docsChatMode and dispatches MODE_EVENT; the drawer then runs on
+// the mode's own Kapa integration with the mode's prompt, tools and source
+// groups. A separate integration separates the widget's own stats, but quiz
+// chats still reach the project's Top Questions and Coverage Gaps, which Kapa
+// cannot split by integration. Closing the drawer keeps the mode, so a reader
+// can close it to read the step; MODE_END_EVENT returns it to normal Ask AI.
+//
+// Read once at mount too, because the button can fire before this bundle has
+// loaded (it loads when the drawer opens).
+function useChatMode () {
+  const [mode, setMode] = useState(() => readMode(window))
+  useEffect(() => {
+    const onMode = (e) => setMode(normalizeMode(e.detail) || readMode(window))
+    const onEnd = () => setMode(null)
+    window.addEventListener(MODE_EVENT, onMode)
+    window.addEventListener(LEGACY_QUIZ_EVENT, onMode)
+    window.addEventListener(MODE_END_EVENT, onEnd)
+    return () => {
+      window.removeEventListener(MODE_EVENT, onMode)
+      window.removeEventListener(LEGACY_QUIZ_EVENT, onMode)
+      window.removeEventListener(MODE_END_EVENT, onEnd)
+    }
+  }, [])
+  return mode
+}
+
+const AGENT_TOOL_NAMES = agentTools.map((t) => t.name)
+
+// The prompt for a mode: the CUSTOM_INSTRUCTIONS sections it keeps, then its
+// own instructions. currentPageContext() is left out on purpose; the mode's
+// own context says what the reader is looking at.
+function modeInstructions (cfg) {
+  return buildBaseInstructions(CUSTOM_INSTRUCTIONS, cfg.baseBlocks, cfg.tools, AGENT_TOOL_NAMES) +
+    cfg.instructions(cfg.detail)
+}
+
+// Tell the page whether the mode it asked for can run, once per mode start.
+// A mode that cannot run on this drawer (signed in, but its integration is
+// switched off) ends at once, so the opener waiting for it is cancelled
+// rather than left to time out.
+function useModeReadiness (mode, authenticated) {
+  const reported = useRef(null)
+  useEffect(() => {
+    if (!mode || authenticated === null) return
+    const key = `${mode.mode}:${mode.nonce}`
+    if (reported.current === key) return
+    reported.current = key
+    const events = MODES[mode.mode].events
+    const props = mode.props || {}
+    if (authenticated === false) {
+      safeHeap(events.blocked, { ...props, reason: 'signed_out' })
+    } else if (!resolveMode(mode, window)) {
+      safeHeap(events.blocked, { ...props, reason: 'unavailable' })
+      endChatMode('unavailable')
+    } else {
+      safeHeap(events.ready, props)
+    }
+  }, [mode, authenticated])
+}
+
+// `inMode` is true while a chat mode runs. Ask AI's question and answer
+// events are not sent then, so a quiz never counts as an Ask AI answer.
+function handleAgentEvent (event, inMode) {
   switch (event.type) {
     case 'response_completed':
+      if (inMode) break
       safeHeap('answer_generated_docs_home', {
         thread_id: event.data.threadId,
         tool_call_count: event.data.toolCallCount,
@@ -384,7 +404,8 @@ function App () {
   const scopeIds = useKapaScopeIds()
   const colorScheme = useSiteColorScheme()
   const { authenticated, user, loginUrl } = useSession()
-  const quiz = useQuiz()
+  const mode = useChatMode()
+  useModeReadiness(mode, authenticated)
 
   // Signed-in: full Agent SDK experience (tools, history, email attribution).
   // NOTE on identity: the `user={{ email }}` prop below is EMAIL ATTRIBUTION — it's
@@ -393,30 +414,44 @@ function App () {
   // external_owner_id (docs-site lib/kapa-owner.mjs) and never carries the email.
   // So the email is searchable while the history key stays opaque.
   if (authenticated === true) {
-    // Quiz mode needs its integration; without one the drawer stays normal Ask AI.
-    // The key remounts the provider for each quiz (the nonce changes on every
-    // click), so each one starts a fresh thread and registers submitChatQuery anew.
-    const quizOn = Boolean(quiz && window.KAPA_QUIZ_INTEGRATION_ID)
+    // A mode needs its integration; without one the drawer stays normal Ask AI.
+    // The key remounts the provider for each mode start (the nonce changes on
+    // every click), so each one starts a fresh thread and registers
+    // submitChatQuery anew.
+    const cfg = resolveMode(mode, window, scopeIds)
     return (
       <AgentProvider
-        key={quizOn ? `quiz:${quiz.nonce || ''}` : 'chat'}
+        key={cfg ? `${cfg.name}:${cfg.detail.nonce || ''}` : 'chat'}
         projectId={window.KAPA_PROJECT_ID}
-        integrationId={quizOn ? window.KAPA_QUIZ_INTEGRATION_ID : window.UI_INTEGRATION_ID}
+        integrationId={cfg ? cfg.integrationId : window.UI_INTEGRATION_ID}
         model="kapa-agent-1.0"
         getSessionToken={getSessionToken}
-        tools={agentTools}
-        customInstructions={quizOn
-          ? CUSTOM_INSTRUCTIONS + QUIZ_INSTRUCTIONS + quizContext(quiz)
+        tools={cfg ? agentTools.filter((t) => cfg.tools.includes(t.name)) : agentTools}
+        customInstructions={cfg
+          ? modeInstructions(cfg)
           : CUSTOM_INSTRUCTIONS + currentPageContext()}
         user={user?.email ? { email: user.email } : undefined}
-        {...sourceGroupProps('agent', scopeIds)}
-        enableHistory={!quizOn}
-        onEvent={handleAgentEvent}
+        {...(cfg ? sourceGroupProps('agent', cfg.sourceGroupIds) : sourceGroupProps('agent', scopeIds))}
+        enableHistory={cfg ? cfg.enableHistory : true}
+        onEvent={(event) => handleAgentEvent(event, Boolean(cfg))}
         theme={{ accentColor: '#444ce7', colorScheme }}
       >
-        <ChatInterface />
+        <ChatInterface
+          mode={cfg ? cfg.name : null}
+          modeDetail={cfg ? cfg.detail : null}
+          persistThread={cfg ? cfg.persistThread : true}
+          showSources={cfg ? cfg.showSources : true}
+        />
       </AgentProvider>
     )
+  }
+
+  // A mode on the anonymous tier: a stale sign-in cookie can land a reader
+  // here after the mode's button showed. The mode runs only on the agent tier,
+  // so ask them to sign in, and never send its opener as an anonymous
+  // question that spends their free allowance.
+  if (authenticated === false && mode) {
+    return <ModeSignIn mode={mode.mode} loginUrl={loginUrl} />
   }
 
   // Anonymous: same drawer, Chat SDK (no session backend, no agent quota).

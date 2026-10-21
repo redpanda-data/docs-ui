@@ -15,16 +15,17 @@ import {
 } from 'lucide-react'
 import { safeHeap } from '../heap.js'
 import { Answer, Toast } from './chatShared.jsx'
+import { ModeBanner } from './ModeBanner.jsx'
+import {
+  MODES, MODE_END_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
+  isModeThread, rememberThread, threadToResume, forgetThread, endChatMode,
+} from '../chatModes.js'
 
 // Example prompts for the signed-in agent welcome screen come from
 // window.AGENT_SUGGESTIONS (set per component by the get-agent-suggestions
 // helper in chat-panel.hbs) so they showcase the agent's tools in the context
 // of the product being read. This JS default is only a fallback if the global
 // is missing (e.g. an older host page).
-// sessionStorage key for the active conversation, so navigating between docs
-// pages (full reloads) resumes the same thread instead of starting fresh.
-const ACTIVE_THREAD_KEY = 'kapa-active-thread'
-
 const AGENT_EXAMPLES_FALLBACK = [
   'Write and test a Bloblang mapping that flattens nested JSON',
   "What's the latest Redpanda Streaming version?",
@@ -204,19 +205,9 @@ function sourceQualifier(url) {
 // ——— Clarifying-question options ————————————————————————————————————
 // The agent is instructed (AskAI.jsx CUSTOM_INSTRUCTIONS) to end a clarifying
 // question with a machine-readable final line:  OPTIONS: A | B | C
-// Split it off the answer markdown so the UI can render clickable choices.
-function splitOptions(md) {
-  const text = md || ''
-  const match = /\n\s*OPTIONS:\s*([^\n]+)\s*$/.exec(text)
-  if (!match) return { md: text, options: [] }
-  const options = match[1]
-    .split('|')
-    .map((s) => s.trim())
-    .filter((s) => s && s.length <= 60)
-    .slice(0, 5)
-  if (options.length < 2) return { md: text, options: [] }
-  return { md: text.slice(0, match.index), options }
-}
+// splitModeControls (chatModes.js) splits it, and any other control line the
+// chat mode uses, off the answer markdown so the UI can render clickable
+// choices.
 
 function AnswerOptions({ options, onPick, disabled }) {
   if (!options.length) return null
@@ -307,7 +298,16 @@ function ActionButtons({ onReset, onCopy, showToast }) {
  *
  * Manages user input, conversation state, and UI responsiveness for both desktop and mobile. Handles dynamic textarea resizing, scroll-to-bottom behavior, and conditional display of header/footer elements based on user interaction. Integrates with the chat backend via the `useAgentChat` hook to submit queries, stop or reset conversations, and display AI-generated suggestions. Signed-in users (detected via the `kapa-session` event from AskAI.jsx) also get a conversation-history view backed by the Kapa Agent SDK.
  */
-export default function ChatInterface() {
+//
+// Props are set by AskAI.jsx from the chat mode table (chatModes.js). With no
+// `mode` this is plain Ask AI.
+//   mode           the running chat mode's name, or null
+//   modeDetail     what the page started the mode with (title, url, nonce)
+//   persistThread  false keeps this thread out of the reader's resume pointer
+//   showSources    false hides the per-answer source list
+export default function ChatInterface({ mode = null, modeDetail = null, persistThread = true, showSources = true }) {
+  const modeDef = (mode && MODES[mode]) || null
+  const modeProps = (modeDetail && modeDetail.props) || {}
   const [message, setMessage]               = useState('')
   const [dots, setDots]                     = useState('')
   const [showScrollDown, setShowScrollDown] = useState(false)
@@ -319,7 +319,7 @@ export default function ChatInterface() {
   // of the welcome screen / default questions before resumeThread() resolves.
   // Cleared once the resume settles (success, failure, or nothing to resume).
   const [resuming, setResuming]             = useState(() => {
-    try { return !!sessionStorage.getItem(ACTIVE_THREAD_KEY) } catch { return false }
+    try { return !!threadToResume(sessionStorage, persistThread) } catch { return false }
   })
   const [toast, setToast]                   = useState(null)
   // null = session state unknown (probe in flight), false = anonymous, true = signed in
@@ -332,6 +332,7 @@ export default function ChatInterface() {
   const [showHistory, setShowHistory]       = useState(false)
   const textareaRef = useRef(null)
   const conversationAreaRef = useRef(null)
+  const historyRef = useRef(null)
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type })
@@ -423,11 +424,11 @@ export default function ChatInterface() {
   // reloads on this static (Antora) site — reopens the SAME conversation
   // instead of starting a fresh one. sessionStorage is per-tab by design: a new
   // tab still starts clean, and "New chat" clears it (see handleReset).
+  // A chat mode with persistThread false leaves the pointer alone, so the
+  // reader's Ask AI conversation is the one that comes back after a quiz.
   useEffect(() => {
     window.__KAPA_THREAD_ID = threadId
-    if (threadId) {
-      try { sessionStorage.setItem(ACTIVE_THREAD_KEY, threadId) } catch { /* storage unavailable */ }
-    }
+    try { rememberThread(sessionStorage, threadId, persistThread) } catch { /* storage unavailable */ }
     return () => {
       delete window.__KAPA_THREAD_ID
     }
@@ -445,14 +446,14 @@ export default function ChatInterface() {
       return
     }
     let stored = null
-    try { stored = sessionStorage.getItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ }
+    try { stored = threadToResume(sessionStorage, persistThread) } catch { /* ignore */ }
     if (!stored || stored === threadId) { setResuming(false); return }
     didResumeRef.current = true
     resumeThread(stored)
       .then(() => setHasInteracted(true))
-      .catch(() => { try { sessionStorage.removeItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ } })
+      .catch(() => { try { forgetThread(sessionStorage, persistThread) } catch { /* ignore */ } })
       .finally(() => setResuming(false))
-  }, [authenticated, resumeThread, threadId])
+  }, [authenticated, resumeThread, threadId, persistThread])
 
   // A resumed or in-flight conversation should show the conversation view
   useEffect(() => {
@@ -462,6 +463,89 @@ export default function ChatInterface() {
   const lastMessage = messages[messages.length - 1]
   // Waiting for the first assistant tokens of the current turn
   const isPreparing = isStreaming && (!lastMessage || lastMessage.role === 'user')
+
+  // ——— Chat mode reporting ——————————————————————————————————————————————
+  // The Agent SDK's response_completed event carries only the thread id and a
+  // tool count, so a mode's progress is read from the conversation itself, once
+  // each answer has finished streaming.
+  const modeProgress = modeDef ? quizProgress(messages) : null
+  const modeProgressRef = useRef(modeProgress)
+  modeProgressRef.current = modeProgress
+  const reportedRef = useRef({ question: 0, complete: false, error: false })
+  useEffect(() => {
+    if (!modeDef || isStreaming || !modeProgress) return
+    const events = modeDef.events
+    const seen = reportedRef.current
+    const last = messages[messages.length - 1]
+    // A new run of questions in the same thread ("New questions").
+    if (modeProgress.questionsSeen < seen.question) Object.assign(seen, { question: 0, complete: false })
+    if (modeProgress.questionsSeen > seen.question) {
+      seen.question = modeProgress.questionsSeen
+      safeHeap(events.question, { ...modeProps, n: modeProgress.questionsSeen, thread_id: threadId })
+    }
+    if (modeProgress.result && !seen.complete) {
+      seen.complete = true
+      safeHeap(events.complete, {
+        ...modeProps,
+        score_reported: modeProgress.result.score,
+        score_tally: modeProgress.tally,
+        thread_id: threadId,
+      })
+    }
+    if (last && last.isError && modeProgress.questionsSeen === 0 && !seen.error) {
+      seen.error = true
+      safeHeap(events.error, { ...modeProps, stage: 'first_turn' })
+    }
+  }, [modeDef, isStreaming, messages, threadId])
+
+  // Report how far the reader got when the mode ends, whatever ended it.
+  const reportModeEnd = (reason) => {
+    if (!modeDef) return
+    safeHeap(modeDef.events.end, {
+      ...modeProps,
+      reason,
+      questions_seen: modeProgressRef.current ? modeProgressRef.current.questionsSeen : 0,
+    })
+  }
+  useEffect(() => {
+    if (!modeDef) return
+    const onEnd = (e) => reportModeEnd((e.detail && e.detail.reason) || 'other')
+    window.addEventListener(MODE_END_EVENT, onEnd)
+    return () => window.removeEventListener(MODE_END_EVENT, onEnd)
+  }, [modeDef])
+
+  // In a mode, put the reader back in the message box when an answer finishes,
+  // unless they have moved focus somewhere of their own. The box is disabled
+  // while streaming, so the drawer's open could not focus it then.
+  useEffect(() => {
+    if (!modeDef || isStreaming || !textareaRef.current) return
+    const active = document.activeElement
+    const idle = !active || active === document.body ||
+      (active.matches && active.matches('[data-chat-action="close"]'))
+    if (idle && document.querySelector('[data-chat-panel].is-open')) {
+      try { textareaRef.current.focus() } catch { /* ignore */ }
+    }
+  }, [modeDef, isStreaming])
+
+  // ——— History filter ——————————————————————————————————————————————————
+  // The Agent SDK's history list has no filter of its own, so threads a chat
+  // mode started are hidden here by title (see isModeThread). Rows are matched
+  // on the SDK's markup: an li whose first button's first div is the title.
+  // If Kapa turns out to scope threads by integration, this can go.
+  useEffect(() => {
+    const root = historyRef.current
+    if (!showHistory || !root) return
+    const apply = () => {
+      root.querySelectorAll('li').forEach((li) => {
+        const title = li.querySelector('button > div')
+        li.classList.toggle('chat-history-mode-thread', Boolean(title && isModeThread(title.textContent)))
+      })
+    }
+    apply()
+    const observer = new MutationObserver(apply)
+    observer.observe(root, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [showHistory])
 
   // Show/hide "scroll down" button
   useEffect(() => {
@@ -581,15 +665,25 @@ export default function ChatInterface() {
     else if (/self[- ]managed/.test(t)) conversationProduct = 'Self-Managed'
   }
 
-  const doQuery = (q) => {
+  // `via` says how the reader sent it: 'chip' for an option button. In a chat
+  // mode Ask AI's question event is not sent; the mode reports answers itself,
+  // never with their text.
+  const doQuery = (q, via = 'typed') => {
     if (authenticated !== true) return
     if (!q.trim()) return
     if (!hasInteracted) setHasInteracted(true)
     setShowHistory(false)
-    safeHeap('ask_question_docs_home', {
-      question: q,
-      thread_id: threadId,
-    })
+    if (!modeDef) {
+      safeHeap('ask_question_docs_home', {
+        question: q,
+        thread_id: threadId,
+      })
+    } else if (modeDef.events.answer) {
+      const progress = quizProgress(messages)
+      if (progress.questionsSeen > progress.answers) {
+        safeHeap(modeDef.events.answer, { ...modeProps, n: progress.questionsSeen, via, thread_id: threadId })
+      }
+    }
     sendMessage(q).catch((err) => {
       console.error('Chat error:', err)
       showToast('Chat is temporarily unavailable. Try again shortly.', 'error')
@@ -598,7 +692,10 @@ export default function ChatInterface() {
     setDropdownOpen(false) // close dropdown when you tap anything
   }
 
-  // Expose submitChatQuery globally for external components (playground, code blocks)
+  // Expose submitChatQuery globally for external components (playground, code blocks).
+  // modeNonce says which chat mode start this interface serves (none for plain
+  // Ask AI): openChatWithQuery hands a query only to the interface whose nonce
+  // matches its own.
   useEffect(() => {
     window.submitChatQuery = (query, autoSubmit = true) => {
       if (!query || !query.trim()) return
@@ -612,10 +709,11 @@ export default function ChatInterface() {
         }
       }
     }
+    window.submitChatQuery.modeNonce = modeDef && modeDetail ? modeDetail.nonce : undefined
     return () => {
       delete window.submitChatQuery
     }
-  }, [sendMessage, hasInteracted, threadId, authenticated])
+  }, [sendMessage, hasInteracted, threadId, authenticated, messages, mode, modeDetail])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -624,6 +722,12 @@ export default function ChatInterface() {
   }
 
   const handleReset = () => {
+    // In a chat mode, Clear and New chat end the mode: the drawer goes back to
+    // Ask AI and the reader's own conversation.
+    if (modeDef) {
+      endChatMode('clear')
+      return
+    }
     resetConversation()
     // Starting a new chat drops the resume pointer, so navigating away doesn't
     // reopen the conversation we just left.
@@ -783,8 +887,11 @@ export default function ChatInterface() {
             )}
           </div>
         )}
+        {modeDef && (
+          <ModeBanner mode={mode} detail={modeDetail} onRestart={() => reportModeEnd('restart')} />
+        )}
         {showHistory && (
-          <div className="chat-history-view">
+          <div className="chat-history-view" ref={historyRef}>
             <AgentThreadHistory onThreadSelected={handleThreadSelected} />
           </div>
         )}
@@ -959,8 +1066,11 @@ export default function ChatInterface() {
               blocks.forEach((b, i) => {
                 if (b.type === 'text' && (b.content || '').trim()) lastTextIdx = i
               })
-              const answerMd = lastTextIdx >= 0 ? blocks[lastTextIdx].content : m.content
-              const { md: answerBody, options } = splitOptions(answerMd)
+              const answerMd = answerText(m)
+              const { md: answerBody, options } = splitModeControls(answerMd, {
+                controls: modeDef ? modeDef.controls : undefined,
+                streaming: isLast && isStreaming,
+              })
               const optionsLive = isLast && !isStreaming && !m.isError
               return (
                 <div key={idx} className={`qa-pair ${m.isError ? 'qa-pair-error' : ''}`}>
@@ -991,9 +1101,9 @@ export default function ChatInterface() {
                   })}
                   {lastTextIdx < 0 && <Answer md={answerBody} />}
                   {options.length > 0 && (
-                    <AnswerOptions options={options} onPick={doQuery} disabled={!optionsLive} />
+                    <AnswerOptions options={options} onPick={(opt) => doQuery(opt, 'chip')} disabled={!optionsLive} />
                   )}
-                  <AnswerSources blocks={m.blocks} conversationProduct={conversationProduct} />
+                  {showSources && <AnswerSources blocks={m.blocks} conversationProduct={conversationProduct} />}
                   {isLast && !isStreaming && (
                     <div className="actions-feedback flex justify-between items-center">
                       <ActionButtons
@@ -1032,7 +1142,7 @@ export default function ChatInterface() {
           <form onSubmit={handleSubmit} className="chat-input-form">
             <div className="chat-input-wrapper">
               <label htmlFor="chat-message" className="visually-hidden">
-                Ask a question about Redpanda
+                {modeDef ? modeDef.inputLabel : 'Ask a question about Redpanda'}
               </label>
               <textarea
                 ref={textareaRef}
@@ -1041,7 +1151,7 @@ export default function ChatInterface() {
                 className="chat-input"
                 autoComplete="off"
                 rows={1}
-                placeholder="Ask anything about Redpanda docs..."
+                placeholder={modeDef ? modeDef.placeholder : 'Ask anything about Redpanda docs...'}
                 value={message}
                 onChange={(e) => {
                   setMessage(e.target.value)

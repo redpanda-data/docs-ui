@@ -1224,12 +1224,14 @@
   var DRAFT_DOWNLOAD_LABEL = 'Download available at release'
 
   // Open Ask AI in quiz mode for this step. The drawer bundle may not be loaded
-  // yet, so the quiz is also left on window for it to read when it mounts. The
-  // nonce gives every click its own fresh quiz thread; dropping submitChatQuery
-  // makes openChatWithQuery wait for the quiz interface rather than send the
-  // first message to the one being replaced.
+  // yet, so the quiz is also left on window for it to read when it mounts
+  // (react/chatModes.js). The nonce gives every click its own fresh quiz
+  // thread, and openChatWithQuery sends the first message only to the
+  // interface registered for that nonce. __docsChatQuiz and docs-chat:quiz are
+  // the pilot's names, kept for a drawer bundle older than this page.
   function startQuiz (el) {
     var title = attr(el, 'data-quiz-title') || (steps().titles[stepId] || '')
+    var query = 'Quiz me on this step' + (title ? ': ' + title : '') + '.'
     var detail = {
       title: title,
       rule: attr(el, 'data-quiz-rule') || '',
@@ -1237,13 +1239,17 @@
       solution: solutionId,
       step: stepId,
       nonce: now(),
+      firstMessage: query,
+      props: baseProps(),
     }
     window.__docsChatQuiz = detail
+    window.__docsChatMode = Object.assign({ mode: 'quiz' }, detail)
     try { delete window.submitChatQuery } catch (e) { window.submitChatQuery = undefined }
+    dispatch('docs-chat:mode', window.__docsChatMode)
     dispatch('docs-chat:quiz', detail)
     track('solution_quiz_start', baseProps())
     if (typeof window.openChatWithQuery === 'function') {
-      window.openChatWithQuery('Quiz me on this step' + (title ? ': ' + title : '') + '.', true)
+      window.openChatWithQuery(query, true, { mode: 'quiz', nonce: detail.nonce })
     }
   }
 
