@@ -7,7 +7,7 @@
  * A mode changes more than the prompt. It runs on its own Kapa integration,
  * passes its own tools and source groups, keeps its thread out of the reader's
  * resume pointer and history list, strips its own control lines from answers,
- * and stays out of the Ask AI analytics. The quiz pilot did each of these at a
+ * and keeps its questions and answers out of the Ask AI analytics. The quiz pilot did each of these at a
  * separate call site and missed several (the resume pointer, history, other
  * Ask AI entry points). Every one of those decisions is read from the table
  * below instead, so a new mode is one entry.
@@ -183,19 +183,24 @@ export const GUIDE_WHOLE_SECTIONS = ['Adapt', 'Acceptance', 'System map', 'Refer
 //                    the model makes stays scoped rather than unfiltered.
 //   baseBlocks       the CUSTOM_INSTRUCTIONS sections the mode keeps
 //   tools            names of the agent tools the mode passes
+//   dropBullets      patterns for base-block bullets the mode leaves out,
+//                    such as those pointing at a block it does not keep
 //   instructions     the mode's own prompt, appended after the base blocks
 //   enableHistory    Agent SDK history for the mode's provider
 //   persistThread    whether the thread becomes the reader's resume pointer
 //   showSources      whether answers list their sources
-//   controls         machine-read final lines stripped from answers, last first
-//   threadPrefix     how the mode's first message starts, used to keep its
-//                    threads out of the Ask AI history list
+//   controls         machine-read final lines stripped from answers
+//   threadPattern    matches the mode's first message, used to keep its
+//                    threads out of the Ask AI history list. It matches the
+//                    whole opener, so a reader's own question that happens to
+//                    start the same way stays in their history.
 //   firstMessage     the opener sent when the page did not supply one
 //   placeholder, inputLabel  the message box while the mode runs
 //   viewLabel        banner link back to the page the mode is about
 //   restart          whether the banner offers Restart
 //   note             one line the banner shows under the title, if any
 //   signInTitle      what the anonymous tier says instead of running the mode
+//   returnHash       where on the page signing in from the drawer returns to
 //   toolContext      the provider context for client-side tools, if any
 //   events           Heap event names. Ask AI's own ask and answer events are
 //                    never sent in a mode. A mode without question, answer
@@ -212,7 +217,7 @@ export const MODES = {
     persistThread: false,
     showSources: false,
     controls: ['QUIZ_RESULT', 'OPTIONS'],
-    threadPrefix: 'Quiz me on this step',
+    threadPattern: /^Quiz me on this step(?:: .+?)?(?: \([^()\s]+\))?\.$/,
     firstMessage: quizOpener,
     placeholder: 'Type your answer, or pick an option',
     inputLabel: 'Your answer',
@@ -233,19 +238,22 @@ export const MODES = {
   // keeps every CUSTOM_INSTRUCTIONS block except Clarifying the user's
   // context: that block allows one clarifying question and points at a
   // Current page block the mode leaves out, and the mode's own Start rules
-  // ask up to three. Tool lines for tools it does not pass are dropped.
+  // ask up to three. The bullets elsewhere that send the model back to "the
+  // clarifying question" go with it. Tool lines for tools it does not pass
+  // are dropped.
   productionize: {
     label: 'Planning',
     integrationKey: 'KAPA_PRODUCTIONIZE_INTEGRATION_ID',
     sourceGroupsKey: 'KAPA_PRODUCTIONIZE_SOURCE_GROUP_IDS',
     baseBlocks: ['Domain context', 'Offering choices', 'Citing sources', 'Writing style', 'Tool strategy', 'Do not'],
     tools: ['get_solution_guide', 'run_bloblang', 'lookup_config_property', 'get_latest_version', 'open_console'],
+    dropBullets: [/the clarifying question/],
     instructions: (detail) => PRODUCTIONIZE_INSTRUCTIONS + productionizeContext(detail),
     enableHistory: false,
     persistThread: false,
     showSources: true,
     controls: ['OPTIONS'],
-    threadPrefix: 'Help me take ',
+    threadPattern: /^Help me take .+ to production\.$/,
     firstMessage: productionizeOpener,
     placeholder: 'Tell Ask AI about your system',
     inputLabel: 'Your reply',
@@ -253,6 +261,8 @@ export const MODES = {
     restart: false,
     note: 'This conversation is stored with your account. Don\'t paste credentials or internal hostnames.',
     signInTitle: 'Sign in to plan it with Ask AI',
+    // The card's own sign-in returns here too (33-solution-productionize.js).
+    returnHash: '#take-to-production',
     // The context the provider passes to client-side tools. It never goes to
     // Kapa; get_solution_guide reads the sliced companion from it.
     toolContext: (detail) => ({ solutionGuide: (detail && detail.guide) || null }),
@@ -293,15 +303,82 @@ export function resolveMode (detail, win, pageScope) {
   return Object.assign({}, def, { name: d.mode, detail: d, integrationId, sourceGroupIds })
 }
 
+// Which drawer App renders:
+//   'loading'      the session probe has not answered yet
+//   'agent'        signed in: the Agent SDK, as Ask AI or as the mode
+//   'mode-signin'  signed out with a mode asked for. A stale sign-in cookie
+//                  can show a mode's button to a signed-out reader; the mode
+//                  runs only on the agent tier, so ask them to sign in rather
+//                  than send its opener as an anonymous question that spends
+//                  their free allowance.
+//   'chat'         signed out: the Chat SDK
+export function drawerTier (authenticated, mode) {
+  if (authenticated === true) return 'agent'
+  if (authenticated === false) return mode ? 'mode-signin' : 'chat'
+  return 'loading'
+}
+
+// What to tell the page about the mode it asked for, or null while the session
+// is unknown: { event: 'ready' } or { event: 'blocked', reason }. `end` means
+// the mode cannot run on this drawer (signed in, but its integration is
+// switched off), so it ends at once and the opener waiting for it is
+// cancelled rather than left to time out.
+export function modeReadiness (mode, authenticated, win) {
+  if (!mode || authenticated === null || authenticated === undefined) return null
+  if (authenticated === false) return { event: 'blocked', reason: 'signed_out' }
+  if (!resolveMode(mode, win)) return { event: 'blocked', reason: 'unavailable', end: true }
+  return { event: 'ready' }
+}
+
+// The AgentProvider and ChatInterface props that change with the mode. `cfg`
+// is resolveMode()'s result, or null for plain Ask AI. `ask` holds plain Ask
+// AI's own settings and the tools a mode picks from:
+//   integrationId, tools, instructions (CUSTOM_INSTRUCTIONS), pageContext,
+//   scopeIds, modeTools (every tool object), knownTools (every tool name)
+// The key remounts the provider for each mode start (the nonce changes on
+// every click), so each one starts a fresh thread and registers
+// submitChatQuery anew. A mode's prompt leaves out the page context on
+// purpose: the mode's own context says what the reader is looking at.
+export function agentProps (cfg, ask) {
+  if (!cfg) {
+    return {
+      key: 'chat',
+      integrationId: ask.integrationId,
+      tools: ask.tools,
+      context: undefined,
+      customInstructions: ask.instructions + ask.pageContext,
+      sourceGroupIds: ask.scopeIds,
+      enableHistory: true,
+      inMode: false,
+      chat: { mode: null, modeDetail: null, persistThread: true, showSources: true },
+    }
+  }
+  return {
+    key: `${cfg.name}:${cfg.detail.nonce || ''}`,
+    integrationId: cfg.integrationId,
+    tools: ask.modeTools.filter((t) => cfg.tools.includes(t.name)),
+    context: cfg.toolContext ? cfg.toolContext(cfg.detail) : undefined,
+    customInstructions: buildBaseInstructions(ask.instructions, cfg.baseBlocks, cfg.tools, ask.knownTools, cfg.dropBullets) +
+      cfg.instructions(cfg.detail),
+    sourceGroupIds: cfg.sourceGroupIds,
+    enableHistory: cfg.enableHistory,
+    inMode: true,
+    chat: { mode: cfg.name, modeDetail: cfg.detail, persistThread: cfg.persistThread, showSources: cfg.showSources },
+  }
+}
+
 // The `## ` sections of CUSTOM_INSTRUCTIONS named in `blocks`, in source order.
 // Inside them, a top-level bullet that names an agent tool the mode does not
 // pass is dropped with its sub-lines: telling the model to verify with
 // run_bloblang when it has no run_bloblang sends it looking for a tool that is
-// not there. `knownTools` is every tool name the prompt might mention.
-export function buildBaseInstructions (text, blocks, tools, knownTools) {
+// not there. `knownTools` is every tool name the prompt might mention. A
+// bullet matching one of `dropBullets` is dropped the same way.
+export function buildBaseInstructions (text, blocks, tools, knownTools, dropBullets) {
   const passed = new Set(tools || [])
   const missing = (knownTools || []).filter((name) => !passed.has(name))
-  const mentionsMissing = (lines) => missing.some((name) => lines.some((l) => new RegExp(`\\b${name}\\b`).test(l)))
+  const drop = dropBullets || []
+  const mentionsMissing = (lines) => missing.some((name) => lines.some((l) => new RegExp(`\\b${name}\\b`).test(l))) ||
+    drop.some((re) => re.test(lines.join(' ').replace(/\s+/g, ' ')))
   const sections = String(text || '').split(/^(?=## )/m)
   const kept = []
   for (const section of sections) {
@@ -328,40 +405,57 @@ export function buildBaseInstructions (text, blocks, tools, knownTools) {
 // Split machine-read control lines off the end of an answer.
 //   OPTIONS: A | B | C   choices the UI renders as buttons
 //   QUIZ_RESULT: 2/3     the score the quiz reports
-// `controls` lists the lines to strip, last line first. While `streaming`, a
-// trailing line that is still the start of a control line is hidden too, so
-// "OPTI" or "QUIZ_RES" never flashes in the answer before the rest arrives.
+// `controls` lists the lines to strip. They are read from the block of control
+// lines that ends the answer, in any order, so a model that swaps the two
+// lines, bolds one or ends it with a period still finishes the quiz. While
+// `streaming`, a trailing line that is still the start of a control line is
+// hidden too, so "OPTI" or "QUIZ_RES" never flashes in the answer before the
+// rest arrives.
 export function splitModeControls (md, opts) {
   const o = opts || {}
   const controls = o.controls || ['OPTIONS']
   let text = md || ''
   if (o.streaming) {
     const nl = text.lastIndexOf('\n')
-    const tail = nl >= 0 ? text.slice(nl + 1).trim() : ''
+    const tail = nl >= 0 ? text.slice(nl + 1).trim().replace(/^\*\*/, '') : ''
     if (tail && controls.some((name) => (name + ':').startsWith(tail))) text = text.slice(0, nl)
   }
+  const lines = text.split('\n')
+  const seen = new Set()
   let options = []
   let result = null
-  for (const name of controls) {
-    const match = new RegExp(`\\n\\s*${name}:[ \\t]*([^\\n]*?)\\s*$`).exec(text)
-    if (!match) continue
-    if (name === 'OPTIONS') {
-      const parsed = match[1]
+  let end = lines.length
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (!lines[i].trim()) continue
+    const line = readControlLine(lines[i], controls)
+    if (!line || seen.has(line.name)) break
+    if (line.name === 'OPTIONS') {
+      const parsed = line.value
         .split('|')
         .map((s) => s.trim())
         .filter((s) => s && s.length <= 60)
         .slice(0, 5)
       // A finished line with fewer than two options is prose, not a control,
       // so it stays. Mid-stream it is a control still arriving.
-      if (parsed.length < 2 && !o.streaming) continue
+      if (parsed.length < 2 && !o.streaming) break
       options = parsed.length < 2 ? [] : parsed
-    } else if (name === 'QUIZ_RESULT') {
-      const score = /^(\d+)\s*\/\s*(\d+)$/.exec(match[1])
+    } else if (line.name === 'QUIZ_RESULT') {
+      const score = /(\d+)\s*\/\s*(\d+)/.exec(line.value)
       result = score ? { score: Number(score[1]), total: Number(score[2]) } : null
     }
-    text = text.slice(0, match.index)
+    seen.add(line.name)
+    end = i
   }
+  if (end < lines.length) text = lines.slice(0, end).join('\n').replace(/\s+$/, '')
   return { md: text, options, result }
+}
+
+// One control line, as { name, value }, or null. Bold around the line or
+// around its name, and a final period, are dropped.
+function readControlLine (line, controls) {
+  const m = /^(?:\*\*)?([A-Z_]+):(?:\*\*)?[ \t]*(.*?)[ \t]*(?:\*\*)?$/.exec(line.trim())
+  if (!m || !controls.includes(m[1])) return null
+  return { name: m[1], value: m[2].replace(/\.$/, '').trim() }
 }
 
 // The text a reader sees as the answer: the last non-empty text block. Earlier
@@ -377,6 +471,9 @@ export function answerText (message) {
 // Where a quiz stands, from the conversation alone. `tally` counts answers
 // graded "Correct." since the last "Question 1 of 3", so it can be checked
 // against the score the model reports. "Partly correct." does not count.
+// A question is read only from a line that starts with "Question N of 3", and
+// never from the finishing message, so a recap such as "- Question 1 of 3:
+// reread Why this approach" neither restarts the tally nor counts as asked.
 export function quizProgress (messages) {
   let questionsSeen = 0
   let tally = 0
@@ -389,14 +486,17 @@ export function quizProgress (messages) {
     }
     const text = answerText(m)
     if (/^\s*(?:\*\*)?Correct\./.test(text)) tally++
-    const asked = /Question\s+(\d+)\s+of\s+3/.exec(text)
+    const controls = splitModeControls(text, { controls: MODES.quiz.controls })
+    if (controls.result) {
+      result = controls.result
+      continue
+    }
+    const asked = /^[ \t]*(?:\*\*)?Question\s+(\d+)\s+of\s+3\b/m.exec(text)
     if (asked) {
       const n = Number(asked[1])
       if (n === 1) { tally = 0; answers = 0; result = null }
       questionsSeen = n
     }
-    const controls = splitModeControls(text, { controls: MODES.quiz.controls })
-    if (controls.result) result = controls.result
   }
   return { questionsSeen, answers, tally, result }
 }
@@ -406,7 +506,7 @@ export function quizProgress (messages) {
 // shows up in the reader's Ask AI history.
 export function isModeThread (title) {
   const t = String(title || '').trim()
-  return Object.values(MODES).some((def) => t.startsWith(def.threadPrefix))
+  return Object.values(MODES).some((def) => def.threadPattern.test(t))
 }
 
 // The resume pointer. A mode with persistThread false neither writes nor
@@ -424,6 +524,30 @@ export function threadToResume (storage, persist) {
 export function forgetThread (storage, persist) {
   if (!persist) return
   try { storage.removeItem(ACTIVE_THREAD_KEY) } catch { /* ignore */ }
+}
+
+// Expose `fn` as window.submitChatQuery for openChatWithQuery and the other
+// Ask AI entry points. modeNonce says which mode start the interface serves
+// (none for plain Ask AI): 19-chat-panel.js hands a mode's opener only to the
+// interface whose nonce matches, never to the Ask AI one being replaced.
+// Returns the cleanup for the effect that calls it.
+export function registerSubmit (win, fn, modeDef, modeDetail) {
+  const w = win || window
+  fn.modeNonce = modeDef && modeDetail ? modeDetail.nonce : undefined
+  w.submitChatQuery = fn
+  return () => {
+    if (w.submitChatQuery === fn) delete w.submitChatQuery
+  }
+}
+
+// Mark the history rows of threads a mode started, so CSS hides them. Rows
+// are matched on the Agent SDK's markup: an li whose first button's first
+// div is the thread title.
+export function markModeThreads (root) {
+  root.querySelectorAll('li').forEach((li) => {
+    const title = li.querySelector('button > div')
+    li.classList.toggle('chat-history-mode-thread', Boolean(title && isModeThread(title.textContent)))
+  })
 }
 
 // End the current mode. 19-chat-panel.js owns this as window.endChatMode so it

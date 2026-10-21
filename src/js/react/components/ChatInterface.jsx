@@ -18,7 +18,7 @@ import { Answer, Toast } from './chatShared.jsx'
 import { ModeBanner } from './ModeBanner.jsx'
 import {
   MODES, MODE_END_EVENT, MODE_COMPLETE_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
-  isModeThread, rememberThread, threadToResume, forgetThread, endChatMode,
+  markModeThreads, registerSubmit, rememberThread, threadToResume, forgetThread, endChatMode,
 } from '../chatModes.js'
 
 // Example prompts for the signed-in agent welcome screen come from
@@ -539,18 +539,12 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
 
   // ——— History filter ——————————————————————————————————————————————————
   // The Agent SDK's history list has no filter of its own, so threads a chat
-  // mode started are hidden here by title (see isModeThread). Rows are matched
-  // on the SDK's markup: an li whose first button's first div is the title.
+  // mode started are hidden here by title (see markModeThreads).
   // If Kapa turns out to scope threads by integration, this can go.
   useEffect(() => {
     const root = historyRef.current
     if (!showHistory || !root) return
-    const apply = () => {
-      root.querySelectorAll('li').forEach((li) => {
-        const title = li.querySelector('button > div')
-        li.classList.toggle('chat-history-mode-thread', Boolean(title && isModeThread(title.textContent)))
-      })
-    }
+    const apply = () => markModeThreads(root)
     apply()
     const observer = new MutationObserver(apply)
     observer.observe(root, { childList: true, subtree: true })
@@ -702,12 +696,10 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
     setDropdownOpen(false) // close dropdown when you tap anything
   }
 
-  // Expose submitChatQuery globally for external components (playground, code blocks).
-  // modeNonce says which chat mode start this interface serves (none for plain
-  // Ask AI): openChatWithQuery hands a query only to the interface whose nonce
-  // matches its own.
+  // Expose submitChatQuery globally for external components (playground, code
+  // blocks), tagged with the mode start this interface serves (registerSubmit).
   useEffect(() => {
-    window.submitChatQuery = (query, autoSubmit = true) => {
+    const submit = (query, autoSubmit = true) => {
       if (!query || !query.trim()) return
       if (autoSubmit) {
         doQuery(query)
@@ -719,10 +711,7 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
         }
       }
     }
-    window.submitChatQuery.modeNonce = modeDef && modeDetail ? modeDetail.nonce : undefined
-    return () => {
-      delete window.submitChatQuery
-    }
+    return registerSubmit(window, submit, modeDef, modeDetail)
   }, [sendMessage, hasInteracted, threadId, authenticated, messages, mode, modeDetail])
 
   const handleSubmit = (e) => {

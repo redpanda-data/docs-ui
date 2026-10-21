@@ -96,8 +96,14 @@ function instructionsFor (guide, slug) {
     guideUrl: `${ORIGIN}/solutions/${slug}/`,
     guide,
   }
-  const base = modes.buildBaseInstructions(CUSTOM_INSTRUCTIONS, def.baseBlocks, def.tools, tools.modeTools.map((t) => t.name))
-  return { all: base + def.instructions(detail), block: modes.productionizeContext(detail) }
+  // The string App sends, from the same agentProps it spreads.
+  const cfg = modes.resolveMode({ mode: 'productionize', ...detail }, { [def.integrationKey]: 'p' }, [])
+  const all = modes.agentProps(cfg, {
+    instructions: CUSTOM_INSTRUCTIONS,
+    modeTools: tools.modeTools,
+    knownTools: tools.modeTools.map((t) => t.name),
+  }).customInstructions
+  return { all, block: modes.productionizeContext(detail) }
 }
 
 for (const slug of SLUGS) {

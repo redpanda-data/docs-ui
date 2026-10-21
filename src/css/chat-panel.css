@@ -1084,9 +1084,10 @@
   background: var(--kapa-surface, #fff);
 }
 
-/* Threads a chat mode started (quiz) stay out of the Ask AI history list.
+/* Threads a chat mode started (quiz, productionize) stay out of the Ask AI
+   history list, in the drawer and in the docs home chat (#kapa-chat-root).
    The SDK styles its rows inline, so this needs !important to win. */
-#chat-panel-kapa-root .chat-history-view li.chat-history-mode-thread {
+.chat-history-view li.chat-history-mode-thread {
   display: none !important;
 }
 

@@ -12,7 +12,7 @@ import { readScopeIds, dropScope, isScopeRejection, SCOPE_DROPPED_EVENT } from '
 import { getSessionToken, installSessionProbe } from './kapaSession.js'
 import {
   MODE_EVENT, MODE_END_EVENT, LEGACY_QUIZ_EVENT, readMode, normalizeMode, resolveMode,
-  buildBaseInstructions, endChatMode, MODES,
+  endChatMode, MODES, drawerTier, modeReadiness, agentProps,
 } from './chatModes.js'
 import { ModeSignIn } from './components/ModeBanner.jsx'
 
@@ -264,40 +264,28 @@ function useChatMode () {
 // lines about tools it does not pass.
 const AGENT_TOOL_NAMES = modeTools.map((t) => t.name)
 
-// The prompt for a mode: the CUSTOM_INSTRUCTIONS sections it keeps, then its
-// own instructions. currentPageContext() is left out on purpose; the mode's
-// own context says what the reader is looking at.
-function modeInstructions (cfg) {
-  return buildBaseInstructions(CUSTOM_INSTRUCTIONS, cfg.baseBlocks, cfg.tools, AGENT_TOOL_NAMES) +
-    cfg.instructions(cfg.detail)
-}
-
-// Tell the page whether the mode it asked for can run, once per mode start.
-// A mode that cannot run on this drawer (signed in, but its integration is
-// switched off) ends at once, so the opener waiting for it is cancelled
-// rather than left to time out.
+// Tell the page whether the mode it asked for can run, once per mode start
+// (see modeReadiness in chatModes.js).
 function useModeReadiness (mode, authenticated) {
   const reported = useRef(null)
   useEffect(() => {
-    if (!mode || authenticated === null) return
+    const ready = modeReadiness(mode, authenticated, window)
+    if (!ready) return
     const key = `${mode.mode}:${mode.nonce}`
     if (reported.current === key) return
     reported.current = key
     const events = MODES[mode.mode].events
     const props = mode.props || {}
-    if (authenticated === false) {
-      safeHeap(events.blocked, { ...props, reason: 'signed_out' })
-    } else if (!resolveMode(mode, window)) {
-      safeHeap(events.blocked, { ...props, reason: 'unavailable' })
-      endChatMode('unavailable')
-    } else {
-      safeHeap(events.ready, props)
-    }
+    if (ready.event === 'ready') safeHeap(events.ready, props)
+    else safeHeap(events.blocked, { ...props, reason: ready.reason })
+    if (ready.end) endChatMode(ready.reason)
   }, [mode, authenticated])
 }
 
-// `inMode` is true while a chat mode runs. Ask AI's question and answer
-// events are not sent then, so a quiz never counts as an Ask AI answer.
+// `inMode` is true while a chat mode runs. Ask AI's answer event is not sent
+// then (ChatInterface skips the question event), so a quiz never counts as an
+// Ask AI answer. Errors, tool runs and thread events still fire under their
+// Ask AI names; none of them carries question or answer text.
 function handleAgentEvent (event, inMode) {
   switch (event.type) {
     case 'response_completed':
@@ -415,45 +403,43 @@ function App () {
   // from the conversation-history key, which the server mints as an opaque hashed
   // external_owner_id (docs-site lib/kapa-owner.mjs) and never carries the email.
   // So the email is searchable while the history key stays opaque.
-  if (authenticated === true) {
+  const tier = drawerTier(authenticated, mode)
+  if (tier === 'agent') {
     // A mode needs its integration; without one the drawer stays normal Ask AI.
-    // The key remounts the provider for each mode start (the nonce changes on
-    // every click), so each one starts a fresh thread and registers
-    // submitChatQuery anew.
-    const cfg = resolveMode(mode, window, scopeIds)
+    // agentProps (chatModes.js) picks the integration, tools, prompt, source
+    // groups and history for the mode, or for plain Ask AI.
+    const props = agentProps(resolveMode(mode, window, scopeIds), {
+      integrationId: window.UI_INTEGRATION_ID,
+      tools: agentTools,
+      instructions: CUSTOM_INSTRUCTIONS,
+      pageContext: currentPageContext(),
+      scopeIds,
+      modeTools,
+      knownTools: AGENT_TOOL_NAMES,
+    })
     return (
       <AgentProvider
-        key={cfg ? `${cfg.name}:${cfg.detail.nonce || ''}` : 'chat'}
+        key={props.key}
         projectId={window.KAPA_PROJECT_ID}
-        integrationId={cfg ? cfg.integrationId : window.UI_INTEGRATION_ID}
+        integrationId={props.integrationId}
         model="kapa-agent-1.0"
         getSessionToken={getSessionToken}
-        tools={cfg ? modeTools.filter((t) => cfg.tools.includes(t.name)) : agentTools}
-        {...(cfg && cfg.toolContext ? { context: cfg.toolContext(cfg.detail) } : {})}
-        customInstructions={cfg
-          ? modeInstructions(cfg)
-          : CUSTOM_INSTRUCTIONS + currentPageContext()}
+        tools={props.tools}
+        {...(props.context ? { context: props.context } : {})}
+        customInstructions={props.customInstructions}
         user={user?.email ? { email: user.email } : undefined}
-        {...(cfg ? sourceGroupProps('agent', cfg.sourceGroupIds) : sourceGroupProps('agent', scopeIds))}
-        enableHistory={cfg ? cfg.enableHistory : true}
-        onEvent={(event) => handleAgentEvent(event, Boolean(cfg))}
+        {...sourceGroupProps('agent', props.sourceGroupIds)}
+        enableHistory={props.enableHistory}
+        onEvent={(event) => handleAgentEvent(event, props.inMode)}
         theme={{ accentColor: '#444ce7', colorScheme }}
       >
-        <ChatInterface
-          mode={cfg ? cfg.name : null}
-          modeDetail={cfg ? cfg.detail : null}
-          persistThread={cfg ? cfg.persistThread : true}
-          showSources={cfg ? cfg.showSources : true}
-        />
+        <ChatInterface {...props.chat} />
       </AgentProvider>
     )
   }
 
-  // A mode on the anonymous tier: a stale sign-in cookie can land a reader
-  // here after the mode's button showed. The mode runs only on the agent tier,
-  // so ask them to sign in, and never send its opener as an anonymous
-  // question that spends their free allowance.
-  if (authenticated === false && mode) {
+  // A mode on the anonymous tier (see drawerTier): ask them to sign in.
+  if (tier === 'mode-signin') {
     return <ModeSignIn mode={mode.mode} loginUrl={loginUrl} />
   }
 
@@ -465,7 +451,7 @@ function App () {
   // Chat SDK's only hook for threadId/answer/feedback, so tracking lives here
   // rather than in ChatSdkInterface (which would double-count submissions and
   // has no access to the thread id).
-  if (authenticated === false) {
+  if (tier === 'chat') {
     return (
       <KapaProvider
         integrationId={window.KAPA_CHAT_INTEGRATION_ID}

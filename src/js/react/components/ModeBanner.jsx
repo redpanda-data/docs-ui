@@ -62,7 +62,7 @@ export function ModeBanner ({ mode, detail, onRestart }) {
 export function ModeSignIn ({ mode, loginUrl }) {
   const def = MODES[mode]
   if (!def) return null
-  const returnTo = window.location.pathname + window.location.search
+  const returnTo = window.location.pathname + window.location.search + (def.returnHash || '')
   // disclosed is left off: this screen shows no privacy note, so /login keeps
   // its interstitial (see docs-site docs-login.mjs).
   const href = loginUrl

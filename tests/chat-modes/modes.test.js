@@ -14,6 +14,9 @@ const vm = require('node:vm')
 const Module = require('node:module')
 const esbuild = require('esbuild')
 
+let parseHTML = null
+try { ({ parseHTML } = require('linkedom')) } catch { /* the markup test is skipped */ }
+
 const ROOT = path.join(__dirname, '..', '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 
@@ -38,6 +41,16 @@ const MODE_TOOL_NAMES = tools.modeTools.map((t) => t.name)
 const ASKAI = read('src/js/react/AskAI.jsx')
 const CHAT = read('src/js/react/components/ChatInterface.jsx')
 const CUSTOM_INSTRUCTIONS = /const CUSTOM_INSTRUCTIONS = `([\s\S]*?)`/.exec(ASKAI)[1]
+// Plain Ask AI's settings as App hands them to agentProps.
+const ASK = {
+  integrationId: 'ask-id',
+  tools: tools.agentTools,
+  instructions: CUSTOM_INSTRUCTIONS,
+  pageContext: '\n\n## Current page\n- PAGE',
+  scopeIds: ['page-grp'],
+  modeTools: tools.modeTools,
+  knownTools: MODE_TOOL_NAMES,
+}
 
 function storage (initial) {
   const data = Object.assign({}, initial)
@@ -229,7 +242,7 @@ test('productionize passes exactly the tools agentTools lists for it', () => {
 
 test('productionize keeps the citing, choices and tool blocks, minus tools it does not pass', () => {
   const def = modes.MODES.productionize
-  const base = modes.buildBaseInstructions(CUSTOM_INSTRUCTIONS, def.baseBlocks, def.tools, MODE_TOOL_NAMES)
+  const base = modes.buildBaseInstructions(CUSTOM_INSTRUCTIONS, def.baseBlocks, def.tools, MODE_TOOL_NAMES, def.dropBullets)
   for (const kept of ['## Domain context', '## Offering choices', '## Citing sources', '## Writing style', '## Tool strategy', '## Do not']) {
     assert.ok(base.includes(kept), kept)
   }
@@ -237,6 +250,12 @@ test('productionize keeps the citing, choices and tool blocks, minus tools it do
   // pointer at a Current page block the mode does not send stay out.
   assert.ok(!base.includes('## Clarifying'))
   assert.ok(!base.includes('Current page'))
+  // Nor do the bullets elsewhere that point back at that block.
+  assert.doesNotMatch(base.replace(/\s+/g, ' '), /clarifying question/)
+  assert.match(base, /Do not cite multiple product variants of the same page\./, 'the rest of Do not stays')
+  // Negative control: without dropBullets those bullets are there.
+  const kept = modes.buildBaseInstructions(CUSTOM_INSTRUCTIONS, def.baseBlocks, def.tools, MODE_TOOL_NAMES)
+  assert.match(kept.replace(/\s+/g, ' '), /Do not reason your way out of the clarifying question/)
   assert.ok(!base.includes('submit_docs_feedback'), 'feedback tool line dropped')
   assert.match(base, /ALWAYS verify a mapping with run_bloblang/, 'run_bloblang is passed, so its line stays')
   const prompt = def.instructions({ title: 'T', guide: { sections: [{ section: 'Security', text: 'x' }], topics: ['Security'], steps: 0, rules: '1. R' } })
@@ -249,7 +268,9 @@ test('the guide reaches get_solution_guide through the provider context, not the
   const def = modes.MODES.productionize
   assert.equal(def.toolContext({ guide }).solutionGuide, guide)
   assert.ok(!def.instructions({ guide }).includes('SECRET GAP TEXT'))
-  assert.match(ASKAI, /cfg && cfg\.toolContext \? \{ context: cfg\.toolContext\(cfg\.detail\) \}/)
+  const cfg = modes.resolveMode({ mode: 'productionize', guide }, { KAPA_PRODUCTIONIZE_INTEGRATION_ID: 'p' }, [])
+  assert.equal(modes.agentProps(cfg, ASK).context.solutionGuide, guide)
+  assert.match(ASKAI, /\{\.\.\.\(props\.context \? \{ context: props\.context \} : \{\}\)\}/)
   // Without a guide the prompt says so, rather than promising a tool result.
   assert.match(modes.productionizeContext({ title: 'T' }), /could not be loaded/)
 })
@@ -489,4 +510,232 @@ test('"Ask AI about this topic" goes through openChatWithQuery, unsent', () => {
   const body = src.slice(src.indexOf('function handleAskAI'), src.indexOf('function handleAddMCP'))
   assert.doesNotMatch(body, /#chat-panel-input/, 'that element does not exist in the drawer')
   assert.match(body, /window\.openChatWithQuery\([^)]*, false\)/)
+})
+
+// ——— Control line drift ——————————————————————————————————————————————————
+
+test('the score is read whatever the order, bold or final period of the control lines', () => {
+  const body = 'Not quite. Because.\n\nYou got 2 of 3.'
+  for (const tail of [
+    'OPTIONS: New questions | Ask about this step\nQUIZ_RESULT: 2/3',
+    'QUIZ_RESULT: 2/3\nOPTIONS: New questions | Ask about this step',
+    '**OPTIONS: New questions | Ask about this step**\n**QUIZ_RESULT: 2/3**',
+    '**OPTIONS:** New questions | Ask about this step\n**QUIZ_RESULT:** 2/3',
+    'OPTIONS: New questions | Ask about this step\nQUIZ_RESULT: 2/3.',
+    'OPTIONS: New questions | Ask about this step\n\nQUIZ_RESULT: 2 / 3',
+  ]) {
+    const out = modes.splitModeControls(body + '\n' + tail, QUIZ)
+    assert.deepEqual(out.result, { score: 2, total: 3 }, tail)
+    assert.deepEqual(out.options, ['New questions', 'Ask about this step'], tail)
+    assert.equal(out.md, body, tail)
+  }
+  // Only the block that ends the answer is read: a control line with prose
+  // after it is prose.
+  const mid = modes.splitModeControls('QUIZ_RESULT: 2/3\nThen more text.', QUIZ)
+  assert.equal(mid.result, null)
+  assert.equal(mid.md, 'QUIZ_RESULT: 2/3\nThen more text.')
+})
+
+test('a recap that names a question neither restarts nor advances the quiz', () => {
+  const messages = [
+    msg('user', 'Quiz me on this step: T (demo/s1).'),
+    msg('assistant', '**Question 1 of 3**\nWhy?'),
+    msg('user', 'B'),
+    msg('assistant', 'Correct. Because.\n\n**Question 2 of 3**\nWhat?'),
+    msg('user', 'x'),
+    msg('assistant', 'Correct. Yes.\n\n**Question 3 of 3**\nHow?'),
+    msg('user', 'y'),
+    msg('assistant', 'Not quite. No.\n\nYou got 2 of 3.\n- Question 1 of 3 was fine.\nQuestion 2 of 3: reread [Why](u#why)\nOPTIONS: New questions | Ask about this step\nQUIZ_RESULT: 2/3'),
+  ]
+  const p = modes.quizProgress(messages)
+  assert.deepEqual(p, { questionsSeen: 3, answers: 3, tally: 2, result: { score: 2, total: 3 } })
+  // A chip after the finish is not an answer to a new question.
+  assert.equal(modes.quizProgress(messages.concat([msg('user', 'Ask about this step')])).answers, 3)
+  // Negative control: "Question N of 3" mid-line is not a question either.
+  assert.equal(modes.quizProgress([msg('assistant', 'Earlier, Question 2 of 3 asked why.')]).questionsSeen, 0)
+})
+
+test('the history filter matches whole openers, so a reader\'s own question stays', () => {
+  assert.equal(modes.isModeThread('Help me take Multiplayer gaming to production.'), true)
+  assert.equal(modes.isModeThread('Help me take a backup of my cluster'), false)
+  assert.equal(modes.isModeThread('Quiz me on this step: Create the topics (demo/s1).'), true)
+  assert.equal(modes.isModeThread('Quiz me on this step please, on tabs'), false)
+})
+
+// ——— What App mounts ——————————————————————————————————————————————————————
+
+test('agentProps: plain Ask AI keeps every tool, the page context, history and the page scope', () => {
+  const props = modes.agentProps(null, ASK)
+  assert.equal(props.key, 'chat')
+  assert.equal(props.integrationId, 'ask-id')
+  assert.equal(props.tools, tools.agentTools)
+  assert.equal(props.customInstructions, CUSTOM_INSTRUCTIONS + ASK.pageContext)
+  assert.deepEqual(props.sourceGroupIds, ['page-grp'])
+  assert.equal(props.enableHistory, true)
+  assert.equal(props.inMode, false)
+  assert.equal(props.context, undefined)
+  assert.deepEqual(props.chat, { mode: null, modeDetail: null, persistThread: true, showSources: true })
+})
+
+test('agentProps: the quiz runs on its own prompt, integration and scope, with no tools or history', () => {
+  const detail = { mode: 'quiz', nonce: 7, title: 'Create the topics', source: '## STEP SOURCE\n<<<STEP SOURCE BEGIN>>>\nX\n<<<STEP SOURCE END>>>' }
+  const cfg = modes.resolveMode(detail, { KAPA_QUIZ_INTEGRATION_ID: 'quiz-id', KAPA_QUIZ_SOURCE_GROUP_IDS: ['quiz-grp'] }, ['page-grp'])
+  const props = modes.agentProps(cfg, ASK)
+  assert.equal(props.key, 'quiz:7')
+  assert.equal(props.integrationId, 'quiz-id')
+  assert.deepEqual(props.tools, [])
+  assert.match(props.customInstructions, /^## Domain context/)
+  assert.ok(props.customInstructions.includes(modes.QUIZ_INSTRUCTIONS), 'QUIZ_INSTRUCTIONS')
+  assert.ok(props.customInstructions.endsWith(detail.source), 'STEP SOURCE closes the prompt')
+  assert.ok(!props.customInstructions.includes('## Current page'), 'no page context in a mode')
+  assert.ok(!props.customInstructions.includes('## Tool strategy'))
+  assert.deepEqual(props.sourceGroupIds, ['quiz-grp'])
+  assert.equal(props.enableHistory, false)
+  assert.equal(props.inMode, true)
+  assert.deepEqual(props.chat, { mode: 'quiz', modeDetail: cfg.detail, persistThread: false, showSources: false })
+})
+
+test('agentProps: productionize passes its planner tools, guide context and own prompt', () => {
+  const guide = { sections: [{ section: 'Rollback', guide_url: 'u', text: 'GAP' }], topics: ['Rollback'], steps: 0, rules: '1. R' }
+  const cfg = modes.resolveMode({ mode: 'productionize', nonce: 9, title: 'T', guide }, { KAPA_PRODUCTIONIZE_INTEGRATION_ID: 'prod-id' }, ['page-grp'])
+  const props = modes.agentProps(cfg, ASK)
+  assert.equal(props.key, 'productionize:9')
+  assert.equal(props.integrationId, 'prod-id')
+  assert.deepEqual(props.tools.map((t) => t.name).sort(), modes.MODES.productionize.tools.slice().sort())
+  assert.equal(props.context.solutionGuide, guide)
+  assert.ok(props.customInstructions.includes('## Productionize mode'))
+  assert.ok(props.customInstructions.includes('## Tool strategy'))
+  assert.doesNotMatch(props.customInstructions.replace(/\s+/g, ' '), /clarifying question/)
+  assert.ok(!props.customInstructions.includes('GAP'), 'the guide text stays in the browser')
+  assert.deepEqual(props.sourceGroupIds, ['page-grp'])
+  assert.equal(props.enableHistory, false)
+  assert.equal(props.inMode, true)
+  assert.deepEqual(props.chat, { mode: 'productionize', modeDetail: cfg.detail, persistThread: false, showSources: true })
+})
+
+test('drawerTier: a mode on the anonymous tier asks to sign in, never runs as Ask AI', () => {
+  const quiz = { mode: 'quiz', nonce: 1 }
+  assert.equal(modes.drawerTier(true, quiz), 'agent')
+  assert.equal(modes.drawerTier(true, null), 'agent')
+  assert.equal(modes.drawerTier(false, quiz), 'mode-signin')
+  assert.equal(modes.drawerTier(false, null), 'chat')
+  assert.equal(modes.drawerTier(null, quiz), 'loading')
+})
+
+test('modeReadiness: signed out is blocked, a switched-off mode ends, otherwise ready', () => {
+  const quiz = { mode: 'quiz', nonce: 1 }
+  const on = { KAPA_QUIZ_INTEGRATION_ID: 'q' }
+  assert.equal(modes.modeReadiness(quiz, null, on), null)
+  assert.equal(modes.modeReadiness(null, true, on), null)
+  assert.deepEqual(modes.modeReadiness(quiz, false, on), { event: 'blocked', reason: 'signed_out' })
+  assert.deepEqual(modes.modeReadiness(quiz, true, {}), { event: 'blocked', reason: 'unavailable', end: true })
+  assert.deepEqual(modes.modeReadiness(quiz, true, on), { event: 'ready' })
+})
+
+test('App mounts what agentProps, drawerTier and modeReadiness decide', () => {
+  const app = ASKAI.slice(ASKAI.indexOf('function App ()'), ASKAI.indexOf('function mount ()'))
+  assert.match(app, /const tier = drawerTier\(authenticated, mode\)/)
+  assert.match(app, /agentProps\(resolveMode\(mode, window, scopeIds\), \{/)
+  for (const prop of ['key={props.key}', 'integrationId={props.integrationId}', 'tools={props.tools}',
+    'customInstructions={props.customInstructions}', "sourceGroupProps('agent', props.sourceGroupIds)",
+    'enableHistory={props.enableHistory}', 'handleAgentEvent(event, props.inMode)', '<ChatInterface {...props.chat} />']) {
+    assert.ok(app.includes(prop), prop)
+  }
+  // The sign-in screen comes before the anonymous Chat SDK drawer.
+  assert.ok(app.indexOf("tier === 'mode-signin'") < app.indexOf("tier === 'chat'"))
+  assert.ok(app.indexOf("tier === 'mode-signin'") > 0)
+  const ready = ASKAI.slice(ASKAI.indexOf('function useModeReadiness'), ASKAI.indexOf('function handleAgentEvent'))
+  assert.match(ready, /modeReadiness\(mode, authenticated, window\)/)
+  assert.match(ready, /if \(ready\.end\) endChatMode\(ready\.reason\)/)
+  // The pilot's event still starts a quiz.
+  const hook = ASKAI.slice(ASKAI.indexOf('function useChatMode'), ASKAI.indexOf('const AGENT_TOOL_NAMES'))
+  assert.match(hook, /addEventListener\(LEGACY_QUIZ_EVENT, onMode\)/)
+  assert.match(hook, /addEventListener\(MODE_EVENT, onMode\)/)
+})
+
+// ——— ChatInterface wiring ——————————————————————————————————————————————————
+
+test('registerSubmit tags the interface with its mode start, and the panel delivers to it', () => {
+  const p = runPanel()
+  const def = modes.MODES.quiz
+  const got = []
+  // The outgoing Ask AI interface, then the quiz one.
+  const offAsk = modes.registerSubmit(p.win, (q) => got.push(['ask', q]), null, null)
+  assert.equal(p.win.submitChatQuery.modeNonce, undefined)
+  p.startQuiz(5)
+  p.tick()
+  assert.deepEqual(got, [], 'the Ask AI interface never gets the opener')
+  offAsk()
+  const offQuiz = modes.registerSubmit(p.win, (q) => got.push(['quiz', q]), def, { nonce: 5 })
+  assert.equal(p.win.submitChatQuery.modeNonce, 5)
+  p.tick()
+  assert.deepEqual(got, [['quiz', 'Quiz me on this step: T.']])
+  offQuiz()
+  assert.equal(p.win.submitChatQuery, undefined)
+  // ChatInterface registers through it.
+  assert.match(CHAT, /return registerSubmit\(window, submit, modeDef, modeDetail\)/)
+  assert.doesNotMatch(CHAT, /window\.submitChatQuery\s*=/)
+})
+
+test('startChatMode restarts with a new nonce and does not end the mode', () => {
+  const p = runPanel()
+  p.startQuiz(1)
+  p.register(1)
+  p.tick()
+  modes.startChatMode({ mode: 'quiz', title: 'T', nonce: 1, firstMessage: 'Quiz me on this step: T.' }, p.win)
+  const next = p.win.__docsChatMode.nonce
+  assert.notEqual(next, 1)
+  assert.equal(p.events.filter((e) => e.type === 'docs-chat:mode').length, 1)
+  p.tick()
+  assert.equal(p.sent.length, 1, 'the old interface does not take the restart')
+  p.register(next)
+  p.tick()
+  assert.deepEqual(p.sent.map((s) => s.nonce), [1, next])
+  assert.equal(p.events.filter((e) => e.type === 'docs-chat:mode-end').length, 0)
+})
+
+test('endChatMode without the drawer script clears the mode and says so', () => {
+  const events = []
+  const win = {
+    __docsChatMode: { mode: 'quiz' },
+    __docsChatQuiz: { title: 'T' },
+    dispatchEvent: (e) => events.push(e),
+    CustomEvent: class { constructor (type, init) { this.type = type; this.detail = init && init.detail } },
+  }
+  modes.endChatMode('back_to_ask', win)
+  assert.equal(win.__docsChatMode, null)
+  assert.equal(win.__docsChatQuiz, null)
+  assert.deepEqual(events.map((e) => [e.type, e.detail]), [['docs-chat:mode-end', { reason: 'back_to_ask', mode: 'quiz' }]])
+})
+
+test('markModeThreads marks mode threads in the SDK history markup and nothing else', { skip: parseHTML ? false : 'linkedom is not installed (npm ci)' }, () => {
+  const row = (title) => `<li><button type="button"><div>${title}</div><div>2 hours ago</div></button><button type="button" title="Delete conversation"></button></li>`
+  const { document } = parseHTML(`<div class="chat-history-view"><ul>${[
+    'Quiz me on this step: Create the topics (demo/s1).',
+    'How do I create a topic?',
+    'Help me take Multiplayer gaming to production.',
+    'Help me take a backup of my cluster',
+  ].map(row).join('')}</ul></div>`)
+  const root = document.querySelector('.chat-history-view')
+  modes.markModeThreads(root)
+  const marked = Array.from(root.querySelectorAll('li')).map((li) => li.classList.contains('chat-history-mode-thread'))
+  assert.deepEqual(marked, [true, false, true, false])
+  assert.match(CHAT, /const apply = \(\) => markModeThreads\(root\)/)
+  // The rule that hides them is not scoped to the drawer, so the docs home
+  // chat hides them too, and the Bump drawer has its own.
+  assert.match(read('src/css/chat-panel.css'), /^\.chat-history-view li\.chat-history-mode-thread \{\n {2}display: none !important;/m)
+  assert.match(read('src/css/chat-panel-bump.css'), /\.chat-history-view li\.chat-history-mode-thread \{\n {2}display: none !important;/)
+})
+
+test('ChatInterface ends the mode on Clear and hides sources only where the mode says', () => {
+  const reset = CHAT.slice(CHAT.indexOf('const handleReset'), CHAT.indexOf('resetConversation()', CHAT.indexOf('const handleReset')))
+  assert.match(reset, /if \(modeDef\) \{\s*endChatMode\('clear'\)\s*return\s*\}/)
+  assert.match(CHAT, /\{showSources && <AnswerSources /)
+  assert.match(CHAT, /showSources = true \}\)/, 'plain Ask AI shows sources by default')
+})
+
+test('signing in from a productionize drawer returns to the card', () => {
+  assert.equal(modes.MODES.productionize.returnHash, '#take-to-production')
+  assert.match(read('src/js/33-solution-productionize.js'), /var CARD_ID = 'take-to-production'/)
+  assert.match(read('src/js/react/components/ModeBanner.jsx'), /window\.location\.search \+ \(def\.returnHash \|\| ''\)/)
 })
