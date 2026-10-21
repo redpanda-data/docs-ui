@@ -47,5 +47,6 @@
     {{#unless (eq solution.download 'none')}}
     <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow"><span data-sol-download-label>Download the complete example</span></a>
     {{/unless}}
+    {{> solution-productionize-link solution=solution}}
   </div>
 </section>

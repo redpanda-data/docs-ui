@@ -31,6 +31,7 @@
     <p class="sol-done-sub">Keep the complete example around for your own projects.</p>
     <a class="sol-btn sol-btn--primary sol-btn--sm" href="/solutions/download?solution={{solution.id}}&amp;version={{solution.version}}&amp;return={{@root.page.url}}" data-sol-download {{#if (eq solution.download 'authenticated')}}data-requires-auth{{/if}} data-analytics="solution_download" rel="nofollow"><span data-sol-download-label>Download the complete example</span></a>
     {{/unless}}
+    {{> solution-productionize-link solution=solution}}
   </div>
   {{!-- Shown at every width: the end of the article is where a reader who
         just finished the step is. The button names what a click does: Mark
@@ -98,3 +99,7 @@
     {{/if}}
   </div>
 </nav>
+{{!-- The last step ends with the way into production. --}}
+{{#unless @root.page.attributes.solution-next-url}}
+{{> solution-productionize solution=solution}}
+{{/unless}}

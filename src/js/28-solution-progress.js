@@ -1940,6 +1940,10 @@
     mergeRecord: mergeRecord,
     track: track,
     hasAuthHint: hasAuthHint,
+    // For the Take this to production card (33-solution-productionize.js),
+    // so its events carry the same props and it reads sign-in the same way.
+    baseProps: baseProps,
+    signedIn: hasAuthHint,
     manageDetails: manageDetails,
     placeRailRecs: placeRailRecs,
     decorateFileBlocks: decorateFileBlocks,

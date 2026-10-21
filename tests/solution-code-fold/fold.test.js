@@ -230,6 +230,17 @@ test('[%collapsible] summaries (no extra class) get the line count of the single
   assert.ok(two.classes.has('sol-details'), 'still styled')
 })
 
+test('the Take this to production card keeps its own disclosures', () => {
+  const mcp = el('details', {}, [el('summary', { text: 'Connect the docs MCP server' }), el('pre', {}, [el('code', { text: 'claude mcp add\n' })])])
+  const card = el('section', { 'data-sol-productionize': '' }, [mcp])
+  // Control: the same disclosure outside the card is decorated.
+  const outside = collapsible('Complete source', [listing(5).block])
+  run({ blocks: [card, outside] })
+  assert.ok(!mcp.classes.has('sol-details'), 'card details left alone')
+  assert.equal(mcp.querySelector('[data-sol-details-lines]'), null, 'no line count in the card')
+  assert.ok(outside.classes.has('sol-details'))
+})
+
 test('does nothing outside solution pages, and is idempotent when re-run', () => {
   const long = listing(80)
   const r = run({ bodyClass: 'article', blocks: [long.block] })

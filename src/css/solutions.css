@@ -919,6 +919,129 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   }
 }
 
+/* "Take this to production" in a done panel: a link to the card on the
+   last step (solution-productionize-link.hbs). */
+.sol-done-link {
+  display: inline-block;
+  margin-top: 0.625rem;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--component-700);
+  text-underline-offset: 2px;
+}
+
+.sol-done .sol-btn + .sol-done-link {
+  margin-left: 0.75rem;
+}
+
+/* "Take this to production" card at the end of the last step
+   (solution-productionize.hbs). It sits in the article, under the step
+   actions, so it takes the article's width and the panel look of the rail
+   cards. */
+.sol-productionize {
+  margin: 1.5rem 0 1rem;
+  padding: 1.25rem;
+  scroll-margin-top: calc(var(--body-top--desktop, var(--navbar-height, 4rem)) + 1rem);
+}
+
+.sol-doc .sol-productionize-title {
+  margin: 0 0 0.375rem;
+  padding: 0;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: calc(20 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--grey-900-new);
+}
+
+.sol-productionize-sub {
+  margin: 0 0 1rem;
+  color: var(--grey-600-new);
+}
+
+.sol-productionize-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sol-productionize-status,
+.sol-productionize-note {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
+}
+
+.sol-productionize-status:empty {
+  display: none;
+}
+
+.sol-productionize-note {
+  margin: 0.75rem 0 0;
+}
+
+/* The generic .doc details rule is a grey padded accordion. Here each
+   disclosure is a plain row under the actions, with its body indented. */
+.sol-doc .sol-productionize-details {
+  margin: 1rem 0 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+.sol-doc .sol-productionize-details > summary {
+  padding: 0.75rem 0 0;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  color: var(--component-700);
+  cursor: pointer;
+}
+
+.sol-doc .sol-productionize-details > summary:focus-visible {
+  outline: 2px solid var(--component-500);
+  outline-offset: 2px;
+}
+
+.sol-productionize-mcp {
+  padding-top: 0.5rem;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+}
+
+.sol-productionize-mcp p {
+  margin: 0.5rem 0 0;
+}
+
+.sol-doc .sol-productionize-prompt,
+.sol-doc .sol-productionize-command {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem;
+  max-height: 24rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  border: 1px solid var(--grey-100-new);
+  border-radius: var(--radius-md-new);
+  background: var(--grey-50-new);
+}
+
+.sol-doc .sol-productionize-command {
+  margin-top: 0.25rem;
+}
+
+@media screen and (max-width: 520px) {
+  .sol-productionize {
+    padding: 1rem;
+  }
+
+  .sol-productionize-actions .sol-btn {
+    width: 100%;
+  }
+}
+
 /* "Start again" confirm, inserted next to the hero button. */
 .sol-reset-confirm {
   display: flex;

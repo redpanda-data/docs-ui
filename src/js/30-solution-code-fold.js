@@ -247,8 +247,14 @@
 
   // <details> (Asciidoctor [%collapsible]): style hook, line-count badge when
   // it hides exactly one listing, and fold its listings once it opens.
+  // The Take this to production card's own disclosures (prompt preview, MCP
+  // setup) are part of the card, not authored blocks, and keep its styling.
+  function insideCard (node) {
+    return !!ancestor(node, function (n) { return !!(n.hasAttribute && n.hasAttribute('data-sol-productionize')) })
+  }
+
   function decorateDetails (details) {
-    if (!insideDoc(details) || hasClass(details, 'sol-details')) return
+    if (!insideDoc(details) || insideCard(details) || hasClass(details, 'sol-details')) return
     var summary = details.querySelector('summary')
     if (!summary) return
     var listings = toArray(details.querySelectorAll('pre'))

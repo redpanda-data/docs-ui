@@ -1,0 +1,54 @@
+{{!--
+  "Take this to production" card on a solution's last step. Context:
+  `solution`. solution-step-actions.hbs includes it after the step actions on
+  the last step only; the done panels (solution-progress.hbs and the inline
+  copy in solution-step-actions.hbs) link to it by its id.
+
+  33-solution-productionize.js drives it:
+  - Plan it with Ask AI opens the drawer in productionize mode, grounded on
+    the agent companion at data-sol-companion-url. Signed out it reads "Sign
+    in to plan it with Ask AI". It stays hidden when the productionize
+    integration is switched off, and when the companion cannot be read, the
+    note below says the prompt still works.
+  - Copy prompt and Preview prompt need the script (the prompt is built from
+    the page's origin), so both ship hidden.
+  - Connect the docs MCP server is static. Only the server URL, the Claude
+    Code command and the VS Code one-click link are written here; the other
+    clients are on How to use these docs, so this card never keeps its own
+    copy of their setup.
+--}}
+<section class="sol-panel sol-productionize" id="take-to-production" data-sol-productionize data-sol-companion-url="{{or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md')}}"{{#with @root.page.attributes.solution-verified-version}} data-sol-verified-version="{{this}}"{{/with}} aria-labelledby="sol-productionize-title">
+  <h2 id="sol-productionize-title" class="sol-productionize-title">Take this to production</h2>
+  <p class="sol-productionize-sub">Turn the reference build into a plan for your own system: your deployment, your scale, your security model.</p>
+  <div class="sol-productionize-actions">
+    <button type="button" class="sol-btn sol-btn--primary" data-sol-productionize-plan data-analytics="solution_productionize_start" hidden>
+      <span data-sol-productionize-plan-label>Plan it with Ask AI</span>
+    </button>
+    <button type="button" class="sol-btn sol-btn--ghost" data-sol-productionize-copy data-analytics="solution_productionize_copy" hidden>
+      <span>Copy prompt for your coding agent</span>
+    </button>
+    <span class="sol-productionize-status" data-sol-productionize-status role="status" aria-live="polite"></span>
+  </div>
+  <p class="sol-productionize-note" data-sol-productionize-note hidden>Ask AI can't load this solution's production guide right now. The prompt for your coding agent still works.</p>
+  <details class="sol-productionize-details" data-sol-productionize-preview hidden>
+    <summary>Preview prompt</summary>
+    <pre class="sol-productionize-prompt" data-sol-productionize-prompt></pre>
+  </details>
+  <details class="sol-productionize-details" data-sol-productionize-mcp>
+    <summary>Connect the docs MCP server</summary>
+    <div class="sol-productionize-mcp" data-sol-mcp-block>
+      <p>Connect the Redpanda docs MCP server so your agent can look up product details.<br>
+      Server URL: <code>https://docs.redpanda.com/mcp</code></p>
+      <p>Claude Code:</p>
+      <pre class="sol-productionize-command"><code>claude mcp add --scope user --transport http redpanda https://docs.redpanda.com/mcp</code></pre>
+      <p>Check it with: <code>claude mcp list</code><br>
+      Sign in for unlimited use: run <code>/mcp</code> and authenticate the <code>redpanda</code> server.</p>
+      {{!-- The same install URI as Page options > Add MCP server to VS Code
+            (14-markdown-dropdown.js): the server config as URI-encoded JSON. --}}
+      <p>VS Code (1.102 or later, with GitHub Copilot): <a href="vscode:mcp/install?%7B%22name%22%3A%22Redpanda%20Documentation%22%2C%22url%22%3A%22https%3A%2F%2Fdocs.redpanda.com%2Fmcp%22%7D" data-sol-mcp-vscode>Add to VS Code</a> (one-click)</p>
+      <p>Cursor, Claude Desktop, ChatGPT and other clients: see <a href="{{{relativize '/home/how-to-use-these-docs/'}}}">How to use these docs</a>.</p>
+      <p>Without signing in you get 10 tool calls every 24 hours per network address.<br>
+      The server answers general product questions. This solution's own production guide is the agent companion linked in the prompt.</p>
+    </div>
+  </details>
+</section>
