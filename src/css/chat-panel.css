@@ -1084,6 +1084,80 @@
   background: var(--kapa-surface, #fff);
 }
 
+/* Threads a chat mode started (quiz) stay out of the Ask AI history list.
+   The SDK styles its rows inline, so this needs !important to win. */
+#chat-panel-kapa-root .chat-history-view li.chat-history-mode-thread {
+  display: none !important;
+}
+
+/* ——— Chat mode banner (quiz) ——— */
+#chat-panel-kapa-root .chat-mode-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin: 8px 18px 0;
+  padding: 8px 12px;
+  border: 1px solid var(--kapa-accent, #444ce7);
+  border-radius: 8px;
+  background: var(--kapa-surface, #fff);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+}
+
+#chat-panel-kapa-root .chat-mode-banner-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+#chat-panel-kapa-root .chat-mode-banner-label {
+  color: var(--kapa-accent, #444ce7);
+}
+
+#chat-panel-kapa-root .chat-mode-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+#chat-panel-kapa-root .chat-mode-banner-action {
+  padding: 2px 0;
+  font: inherit;
+  font-weight: 500;
+  color: var(--kapa-accent, #444ce7);
+  background: none;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#chat-panel-kapa-root .chat-mode-banner-action:hover {
+  text-decoration: underline;
+}
+
+#chat-panel-kapa-root .chat-mode-banner-action:focus-visible {
+  outline: 2px solid var(--kapa-accent, #444ce7);
+  outline-offset: 2px;
+}
+
+/* The drawer is full width here: stack the title over the actions, with
+   tap targets tall enough for a thumb. */
+@media (max-width: 520px) {
+  #chat-panel-kapa-root .chat-mode-banner {
+    margin: 8px 12px 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #chat-panel-kapa-root .chat-mode-banner-action {
+    min-height: 44px;
+    padding: 0 4px;
+  }
+}
+
 /* ——— Per-answer sources ——— */
 #chat-panel-kapa-root .answer-sources {
   margin-top: 8px;
@@ -1149,6 +1223,7 @@
 .chat-panel.is-fullscreen #chat-panel-kapa-root .conversation,
 .chat-panel.is-fullscreen #chat-panel-kapa-root .welcome-screen,
 .chat-panel.is-fullscreen #chat-panel-kapa-root .chat-history-toggle-row,
+.chat-panel.is-fullscreen #chat-panel-kapa-root .chat-mode-banner,
 .chat-panel.is-fullscreen #chat-panel-kapa-root .chat-history-view,
 .chat-panel.is-fullscreen #chat-panel-kapa-root .chat-input-form,
 .chat-panel.is-fullscreen #chat-panel-kapa-root .disclaimer {
