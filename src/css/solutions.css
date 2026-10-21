@@ -1554,12 +1554,30 @@ html[data-theme="dark"] .sol-doc {
   margin: 0;
 }
 
-.sol-doc details.sol-details[open] > .content > .listingblock:first-child > .content,
-.sol-doc details.sol-details[open] > .content > .listingblock:first-child pre,
+.sol-doc details.sol-details:not(.sol-details--panel)[open] > .content > .listingblock:first-child > .content,
+.sol-doc details.sol-details:not(.sol-details--panel)[open] > .content > .listingblock:first-child pre,
 .sol-doc details.collapsible[open] > .content > .listingblock:first-child > .content,
 .sol-doc details.collapsible[open] > .content > .listingblock:first-child pre {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+/* A details whose content is more than one listing (prose, steps, several
+   blocks) has nothing to attach to the open header, so its body is a panel
+   in the header's border: the reader sees where the disclosed part ends. */
+.sol-doc details.sol-details--panel[open] > .content {
+  padding: 0.25rem 0.875rem 0.875rem;
+  border: 1px solid var(--sol-code-border);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+
+.sol-doc details.sol-details--panel[open] > .content > :first-child {
+  margin-top: 0.75rem;
+}
+
+.sol-doc details.sol-details--panel[open] > .content > :last-child {
+  margin-bottom: 0;
 }
 
 .sol-doc .sol-details-lines {

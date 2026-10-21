@@ -25,8 +25,9 @@
  *  - Asciidoctor renders [%collapsible] example blocks as
  *    <details><summary class="title">...</summary><div class="content">, with
  *    no extra class. Every such details in the article gets the sol-details
- *    class for styling and, when it hides exactly one listing, a line-count
- *    badge in its summary.
+ *    class for styling. One that hides a single listing and nothing else gets
+ *    a line-count badge in its summary; any other gets sol-details--panel, a
+ *    bordered body that shows where the disclosed content ends.
  *  - prefers-reduced-motion: no smooth scrolling back to the block on
  *    collapse (the CSS also drops its transitions under the same query).
  *
@@ -263,7 +264,18 @@
       if (!details.open) return
       toArray(details.querySelectorAll('.listingblock')).forEach(processBlock)
     })
-    if (listings.length !== 1) return
+    // A details that hides one listing and nothing else reads as a file: the
+    // code block attaches to the header and the header counts its lines. Any
+    // other content (prose, lists, several blocks) gets a bordered panel, so
+    // the reader can see where the disclosed content ends, and no count: one
+    // command's "1 line" would undersell a section of steps.
+    var content = toArray(details.children).filter(function (c) { return hasClass(c, 'content') })[0]
+    var blocks = content ? toArray(content.children) : []
+    var codeOnly = listings.length === 1 && blocks.length === 1 && hasClass(blocks[0], 'listingblock')
+    if (!codeOnly) {
+      details.classList.add('sol-details--panel')
+      return
+    }
     var code = listings[0].querySelector('code') || listings[0]
     var lines = countLines(code.textContent)
     if (!lines) return

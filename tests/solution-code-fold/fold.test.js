@@ -230,6 +230,22 @@ test('[%collapsible] summaries (no extra class) get the line count of the single
   assert.ok(two.classes.has('sol-details'), 'still styled')
 })
 
+test('a collapsible with more than a single listing gets a bordered panel and no line count', () => {
+  // The "Build along instead" shape: prose, a list, and one command.
+  const command = listing(1)
+  const prose = el('div', { class: 'paragraph' }, [el('p', { text: 'Every file is shown in full on the pages.' })])
+  const steps = el('div', { class: 'olist arabic' }, [el('ol', {}, [el('li', {}, [command.block])])])
+  const mixed = collapsible('Build along instead (optional)', [prose, steps], true)
+  const file = collapsible('Complete source: Makefile', [listing(30, { renderedLines: 0 }).block])
+  const two = collapsible('Two files', [listing(5).block, listing(6).block])
+  run({ blocks: [mixed, file, two] })
+  assert.ok(mixed.classes.has('sol-details--panel'), 'prose and steps: a panel shows where the section ends')
+  assert.equal(mixed.querySelector('[data-sol-details-lines]'), null, 'no "1 line" for a section of steps')
+  assert.ok(two.classes.has('sol-details--panel'), 'several listings: a panel too')
+  assert.ok(!file.classes.has('sol-details--panel'), 'a single listing attaches to the header')
+  assert.equal(file.querySelector('[data-sol-details-lines]').textContent, '30 lines')
+})
+
 test('the Take this to production card keeps its own disclosures', () => {
   const mcp = el('details', {}, [el('summary', { text: 'Connect the docs MCP server' }), el('pre', {}, [el('code', { text: 'claude mcp add\n' })])])
   const card = el('section', { 'data-sol-productionize': '' }, [mcp])
