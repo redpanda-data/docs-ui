@@ -77,11 +77,15 @@ function fences (text) {
   return out
 }
 
-// Elements of the article the extractor reads: not in a skipped section and
-// not in a tab panel (which panel is read is checked by the tab test).
+// Elements of the article the extractor reads: inside the preamble or a
+// direct .sect1 child (so not page chrome such as the production card), not
+// in a skipped section, and not in a tab panel (which panel is read is
+// checked by the tab test).
 function readElements (article, selector) {
   return Array.from(article.querySelectorAll(selector)).filter((el) => {
     if (el.closest('.tabpanel')) return false
+    const top = el.closest('#preamble, .sect1')
+    if (!top || top.parentElement !== article) return false
     const sect = el.closest('.sect1')
     const h2 = sect && sect.querySelector(':scope > h2')
     return !(h2 && quiz.SKIP_SECTIONS.includes(h2.id))
