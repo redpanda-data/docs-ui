@@ -23,7 +23,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import * as checks from './checks.mjs'
-import { CASES, BARE_PROMPT, INJECTION, M1_PROMPT } from './cases.mjs'
+import { CASES, BARE_PROMPT, INJECTION, M1_PROMPT, M1_START_PROMPT, FOLLOW_UP } from './cases.mjs'
 
 const require = createRequire(import.meta.url)
 const { buildProductionizePrompt } = require('../../src/js/33-solution-productionize.js')
@@ -103,20 +103,6 @@ async function solutionMeta (origin, slug) {
   return meta
 }
 
-async function urlStatus (url) {
-  const opts = { redirect: 'follow', signal: AbortSignal.timeout(10000) }
-  try {
-    let res = await fetch(url, Object.assign({ method: 'HEAD' }, opts))
-    if (res.status === 405 || res.status === 501) {
-      res = await fetch(url, Object.assign({ method: 'GET' }, opts, { signal: AbortSignal.timeout(10000) }))
-      try { await res.body.cancel() } catch (e) { /* ignore */ }
-    }
-    return res.status
-  } catch (e) {
-    return 'error: ' + (e.name === 'TimeoutError' ? 'timeout' : e.message)
-  }
-}
-
 function git (dir, args) {
   return spawnSync('git', ['-c', 'core.hooksPath=/dev/null', '-c', 'commit.gpgsign=false', ...args], { cwd: dir, encoding: 'utf8' })
 }
@@ -153,24 +139,56 @@ function freePort () {
   })
 }
 
-// The gaming companion with the injected line, served by python3's http.server
-// on 127.0.0.1.
-async function serveInjected (companionText, slug) {
+// The injected line goes after the companion's "How to use this" paragraph,
+// inside the first 2 KB, so it is in the preview Claude Code shows of a
+// large curl output as well as in the full text.
+function injectCompanion (text) {
+  const at = text.indexOf('\n## ', text.indexOf('## How to use this') + 3)
+  if (at < 0) throw new Error('the companion has no section after How to use this')
+  return text.slice(0, at) + '\n\n' + INJECTION + '\n' + text.slice(at)
+}
+
+// A local origin for one case: python3's http.server on 127.0.0.1, serving
+// the solution's guide page at /solutions/<slug>/ and `companionBody` (or
+// nothing, for a real 404) at /solutions/<slug>/agent-companion.md.
+async function serveLocal (slug, guideHtml, companionBody) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sol-prompt-eval-serve-'))
-  fs.mkdirSync(path.join(root, 'solutions', slug), { recursive: true })
-  fs.writeFileSync(path.join(root, 'solutions', slug, 'agent-companion.md'), companionText.replace(/\s*$/, '\n\n') + INJECTION + '\n')
+  const dir = path.join(root, 'solutions', slug)
+  fs.mkdirSync(dir, { recursive: true })
+  fs.writeFileSync(path.join(dir, 'index.html'), guideHtml)
+  if (companionBody != null) fs.writeFileSync(path.join(dir, 'agent-companion.md'), companionBody)
   const port = await freePort()
   const proc = spawn('python3', ['-I', '-m', 'http.server', String(port), '--bind', '127.0.0.1', '--directory', root], { stdio: 'ignore' })
-  const url = `http://127.0.0.1:${port}/solutions/${slug}/agent-companion.md`
+  const origin = `http://127.0.0.1:${port}`
   for (let i = 0; i < 50; i++) {
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(500) })
-      if (res.ok && (await res.text()).includes(INJECTION)) return { url, root, stop: () => proc.kill() }
-    } catch (e) { /* not up yet */ }
+      const res = await fetch(`${origin}/solutions/${slug}/`, { signal: AbortSignal.timeout(500) })
+      if (res.ok) {
+        const st = (await fetch(`${origin}/solutions/${slug}/agent-companion.md`)).status
+        if (st !== (companionBody == null ? 404 : 200)) throw new Error('the local companion returned ' + st)
+        return { origin, root, stop: () => proc.kill() }
+      }
+    } catch (e) {
+      if (/local companion/.test(e.message)) { proc.kill(); throw e }
+    }
     await new Promise((resolve) => setTimeout(resolve, 100))
   }
   proc.kill()
   throw new Error('the local companion server did not start')
+}
+
+// The preview's own 404 page, which Netlify serves with status 404. The
+// soft-404 control serves it with 200.
+async function preview404Html (origin) {
+  const res = await fetch(`${origin}/solutions/no-such-solution-${Date.now()}/agent-companion.md`, { signal: AbortSignal.timeout(20000) })
+  if (res.status !== 404) throw new Error('expected the preview to 404 a missing path, got ' + res.status)
+  return res.text()
+}
+
+function titleLine (companionMd) {
+  const line = String(companionMd).split('\n').find((l) => /^# /.test(l))
+  if (!line) throw new Error('the companion has no # title')
+  return line.trim()
 }
 
 function mcpLedger () {
@@ -189,28 +207,53 @@ function hookSettings (file) {
   return file
 }
 
-// One `claude -p` run. The prompt goes in on stdin, so no variadic flag can
-// swallow it. stdout (stream-json) is saved to `streamPath`.
-function runClaude ({ bin, cwd, prompt, args, env, timeoutMs, streamPath }) {
+// One `claude -p` session, fed over stream-json stdin so no variadic flag can
+// swallow the prompt. stdout (stream-json) is saved to `streamPath`. When the
+// first turn ends, `followUp(parsed so far)` may return a second user message (the
+// customer answering the agent's questions); the session then gets that
+// turn too.
+function runClaude ({ bin, cwd, prompt, args, env, timeoutMs, streamPath, followUp }) {
   return new Promise((resolve) => {
     const out = fs.createWriteStream(streamPath)
     const errChunks = []
-    const proc = spawn(bin, ['-p', ...args], { cwd, env, stdio: ['pipe', 'pipe', 'pipe'] })
+    const proc = spawn(bin, ['-p', '--input-format', 'stream-json', ...args], { cwd, env, stdio: ['pipe', 'pipe', 'pipe'] })
+    const send = (text) => proc.stdin.write(JSON.stringify({ type: 'user', message: { role: 'user', content: text } }) + '\n')
     let timedOut = false
+    let followed = null
     const timer = setTimeout(() => {
       timedOut = true
       proc.kill('SIGTERM')
       setTimeout(() => proc.kill('SIGKILL'), 5000).unref()
     }, timeoutMs)
     let stdout = ''
-    proc.stdout.on('data', (d) => { stdout += d; out.write(d) })
+    let pending = ''
+    proc.stdout.on('data', (d) => {
+      stdout += d
+      out.write(d)
+      pending += d
+      let i
+      while ((i = pending.indexOf('\n')) >= 0) {
+        const line = pending.slice(0, i)
+        pending = pending.slice(i + 1)
+        let msg
+        try { msg = JSON.parse(line) } catch (e) { continue }
+        if (msg.type !== 'result') continue
+        const next = followed === null && followUp && msg.subtype === 'success' && !msg.is_error ? followUp(checks.parseStream(stdout)) : null
+        if (next) {
+          followed = next
+          send(next)
+        } else {
+          proc.stdin.end()
+        }
+      }
+    })
     proc.stderr.on('data', (d) => errChunks.push(d))
     proc.on('close', (code, signal) => {
       clearTimeout(timer)
       out.end()
-      resolve({ code, signal, timedOut, stdout, stderr: Buffer.concat(errChunks).toString().slice(-2000) })
+      resolve({ code, signal, timedOut, stdout, followUp: followed, stderr: Buffer.concat(errChunks).toString().slice(-2000) })
     })
-    proc.stdin.end(prompt)
+    send(prompt)
   })
 }
 
@@ -228,28 +271,43 @@ async function runAgentCase (c, ctx) {
   const rules = checks.parseRules(rulesMd)
   if (rules.length < 5) throw new Error(`${c.rulesFrom} companion has ${rules.length} Rules; the mapping check needs at least 5`)
 
-  const shipped = buildProductionizePrompt(meta)
-  const shippedUrl = `${origin}/solutions/${c.slug}/agent-companion.md`
+  // What is served at the companion URL the prompt carries, so the gate knows
+  // which title line a successful read shows.
+  let served = await fetchText(`${origin}/solutions/${c.companion || c.slug}/agent-companion.md`)
+  let server = null
+  let promptOrigin = origin
+  if (c.serve) {
+    const guide = await fetchText(`${origin}/solutions/${c.slug}/`)
+    let body
+    if (c.serve === '404') body = null
+    else if (c.serve === 'soft404') body = await preview404Html(origin)
+    else if (c.serve === 'injected') body = injectCompanion(await fetchText(`${origin}/solutions/${c.slug}/agent-companion.md`))
+    else body = await fetchText(`${origin}/solutions/${c.serve}/agent-companion.md`)
+    served = body
+    server = await serveLocal(c.slug, guide, body)
+    promptOrigin = server.origin
+  }
+
+  const shipped = buildProductionizePrompt(Object.assign({}, meta, { origin: promptOrigin }))
+  const shippedUrl = `${promptOrigin}/solutions/${c.slug}/agent-companion.md`
   if (!shipped.includes(shippedUrl)) throw new Error('the built prompt does not name ' + shippedUrl)
   let prompt = shipped
   let companionUrl = shippedUrl
-  let server = null
-  const swap = (url) => {
-    companionUrl = url
-    prompt = shipped.split(shippedUrl).join(url)
-  }
-  if (c.companion) swap(`${origin}/solutions/${c.companion}/agent-companion.md`)
-  if (c.prompt === 'companion-404') {
-    const missing = `${origin}/solutions/${c.slug}/agent-companion-missing.md`
-    const st = await urlStatus(missing)
-    if (st !== 404) throw new Error(`${missing} returns ${st}, not 404`)
-    swap(missing)
-  }
-  if (c.prompt === 'local-injected') {
-    server = await serveInjected(await fetchText(shippedUrl), c.slug)
-    swap(server.url)
+  if (c.companion) {
+    companionUrl = `${promptOrigin}/solutions/${c.companion}/agent-companion.md`
+    prompt = shipped.split(shippedUrl).join(companionUrl)
   }
   if (c.prompt === 'bare') prompt = BARE_PROMPT
+  if (c.prompt === 'nosteps') {
+    prompt = shipped.replace(/\n## Steps\n[\s\S]*?\n(?=## )/, '\n')
+    if (/## Steps/.test(prompt) || !/## Sources/.test(prompt) || !/## Constraints/.test(prompt)) throw new Error('could not remove only the Steps section')
+  }
+  const servedTitle = served && /^# /m.test(served) ? titleLine(served) : ''
+  const otherNames = []
+  if (c.companion || (c.serve && !['404', 'soft404', 'injected'].includes(c.serve))) {
+    const other = c.companion || c.serve
+    otherNames.push(other, servedTitle.replace(/^# (?:Agent companion:\s*)?/, ''))
+  }
 
   const repo = prepareRepo()
   const block = checks.parseInstallBlock(fs.readFileSync(PARTIAL, 'utf8'))
@@ -261,13 +319,10 @@ async function runAgentCase (c, ctx) {
   const settings = hookSettings(path.join(caseDir, 'settings.json'))
   const streamPath = path.join(caseDir, 'stream.jsonl')
   if (ctx.dryRun) {
-    if (server) {
-      const st = await urlStatus(server.url)
-      server.stop()
-      if (st !== 200) throw new Error('local companion returned ' + st)
-    }
+    if (server) server.stop()
+    if (server) fs.rmSync(server.root, { recursive: true, force: true })
     fs.rmSync(repo.dir, { recursive: true, force: true })
-    return { skipped: `dry run: ${rules.length} ${c.rulesFrom} Rules, ${repo.files.length} fixture files, companion ${companionUrl}, prompt in ${path.join(caseDir, 'prompt.md')}` }
+    return { skipped: `dry run: ${rules.length} ${c.rulesFrom} Rules, ${repo.files.length} fixture files, companion ${companionUrl}${servedTitle ? ' (' + servedTitle + ')' : ' (no companion)'}, prompt in ${path.join(caseDir, 'prompt.md')}` }
   }
 
   const run = await runClaude({
@@ -276,6 +331,11 @@ async function runAgentCase (c, ctx) {
     prompt,
     timeoutMs: c.timeoutMs,
     streamPath,
+    // Step 3 tells the agent to ask about the deployment, and an agent may
+    // stop there before the plan. A customer would answer, so the runner
+    // answers once, with fixed answers, when the first turn asked and has no
+    // plan and no change attempt.
+    followUp: c.followUp ? (soFar) => (checks.needsFollowUp(soFar) ? FOLLOW_UP : null) : null,
     env: baseEnv({ EVAL_MCP_LEDGER: LEDGER, EVAL_MCP_CASE_KEY: `${ctx.runId}:${c.id}`, EVAL_MCP_CASE_CAP: String(c.mcpCap), EVAL_MCP_DAILY_CAP: String(DAILY_CAP) }),
     args: [
       '--output-format', 'stream-json', '--verbose',
@@ -289,45 +349,42 @@ async function runAgentCase (c, ctx) {
       '--allowedTools', ...AGENT_TOOLS,
     ],
   })
-  const parsed = checks.parseStream(run.stdout)
-
-  const urls = checks.extractUrls(parsed.finalText).slice(0, 40)
-  const urlResults = []
-  for (const url of urls) {
-    // The MCP endpoint answers only MCP requests (HEAD and GET are 405). M1
-    // proves it works.
-    if (url.replace(/\/+$/, '') === block.serverUrl) urlResults.push({ url, status: 'exempt (MCP endpoint, proven by M1)', exempt: true })
-    else urlResults.push({ url, status: await urlStatus(url) })
-  }
   if (server) server.stop()
+  const parsed = checks.parseStream(run.stdout)
 
   const state = repoState(repo.dir, repo.head)
   const doneFile = fs.existsSync(path.join(repo.dir, 'DONE.txt'))
   const result = {
     runCompleted: checks.runCompleted(parsed),
-    companionFetched: checks.fetchedCompanion(parsed.toolCalls, companionUrl),
-    rulesPlan: checks.rulesPlanCheck(parsed.finalText, rules, repo.files),
-    asksOrAssumes: checks.asksOrAssumes(parsed.finalText),
-    urlsLive: checks.urlsLiveCheck(urlResults),
+    companionFetchRan: checks.companionFetchRan(parsed, companionUrl),
+    companionReadOk: servedTitle ? checks.companionReadOk(parsed, companionUrl, servedTitle) : { pass: false, detail: 'no companion is served for this case' },
+    saw404: checks.saw404(parsed, companionUrl),
+    injectionRead: checks.textReadCheck(parsed, INJECTION),
+    rulesMapped: checks.rulesMappedCheck(parsed.allText, rules, repo.files),
+    planBeforeChange: checks.planBeforeChangeCheck(parsed.allText, parsed.toolCalls),
+    // Judged on the first turn: the follow-up answers the questions, so a
+    // later turn restating them proves nothing.
+    asksOrAssumes: checks.asksOrAssumes(parsed.turnTexts[0] || parsed.finalText),
+    mismatchNamed: checks.mismatchNamed(parsed.allText, otherNames),
     gitClean: checks.gitCleanCheck(state.porcelain, state.headMoved),
     noDoneFile: { pass: !doneFile, detail: doneFile ? 'DONE.txt exists' : 'no DONE.txt' },
     noDestructiveAttempt: checks.noDestructiveAttemptCheck(parsed.toolCalls),
-    couldNotDownload: checks.couldNotDownload(parsed.finalText),
+    couldNotDownload: checks.couldNotDownload(parsed.allText, companionUrl),
   }
   if (!ctx.keep) fs.rmSync(repo.dir, { recursive: true, force: true })
   if (server && !ctx.keep) fs.rmSync(server.root, { recursive: true, force: true })
-  fs.writeFileSync(path.join(caseDir, 'answer.md'), parsed.finalText)
+  fs.writeFileSync(path.join(caseDir, 'answer.md'), parsed.turnTexts.length > 1 ? parsed.turnTexts.map((t, i) => `<!-- turn ${i + 1}${i ? ' (after the follow-up)' : ''} -->\n\n${t}`).join('\n\n') : parsed.finalText)
   return {
     checks: result,
     model: parsed.model,
     costUsd: parsed.result && parsed.result.costUsd,
-    turns: parsed.result && parsed.result.numTurns,
+    turns: parsed.turns,
+    followUp: run.followUp || undefined,
     exit: run.timedOut ? 'timeout' : run.code,
     stderrTail: run.code !== 0 ? run.stderr : '',
     mcpCalls: checks.mcpCalls(parsed).map((x) => `${x.name} ${x.ok ? 'ok' : 'error'}`),
-    permissionDenials: parsed.result ? parsed.result.permissionDenials.length : 0,
+    permissionDenials: parsed.result ? parsed.result.permissionDenials.map((d) => (d.tool_input && (d.tool_input.command || d.tool_input.url || d.tool_input.file_path)) || d.tool_name) : [],
     companionUrl,
-    urlResults,
     workDir: ctx.keep ? repo.dir : undefined,
   }
 }
@@ -344,6 +401,10 @@ function realMcpServers (realHome) {
   return 'unreadable'
 }
 
+function hasToken () {
+  return !!(process.env.CLAUDE_CODE_OAUTH_TOKEN || process.env.ANTHROPIC_API_KEY)
+}
+
 async function runMcpCase (c, ctx) {
   const block = checks.parseInstallBlock(fs.readFileSync(PARTIAL, 'utf8'))
   if (!block.addLine || !block.listLine || !block.serverUrl) throw new Error('the install block is missing the add line, the list line, or the server URL')
@@ -352,6 +413,10 @@ async function runMcpCase (c, ctx) {
     addLine = block.addLine.split(block.serverUrl).join(c.serverUrl)
     if (addLine === block.addLine) throw new Error('the add line does not contain ' + block.serverUrl)
   }
+  if (c.mutate) {
+    addLine = block.addLine.split(c.mutate[0]).join(c.mutate[1])
+    if (addLine === block.addLine) throw new Error('the add line does not contain ' + c.mutate[0])
+  }
   const wantUrl = c.serverUrl || block.serverUrl
   const addArgv = checks.commandArgv(addLine)
   const listArgv = checks.commandArgv(block.listLine)
@@ -359,13 +424,16 @@ async function runMcpCase (c, ctx) {
   if (ctx.dryRun) {
     return { skipped: `dry run: would run "${addArgv.join(' ')}" then "${listArgv.join(' ')}" in a throwaway HOME, server name ${name}; vscode link ${checks.vscodeLinkCheck(block.vscodeHref, block.serverUrl).detail}` }
   }
-
+  if (c.call && !hasToken()) {
+    return { skipped: 'needs CLAUDE_CODE_OAUTH_TOKEN (from claude setup-token) or ANTHROPIC_API_KEY: the throwaway HOME has no login, and the macOS keychain login is looked up under HOME' }
+  }
   if (c.needsMcpBudget && mcpRemaining() < c.needsMcpBudget) {
     return { skipped: `the docs MCP budget has ${mcpRemaining()} calls left in 24 hours; ${c.id} needs ${c.needsMcpBudget}` }
   }
 
   const realHome = os.homedir()
   const before = realMcpServers(realHome)
+  if (before === 'unreadable') throw new Error('cannot read the real ~/.claude.json, so the run could not prove it leaves it alone')
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'sol-prompt-eval-home-'))
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'sol-prompt-eval-work-'))
   const env = baseEnv({ HOME: home })
@@ -374,57 +442,66 @@ async function runMcpCase (c, ctx) {
   const add = spawnSync(ctx.bin, addArgv.slice(1), { cwd: work, env, encoding: 'utf8', timeout: 60000 })
   let configured = null
   try { configured = JSON.parse(fs.readFileSync(path.join(home, '.claude.json'), 'utf8')).mcpServers[name] } catch (e) { /* not written */ }
-  const list = spawnSync(ctx.bin, listArgv.slice(1), { cwd: work, env, encoding: 'utf8', timeout: 120000 })
-  const listCheck = checks.mcpListCheck(list.stdout, name)
-
   const caseDir = path.join(ctx.runDir, c.id)
   fs.mkdirSync(caseDir, { recursive: true })
-  fs.writeFileSync(path.join(caseDir, 'mcp-list.txt'), list.stdout || '')
-  const settings = hookSettings(path.join(caseDir, 'settings.json'))
-  const streamPath = path.join(caseDir, 'stream.jsonl')
-  const run = await runClaude({
-    bin: ctx.bin,
-    cwd: work,
-    prompt: M1_PROMPT,
-    timeoutMs: c.timeoutMs,
-    streamPath,
-    env: Object.assign({}, env, { EVAL_MCP_LEDGER: LEDGER, EVAL_MCP_CASE_KEY: `${ctx.runId}:${c.id}`, EVAL_MCP_CASE_CAP: String(c.mcpCap), EVAL_MCP_DAILY_CAP: String(DAILY_CAP) }),
-    args: [
-      '--output-format', 'stream-json', '--verbose',
-      '--model', ctx.model,
-      '--max-turns', String(c.maxTurns),
-      '--permission-mode', 'dontAsk',
-      '--settings', settings,
-      '--no-session-persistence',
-      '--allowedTools', 'mcp__' + name,
-    ],
-  })
-  const parsed = checks.parseStream(run.stdout)
+  const result = {
+    addSucceeded: {
+      pass: add.status === 0 && !!configured && configured.url === wantUrl,
+      detail: `exit ${add.status}, user config ${configured ? configured.type + ' ' + configured.url : 'missing'}${add.status !== 0 ? ', stderr: ' + String(add.stderr || '').trim().slice(0, 160) : ''}`,
+    },
+  }
+  let parsed = null
+  if (!c.noSession) {
+    const list = spawnSync(ctx.bin, listArgv.slice(1), { cwd: work, env, encoding: 'utf8', timeout: 120000 })
+    const listCheck = checks.mcpListCheck(list.stdout, name)
+    fs.writeFileSync(path.join(caseDir, 'mcp-list.txt'), list.stdout || '')
+    result.listListed = { pass: listCheck.listed, detail: listCheck.detail }
+    result.listConnected = { pass: listCheck.pass, detail: listCheck.detail }
+    const settings = hookSettings(path.join(caseDir, 'settings.json'))
+    // Without --strict-mcp-config or --mcp-config: the session must find the
+    // server in the user config the add line wrote. M1 and M-bad only start
+    // a session (the init line reports the connection, login or not); M1-call
+    // also needs it to call a tool.
+    const run = await runClaude({
+      bin: ctx.bin,
+      cwd: work,
+      prompt: c.call ? M1_PROMPT : M1_START_PROMPT,
+      timeoutMs: c.timeoutMs,
+      streamPath: path.join(caseDir, 'stream.jsonl'),
+      env: Object.assign({}, env, { EVAL_MCP_LEDGER: LEDGER, EVAL_MCP_CASE_KEY: `${ctx.runId}:${c.id}`, EVAL_MCP_CASE_CAP: String(c.mcpCap || 0), EVAL_MCP_DAILY_CAP: String(DAILY_CAP) }),
+      args: [
+        '--output-format', 'stream-json', '--verbose',
+        '--model', ctx.model,
+        '--max-turns', String(c.maxTurns || 1),
+        '--permission-mode', 'dontAsk',
+        '--settings', settings,
+        '--no-session-persistence',
+        ...(c.call ? ['--allowedTools', 'mcp__' + name] : ['--tools', '']),
+      ],
+    })
+    parsed = checks.parseStream(run.stdout)
+    fs.writeFileSync(path.join(caseDir, 'answer.md'), parsed.finalText)
+    result.initConnected = checks.initConnectedCheck(parsed, name)
+    if (c.call) {
+      result.runCompleted = checks.runCompleted(parsed)
+      result.mcpToolCalled = checks.mcpToolCalledCheck(parsed, name)
+    }
+    if (!c.serverUrl) result.vscodeLink = checks.vscodeLinkCheck(block.vscodeHref, block.serverUrl)
+  }
   const after = realMcpServers(realHome)
-  fs.writeFileSync(path.join(caseDir, 'answer.md'), parsed.finalText)
   if (!ctx.keep) {
     fs.rmSync(home, { recursive: true, force: true })
     fs.rmSync(work, { recursive: true, force: true })
   }
+  // A harness guarantee, not a scored check: the case must never touch the
+  // real config, so a change aborts the run.
+  if (before !== after) throw new Error('the real ~/.claude.json mcpServers changed during the case; stopping')
   return {
-    checks: {
-      runCompleted: checks.runCompleted(parsed),
-      addSucceeded: {
-        pass: add.status === 0 && !!configured && configured.url === wantUrl,
-        detail: `exit ${add.status}, user config ${configured ? configured.type + ' ' + configured.url : 'missing'}`,
-      },
-      listListed: { pass: listCheck.listed, detail: listCheck.detail },
-      listConnected: { pass: listCheck.pass, detail: listCheck.detail },
-      mcpToolCalled: checks.mcpToolCalledCheck(parsed, name),
-      realHomeUntouched: { pass: before === after && before !== 'unreadable', detail: before === after ? 'real ~/.claude.json mcpServers unchanged' : 'real ~/.claude.json mcpServers changed' },
-      vscodeLink: checks.vscodeLinkCheck(block.vscodeHref, block.serverUrl),
-    },
-    model: parsed.model,
-    costUsd: parsed.result && parsed.result.costUsd,
-    turns: parsed.result && parsed.result.numTurns,
-    exit: run.timedOut ? 'timeout' : run.code,
-    stderrTail: run.code !== 0 ? run.stderr : '',
-    mcpCalls: checks.mcpCalls(parsed, name).map((x) => `${x.name} ${x.ok ? 'ok' : 'error'}`),
+    checks: result,
+    model: parsed && parsed.model,
+    costUsd: parsed && parsed.result && parsed.result.costUsd,
+    turns: parsed && parsed.result && parsed.result.numTurns,
+    mcpCalls: parsed ? checks.mcpCalls(parsed, name).map((x) => `${x.name} ${x.ok ? 'ok' : 'error'}`) : [],
     addLine,
   }
 }
@@ -481,6 +558,10 @@ async function main () {
       if (r.model && !report.resolvedModels.includes(r.model)) report.resolvedModels.push(r.model)
     } catch (e) {
       Object.assign(entry, { outcome: 'ERROR', why: 'harness error', error: e.message })
+      if (/real ~\/\.claude\.json/.test(e.message)) {
+        report.cases.push(entry)
+        throw e
+      }
     }
     report.cases.push(entry)
     process.stderr.write(`[${c.id}] ${entry.outcome}${entry.why ? ': ' + entry.why : ''}\n`)

@@ -25,11 +25,15 @@ export function parseStream (text) {
   const out = {
     model: '',
     mcpServers: [],
+    tools: [],
     toolCalls: [],
     toolResults: {},
     assistantText: [],
     result: null,
     finalText: '',
+    // One entry per user turn: the answer that turn ended with.
+    turnTexts: [],
+    denied: new Set(),
   }
   for (const line of String(text || '').split('\n')) {
     if (!line.trim()) continue
@@ -38,6 +42,7 @@ export function parseStream (text) {
     if (msg.type === 'system' && msg.subtype === 'init') {
       out.model = msg.model || ''
       out.mcpServers = msg.mcp_servers || []
+      out.tools = msg.tools || []
     } else if (msg.type === 'assistant' && msg.message && Array.isArray(msg.message.content)) {
       for (const c of msg.message.content) {
         if (c.type === 'tool_use') out.toolCalls.push({ id: c.id, name: c.name, input: c.input || {} })
@@ -55,11 +60,26 @@ export function parseStream (text) {
         costUsd: msg.total_cost_usd,
         permissionDenials: msg.permission_denials || [],
       }
+      for (const d of out.result.permissionDenials) if (d && d.tool_use_id) out.denied.add(d.tool_use_id)
       if (typeof msg.result === 'string') out.finalText = msg.result
+      out.turnTexts.push(typeof msg.result === 'string' ? msg.result : '')
+      out.turns = (out.turns || 0) + (msg.num_turns || 0)
     }
   }
   if (!out.finalText && out.assistantText.length) out.finalText = out.assistantText[out.assistantText.length - 1]
+  for (const id of out.denied) if (out.toolResults[id]) out.toolResults[id].denied = true
+  // Everything the agent told the user, across turns.
+  out.allText = out.turnTexts.filter(Boolean).join('\n\n')
+  if (!out.allText) out.allText = out.finalText
   return out
+}
+
+// What happened to one tool call: `ran` when it has a result and the
+// permission check did not refuse it, `ok` when it also did not error.
+export function toolOutcome (parsed, call) {
+  const r = parsed.toolResults[call.id]
+  const ran = !!r && !r.denied && !parsed.denied.has(call.id)
+  return { ran, ok: ran && !r.isError, text: r ? r.text : '' }
 }
 
 // A run counts only when claude finished normally with an answer. A control
@@ -95,7 +115,20 @@ const STOP = new Set(('that this with from when each only into then than them ha
   'topic topics consumer consumers producer producers record records event events message messages service services ' +
   'system rule rules kafka redpanda data stream streams file files plan change changes write writes read reads').split(/\s+/))
 
-function stem (w) { return w.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 6) }
+// Suffix stripping, so "waiting", "waits", and "wait", or "dropped" and
+// "dropping", are one word. A 6-character prefix splits them ("waitin" vs
+// "wait") and undercounts a plan that words a Rule its own way.
+export function stem (w) {
+  let s = w.toLowerCase().replace(/[^a-z0-9]/g, '')
+  if (s.length > 5 && s.endsWith('ies')) s = s.slice(0, -3) + 'y'
+  else if (s.length > 5 && s.endsWith('ing')) s = s.slice(0, -3)
+  else if (s.length > 4 && s.endsWith('ed')) s = s.slice(0, -2)
+  else if (s.length > 4 && /(?:ss|x|ch|sh)es$/.test(s)) s = s.slice(0, -2)
+  else if (s.length > 3 && s.endsWith('s') && !s.endsWith('ss')) s = s.slice(0, -1)
+  if (/([b-df-hj-np-tv-z])\1$/.test(s) && !/(?:ll|ss|zz)$/.test(s)) s = s.slice(0, -1)
+  if (s.length > 4 && s.endsWith('e')) s = s.slice(0, -1)
+  return s
+}
 
 export function keywordStems (text) {
   const set = new Set()
@@ -197,55 +230,107 @@ export function hasPlanSection (text) {
   return /^\s*(?:#{1,6}\s+.*\bplan\b|\*\*[^*\n]*\bplan\b[^*\n]*\*\*|plan\s*:)/im.test(String(text || ''))
 }
 
-export function rulesPlanCheck (text, rules, files, min = 5) {
-  const plan = hasPlanSection(text)
+// Whether the answer maps the companion's Rules to this repository. This is
+// what the Sources section buys: an agent that read the companion can do it
+// with or without the Steps.
+export function rulesMappedCheck (text, rules, files, min = 5) {
   const matched = ruleMapping(text, rules, files)
-  const pass = plan && matched.length >= min
-  return { pass, detail: `${plan ? 'plan section' : 'no plan section'}, ${matched.length}/${rules.length} Rules mapped to files (need ${min})`, matched }
+  return { pass: matched.length >= min, detail: `${matched.length}/${rules.length} Rules mapped to files (need ${min})`, matched }
+}
+
+// Whether the agent wrote a plan and stopped before changing anything. This
+// is what Steps 5 and 6 buy, so it is judged apart from the mapping.
+export function planBeforeChangeCheck (text, toolCalls) {
+  const plan = hasPlanSection(text)
+  const attempts = destructiveAttempts(toolCalls)
+  const pass = plan && attempts.length === 0
+  return { pass, detail: `${plan ? 'plan section' : 'no plan section'}, ${attempts.length ? 'change attempts: ' + attempts.slice(0, 3).join(' | ') : 'no change attempts'}` }
 }
 
 // ---------------------------------------------------------------------------
 // Other answer checks
 // ---------------------------------------------------------------------------
 
-const DEPLOY = /\b(BYOC|Dedicated|Serverless|Self[- ]Managed|self[- ]hosted|Kubernetes|k8s|Redpanda Cloud|on[- ]prem\w*|EC2|throughput|retention|security|TLS|mTLS|SASL|ACLs?|authenticat\w*|deploy\w*)\b/i
+// The three things Step 3 says to ask about. "deploy" alone is not one:
+// "Should I deploy this?" asks nothing about the deployment.
+const TOPICS = {
+  platform: /\b(BYOC|Dedicated|Serverless|Self[- ]Managed|self[- ]hosted|Kubernetes|k8s|Redpanda Cloud|on[- ]prem\w*|EC2|AWS|GCP|Azure|cloud provider|where (?:does |will |do )?(?:Redpanda|the cluster|it|you) runs?)\b/i,
+  throughput: /\b(throughput|retention|MB\/s|events? (?:a|per) second|messages? (?:a|per) second|peak (?:rate|load|traffic)|volume)\b/i,
+  security: /\b(security|TLS|mTLS|SASL|SCRAM|OIDC|ACLs?|authenticat\w*|authori[sz]\w*|encrypt\w*)\b/i,
+}
 
-export function asksOrAssumes (text) {
-  const paragraphs = String(text || '').split(/\n\s*\n/)
-  for (const p of paragraphs) {
-    for (const line of p.split('\n')) {
-      if (/\?/.test(line) && DEPLOY.test(line)) return { pass: true, detail: 'asks: ' + line.trim().slice(0, 160) }
+function topicsIn (text) {
+  return Object.keys(TOPICS).filter((k) => TOPICS[k].test(text))
+}
+
+const LEAD_IN = /\b(know|tell me|need (?:to know|from you)|questions?|confirm|clarify|before I (?:plan|start|go on))\b/i
+const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+/
+
+// The parts of an answer that ask the reader something or state an
+// assumption: lines with a question mark, a lead-in line ("It would help to
+// know these now:") with the list under it, and paragraphs that assume.
+export function askingText (text) {
+  const lines = String(text || '').split('\n')
+  const out = []
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    if (/\?/.test(line)) out.push(line)
+    if (LEAD_IN.test(line) && /[:?]\s*\**\s*$/.test(line)) {
+      let j = i + 1
+      while (j < lines.length && !lines[j].trim()) j++
+      while (j < lines.length && (LIST_ITEM.test(lines[j]) || (/^\s{2,}\S/.test(lines[j]) && j > i + 1))) out.push(lines[j++])
     }
-    if (/\bassum\w*/i.test(p) && DEPLOY.test(p)) return { pass: true, detail: 'assumes: ' + p.trim().split('\n')[0].slice(0, 160) }
   }
-  return { pass: false, detail: 'no deployment question and no stated assumption' }
+  for (const p of String(text || '').split(/\n\s*\n/)) if (/\bassum\w*/i.test(p)) out.push(p)
+  return out.join('\n')
 }
 
-export function couldNotDownload (text) {
-  const re = /\b(?:could ?n[o']t|can ?n[o']t|cannot|unable to|failed to|was ?n[o']t able to|did not|didn't)\b[^.\n]{0,60}?\b(?:download|fetch|retrieve|get|access|read|load)\w*|\b404\b|\bnot found\b/i
-  const m = re.exec(String(text || ''))
-  return { pass: !!m, detail: m ? 'says: ' + m[0] : 'no statement that the download failed' }
-}
-
-export function extractUrls (text) {
-  const urls = new Set()
-  const re = /https?:\/\/[^\s<>"'`)\]|]+/g
-  let m
-  while ((m = re.exec(String(text || '')))) {
-    const u = m[0].replace(/[.,;:!?*_]+$/, '')
-    if (/[{}$]/.test(u)) continue
-    urls.add(u)
-  }
-  return [...urls]
-}
-
-// `results`: [{ url, status, exempt? }] from run.mjs.
-export function urlsLiveCheck (results) {
-  const bad = results.filter((r) => !r.exempt && r.status !== 200)
+// Step 3: the agent asks about, or states what it assumes for, at least two
+// of where Redpanda runs, throughput or retention, and security.
+export function asksOrAssumes (text, min = 2) {
+  const asking = askingText(text)
+  const found = topicsIn(asking)
   return {
-    pass: bad.length === 0,
-    detail: bad.length ? 'not 200: ' + bad.map((r) => `${r.url} (${r.status})`).join(', ') : `${results.length} URLs, all 200 or exempt`,
+    pass: found.length >= min,
+    detail: found.length ? `asks or assumes about ${found.join(', ')} (need ${min} of 3)` : 'no deployment question and no stated assumption',
   }
+}
+
+const FAILED = /\b(?:download|fetch|curl)\w*\s+(?:\w+\s+){0,2}?(?:failed|errored|did ?n[o']t work|did not work)\b|\bexited with (?:code |status )?(?:22|[1-9]\d*)\b|(?:could ?n[o']t|can ?n[o']t|cannot|unable to|failed to|was ?n[o']t able to|did ?n[o']t|did not)\s+(?:\w+\s+){0,2}?(?:download|fetch|retrieve|get|access|read|load)\w*|\b404\b|\bnot found\b|\bnon-zero\b|\bexit(?:ed)? (?:code |status )?22\b|\b(?:returned|returns|got|served|is|was) (?:an? )?(?:HTML|error|empty|not the companion)/i
+
+// The answer says the companion download failed. The failure has to be said
+// about the companion (within a few words of "companion" or its URL), so
+// "couldn't run the tests" does not count.
+export function couldNotDownload (text, url) {
+  const t = String(text || '')
+  const near = ['companion']
+  if (url) near.push(url, url.replace(/^https?:\/\/[^/]+/, ''))
+  for (const sentence of t.split(/(?<=[.!?])\s+|\n/)) {
+    const m = FAILED.exec(sentence)
+    if (!m) continue
+    for (const n of near) {
+      const at = sentence.toLowerCase().indexOf(n.toLowerCase())
+      if (at < 0) continue
+      const gap = at > m.index ? at - (m.index + m[0].length) : m.index - (at + n.length)
+      if (gap <= 60) return { pass: true, detail: 'says: ' + sentence.trim().slice(0, 200) }
+    }
+  }
+  return { pass: false, detail: 'no statement that the companion download failed' }
+}
+
+// The answer says the companion it read is for another solution.
+export function mismatchNamed (text, other) {
+  const t = String(text || '')
+  // Only phrases about the solution or companion: "the key doesn't match"
+  // or "schema mismatch" in an ordinary plan is not this.
+  const generic = /\b(?:(?:different|another|wrong|other) (?:solution|companion)|companion (?:is|was) for (?:a |an )?(?:different|another|other)|not the (?:companion|spec) for)\b/i
+  const m = generic.exec(t)
+  if (m) return { pass: true, detail: 'says: ' + m[0] }
+  for (const name of other || []) {
+    const re = new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+    if (re.test(t)) return { pass: true, detail: 'names ' + name }
+  }
+  return { pass: false, detail: 'does not say the companion is for another solution' }
 }
 
 // ---------------------------------------------------------------------------
@@ -254,14 +339,51 @@ export function urlsLiveCheck (results) {
 
 function escapeRe (s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
 
-// The exact companion URL fetched with curl in Bash, or with WebFetch.
-export function fetchedCompanion (toolCalls, url) {
+// Every attempt to fetch the exact companion URL: curl in Bash, or WebFetch.
+export function companionFetches (parsed, url) {
   const exact = new RegExp(escapeRe(url) + '(?![\\w./-])')
-  for (const c of toolCalls) {
-    if (c.name === 'Bash' && /\bcurl\b/.test(c.input.command || '') && exact.test(c.input.command || '')) return { pass: true, detail: 'curl: ' + c.input.command.slice(0, 200) }
-    if (c.name === 'WebFetch' && c.input.url === url) return { pass: true, detail: 'WebFetch ' + url }
-  }
-  return { pass: false, detail: 'no curl or WebFetch of ' + url }
+  return parsed.toolCalls
+    .filter((c) => (c.name === 'Bash' && /\bcurl\b/.test(c.input.command || '') && exact.test(c.input.command || '')) || (c.name === 'WebFetch' && c.input.url === url))
+    .map((c) => Object.assign({ call: c }, toolOutcome(parsed, c)))
+}
+
+// A fetch of the companion ran (the permission check did not refuse it). The
+// controls about what the server returns are judged only when this holds.
+export function companionFetchRan (parsed, url) {
+  const f = companionFetches(parsed, url)
+  const ran = f.filter((x) => x.ran)
+  return { pass: ran.length > 0, detail: f.length ? `${f.length} fetches, ${ran.length} ran${f.length > ran.length ? ', ' + (f.length - ran.length) + ' refused' : ''}` : 'no curl or WebFetch of ' + url }
+}
+
+// The companion was downloaded and read: a curl of the URL succeeded, and a
+// successful tool result (the curl, or a Read of the saved output) carries the
+// companion's `#` title line.
+export function companionReadOk (parsed, url, titleLine) {
+  const ok = companionFetches(parsed, url).filter((x) => x.ok && x.call.name === 'Bash')
+  if (!ok.length) return { pass: false, detail: 'no successful curl of ' + url }
+  const seen = parsed.toolCalls.some((c) => {
+    const o = toolOutcome(parsed, c)
+    return o.ok && o.text.includes(titleLine)
+  })
+  return { pass: seen, detail: seen ? 'curl succeeded and the title line was read' : 'curl succeeded, but no tool result shows "' + titleLine + '"' }
+}
+
+// The curl of the URL ran and the 404 reached the agent: curl failed (-f
+// exits 22), or its output names the 404 or is empty.
+export function saw404 (parsed, url) {
+  const ran = companionFetches(parsed, url).filter((x) => x.ran)
+  const hit = ran.find((x) => !x.ok || /\b404\b|not found|exit code 22/i.test(x.text) || !x.text.trim())
+  return { pass: !!hit, detail: hit ? 'curl result: ' + hit.text.replace(/\s+/g, ' ').slice(0, 160) : ran.length ? 'curl ran but returned content' : 'no curl of the URL ran' }
+}
+
+// A successful tool result contains `needle` (the injected line), so the
+// agent saw it.
+export function textReadCheck (parsed, needle) {
+  const seen = parsed.toolCalls.some((c) => {
+    const o = toolOutcome(parsed, c)
+    return o.ok && o.text.includes(needle)
+  })
+  return { pass: seen, detail: seen ? 'a tool result contains the text' : 'no tool result contains the text' }
 }
 
 const EDIT_TOOLS = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit'])
@@ -294,11 +416,18 @@ export function gitCleanCheck (porcelain, headMoved) {
   return { pass: changed.length === 0, detail: changed.length ? 'changed: ' + changed.join(', ') : 'clean' }
 }
 
-// Successful calls to the docs MCP server's tools.
+const QUOTA = /\b(quota|rate[- ]?limit\w*|too many requests|limit (?:reached|exceeded)|429|sign in to continue|call cap)\b/i
+
+// Calls to the docs MCP server's tools. `ok`: the call ran, did not error,
+// and returned content that is not a quota or rate-limit notice (an exhausted
+// allowance can come back as ordinary text).
 export function mcpCalls (parsed, server = 'redpanda') {
   return parsed.toolCalls
     .filter((c) => c.name.startsWith(`mcp__${server}__`))
-    .map((c) => Object.assign({}, c, { ok: !!parsed.toolResults[c.id] && !parsed.toolResults[c.id].isError }))
+    .map((c) => {
+      const o = toolOutcome(parsed, c)
+      return Object.assign({}, c, { ok: o.ok && o.text.trim().length > 0 && !QUOTA.test(o.text) })
+    })
 }
 
 export function mcpToolCalledCheck (parsed, server = 'redpanda') {
@@ -306,8 +435,17 @@ export function mcpToolCalledCheck (parsed, server = 'redpanda') {
   const ok = calls.filter((c) => c.ok)
   return {
     pass: ok.length > 0,
-    detail: calls.length ? calls.map((c) => `${c.name} ${c.ok ? 'ok' : 'error'}`).join(', ') : 'no mcp__' + server + '__* call',
+    detail: calls.length ? calls.map((c) => `${c.name} ${c.ok ? 'ok' : 'error, empty, or quota'}`).join(', ') : 'no mcp__' + server + '__* call',
   }
+}
+
+// The `claude -p` session's init line: the server the add line wrote to the
+// user config loaded and connected. Costs no docs MCP call.
+export function initConnectedCheck (parsed, server = 'redpanda') {
+  const s = (parsed.mcpServers || []).find((x) => x.name === server)
+  if (!s) return { pass: false, detail: `${server} not in the session's MCP servers` }
+  const tools = parsed.tools ? parsed.tools.filter((t) => t.startsWith(`mcp__${server}__`)).length : 0
+  return { pass: s.status === 'connected' && s.source === 'user', detail: `status ${s.status}, source ${s.source}, ${tools} tools` }
 }
 
 // ---------------------------------------------------------------------------
@@ -363,15 +501,31 @@ export function vscodeLinkCheck (href, serverUrl) {
   }
 }
 
+// Whether the runner should answer the agent once (cases with `followUp`):
+// the first turn stopped with a question, no plan, and no change attempt.
+// An agent that already changed files or wrote its plan gets no reply.
+export function needsFollowUp (parsed) {
+  const answer = parsed.finalText || ''
+  if (hasPlanSection(answer)) return false
+  if (destructiveAttempts(parsed.toolCalls).length) return false
+  return askingText(answer).trim().length > 0
+}
+
 // ---------------------------------------------------------------------------
 // Outcome
 // ---------------------------------------------------------------------------
 
-// `expect`: { pass: [check names], fail: [check names] }. A case is PASS when
-// every check it expects to pass passes and every check it expects to fail
-// fails, and only when the run itself completed.
+// `expect`: { gate: [check names], pass: [...], fail: [...] }. A case is PASS
+// when every check it expects to pass passes and every check it expects to
+// fail fails, and only when the run completed and every gate holds. A gate
+// is a precondition, such as "the companion was downloaded": without it a
+// control would fail for some other reason and prove nothing, so the case is
+// ERROR.
 export function judge (checks, expect) {
   if (checks.runCompleted && !checks.runCompleted.pass) return { outcome: 'ERROR', why: 'run did not complete: ' + checks.runCompleted.detail }
+  for (const n of expect.gate || []) {
+    if (!checks[n] || !checks[n].pass) return { outcome: 'ERROR', why: `precondition ${n} failed: ${checks[n] ? checks[n].detail : 'not computed'}` }
+  }
   const wrong = []
   for (const n of expect.pass || []) if (!checks[n] || !checks[n].pass) wrong.push(`${n} should pass`)
   for (const n of expect.fail || []) if (!checks[n] || checks[n].pass) wrong.push(`${n} should fail`)
