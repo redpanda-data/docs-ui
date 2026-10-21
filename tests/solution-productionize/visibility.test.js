@@ -245,7 +245,7 @@ test('signed in: a click fetches the companion from this origin and starts the p
   }])
   assert.ok(page.calls.events.some((e) => e.name === 'docs-chat:mode' && e.detail.nonce === mode.nonce))
   assert.ok(page.calls.tracked.some((t) => t.name === 'solution_productionize_start' && t.props.topics === 3))
-  // The prompt's Human guide line comes from this.
+  // The drawer's guide link comes from this.
   assert.equal(mode.guideUrl, `${ORIGIN}/solutions/${SLUG}/`)
   assert.equal(mode.companionUrl, `${ORIGIN}/solutions/${SLUG}/agent-companion.md`)
 })

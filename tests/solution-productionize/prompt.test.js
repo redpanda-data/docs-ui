@@ -35,34 +35,33 @@ const META = {
 }
 const COMPANION = `${META.origin}/solutions/${META.slug}/agent-companion.md`
 
-test('the prompt points at this origin\'s companion and guide', () => {
+test('the prompt points at this origin\'s companion, and nowhere else', () => {
   const prompt = prod.buildProductionizePrompt(META)
   assert.ok(prompt.startsWith(`# Take this design to production: ${META.title}\n`))
-  assert.ok(prompt.includes(`- Agent companion, the spec for this work: ${COMPANION}\n`))
-  assert.ok(prompt.includes(`- Human guide: ${META.origin}/solutions/${META.slug}/\n`))
   assert.ok(prompt.includes(`"${META.title}" (version v1.0.0, verified against Redpanda 26.2.1)`))
-  assert.ok(!prompt.includes('docs.redpanda.com/solutions/'), 'no production solution link')
+  assert.ok(prompt.includes('Do not copy the reference system.'))
+  const urls = prompt.match(/https?:\/\/[^\s`]+/g)
+  assert.deepEqual(urls, [COMPANION], 'the companion is the only URL')
 })
 
-test('the agent downloads the companion with curl and checks its version', () => {
+test('the prompt is a pointer: the skill, else the companion\'s How to use this', () => {
   const prompt = prod.buildProductionizePrompt(META)
+  assert.ok(prompt.includes('If the Redpanda skills plugin is installed, use the `redpanda-solutions` skill.'))
   // One plain command (an allow rule for curl matches it), -f so a 404
   // fails, what failure looks like, and what to do when curl is not allowed.
-  assert.ok(prompt.includes(`Download it in full with this one command, exactly as written, with no pipes, redirects, \`cd\`, or temporary directories: \`curl -sf ${COMPANION}\`.`))
-  assert.ok(prompt.includes('If curl exits non-zero, or its output does not start with `# Agent companion:`, the download failed.'))
+  assert.ok(prompt.includes(`with this one command, exactly as written, with no pipes, redirects, \`cd\`, or temporary directories: \`curl -sf ${COMPANION}\`.`))
+  assert.ok(prompt.includes('If curl exits non-zero, or its output does not start with `# Agent companion:`, the download failed'))
   assert.ok(prompt.includes('If you cannot run curl, ask me to paste the file.'))
   assert.ok(!/curl -s /.test(prompt), 'no curl without -f')
-  assert.match(prompt, /^1\. Download the companion\. If you cannot, stop and tell me\. Do not work from memory\. Confirm the companion names version v1\.0\.0\.$/m)
-  // The docs MCP server is for product details; it never serves the companion.
-  assert.match(prompt, /It cannot return this solution's companion\./)
+  assert.ok(prompt.trimEnd().endsWith('Then follow the companion\'s "How to use this" section.'))
 })
 
-test('the prompt asks for a plan and an approval before any change', () => {
+test('the prompt carries no procedure of its own', () => {
   const prompt = prod.buildProductionizePrompt(META)
-  const steps = prompt.split('\n').filter((l) => /^\d+\. /.test(l))
-  assert.equal(steps.length, 7)
-  assert.match(steps[4], /^5\. Write a plan before you change anything/)
-  assert.match(steps[5], /^6\. Stop and wait for my approval\./)
+  // The steps, the constraints, and the docs sources live in the companion.
+  assert.doesNotMatch(prompt, /^\d+\. /m, 'no numbered steps')
+  assert.doesNotMatch(prompt, /^## /m, 'no sections')
+  assert.doesNotMatch(prompt, /approval|Adapt|Acceptance|invent|throughput|llms\.txt|MCP/i)
 })
 
 test('no placeholder is left unfilled, with or without a verified version', () => {
