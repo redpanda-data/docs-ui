@@ -21,3 +21,5 @@ test-results-*.*
 tests/solution-quiz/.corpus/
 # Solutions productionize test corpus (tests/solution-productionize/fetch-companions.mjs)
 tests/solution-productionize/.corpus/
+# Solutions prompt eval results (evals/solutions-prompts/run.mjs)
+evals/solutions-prompts/.results/
