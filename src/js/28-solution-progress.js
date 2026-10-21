@@ -1318,6 +1318,48 @@
     if (quizState === 'active' && (!d.mode || d.mode === 'quiz')) quizState = 'ended'
   }
 
+  // Authors mark the words that offer the download in running text, for
+  // example [.solution-download]#download the complete example#, which
+  // Asciidoctor renders as <span class="solution-download">. Each becomes a
+  // link to the same gated bundle download as the rail, so the offer sits
+  // where the step makes it and no page carries a URL. The words stay plain
+  // text when there is nothing to download, and inert (with a title saying
+  // why) for a draft, because replacing them would break the sentence.
+  function upgradeInlineDownloads () {
+    if (downloadPolicy === 'none') return
+    $$('.solution-download').forEach(function (span) {
+      if (!span.parentNode || span.tagName === 'A') return
+      var link = document.createElement('a')
+      link.className = 'sol-inline-download'
+      link.setAttribute('data-sol-download-inline', '')
+      link.setAttribute('rel', 'nofollow')
+      // Move the nodes, not the text, so inline markup inside the words stays.
+      if (span.firstChild) {
+        while (span.firstChild) link.appendChild(span.firstChild)
+      } else {
+        link.textContent = span.textContent
+      }
+      if (isDraft) {
+        link.setAttribute('aria-disabled', 'true')
+        link.setAttribute('title', DRAFT_DOWNLOAD_LABEL)
+        link.className += ' is-disabled'
+      } else {
+        link.setAttribute('href', DOWNLOAD_ENDPOINT + '?solution=' + encodeURIComponent(solutionId || '') +
+          '&version=' + encodeURIComponent(pageVersion || '') +
+          '&return=' + encodeURIComponent(window.location.pathname))
+        link.addEventListener('click', function (e) {
+          if (downloadPolicy === 'authenticated' && !hasAuthHint()) {
+            if (e && e.preventDefault) e.preventDefault()
+            openSignin('download')
+            return
+          }
+          track('solution_download', baseProps({ kind: 'bundle', source: 'click', placement: 'inline' }))
+        })
+      }
+      span.parentNode.replaceChild(link, span)
+    })
+  }
+
   function disableDraftDownloads () {
     if (!isDraft) return
     // The asset name describes a file that does not exist yet.
@@ -1983,6 +2025,7 @@
   }
 
   if (isSolutionPage) {
+    upgradeInlineDownloads()
     if (isStep && stepId) {
       setCurrent(solutionId, stepId, pageVersion)
       track('solution_step_view', baseProps({ step_index: Number(attr(body, 'data-step-index')) || null }))

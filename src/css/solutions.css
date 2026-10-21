@@ -1580,6 +1580,27 @@ html[data-theme="dark"] .sol-doc {
   margin-bottom: 0;
 }
 
+/* An inline download offer in running text ([.solution-download]#...#):
+   a link with a download glyph, so it reads as the action, not a reference. */
+.sol-doc a.sol-inline-download {
+  font-weight: 600;
+}
+
+.sol-doc a.sol-inline-download::after {
+  content: " \2193";
+}
+
+.sol-doc a.sol-inline-download.is-disabled {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+  cursor: default;
+}
+
+.sol-doc a.sol-inline-download.is-disabled::after {
+  content: none;
+}
+
 .sol-doc .sol-details-lines {
   margin-left: auto;
   font-family: var(--body-font-family-mono, monospace);

@@ -86,6 +86,11 @@ class El {
   }
 
   remove () { if (this.parentNode) this.parentNode.removeChild(this) }
+  replaceChild (child, old) {
+    this.insertBefore(child, old)
+    this.removeChild(old)
+    return old
+  }
 
   getAttribute (name) {
     if (name === 'class') return this.className

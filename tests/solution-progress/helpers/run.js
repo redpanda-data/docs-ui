@@ -234,6 +234,12 @@ function buildPage (o) {
     main.push(els.start, els.heroProgress, els.stepList, els.endNav)
   }
   if (o.blocks !== false) buildBlocks(els).forEach((b) => main.push(b))
+  // An author's inline offer, [.solution-download]#...#, inside a sentence.
+  if (o.inlineDownload) {
+    els.inlineDownload = el('span', { class: 'solution-download', text: 'download the complete example' })
+    els.inlineSentence = el('p', {}, [el('span', { text: 'The quickest way is to ' }), els.inlineDownload, el('span', { text: ', unzip it.' })])
+    main.push(els.inlineSentence)
+  }
   // == Files for this step, the article's own list (opt in): the path is the
   // first <code> of each bullet; one bullet is a generated file that the
   // download endpoint does not serve, one carries a suffix.
