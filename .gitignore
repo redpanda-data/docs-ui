@@ -17,3 +17,5 @@ test-results-*.*
 # Test screenshots
 *.png
 !/src/img/*.png
+# Solutions quiz test corpus (tests/solution-quiz/build-corpus.mjs)
+tests/solution-quiz/.corpus/
