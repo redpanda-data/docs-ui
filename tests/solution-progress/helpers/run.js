@@ -202,7 +202,9 @@ function buildPage (o) {
       els.rowDone = el('div', { 'data-sol-done': '', 'data-sol-done-inline': '', hidden: '' }, [els.rowDownload])
       // continueRow: a step with a next step renders Complete and continue
       // (a link to the next step) and the Next link instead of the toggle.
-      els.rowQuiz = el('button', Object.assign({ 'data-sol-quiz': '', 'data-quiz-title': 'Create the topics', hidden: '' }, o.quizRule ? { 'data-quiz-rule': o.quizRule } : {}))
+      els.rowQuiz = el('button', Object.assign({ 'data-sol-quiz': '', 'data-quiz-title': 'Create the topics', hidden: '' },
+        o.quizRule ? { 'data-quiz-rule': o.quizRule } : {},
+        o.quizAdapt ? { 'data-quiz-adapt': o.quizAdapt } : {}))
       const rowMain = [els.rowBar, els.rowDone, els.rowComplete, els.rowQuiz]
       if (o.continueRow) {
         els.rowContinue = el('a', { 'data-sol-complete-continue': '', href: '/solutions/' + o.solutionId + '/next/' })
@@ -300,7 +302,7 @@ function run (options) {
     o.sessionRaw || {}
   ), o.storageThrows)
 
-  const calls = { fetch: [], events: [], replaceState: [], assign: [], heap: [], chatQueries: [] }
+  const calls = { fetch: [], events: [], replaceState: [], assign: [], heap: [], chatQueries: [], openPanel: 0, quizSource: [] }
   const clock = { now: o.now }
   class FakeDate extends Date {
     static now () { return clock.now }
@@ -355,7 +357,14 @@ function run (options) {
       dataLayer: [],
       KAPA_QUIZ_INTEGRATION_ID: o.quizIntegration === false ? undefined : 'quiz-integration',
       submitChatQuery: () => {},
-      openChatWithQuery: (query, autoSubmit) => calls.chatQueries.push({ query, autoSubmit }),
+      openChatWithQuery: (query, autoSubmit, opts) => calls.chatQueries.push(Object.assign({ query, autoSubmit }, opts && o.chatOpts ? { opts } : {})),
+      openChatPanel: () => { calls.openPanel++ },
+      // 27-solution-quiz-source.js, which reads the rendered step. The DOM
+      // stub cannot run it, so a test hands in what it returns; tests/solution-quiz
+      // runs the real one over rendered pages.
+      __solutionQuiz: o.quizSource
+        ? { quizSource: (doc, button, loc) => { calls.quizSource.push({ title: button.getAttribute('data-quiz-title'), pathname: loc.pathname }); return o.quizSource() } }
+        : undefined,
     },
   }
   context.window.window = context.window

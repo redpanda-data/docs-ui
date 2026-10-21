@@ -1225,32 +1225,93 @@
 
   // Open Ask AI in quiz mode for this step. The drawer bundle may not be loaded
   // yet, so the quiz is also left on window for it to read when it mounts
-  // (react/chatModes.js). The nonce gives every click its own fresh quiz
-  // thread, and openChatWithQuery sends the first message only to the
-  // interface registered for that nonce. __docsChatQuiz and docs-chat:quiz are
-  // the pilot's names, kept for a drawer bundle older than this page.
+  // (react/chatModes.js). The nonce gives every new quiz its own thread, and
+  // openChatWithQuery sends the first message only to the interface
+  // registered for that nonce. __docsChatQuiz and docs-chat:quiz are the
+  // pilot's names, kept for a drawer bundle older than this page.
+  //
+  // The quiz on this page is in one of four states:
+  //   idle      not started on this page load
+  //   active    running in the drawer under quizNonce
+  //   finished  the drawer read the score (docs-chat:mode-complete)
+  //   ended     the reader left it (docs-chat:mode-end: Back to Ask AI,
+  //             Clear, New chat, another Ask AI entry point)
+  // A click while active only opens the drawer, because the reader closed it
+  // to read the step and wants the same quiz back. Any other state starts a
+  // new quiz. The drawer's own Restart starts one too (docs-chat:mode).
+  var quizState = 'idle'
+  var quizNonce = null
+
+  function quizRunning () {
+    var active = window.__docsChatMode
+    return quizState === 'active' && !!active && active.mode === 'quiz' && active.nonce === quizNonce
+  }
+
+  // The step as STEP SOURCE text (27-solution-quiz-source.js), or null when
+  // that script is missing or reading the page failed. The drawer then quizzes
+  // on the title and rule alone.
+  function readQuizSource (el) {
+    var reader = window.__solutionQuiz
+    if (!reader || typeof reader.quizSource !== 'function') return null
+    try {
+      return reader.quizSource(document, el, window.location)
+    } catch (e) {
+      return null
+    }
+  }
+
   function startQuiz (el) {
+    if (quizRunning()) {
+      if (typeof window.openChatPanel === 'function') window.openChatPanel()
+      return
+    }
     var title = attr(el, 'data-quiz-title') || (steps().titles[stepId] || '')
-    var query = 'Quiz me on this step' + (title ? ': ' + title : '') + '.'
+    var read = readQuizSource(el)
     var detail = {
       title: title,
       rule: attr(el, 'data-quiz-rule') || '',
+      adapt: attr(el, 'data-quiz-adapt') || '',
       url: window.location.pathname,
       solution: solutionId,
       step: stepId,
       nonce: now(),
-      firstMessage: query,
+      source: read ? read.block : '',
       props: baseProps(),
     }
+    // Same opener as the drawer's quizOpener, which Restart uses.
+    detail.firstMessage = 'Quiz me on this step' + (title ? ': ' + title : '') + ' (' + solutionId + '/' + stepId + ').'
+    quizState = 'active'
+    quizNonce = detail.nonce
     window.__docsChatQuiz = detail
     window.__docsChatMode = Object.assign({ mode: 'quiz' }, detail)
     try { delete window.submitChatQuery } catch (e) { window.submitChatQuery = undefined }
     dispatch('docs-chat:mode', window.__docsChatMode)
     dispatch('docs-chat:quiz', detail)
-    track('solution_quiz_start', baseProps())
+    track('solution_quiz_start', baseProps({
+      source_chars: read ? read.source.chars : 0,
+      sections: read ? read.source.sections.length : 0,
+      truncated: read ? read.source.truncated : false,
+    }))
     if (typeof window.openChatWithQuery === 'function') {
-      window.openChatWithQuery(query, true, { mode: 'quiz', nonce: detail.nonce })
+      window.openChatWithQuery(detail.firstMessage, true, { mode: 'quiz', nonce: detail.nonce })
     }
+  }
+
+  function onQuizMode (e) {
+    var d = (e && e.detail) || {}
+    if (d.mode !== 'quiz' || d.step !== stepId || d.solution !== solutionId) return
+    quizState = 'active'
+    quizNonce = d.nonce
+  }
+
+  function onQuizComplete (e) {
+    var d = (e && e.detail) || {}
+    if (d.mode === 'quiz' && quizState === 'active' && d.nonce === quizNonce) quizState = 'finished'
+  }
+
+  function onQuizEnd (e) {
+    var d = (e && e.detail) || {}
+    if (quizState === 'active' && (!d.mode || d.mode === 'quiz')) quizState = 'ended'
   }
 
   function disableDraftDownloads () {
@@ -1411,8 +1472,10 @@
       el.hidden = !finished || (el.hasAttribute('data-sol-done-inline') && !narrow)
     })
 
-    // Quiz pilot: only for a signed-in reader, and only when the drawer has a
-    // quiz integration to run on.
+    // Quiz: only for a signed-in reader, and only when the drawer has a quiz
+    // integration to run on. chat-panel.hbs sets KAPA_QUIZ_INTEGRATION_ID only
+    // when the page has not, so a page that sets it to '' switches the quiz
+    // off without a UI release.
     $$('[data-sol-quiz]').forEach(function (el) {
       el.hidden = !signedIn || !window.KAPA_QUIZ_INTEGRATION_ID
     })
@@ -1940,6 +2003,11 @@
     $$('[data-sol-quiz]').forEach(function (el) {
       el.addEventListener('click', function () { startQuiz(el) })
     })
+    if ($('[data-sol-quiz]')) {
+      window.addEventListener('docs-chat:mode', onQuizMode)
+      window.addEventListener('docs-chat:mode-complete', onQuizComplete)
+      window.addEventListener('docs-chat:mode-end', onQuizEnd)
+    }
     $$('[data-sol-download]').forEach(function (el) {
       el.addEventListener('click', function (e) {
         if (isDraft) {
