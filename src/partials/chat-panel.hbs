@@ -50,8 +50,11 @@
   <script>
     window.UI_INTEGRATION_ID = window.UI_INTEGRATION_ID || '36b37003-41d8-4952-857e-344fbb3dc392';
     window.KAPA_PROJECT_ID = window.KAPA_PROJECT_ID || '97f44223-f930-4fb9-ae1e-ecd436a4d85c';
-    {{!-- Solutions quiz pilot: its own Agent SDK integration, so quiz chats stay out of Ask AI analytics --}}
-    window.KAPA_QUIZ_INTEGRATION_ID = window.KAPA_QUIZ_INTEGRATION_ID || '1a84301f-cfa3-4de6-9155-8eba9e11d13c';
+    {{!-- Chat modes (react/chatModes.js) each run on their own Agent SDK
+          integration. A default only when the global is absent, so a host page
+          that sets one to '' before this script switches that mode off. --}}
+    if (!('KAPA_QUIZ_INTEGRATION_ID' in window)) window.KAPA_QUIZ_INTEGRATION_ID = '1a84301f-cfa3-4de6-9155-8eba9e11d13c';
+    if (!('KAPA_PRODUCTIONIZE_INTEGRATION_ID' in window)) window.KAPA_PRODUCTIONIZE_INTEGRATION_ID = '8c41c92e-b589-40c7-9512-418e7428a84a';
     {{!-- Chat SDK integration (anonymous tier — no session backend) --}}
     window.KAPA_CHAT_INTEGRATION_ID = window.KAPA_CHAT_INTEGRATION_ID || '13dd3c3c-52eb-4d92-9b61-383a946bccac';
     {{!-- Session tokens are minted by the docs-site backend (netlify/functions/kapa-session.mjs) --}}
