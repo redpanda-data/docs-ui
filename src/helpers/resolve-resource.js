@@ -118,7 +118,15 @@ module.exports = (resource, { data, hash: context }) => {
     for (const [key, value] of Object.entries(context || {})) {
       if (value !== undefined) explicit[key] = value
     }
-    context = Object.assign({ component: page.component.name, version: page.version, module: page.module }, explicit)
+    // A lookup in ANOTHER component must not inherit this page's version: a
+    // 26.2 streaming page asking for the versionless connect component's
+    // attachment would ask for connect@26.2, which does not exist. Leave the
+    // version unset so the target component's latest is used below.
+    const crossComponent = explicit.component !== undefined && explicit.component !== page.component.name
+    context = Object.assign(
+      { component: page.component.name, version: crossComponent ? undefined : page.version, module: page.module },
+      explicit
+    )
   }
 
   // Cross-component resolution from a versionless component (version '')
@@ -154,12 +162,17 @@ module.exports = (resource, { data, hash: context }) => {
 
   if (file) {
     result = file.pub.url
-  } else if (fallbackUrl) {
-    // Use fallback URL when resource not in content catalog
+  } else if (optional) {
+    // The caller handles the miss: hand back exactly the fallback it gave,
+    // including an empty string. Returning the raw resource spec here (as this
+    // once did when the fallback was empty) made {{#with (resolve-resource ...
+    // fallback='')}} truthy on a miss, so head-meta emitted
+    // content="attachment$redpanda-properties-v25.2.1.json" for a file that
+    // did not exist.
     result = fallbackUrl
   } else {
     // Log warning for unresolved resource (only if no fallback provided)
-    if (!optional) logUnresolved(resolvedResource, 'target not found in content catalog', page, context, logger)
+    logUnresolved(resolvedResource, 'target not found in content catalog', page, context, logger)
     result = resource
   }
 
