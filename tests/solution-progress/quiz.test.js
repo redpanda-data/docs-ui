@@ -153,3 +153,30 @@ test('Restart in the drawer keeps the quiz active under its new nonce', () => {
   assert.equal(r.quizEvents().length, 1)
   assert.equal(r.calls.openPanel, 1)
 })
+
+test('a click announces the quiz as a chat mode, with the opener\'s nonce', () => {
+  const r = run({ actionRow: true, signedIn: true, hint: 'true', chatOpts: true })
+  r.els.rowQuiz.dispatch('click')
+  const modes = r.calls.events.filter((e) => e.type === 'docs-chat:mode').map((e) => e.detail)
+  assert.equal(modes.length, 1)
+  assert.equal(modes[0].mode, 'quiz')
+  assert.equal(modes[0].step, 's1')
+  const [sent] = r.chatQueries()
+  assert.equal(sent.opts.nonce, modes[0].nonce)
+})
+
+test('a click ends a running production plan before the quiz starts', () => {
+  const r = run({ actionRow: true, signedIn: true, hint: 'true' })
+  const ended = []
+  r.win().endChatMode = (reason) => { ended.push({ reason, mode: r.win().__docsChatMode.mode }) }
+  r.win().__docsChatMode = { mode: 'productionize', nonce: 1 }
+  r.els.rowQuiz.dispatch('click')
+  assert.deepEqual(ended, [{ reason: 'other_mode', mode: 'productionize' }])
+  assert.equal(r.win().__docsChatMode.mode, 'quiz')
+  // Negative control: with no other mode running, nothing is ended.
+  const fresh = run({ actionRow: true, signedIn: true, hint: 'true' })
+  const none = []
+  fresh.win().endChatMode = (reason) => none.push(reason)
+  fresh.els.rowQuiz.dispatch('click')
+  assert.deepEqual(none, [])
+})

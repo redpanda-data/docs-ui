@@ -1265,6 +1265,10 @@
       if (typeof window.openChatPanel === 'function') window.openChatPanel()
       return
     }
+    // Another mode (the production plan on the last step) ends first, so it
+    // reports its end and its interface does not unmount without one.
+    var active = window.__docsChatMode
+    if (active && active.mode !== 'quiz' && typeof window.endChatMode === 'function') window.endChatMode('other_mode')
     var title = attr(el, 'data-quiz-title') || (steps().titles[stepId] || '')
     var read = readQuizSource(el)
     var detail = {
