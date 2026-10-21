@@ -15,7 +15,7 @@
  *  - Only the selected tab of a tab set, labelled "(tab: <name>)".
  *  - Collapsed <details> blocks, labelled "(collapsed: <summary>)".
  *  - Not the page chrome inside the article: code block toolboxes, buttons,
- *    anything aria-hidden, and callout markers in code.
+ *    anything aria-hidden or hidden, and callout markers in code.
  *
  * How it is written: h2 becomes ###, h3 becomes ####, paragraphs and list
  * items are kept as lines, tables as one line per row, admonitions as
@@ -27,7 +27,14 @@
  * one step at a time until the text fits. The preamble, Why this approach,
  * Verify and the prose of What you do are never left out: the quiz's
  * questions come from them. A page that is still over the cap after every
- * step is sent as it is, and the corpus test reports it.
+ * step is sent as it is, and the corpus test reports it, up to
+ * QUIZ_SOURCE_HARD_MAX_CHARS. Past that, as a last resort, Verify code keeps
+ * its first VERIFY_MAX_LINES lines, and then the text is cut, so one step
+ * with a very long Verify output cannot grow the request without limit.
+ *
+ * Page text cannot close the STEP SOURCE block early: anything that reads as
+ * a marker, however many angle brackets or whatever whitespace it has, is
+ * escaped, and so is every metadata line written before the block.
  *
  * Exposed as window.__solutionQuiz, and as module.exports so the tests can run
  * it over rendered pages (tests/solution-quiz).
@@ -36,7 +43,9 @@
   'use strict'
 
   var QUIZ_SOURCE_MAX_CHARS = 8000
+  var QUIZ_SOURCE_HARD_MAX_CHARS = 12000
   var CODE_MAX_LINES = 15
+  var VERIFY_MAX_LINES = 40
   var SKIP_SECTIONS = ['files-for-this-step', 'production-considerations']
   // Section ids are matched by prefix, so "what-happens" also covers a
   // writer's "What happens when you run it".
@@ -89,7 +98,7 @@
     var doc = root.ownerDocument
     // Callout markers: <i class="conum"></i><b>(1)</b>, or <b class="conum">.
     each(root, '.conum + b', remove)
-    each(root, '.source-toolbox, button, [aria-hidden="true"], .conum, script, style, svg, img', remove)
+    each(root, '.source-toolbox, button, [aria-hidden="true"], .conum, script, style, svg, img, template', remove)
 
     // Tabs (@asciidoctor/tabs): keep the panel of the selected tab, or of the
     // first tab before the tabs script has run.
@@ -105,6 +114,9 @@
       })
       each(tabs, '.tablist', remove)
     })
+    // Hidden content is not what the reader sees. After the tabs, so a
+    // selected panel the tabs script has not shown yet is still read.
+    each(root, '[hidden], [style*="display:none"], [style*="display: none"]', remove)
 
     // A closed <details> still holds its text. Say it was collapsed, so the
     // model does not build a question on something the reader may not have
@@ -214,8 +226,18 @@
     }).join('\n\n')
   }
 
+  // Zero-width characters are dropped first, so they cannot hide a marker
+  // from the pattern. Safe to run twice: an escaped marker has two brackets.
   function escapeMarkers (text) {
-    return text.replace(/<<<(\s*STEP SOURCE (?:BEGIN|END)\s*)>>>/gi, '<<$1>>')
+    return String(text || '')
+      .replace(/[\u200b-\u200d\u2060\ufeff]/g, '')
+      .replace(/<{3,}(\s*STEP\s+SOURCE\s+(?:BEGIN|END)\s*)>{3,}/gi, '<<$1>>')
+  }
+
+  // One metadata line: whitespace collapsed, so a value cannot start a line
+  // of its own, and markers escaped.
+  function flat (value) {
+    return escapeMarkers(String(value || '').replace(/\s+/g, ' ').trim())
   }
 
   // The step as text: { text, chars, sections: [{ id, title }], truncated,
@@ -223,6 +245,7 @@
   // links. `trimmed` names the TRIM_ORDER steps that were needed.
   function extractStepSource (article, opts) {
     var max = (opts && opts.maxChars) || QUIZ_SOURCE_MAX_CHARS
+    var hardMax = Math.max(max, (opts && opts.hardMaxChars) || QUIZ_SOURCE_HARD_MAX_CHARS)
     if (!article) return { text: '', chars: 0, sections: [], truncated: false, trimmed: [] }
     var root = article.cloneNode(true)
     clean(root)
@@ -280,6 +303,28 @@
       }
     }
 
+    // The last resort, past the hard cap only.
+    if (text.length > hardMax) {
+      var shortened = false
+      sections.forEach(function (s) {
+        if (!matches(s.id, KEEP_CODE_WHOLE)) return
+        s.parts.forEach(function (p) {
+          if (p.kind !== 'code' || p.omitted || p.lines.length <= VERIFY_MAX_LINES) return
+          p.text = fence(p.lines, VERIFY_MAX_LINES)
+          shortened = true
+        })
+      })
+      if (shortened) {
+        trimmed.push('verify-code-short')
+        text = escapeMarkers(assemble(sections))
+      }
+    }
+    if (text.length > hardMax) {
+      var cut = text.lastIndexOf('\n', hardMax)
+      text = text.slice(0, cut > hardMax / 2 ? cut : hardMax) + '\n[rest of the step left out for length]'
+      trimmed.push('cut')
+    }
+
     return {
       text: text,
       chars: text.length,
@@ -297,15 +342,15 @@
     var page = m.url || ''
     var lines = ['## STEP SOURCE']
     var ids = [m.solutionId, m.version].filter(Boolean).join(', ')
-    if (m.solutionTitle || ids) lines.push('Solution: ' + (m.solutionTitle || m.solutionId) + (ids ? ' (' + ids + ')' : ''))
-    if (m.stepIndex && m.stepCount) lines.push('Step ' + m.stepIndex + ' of ' + m.stepCount + ': ' + (m.stepTitle || ''))
-    else if (m.stepTitle) lines.push('Step: ' + m.stepTitle)
-    if (page) lines.push('Page: ' + page)
-    if (m.rule) lines.push('Rule this step establishes: ' + m.rule)
-    if (m.adapt) lines.push('What to change when you adapt it: ' + m.adapt)
+    if (m.solutionTitle || ids) lines.push('Solution: ' + flat(m.solutionTitle || m.solutionId) + (ids ? ' (' + flat(ids) + ')' : ''))
+    if (m.stepIndex && m.stepCount) lines.push('Step ' + flat(m.stepIndex) + ' of ' + flat(m.stepCount) + ': ' + flat(m.stepTitle))
+    else if (m.stepTitle) lines.push('Step: ' + flat(m.stepTitle))
+    if (page) lines.push('Page: ' + flat(page))
+    if (m.rule) lines.push('Rule this step establishes: ' + flat(m.rule))
+    if (m.adapt) lines.push('What to change when you adapt it: ' + flat(m.adapt))
     if (s.sections && s.sections.length && page) {
       lines.push('Section links:')
-      s.sections.forEach(function (sec) { lines.push('- ' + sec.title + ': ' + page + '#' + sec.id) })
+      s.sections.forEach(function (sec) { lines.push('- ' + flat(sec.title) + ': ' + flat(page) + '#' + flat(sec.id)) })
     }
     lines.push(BEGIN, escapeMarkers(s.text || ''), END)
     return lines.join('\n')
@@ -336,7 +381,10 @@
 
   var api = {
     QUIZ_SOURCE_MAX_CHARS: QUIZ_SOURCE_MAX_CHARS,
+    QUIZ_SOURCE_HARD_MAX_CHARS: QUIZ_SOURCE_HARD_MAX_CHARS,
     CODE_MAX_LINES: CODE_MAX_LINES,
+    VERIFY_MAX_LINES: VERIFY_MAX_LINES,
+    escapeMarkers: escapeMarkers,
     SKIP_SECTIONS: SKIP_SECTIONS,
     extractStepSource: extractStepSource,
     stepSourceBlock: stepSourceBlock,
