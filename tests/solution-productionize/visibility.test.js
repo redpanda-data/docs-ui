@@ -348,7 +348,7 @@ test('the prompt is shown in Preview prompt and copied as it is', { skip }, asyn
   const page = load({ signedIn: false })
   const shown = page.$('[data-sol-productionize-prompt]').textContent
   assert.ok(shown.startsWith(`# Take the ${TITLE} design to production`))
-  assert.ok(shown.includes(`curl -s ${ORIGIN}/solutions/${SLUG}/agent-companion.md`))
+  assert.ok(shown.includes(`curl -sf ${ORIGIN}/solutions/${SLUG}/agent-companion.md`))
   page.copy.click()
   await flush()
   assert.deepEqual(page.calls.copied, [shown])

@@ -46,7 +46,12 @@ test('the prompt points at this origin\'s companion and guide', () => {
 
 test('the agent downloads the companion with curl and checks its version', () => {
   const prompt = prod.buildProductionizePrompt(META)
-  assert.ok(prompt.includes(`Download it in full with \`curl -s ${COMPANION}\`.`))
+  // One plain command (an allow rule for curl matches it), -f so a 404
+  // fails, what failure looks like, and what to do when curl is not allowed.
+  assert.ok(prompt.includes(`Download it in full with this one command, exactly as written, with no pipes, redirects, \`cd\`, or temporary directories: \`curl -sf ${COMPANION}\`.`))
+  assert.ok(prompt.includes('If curl exits non-zero, or its output does not start with `# Agent companion:`, the download failed.'))
+  assert.ok(prompt.includes('If you cannot run curl, ask me to paste the file.'))
+  assert.ok(!/curl -s /.test(prompt), 'no curl without -f')
   assert.match(prompt, /^1\. Download the companion\. If you cannot, stop and tell me\. Do not work from memory\. Confirm the companion names version v1\.0\.0\.$/m)
   // The docs MCP server is for product details; it never serves the companion.
   assert.match(prompt, /It cannot return this solution's companion\./)
