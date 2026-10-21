@@ -501,6 +501,11 @@ test('opening in a mode focuses the message box; plain Ask AI focuses Close', ()
   p.panel.hasInput = false
   p.win.openChatPanel()
   assert.deepEqual(p.focused, ['close', 'input', 'close'])
+  // A box disabled while an answer streams cannot take focus either.
+  const q = runPanel()
+  q.panel.querySelector('#chat-message').disabled = true
+  q.startQuiz(1)
+  assert.deepEqual(q.focused, ['close'])
 })
 
 // ——— Other Ask AI entry points ——————————————————————————————————————————
