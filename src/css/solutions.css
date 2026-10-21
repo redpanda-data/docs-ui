@@ -999,6 +999,32 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   cursor: pointer;
 }
 
+.sol-doc .sol-productionize-details > summary::after {
+  /* The generic .doc details chevron sits at the far right of the row; the
+     summary already shows the browser's own disclosure triangle. */
+  content: none;
+}
+
+/* Tabs on solution pages (Local, Kubernetes, Cloud): the vendor styles leave
+   the panel unboxed, so a tab's content runs into the page. The tab row and
+   the selected panel read as one bordered block, like a collapsible. */
+.sol-doc .tabs .tablist > ul {
+  border: 1px solid var(--sol-code-border);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  background: var(--component-bg-tint);
+}
+
+.sol-doc .tabs .tabpanel {
+  padding: 0.25rem 0.875rem 0.875rem;
+  border: 1px solid var(--sol-code-border);
+  border-radius: 0 0 10px 10px;
+}
+
+.sol-doc .tabs .tabpanel > :last-child {
+  margin-bottom: 0;
+}
+
 .sol-doc .sol-productionize-details > summary:focus-visible {
   outline: 2px solid var(--component-500);
   outline-offset: 2px;
