@@ -65,10 +65,11 @@
     <button type="button" class="sol-btn sol-btn--ghost" data-sol-save data-intent="save" data-analytics="solution_save_progress">
       <span data-sol-save-label>Sign in to sync</span>
     </button>
-    {{!-- Quiz pilot: signed-in readers only (28-solution-progress.js unhides it),
-          and only when the drawer has a quiz integration. Opens Ask AI in quiz
-          mode with this step's title and rule as context. --}}
-    <button type="button" class="sol-btn sol-btn--ghost" data-sol-quiz data-quiz-title="{{@root.page.title}}"{{#with @root.page.attributes.solution-rule}} data-quiz-rule="{{this}}"{{/with}} data-analytics="solution_quiz_start" hidden>
+    {{!-- Quiz: signed-in readers only (28-solution-progress.js unhides it), and
+          only when the drawer has a quiz integration. Opens Ask AI in quiz mode
+          with this step's text (27-solution-quiz-source.js), title, rule and
+          adapt line as context. --}}
+    <button type="button" class="sol-btn sol-btn--ghost" data-sol-quiz data-quiz-title="{{@root.page.title}}"{{#with @root.page.attributes.solution-rule}} data-quiz-rule="{{this}}"{{/with}}{{#with @root.page.attributes.solution-adapt}} data-quiz-adapt="{{this}}"{{/with}} data-analytics="solution_quiz_start" hidden>
       <span>Quiz me on this step</span>
     </button>
   </div>
