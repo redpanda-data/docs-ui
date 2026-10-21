@@ -17,7 +17,7 @@ import { safeHeap } from '../heap.js'
 import { Answer, Toast } from './chatShared.jsx'
 import { ModeBanner } from './ModeBanner.jsx'
 import {
-  MODES, MODE_END_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
+  MODES, MODE_END_EVENT, MODE_COMPLETE_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
   isModeThread, rememberThread, threadToResume, forgetThread, endChatMode,
 } from '../chatModes.js'
 
@@ -491,6 +491,11 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
         score_tally: modeProgress.tally,
         thread_id: threadId,
       })
+      // The page marks its quiz finished, so the next "Quiz me on this step"
+      // click starts a new quiz instead of reopening this one.
+      window.dispatchEvent(new CustomEvent(MODE_COMPLETE_EVENT, {
+        detail: { mode, nonce: modeDetail && modeDetail.nonce, score: modeProgress.result.score },
+      }))
     }
     if (last && last.isError && modeProgress.questionsSeen === 0 && !seen.error) {
       seen.error = true

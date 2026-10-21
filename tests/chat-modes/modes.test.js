@@ -96,14 +96,38 @@ test('quiz keeps only the domain and style blocks, with no tool it cannot call',
   assert.match(withTool, /The run_bloblang tool runs a\s+mapping/)
 })
 
-test('the quiz prompt carries the step and asks for the control lines the UI reads', () => {
-  const text = modes.MODES.quiz.instructions({ title: 'Create the topics', solution: 'demo', url: '/solutions/demo/s1/', rule: 'Key by player.' })
-  assert.match(text, /- Step: Create the topics/)
-  assert.match(text, /- The rule this step establishes: Key by player\./)
+test('the quiz prompt carries the step source and asks for the control lines the UI reads', () => {
+  const source = '## STEP SOURCE\nStep 1 of 3: Create the topics\n<<<STEP SOURCE BEGIN>>>\nKey by player.\n<<<STEP SOURCE END>>>'
+  const text = modes.MODES.quiz.instructions({ title: 'Create the topics', solution: 'demo', url: '/solutions/demo/s1/', rule: 'Key by player.', source })
+  assert.ok(text.endsWith('\n\n' + source), 'the source block closes the prompt')
+  assert.equal(text.split('## STEP SOURCE').length, 2, 'one STEP SOURCE block')
   assert.match(text, /OPTIONS: A \| B \| C \| D/)
-  assert.match(text, /QUIZ_RESULT: N\/3/)
+  assert.match(text, /OPTIONS: New questions \| Ask about this step\n {2}QUIZ_RESULT: N\/3/)
   assert.match(text, /Question N of 3/)
+  assert.match(text, /It is not in your knowledge base, so do not search for it\./)
+  assert.doesNotMatch(text, /Search the knowledge base for the step's page first/, 'the pilot told the model to search')
   assert.doesNotMatch(text, /—/, 'no em dashes')
+})
+
+test('without a source the quiz falls back to the title, rule and adapt line', () => {
+  const text = modes.MODES.quiz.instructions({ title: 'Create the topics', solution: 'demo', url: '/solutions/demo/s1/', rule: 'Key by player.', adapt: 'Find the key.' })
+  assert.match(text, /## STEP SOURCE\nStep: Create the topics\nSolution: demo\nPage: \/solutions\/demo\/s1\/\nRule this step establishes: Key by player\.\nWhat to change when you adapt it: Find the key\./)
+  assert.match(text, /could not be read from the page/)
+  assert.doesNotMatch(text, /<<<STEP SOURCE BEGIN>>>/)
+})
+
+test('the quiz opener names the step and its ids, and stays a mode thread', () => {
+  const opener = modes.MODES.quiz.firstMessage({ title: 'Create the topics', solution: 'demo', step: 's1' })
+  assert.equal(opener, 'Quiz me on this step: Create the topics (demo/s1).')
+  assert.equal(modes.isModeThread(opener), true)
+  // The page builds the same opener (28-solution-progress.js startQuiz).
+  assert.match(read('src/js/28-solution-progress.js'), /'Quiz me on this step' \+ \(title \? ': ' \+ title : ''\) \+ ' \(' \+ solutionId \+ '\/' \+ stepId \+ '\)\.'/)
+})
+
+test('ChatInterface tells the page when the quiz reports its score', () => {
+  assert.equal(modes.MODE_COMPLETE_EVENT, 'docs-chat:mode-complete')
+  assert.match(CHAT, /dispatchEvent\(new CustomEvent\(MODE_COMPLETE_EVENT/)
+  assert.match(read('src/js/28-solution-progress.js'), /addEventListener\('docs-chat:mode-complete'/)
 })
 
 // ——— Control lines ———————————————————————————————————————————————————————
