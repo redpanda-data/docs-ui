@@ -9,8 +9,9 @@
  *
  * What is read, from article.doc:
  *  - #preamble and every direct .sect1 child, except the sections that hold
- *    files and the production guide (SKIP_SECTIONS). Those headings are fixed
- *    by the redpanda-solutions CONTRIBUTING guide. Any other section a writer
+ *    files and the production guide, and the Take this to production card
+ *    (SKIP_SECTIONS). Those headings are fixed by the redpanda-solutions
+ *    CONTRIBUTING guide and the card's partial. Any other section a writer
  *    adds is read too, so there is no list of sections to keep up to date.
  *  - Only the selected tab of a tab set, labelled "(tab: <name>)".
  *  - Collapsed <details> blocks, labelled "(collapsed: <summary>)".
@@ -46,7 +47,9 @@
   var QUIZ_SOURCE_HARD_MAX_CHARS = 12000
   var CODE_MAX_LINES = 15
   var VERIFY_MAX_LINES = 40
-  var SKIP_SECTIONS = ['files-for-this-step', 'production-considerations']
+  // take-to-production is the UI's own card on the last step
+  // (solution-productionize.hbs), a sect1 so On this page lists it.
+  var SKIP_SECTIONS = ['files-for-this-step', 'production-considerations', 'take-to-production']
   // Section ids are matched by prefix, so "what-happens" also covers a
   // writer's "What happens when you run it".
   var TRIM_ORDER = [

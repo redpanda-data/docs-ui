@@ -66,13 +66,7 @@
     <button type="button" class="sol-btn sol-btn--ghost" data-sol-save data-intent="save" data-analytics="solution_save_progress">
       <span data-sol-save-label>Sign in to sync</span>
     </button>
-    {{!-- Quiz: signed-in readers only (28-solution-progress.js unhides it), and
-          only when the drawer has a quiz integration. Opens Ask AI in quiz mode
-          with this step's text (27-solution-quiz-source.js), title, rule and
-          adapt line as context. --}}
-    <button type="button" class="sol-btn sol-btn--ghost" data-sol-quiz data-quiz-title="{{@root.page.title}}"{{#with @root.page.attributes.solution-rule}} data-quiz-rule="{{this}}"{{/with}}{{#with @root.page.attributes.solution-adapt}} data-quiz-adapt="{{this}}"{{/with}} data-analytics="solution_quiz_start" hidden>
-      <span>Quiz me on this step</span>
-    </button>
+    {{> solution-quiz-button class='sol-btn'}}
   </div>
   <div class="sol-step-actions-nav">
     {{#if @root.page.attributes.solution-prev-url}}
@@ -87,7 +81,7 @@
     </a>
     {{/if}}
     {{#if @root.page.attributes.solution-next-url}}
-    <a class="sol-btn sol-step-nav sol-step-nav--next" data-sol-next href="{{{relativize @root.page.attributes.solution-next-url}}}">
+    <a class="sol-btn sol-step-nav sol-step-nav--next" data-sol-next data-sol-next-title="{{@root.page.attributes.solution-next-title}}" href="{{{relativize @root.page.attributes.solution-next-url}}}">
       <span class="sol-step-nav-text"><span class="sol-step-nav-kicker">Next</span>{{@root.page.attributes.solution-next-title}}</span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
     </a>
@@ -99,7 +93,3 @@
     {{/if}}
   </div>
 </nav>
-{{!-- The last step ends with the way into production. --}}
-{{#unless @root.page.attributes.solution-next-url}}
-{{> solution-productionize solution=solution}}
-{{/unless}}

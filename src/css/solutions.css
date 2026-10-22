@@ -32,7 +32,6 @@
 .doc .sol-step-link:hover,
 .doc .sol-eyebrow-link,
 .doc .sol-related-link,
-.doc .sol-file-link,
 .doc .sol-btn,
 .doc .sol-btn:hover,
 .doc .sol-step-nav,
@@ -47,8 +46,7 @@
 .doc .sol-rec-card:hover .sol-rec-title,
 .doc .sol-step-link:hover .sol-step-title,
 .doc .sol-eyebrow-link:hover,
-.doc .sol-related-link:hover span,
-.doc .sol-file-link:hover span {
+.doc .sol-related-link:hover span {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -64,13 +62,11 @@
   color: var(--component-600);
 }
 
-.doc .sol-related-link,
-.doc .sol-file-link {
+.doc .sol-related-link {
   color: var(--grey-700-new);
 }
 
-.doc .sol-related-link:hover,
-.doc .sol-file-link:hover {
+.doc .sol-related-link:hover {
   color: var(--component-700);
 }
 
@@ -198,6 +194,68 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
 .sol-page-options .markdown-dropdown {
   position: relative;
   display: inline-block;
+}
+
+/* Page options in the eyebrow row is solution chrome, not the generic pill
+   (markdown-dropdown.css): the same small outlined control as the code
+   toolbox's Download (.sol-file-download, doc.css), in light and dark. The
+   menu takes the same border and radius. Other pages keep the pill. */
+.sol-page-options .markdown-dropdown-toggle {
+  gap: 5px;
+  padding: 4px 8px;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  font-family: var(--body-font-family);
+  line-height: inherit;
+  background: transparent;
+  border: 1px solid var(--grey-300-new, #d1d5db);
+  border-radius: 5px;
+  color: var(--grey-600-new, #4b5563);
+  transition: background 0.12s, color 0.12s;
+}
+
+.sol-page-options .markdown-dropdown-toggle:hover,
+.sol-page-options .markdown-dropdown-toggle[aria-expanded="true"] {
+  background: var(--grey-100-new, #f3f4f6);
+  border-color: var(--grey-300-new, #d1d5db);
+  color: var(--grey-900-new, #111827);
+}
+
+.sol-page-options .markdown-dropdown-toggle .markdown-icon,
+.sol-page-options .markdown-dropdown-toggle .dropdown-caret {
+  width: 12px;
+  height: 12px;
+  color: currentColor;
+}
+
+.sol-page-options .markdown-dropdown-menu {
+  border: 1px solid var(--grey-300-new, #d1d5db);
+  border-radius: 5px;
+}
+
+.sol-page-options .markdown-dropdown-item {
+  border-radius: 4px;
+}
+
+html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #a8b2c7;
+}
+
+html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle:hover,
+html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle .markdown-icon,
+html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle .dropdown-caret {
+  color: currentColor;
+}
+
+html[data-theme="dark"] .sol-page-options .markdown-dropdown-menu {
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .sol-eyebrow-link {
@@ -643,6 +701,38 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   .sol-step-actions-main [data-sol-save] {
     display: none;
   }
+}
+
+/* Under Your progress on a step page (solution-step-rail-actions.hbs): the
+   quiz and the way into production. In the rail body, so they show at every
+   width the rail does, collapsed rail included. */
+.sol-rail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.sol-rail-action {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.sol-rail-action[hidden] {
+  display: none;
+}
+
+.sol-rail-action svg {
+  flex: none;
+  color: var(--component-700);
+}
+
+/* The overview's line about the quiz and the production card, above the
+   Steps list. */
+.sol-steps-note {
+  margin: 0 0 0.75rem;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--sol-meta);
 }
 
 /* The on-this-page TOC (toc.hbs) inside the rail: static, full width, and
@@ -1171,93 +1261,6 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   flex: 1 1 10rem;
 }
 
-.sol-files {
-  margin-top: 0.625rem;
-}
-
-.sol-files-label {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  color: var(--grey-700-new);
-}
-
-.sol-files .sol-panel-text {
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  margin: 0 0 0.375rem;
-}
-
-/* All build-along files: collapsed on every page (solution-code-download.hbs).
-   The label is the summary. */
-.sol-files-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  cursor: pointer;
-  list-style: none;
-}
-
-.sol-files-summary::-webkit-details-marker {
-  display: none;
-}
-
-.sol-files-summary .sol-files-label {
-  margin: 0;
-}
-
-.sol-files-summary::after {
-  content: "";
-  flex: none;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-  color: var(--sol-meta);
-  transition: transform 0.15s ease;
-}
-
-.sol-files-details[open] > .sol-files-summary::after {
-  transform: rotate(-135deg);
-}
-
-.sol-files-details[open] > .sol-files-summary {
-  margin-bottom: 0.5rem;
-}
-
-.sol-file-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.sol-file-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0;
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--grey-700-new);
-  text-decoration: none;
-  word-break: break-all;
-}
-
-.sol-file-link:hover {
-  color: var(--component-700);
-}
-
-.sol-file-link svg {
-  color: var(--grey-400-new);
-  flex: none;
-}
-
-/* A draft has no release: the entry names the file but downloads nothing. */
-.sol-file-link.is-disabled,
-.sol-file-link.is-disabled:hover {
-  color: var(--grey-500-new);
-  cursor: default;
-}
-
 /* ---- step page ------------------------------------------------------------ */
 
 .sol-step-header {
@@ -1657,8 +1660,8 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
 }
 
 /* == Files for this step: a bullet whose path is in the download allowlist is
-   wrapped by 28-solution-progress.js in the same gated download link as the
-   rail's All build-along files entry, with the same tray icon after the name.
+   wrapped by 28-solution-progress.js in a gated download link, the same one
+   as the Download control on its code block, with a tray icon after the name.
    The path keeps its inline-code look; hover underlines it like a link. */
 .doc .sol-step-file-link {
   color: inherit;
@@ -2639,7 +2642,6 @@ html[data-theme="dark"] .sol-rail-summary-meta,
 html[data-theme="dark"] .sol-step-actions-count,
 html[data-theme="dark"] .sol-progress-count,
 html[data-theme="dark"] .sol-filter-row,
-html[data-theme="dark"] .sol-file-link,
 html[data-theme="dark"] .sol-empty,
 html[data-theme="dark"] .sol-gate {
   color: var(--grey-300-new);

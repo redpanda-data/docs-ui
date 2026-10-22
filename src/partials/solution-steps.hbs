@@ -8,11 +8,17 @@
   so the on-this-page TOC, which reads `article.doc > .sect1 > h2[id]`, lists
   it like any authored section. solution.hbs renders it before the first
   authored section.
+
+  The line above the list says what the steps hold besides the build: the quiz
+  at the end of each one (solution-quiz-button.hbs) and the production card
+  on the last (solution-productionize.hbs). It is UI copy, so no solution's
+  content has to repeat it.
 --}}
 {{#if solution.steps.length}}
 <div class="sect1 sol-steps" id="steps">
   <h2 id="sol-steps-title" class="sol-section-title">Steps</h2>
   <div class="sectionbody">
+  <p class="sol-steps-note">Each step ends with a short quiz to check your understanding, and the last step helps you plan the production rollout with Ask AI or your coding agent.</p>
   <ol class="sol-step-list" data-sol-steps>
     {{#each solution.steps}}
     <li class="sol-step-item" data-sol-step-id="{{id}}" data-sol-step-url="{{url}}">

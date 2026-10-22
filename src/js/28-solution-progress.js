@@ -70,11 +70,12 @@
  *     reader is never asked to sign in for one file while the whole zip is
  *     free, and never sees a control where the CTA itself is absent. The
  *     download starts on return from sign-in.
- *   - The rail's All build-along files panel lists the same files (the
- *     catalog record's `files` allowlist) as data-sol-file-link entries. Each
- *     one goes through the very same handler as the code-block control: same
- *     URL builder, same sign-in gate and intent=download&path= round trip,
- *     inert for a draft. No file of a solution has a public download link.
+ *   - A step's Files for this step list links each file in the catalog
+ *     record's `files` allowlist (data-solution-files on the body) as a
+ *     data-sol-file-link entry. Each one goes through the very same handler
+ *     as the code-block control: same URL builder, same sign-in gate and
+ *     intent=download&path= round trip, inert for a draft. No file of a
+ *     solution has a public download link.
  *   - Gates exist only on Save and on the authenticated download. Anonymous
  *     readers can start, mark steps, and see progress on this device.
  *   - Analytics: track(name, props) -> window.heap.track when present, and
@@ -1148,7 +1149,7 @@
       // in this tab): say what to do next rather than nothing.
       if (!fresh) {
         toast(filePath
-          ? 'You are signed in. Select Download on its code block or in All build-along files to get ' + filePath + '.'
+          ? 'You are signed in. Select Download on its code block to get ' + filePath + '.'
           : 'You are signed in. Select Download to get the complete example.')
         return
       }
@@ -1260,7 +1261,24 @@
     }
   }
 
+  // Signed out, the quiz button reads "Quiz me on this step (sign in)" and
+  // opens the sign-in modal; signing in returns to this step. The quiz runs
+  // only on the signed-in drawer (react/chatModes.js drawerTier).
+  function openQuizSignin () {
+    track('solution_quiz_signin', baseProps())
+    dispatch('docs-account:open-signin', {
+      title: 'Sign in to take the quiz',
+      lead: 'Ask AI asks you three short questions about this step and links the part to reread for anything you miss.',
+      cta: 'Sign in and take the quiz',
+      returnTo: window.location.pathname + window.location.search,
+    })
+  }
+
   function startQuiz (el) {
+    if (!hasAuthHint()) {
+      openQuizSignin()
+      return
+    }
     if (quizRunning()) {
       if (typeof window.openChatPanel === 'function') window.openChatPanel()
       return
@@ -1281,6 +1299,15 @@
       nonce: now(),
       source: read ? read.block : '',
       props: baseProps(),
+    }
+    // For the drawer's summary once the quiz finishes: Mark step complete
+    // writes the mark for this version, and Next step is this page's own
+    // next link.
+    detail.version = pageVersion || ''
+    var next = $('[data-sol-next]')
+    if (next) {
+      detail.nextUrl = next.getAttribute('href') || ''
+      detail.nextTitle = attr(next, 'data-sol-next-title') || ''
     }
     // Same opener as the drawer's quizOpener, which Restart uses.
     detail.firstMessage = 'Quiz me on this step' + (title ? ': ' + title : '') + ' (' + solutionId + '/' + stepId + ').'
@@ -1372,15 +1399,6 @@
       var label = $('[data-sol-download-label]', el)
       if (label) label.textContent = DRAFT_DOWNLOAD_LABEL
       else el.textContent = DRAFT_DOWNLOAD_LABEL
-    })
-    // The rail's file entries keep their names (they are still the list of
-    // files to build along with) and lose only the link.
-    $$('[data-sol-file-link]').forEach(function (el) {
-      el.removeAttribute('href')
-      el.removeAttribute('aria-label')
-      el.setAttribute('aria-disabled', 'true')
-      el.setAttribute('title', attr(el, 'data-sol-file-link') + ': ' + DRAFT_DOWNLOAD_LABEL)
-      if (el.classList) el.classList.add('is-disabled')
     })
   }
 
@@ -1518,12 +1536,15 @@
       el.hidden = !finished || (el.hasAttribute('data-sol-done-inline') && !narrow)
     })
 
-    // Quiz: only for a signed-in reader, and only when the drawer has a quiz
-    // integration to run on. chat-panel.hbs sets KAPA_QUIZ_INTEGRATION_ID only
-    // when the page has not, so a page that sets it to '' switches the quiz
-    // off without a UI release.
+    // Quiz: only when the drawer has a quiz integration to run on.
+    // chat-panel.hbs sets KAPA_QUIZ_INTEGRATION_ID only when the page has not,
+    // so a page that sets it to '' switches the quiz off without a UI release.
+    // Signed out it says it needs a sign-in, and a click opens the sign-in
+    // modal (openQuizSignin); with nowhere to sign in it stays hidden.
     $$('[data-sol-quiz]').forEach(function (el) {
-      el.hidden = !signedIn || !window.KAPA_QUIZ_INTEGRATION_ID
+      el.hidden = !window.KAPA_QUIZ_INTEGRATION_ID || (!signedIn && !authAvailable())
+      var label = $('[data-sol-quiz-label]', el)
+      if (label) label.textContent = signedIn ? 'Quiz me on this step' : 'Quiz me on this step (sign in)'
     })
 
     // Gate + download visibility.
@@ -1552,12 +1573,6 @@
     $$('[data-sol-download-panel]').forEach(function (el) {
       var authOnly = !!$('[data-sol-download][data-requires-auth]', el)
       el.hidden = authOnly && !available
-    })
-    // Every entry is a gated download, so the panel follows the bundle panel:
-    // a list of links no reader here can complete is worse than none. The
-    // files themselves are on the steps either way.
-    $$('[data-sol-files-panel]').forEach(function (el) {
-      el.hidden = downloadPolicy === 'none' || (fileDownloadsGated() && !available)
     })
     disableDraftDownloads()
     // Signed in, progress syncs on its own, so Save is only there to retry
@@ -1894,10 +1909,9 @@
     startDownload(fileDownloadUrl(filePath, pageVersion))
   }
 
-  // The rail's All build-along files entries. The partial renders a working
-  // href for readers without this script (docs-site gates it server side);
-  // here it is rebuilt with fileDownloadUrl so the two controls can never
-  // point at different URLs. A draft entry has no href to rebuild.
+  // The Files for this step links decorateFileList makes. Each href is built
+  // with fileDownloadUrl, the code-block control's URL builder, so the two
+  // can never point at different URLs. A draft entry has no href.
   function wireFileLinks () {
     $$('[data-sol-file-link]').forEach(function (el) {
       var filePath = attr(el, 'data-sol-file-link')
@@ -1907,29 +1921,29 @@
           if (e && e.preventDefault) e.preventDefault()
           return
         }
-        requestFileDownload(e, filePath, attr(el, 'data-sol-placement') || 'rail')
+        requestFileDownload(e, filePath, attr(el, 'data-sol-placement') || 'step')
       })
     })
   }
 
   // == Files for this step: each bullet names a file the page shows in full,
   // or a generated one. A name that is in the solution's download allowlist
-  // (the rail's All build-along files entries, which are record.files) is
-  // wrapped in the same gated download link as that panel's entry, with the
-  // same tray icon after it, so the list that sits next to the code is not the
-  // one place on the page that cannot download it. A generated file is not
-  // served and stays plain text. Present only where the bundle CTA is present,
-  // for the reason decorateFileBlocks gives; a draft keeps the names and loses
-  // the link, like the rail. wireFileLinks binds the clicks, so this runs
-  // first.
+  // (record.files, which layouts/solution-step.hbs writes to the body as
+  // data-solution-files) is wrapped in a gated download link with the tray
+  // icon after it, so the list that sits next to the code can download it
+  // too. A generated file is not served and stays plain text. Present only
+  // where the bundle CTA is present, for the reason decorateFileBlocks gives;
+  // a draft keeps the names and loses the link. wireFileLinks binds the
+  // clicks, so this runs first.
   function decorateFileList () {
     if (!isSolutionPage || !isStep) return
     if (downloadPolicy === 'none') return
     if (fileDownloadsGated() && !authAvailable()) return
     var allow = {}
-    $$('[data-sol-file-link]').forEach(function (el) {
-      var p = attr(el, 'data-sol-file-link')
-      if (p) allow[p] = true
+    var files = []
+    try { files = JSON.parse(attr(body, 'data-solution-files') || '[]') } catch (e) { files = [] }
+    ;(Array.isArray(files) ? files : []).forEach(function (p) {
+      if (typeof p === 'string' && p) allow[p] = true
     })
     var heading = null
     $$('h2').forEach(function (h) {

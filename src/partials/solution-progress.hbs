@@ -12,8 +12,10 @@
   repeated in the step action row (data-sol-done-inline) because the rail
   collapses on narrow screens. Get the code (solution-code-download.hbs)
   opens the card, above the progress bar, because the code is what a reader
-  needs first on a step; the collapsed file list (solution-files.hbs) closes
-  it. Progress, download and sign-in are still one box; when the download is
+  needs first on a step; the progress block closes it. There is no list of
+  every file here: each step's Files for this step section and the Download
+  control on each code block cover that. Progress, download and sign-in are
+  still one box; when the download is
   gated its sign-in line replaces Sign in to sync, which would ask for the
   same sign-in twice. Everything is driven by
   28-solution-progress.js, which reads the step ids from the sidebar entries
@@ -40,7 +42,6 @@
     </button>
     <span class="sol-sync-state" data-sol-sync-state aria-live="polite"></span>
   </div>
-  {{> solution-files solution=solution}}
   <div class="sol-done" data-sol-done hidden>
     <p class="sol-done-title">You finished this solution.</p>
     <p class="sol-done-sub">Keep the complete example around for your own projects.</p>

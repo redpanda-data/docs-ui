@@ -142,7 +142,7 @@ test('the sidebar groups stay open and each step has a place for its status text
   })
   assert.match(html, /nav-item sol-nav-group" data-depth="1">\s*<div class="item"><span class="nav-text sol-nav-heading">Steps/)
   assert.match(html, /<span class="visually-hidden sol-nav-step-status" data-sol-nav-step-status><\/span>/)
-  assert.doesNotMatch(html, /All build-along files/, 'the files are in the rail, not repeated in the sidebar')
+  assert.doesNotMatch(html, /All build-along files/, 'each step lists its own files; the sidebar does not repeat them')
 
   const css = read('src/css/solutions.css')
   assert.match(css, /\.sol-nav \.nav-item\.sol-nav-group > \.nav-list \{\s*display: block;/, 'overrides nav.css hiding lists of inactive items')
@@ -247,7 +247,7 @@ test('Ask AI on a solutions page suggests solution questions, not the agent defa
 
 test('the overview puts Steps after the introduction and before the first section, as an On this page section', () => {
   const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'get-header-color', 'split-at-first-section', 'html-has-id'], ['solution-steps', 'solution-related-docs', 'solution-overview-next'])
-  ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'solution-files', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
+  ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
   const solution = {
     id: 'g',
     steps: [{ id: 's1', title: 'One', url: '/solutions/g/s1/', order: 1 }],
@@ -278,63 +278,17 @@ test('the overview puts Steps after the introduction and before the first sectio
   assert.equal(split('<p>a</p><div class="sect1 x"><h2>').after, '<div class="sect1 x"><h2>')
 })
 
-test('the rail file list is collapsed on every page, inside the progress card', () => {
-  const hbs = engine(['eq', 'and', 'not', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
-  const render = hbs.compile('{{> solution-code-download solution=solution}}{{> solution-files solution=solution}}')
-  const solution = { id: 'g', version: 'v1.0.0', download: 'public', files: ['Makefile', 'compose.yaml'] }
-  for (const page of [{ layout: 'solution', url: '/solutions/g/' }, { layout: 'solution-step', url: '/solutions/g/s1/' }]) {
-    const html = render({ solution, page })
-    assert.match(html, /<details class="sol-files-details">/, page.layout + ': collapsed')
-    assert.match(html, /All build-along files \(2\)/)
-    assert.match(html, /<span>Makefile<\/span>/, 'the links are there, just collapsed')
-    assert.doesNotMatch(html, /class="sol-panel[ "]/, page.layout + ': a section of the card, not a second panel')
-  }
-})
-
-test('the rail file list is record.files as gated download links, never public attachment links', () => {
-  const hbs = engine(['eq', 'and', 'not', 'relativize', 'encode-uri'], ['solution-code-download', 'solution-files', 'solution-access-gate'])
-  const render = hbs.compile('{{> solution-code-download solution=solution}}{{> solution-files solution=solution}}')
-  const attachments = [{ name: 'verification.json', url: '/solutions/g/_attachments/verification.json' }]
-  const files = ['docker-compose.yml', 'services/leaderboard/main.go', 'scripts/verify-lib.sh']
-  const page = { layout: 'solution', url: '/solutions/g/' }
-  const gated = render({ solution: { id: 'g', version: 'v1.2.0', status: 'published', download: 'authenticated', files, attachments }, page })
-  assert.doesNotMatch(gated, /_attachments/, 'attachments are evidence, not the build-along list')
-  assert.match(gated, /All build-along files \(3\)/, 'the count is record.files')
-  const links = gated.match(/<a class="sol-file-link"[^>]*>/g)
-  assert.equal(links.length, 3)
-  assert.match(links[1], /href="\/solutions\/download\?solution=g&amp;version=v1\.2\.0&amp;path=services%2Fleaderboard%2Fmain\.go&amp;return=%2Fsolutions%2Fg%2F"/)
-  assert.match(links[1], /data-sol-file-link="services\/leaderboard\/main\.go"/)
-  links.forEach((a) => assert.match(a, /data-requires-auth/))
-  assert.match(gated, /Sign in to download all 3 as one zip, tested at v1\.2\.0\./)
-  assert.doesNotMatch(gated, /without the download/, 'no promise of public files')
-
-  const pub = render({ solution: { id: 'g', version: 'v1.2.0', download: 'public', files }, page })
-  assert.doesNotMatch(pub, /data-requires-auth/)
-  assert.match(pub, /path=scripts%2Fverify-lib\.sh/)
-
-  const draft = render({ solution: { id: 'g', version: 'v0.1.0', status: 'draft', download: 'authenticated', files }, page })
-  const draftLinks = draft.match(/<a class="sol-file-link[^"]*"[^>]*>/g)
-  assert.equal(draftLinks.length, 3)
-  draftLinks.forEach((a) => {
-    assert.doesNotMatch(a, /href=/, 'a draft has no link, public or gated')
-    assert.match(a, /aria-disabled="true"/)
-  })
-  assert.match(draft, /Download available at release\./)
-
-  // TEMPORARY, preview only: draftDownloads gives a draft the gated links.
-  const previewDraft = render({ solution: { id: 'g', version: 'v0.1.0', status: 'draft', download: 'authenticated', draftDownloads: true, files }, page })
-  const previewLinks = previewDraft.match(/<a class="sol-file-link[^"]*"[^>]*>/g)
-  assert.equal(previewLinks.length, 3)
-  previewLinks.forEach((a) => assert.doesNotMatch(a, /aria-disabled/))
-  assert.match(previewDraft, /data-requires-auth/)
-  assert.doesNotMatch(previewDraft, /Download available at release/)
-
-  assert.doesNotMatch(render({ solution: { id: 'g', download: 'none', files }, page }), /sol-files/, 'no downloads, no download list')
-  assert.doesNotMatch(render({ solution: { id: 'g', download: 'authenticated', files: [], attachments }, page }), /sol-files/)
+test('the rail has no list of every file: each step lists its own, and code blocks download', () => {
+  assert.equal(fs.existsSync(path.join(ROOT, 'src/partials/solution-files.hbs')), false)
+  assert.doesNotMatch(read('src/partials/solution-progress.hbs'), /solution-files/)
+  assert.doesNotMatch(read('src/css/solutions.css'), /\.sol-files\b|\.sol-file-link\b/)
+  assert.doesNotMatch(read('src/js/28-solution-progress.js'), /All build-along files/)
+  // The Files for this step links still need the allowlist, now on the body.
+  assert.match(read('src/layouts/solution-step.hbs'), /data-solution-files="\{\{json-stringify files\}\}"/)
 })
 
 test('every step page carries a Mark step complete toggle; a step with a next step adds Complete and continue', () => {
-  const hbs = engine(['eq', 'relativize', 'subtract', 'concat', 'or'], ['solution-step-actions', 'solution-productionize-link', 'solution-productionize'])
+  const hbs = engine(['eq', 'relativize', 'subtract', 'concat', 'or'], ['solution-step-actions', 'solution-productionize-link', 'solution-quiz-button'])
   const render = hbs.compile('{{> solution-step-actions solution=solution}}')
   const solution = { id: 'g', version: 'v1.0.0', url: '/solutions/g/', download: 'public', steps: [{ id: 's1', url: '/solutions/g/s1/' }, { id: 's2', url: '/solutions/g/s2/' }] }
   const middle = render({ solution, page: { url: '/solutions/g/s1/', attributes: { 'solution-next-url': '/solutions/g/s2/', 'solution-next-title': 'Two' } } })
@@ -343,7 +297,8 @@ test('every step page carries a Mark step complete toggle; a step with a next st
   const last = render({ solution, page: { url: '/solutions/g/s2/', attributes: { 'solution-prev-url': '/solutions/g/s1/', 'solution-prev-title': 'One' } } })
   assert.doesNotMatch(last, /data-sol-complete-continue/, 'nothing to continue to')
   assert.match(last, /class="sol-btn sol-btn--primary" data-sol-complete /, 'the toggle is the last step\'s primary action')
-  // The last step ends with the Take this to production card; no other step does.
-  assert.match(last, /id="take-to-production"/)
-  assert.doesNotMatch(middle, /id="take-to-production"/)
+  // The Take this to production card is the layout's to place, after
+  // Production considerations (tests/solution-productionize), never here.
+  assert.doesNotMatch(last, /data-sol-productionize /)
+  assert.doesNotMatch(middle, /data-sol-productionize /)
 })

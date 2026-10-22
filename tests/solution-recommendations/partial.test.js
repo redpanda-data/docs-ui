@@ -503,7 +503,7 @@ test('entry points render only when the solutions component exists', () => {
 test('the recommendation partial never renders a repository URL', () => {
   const html = render(page({ 'related-solutions': JSON.stringify(RECS) }))
   assert.doesNotMatch(html, /github\.com/)
-  for (const partial of ['solution-code-download', 'solution-files', 'solution-access-gate', 'solution-hero', 'solution-meta', 'solution-card', 'nav-tree-solution']) {
+  for (const partial of ['solution-code-download', 'solution-access-gate', 'solution-hero', 'solution-meta', 'solution-card', 'nav-tree-solution']) {
     assert.doesNotMatch(read('src/partials/' + partial + '.hbs'), /github\.com|solution\.repo|\.repo\b/, partial + ' must not render the repo')
   }
 })

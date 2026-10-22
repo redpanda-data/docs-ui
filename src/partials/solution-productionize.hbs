@@ -1,8 +1,11 @@
 {{!--
   "Take this to production" card on a solution's last step. Context:
-  `solution`. solution-step-actions.hbs includes it after the step actions on
-  the last step only; the done panels (solution-progress.hbs and the inline
-  copy in solution-step-actions.hbs) link to it by its id.
+  `solution`. layouts/solution-step.hbs includes it on the last step only,
+  directly after the Production considerations section (split-after-section).
+  It is marked up as an Asciidoctor section (.sect1 > h2[id]) so On this page
+  lists it, and the heading carries the id the done panels
+  (solution-progress.hbs and the inline copy in solution-step-actions.hbs) and
+  the step rail (solution-step-rail-actions.hbs) link to.
 
   33-solution-productionize.js drives it:
   - Plan it with Ask AI opens the drawer in productionize mode, grounded on
@@ -19,8 +22,8 @@
     clients are only on that page, so this card never keeps its own copy of
     their setup.
 --}}
-<section class="sol-panel sol-productionize" id="take-to-production" data-sol-productionize data-sol-companion-url="{{or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md')}}"{{#with @root.page.attributes.solution-verified-version}} data-sol-verified-version="{{this}}"{{/with}} aria-labelledby="sol-productionize-title">
-  <h2 id="sol-productionize-title" class="sol-productionize-title">Take this to production</h2>
+<section class="sect1 sol-panel sol-productionize" data-sol-productionize data-sol-companion-url="{{or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md')}}"{{#with @root.page.attributes.solution-verified-version}} data-sol-verified-version="{{this}}"{{/with}} aria-labelledby="take-to-production">
+  <h2 id="take-to-production" class="sol-productionize-title">Take this to production</h2>
   <p class="sol-productionize-sub">Turn the reference build into a plan for your own system: your deployment, your scale, your security model.</p>
   <div class="sol-productionize-actions">
     <button type="button" class="sol-btn sol-btn--primary" data-sol-productionize-plan data-analytics="solution_productionize_start" hidden>

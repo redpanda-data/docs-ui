@@ -18,7 +18,7 @@ const STORE_KEY = 'docs-solutions-progress'
 const HINT_KEY = 'docs-solutions-progress-hint'
 const DIRTY_KEY = 'docs-solutions-progress-dirty'
 const PENDING_KEY = 'docs-solutions-pending-intent'
-const RAIL_FILES = ['docker-compose.yml', 'services/leaderboard/main.go', 'scripts/verify-lib.sh']
+const FILES = ['docker-compose.yml', 'services/leaderboard/main.go', 'scripts/verify-lib.sh']
 
 function storage (initial, throws) {
   const data = Object.assign({}, initial || {})
@@ -102,6 +102,9 @@ function buildPage (o) {
   if (o.draftDownloads) bodyAttrs['data-solution-draft-downloads'] = 'true'
   if (o.fileCount !== undefined) bodyAttrs['data-solution-file-count'] = String(o.fileCount)
   if (o.testedOn) bodyAttrs['data-solution-tested-on'] = o.testedOn
+  // The download allowlist (record.files), which layouts/solution-step.hbs
+  // writes to the body for the Files for this step links.
+  if (o.files !== false) bodyAttrs['data-solution-files'] = JSON.stringify(o.files || FILES)
   if (o.page === 'step') {
     bodyAttrs['data-step-id'] = o.stepId
     bodyAttrs['data-step-index'] = String(stepIds.indexOf(o.stepId) + 1)
@@ -155,30 +158,7 @@ function buildPage (o) {
   // gate: false mirrors solution-code-download.hbs for a non-authenticated
   // download, which renders no gate.
   els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat(o.gate === false ? [els.asset] : [els.asset, els.gate]))
-  // All build-along files (solution-code-download.hbs): record.files as gated
-  // download links, rendered with no href for a draft and not at all for
-  // download: 'none'.
-  const railPanel = []
-  if (o.download !== 'none' && o.railFiles !== false) {
-    const policy = o.download || 'authenticated'
-    els.fileLinks = (o.railFiles || RAIL_FILES).map((file) => {
-      const attrs = { class: 'sol-file-link', 'data-sol-file-link': file }
-      if (o.status === 'draft' && !o.draftHref) {
-        attrs['aria-disabled'] = 'true'
-        attrs.class += ' is-disabled'
-      } else {
-        attrs.href = '/solutions/download?solution=' + o.solutionId + '&version=' + o.version +
-          '&path=' + encodeURIComponent(file) + '&return=' + encodeURIComponent('/solutions/' + o.solutionId + '/')
-        if (policy === 'authenticated') attrs['data-requires-auth'] = ''
-      }
-      return el('a', attrs, [el('span', { text: file })])
-    })
-    els.filesPanel = el('section', { 'data-sol-files-panel': '' }, [
-      el('details', { class: 'sol-files-details' }, [el('ul', { class: 'sol-file-list' }, els.fileLinks.map((a) => el('li', {}, [a])))]),
-    ])
-    railPanel.push(els.filesPanel)
-  }
-  els.rail = el('details', { 'data-sol-rail': '', open: '' }, [els.progress, els.downloadPanel].concat(railPanel))
+  els.rail = el('details', { 'data-sol-rail': '', open: '' }, [els.progress, els.downloadPanel])
 
   const main = []
   if (o.page === 'step') {
@@ -202,13 +182,14 @@ function buildPage (o) {
       els.rowDone = el('div', { 'data-sol-done': '', 'data-sol-done-inline': '', hidden: '' }, [els.rowDownload])
       // continueRow: a step with a next step renders Complete and continue
       // (a link to the next step) and the Next link instead of the toggle.
+      els.rowQuizLabel = el('span', { 'data-sol-quiz-label': '', text: 'Quiz me on this step' })
       els.rowQuiz = el('button', Object.assign({ 'data-sol-quiz': '', 'data-quiz-title': 'Create the topics', hidden: '' },
         o.quizRule ? { 'data-quiz-rule': o.quizRule } : {},
-        o.quizAdapt ? { 'data-quiz-adapt': o.quizAdapt } : {}))
+        o.quizAdapt ? { 'data-quiz-adapt': o.quizAdapt } : {}), [els.rowQuizLabel])
       const rowMain = [els.rowBar, els.rowDone, els.rowComplete, els.rowQuiz]
       if (o.continueRow) {
         els.rowContinue = el('a', { 'data-sol-complete-continue': '', href: '/solutions/' + o.solutionId + '/next/' })
-        els.rowNext = el('a', { 'data-sol-next': '', class: 'sol-btn sol-step-nav', href: '/solutions/' + o.solutionId + '/next/' })
+        els.rowNext = el('a', { 'data-sol-next': '', 'data-sol-next-title': 'Produce the events', class: 'sol-btn sol-step-nav', href: '/solutions/' + o.solutionId + '/next/' })
         rowMain.push(els.rowContinue, els.rowNext)
       }
       els.actionRow = el('nav', { class: 'sol-step-actions' }, rowMain)
@@ -435,4 +416,4 @@ function run (options) {
   }
 }
 
-module.exports = { run, plain, doneIds, STORE_KEY, HINT_KEY, DIRTY_KEY, PENDING_KEY, RAIL_FILES }
+module.exports = { run, plain, doneIds, STORE_KEY, HINT_KEY, DIRTY_KEY, PENDING_KEY, FILES }

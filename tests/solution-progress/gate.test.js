@@ -127,7 +127,7 @@ test('signed-in download click navigates normally and is tracked', () => {
   assert.ok(r.calls.heap.some((e) => e.name === 'solution_download'))
 })
 
-test('auth unavailable: "saved on this device", no sign-in button, download CTA hidden, build-along files untouched', () => {
+test('auth unavailable: "saved on this device", no sign-in button, download CTA hidden, no sign-in offered', () => {
   const r = run({ signedIn: false, accountHidden: true, kapaLoginUrl: undefined, isUiPreview: false })
   assert.equal(r.els.gateText.textContent, 'Progress is saved on this device.')
   assert.equal(r.els.signin.hidden, true)

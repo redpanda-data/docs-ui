@@ -24,7 +24,8 @@ const SLUG = 'multiplayer-gaming'
 const TITLE = 'Keep a live leaderboard current as game events stream in'
 const STEPS = ['start-environment', 'create-topics', 'verify-end-to-end']
 const stepUrl = (id) => `/solutions/${SLUG}/${id}/`
-const LAST = stepUrl(STEPS[STEPS.length - 1])
+const LAST_ID = STEPS[STEPS.length - 1]
+const LAST = stepUrl(LAST_ID)
 
 let parseHTML = null
 try { ({ parseHTML } = require('linkedom')) } catch { /* reported below */ }
@@ -49,17 +50,36 @@ const SOLUTION = {
   steps: STEPS.map((id, i) => ({ id, url: stepUrl(id), title: 'Title of ' + id, order: i + 1 })),
 }
 
-const PAGE = hbs.compile(`<!DOCTYPE html>
-<html><body class="article {{bodyClass}}" data-solution-id="{{solution.id}}" data-solution-version="{{solution.version}}" data-solution-title="{{solution.title}}" data-solution-tested-on="Docker"{{#if page.attributes.solution-step-id}} data-step-id="{{page.attributes.solution-step-id}}"{{/if}}>
-<ol>{{#each solution.steps}}<li data-sol-nav-step="{{id}}" data-sol-nav-url="{{url}}"><span class="sol-nav-step-title">{{title}}</span></li>{{/each}}</ol>
-<article class="doc sol-doc">
+// The step body the way layouts/solution-step.hbs builds it: on the last step
+// the card goes directly after Production considerations, which is last
+// here, as it is on the real pages, ahead of the footnotes. The aside is the
+// step rail, with the quiz and production entries under Your progress.
+const LAYOUT = fs.readFileSync(path.join(ROOT, 'src/layouts/solution-step.hbs'), 'utf8')
+const CONTENTS = `<div class="sect1"><h2 id="clean-up">Clean up</h2><div class="sectionbody"><p>Stop it.</p></div></div>
 <div class="sect1"><h2 id="production-considerations">Production considerations</h2><div class="sectionbody">
 <div class="sect2"><h3 id="prod-security">Security</h3></div>
 <div class="sect2"><h3 id="prod-recovery-point-and-time">Recovery point and recovery time</h3></div>
 </div></div>
-{{#if page.attributes.solution-step-id}}{{> solution-step-actions solution=solution}}{{/if}}
+<div id="footnotes"><hr></div>`
+
+const PAGE = hbs.compile(`<!DOCTYPE html>
+<html><body class="article {{bodyClass}}" data-solution-id="{{solution.id}}" data-solution-version="{{solution.version}}" data-solution-title="{{solution.title}}" data-solution-tested-on="Docker"{{#if page.attributes.solution-step-id}} data-step-id="{{page.attributes.solution-step-id}}"{{/if}}>
+<ol>{{#each solution.steps}}<li data-sol-nav-step="{{id}}" data-sol-nav-url="{{url}}"><span class="sol-nav-step-title">{{title}}</span></li>{{/each}}</ol>
+<article class="doc sol-doc">
+{{#if page.attributes.solution-step-id}}
+{{#if page.attributes.solution-next-url}}
+{{{page.contents}}}
+{{else}}
+{{#with (split-after-section page.contents 'production-considerations') as |parts|}}
+{{{parts.before}}}
+{{> solution-productionize solution=@root.solution}}
+{{{parts.after}}}
+{{/with}}
+{{/if}}
+{{> solution-step-actions solution=solution}}
+{{else}}{{{page.contents}}}{{/if}}
 </article>
-<aside>{{> solution-progress solution=solution}}</aside>
+<aside>{{> solution-progress solution=solution}}{{#if page.attributes.solution-step-id}}{{> solution-step-rail-actions solution=solution}}{{/if}}</aside>
 </body></html>`)
 
 function render (o) {
@@ -73,8 +93,8 @@ function render (o) {
     if (i < STEPS.length - 1) attributes['solution-next-url'] = stepUrl(STEPS[i + 1])
   }
   Object.assign(attributes, o.attributes)
-  return PAGE({ solution: SOLUTION, bodyClass: o.step ? 'solution-step' : 'solution', page: { url, title: 'T', attributes }, site: { path: '' } }, {
-    data: { root: { page: { url, attributes }, site: { path: '' } } },
+  return PAGE({ solution: SOLUTION, bodyClass: o.step ? 'solution-step' : 'solution', page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '' } }, {
+    data: { root: { solution: SOLUTION, page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '' } } },
   })
 }
 
@@ -194,9 +214,36 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 test('the card is on the last step only', { skip }, () => {
   assert.ok(load({}).card, 'last step')
-  assert.equal(load({}).card.id, 'take-to-production')
+  assert.equal(load({}).card.querySelector('h2').id, 'take-to-production')
   assert.equal(load({ step: STEPS[0] }).card, null, 'first step')
   assert.equal(load({ step: null }).card, null, 'overview')
+})
+
+test('the card follows Production considerations, ahead of the step actions, and On this page lists it', { skip }, () => {
+  const { document } = load({})
+  // The on-this-page TOC's own selector for h2 entries (02-on-this-page.js).
+  const toc = Array.from(document.querySelectorAll('article.doc>.sect1>h2[id]')).map((h) => h.id)
+  assert.deepEqual(toc, ['clean-up', 'production-considerations', 'take-to-production'])
+  const order = Array.from(document.querySelector('article.doc').children).map((el) =>
+    el.matches('[data-sol-productionize]') ? 'card' : el.matches('.sol-step-actions') ? 'actions' : el.id || el.querySelector('h2')?.id)
+  assert.deepEqual(order.filter(Boolean), ['clean-up', 'production-considerations', 'card', 'footnotes', 'actions'])
+  // The layout places it with the same helper and section id.
+  assert.match(LAYOUT, /split-after-section page\.contents 'production-considerations'/)
+  assert.match(LAYOUT, /\{\{> solution-productionize solution=/)
+  assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'src/partials/solution-step-actions.hbs'), 'utf8'), /solution-productionize solution/)
+})
+
+test('the step rail offers the quiz and the way into production on every step', { skip }, () => {
+  for (const [step, href] of [[STEPS[0], '../verify-end-to-end/#take-to-production'], [LAST_ID, '#take-to-production']]) {
+    const { document } = load({ step })
+    const rail = document.querySelector('aside [data-sol-rail-actions]')
+    assert.ok(rail, step)
+    assert.ok(rail.querySelector('[data-sol-quiz]'), 'the quiz button, with the same data attribute the script binds')
+    const link = rail.querySelector('[data-sol-productionize-link]')
+    assert.equal(link.getAttribute('href'), href)
+    assert.equal(link.getAttribute('data-placement'), 'rail')
+  }
+  assert.equal(load({ step: null }).document.querySelector('[data-sol-rail-actions]'), null, 'not on the overview')
 })
 
 test('signed out: the plan button asks to sign in and returns to the card', { skip }, () => {
@@ -384,11 +431,11 @@ test('the MCP block names the server, the Claude Code command and the VS Code on
 })
 
 test('done panels link to the card: a scroll on the last step, the last step elsewhere', { skip }, () => {
-  const hrefs = (page) => Array.from(page.document.querySelectorAll('[data-sol-productionize-link]')).map((a) => a.getAttribute('href'))
+  const hrefs = (page) => Array.from(page.document.querySelectorAll('[data-sol-done] [data-sol-productionize-link]')).map((a) => a.getAttribute('href'))
   assert.deepEqual(hrefs(load({})), ['#take-to-production', '#take-to-production'], 'last step: inline and rail')
   assert.deepEqual(hrefs(load({ step: STEPS[0] })), ['../verify-end-to-end/#take-to-production', '../verify-end-to-end/#take-to-production'])
   assert.deepEqual(hrefs(load({ step: null })), ['verify-end-to-end/#take-to-production'], 'overview: rail only')
-  for (const a of load({}).document.querySelectorAll('[data-sol-productionize-link]')) {
+  for (const a of load({}).document.querySelectorAll('[data-sol-productionize-link]:not([data-placement])')) {
     assert.equal(a.textContent, 'Take this to production')
     assert.ok(a.closest('[data-sol-done]'), 'inside a done panel')
   }

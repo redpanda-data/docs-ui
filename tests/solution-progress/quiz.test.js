@@ -10,9 +10,35 @@ const test = require('node:test')
 const assert = require('node:assert')
 const { run } = require('./helpers/run')
 
-test('hidden from anonymous readers, shown when signed in', () => {
-  assert.equal(run({ actionRow: true, signedIn: false, accountHidden: false }).els.rowQuiz.hidden, true)
-  assert.equal(run({ actionRow: true, signedIn: true, hint: 'true' }).els.rowQuiz.hidden, false)
+test('shown signed in; signed out it asks to sign in, and hides only with nowhere to sign in', () => {
+  const signedIn = run({ actionRow: true, signedIn: true, hint: 'true' }).els
+  assert.equal(signedIn.rowQuiz.hidden, false)
+  assert.equal(signedIn.rowQuizLabel.textContent, 'Quiz me on this step')
+  const signedOut = run({ actionRow: true, signedIn: false, accountHidden: false }).els
+  assert.equal(signedOut.rowQuiz.hidden, false)
+  assert.equal(signedOut.rowQuizLabel.textContent, 'Quiz me on this step (sign in)')
+  assert.equal(run({ actionRow: true, signedIn: false }).els.rowQuiz.hidden, true, 'no sign-in on this page')
+})
+
+test('signed out, a click opens the sign-in modal and returns to this step, with no quiz', () => {
+  const r = run({ actionRow: true, signedIn: false, accountHidden: false })
+  r.els.rowQuiz.dispatch('click')
+  const [signin] = r.signinEvents()
+  assert.ok(signin, 'the sign-in modal opens')
+  assert.equal(signin.detail.title, 'Sign in to take the quiz')
+  assert.equal(signin.detail.returnTo, '/solutions/demo/s1/')
+  assert.deepEqual(r.quizEvents(), [])
+  assert.deepEqual(r.chatQueries(), [])
+  assert.ok(r.calls.heap.some((e) => e.name === 'solution_quiz_signin'))
+})
+
+test('the quiz carries what its summary needs: the version and the next step', () => {
+  const r = run({ actionRow: true, continueRow: true, signedIn: true, hint: 'true' })
+  r.els.rowQuiz.dispatch('click')
+  const mode = r.win().__docsChatMode
+  assert.equal(mode.version, 'v1.0.0')
+  assert.equal(mode.nextUrl, '/solutions/demo/next/')
+  assert.equal(mode.nextTitle, 'Produce the events')
 })
 
 test('hidden when the drawer has no quiz integration', () => {

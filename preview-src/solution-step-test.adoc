@@ -231,7 +231,7 @@ PASS 9/9 checks
 * `services/leaderboard/go.mod`: shown in full above.
 * `services/leaderboard/main.go`: shown in full under Complete source.
 
-Signed-in readers can download each file with the Download control on its code block or from the *All build-along files* panel.
+Signed-in readers can download each file from this list or with the Download control on its code block.
 
 == In production
 
