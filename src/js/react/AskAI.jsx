@@ -12,7 +12,7 @@ import { readScopeIds, dropScope, isScopeRejection, SCOPE_DROPPED_EVENT } from '
 import { getSessionToken, installSessionProbe } from './kapaSession.js'
 import {
   MODE_EVENT, MODE_END_EVENT, LEGACY_QUIZ_EVENT, readMode, normalizeMode, resolveMode,
-  endChatMode, MODES, drawerTier, modeReadiness, agentProps,
+  endChatMode, MODES, drawerTier, modeReadiness, agentProps, modeStatus,
 } from './chatModes.js'
 import { ModeSignIn } from './components/ModeBanner.jsx'
 
@@ -396,6 +396,11 @@ function App () {
   const { authenticated, user, loginUrl } = useSession()
   const mode = useChatMode()
   useModeReadiness(mode, authenticated)
+  // The drawer header says which mode runs ("Quiz: <step>"), and goes back to
+  // its default with plain Ask AI (19-chat-panel.js setChatStatus).
+  useEffect(() => {
+    if (typeof window.setChatStatus === 'function') window.setChatStatus(modeStatus(mode))
+  }, [mode])
 
   // Signed-in: full Agent SDK experience (tools, history, email attribution).
   // NOTE on identity: the `user={{ email }}` prop below is EMAIL ATTRIBUTION — it's

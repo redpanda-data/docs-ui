@@ -361,6 +361,9 @@
         url: loc.pathname,
         nonce: Date.now(),
         guide: guide,
+        // The banner's Hand this plan to your coding agent copies this prompt
+        // with the plan so far after it (react/components/ModeBanner.jsx).
+        agentPrompt: prompt,
         props: baseProps(),
       }
       // Same opener as the drawer's productionizeOpener.

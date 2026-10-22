@@ -379,9 +379,11 @@ function runPanel (opts = {}) {
   const close = node('close')
   const classes = new Set(opts.classes || [])
   const expand = { handlers: [], addEventListener (t, fn) { if (t === 'click') this.handlers.push(fn) }, click () { this.handlers.forEach((fn) => fn()) } }
+  const status = { textContent: 'Ask about any doc' }
   const panel = {
     classes,
     expand,
+    status,
     classList: {
       add: (c) => { classes.add(c) },
       remove: (c) => { classes.delete(c) },
@@ -391,13 +393,14 @@ function runPanel (opts = {}) {
     setAttribute () {},
     getAttribute: () => null,
     querySelectorAll: (sel) => (String(sel).includes('data-chat-action="expand"') ? [expand] : []),
-    querySelector: (sel) => (sel === '#chat-message' ? (panel.hasInput ? input : null) : sel.includes('close') ? close : null),
+    querySelector: (sel) => (sel === '#chat-message' ? (panel.hasInput ? input : null) : sel.includes('close') ? close : sel === '[data-chat-status]' ? status : null),
     dataset: {},
     inert: false,
     hasInput: true,
   }
   const win = {
     innerWidth: 1400,
+    sessionStorage: storage(opts.session),
     addEventListener: (t, fn) => { (listeners[t] = listeners[t] || []).push(fn) },
     removeEventListener: (t, fn) => { listeners[t] = (listeners[t] || []).filter((f) => f !== fn) },
     dispatchEvent: (e) => { events.push(e); (listeners[e.type] || []).slice().forEach((fn) => fn(e)); return true },
@@ -405,7 +408,7 @@ function runPanel (opts = {}) {
   }
   const context = {
     window: win,
-    localStorage: storage(),
+    localStorage: storage(opts.local),
     document: {
       cookie: 'rp_docs_auth=1',
       querySelector: (sel) => (String(sel).includes('data-chat-panel') ? panel : null),
@@ -425,7 +428,7 @@ function runPanel (opts = {}) {
     win.__docsChatMode = { mode: 'quiz', nonce }
     return win.openChatWithQuery('Quiz me on this step: T.', true, { mode: 'quiz', nonce })
   }
-  return { win, events, sent, focused, panel, register, tick, startQuiz, storage: context.localStorage, pending: () => timers.length }
+  return { win, events, sent, focused, panel, register, tick, startQuiz, storage: context.localStorage, session: win.sessionStorage, pending: () => timers.length }
 }
 
 test('a quiz opener waits for the quiz interface, not the Ask AI one being replaced', () => {
@@ -773,12 +776,124 @@ test('a reader who already uses full screen keeps it after the mode', () => {
   assert.equal(p.panel.classes.has('is-fullscreen'), true)
 })
 
-test('a size the reader picks during the mode survives its end', () => {
+test('a size the reader picks during the mode is not saved, and ending the mode undoes it', () => {
   const p = runPanel()
   p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode', { detail: { mode: 'productionize', nonce: 1 } }))
   p.panel.expand.click() // back to the side drawer
-  p.panel.expand.click() // and full screen again, by choice
-  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode-end', { detail: { reason: 'ask_instead', mode: 'productionize' } }))
+  p.panel.expand.click() // and full screen again
   assert.equal(p.panel.classes.has('is-fullscreen'), true)
+  assert.equal(p.storage.getItem('redpanda-chat-panel-fullscreen'), null, 'nothing saved during the mode')
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode-end', { detail: { reason: 'back_to_ask', mode: 'productionize' } }))
+  assert.equal(p.panel.classes.has('is-fullscreen'), false, 'the reader\'s own size comes back')
+  // Outside a mode the toggle is the reader's setting again.
+  p.panel.expand.click()
   assert.equal(p.storage.getItem('redpanda-chat-panel-fullscreen'), 'true')
+})
+
+test('opening in a mode saves no open state, so the next page does not reopen the drawer', () => {
+  const p = runPanel()
+  p.startQuiz(1)
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:mode', { detail: { mode: 'quiz', nonce: 1 } }))
+  assert.equal(p.storage.getItem('redpanda-chat-panel-open'), null)
+  assert.equal(p.session.getItem('redpanda-chat-panel-mode-open'), 'true')
+  // Back to Ask AI leaves nothing behind either.
+  p.win.endChatMode('back_to_ask')
+  assert.equal(p.storage.getItem('redpanda-chat-panel-open'), null)
+  assert.equal(p.session.getItem('redpanda-chat-panel-mode-open'), null)
+  // A plain open is remembered as before.
+  p.win.openChatPanel()
+  assert.equal(p.storage.getItem('redpanda-chat-panel-open'), 'true')
+})
+
+test('closing the drawer during a mode clears the mode marker', () => {
+  const p = runPanel()
+  p.startQuiz(1)
+  p.win.dispatchEvent(new p.win.CustomEvent('docs-chat:close'))
+  assert.equal(p.session.getItem('redpanda-chat-panel-mode-open'), null)
+  assert.equal(p.storage.getItem('redpanda-chat-panel-open'), null)
+})
+
+test('a page load after a drawer open in a mode does not restore it full screen', () => {
+  const local = { 'redpanda-chat-panel-open': 'true', 'redpanda-chat-panel-fullscreen': 'true' }
+  const after = runPanel({ local, session: { 'redpanda-chat-panel-mode-open': 'true' } })
+  assert.equal(after.panel.classes.has('is-fullscreen'), false, 'plain Ask AI, at the side')
+  assert.equal(after.session.getItem('redpanda-chat-panel-mode-open'), null, 'the marker is used once')
+  // Without the marker the reader's own full-screen setting applies.
+  const plain = runPanel({ local })
+  assert.equal(plain.panel.classes.has('is-fullscreen'), true)
+})
+
+test('the header names the mode and goes back to the default after it', () => {
+  const p = runPanel()
+  p.win.setChatStatus(modes.modeStatus({ mode: 'quiz', title: 'Register the schemas', nonce: 1 }))
+  assert.equal(p.panel.status.textContent, 'Quiz: Register the schemas')
+  p.win.endChatMode('back_to_ask')
+  assert.equal(p.panel.status.textContent, 'Ask about any doc')
+  p.win.setChatStatus(modes.modeStatus({ mode: 'productionize', title: 'Multiplayer gaming', nonce: 2 }))
+  assert.equal(p.panel.status.textContent, 'Production plan: Multiplayer gaming')
+  p.win.setChatStatus(modes.modeStatus(null))
+  assert.equal(p.panel.status.textContent, 'Ask about any doc')
+  assert.match(read('src/js/react/AskAI.jsx'), /window\.setChatStatus\(modeStatus\(mode\)\)/)
+})
+
+test('the quiz placeholder invites a pick only while options show', () => {
+  const quiz = modes.MODES.quiz
+  assert.equal(modes.modePlaceholder(quiz, false), 'Type your answer')
+  assert.equal(modes.modePlaceholder(quiz, true), 'Type your answer, or pick an option')
+  assert.equal(modes.modePlaceholder(modes.MODES.productionize, true), 'Tell Ask AI about your system')
+  assert.match(CHAT, /placeholder=\{modeDef \? modePlaceholder\(modeDef, lastOptionsLive\)/)
+})
+
+test('options listed in the question show once, as the chips', () => {
+  const md = '**Question 2 of 3**\nWhy register under <topic>-value?\n\nA. To share one subject\nB) **To check per topic**\n- C. To skip checks\n**D.** To rename it\n\nPick one.'
+  const merged = modes.mergeListedOptions(md, ['A', 'B', 'C', 'D'])
+  assert.deepEqual(merged.options, ['A. To share one subject', 'B. To check per topic', 'C. To skip checks', 'D. To rename it'])
+  assert.equal(merged.md, '**Question 2 of 3**\nWhy register under <topic>-value?\n\nPick one.')
+  assert.equal(merged.listed, true)
+  // Chips that already carry the text keep it, and the listed lines still go.
+  assert.deepEqual(modes.mergeListedOptions('Q\nA. One\nB. Two', ['A) One', 'B) Two']).options, ['A. One', 'B. Two'])
+  // Anything else is left alone.
+  for (const [text, opts] of [
+    ['Q\nA. One\nB. Two', ['New questions', 'Ask about this step']],
+    ['Q with no list', ['A', 'B']],
+    ['Q\nA. One\nB. Two\nC. Three', ['A', 'B']],
+    ['Q\nA. One', ['A']],
+  ]) {
+    const out = modes.mergeListedOptions(text, opts)
+    assert.equal(out.md, text)
+    assert.deepEqual(out.options, opts)
+  }
+})
+
+test('Copy plan copies every answer as Markdown, and the hand-off adds it to the agent prompt', () => {
+  const messages = [
+    { role: 'user', content: 'Help me take this design to production: X.' },
+    { role: 'assistant', blocks: [{ type: 'text', content: 'Where will you run it?\nOPTIONS: Cloud BYOC | Self-Managed Linux' }] },
+    { role: 'user', content: 'Cloud BYOC' },
+    { role: 'assistant', isError: true, content: 'Something went wrong' },
+    { role: 'assistant', blocks: [{ type: 'text', content: 'Thinking' }, { type: 'text', content: '1. Size the brokers' }] },
+  ]
+  const plan = modes.modeTranscript(messages, modes.MODES.productionize.controls)
+  assert.equal(plan, 'Where will you run it?\n\n1. Size the brokers')
+  const text = modes.agentHandoff('# Take this design to production: X\n\nThen follow it.\n', plan)
+  assert.equal(text, '# Take this design to production: X\n\nThen follow it.\n\n## Plan so far\n\n' + plan + '\n')
+  assert.equal(modes.MODES.productionize.copyPlan, true)
+  assert.match(read('src/js/33-solution-productionize.js'), /agentPrompt: prompt,/)
+  const banner = read('src/js/react/components/ModeBanner.jsx')
+  assert.match(banner, /\{plan && detail\.agentPrompt && \(/, 'the hand-off waits for an answer and a prompt')
+  assert.match(banner, /Hand this plan to your coding agent/)
+})
+
+test('a finished quiz shows its summary in place of the final chips', () => {
+  assert.equal(modes.MODES.quiz.summary, true)
+  assert.match(CHAT, /options\.length > 0 && !summary &&/)
+  assert.match(CHAT, /<QuizSummary detail=\{modeDetail\} result=\{summary\}/)
+  const banner = read('src/js/react/components/ModeBanner.jsx')
+  assert.match(banner, /progress\.markComplete\(detail\.solution, detail\.step, detail\.version\)/)
+  for (const label of ['Mark step complete', 'Next step', 'Retry']) assert.ok(banner.includes(label), label)
+})
+
+test('the quiz copies code literals exactly', () => {
+  assert.match(modes.QUIZ_INSTRUCTIONS, /Copy every code literal from STEP SOURCE exactly/)
+  assert.match(modes.QUIZ_INSTRUCTIONS, /<topic>-value/)
 })

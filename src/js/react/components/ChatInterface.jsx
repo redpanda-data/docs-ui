@@ -15,10 +15,11 @@ import {
 } from 'lucide-react'
 import { safeHeap } from '../heap.js'
 import { Answer, Toast } from './chatShared.jsx'
-import { ModeBanner } from './ModeBanner.jsx'
+import { ModeBanner, QuizSummary } from './ModeBanner.jsx'
 import {
   MODES, MODE_END_EVENT, MODE_COMPLETE_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
   markModeThreads, registerSubmit, rememberThread, threadToResume, forgetThread, endChatMode,
+  mergeListedOptions, modePlaceholder,
 } from '../chatModes.js'
 
 // Example prompts for the signed-in agent welcome screen come from
@@ -209,10 +210,10 @@ function sourceQualifier(url) {
 // chat mode uses, off the answer markdown so the UI can render clickable
 // choices.
 
-function AnswerOptions({ options, onPick, disabled }) {
+function AnswerOptions({ options, onPick, disabled, listed = false }) {
   if (!options.length) return null
   return (
-    <div className="answer-options" role="group" aria-label="Choose an option">
+    <div className={`answer-options${listed ? ' is-listed' : ''}`} role="group" aria-label="Choose an option">
       {options.map((opt) => (
         <button
           key={opt}
@@ -463,6 +464,11 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
   const lastMessage = messages[messages.length - 1]
   // Waiting for the first assistant tokens of the current turn
   const isPreparing = isStreaming && (!lastMessage || lastMessage.role === 'user')
+  // Whether the last answer shows live option chips, for the placeholder.
+  const lastControls = modeDef && lastMessage && lastMessage.role !== 'user' && !isStreaming && !lastMessage.isError
+    ? splitModeControls(answerText(lastMessage), { controls: modeDef.controls })
+    : null
+  const lastOptionsLive = Boolean(lastControls && lastControls.options.length && !(modeDef.summary && lastControls.result))
 
   // ——— Chat mode reporting ——————————————————————————————————————————————
   // The Agent SDK's response_completed event carries only the thread id and a
@@ -536,6 +542,25 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
       try { textareaRef.current.focus() } catch { /* ignore */ }
     }
   }, [modeDef, isStreaming])
+
+  // In a mode, keep the newest turn in view: after the reader answers, and
+  // again when the feedback and next question have finished arriving. The
+  // newest answer is shown from its top when it is taller than the log, so
+  // the feedback is never scrolled past; otherwise the log goes to the end,
+  // where the options are. Plain Ask AI keeps its own scrolling.
+  useEffect(() => {
+    const area = conversationAreaRef.current
+    if (!modeDef || !area || (isStreaming && !isPreparing)) return
+    const frame = requestAnimationFrame(() => {
+      const pairs = area.querySelectorAll('.conversation > .qa-pair')
+      const last = pairs[pairs.length - 1]
+      if (!last) return
+      const top = area.scrollTop + last.getBoundingClientRect().top - area.getBoundingClientRect().top
+      const target = last.offsetHeight > area.clientHeight ? top - 8 : area.scrollHeight
+      area.scrollTo({ top: target, behavior: 'smooth' })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [modeDef, isStreaming, isPreparing, messages.length])
 
   // ——— History filter ——————————————————————————————————————————————————
   // The Agent SDK's history list has no filter of its own, so threads a chat
@@ -887,7 +912,13 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
           </div>
         )}
         {modeDef && (
-          <ModeBanner mode={mode} detail={modeDetail} onRestart={() => reportModeEnd('restart')} />
+          <ModeBanner
+            mode={mode}
+            detail={modeDetail}
+            messages={messages}
+            onRestart={() => reportModeEnd('restart')}
+            onCopy={(what, chars) => modeDef.events.copy && safeHeap(modeDef.events.copy, { ...modeProps, what, chars })}
+          />
         )}
         {showHistory && (
           <div className="chat-history-view" ref={historyRef}>
@@ -1066,11 +1097,19 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
                 if (b.type === 'text' && (b.content || '').trim()) lastTextIdx = i
               })
               const answerMd = answerText(m)
-              const { md: answerBody, options } = splitModeControls(answerMd, {
+              const split = splitModeControls(answerMd, {
                 controls: modeDef ? modeDef.controls : undefined,
                 streaming: isLast && isStreaming,
               })
+              // A quiz question that lists A to D in its text shows them once,
+              // as the chips (mergeListedOptions).
+              const { md: answerBody, options, listed } = modeDef && modeDef.summary && !(isLast && isStreaming)
+                ? mergeListedOptions(split.md, split.options)
+                : split
               const optionsLive = isLast && !isStreaming && !m.isError
+              // A finished quiz: the summary card takes the place of the
+              // final message's chips.
+              const summary = modeDef && modeDef.summary && split.result && !m.isError ? split.result : null
               return (
                 <div key={idx} className={`qa-pair ${m.isError ? 'qa-pair-error' : ''}`}>
                   {blocks.map((block, bi) => {
@@ -1099,8 +1138,11 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
                     )
                   })}
                   {lastTextIdx < 0 && <Answer md={answerBody} />}
-                  {options.length > 0 && (
-                    <AnswerOptions options={options} onPick={(opt) => doQuery(opt, 'chip')} disabled={!optionsLive} />
+                  {options.length > 0 && !summary && (
+                    <AnswerOptions options={options} listed={listed} onPick={(opt) => doQuery(opt, 'chip')} disabled={!optionsLive} />
+                  )}
+                  {summary && isLast && !isStreaming && (
+                    <QuizSummary detail={modeDetail} result={summary} onRestart={() => reportModeEnd('restart')} />
                   )}
                   {showSources && <AnswerSources blocks={m.blocks} conversationProduct={conversationProduct} />}
                   {isLast && !isStreaming && (
@@ -1150,7 +1192,7 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
                 className="chat-input"
                 autoComplete="off"
                 rows={1}
-                placeholder={modeDef ? modeDef.placeholder : 'Ask anything about Redpanda docs...'}
+                placeholder={modeDef ? modePlaceholder(modeDef, lastOptionsLive) : 'Ask anything about Redpanda docs...'}
                 value={message}
                 onChange={(e) => {
                   setMessage(e.target.value)

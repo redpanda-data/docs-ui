@@ -1,6 +1,27 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Sparkles } from 'lucide-react'
-import { MODES, endChatMode, startChatMode } from '../chatModes.js'
+import { MODES, endChatMode, startChatMode, modeTranscript, agentHandoff } from '../chatModes.js'
+
+// Copy `text`, then say so in the banner for a few seconds.
+function useCopy () {
+  const [status, setStatus] = useState('')
+  useEffect(() => {
+    if (!status) return undefined
+    const t = setTimeout(() => setStatus(''), 4000)
+    return () => clearTimeout(t)
+  }, [status])
+  const copy = (text, done) => {
+    const clip = navigator.clipboard
+    const failed = () => setStatus('Could not copy. Select the text and copy it yourself.')
+    if (!clip || typeof clip.writeText !== 'function') return failed()
+    try {
+      clip.writeText(text).then(() => setStatus(done), failed)
+    } catch {
+      failed()
+    }
+  }
+  return [status, copy]
+}
 
 // ——— ModeBanner ——————————————————————————————————————————————————————————
 // Shown above the conversation while a chat mode runs, so the reader always
@@ -11,9 +32,17 @@ import { MODES, endChatMode, startChatMode } from '../chatModes.js'
 // note (productionize: what not to paste) sits under the title. Restart is a
 // new nonce: a fresh thread with the same opener. `onRestart` runs first so
 // the outgoing interface can report how far the reader got.
-export function ModeBanner ({ mode, detail, onRestart }) {
+//
+// A mode with copyPlan (productionize) adds, once there is an answer, Copy plan
+// (every answer so far, as Markdown) and Hand this plan to your coding agent:
+// the card's coding agent prompt (detail.agentPrompt, from
+// 33-solution-productionize.js) with the plan under "## Plan so far".
+// `messages` is the conversation; `onCopy` reports a copy for analytics.
+export function ModeBanner ({ mode, detail, onRestart, messages, onCopy }) {
   const def = MODES[mode]
+  const [copyStatus, copy] = useCopy()
   if (!def || !detail) return null
+  const plan = def.copyPlan ? modeTranscript(messages, def.controls) : ''
 
   const viewStep = (e) => {
     let samePage = false
@@ -45,8 +74,87 @@ export function ModeBanner ({ mode, detail, onRestart }) {
             Restart
           </button>
         )}
+        {plan && (
+          <button
+            type="button"
+            className="chat-mode-banner-action"
+            onClick={() => { copy(plan, 'Copied the plan.'); if (onCopy) onCopy('plan', plan.length) }}
+          >
+            Copy plan
+          </button>
+        )}
+        {plan && detail.agentPrompt && (
+          <button
+            type="button"
+            className="chat-mode-banner-action"
+            onClick={() => {
+              const text = agentHandoff(detail.agentPrompt, plan)
+              copy(text, 'Copied. Paste it into your coding agent.')
+              if (onCopy) onCopy('handoff', text.length)
+            }}
+          >
+            Hand this plan to your coding agent
+          </button>
+        )}
         <button type="button" className="chat-mode-banner-action" onClick={() => endChatMode('back_to_ask')}>
           Back to Ask AI
+        </button>
+      </div>
+      {def.copyPlan && (
+        <p className="chat-mode-banner-status" role="status" aria-live="polite">{copyStatus}</p>
+      )}
+    </div>
+  )
+}
+
+// ——— QuizSummary —————————————————————————————————————————————————————————
+// Under the last answer of a finished quiz (QUIZ_RESULT): the score and what
+// to do next. Mark step complete goes through the page's progress API
+// (window.docsSolutions, 28-solution-progress.js), so it is the same mark as
+// the button under the step. Next step is the step page's own next link
+// (detail.nextUrl). Retry is Restart: a new quiz on a fresh thread.
+export function QuizSummary ({ detail, result, onRestart }) {
+  const progress = typeof window !== 'undefined' ? window.docsSolutions : null
+  const canMark = !!(progress && typeof progress.markComplete === 'function' && detail && detail.solution && detail.step)
+  const doneNow = () => {
+    try {
+      const record = progress.getRecord(detail.solution)
+      return !!(record && record.steps && record.steps[detail.step] && record.steps[detail.step].done)
+    } catch {
+      return false
+    }
+  }
+  const [done, setDone] = useState(() => canMark && doneNow())
+  if (!detail || !result) return null
+
+  const mark = () => {
+    if (!canMark) return
+    progress.markComplete(detail.solution, detail.step, detail.version)
+    setDone(true)
+  }
+  const retry = () => {
+    if (onRestart) onRestart()
+    startChatMode(detail)
+  }
+
+  return (
+    <div className="chat-quiz-summary" role="region" aria-label="Quiz result">
+      <p className="chat-quiz-summary-title">
+        Quiz complete: {result.score} of {result.total} correct.
+      </p>
+      <div className="chat-quiz-summary-actions">
+        {canMark && (
+          <button type="button" className="chat-quiz-summary-action is-primary" onClick={mark} disabled={done}>
+            {done ? 'Step complete' : 'Mark step complete'}
+          </button>
+        )}
+        {detail.nextUrl && (
+          <a className="chat-quiz-summary-action" href={detail.nextUrl}>
+            Next step{detail.nextTitle ? `: ${detail.nextTitle}` : ''}
+          </a>
+        )}
+        <button type="button" className="chat-quiz-summary-action" onClick={retry}>
+          Retry
         </button>
       </div>
     </div>

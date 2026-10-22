@@ -65,6 +65,7 @@ Questions
 - For multiple choice, put four options labelled A to D on separate lines. Take wrong options from "Other ways to do this" or from plausible misreadings of the step. End the message with this line and nothing after it:
   OPTIONS: A | B | C | D
 - Do not reveal or hint at the answer, and do not list upcoming questions.
+- Copy every code literal from STEP SOURCE exactly as it is written there: commands, topic and subject names, flags, values, and placeholders such as <topic>-value. Keep each hyphen a hyphen, never a dash, and format literals as inline code.
 
 Feedback
 - After each answer, start with exactly one of "Correct.", "Partly correct.", or "Not quite." Then explain in one or two sentences using the step, and link the section that supports it, for example [Why this approach](<url>#why-this-approach). Use only links from "Section links".
@@ -135,7 +136,7 @@ Limits
 
 Finish
 - End the plan with Acceptance (call get_solution_guide for it), restated for their system: for each rule, the evidence they should collect from their own system.
-- Then offer, once: "To apply this to your repository, copy the prompt for your coding agent from the Take this to production card."`
+- Then offer, once: "To apply this to your repository, choose Hand this plan to your coding agent above this chat. It copies the coding agent prompt with this plan."`
 /* eslint-enable max-len */
 
 // The solution to plan for. The page fetches the agent companion and slices
@@ -196,8 +197,14 @@ export const GUIDE_WHOLE_SECTIONS = ['Adapt', 'Acceptance', 'System map', 'Refer
 //                    start the same way stays in their history.
 //   firstMessage     the opener sent when the page did not supply one
 //   placeholder, inputLabel  the message box while the mode runs
+//   optionsPlaceholder  the message box while the last answer shows options
 //   viewLabel        banner link back to the page the mode is about
 //   restart          whether the banner offers Restart
+//   status           the drawer header's subtitle while the mode runs
+//   summary          whether a finished quiz shows its summary card
+//                    (QUIZ_RESULT) with Mark step complete, Next step, Retry
+//   copyPlan         whether the banner offers Copy plan and the coding
+//                    agent hand-off once there is an answer
 //   note             one line the banner shows under the title, if any
 //   signInTitle      what the anonymous tier says instead of running the mode
 //   returnHash       where on the page signing in from the drawer returns to
@@ -219,10 +226,13 @@ export const MODES = {
     controls: ['QUIZ_RESULT', 'OPTIONS'],
     threadPattern: /^Quiz me on this step(?:: .+?)?(?: \([^()\s]+\))?\.$/,
     firstMessage: quizOpener,
-    placeholder: 'Type your answer, or pick an option',
+    placeholder: 'Type your answer',
+    optionsPlaceholder: 'Type your answer, or pick an option',
     inputLabel: 'Your answer',
     viewLabel: 'View step',
     restart: true,
+    status: (detail) => 'Quiz' + (detail && detail.title ? ': ' + detail.title : ''),
+    summary: true,
     signInTitle: 'Sign in to take the quiz',
     events: {
       ready: 'solution_quiz_ready',
@@ -261,6 +271,8 @@ export const MODES = {
     inputLabel: 'Your reply',
     viewLabel: null,
     restart: false,
+    status: (detail) => 'Production plan' + (detail && detail.title ? ': ' + detail.title : ''),
+    copyPlan: true,
     note: 'This conversation is stored with your account. Don\'t paste credentials or internal hostnames.',
     signInTitle: 'Sign in to plan it with Ask AI',
     // The card's own sign-in returns here too (33-solution-productionize.js).
@@ -272,6 +284,7 @@ export const MODES = {
       ready: 'solution_productionize_ready',
       blocked: 'solution_productionize_blocked',
       end: 'solution_productionize_end',
+      copy: 'solution_productionize_plan_copy',
       error: 'solution_productionize_error',
     },
   },
@@ -574,4 +587,59 @@ export function startChatMode (detail, win) {
   w.dispatchEvent(new w.CustomEvent(MODE_EVENT, { detail: next }))
   const first = next.firstMessage || MODES[next.mode].firstMessage(next)
   if (typeof w.openChatWithQuery === 'function') w.openChatWithQuery(first, true, { mode: next.mode, nonce: next.nonce })
+}
+
+// The drawer header's subtitle for `detail`, or null for plain Ask AI.
+export function modeStatus (detail) {
+  const d = normalizeMode(detail)
+  if (!d || !MODES[d.mode].status) return null
+  return MODES[d.mode].status(d)
+}
+
+// The message box placeholder: a mode's optionsPlaceholder only while the last
+// answer shows option chips, so an open question never invites a pick.
+export function modePlaceholder (def, hasOptions) {
+  if (!def) return null
+  return (hasOptions && def.optionsPlaceholder) || def.placeholder
+}
+
+// A question that lists its options in the text ("A. ...", "B) ...") and also
+// ends with OPTIONS: A | B | C | D would show every letter twice. The listed
+// lines move into the chips ("A. text") and leave the text, so each option
+// shows once and the chip says what it picks. Anything else is returned as it
+// is: options that are not letters, letters that do not match the list, or a
+// list with fewer than two entries.
+const LISTED_OPTION = /^[ \t]*(?:[-*][ \t]+)?(?:\*\*)?\(?([A-E])(?:\*\*)?[.):](?:\*\*)?[ \t]+(.+?)[ \t]*$/
+const LETTER_OPTION = /^\(?([A-E])(?:[.):]\s*(.*))?$/
+export function mergeListedOptions (md, options) {
+  const opts = options || []
+  if (opts.length < 2) return { md, options: opts }
+  const letters = opts.map((o) => LETTER_OPTION.exec(String(o).trim()))
+  if (letters.some((m) => !m)) return { md, options: opts }
+  const lines = String(md || '').split('\n')
+  const listed = {}
+  const drop = new Set()
+  lines.forEach((line, i) => {
+    const m = LISTED_OPTION.exec(line)
+    if (m && !listed[m[1]]) { listed[m[1]] = m[2].replace(/\*\*/g, '').trim(); drop.add(i) }
+  })
+  if (!letters.every((m) => listed[m[1]]) || Object.keys(listed).length !== letters.length) return { md, options: opts }
+  const body = lines.filter((_, i) => !drop.has(i)).join('\n').replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '')
+  return { md: body, options: letters.map((m) => `${m[1]}. ${listed[m[1]]}`), listed: true }
+}
+
+// The assistant's side of a mode's conversation as Markdown, control lines
+// stripped: what Copy plan copies.
+export function modeTranscript (messages, controls) {
+  return (messages || [])
+    .filter((m) => m.role !== 'user' && !m.isError)
+    .map((m) => splitModeControls(answerText(m), { controls }).md.trim())
+    .filter(Boolean)
+    .join('\n\n')
+}
+
+// The coding agent prompt from the Take this to production card, with the
+// plan so far after it.
+export function agentHandoff (prompt, plan) {
+  return String(prompt || '').replace(/\s+$/, '') + '\n\n## Plan so far\n\n' + String(plan || '').trim() + '\n'
 }

@@ -1154,6 +1154,72 @@
   outline-offset: 2px;
 }
 
+/* Copy plan and the coding agent hand-off say what they copied here, under
+   the actions. Empty, it takes no space. */
+#chat-panel-kapa-root .chat-mode-banner-status {
+  flex: 1 0 100%;
+  order: 2;
+  margin: 0;
+  color: var(--kapa-text-muted, #6b7280);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+}
+
+#chat-panel-kapa-root .chat-mode-banner-status:empty {
+  display: none;
+}
+
+/* A finished quiz: the score and what to do next (ModeBanner.jsx
+   QuizSummary), under the last answer. */
+#chat-panel-kapa-root .chat-quiz-summary {
+  margin: 12px 0 4px;
+  padding: 12px;
+  border: 1px solid var(--kapa-border, #e5e5e5);
+  border-radius: 8px;
+  background: var(--kapa-surface, #fff);
+}
+
+#chat-panel-kapa-root .chat-quiz-summary-title {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+#chat-panel-kapa-root .chat-quiz-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#chat-panel-kapa-root .chat-quiz-summary-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  font-weight: 500;
+  color: var(--kapa-accent, #444ce7);
+  background: transparent;
+  border: 1px solid var(--kapa-accent, #444ce7);
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#chat-panel-kapa-root .chat-quiz-summary-action.is-primary {
+  color: #fff;
+  background: var(--kapa-accent, #444ce7);
+}
+
+#chat-panel-kapa-root .chat-quiz-summary-action:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#chat-panel-kapa-root .chat-quiz-summary-action:focus-visible {
+  outline: 2px solid var(--kapa-accent, #444ce7);
+  outline-offset: 2px;
+}
+
 /* The drawer is full width here: stack the title over the actions, with
    tap targets tall enough for a thumb. */
 @media (max-width: 520px) {
@@ -1643,6 +1709,18 @@
   border-radius: 999px;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Quiz options merged from the question text ("A. ...") are sentences, not
+   one-word picks: one per line, left aligned. */
+#chat-panel-kapa-root .answer-options.is-listed {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#chat-panel-kapa-root .answer-options.is-listed .answer-option {
+  text-align: left;
+  border-radius: 8px;
 }
 
 #chat-panel-kapa-root .answer-option:hover:not(:disabled) {

@@ -96,26 +96,62 @@
   })
 
   // A quiz or production plan is a focused task, so a chat mode opens the
-  // drawer full screen. The reader's own setting is untouched: the mode is not
-  // saved, and ending it restores the size the drawer had, unless the reader
-  // changed the size themselves during the mode.
+  // drawer full screen. Nothing about the mode is saved: the full screen is
+  // never written to FULLSCREEN_KEY, an open in a mode never writes
+  // STORAGE_KEY, and a size the reader picks during the mode lasts only until
+  // it ends. Ending it restores the size the drawer had before. The mode itself
+  // does not survive a page load (react/chatModes.js), so a saved size or open
+  // flag would only bring the drawer back full screen in plain Ask AI, with
+  // the quiz gone. MODE_OPEN_KEY marks a drawer open in a mode, so the next
+  // page load does not apply the reader's full-screen setting to it either.
+  var MODE_OPEN_KEY = 'redpanda-chat-panel-mode-open'
   var modeFullscreen = null // { restore: boolean } while a mode set the size
+  var statusEl = chatPanel.querySelector('[data-chat-status]')
+  var defaultStatus = statusEl ? statusEl.textContent : ''
+
+  function session (fn) {
+    try { return fn(window.sessionStorage) } catch (e) { return null }
+  }
+
+  // Between docs-chat:mode and docs-chat:mode-end, or while the page has set
+  // a mode the drawer has not announced yet.
+  var modeActive = false
+  function inMode () {
+    return modeActive || !!window.__docsChatMode
+  }
+
   window.addEventListener('docs-chat:mode', function () {
+    modeActive = true
+    if (isOpen) session(function (s) { s.setItem(MODE_OPEN_KEY, 'true') })
     if (modeFullscreen) return
     modeFullscreen = { restore: chatPanel.classList.contains('is-fullscreen') }
     chatPanel.classList.add('is-fullscreen')
   })
   window.addEventListener('docs-chat:mode-end', function () {
+    modeActive = false
+    session(function (s) { s.removeItem(MODE_OPEN_KEY) })
+    if (statusEl) statusEl.textContent = defaultStatus
     if (!modeFullscreen) return
     if (!modeFullscreen.restore) chatPanel.classList.remove('is-fullscreen')
+    else chatPanel.classList.add('is-fullscreen')
     modeFullscreen = null
   })
 
+  // The header names the mode, as "Quiz: <step>" or "Production plan:
+  // <solution>". The drawer (react/chatModes.js modeStatus) sets it from the
+  // mode table; ending the mode puts the default back here, so the header is
+  // right even when the drawer bundle never loaded.
+  window.setChatStatus = function (text) {
+    if (statusEl) statusEl.textContent = text || defaultStatus
+  }
+
   chatPanel.querySelectorAll('[data-chat-action="expand"]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      // The reader chose a size, so ending the mode leaves it alone.
-      modeFullscreen = null
       var fullscreen = chatPanel.classList.toggle('is-fullscreen')
+      // During a mode the size is the mode's: not saved, and undone when the
+      // mode ends.
+      if (inMode()) return
+      modeFullscreen = null
       try {
         localStorage.setItem(FULLSCREEN_KEY, String(fullscreen))
       } catch (e) {
@@ -259,7 +295,12 @@
       if (target && typeof target.focus === 'function') { try { target.focus() } catch (e) { /* ignore */ } }
     }
 
-    // Persist state to localStorage
+    // Persist state to localStorage. Not in a chat mode: the mode is gone after
+    // a page load, so the drawer would come back as plain Ask AI.
+    if (inMode()) {
+      session(function (s) { s.setItem(MODE_OPEN_KEY, 'true') })
+      return
+    }
     try {
       localStorage.setItem(STORAGE_KEY, 'true')
     } catch (e) {
@@ -290,6 +331,7 @@
     if ('inert' in chatPanel) chatPanel.inert = true
 
     // Remove from localStorage (panel explicitly closed)
+    session(function (s) { s.removeItem(MODE_OPEN_KEY) })
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch (e) {
@@ -304,7 +346,11 @@
     try {
       var savedState = localStorage.getItem(STORAGE_KEY)
       var isMobile = window.innerWidth <= 520
-      if (localStorage.getItem(FULLSCREEN_KEY) === 'true') {
+      // The last page had the drawer open in a mode, which a page load ends:
+      // whatever opens now is plain Ask AI, at the side.
+      var wasMode = session(function (s) { return s.getItem(MODE_OPEN_KEY) }) === 'true'
+      session(function (s) { s.removeItem(MODE_OPEN_KEY) })
+      if (!wasMode && localStorage.getItem(FULLSCREEN_KEY) === 'true') {
         chatPanel.classList.add('is-fullscreen')
       }
       if (savedState === 'true' && !isMobile) {
