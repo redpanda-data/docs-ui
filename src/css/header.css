@@ -154,23 +154,25 @@ html.is-clipped--navbar {
   white-space: nowrap;
 }
 
+/* Any crumb that gives way shows a real ellipsis. Most crumbs keep their
+   width (flex-shrink: 0 above), so this only shows on the ones allowed to
+   shrink: the last crumb, and a crumb a page opts in, such as the solution
+   crumb (solutions.css). The collapsed state used to reset these to
+   text-overflow: unset with a far more specific selector, which turned the
+   solution crumb's ellipsis into a hard clip. 21-breadcrumb-collapse.js
+   gives a truncated crumb its full text as a title, and the ellipsis menu
+   lists the whole trail. */
+.topbar-crumbs .breadcrumbs li > a,
+.topbar-crumbs .breadcrumbs li > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Collapsed state - hide middle items */
 .topbar-crumbs.is-collapsed .breadcrumbs li.bc-hidden {
   display: none;
-}
-
-/* In collapsed state, the visible middle items don't truncate; the last
-   crumb still can, if even the collapsed trail does not fit. */
-.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li):not(:last-child) {
-  flex-shrink: 0;
-  min-width: auto;
-  overflow: visible;
-}
-
-.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li):not(:last-child) a,
-.topbar-crumbs.is-collapsed .breadcrumbs li:not(.bc-hidden):not(.bc-ellipsis-li):not(:last-child) span {
-  overflow: visible;
-  text-overflow: unset;
 }
 
 /* Ellipsis list item container - positioned relative for dropdown */
@@ -179,7 +181,10 @@ html.is-clipped--navbar {
   position: relative;
 }
 
-.topbar-crumbs.is-collapsed .breadcrumbs li.bc-ellipsis-li {
+/* Shown when middle crumbs are hidden, and when a visible crumb is cut
+   short, so the full trail is always one click away. */
+.topbar-crumbs.is-collapsed .breadcrumbs li.bc-ellipsis-li,
+.topbar-crumbs.has-truncated .breadcrumbs li.bc-ellipsis-li {
   display: flex;
   align-items: center;
 }
@@ -263,7 +268,10 @@ html[data-theme="dark"] .bc-dropdown {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32);
 }
 
-.bc-dropdown a {
+/* The menu is where a cut-short crumb is read in full, so its entries wrap
+   rather than truncate again. */
+.bc-dropdown a,
+.bc-dropdown span {
   display: flex;
   align-items: center;
   padding: 8px 12px;
@@ -271,10 +279,18 @@ html[data-theme="dark"] .bc-dropdown {
   color: var(--grey-700-new, #3f3f46);
   text-decoration: none;
   font-size: calc(15 / var(--rem-base) * 1rem);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
   transition: background 0.12s;
+}
+
+.bc-dropdown [aria-current="page"] {
+  color: var(--grey-900-new, #181818);
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .bc-dropdown [aria-current="page"] {
+  color: #fff;
 }
 
 .bc-dropdown a:hover {
