@@ -611,6 +611,12 @@ export function modePlaceholder (def, hasOptions) {
 // list with fewer than two entries.
 const LISTED_OPTION = /^[ \t]*(?:[-*][ \t]+)?(?:\*\*)?\(?([A-E])(?:\*\*)?[.):](?:\*\*)?[ \t]+(.+?)[ \t]*$/
 const LETTER_OPTION = /^\(?([A-E])(?:[.):]\s*(.*))?$/
+// The quiz summary card states the score, so the model's own "You got N of 3."
+// line is dropped from the final message while the card shows.
+export function stripScoreLine (md) {
+  return String(md || '').replace(/^[ \t]*\**You got \d+ of \d+\.\**[ \t]*(\r?\n|$)/m, '').replace(/^\s+/, '')
+}
+
 export function mergeListedOptions (md, options) {
   const opts = options || []
   if (opts.length < 2) return { md, options: opts }

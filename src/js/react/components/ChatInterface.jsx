@@ -19,7 +19,7 @@ import { ModeBanner, QuizSummary } from './ModeBanner.jsx'
 import {
   MODES, MODE_END_EVENT, MODE_COMPLETE_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
   markModeThreads, registerSubmit, rememberThread, threadToResume, forgetThread, endChatMode,
-  mergeListedOptions, modePlaceholder,
+  mergeListedOptions, modePlaceholder, stripScoreLine,
 } from '../chatModes.js'
 
 // Example prompts for the signed-in agent welcome screen come from
@@ -561,6 +561,42 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
     })
     return () => cancelAnimationFrame(frame)
   }, [modeDef, isStreaming, isPreparing, messages.length])
+
+  // In a mode, the log can shrink and grow again after an answer finishes (the
+  // finished message re-renders, the summary card mounts), which leaves it
+  // scrolled to the top. Until the reader scrolls on their own, follow those
+  // size changes so the newest turn stays in view.
+  const modePinnedRef = useRef(true)
+  useEffect(() => { modePinnedRef.current = true }, [messages.length])
+  useEffect(() => {
+    const area = conversationAreaRef.current
+    const conv = area && area.querySelector('.conversation')
+    if (!modeDef || !area || !conv || typeof ResizeObserver === 'undefined') return
+    const release = (e) => {
+      // Typing an answer is not scrolling away.
+      if (e && e.target && e.target.closest && e.target.closest('textarea, input')) return
+      modePinnedRef.current = false
+    }
+    const follow = () => {
+      if (!modePinnedRef.current || (isStreaming && !isPreparing)) return
+      const pairs = conv.querySelectorAll(':scope > .qa-pair')
+      const last = pairs[pairs.length - 1]
+      if (!last) return
+      const top = area.scrollTop + last.getBoundingClientRect().top - area.getBoundingClientRect().top
+      area.scrollTop = last.offsetHeight > area.clientHeight ? top - 8 : area.scrollHeight
+    }
+    const observer = new ResizeObserver(follow)
+    observer.observe(conv)
+    area.addEventListener('wheel', release, { passive: true })
+    area.addEventListener('touchmove', release, { passive: true })
+    area.addEventListener('keydown', release)
+    return () => {
+      observer.disconnect()
+      area.removeEventListener('wheel', release)
+      area.removeEventListener('touchmove', release)
+      area.removeEventListener('keydown', release)
+    }
+  }, [modeDef, isStreaming, isPreparing])
 
   // ——— History filter ——————————————————————————————————————————————————
   // The Agent SDK's history list has no filter of its own, so threads a chat
@@ -1110,6 +1146,7 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
               // A finished quiz: the summary card takes the place of the
               // final message's chips.
               const summary = modeDef && modeDef.summary && split.result && !m.isError ? split.result : null
+              const shownBody = summary && isLast && !isStreaming ? stripScoreLine(answerBody) : answerBody
               return (
                 <div key={idx} className={`qa-pair ${m.isError ? 'qa-pair-error' : ''}`}>
                   {blocks.map((block, bi) => {
@@ -1130,14 +1167,14 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
                       )
                     }
                     if (block.type !== 'text' || !(block.content || '').trim()) return null
-                    if (bi === lastTextIdx) return <Answer key={bi} md={answerBody} />
+                    if (bi === lastTextIdx) return <Answer key={bi} md={shownBody} />
                     return (
                       <div key={bi} className="answer-interim" aria-label="Agent thinking">
                         {block.content}
                       </div>
                     )
                   })}
-                  {lastTextIdx < 0 && <Answer md={answerBody} />}
+                  {lastTextIdx < 0 && <Answer md={shownBody} />}
                   {options.length > 0 && !summary && (
                     <AnswerOptions options={options} listed={listed} onPick={(opt) => doQuery(opt, 'chip')} disabled={!optionsLive} />
                   )}

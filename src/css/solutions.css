@@ -213,6 +213,13 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   transition: background 0.12s, color 0.12s;
 }
 
+/* The toggle sits on the right edge of .doc, whose paint containment
+   (doc.css) clips anything drawn outside it, so the focus ring goes inside the
+   border instead of around it. */
+.sol-page-options .markdown-dropdown-toggle:focus-visible {
+  outline-offset: -3px;
+}
+
 .sol-page-options .markdown-dropdown-toggle:hover,
 .sol-page-options .markdown-dropdown-toggle[aria-expanded="true"] {
   background: var(--grey-100-new, #f3f4f6);

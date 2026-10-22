@@ -157,6 +157,12 @@ test('splitModeControls strips QUIZ_RESULT, then OPTIONS', () => {
   assert.deepEqual(out.result, { score: 2, total: 3 })
 })
 
+test('stripScoreLine drops the model score line the summary card repeats', () => {
+  assert.equal(modes.stripScoreLine('You got 2 of 3.\n- Reread [Verify](u#verify).'), '- Reread [Verify](u#verify).')
+  assert.equal(modes.stripScoreLine('Correct. Yes.\n\n**You got 3 of 3.**'), 'Correct. Yes.\n\n')
+  assert.equal(modes.stripScoreLine('Correct. You got the idea.'), 'Correct. You got the idea.')
+})
+
 test('a partial trailing control line is hidden while streaming', () => {
   for (const cut of ['O', 'OPTI', 'OPTIONS', 'OPTIONS:']) {
     const out = modes.splitModeControls('**Question 1 of 3**\nWhy?\n' + cut, { ...QUIZ, streaming: true })
