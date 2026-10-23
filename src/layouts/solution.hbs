@@ -25,6 +25,9 @@
     <article class="doc sol-doc">
       {{> breadcrumbs}}
       {{> solution-hero solution=(parse-json page.attributes.solution)}}
+      {{!-- The outcome diagram: the first thing after the title and the
+            description, above the metadata panel. --}}
+      {{> solution-outcome}}
       {{> solution-meta solution=(parse-json page.attributes.solution)}}
       {{!-- The Steps list goes right after the introduction, before the
             first authored section: it is what the reader came to start, and

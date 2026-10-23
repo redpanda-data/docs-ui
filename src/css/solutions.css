@@ -615,6 +615,63 @@ html[data-theme="dark"] .sol-page-options .markdown-dropdown-menu {
   color: var(--sol-meta);
 }
 
+/* Outcome diagram (solution-outcome.hbs): the inlined outcome.svg between the
+   hero and the metadata panel. The SVG ships its own light and dark palette
+   so it reads when opened on its own; these rules map its --oc-* colors to
+   the site's tokens and switch them with html[data-theme], which an <img>
+   could not see. Both beat the SVG's own rules: .sol-outcome .oc outranks .oc,
+   and the dark rule outranks [data-theme="dark"] .oc. The
+   canvas is 640 wide, so it is drawn at about 1:1 at the content width and
+   still legible at phone width; it never grows past 720px. */
+.sol-outcome {
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+
+.sol-outcome-art {
+  display: block;
+  max-width: 720px;
+}
+
+.sol-outcome-art svg,
+img.sol-outcome-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sol-outcome .oc {
+  --oc-ink: var(--grey-900-new);
+  --oc-muted: var(--grey-700-new);
+  --oc-line: var(--grey-500-new);
+  --oc-card: var(--grey-50-new);
+  --oc-edge: var(--grey-100-new);
+  --oc-rp: var(--brand-700-new);
+  --oc-rp-edge: var(--brand-600-new);
+  --oc-rp-fill: var(--brand-50-new);
+  --oc-chip: var(--color-white, #fff);
+  --oc-win: var(--teal-700-new);
+  --oc-win-mark: var(--teal-500-new);
+}
+
+.sol-outcome .oc text {
+  font-family: var(--body-font-family, Inter, system-ui, sans-serif);
+}
+
+html[data-theme="dark"] .sol-outcome .oc {
+  --oc-ink: var(--grey-50-new);
+  --oc-muted: var(--grey-200-new);
+  --oc-line: var(--grey-400-new);
+  --oc-card: var(--card-color, #1e2128);
+  --oc-edge: var(--grey-700-new);
+  --oc-rp: var(--brand-400-new);
+  --oc-rp-edge: var(--brand-500-new);
+  --oc-rp-fill: rgba(226, 67, 40, 0.12);
+  --oc-chip: var(--card-color, #1e2128);
+  --oc-win: var(--teal-300-new);
+  --oc-win-mark: var(--teal-400-new);
+}
+
 .sol-meta {
   display: flex;
   flex-wrap: wrap;
