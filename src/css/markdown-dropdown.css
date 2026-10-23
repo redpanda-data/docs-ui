@@ -98,6 +98,14 @@ html[data-theme=dark] .dropdown-caret {
   transform: translateY(0);
 }
 
+/* The agent-companion link is an <a>: keep it looking like the buttons, and
+   out of reach of .doc a's underline and link color. */
+.markdown-dropdown a.markdown-dropdown-item,
+.markdown-dropdown a.markdown-dropdown-item:hover {
+  box-sizing: border-box;
+  text-decoration: none;
+}
+
 /* Menu Items */
 .markdown-dropdown-item {
   display: flex;

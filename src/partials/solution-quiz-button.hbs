@@ -1,0 +1,16 @@
+{{!--
+  "Quiz me on this step": under the step (solution-step-actions.hbs) and in
+  the step page's rail (solution-step-rail-actions.hbs). Context: the page;
+  `class` is the button's style classes.
+
+  Hidden until 28-solution-progress.js shows it, and only when the drawer has
+  a quiz integration. Signed in, a click opens Ask AI in quiz mode with this
+  step's text (27-solution-quiz-source.js), title, rule and adapt line as
+  context. Signed out it reads "Quiz me on this step (sign in)" and opens the
+  sign-in modal, which returns to this step. Every copy has the same handler:
+  the script binds each [data-sol-quiz].
+--}}
+<button type="button" class="{{class}}" data-sol-quiz data-quiz-title="{{@root.page.title}}"{{#with @root.page.attributes.solution-rule}} data-quiz-rule="{{this}}"{{/with}}{{#with @root.page.attributes.solution-adapt}} data-quiz-adapt="{{this}}"{{/with}} data-analytics="solution_quiz_start"{{#if placement}} data-placement="{{placement}}"{{/if}} hidden>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <span data-sol-quiz-label>Quiz me on this step</span>
+</button>

@@ -76,6 +76,9 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
                 }, {})
               uiModel.page.layout = doc.getAttribute('page-layout', 'default')
               uiModel.page.title = doc.getDocumentTitle()
+              // Antora sets page.description from :description:; layouts use
+              // it for the meta description and the solutions landing lede.
+              if (doc.hasAttribute('description')) uiModel.page.description = doc.getAttribute('description')
               uiModel.page.contents = Buffer.from(doc.convert())
             }
             file.extname = '.html'

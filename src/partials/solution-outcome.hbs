@@ -1,0 +1,18 @@
+{{!--
+  The outcome diagram under the hero of a solution overview: the finished
+  system and what it delivers, named by :page-solution-outcome-image: and
+  described by :page-solution-outcome-alt:. The solution-outcome helper
+  inlines the SVG so it follows the site theme (see the helper). Without the
+  attribute, or when the image does not resolve, nothing renders.
+--}}
+{{#if @root.page.attributes.solution-outcome-image}}
+{{#with (solution-outcome @root.page.attributes.solution-outcome-image) as |outcome|}}
+<figure class="sol-outcome is-before-toc">
+  {{#if outcome.svg}}
+  <div class="sol-outcome-art" role="img" aria-label="{{@root.page.attributes.solution-outcome-alt}}">{{{outcome.svg}}}</div>
+  {{else if outcome.src}}
+  <img class="sol-outcome-art" src="{{{relativize outcome.src}}}" alt="{{@root.page.attributes.solution-outcome-alt}}">
+  {{/if}}
+</figure>
+{{/with}}
+{{/if}}
