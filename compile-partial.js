@@ -22,8 +22,12 @@ if (fs.existsSync(helpersDir)) {
 function fetchRemoteAntoraVersion() {
   const url = 'https://raw.githubusercontent.com/redpanda-data/docs/main/antora.yml'
   return new Promise((resolve, reject) => {
-    https.get(url, res => {
+    // agent: false so no kept-alive socket holds the process open afterwards.
+    const req = https.get(url, { agent: false }, res => {
       if (res.statusCode !== 200) {
+        // Drain the response: an unread body keeps the socket, and the
+        // process, open, so the build hangs here (docs is private: 404).
+        res.resume()
         return reject(new Error(`Failed to fetch antora.yml: ${res.statusCode}`))
       }
       let body = ''
@@ -40,7 +44,9 @@ function fetchRemoteAntoraVersion() {
           reject(err)
         }
       })
-    }).on('error', reject)
+    })
+    req.on('error', reject)
+    req.setTimeout(10000, () => req.destroy(new Error('timed out after 10 s')))
   })
 }
 
