@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const Handlebars = require('handlebars');
 const https = require('https');
-const yaml = require('js-yaml');
 
 const helpersDir = path.join(__dirname, 'src', 'helpers');
 if (fs.existsSync(helpersDir)) {
@@ -19,30 +18,31 @@ if (fs.existsSync(helpersDir)) {
   });
 }
 
-function fetchRemoteAntoraVersion() {
-  const url = 'https://raw.githubusercontent.com/redpanda-data/docs/main/antora.yml'
+// The latest Self-Managed version, as the live docs site states it in every
+// page's <meta name="latest-redpanda-version">. The site is public, so this
+// needs no token (redpanda-data/docs, which holds antora.yml, is private).
+const LATEST_VERSION_URL = 'https://docs.redpanda.com/home/'
+
+function fetchLatestVersion () {
   return new Promise((resolve, reject) => {
     // agent: false so no kept-alive socket holds the process open afterwards.
-    const req = https.get(url, { agent: false }, res => {
+    const req = https.get(LATEST_VERSION_URL, { agent: false }, (res) => {
       if (res.statusCode !== 200) {
         // Drain the response: an unread body keeps the socket, and the
-        // process, open, so the build hangs here (docs is private: 404).
+        // process, open, so the build would hang here.
         res.resume()
-        return reject(new Error(`Failed to fetch antora.yml: ${res.statusCode}`))
+        return reject(new Error(`${LATEST_VERSION_URL} returned ${res.statusCode}`))
       }
       let body = ''
-      res.on('data', chunk => (body += chunk))
+      res.setEncoding('utf8')
+      res.on('data', (chunk) => (body += chunk))
       res.on('end', () => {
-        try {
-          const cfg = yaml.load(body)
-          if (cfg.version == null) {
-            throw new Error('version field missing')
-          }
-          const version = String(cfg.version).trim()
-          resolve(version)
-        } catch (err) {
-          reject(err)
+        const match = /<meta\s+name="latest-redpanda-version"\s+content="([^"]*)"/i.exec(body)
+        const version = match && match[1].trim()
+        if (!version || !/^\d+\.\d+$/.test(version)) {
+          return reject(new Error(`no latest-redpanda-version meta tag in ${LATEST_VERSION_URL}`))
         }
+        resolve(version)
       })
     })
     req.on('error', reject)
@@ -128,13 +128,20 @@ async function ensureRootVersion(context) {
     return;
   }
 
-  // Fallback: remote fetch
+  // Fallback: the live docs site
   try {
-    const remoteVersion = await fetchRemoteAntoraVersion();
+    const remoteVersion = await fetchLatestVersion();
     rootComponent.latest = rootComponent.latest || {};
     rootComponent.latest.version = remoteVersion;
   } catch (err) {
-    console.warn(`⚠️ Could not fetch Antora version: ${err.message}`);
+    // Without a version the Bump widgets ship "Self-Managed v" as the search
+    // tag and an empty latest-redpanda-version meta tag, so a release build
+    // (CI) stops here. Locally it only warns, so the build works offline.
+    if (process.env.CI) {
+      console.error(`❌ Could not get the latest Redpanda version: ${err.message}. Set LATEST_ENTERPRISE to build without it.`);
+      process.exit(1);
+    }
+    console.warn(`⚠️ Could not get the latest Redpanda version: ${err.message}`);
   }
 }
 
