@@ -439,7 +439,7 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
   }
 }
 
-/* Status badges (Beta, Limited Availability) in sticky header */
+/* Status badges (Beta, Preview, Limited Availability, Since) in sticky header */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -485,7 +485,9 @@ html[data-theme="dark"] .status-badge--beta {
   border-color: rgba(251, 191, 36, 0.3);
 }
 
-html[data-theme="dark"] .status-badge--preview {
+/* Since shares the neutral dark palette with Preview */
+html[data-theme="dark"] .status-badge--preview,
+html[data-theme="dark"] .status-badge--since {
   background: rgba(148, 163, 184, 0.15);
   color: #cbd5e1;
   border-color: rgba(148, 163, 184, 0.3);
@@ -509,6 +511,26 @@ html[data-theme="dark"] .status-badge--cloud {
   background: rgba(14, 165, 233, 0.15);
   color: #7dd3fc;
   border-color: rgba(14, 165, 233, 0.3);
+}
+
+.status-badge--since {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  font-weight: 500;
+}
+
+/* Full badge text for screen readers; the visible "Since X" is aria-hidden */
+.status-badge__sr-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Availability badges: links to the other platform's version of this page */

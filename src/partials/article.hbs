@@ -24,7 +24,7 @@
     </div>
     {{/with}}
     {{> version-selector}}
-    {{!-- Status badges: Beta, Preview, Limited Availability --}}
+    {{!-- Status badges: Beta, Preview, Limited Availability, Since (version) --}}
     {{#if page.attributes.beta}}
     <span class="status-badge status-badge--beta" data-tippy-content="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}This feature is in beta and may change.{{/if}}">beta</span>
     {{/if}}
@@ -38,6 +38,17 @@
       </svg>
       Limited Availability
     </span>
+    {{/if}}
+    {{!-- Version badge: the release that introduced the page's feature.
+         :page-introduced-in: takes a bare X.Y.Z (a leading v or trailing period
+         is stripped). :page-introduced-in-product: names the product in the
+         tooltip, for example "Redpanda Connect"; without it the tooltip says
+         "version". Never shown on Cloud pages: a self-managed version doesn't
+         apply there, even if a single-sourced page carries the attribute. --}}
+    {{#if (and page.attributes.introduced-in (not page.attributes.cloud))}}
+    {{#with (normalize-version page.attributes.introduced-in)}}
+    <span class="status-badge status-badge--since" data-tippy-content="Introduced in {{#if @root.page.attributes.introduced-in-product}}{{@root.page.attributes.introduced-in-product}}{{else}}version{{/if}} {{this}}."><span aria-hidden="true">Since {{this}}</span><span class="status-badge__sr-text">Introduced in {{#if @root.page.attributes.introduced-in-product}}{{@root.page.attributes.introduced-in-product}}{{else}}version{{/if}} {{this}}</span></span>
+    {{/with}}
     {{/if}}
     {{!-- ADP platform badges: only show when limited to one platform --}}
     {{#if page.attributes.adp}}
