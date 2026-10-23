@@ -46,7 +46,10 @@ function decodeHtmlEntities (str) {
  * 1. HTML entities are decoded to actual characters (e.g., &#8217; becomes right single quote)
  * 2. Backslashes must be escaped to avoid invalid JSON
  * 3. Double quotes must be escaped to avoid breaking JSON strings
- * 4. </script> substrings must be escaped to avoid breaking out of script tags
+ * 4. < is written as \u003c so </script> or <!-- can't break out of the script block
+ *
+ * Call it with triple braces ({{{json-safe x}}}). Double braces HTML-escape the
+ * result, turning \" into \&quot;, which is an invalid JSON escape sequence.
  *
  * @param {string} value - The string to make JSON-safe
  * @returns {string} - The JSON-safe string
@@ -63,8 +66,8 @@ module.exports = (value) => {
       .replace(/\\/g, '\\\\')
       // Escape double quotes
       .replace(/"/g, '\\"')
-      // Escape </script> to prevent breaking out of script block
-      .replace(/<\/script>/gi, '<\\/script>')
+      // Escape < so </script> or <!-- can't break out of the script block
+      .replace(/</g, '\\u003c')
       // Escape other control characters that could break JSON
       .replace(/\n/g, '\\n')
       .replace(/\r/g, '\\r')

@@ -44,9 +44,14 @@
   - Streaming pages: Use page.version (readers on /25.3/ get 25.3's JSON)
   - Non-streaming pages: Use streaming.latest.version (cloud/connect get latest streaming JSON)
 
-  Fallback URLs point to production to ensure tooltips work even when:
-  - Running preview builds without full content catalog
-  - JSON hasn't been published yet for the specified version
+  No production fallback. Every dataset below lives in a component this build
+  contains, so a tag that does not resolve in the catalog is a file that does
+  not exist anywhere: older release branches never generated one. Emitting a
+  URL for it (as this partial once did) produced an absolute docs.redpanda.com
+  URL that 404ed on production too, and sent preview builds to production for
+  data they carried themselves. When nothing resolves, no meta tag is emitted
+  and the tooltip script stays idle. Preview builds without a content catalog
+  are handled inside resolve-resource, which synthesises a URL there.
 --}}
 {{#if page.componentVersion.asciidoc.attributes.available-properties-tag}}
 {{!--
@@ -56,9 +61,11 @@
   at build time but fetched streaming's at runtime, so its tooltips described
   different properties from the ones its own pages document.
 --}}
-{{#with page.componentVersion.asciidoc.attributes.available-properties-tag}}
-<meta name="latest-redpanda-tag" content="{{this}}">
-<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component=@root.page.component.name module='reference' version=@root.page.version fallback=(concat 'https://docs.redpanda.com/' @root.page.component.name '/' @root.page.version '/reference/_attachments/redpanda-properties-' this '.json')}}">
+{{#with page.componentVersion.asciidoc.attributes.available-properties-tag as |tag|}}
+{{#with (resolve-resource (concat 'attachment$redpanda-properties-' tag '.json') component=@root.page.component.name module='reference' version=@root.page.version fallback='') as |url|}}
+<meta name="latest-redpanda-tag" content="{{tag}}">
+<meta name="properties-json-url" content="{{url}}">
+{{/with}}
 {{/with}}
 {{else if (and (eq page.component.name 'streaming') page.componentVersion.asciidoc.attributes.latest-redpanda-tag)}}
 {{!--
@@ -73,17 +80,21 @@
   slash, verified live: the home page served exactly this malformed URL once
   version-fetcher started resolving latest-redpanda-tag correctly.
 --}}
-{{#with page.componentVersion.asciidoc.attributes.latest-redpanda-tag}}
-<meta name="latest-redpanda-tag" content="{{this}}">
-<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' version=@root.page.version fallback=(concat 'https://docs.redpanda.com/streaming/' @root.page.version '/reference/_attachments/redpanda-properties-' this '.json')}}">
+{{#with page.componentVersion.asciidoc.attributes.latest-redpanda-tag as |tag|}}
+{{#with (resolve-resource (concat 'attachment$redpanda-properties-' tag '.json') component='streaming' module='reference' version=@root.page.version fallback='') as |url|}}
+<meta name="latest-redpanda-tag" content="{{tag}}">
+<meta name="properties-json-url" content="{{url}}">
+{{/with}}
 {{/with}}
 {{else}}
 {{!-- Non-streaming (cloud, connect): resolve against streaming's latest version --}}
 {{#with (or site.components.streaming site.components.ROOT)}}
 {{#if this.latest.asciidoc.attributes.latest-redpanda-tag}}
-{{#with (or this.latest.asciidoc.attributes.available-properties-tag this.latest.asciidoc.attributes.latest-redpanda-tag)}}
-<meta name="latest-redpanda-tag" content="{{this}}">
-<meta name="properties-json-url" content="{{resolve-resource (concat 'attachment$redpanda-properties-' this '.json') component='streaming' module='reference' version=(or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) fallback=(concat 'https://docs.redpanda.com/streaming/' (or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) '/reference/_attachments/redpanda-properties-' this '.json')}}">
+{{#with (or this.latest.asciidoc.attributes.available-properties-tag this.latest.asciidoc.attributes.latest-redpanda-tag) as |tag|}}
+{{#with (resolve-resource (concat 'attachment$redpanda-properties-' tag '.json') component='streaming' module='reference' version=(or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) fallback='') as |url|}}
+<meta name="latest-redpanda-tag" content="{{tag}}">
+<meta name="properties-json-url" content="{{url}}">
+{{/with}}
 {{/with}}
 {{/if}}
 {{/with}}
@@ -112,14 +123,22 @@
   Resolution strategy:
   1. Use available-connect-version (set by extension to highest version with JSON in catalog)
   2. Fall back to latest-connect-version for backwards compatibility
-  3. If resource not in catalog, fall back to production URL
+  3. If the resource is not in the catalog, emit nothing (see the note above)
 
-  Connect component is versionless, so URLs use /connect/components/... (no version segment)
+  Connect component is versionless, so URLs use /connect/components/... (no
+  version segment). No version= is passed: resolve-resource defaults a
+  cross-component lookup to the target component's latest version, which for a
+  versionless component is ''. Passing (or a.version b.version) here read as
+  undefined when the first was '' and the second component did not exist, so
+  the lookup inherited the page's own version and missed on every versioned
+  streaming page.
 --}}
 {{#with (or site.components.connect site.components.redpanda-connect)}}
 {{#if this.latest.asciidoc.attributes.latest-connect-version}}
 {{#with (or this.latest.asciidoc.attributes.available-connect-version this.latest.asciidoc.attributes.latest-connect-version)}}
-<meta name="connect-json-url" content="{{resolve-resource (concat 'attachment$connect-' this '.json') component='connect' module='components' version=(or @root.site.components.connect.latest.version @root.site.components.redpanda-connect.latest.version) fallback=(concat 'https://docs.redpanda.com/connect/components/_attachments/connect-' this '.json')}}">
+{{#with (resolve-resource (concat 'attachment$connect-' this '.json') component='connect' module='components' fallback='') as |url|}}
+<meta name="connect-json-url" content="{{url}}">
+{{/with}}
 {{/with}}
 {{/if}}
 {{/with}}
