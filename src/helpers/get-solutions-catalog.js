@@ -181,8 +181,25 @@ function normalizeFacets (facets, records) {
     industries: byCountThenName(normalizeFacet(facets.industries, records, 'industries')),
     categories: normalizeFacet(facets.categories, records, 'categories'),
     technologies: normalizeFacet(facets.technologies, records, 'technologies'),
-    platforms: normalizeFacet(facets.platforms, records, 'platforms'),
+    platforms: platformFacet(records),
   }
+}
+
+// Runs on lists every platform a solution runs on, even one every solution
+// runs on. Unlike the other groups it is a statement of support as much as a
+// filter: a reader looking for Kubernetes or Docker Compose should see it
+// offered, though ticking it narrows nothing today. So it is always counted
+// from the records, not taken from the extension's facet, which drops values
+// held by every solution.
+const PLATFORM_ORDER = ['self-managed', 'kubernetes', 'cloud']
+
+function platformFacet (records) {
+  const counts = countValues(records, 'platforms')
+  // Local first, then Kubernetes, then Cloud; anything else after, by name.
+  const rank = (v) => { const i = PLATFORM_ORDER.indexOf(v); return i === -1 ? PLATFORM_ORDER.length : i }
+  return Array.from(counts.keys())
+    .sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b))
+    .map((value) => ({ value, count: counts.get(value) }))
 }
 
 // Technologies a card chip should skip: the ones every record carries. When

@@ -431,7 +431,8 @@ test('get-solutions-catalog normalizes facets to {value, count} from the extensi
 
   const fromStrings = call({ categories: ['Integration', 'Clients'], platforms: ['cloud', 'self-managed'] })
   assert.deepEqual(fromStrings.facets.categories, [{ value: 'Integration', count: 1 }, { value: 'Clients', count: 2 }], 'plain strings gain counts')
-  assert.deepEqual(fromStrings.facets.platforms, [{ value: 'cloud', count: 2 }, { value: 'self-managed', count: 1 }])
+  // Runs on is always counted from the records, local first (platformFacet).
+  assert.deepEqual(fromStrings.facets.platforms, [{ value: 'self-managed', count: 1 }, { value: 'cloud', count: 2 }])
 
   // The filters partial renders the value, never the object.
   const filters = hbs.compile(read('src/partials/solutions-filters.hbs'))({ catalog: fromExtension })

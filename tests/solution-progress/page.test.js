@@ -212,12 +212,21 @@ test('the sidebar tick has text: "(completed)" is written into the step entry', 
   assert.equal(status(0), '', 'and cleared when un-marked')
 })
 
-test('the overview CTA returns to the step last opened when nothing is marked yet', () => {
-  const r = run({ page: 'overview', localStore: storeOf(rec({}, { currentStep: 's2' })) })
-  assert.equal(r.els.startLabel.textContent, 'Continue')
-  assert.equal(r.els.start.getAttribute('href'), '/solutions/demo/s2/', 'not step 1')
+test('with nothing marked the overview CTA starts at step 1 and links the step last opened', () => {
+  // Opening a later step (search, a recommendation, Take this to production)
+  // is not progress, so the CTA does not jump there.
+  const r = run({ page: 'overview', localStore: storeOf(rec({}, { currentStep: 's3' })) })
+  assert.equal(r.els.startLabel.textContent, 'Start')
+  assert.equal(r.els.start.getAttribute('href'), '/solutions/demo/s1/')
   assert.equal(r.els.heroProgress.hidden, false)
-  assert.equal(r.els.heroProgress.textContent, 'Last opened: Title of s2')
+  const opened = r.els.heroProgress.querySelector('a')
+  assert.match(r.els.heroProgress.textContent, /^Last opened: /)
+  assert.equal(opened.textContent, 'Title of s3')
+  assert.equal(opened.getAttribute('href'), '/solutions/demo/s3/')
+  // Step 1 last opened: nothing extra to offer.
+  const first = run({ page: 'overview', localStore: storeOf(rec({}, { currentStep: 's1' })) })
+  assert.equal(first.els.start.getAttribute('href'), '/solutions/demo/s1/')
+  assert.equal(first.els.heroProgress.hidden, true)
   assert.equal(r.els.state.textContent, 'Started')
   // Once something is done, the first step not done wins again.
   const going = run({ page: 'overview', localStore: storeOf(rec({ s1: { done: true, at: 10 } }, { currentStep: 's3' })) })

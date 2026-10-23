@@ -1471,16 +1471,17 @@
     var starts = $$('[data-sol-start]')
     if (starts.length) {
       var next = record && !finished ? firstIncomplete(record, ids) : null
-      // Nothing marked yet, but a step was opened: go back to that one. It is
-      // where the reader stopped reading, and step 1 would send them back to
-      // the start of a solution they had already got into.
-      var lastOpened = record && !finished && !done && record.currentStep && urls[record.currentStep]
+      // Nothing marked yet: Start at step 1. The step last opened is not where
+      // the reader got to: search, a recommendation, a shared link or the
+      // rail's Take this to production all open a later step directly. It is
+      // offered as a link in the progress line instead (heroProgress below).
+      var lastOpened = record && !finished && !done && record.currentStep && urls[record.currentStep] &&
+        record.currentStep !== ids[0]
         ? record.currentStep
         : null
-      if (lastOpened) next = lastOpened
       var startHref = next && urls[next] ? urls[next]
         : record && finished && ids.length && urls[ids[0]] ? urls[ids[0]] : null
-      var startLabel = next && urls[next] ? 'Continue' : startHref ? 'Start again' : null
+      var startLabel = next && urls[next] ? (done ? 'Continue' : 'Start') : startHref ? 'Start again' : null
       // The closing copy names the step it opens, so it follows the href.
       var startIndex = startHref ? ids.indexOf(next && urls[next] ? next : ids[0]) : -1
       starts.forEach(function (start) {
@@ -1498,7 +1499,14 @@
         heroProgress.hidden = !record || (!done && !openedTitle)
         heroProgress.textContent = record && done
           ? done + ' of ' + total + ' steps done'
-          : openedTitle ? 'Last opened: ' + openedTitle : ''
+          : openedTitle ? 'Last opened: ' : ''
+        if (record && !done && openedTitle) {
+          var openedLink = document.createElement('a')
+          openedLink.className = 'sol-hero-progress-link'
+          openedLink.setAttribute('href', urls[lastOpened])
+          openedLink.textContent = openedTitle
+          heroProgress.appendChild(openedLink)
+        }
       }
     }
 

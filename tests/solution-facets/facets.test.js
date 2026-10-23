@@ -273,6 +273,23 @@ test('an old ?category=, ?tech= or ?difficulty= link is tolerated: dropped from 
   assert.equal(r.dropped.hidden, true, 'and the reader is not told a filter was ignored')
 })
 
+test('Runs on lists every platform, even one every solution runs on', () => {
+  const records = [
+    { id: 'a', title: 'A', url: '/solutions/a/', status: 'published', platforms: ['self-managed', 'kubernetes'] },
+    { id: 'b', title: 'B', url: '/solutions/b/', status: 'published', platforms: ['cloud', 'kubernetes', 'self-managed'] },
+  ]
+  // The extension's facet keeps only the value that narrows the list.
+  const catalog = helper({ solutions: records, facets: { platforms: [{ value: 'cloud', count: 1 }] } })
+  assert.deepEqual(catalog.facets.platforms, [
+    { value: 'self-managed', count: 2 },
+    { value: 'kubernetes', count: 2 },
+    { value: 'cloud', count: 1 },
+  ])
+  const html = renderFilters({ catalog })
+  assert.ok(legendsOf(html).includes('Runs on'))
+  assert.deepEqual(checkboxesOf(html).filter((c) => c.name === 'platform').map((c) => c.value), ['self-managed', 'kubernetes', 'cloud'])
+})
+
 test('a group with one value renders as a single labeled toggle, not a legend over one box', () => {
   const html = renderFilters({
     catalog: {
