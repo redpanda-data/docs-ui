@@ -10,6 +10,8 @@ This page sets `:page-introduced-in: 4.43.0`, so the sticky header shows a gray 
 * Hovering the badge shows the tooltip "Introduced in version 4.43.0."
 * The badge is readable in both light and dark themes.
 * Pages that don't set `:page-introduced-in:`, such as the Limited Availability Test page, show no version badge.
+* The Introduced-In Badge With Other Badges page shows the badge next to Beta and Limited Availability, with the product named in the tooltip.
+* The Introduced-In Badge on Cloud page sets `:page-introduced-in:` but shows no version badge.
 
 == Page content
 
