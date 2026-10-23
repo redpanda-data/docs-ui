@@ -35,6 +35,15 @@
  *     chipsById: the same lists by solution id, for recommendation entries,
  *                which come from page-related-solutions rather than the
  *                catalog
+ *     taxonomy:  the catalog's `taxonomy` summary (platform and technology
+ *                concepts of the docs taxonomy), or null for a catalog built
+ *                before it; solutions-for-component reads it
+ *     platformNames: reader-facing name of each platform value, by concept
+ *                ID, altLabel ("self-managed" is Docker Compose), and authored
+ *                value (from each record's `concepts.platforms`), or null
+ *                when the catalog has neither; platform-name, platform-list,
+ *                and format-verified-evidence take it as `names=` and fall
+ *                back to their own map without it
  *     json:      the records projected to the fields 29-solutions-home.js
  *                reads, for a <script type="application/json"> block (`</`
  *                is escaped so it cannot close the script tag)
@@ -191,7 +200,7 @@ function normalizeFacets (facets, records) {
 // offered, though ticking it narrows nothing today. So it is always counted
 // from the records, not taken from the extension's facet, which drops values
 // held by every solution.
-const PLATFORM_ORDER = ['self-managed', 'kubernetes', 'cloud']
+const PLATFORM_ORDER = ['self-managed', 'docker', 'kubernetes', 'cloud']
 
 function platformFacet (records) {
   const counts = countValues(records, 'platforms')
@@ -249,6 +258,28 @@ function chipsFor (technologies, universal, counts) {
     .map((x) => x.t)
 }
 
+// Names for platform values from the docs taxonomy: every deployment concept
+// by ID and altLabel, then the authored value of each record's concepts (which
+// wins, being what that record actually wrote). Null when the catalog carries
+// neither, so the helpers use their own fallback map.
+function platformNamesOf (taxonomy, records) {
+  const names = {}
+  let found = false
+  const set = (key, label) => {
+    if (typeof key !== 'string' || !key || typeof label !== 'string' || !label) return
+    names[key] = label
+    found = true
+  }
+  const platforms = taxonomy && Array.isArray(taxonomy.platforms) ? taxonomy.platforms : []
+  platforms.forEach((p) => { if (p) toArray(p.altLabels).forEach((alt) => set(alt, p.label)) })
+  platforms.forEach((p) => { if (p) set(p.id, p.label) })
+  records.forEach((r) => {
+    const items = r.concepts && Array.isArray(r.concepts.platforms) ? r.concepts.platforms : []
+    items.forEach((item) => { if (item) set(item.value, item.label) })
+  })
+  return found ? names : null
+}
+
 let memo = { raw: undefined, result: null }
 
 function build (catalog) {
@@ -266,9 +297,13 @@ function build (catalog) {
     chipsById[record.id] = record.chipTechnologies
   })
 
+  const taxonomy = catalog.taxonomy && typeof catalog.taxonomy === 'object' ? catalog.taxonomy : null
+
   return {
     generatedAt: catalog.generatedAt || null,
     siteUrl: catalog.siteUrl || null,
+    taxonomy,
+    platformNames: platformNamesOf(taxonomy, all),
     universalTechnologies,
     chipsById,
     all,

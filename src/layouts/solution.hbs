@@ -15,7 +15,7 @@
         article's headings. The left nav owns navigation; the body Steps list
         (solution-steps) carries the ticks on the overview; the right rail is
         the progress card, the TOC and the code panel. --}}
-  <body class="article solution{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}"{{#if draftDownloads}} data-solution-draft-downloads="true"{{/if}} data-solution-title="{{title}}" data-solution-file-count="{{files.length}}"{{#if verified.platforms.length}} data-solution-tested-on="{{platform-list verified.platforms}}"{{/if}} data-solution-step-count="{{steps.length}}"{{/with}}>
+  <body class="article solution{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}"{{#if draftDownloads}} data-solution-draft-downloads="true"{{/if}} data-solution-title="{{title}}" data-solution-file-count="{{files.length}}"{{#if verified.platforms.length}} data-solution-tested-on="{{platform-list verified.platforms names=(lookup (get-solutions-catalog) 'platformNames')}}"{{/if}} data-solution-step-count="{{steps.length}}"{{/with}}>
 {{> header}}
 <div class="body no-keep-markup">
 {{> nav}}

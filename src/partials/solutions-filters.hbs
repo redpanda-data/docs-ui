@@ -50,7 +50,7 @@
       {{/each}}
     </fieldset>
     {{/if}}
-    {{#*inline "sol-platform-name"}}{{platform-name value}}{{/inline}}
+    {{#*inline "sol-platform-name"}}{{platform-name value names=(lookup (get-solutions-catalog) 'platformNames')}}{{/inline}}
     {{#if (eq catalog.facets.platforms.length 1)}}
     {{#each catalog.facets.platforms}}
     <div class="sol-filter-group sol-filter-group--single">

@@ -14,7 +14,7 @@
     <dt>Runs on</dt>
     <dd class="sol-chips">
       {{#each solution.platforms}}
-      <span class="sol-chip sol-chip--platform">{{platform-name this}}</span>
+      <span class="sol-chip sol-chip--platform">{{platform-name this names=(lookup (get-solutions-catalog) 'platformNames')}}</span>
       {{/each}}
     </dd>
   </div>
@@ -80,7 +80,7 @@
   {{#with (format-release-date solution.verified.runAt long=true) as |verifiedAt|}}
   <div class="sol-meta-item sol-meta-item--verified">
     <dt>Last verified</dt>
-    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified)}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}{{#if ../solution.verified.platforms.length}} on {{platform-list ../solution.verified.platforms}}{{/if}}</dd>
+    <dd class="sol-verified"{{#with (format-verified-evidence ../solution.verified names=(lookup (get-solutions-catalog) 'platformNames'))}} title="{{this}}"{{/with}}>{{verifiedAt}}{{#with ../solution.verified.redpandaVersion}} against Redpanda {{this}}{{/with}}{{#if ../solution.verified.platforms.length}} on {{platform-list ../solution.verified.platforms names=(lookup (get-solutions-catalog) 'platformNames')}}{{/if}}</dd>
   </div>
   {{/with}}
 </dl>

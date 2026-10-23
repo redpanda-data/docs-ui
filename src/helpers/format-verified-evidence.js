@@ -64,8 +64,10 @@ function formatScript (script) {
   return describeScript(status, passed, total)
 }
 
-// Inlined rather than required: the UI loader registers each helper file on
-// its own and cannot resolve siblings (platform-name.js has the same map).
+// Platform names come from the `names` hash argument, the catalog's
+// `platformNames` built from the docs taxonomy (see platform-name.js). This map
+// is the fallback for a catalog without one. Inlined rather than required: the
+// UI loader registers each helper file on its own and cannot resolve siblings.
 const PLATFORM_NAMES = { 'self-managed': 'Docker Compose', cloud: 'Redpanda Cloud', kubernetes: 'Kubernetes' }
 const ENVIRONMENT = [
   ['kind', 'kind'],
@@ -81,7 +83,7 @@ function formatDate (value) {
   return date.toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-function formatRun (platform, run) {
+function formatRun (platform, run, nameOf) {
   if (!run || typeof run !== 'object') return ''
   const parts = []
   const script = formatScript(run.verifyScript)
@@ -94,11 +96,14 @@ function formatRun (platform, run) {
     if (typeof version === 'string' && VERSION_RX.test(version)) parts.push(label + ' ' + version)
   }
   if (!parts.length) return ''
-  return (PLATFORM_NAMES[platform] || platform) + ': ' + parts.join(', ')
+  return nameOf(platform) + ': ' + parts.join(', ')
 }
 
-module.exports = function (verified) {
+module.exports = function (verified, options) {
   if (!verified || typeof verified !== 'object') return ''
+  const given = options && options.hash && options.hash.names
+  const names = given && typeof given === 'object' ? given : {}
+  const nameOf = (p) => (Object.prototype.hasOwnProperty.call(names, String(p)) ? names[String(p)] : PLATFORM_NAMES[p] || String(p))
   const parts = []
   for (const [key, one, many] of COUNTS) {
     const value = verified[key]
@@ -112,10 +117,10 @@ module.exports = function (verified) {
   // The content hash (contentRev) is maintainer evidence, read from
   // verification.json, and means nothing to a reader, so it is not shown.
   const runs = verified.runs && typeof verified.runs === 'object' ? verified.runs : {}
-  const others = Object.keys(runs).sort().map((platform) => formatRun(platform, runs[platform])).filter(Boolean)
+  const others = Object.keys(runs).sort().map((platform) => formatRun(platform, runs[platform], nameOf)).filter(Boolean)
   const clauses = []
   // Once another platform's clause follows, the base run needs its own name.
-  if (parts.length) clauses.push((others.length ? PLATFORM_NAMES['self-managed'] + ': ' : '') + parts.join(', '))
+  if (parts.length) clauses.push((others.length ? nameOf('self-managed') + ': ' : '') + parts.join(', '))
   clauses.push(...others)
   return clauses.join('; ')
 }

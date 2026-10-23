@@ -760,7 +760,7 @@
   {{> solution-recommendations}}
   {{else}}
   {{#with (get-solutions-catalog) as |catalog|}}
-  {{#with (solutions-for-component catalog.all @root.page.component.name) as |picks|}}
+  {{#with (solutions-for-component catalog.all @root.page.component.name catalog.taxonomy) as |picks|}}
   {{#if picks.length}}
   <section class="ch3-section sol-recs sol-recs--home" data-sol-recs data-component="{{@root.page.component.name}}" aria-labelledby="build-it-in-practice">
     <div class="sol-recs-head">
