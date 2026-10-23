@@ -46,7 +46,7 @@ test('the prompt points at this origin\'s companion, and nowhere else', () => {
 
 test('the prompt is a pointer: the skill, else the companion\'s How to use this', () => {
   const prompt = prod.buildProductionizePrompt(META)
-  assert.ok(prompt.includes('If the Redpanda skills plugin is installed, use the `redpanda-solutions` skill.'))
+  assert.ok(prompt.includes('If the `redpanda-solutions` skill is available, use it.'))
   // One plain command (an allow rule for curl matches it), -f so a 404
   // fails, what failure looks like, and what to do when curl is not allowed.
   assert.ok(prompt.includes(`with this one command, exactly as written, with no pipes, redirects, \`cd\`, or temporary directories: \`curl -sf ${COMPANION}\`.`))

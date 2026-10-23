@@ -16,7 +16,9 @@
  *    companion with curl and follow its How to use this, which holds the
  *    procedure. The docs MCP server cannot return a solution's companion, so
  *    the prompt never says it can.
- *  - Connect the docs MCP server. Static text in the partial.
+ *  - Install the Redpanda skills for Claude Code, shown only when the
+ *    playbook sets site.keys.solutionsSkillInstall, and Connect the docs MCP
+ *    server. Static text in the partial.
  *
  * The companion links hardcode https://docs.redpanda.com/solutions/
  * (agent-companion.js in the docs extensions), so every solution link in it is
@@ -205,7 +207,7 @@
       '',
       'I built the Redpanda Solutions reference "' + m.title + '" ' + built + '. Help me apply its design to this repository and my production environment. Do not copy the reference system.',
       '',
-      'If the Redpanda skills plugin is installed, use the `redpanda-solutions` skill.',
+      'If the `redpanda-solutions` skill is available, use it.',
       '',
       // One plain command, so it matches a `curl` allow rule: agents told
       // only "curl -s URL" wrapped it in mktemp, cd, and wc, and a

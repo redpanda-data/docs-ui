@@ -93,8 +93,8 @@ function render (o) {
     if (i < STEPS.length - 1) attributes['solution-next-url'] = stepUrl(STEPS[i + 1])
   }
   Object.assign(attributes, o.attributes)
-  return PAGE({ solution: SOLUTION, bodyClass: o.step ? 'solution-step' : 'solution', page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '' } }, {
-    data: { root: { solution: SOLUTION, page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '' } } },
+  return PAGE({ solution: SOLUTION, bodyClass: o.step ? 'solution-step' : 'solution', page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '', ...o.site } }, {
+    data: { root: { solution: SOLUTION, page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '', ...o.site } } },
   })
 }
 
@@ -428,6 +428,19 @@ test('the MCP block names the server, the Claude Code command and the VS Code on
   assert.ok(dropdown.includes("name: 'Redpanda Documentation'") && dropdown.includes("url: 'https://docs.redpanda.com/mcp'"))
   const other = Array.from(block.querySelectorAll('a')).find((a) => a.textContent === 'How to use these docs')
   assert.equal(other.getAttribute('href'), '../../../home/how-to-use-these-docs/')
+})
+
+test('the skills install shows only when the playbook turns it on, and retitles the MCP block', { skip }, () => {
+  const off = load({})
+  assert.equal(off.$('[data-sol-productionize-skill]'), null)
+  assert.equal(off.$('[data-sol-productionize-mcp] > summary').textContent.trim(), 'Connect the docs MCP server')
+  const on = load({ site: { keys: { solutionsSkillInstall: 'true' } } })
+  const skill = on.$('[data-sol-productionize-skill]')
+  assert.ok(skill)
+  assert.ok(skill.textContent.includes('claude plugin marketplace add redpanda-data/skills && claude plugin install redpanda@redpanda-skills'))
+  // Ahead of the MCP block, which the plugin makes the other agents' path.
+  assert.ok(skill.compareDocumentPosition(on.$('[data-sol-productionize-mcp]')) & 4)
+  assert.equal(on.$('[data-sol-productionize-mcp] > summary').textContent.trim(), 'Using another coding agent? Connect the docs MCP server')
 })
 
 test('done panels link to the card: a scroll on the last step, the last step elsewhere', { skip }, () => {

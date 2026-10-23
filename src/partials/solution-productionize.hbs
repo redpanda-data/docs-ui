@@ -15,6 +15,11 @@
     note below says the prompt still works.
   - Copy prompt and Preview prompt need the script (the prompt is built from
     the page's origin), so both ship hidden.
+  - Install the Redpanda skills for Claude Code renders only when the
+    playbook sets site.keys.solutionsSkillInstall, which it does once the
+    redpanda-solutions skill is in a published plugin release. The commands
+    follow the README in redpanda-data/skills. With it on, the MCP disclosure
+    is titled for the other agents, because the plugin installs the server.
   - Connect the docs MCP server is static, and written here: the server URL,
     the Claude Code add, list and /mcp sign-in steps, the VS Code one-click
     link and version, and the anonymous allowance. They follow How to use
@@ -39,8 +44,18 @@
     <summary>Preview prompt</summary>
     <pre class="sol-productionize-prompt" data-sol-productionize-prompt></pre>
   </details>
+  {{#if @root.site.keys.solutionsSkillInstall}}
+  <details class="sol-productionize-details" data-sol-productionize-skill>
+    <summary>Install the Redpanda skills for Claude Code</summary>
+    <div class="sol-productionize-mcp">
+      <p>The Redpanda plugin adds the <code>redpanda-solutions</code> skill, which finds this solution's agent companion for you, and the docs MCP server. Run in your shell:</p>
+      <pre class="sol-productionize-command"><code>claude plugin marketplace add redpanda-data/skills &amp;&amp; claude plugin install redpanda@redpanda-skills</code></pre>
+      <p>Then ask Claude Code to apply this solution to your repository, or paste the prompt above.</p>
+    </div>
+  </details>
+  {{/if}}
   <details class="sol-productionize-details" data-sol-productionize-mcp>
-    <summary>Connect the docs MCP server</summary>
+    <summary>{{#if @root.site.keys.solutionsSkillInstall}}Using another coding agent? Connect the docs MCP server{{else}}Connect the docs MCP server{{/if}}</summary>
     <div class="sol-productionize-mcp" data-sol-mcp-block>
       <p>Connect the Redpanda docs MCP server so your agent can look up product details.<br>
       Server URL: <code>https://docs.redpanda.com/mcp</code></p>
