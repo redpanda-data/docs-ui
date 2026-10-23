@@ -16,8 +16,10 @@
   - Copy prompt and Preview prompt need the script (the prompt is built from
     the page's origin), so both ship hidden.
   - Install the Redpanda skills for Claude Code renders only when the
-    playbook sets site.keys.solutionsSkillInstall, which it does once the
-    redpanda-solutions skill is in a published plugin release. The commands
+    playbook sets `solutions-skill-install: true` under site.keys (Antora
+    camelCases it to site.keys.solutionsSkillInstall). Set it in docs-site's
+    antora-playbook.yml once the redpanda-solutions skill is in a published
+    plugin release. The commands
     follow the README in redpanda-data/skills. With it on, the MCP disclosure
     is titled for the other agents, because the plugin installs the server.
   - Connect the docs MCP server is static, and written here: the server URL,

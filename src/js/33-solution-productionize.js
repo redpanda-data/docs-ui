@@ -17,8 +17,8 @@
  *    procedure. The docs MCP server cannot return a solution's companion, so
  *    the prompt never says it can.
  *  - Install the Redpanda skills for Claude Code, shown only when the
- *    playbook sets site.keys.solutionsSkillInstall, and Connect the docs MCP
- *    server. Static text in the partial.
+ *    playbook sets solutions-skill-install under site.keys (see the
+ *    partial), and Connect the docs MCP server. Static text in the partial.
  *
  * The companion links hardcode https://docs.redpanda.com/solutions/
  * (agent-companion.js in the docs extensions), so every solution link in it is
