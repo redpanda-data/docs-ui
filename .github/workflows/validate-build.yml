@@ -97,6 +97,8 @@ jobs:
         run: npm run test:docs-page-weight
       - name: Test the introduced-in version badge
         run: npm run test:introduced-in-badge
+      - name: Test the Ask AI latest-version tool
+        run: npm run test:latest-version-tool
       - name: Cache generated files
         uses: actions/cache@v4
         with:
