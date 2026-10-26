@@ -47,7 +47,9 @@
          apply there, even if a single-sourced page carries the attribute. --}}
     {{#if (and page.attributes.introduced-in (not page.attributes.cloud))}}
     {{#with (normalize-version page.attributes.introduced-in)}}
-    <span class="status-badge status-badge--since" data-tippy-content="Introduced in {{#if @root.page.attributes.introduced-in-product}}{{@root.page.attributes.introduced-in-product}}{{else}}version{{/if}} {{this}}."><span aria-hidden="true">Since {{this}}</span><span class="status-badge__sr-text">Introduced in {{#if @root.page.attributes.introduced-in-product}}{{@root.page.attributes.introduced-in-product}}{{else}}version{{/if}} {{this}}</span></span>
+    {{!-- One source for the tooltip and the screen reader text, so they can't drift --}}
+    {{#*inline "introduced-in-text"}}Introduced in {{#if @root.page.attributes.introduced-in-product}}{{@root.page.attributes.introduced-in-product}}{{else}}version{{/if}} {{this}}.{{/inline}}
+    <span class="status-badge status-badge--since" data-tippy-content="{{> introduced-in-text}}"><span aria-hidden="true">Since {{this}}</span><span class="status-badge__sr-text">{{> introduced-in-text}}</span></span>
     {{/with}}
     {{/if}}
     {{!-- ADP platform badges: only show when limited to one platform --}}

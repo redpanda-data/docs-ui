@@ -36,7 +36,7 @@ test('renders the badge when the page sets introduced-in', () => {
   assert.equal(sinceBadges(html).length, 1)
   assert.equal(visible(html), 'Since 4.43.0')
   assert.equal(tooltip(html), 'Introduced in version 4.43.0.')
-  assert.equal(srText(html), 'Introduced in version 4.43.0')
+  assert.equal(srText(html), tooltip(html), 'screen reader text matches the tooltip')
 })
 
 test('renders nothing when introduced-in is absent or empty', () => {
@@ -55,7 +55,7 @@ test('names the product in the tooltip and screen reader text when introduced-in
   const html = render({ 'introduced-in': '4.43.0', 'introduced-in-product': 'Redpanda Connect' })
   assert.equal(visible(html), 'Since 4.43.0')
   assert.equal(tooltip(html), 'Introduced in Redpanda Connect 4.43.0.')
-  assert.equal(srText(html), 'Introduced in Redpanda Connect 4.43.0')
+  assert.equal(srText(html), tooltip(html), 'screen reader text matches the tooltip')
 })
 
 test('normalizes a leading v and trailing periods', () => {
@@ -63,6 +63,7 @@ test('normalizes a leading v and trailing periods', () => {
     const html = render({ 'introduced-in': raw })
     assert.equal(visible(html), 'Since 4.43.0', raw)
     assert.equal(tooltip(html), 'Introduced in version 4.43.0.', raw)
+    assert.equal(srText(html), tooltip(html), raw)
   }
 })
 
