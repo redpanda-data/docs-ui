@@ -2,8 +2,7 @@
 
 // Verifies the Ask AI get_latest_version tool (src/js/react/agentTools.js) and
 // the release meta tags it reads, which src/partials/head-meta.hbs writes from
-// the attributes the version-fetcher extension sets on streaming's latest
-// version.
+// the attributes on the latest Streaming and Connect component versions.
 //
 // agentTools.js is an ES module and CI runs Node 18, so it is loaded through
 // vm with its single export rewritten into a global assignment (see
@@ -117,10 +116,15 @@ test('head-meta writes one meta per release attribute and skips empty ones', () 
         attributes: {
           'latest-redpanda-tag': 'v26.2.4',
           'latest-console-version': 'v3.3.1',
-          'latest-connect-version': '4.114.0',
+          'latest-connect-version': '4.100.0',
           'latest-operator-version': 'v26.2.1',
           'latest-redpanda-helm-chart-version': '',
         },
+      },
+    },
+    site: {
+      components: {
+        connect: { latest: { asciidoc: { attributes: { 'latest-connect-version': '4.114.0' } } } },
       },
     },
   })
@@ -129,4 +133,14 @@ test('head-meta writes one meta per release attribute and skips empty ones', () 
   assert.match(html, /<meta name="latest-connect-release" content="4\.114\.0">/)
   assert.match(html, /<meta name="latest-operator-release" content="v26\.2\.1">/)
   assert.doesNotMatch(html, /latest-helm-chart-release/)
+})
+
+test('head-meta omits the Connect release when the latest Connect attribute is absent or empty', () => {
+  for (const connect of [undefined, { latest: { asciidoc: { attributes: {} } } }, { latest: { asciidoc: { attributes: { 'latest-connect-version': '' } } } }]) {
+    const html = RELEASES({
+      latest: { asciidoc: { attributes: { 'latest-connect-version': '4.100.0' } } },
+      site: { components: { connect } },
+    })
+    assert.doesNotMatch(html, /latest-connect-release/)
+  }
 })
