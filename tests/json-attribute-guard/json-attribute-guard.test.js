@@ -42,10 +42,16 @@ test('obj warns and returns an empty object for malformed JSON', () => {
   assert.match(warnings[0], /modules\/ROOT\/pages\/broken\.adoc: ignoring malformed JSON attribute value/)
 })
 
-test('obj still warns when no logger is available', (t) => {
-  const warn = t.mock.method(console, 'warn', () => {})
-  assert.deepEqual(obj('- text: YAML', { data: { root: {} } }), {})
-  assert.equal(warn.mock.callCount(), 1)
+test('obj still warns when no logger is available', () => {
+  const original = console.warn
+  let calls = 0
+  console.warn = () => { calls++ }
+  try {
+    assert.deepEqual(obj('- text: YAML', { data: { root: {} } }), {})
+  } finally {
+    console.warn = original
+  }
+  assert.equal(calls, 1)
 })
 
 for (const [name, call] of [

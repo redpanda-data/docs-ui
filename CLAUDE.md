@@ -99,7 +99,7 @@ The `compile-partial.js` script compiles specific Handlebars partials into stand
 Context is provided via JSON files in `context/` directory.
 
 ### Handlebars Templates
-Layouts select partials to compose pages. Helpers in `src/helpers/` provide template logic (e.g., `is-beta-feature.js`, `is-enterprise.js`, `get-page-info.js`). Pages specify layout via `page-layout` AsciiDoc attribute.
+Layouts select partials to compose pages. Helpers in `src/helpers/` provide template logic (e.g., `is-beta-feature.js`, `get-page-info.js`). Pages specify layout via `page-layout` AsciiDoc attribute.
 
 ### Preview System
 `preview-src/` contains AsciiDoc sample pages for testing UI locally. UI model is defined in `preview-src/ui-model.yml`. Preview pages are built with Asciidoctor and rendered using the UI templates.

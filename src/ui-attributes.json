@@ -351,6 +351,14 @@
       "description": "Data Platform landing page: Cloud card link.",
       "readBy": ["src/partials/data-platform.hbs"]
     },
+    "page-cloud-landing": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Data Platform landing page: shows the component cards section.",
+      "caution": "Any non-empty value turns it on.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
     "page-cloud-only": {
       "setIn": ["page"],
       "setBy": "writer",
@@ -379,6 +387,14 @@
       "type": "string",
       "description": "Data Platform landing page: Cloud card title.",
       "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-commercial-names": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "list",
+      "format": "Names separated by commas",
+      "description": "Commercial names for a Connect component, appended to the meta keywords. The add-commercial-names tool writes it, and the generate-rp-connect-info extension adds names from the connector catalog.",
+      "readBy": ["src/partials/head-info.hbs"]
     },
     "page-component-cards-title": {
       "setIn": ["page"],
@@ -630,14 +646,6 @@
       "description": "Turns off property tooltips. Set by the set-available-attachment-versions extension.",
       "readBy": ["src/partials/head-meta.hbs"]
     },
-    "page-enterprise": {
-      "setIn": ["page"],
-      "setBy": "writer",
-      "type": "boolean-string",
-      "description": "Read by the is-enterprise helper, which no template calls.",
-      "caution": "Only the exact string true turns it on.",
-      "readBy": ["src/helpers/is-enterprise.js"]
-    },
     "page-eol": {
       "setIn": ["page", "component"],
       "setBy": "writer",
@@ -844,8 +852,8 @@
       "setIn": ["page"],
       "setBy": "writer",
       "type": "string",
-      "description": "Home page (role home): hero eyebrow text.",
-      "readBy": ["src/partials/home.hbs"]
+      "description": "Landing pages (home, labs home): hero eyebrow text.",
+      "readBy": ["src/layouts/labs-home.hbs", "src/partials/home.hbs"]
     },
     "page-hero-gradient": {
       "setIn": ["page"],
@@ -866,8 +874,8 @@
       "setIn": ["page"],
       "setBy": "writer",
       "type": "string",
-      "description": "Home page (role home): hero subtitle.",
-      "readBy": ["src/partials/home.hbs"]
+      "description": "Landing pages (home, labs home): hero subtitle.",
+      "readBy": ["src/layouts/labs-home.hbs", "src/partials/home.hbs"]
     },
     "page-hero-suggestion-{n}": {
       "setIn": ["page"],
@@ -888,8 +896,8 @@
       "setIn": ["page"],
       "setBy": "writer",
       "type": "string",
-      "description": "Landing pages (home, component-home-v3): hero title.",
-      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/home.hbs"]
+      "description": "Landing pages (home, component-home-v3, labs home): hero title.",
+      "readBy": ["src/layouts/labs-home.hbs", "src/partials/component-home-v3.hbs", "src/partials/home.hbs"]
     },
     "page-hide-view-latest": {
       "setIn": ["page"],
@@ -1129,13 +1137,6 @@
       "description": "Alternative headline in structured data when it differs from the page title.",
       "readBy": ["src/partials/head-structured-data.hbs"]
     },
-    "page-new": {
-      "setIn": ["page"],
-      "setBy": "writer",
-      "type": "flag",
-      "description": "Read by the is-new-resource helper, which no template calls.",
-      "readBy": ["src/helpers/is-new-resource.js"]
-    },
     "page-no-toc": {
       "setIn": ["page"],
       "setBy": "writer",
@@ -1143,47 +1144,6 @@
       "description": "Hides the On this page table of contents.",
       "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
       "readBy": ["src/partials/article.hbs", "src/partials/toc.hbs"]
-    },
-    "page-page-cloud-landing": {
-      "setIn": ["page"],
-      "setBy": "writer",
-      "type": "resource-id",
-      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
-      "description": "Data Platform landing page: Cloud landing link.",
-      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-cloud-landing:.",
-      "readBy": ["src/partials/data-platform.hbs"]
-    },
-    "page-page-commercial-names": {
-      "setIn": ["page"],
-      "setBy": "writer",
-      "type": "string",
-      "description": "Extra meta keywords.",
-      "caution": "The template reads a doubled page- prefix. The add-commercial-names tool writes :page-commercial-names:, which this read never sees.",
-      "readBy": ["src/partials/head-info.hbs"]
-    },
-    "page-page-hero-eyebrow": {
-      "setIn": ["page"],
-      "setBy": "writer",
-      "type": "string",
-      "description": "Labs home layout: hero eyebrow.",
-      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-hero-...:.",
-      "readBy": ["src/layouts/labs-home.hbs"]
-    },
-    "page-page-hero-subtitle": {
-      "setIn": ["page"],
-      "setBy": "writer",
-      "type": "string",
-      "description": "Labs home layout: hero subtitle.",
-      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-hero-...:.",
-      "readBy": ["src/layouts/labs-home.hbs"]
-    },
-    "page-page-hero-title": {
-      "setIn": ["page"],
-      "setBy": "writer",
-      "type": "string",
-      "description": "Labs home layout: hero title.",
-      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-hero-...:.",
-      "readBy": ["src/layouts/labs-home.hbs"]
     },
     "page-pagination": {
       "setIn": ["page"],
