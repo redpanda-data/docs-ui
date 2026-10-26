@@ -76,6 +76,7 @@ The project uses Gulp 4 with task definitions in `gulpfile.js` and task implemen
 - `font/` - Web fonts
 - `img/` - Images and icons
 - `ui.yml` - Defines which static files to include in bundle
+- `ui-attributes.json` - Every page and component attribute the templates and helpers read, with type, values, and readers. Ships in the bundle and as a release asset for the docs language server. When a template or helper starts or stops reading an attribute, update this file; `npm run test:ui-attributes` fails until it matches
 
 ### WebAssembly Integration
 Two WASM modules built from Go:

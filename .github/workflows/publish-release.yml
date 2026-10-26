@@ -50,7 +50,7 @@
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
             TAG="${{ github.ref_name }}"
-            ASSET=./build/ui-bundle.zip
+            ASSET="./build/ui-bundle.zip ./src/ui-attributes.json"
             FLAGS="--generate-notes"
             if [[ "$TAG" =~ - ]]; then
               FLAGS+=" --prerelease"

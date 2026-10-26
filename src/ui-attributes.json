@@ -1,0 +1,1695 @@
+{
+  "$comment": "Every AsciiDoc attribute the docs UI templates, helpers, and scripts read. tests/ui-attributes checks this file against the source: a read that is not declared here fails, and so does an entry nothing reads. Keys are the names writers type in a page header (page-*) or in antora.yml (component). {n} in a key stands for each number in range.",
+  "schemaVersion": 1,
+  "types": {
+    "string": "Plain text.",
+    "html": "Text rendered without escaping, so inline HTML works.",
+    "flag": "Tested for truthiness. See caution for how empty and false values behave.",
+    "boolean": "A YAML boolean in antora.yml.",
+    "boolean-string": "Compared with the exact string true.",
+    "enum": "One of values.",
+    "number": "An integer.",
+    "date": "A date in YYYY-MM-DD form.",
+    "color": "A six-digit hex color.",
+    "url": "An absolute or root-relative URL.",
+    "resource-id": "An Antora resource ID, root-relative path, or URL resolved by the resolve-resource helper.",
+    "list": "Several values in one string. format gives the separator.",
+    "json": "A JSON string. format gives the shape.",
+    "array": "A structured array, which only an extension or YAML can provide.",
+    "object": "A structured object, which only an extension or YAML can provide."
+  },
+  "attributes": {
+    "agent-suggestion-{n}": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 4],
+      "description": "Suggested agent prompts for the component, overriding the defaults.",
+      "readBy": ["src/helpers/get-agent-suggestions.js"]
+    },
+    "ai-suggestion-{n}": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 4],
+      "description": "Suggested Ask AI questions for the component. Defaults apply when none are set.",
+      "readBy": ["src/helpers/get-ai-suggestions.js"]
+    },
+    "announcement": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows the announcement bar for this component version.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "announcement-link": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Announcement bar link target.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "announcement-link-text": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Announcement bar link text.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "announcement-text": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Announcement bar text.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "available-connect-version": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "available-properties-tag": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "component-metadata": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "object",
+      "format": "YAML object in antora.yml",
+      "description": "Header and color settings for the component, such as color and heroGradient.",
+      "readBy": ["src/helpers/aggregate-whats-new.js", "src/helpers/get-component-color.js", "src/helpers/get-component-header-data.js", "src/helpers/get-header-color.js", "src/helpers/get-header-data.js", "src/helpers/get-hero-gradient.js", "src/helpers/get-whats-new-color.js", "src/helpers/sort-components.js", "src/helpers/test-home-component.js"]
+    },
+    "component-whats-new-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 10],
+      "description": "Aggregated what's new: item desc, set on a component home page.",
+      "readBy": ["src/helpers/aggregate-whats-new.js"]
+    },
+    "component-whats-new-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 10],
+      "description": "Aggregated what's new: item link, set on a component home page.",
+      "readBy": ["src/helpers/aggregate-whats-new.js"]
+    },
+    "component-whats-new-{n}-tag": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 10],
+      "description": "Aggregated what's new: item tag, set on a component home page.",
+      "readBy": ["src/helpers/aggregate-whats-new.js"]
+    },
+    "component-whats-new-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 10],
+      "description": "Aggregated what's new: item title, set on a component home page.",
+      "readBy": ["src/helpers/aggregate-whats-new.js"]
+    },
+    "description": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Page description for meta tags, structured data, and page cards.",
+      "readBy": ["src/helpers/get-page-info.js"]
+    },
+    "kapa-source-groups": {
+      "setIn": ["component", "site"],
+      "setBy": "writer",
+      "type": "json",
+      "format": "JSON; malformed values are skipped",
+      "description": "Kapa source groups that scope Ask AI retrieval. Checked on the component version, then the component, then the page, then the site.",
+      "readBy": ["src/helpers/get-kapa-source-groups.js"]
+    },
+    "kapa_source_groups": {
+      "setIn": ["component", "site"],
+      "setBy": "writer",
+      "type": "json",
+      "description": "Alternative spelling of kapa-source-groups.",
+      "readBy": ["src/helpers/get-kapa-source-groups.js"]
+    },
+    "latest-connect-version": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "latest-redpanda-tag": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "learning-objective-{n}": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Learning objectives listed in structured data as what the page teaches.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-additional-resources": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "array",
+      "format": "Array iterated with each. AsciiDoc header values are strings, so this must come from an extension or YAML.",
+      "description": "Links listed at the bottom of the On this page sidebar.",
+      "readBy": ["src/partials/toc.hbs"]
+    },
+    "page-adp": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Marks an Agentic Data Plane page. Hides the Cloud and Self-Managed availability badges and enables the ADP deployment badges.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/article.hbs", "src/partials/nav-tree.hbs"]
+    },
+    "page-adp-docs": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Home page (role home): Agentic Data Plane docs link.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-adp-home": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Home page (role home): Agentic Data Plane home link.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-adp-quickstart": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Home page (role home): Agentic Data Plane quickstart link.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-agent-handoff": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "enum",
+      "values": ["project", "ui"],
+      "description": "Adds the agent handoff action to the page and selects its mode. Defaults to project.",
+      "caution": "Unknown values fall back to project.",
+      "readBy": ["src/helpers/agent-handoff-mode.js", "src/helpers/has-agent-handoff.js"]
+    },
+    "page-announcement": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows the announcement bar for this page.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "page-announcement-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Announcement bar link target.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "page-announcement-link-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Announcement bar link text.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "page-announcement-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Announcement bar text.",
+      "readBy": ["src/partials/announcement-bar.hbs"]
+    },
+    "page-beta": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows a beta badge in the page header and marks the page beta in the navigation.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/helpers/is-beta-feature.js", "src/partials/article.hbs", "src/partials/component-home-v3.hbs"]
+    },
+    "page-beta-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Tooltip text for the beta badge. Defaults to a generic beta notice.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-bloblang-samples": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON object",
+      "description": "Samples for the Bloblang playground. Set by the collect-bloblang-samples extension.",
+      "caution": "Malformed JSON is logged and ignored.",
+      "readBy": ["src/partials/bloblang-playground.hbs"]
+    },
+    "page-breadcrumb-hierarchy": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON array",
+      "description": "Breadcrumb trail. Set by the unified-navigation extension.",
+      "readBy": ["src/partials/breadcrumbs.hbs"]
+    },
+    "page-byoc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Legacy BYOC badge on non-ADP pages.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-byoc-only": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "On an ADP page, shows the BYOC-only badge. Also marks the page in the navigation.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/helpers/is-byoc-feature.js", "src/partials/article.hbs"]
+    },
+    "page-byoc-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Tooltip text for the BYOC badge.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-categories": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Structured data keywords when the page has no keywords.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-cloud": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Marks a Cloud page. Suppresses the \"view latest version\" banner and changes head metadata.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/article.hbs", "src/partials/head-meta.hbs"]
+    },
+    "page-cloud-available": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows an \"also available in Cloud\" badge linking to page-cloud-available-url.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-cloud-available-url": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "url",
+      "description": "Link target for the \"also available in Cloud\" badge.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-cloud-description": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Data Platform landing page: Cloud card description.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-cloud-docs": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Home page (role home): Cloud docs link.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-cloud-home": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Data Platform landing page: Cloud card link.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-cloud-only": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows the Cloud-only badge (or the Serverless and Dedicated badge on ADP pages) and marks the page in the navigation.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/helpers/is-cloud-feature.js", "src/partials/article.hbs"]
+    },
+    "page-cloud-only-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Tooltip text for the Cloud-only badge.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-cloud-tagline": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Data Platform landing page: Cloud card tagline.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-cloud-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Data Platform landing page: Cloud card title.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-component-cards-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Landing pages (component-home-v3, data-platform): heading of the component cards.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-component-name": {
+      "setIn": ["page"],
+      "setBy": "antora",
+      "type": "string",
+      "description": "Antora sets this to the component name of the page. Suggested and related labs are skipped on labs pages.",
+      "readBy": ["src/helpers/add-suggested-labs.js", "src/helpers/list-related-labs.js"]
+    },
+    "page-component-{n}-cta-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Landing pages: component card cta-text.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-component-{n}-deployments": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "enum",
+      "values": ["all", "byoc"],
+      "range": [1, 3],
+      "description": "Landing pages: deployments the component supports. Anything other than all shows a deployment badge.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-component-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Landing pages: component card desc.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-component-{n}-features": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "list",
+      "format": "Items separated by ;;",
+      "range": [1, 3],
+      "description": "Landing pages: component card features.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-component-{n}-is-new": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "range": [1, 3],
+      "description": "Landing pages: shows a NEW badge on the component card.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-component-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 3],
+      "description": "Landing pages: component card link.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-component-{n}-name": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Landing pages: component card name.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-concept-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 6],
+      "description": "Component home v3: concept card desc.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-concept-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 6],
+      "description": "Component home v3: concept card link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-concept-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 6],
+      "description": "Component home v3: concept card title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-concepts-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: heading of the concepts grid.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-connect-docs": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Home page (role home): Connect docs link.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-console-config-migrator": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Adds the Console config migrator tool to the page.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-context-switcher": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "json",
+      "format": "JSON array of {name, to}; to is a resource ID or current",
+      "description": "Dropdown that switches between variants of the page. The process-context-switcher extension rewrites the to values.",
+      "caution": "Malformed JSON is logged and ignored.",
+      "readBy": ["src/partials/article.hbs", "src/partials/context-switcher.hbs"]
+    },
+    "page-contribution": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Shows the edit and contribution links in the feedback footer.",
+      "caution": "Unset or the string false hides them. Any other value shows them.",
+      "readBy": ["src/partials/feedback-footer.hbs"]
+    },
+    "page-custom-navigation": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON array",
+      "description": "Navigation tree for unified navigation. Set by the unified-navigation extension.",
+      "readBy": ["src/partials/nav-menu-scroll.hbs", "src/partials/nav-menu.hbs"]
+    },
+    "page-data-platform-home": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Home page (role home): Data Platform home link.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-deploy-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: heading of the deploy cards.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-deploy-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home v3: deploy card desc.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-deploy-{n}-icon": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "enum",
+      "values": ["cloud", "lightning", "package", "plug", "plug-connected", "terminal"],
+      "range": [1, 3],
+      "description": "Component home v3: deploy card icon.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-deploy-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 3],
+      "description": "Component home v3: deploy card link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-deploy-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home v3: deploy card title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-deployment-cards-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Landing pages: heading of the deployment cards.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-deployment-{n}-cta-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Landing pages: deployment card cta-text.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-deployment-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Landing pages: deployment card desc.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-deployment-{n}-features": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "list",
+      "format": "Items separated by ;;",
+      "range": [1, 3],
+      "description": "Landing pages: deployment card features.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-deployment-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 3],
+      "description": "Landing pages: deployment card link.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-deployment-{n}-name": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Landing pages: deployment card name.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-disable-property-tooltips": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "flag",
+      "description": "Turns off property tooltips. Set by the set-available-attachment-versions extension.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "page-enterprise": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "boolean-string",
+      "description": "Read by the is-enterprise helper, which no template calls.",
+      "caution": "Only the exact string true turns it on.",
+      "readBy": ["src/helpers/is-enterprise.js"]
+    },
+    "page-eol": {
+      "setIn": ["page", "component"],
+      "setBy": "writer",
+      "type": "boolean",
+      "description": "Legacy flag that marks a version end of life.",
+      "caution": "The EOL banner needs a YAML boolean true. The version selector also accepts the string true.",
+      "readBy": ["src/helpers/is-eol.js", "src/helpers/version-status.js", "src/partials/latest-banner.hbs"]
+    },
+    "page-eol-date": {
+      "setIn": ["page", "component"],
+      "setBy": "extension",
+      "type": "date",
+      "description": "Computed end-of-life date shown in the EOL banner and version selector.",
+      "readBy": ["src/partials/latest-banner.hbs", "src/partials/version-selector.hbs"]
+    },
+    "page-eol-doc": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "url",
+      "description": "Link to the end-of-life policy shown in the EOL banner.",
+      "readBy": ["src/partials/latest-banner.hbs"]
+    },
+    "page-exclude-from-dropdown-selector": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Set in antora.yml to leave a component out of the component dropdown.",
+      "readBy": ["src/helpers/length.js"]
+    },
+    "page-exclude-related-labs": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "boolean-string",
+      "description": "Turns off the Suggested labs section at the end of the page.",
+      "caution": "Only the exact string true turns it on.",
+      "readBy": ["src/helpers/add-suggested-labs.js"]
+    },
+    "page-faqs": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON array the extension builds from :page-faq-N-question: and :page-faq-N-answer:",
+      "description": "FAQ entries for FAQPage structured data. Set by the add-faq-structured-data extension.",
+      "caution": "Malformed JSON is logged and ignored.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-feature-list": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "array",
+      "description": "Component home v1: feature list.",
+      "readBy": ["src/partials/component-home.hbs"]
+    },
+    "page-features-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: heading of the feature cards.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-features-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home v3: feature card desc.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-features-{n}-icon": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "enum",
+      "values": ["chart", "flow", "plug"],
+      "range": [1, 3],
+      "description": "Component home v3: feature card icon.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-features-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 3],
+      "description": "Component home v3: feature card link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-features-{n}-new": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "range": [1, 3],
+      "description": "Component home v3: shows a NEW badge on the feature card.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-features-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home v3: feature card title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-footer-menu-list": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "array",
+      "description": "Component home v1: footer menu.",
+      "readBy": ["src/partials/component-home.hbs"]
+    },
+    "page-footer-note-intro": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: footer note lead-in.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-footer-note-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Component home v3: footer note link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-footer-note-link-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: footer note link text.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-footer-note-suffix": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: footer note text after the link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-footer-note-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: footer note text.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-git-created-date": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "date",
+      "description": "First commit date of the page. Set by the add-git-dates extension.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-git-modified-date": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "date",
+      "description": "Last commit date of the page. Set by the add-git-dates extension.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-has-custom-nav": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "flag",
+      "description": "Set by the unified-navigation extension when page-custom-navigation is present.",
+      "readBy": ["src/partials/nav-menu-scroll.hbs", "src/partials/nav-menu.hbs"]
+    },
+    "page-has-faqs": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "flag",
+      "description": "Set by the add-faq-structured-data extension when page-faqs is present.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-has-markdown": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "flag",
+      "description": "Set by the convert-to-markdown extension when the page has a Markdown twin. Shows the Page options menu.",
+      "readBy": ["src/helpers/has-markdown.js"]
+    },
+    "page-hero-ask-placeholder": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Landing pages: placeholder text in the hero Ask AI box.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs", "src/partials/home.hbs"]
+    },
+    "page-hero-color": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "color",
+      "format": "#RRGGBB",
+      "description": "Base color for the hero gradient.",
+      "readBy": ["src/helpers/get-hero-gradient.js"]
+    },
+    "page-hero-description": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "html",
+      "description": "Component home v3: hero lede. Required.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-hero-eyebrow": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): hero eyebrow text.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-hero-gradient": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "format": "CSS linear-gradient()",
+      "description": "CSS gradient that overrides the hero background.",
+      "readBy": ["src/helpers/get-hero-gradient.js"]
+    },
+    "page-hero-stat2-number": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Data Platform landing page: second hero statistic.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-hero-subtitle": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): hero subtitle.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-hero-suggestion-{n}": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Landing pages: suggested questions under the hero Ask AI box.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs", "src/partials/home.hbs"]
+    },
+    "page-hero-suggestions-label": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Landing pages: label above the hero Ask AI suggestions.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs", "src/partials/home.hbs"]
+    },
+    "page-hero-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Landing pages (home, component-home-v3): hero title.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/home.hbs"]
+    },
+    "page-hide-view-latest": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Hides the \"view the latest version\" banner on older versions.",
+      "caution": "Any value, including an empty one, hides the banner.",
+      "readBy": ["src/partials/latest-banner.hbs"]
+    },
+    "page-home-ai-summary": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v2: summary text.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-image": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v2: hero image file name in _images.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-image-alt": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v2: hero image alt text.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-intro": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "html",
+      "description": "Component home v2: introduction.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-intro-learn-more": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "url",
+      "description": "Component home v2: Learn more link.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-overview-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v2: overview heading.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-primary-row": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "array",
+      "format": "Array of {url, title, description, link-text}",
+      "description": "Component home v2: primary row cards.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-primary-row-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v2: primary row heading.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-secondary-row": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "array",
+      "format": "Array of {url, title, description, link-text}",
+      "description": "Component home v2: secondary row cards.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-secondary-row-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v2: secondary row heading.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-tertiary-row": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "array",
+      "format": "Array of {url, title}",
+      "description": "Component home v2: tertiary row links.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-home-tertiary-row-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v2: tertiary row heading.",
+      "readBy": ["src/partials/component-home-v2.hbs"]
+    },
+    "page-index-data": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Name of a component attribute that holds JSON index data for the index-list role.",
+      "readBy": ["src/helpers/get-index-data.js"]
+    },
+    "page-intent-adp-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): Agentic Data Plane intent card description.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-adp-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): Agentic Data Plane intent card title.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-dp-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): Data Platform intent card description.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-dp-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): Data Platform intent card title.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-heading": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): heading of the intent cards.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-is-nearing-eol": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "boolean-string",
+      "description": "Set to true when the version is close to end of life. Shows the nearing-EOL banner.",
+      "readBy": ["src/partials/latest-banner.hbs"]
+    },
+    "page-is-past-eol": {
+      "setIn": ["page", "component"],
+      "setBy": "extension",
+      "type": "boolean-string",
+      "description": "Set to true when the version is past end of life. Shows the EOL banner.",
+      "readBy": ["src/helpers/is-eol.js", "src/partials/latest-banner.hbs"]
+    },
+    "page-is-umbrella-nav": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "flag",
+      "description": "Set by the unified-navigation extension on umbrella navigation pages.",
+      "readBy": ["src/partials/nav-bucket-recursive.hbs"]
+    },
+    "page-is-unified-nav": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows the unified product switcher.",
+      "readBy": ["src/partials/product-switcher.hbs"]
+    },
+    "page-kapa-source-groups": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "json",
+      "description": "Page-level kapa-source-groups.",
+      "readBy": ["src/helpers/get-kapa-source-groups.js"]
+    },
+    "page-kapa_source_groups": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "json",
+      "description": "Page-level alternative spelling of kapa-source-groups.",
+      "readBy": ["src/helpers/get-kapa-source-groups.js"]
+    },
+    "page-labs-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "url",
+      "description": "Component home v3: link to all labs.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-labs-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: heading of the labs section.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-labs-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "url",
+      "range": [1, 4],
+      "description": "Component home v3: lab link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-labs-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 4],
+      "description": "Component home v3: lab title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-limited-availability": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows a limited availability badge in the page header and navigation.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/helpers/is-limited-availability-feature.js", "src/partials/article.hbs"]
+    },
+    "page-limited-availability-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Tooltip text for the limited availability badge.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-match-component-version": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "With page-index-data, keeps only entries from the same component version.",
+      "readBy": ["src/helpers/get-index-data.js"]
+    },
+    "page-navtitle": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Alternative headline in structured data when it differs from the page title.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-new": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Read by the is-new-resource helper, which no template calls.",
+      "readBy": ["src/helpers/is-new-resource.js"]
+    },
+    "page-no-toc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Hides the On this page table of contents.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/article.hbs", "src/partials/toc.hbs"]
+    },
+    "page-page-cloud-landing": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Data Platform landing page: Cloud landing link.",
+      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-cloud-landing:.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-page-commercial-names": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Extra meta keywords.",
+      "caution": "The template reads a doubled page- prefix. The add-commercial-names tool writes :page-commercial-names:, which this read never sees.",
+      "readBy": ["src/partials/head-info.hbs"]
+    },
+    "page-page-hero-eyebrow": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Labs home layout: hero eyebrow.",
+      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-hero-...:.",
+      "readBy": ["src/layouts/labs-home.hbs"]
+    },
+    "page-page-hero-subtitle": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Labs home layout: hero subtitle.",
+      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-hero-...:.",
+      "readBy": ["src/layouts/labs-home.hbs"]
+    },
+    "page-page-hero-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Labs home layout: hero title.",
+      "caution": "The template reads a doubled page- prefix, so the writer must type :page-page-hero-...:.",
+      "readBy": ["src/layouts/labs-home.hbs"]
+    },
+    "page-pagination": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Turns on previous and next links at the bottom of the page.",
+      "caution": "Any value, including an empty one, turns it on. Leave it unset to turn it off.",
+      "readBy": ["src/partials/head-info.hbs", "src/partials/pagination.hbs"]
+    },
+    "page-path-cloud-cta": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: Cloud column button text.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-cloud-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: Cloud column description.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-cloud-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Component home v3: Cloud column link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-cloud-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: Cloud column title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-cloud-{n}": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home v3: Cloud column bullet.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-self-cta": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: Self-Managed column button text.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-self-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: Self-Managed column description.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-self-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Component home v3: Self-Managed column link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-self-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: Self-Managed column title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-self-{n}": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home v3: Self-Managed column bullet.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-path-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: heading of the Self-Managed versus Cloud comparison. The comparison shows only when this is set.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-pathway-{n}-cta": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 2],
+      "description": "Component home v3: pathway card cta.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-pathway-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 2],
+      "description": "Component home v3: pathway card desc.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-pathway-{n}-icon": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "enum",
+      "values": ["connect", "sparkles"],
+      "range": [1, 2],
+      "description": "Component home v3: pathway card icon.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-pathway-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 2],
+      "description": "Component home v3: pathway card link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-pathway-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 2],
+      "description": "Component home v3: pathway card title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-pathways-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: heading of the pathway cards.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-popular-heading": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Data Platform landing page: heading of the popular topics.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-popular-subtitle": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Data Platform landing page: subtitle of the popular topics.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-popular-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Component home v3: heading of the popular topics.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-popular-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 4],
+      "description": "Component home v3: popular topic description.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-popular-{n}-icon": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "enum",
+      "values": ["book", "chart", "docker", "flow", "kubernetes", "lightning", "linux", "package", "plug", "sparkles", "terminal"],
+      "range": [1, 4],
+      "description": "Component home v3: popular topic icon.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-popular-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 6],
+      "description": "Landing pages: popular topic link.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-popular-{n}-tag": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 6],
+      "description": "Data Platform landing page: popular topic tag.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-popular-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 6],
+      "description": "Landing pages: popular topic title.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
+    },
+    "page-prerequisites": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Prerequisites for structured data.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-preview": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows a preview badge in the page header and marks the page preview in the navigation.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/helpers/is-preview-feature.js", "src/partials/article.hbs"]
+    },
+    "page-preview-text": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Tooltip text for the preview badge.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-product-cloud-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): cloud product card description.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-product-cloud-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): cloud product card title.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-product-connect-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): connect product card description.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-product-connect-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): connect product card title.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-product-self-managed-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): self-managed product card description.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-product-self-managed-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): self-managed product card title.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-product-streaming-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): streaming product card description.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-product-streaming-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): streaming product card title.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-related-docs": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON array",
+      "description": "Related docs listed in the lab navigation. Set by the find-related-docs extension.",
+      "readBy": ["src/partials/nav-tree-lab.hbs"]
+    },
+    "page-related-labs": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON array of {title, url, description}",
+      "description": "Related labs for the Suggested labs section and the lab navigation. Set by the find-related-labs extension.",
+      "caution": "Malformed JSON is logged and ignored.",
+      "readBy": ["src/helpers/add-suggested-labs.js", "src/helpers/list-related-labs.js", "src/partials/nav-tree-lab.hbs"]
+    },
+    "page-release-date": {
+      "setIn": ["page", "component"],
+      "setBy": "writer",
+      "type": "date",
+      "format": "YYYY-MM-DD",
+      "description": "Release date of the component version. Drives the EOL calculation and the structured-data datePublished fallback.",
+      "caution": "Set in antora.yml. The compute-end-of-life extension copies it onto pages.",
+      "readBy": ["src/helpers/is-eol.js", "src/helpers/version-status.js", "src/partials/head-structured-data.hbs", "src/partials/version-selector.hbs"]
+    },
+    "page-role": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "enum",
+      "values": ["home", "component-home", "component-home-v2", "component-home-v3", "bloblang-playground", "bloblang-snippets", "enable-ace-editor", "index-list", "related-labs", "two-column"],
+      "description": "Switches the page body to a special layout inside the default template. Also added as a CSS class on the body or main element.",
+      "caution": "An unknown value falls back silently to a normal article.",
+      "readBy": ["src/helpers/has-markdown.js", "src/layouts/default.hbs", "src/layouts/index.hbs", "src/layouts/lab.hbs", "src/partials/article.hbs", "src/partials/feedback-footer.hbs", "src/partials/head-info.hbs", "src/partials/head-scripts.hbs", "src/partials/header-scripts.hbs", "src/partials/main.hbs", "src/partials/pagination.hbs", "src/partials/product-switcher.hbs", "src/partials/toc.hbs"]
+    },
+    "page-self-managed-available": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows an \"also available in Self-Managed\" badge linking to page-self-managed-available-url.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-self-managed-available-url": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "url",
+      "description": "Link target for the \"also available in Self-Managed\" badge.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-self-managed-docs": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Home page (role home): Self-Managed docs link.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-self-managed-home": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Data Platform landing page: Self-Managed card link.",
+      "readBy": ["src/partials/data-platform.hbs"]
+    },
+    "page-self-managed-only": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Shows the Self-Managed-only badge.",
+      "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-stats": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "list",
+      "format": "value|label pairs separated by ;;",
+      "description": "Component home v3: hero statistics.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-status-badge": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "html",
+      "description": "Component home v3: status chip next to the title, for example SELF-MANAGED • v25.1 | GA.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-support-months": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "number",
+      "description": "Number of months a version is supported after its release date. Defaults to 12.",
+      "readBy": ["src/helpers/is-eol.js", "src/partials/version-selector.hbs"]
+    },
+    "page-tabs": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "list",
+      "format": "Labels separated by ;;",
+      "description": "Component home v3: tab labels.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-toc-collapsible": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "boolean-string",
+      "description": "Makes On this page groups collapsible.",
+      "caution": "Only the exact string true turns it on.",
+      "readBy": ["src/partials/toc.hbs"]
+    },
+    "page-toclevels": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "number",
+      "default": "2",
+      "description": "Section depth for the On this page table of contents. Defaults to 2.",
+      "readBy": ["src/partials/toc.hbs"]
+    },
+    "page-toctitle": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Title of the On this page table of contents.",
+      "readBy": ["src/partials/toc.hbs"]
+    },
+    "page-topic-type": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Topic type for structured data.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "page-upgrade-doc": {
+      "setIn": ["page", "component"],
+      "setBy": "extension",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "Upgrade guide linked from the EOL banner and version selector.",
+      "readBy": ["src/partials/latest-banner.hbs", "src/partials/version-selector.hbs"]
+    },
+    "page-version": {
+      "setIn": ["page"],
+      "setBy": "antora",
+      "type": "string",
+      "description": "Antora sets this to the component version of the page.",
+      "readBy": ["src/helpers/is-prerelease.js", "src/partials/nav-explore.hbs"]
+    },
+    "page-whats-new-doc": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "description": "What's new page linked from the version selector.",
+      "readBy": ["src/partials/version-selector.hbs"]
+    },
+    "page-whats-new-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 10],
+      "description": "What's new section: item desc.",
+      "readBy": ["src/helpers/get-whats-new-items.js"]
+    },
+    "page-whats-new-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "format": "An Antora resource ID (for example streaming:get-started:quick-start.adoc), a root-relative path, or an absolute URL. Resolved by the resolve-resource helper, which logs a warning when the target does not exist.",
+      "range": [1, 10],
+      "description": "What's new section: item link.",
+      "readBy": ["src/helpers/get-whats-new-color.js", "src/helpers/get-whats-new-items.js"]
+    },
+    "page-whats-new-{n}-tag": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 10],
+      "description": "What's new section: item tag.",
+      "readBy": ["src/helpers/get-whats-new-items.js"]
+    },
+    "page-whats-new-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 10],
+      "description": "What's new section: item title.",
+      "readBy": ["src/helpers/get-whats-new-items.js"]
+    },
+    "personas": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Audience type in structured data.",
+      "readBy": ["src/partials/head-structured-data.hbs"]
+    },
+    "primary-site-url": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "url",
+      "description": "Primary site URL used to rewrite latest-version links when PRIMARY_SITE_SUPPORTS_CURRENT_URL is set.",
+      "readBy": ["src/helpers/latest-page-url.js"]
+    },
+    "removals-without-aliases": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Pages intentionally removed from the latest version, so the missing-page warning skips them.",
+      "readBy": ["src/helpers/log-missing.js"]
+    },
+    "toc-tools-links": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "json",
+      "format": "JSON array of {text, url, icon, external, description}; icon one of terminal, layers, book, link",
+      "description": "Links in the tools block.",
+      "caution": "Must be a JSON string, not a YAML array. Malformed JSON is logged and ignored.",
+      "readBy": ["src/partials/component-tools-fab.hbs", "src/partials/toc.hbs"]
+    },
+    "toc-tools-title": {
+      "setIn": ["component"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Title of the tools block in the On this page sidebar and the mobile tools button.",
+      "readBy": ["src/partials/body.hbs", "src/partials/component-tools-fab.hbs", "src/partials/toc.hbs"]
+    }
+  }
+}

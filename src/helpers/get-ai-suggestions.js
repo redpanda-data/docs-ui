@@ -37,9 +37,9 @@ module.exports = function (options) {
 
   // Collect up to 4 suggestions from component attributes
   for (let i = 1; i <= 4; i++) {
-    const key = `ai-suggestion-${i}`
-    if (attrs[key]) {
-      suggestions.push(attrs[key])
+    const suggestion = attrs[`ai-suggestion-${i}`]
+    if (suggestion) {
+      suggestions.push(suggestion)
     }
   }
 
