@@ -178,7 +178,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--component-600);
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Page options (markdown-dropdown.hbs) at the end of the eyebrow row, out of
@@ -202,6 +202,7 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
    menu takes the same border and radius. Other pages keep the pill. */
 .sol-page-options .markdown-dropdown-toggle {
   gap: 5px;
+  min-height: 32px;
   padding: 4px 8px;
   font-size: calc(12 / var(--rem-base) * 1rem);
   font-family: var(--body-font-family);
@@ -265,10 +266,14 @@ html[data-theme="dark"] .sol-page-options .markdown-dropdown-menu {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+/* The back link is one line of small text; the block padding grows its hit
+   area and the negative margin keeps the row where it was. */
 .sol-eyebrow-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 6px;
+  padding-block: 11px;
+  margin-block: -11px;
   color: var(--component-600);
   text-decoration: none;
   text-transform: none;
@@ -578,7 +583,12 @@ html[data-theme="dark"] .sol-page-options .markdown-dropdown-menu {
   margin: 0 0 0.75rem;
 }
 
-.sol-lede {
+/* doc.css zeroes `.doc p` and `.doc dl` margins (0,1,1), which beats a single
+   class, so the Solutions paragraphs that set their own margin (the lede, the
+   metadata panel, the steps note, the production card's subtitle, the done
+   panel) take a .doc prefix. Without it the hero's Start button sat on the
+   lede and the production card's subtitle touched its first button. */
+.doc .sol-lede {
   font-size: calc(18 / var(--rem-base) * 1rem);
   line-height: 1.55;
   color: var(--grey-600-new);
@@ -672,7 +682,7 @@ html[data-theme="dark"] .sol-outcome .oc {
   --oc-win-mark: var(--teal-400-new);
 }
 
-.sol-meta {
+.doc .sol-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 2rem;
@@ -793,7 +803,7 @@ html[data-theme="dark"] .sol-outcome .oc {
 
 /* The overview's line about the quiz and the production card, above the
    Steps list. */
-.sol-steps-note {
+.doc .sol-steps-note {
   margin: 0 0 0.75rem;
   font-size: calc(14 / var(--rem-base) * 1rem);
   color: var(--sol-meta);
@@ -1047,13 +1057,15 @@ html[data-theme="dark"] .sol-outcome .oc {
   border: 1px solid var(--component-200);
 }
 
-.sol-done-title {
+.sol-done-title,
+.doc .sol-done-title {
   font-weight: 700;
   color: var(--component-700);
   margin: 0 0 0.25rem;
 }
 
-.sol-done-sub {
+.sol-done-sub,
+.doc .sol-done-sub {
   font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--grey-600-new);
   margin: 0 0 0.625rem;
@@ -1108,7 +1120,7 @@ html[data-theme="dark"] .sol-outcome .oc {
   color: var(--grey-900-new);
 }
 
-.sol-productionize-sub {
+.doc .sol-productionize-sub {
   margin: 0 0 1rem;
   color: var(--grey-600-new);
 }
@@ -1118,6 +1130,21 @@ html[data-theme="dark"] .sol-outcome .oc {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
+}
+
+/* The copy action is the card's secondary button, so it takes the outlined
+   look of the other secondary buttons instead of reading as a text link
+   beside the primary. */
+.sol-productionize-actions .sol-btn--ghost,
+.sol-step-actions .sol-btn--ghost {
+  background: var(--sol-surface);
+  border-color: var(--grey-200-new);
+}
+
+.sol-productionize-actions .sol-btn--ghost:hover,
+.sol-step-actions .sol-btn--ghost:hover {
+  background: var(--component-bg-tint);
+  border-color: var(--grey-300-new);
 }
 
 .sol-productionize-status,
@@ -1130,14 +1157,15 @@ html[data-theme="dark"] .sol-outcome .oc {
   display: none;
 }
 
-.sol-productionize-note {
+.doc .sol-productionize-note {
   margin: 0.75rem 0 0;
 }
 
 /* The generic .doc details rule is a grey padded accordion. Here each
-   disclosure is a plain row under the actions, with its body indented. */
+   disclosure is a plain row under the actions, divided by a rule, with the
+   same space above and below its summary and under an open body. */
 .sol-doc .sol-productionize-details {
-  margin: 1rem 0 0;
+  margin: 1.25rem 0 0;
   padding: 0;
   background: none;
   box-shadow: none;
@@ -1145,8 +1173,18 @@ html[data-theme="dark"] .sol-outcome .oc {
   border-top: 1px solid var(--grey-100-new);
 }
 
+/* Only after a shown disclosure: the preview ships hidden, and the one after
+   it still needs the space under the actions. */
+.sol-doc .sol-productionize-details:not([hidden]) ~ .sol-productionize-details {
+  margin-top: 0;
+}
+
+.sol-doc .sol-productionize-details[open] {
+  padding-bottom: 0.75rem;
+}
+
 .sol-doc .sol-productionize-details > summary {
-  padding: 0.75rem 0 0;
+  padding: 0.75rem 0;
   font-size: calc(14 / var(--rem-base) * 1rem);
   font-weight: 600;
   color: var(--component-700);
@@ -1159,14 +1197,37 @@ html[data-theme="dark"] .sol-outcome .oc {
   content: none;
 }
 
+/* The browser's triangle sat against the label. The same glyphs, with room. */
+.sol-doc .sol-productionize-details > summary::marker {
+  content: "\25B8\00A0\00A0";
+}
+
+.sol-doc .sol-productionize-details[open] > summary::marker {
+  content: "\25BE\00A0\00A0";
+}
+
 /* Tabs on solution pages (Local, Kubernetes, Cloud): the vendor styles leave
    the panel unboxed, so a tab's content runs into the page. The tab row and
-   the selected panel read as one bordered block, like a collapsible. */
+   the selected panel read as one bordered block, like a collapsible. Inside
+   the bordered bar the vendor's 4px label padding sat the labels on its top
+   edge, and a wrapped tab touched the row above it with a different inset,
+   so the bar takes its own padding and spaces the labels with gap. */
 .sol-doc .tabs .tablist > ul {
+  gap: 0.25rem;
+  justify-content: flex-start;
+  padding: 0.25rem 0.375rem 0;
   border: 1px solid var(--sol-code-border);
   border-bottom: 0;
   border-radius: 10px 10px 0 0;
   background: var(--component-bg-tint);
+}
+
+.sol-doc .tabs .tablist.ulist > ul li + li {
+  margin-left: 0;
+}
+
+.sol-doc .tabs .tablist > ul li > p {
+  padding: 0.5rem 0.875rem;
 }
 
 .sol-doc .tabs .tabpanel {
@@ -1184,18 +1245,23 @@ html[data-theme="dark"] .sol-outcome .oc {
   outline-offset: 2px;
 }
 
+/* Each label and its command read as a group: 12px between paragraphs, 8px
+   from a label down to its command. */
 .sol-productionize-mcp {
-  padding-top: 0.5rem;
   font-size: calc(14 / var(--rem-base) * 1rem);
 }
 
 .sol-productionize-mcp p {
-  margin: 0.5rem 0 0;
+  margin: 0.75rem 0 0;
+}
+
+.sol-productionize-mcp > :first-child {
+  margin-top: 0;
 }
 
 .sol-doc .sol-productionize-prompt,
 .sol-doc .sol-productionize-command {
-  margin: 0.75rem 0 0;
+  margin: 0;
   padding: 0.75rem;
   max-height: 24rem;
   overflow: auto;
@@ -1209,7 +1275,7 @@ html[data-theme="dark"] .sol-outcome .oc {
 }
 
 .sol-doc .sol-productionize-command {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
 }
 
 @media screen and (max-width: 520px) {
@@ -1219,6 +1285,10 @@ html[data-theme="dark"] .sol-outcome .oc {
 
   .sol-productionize-actions .sol-btn {
     width: 100%;
+  }
+
+  .sol-step-actions-main > .sol-btn {
+    flex: 1 1 100%;
   }
 }
 
@@ -1289,7 +1359,7 @@ html[data-theme="dark"] .sol-outcome .oc {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--sol-meta);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
 }
 
 .sol-download .sol-btn {
@@ -1309,7 +1379,7 @@ html[data-theme="dark"] .sol-outcome .oc {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.25rem 0.375rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   font-size: calc(12 / var(--rem-base) * 1rem);
   line-height: 1.45;
   color: var(--grey-600-new);
@@ -1323,6 +1393,12 @@ html[data-theme="dark"] .sol-outcome .oc {
 
 .sol-gate-text {
   flex: 1 1 10rem;
+}
+
+/* Sign in is a 12px text button: a bigger hit area, same line box. */
+.sol-gate .sol-link-btn {
+  padding-block: 0.5rem;
+  margin-block: -0.5rem;
 }
 
 /* ---- step page ------------------------------------------------------------ */
@@ -1525,7 +1601,24 @@ html[data-theme="dark"] .sol-doc {
 .sol-doc .sol-code-title .source-toolbox {
   position: static;
   visibility: visible;
+  flex-shrink: 0;
   margin-left: auto;
+}
+
+/* A long path gives way to the toolbox: the bar is nowrap inside a block
+   that clips, so Download was cut off on phones. The Download control keeps
+   the full path in its aria-label. */
+.sol-doc .listingblock.sol-code-titled > .title.sol-code-title > code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 479px) {
+  .sol-doc .sol-code-title .sol-file-download-label {
+    display: none;
+  }
 }
 
 /* Folded listing: clipped, faded at the bottom, with a toggle underneath. */
@@ -1780,7 +1873,7 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.375rem;
+  gap: 0.75rem;
 }
 
 .sol-related-link {
@@ -1890,7 +1983,8 @@ html[data-theme="dark"] .sol-doc .sol-code-fold-btn {
   overflow: hidden;
 }
 
-.sol-recs-foot {
+.sol-recs-foot,
+.doc .sol-recs-foot {
   margin: 0.75rem 0 0;
   font-size: calc(13 / var(--rem-base) * 1rem);
 }
@@ -2101,8 +2195,74 @@ html[data-theme="dark"] .doc .toc.embedded .sol-rail-rec:hover .sol-rail-rec-tit
   align-items: center;
 }
 
+/* Collapsed above the grid, the summary is a control (icon, count, chevron)
+   and the open body is one panel attached under it, with rows tall enough
+   to tap and a foot to clear or close. */
+.doc .sol-filters-slot .sol-filters > .sol-filters-summary {
+  box-sizing: border-box;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+}
+
+.sol-filters-slot .sol-filters[open] > .sol-filters-summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.sol-filters-icon {
+  flex: none;
+  color: var(--sol-meta);
+}
+
+.sol-filters-slot .sol-filters-active {
+  margin-left: 0;
+}
+
 .sol-filters-slot .sol-filters-body {
-  margin-top: 0.75rem;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--grey-100-new);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-lg-new) var(--radius-lg-new);
+  background: var(--sol-surface);
+}
+
+.sol-filters-slot .sol-filter-row {
+  min-height: 40px;
+  padding: 0;
+}
+
+.sol-filters-slot .sol-filter-row input {
+  width: 18px;
+  height: 18px;
+}
+
+.sol-filters-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--grey-100-new);
+}
+
+.sol-filters-foot .sol-filters-clear {
+  min-height: 40px;
+}
+
+.sol-filters-done {
+  margin-left: auto;
+}
+
+/* In the sidebar the filters are always open: no Done, and Clear stays a
+   direct item of the form as before. */
+.sol-nav-filters .sol-filters-foot {
+  display: contents;
+}
+
+.sol-nav-filters .sol-filters-done {
+  display: none;
 }
 
 .sol-filters-summary {
@@ -2274,7 +2434,7 @@ html[data-theme="dark"] .sol-filter-row.is-empty {
   color: var(--sol-meta);
 }
 
-.sol-results-note {
+.doc .sol-results-note {
   margin: 0 0 0.75rem;
   font-size: calc(13 / var(--rem-base) * 1rem);
   color: var(--grey-700-new);
@@ -2655,6 +2815,27 @@ html[data-theme="dark"] .sol-btn--ghost:hover {
   background: var(--component-bg-tint-hover);
 }
 
+html[data-theme="dark"] .sol-filters-slot .sol-filters-body {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-filters-foot {
+  border-top-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-productionize-actions .sol-btn--ghost,
+html[data-theme="dark"] .sol-step-actions .sol-btn--ghost {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-productionize-actions .sol-btn--ghost:hover,
+html[data-theme="dark"] .sol-step-actions .sol-btn--ghost:hover {
+  background: var(--component-bg-tint-hover);
+  border-color: var(--grey-600-new);
+}
+
 html[data-theme="dark"] .sol-btn[aria-pressed="true"] {
   background: var(--component-bg-tint-active);
   border-color: var(--component-700);
@@ -2684,6 +2865,7 @@ html[data-theme="dark"] .sol-nav-step.is-current-page:not(.is-complete) .sol-nav
 
 html[data-theme="dark"] .sol-title,
 html[data-theme="dark"] .sol-panel-title,
+html[data-theme="dark"] .sol-doc .sol-productionize-title,
 html[data-theme="dark"] .sol-step-title,
 html[data-theme="dark"] .sol-rec-title,
 html[data-theme="dark"] .sol-card-title,
@@ -2698,6 +2880,7 @@ html[data-theme="dark"] .sol-version-notice {
 
 html[data-theme="dark"] .sol-lede,
 html[data-theme="dark"] .sol-panel-text,
+html[data-theme="dark"] .doc .sol-productionize-sub,
 html[data-theme="dark"] .sol-rec-desc,
 html[data-theme="dark"] .sol-card-desc,
 html[data-theme="dark"] .sol-recs-sub,
@@ -2713,8 +2896,18 @@ html[data-theme="dark"] .sol-gate {
 
 html[data-theme="dark"] .sol-hero,
 html[data-theme="dark"] .sol-step-header,
-html[data-theme="dark"] .sol-step-actions {
+html[data-theme="dark"] .sol-step-actions,
+html[data-theme="dark"] .sol-doc .sol-productionize-details {
   border-color: var(--grey-700-new);
+}
+
+/* The production card had no dark rules: its title stayed near-black on the
+   dark panel and its prompt and commands kept the light code background
+   under light text. They take the code blocks' dark tokens. */
+html[data-theme="dark"] .sol-doc .sol-productionize-prompt,
+html[data-theme="dark"] .sol-doc .sol-productionize-command {
+  background: var(--sol-code-bg);
+  border-color: var(--sol-code-border);
 }
 
 html[data-theme="dark"] .sol-meta,
@@ -2914,7 +3107,7 @@ html[data-theme="dark"] .sol-toast {
     font-size: calc(28 / var(--rem-base) * 1rem);
   }
 
-  .sol-lede {
+  .doc .sol-lede {
     font-size: calc(16 / var(--rem-base) * 1rem);
   }
 
@@ -2936,10 +3129,58 @@ html[data-theme="dark"] .sol-toast {
   .sol-step-nav--next {
     margin-left: 0;
   }
+
+  /* Tap targets: 44px for buttons, 40px for the smaller controls. */
+  .sol-btn {
+    min-height: 44px;
+  }
+
+  .sol-doc .tabs .tablist > ul li > p {
+    padding-block: 0.625rem;
+  }
+
+  .sol-page-options .markdown-dropdown-toggle {
+    min-height: 40px;
+  }
+
+  .sol-doc .sol-code-title .source-toolbox .copy-button,
+  .sol-doc .sol-code-title .source-toolbox .ask-ai-button,
+  .sol-doc .sol-code-title .source-toolbox .sol-file-download {
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .sol-doc .sol-code-fold-btn,
+  .sol-doc details > summary.title {
+    box-sizing: border-box;
+    min-height: 40px;
+  }
+
+  /* The back link takes its own row, so the "/" no longer dangles at the end
+     of one row or starts the next. */
+  .sol-eyebrow-sep {
+    display: none;
+  }
+
+  .sol-eyebrow-link {
+    flex-basis: 100%;
+  }
+
+  /* doc.css spaces the article 3rem below the top bar; on a phone the rail
+     card is above it, so that gap is empty space. */
+  main.solution .doc.sol-doc,
+  main.solution-step .doc.sol-doc {
+    margin-top: 0.5rem;
+  }
+
+  .sol-doc .breadcrumbs ul {
+    row-gap: 4px;
+  }
 }
 
 @media (max-width: 400px) {
-  .sol-meta {
+  .doc .sol-meta {
     gap: 0.75rem 1.25rem;
     padding: 0.75rem 1rem;
   }
@@ -3066,6 +3307,10 @@ html[data-theme="dark"] .sol-toast {
   transform: rotate(45deg);
   color: var(--sol-meta);
   transition: transform 0.15s ease;
+  /* doc.css positions the generic details chevron absolutely at right: 0
+     with an image, which put a second chevron outside the box. */
+  position: static;
+  background: none;
 }
 
 .doc .sol-filters-slot .sol-filters[open] > .sol-filters-summary::after {
