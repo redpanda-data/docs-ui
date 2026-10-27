@@ -330,6 +330,28 @@
   transform: rotate(180deg); /* expanded points down */
 }
 
+/* collapseAfter groups (Solutions layouts): the toggle also shows how many entries it hides,
+   so it is wider than the caret-only toggle and reads as "Production considerations (20)". */
+.toc .toc-menu .toc-group-toggle--count {
+  width: auto;
+  min-width: 24px;
+  gap: 2px;
+  padding: 0 4px 0 2px;
+  color: var(--toc-font-color);
+  font: inherit;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+
+.toc .toc-menu .toc-group-count {
+  white-space: nowrap;
+}
+
+/* Count first, then the caret, at the end of the row like the caret-only toggle. */
+.toc .toc-menu .toc-group-toggle--count::before {
+  order: 1;
+}
+
 /* The mobile dropdown clones the sidebar list without the toggle behavior, so it shows every entry */
 .toc.embedded .toc-menu .toc-group-toggle {
   display: none;

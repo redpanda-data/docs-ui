@@ -36,6 +36,11 @@
   if (levels < 0) return
   // Set from :page-toc-collapsible: true via toc.hbs. See buildCollapsibleGroups below.
   var collapsible = sidebar.dataset.collapsible === 'true'
+  // Set on Solutions pages (data-collapse-after in toc.hbs): only a level-1 entry with more
+  // entries under it than this collapses, and it starts collapsed. Ignored when the page opts
+  // in to collapsing every group with :page-toc-collapsible:.
+  var collapseAfter = collapsible ? 0 : parseInt(sidebar.dataset.collapseAfter, 10) || 0
+  var grouped = collapsible || collapseAfter > 0
 
   var articleSelector = 'article.doc'
   var article = document.querySelector(articleSelector)
@@ -67,7 +72,7 @@
     return accum
   }, document.createElement('ul'))
 
-  if (collapsible) buildCollapsibleGroups(list)
+  if (grouped) buildCollapsibleGroups(list, collapseAfter)
 
   /**
    * Make one fragment the active entry, clearing whatever was active before.
@@ -254,45 +259,67 @@
   }
 
   /**
-   * Turn the flat TOC list into collapsible groups. Opt-in with :page-toc-collapsible: true.
-   * Each level-1 entry becomes a group that holds the deeper entries following it, behind a
-   * toggle button. A level-1 entry with nothing under it stays a plain entry. Only the first
-   * group starts expanded; a group also opens whenever one of its entries becomes active (click,
-   * scroll, or a hash change). The mobile dropdown clones this markup but shows everything; see
-   * .toc.embedded in toc.css.
+   * Turn the flat TOC list into collapsible groups. Each level-1 entry becomes a group that holds
+   * the deeper entries following it, behind a toggle button. A level-1 entry with nothing under it
+   * stays a plain entry. A group opens whenever one of its entries, or its own heading, becomes
+   * active (click, scroll, or a hash change), so the highlight is never hidden. The mobile
+   * dropdown clones this markup but shows everything; see .toc.embedded in toc.css.
+   *
+   * Two modes:
+   *  - :page-toc-collapsible: true (collapseAfter 0): every group collapses and only the first
+   *    starts expanded.
+   *  - data-collapse-after=N, which toc.hbs sets on Solutions pages: only a group with more
+   *    than N entries under it collapses, it starts collapsed, and its toggle shows the count.
+   *    Shorter groups stay a plain flat list. This is for the last step's Production considerations, which lists
+   *    about 20 topics.
    * @param {HTMLUListElement} root - The <ul> built from the page headings, one <li> per heading.
+   * @param {number} collapseAfter - 0 to group every entry; otherwise the largest group left open.
    */
-  function buildCollapsibleGroups (root) {
+  function buildCollapsibleGroups (root, collapseAfter) {
     var groups = []
-    var groupList
+    var current
     find('li', root).forEach(function (item) {
       if (parseInt(item.dataset.level, 10) === 1) {
-        groupList = document.createElement('ul')
-        groupList.id = 'toc-group-' + (groups.length + 1)
-        groups.push({ item: item, list: groupList })
-      } else if (groupList) {
-        groupList.appendChild(item)
+        groups.push((current = { item: item, entries: [] }))
+      } else if (current) {
+        current.entries.push(item)
       }
     })
     var firstGroup
-    groups.forEach(function (group) {
-      if (!group.list.children.length) return
+    groups.forEach(function (group, idx) {
+      var count = group.entries.length
+      if (!count || (collapseAfter && count <= collapseAfter)) return
       var item = group.item
+      var groupList = document.createElement('ul')
+      groupList.id = 'toc-group-' + (idx + 1)
+      group.entries.forEach(function (entry) {
+        groupList.appendChild(entry)
+      })
       item.classList.add('toc-group')
       var toggle = document.createElement('button')
       toggle.type = 'button'
       toggle.className = 'toc-group-toggle'
       toggle.setAttribute('aria-expanded', 'false')
-      toggle.setAttribute('aria-controls', group.list.id)
-      toggle.setAttribute('aria-label', 'Toggle ' + item.textContent)
+      toggle.setAttribute('aria-controls', groupList.id)
+      if (collapseAfter) {
+        // The count is the visible label, so the accessible name carries it too.
+        toggle.classList.add('toc-group-toggle--count')
+        var countLabel = document.createElement('span')
+        countLabel.className = 'toc-group-count'
+        countLabel.textContent = '(' + count + ')'
+        toggle.appendChild(countLabel)
+        toggle.setAttribute('aria-label', item.textContent + ': ' + count + ' entries')
+      } else {
+        toggle.setAttribute('aria-label', 'Toggle ' + item.textContent)
+      }
       toggle.addEventListener('click', function () {
         setGroupExpanded(item, !item.classList.contains('is-expanded'))
       })
       item.appendChild(toggle)
-      item.appendChild(group.list)
+      item.appendChild(groupList)
       if (!firstGroup) firstGroup = item
     })
-    if (firstGroup) setGroupExpanded(firstGroup, true)
+    if (firstGroup && !collapseAfter) setGroupExpanded(firstGroup, true)
   }
 
   /**
@@ -312,11 +339,11 @@
 
   /**
    * Expand the group that contains a TOC link so an active entry is never hidden.
-   * No-op when the TOC is not collapsible or the link sits at the top level.
+   * No-op when the TOC has no groups or the link sits at the top level.
    * @param {HTMLAnchorElement} link - The TOC link that just became active.
    */
   function revealGroup (link) {
-    if (!collapsible) return
+    if (!grouped) return
     var el = link.parentNode
     while (el && el !== list) {
       if (el.classList && el.classList.contains('toc-group')) {

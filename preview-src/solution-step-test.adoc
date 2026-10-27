@@ -241,3 +241,41 @@ Signed-in readers can download each file from this list or with the Download con
 Do not run Console on the same host as a broker, and put the Schema Registry behind TLS: every producer and consumer in this solution fetches schemas from it.
 For the full picture, see xref:verify-end-to-end.adoc#prod-security[Production considerations: security].
 --
+
+// A last step lists every production topic under Production considerations,
+// often 15 or more. With more than six entries the On this page group starts
+// collapsed and its toggle shows the count (collapseAfter in solution-step.hbs).
+== Production considerations
+
+=== Brokers and replication
+
+Run at least three brokers and set the replication factor of every topic to 3.
+
+[[prod-security]]
+=== Security
+
+Turn on TLS and SASL/SCRAM, and give each service its own principal with the ACLs it needs.
+
+=== Partitions
+
+Size partitions for the peak event rate, not the average.
+
+=== Schema validation
+
+Turn on server-side schema ID validation so a producer cannot write an unregistered schema.
+
+=== Consumer scaling
+
+Scale each consumer group on lag, up to one instance per partition.
+
+=== Data retention
+
+Keep raw events for as long as you need to replay them, and compact the leaderboard topic.
+
+=== Observability
+
+Alert on consumer lag, under-replicated partitions and schema registration failures.
+
+=== Disaster recovery
+
+Replicate the topics to a second region with Shadowing.
