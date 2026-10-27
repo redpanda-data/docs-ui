@@ -240,8 +240,8 @@ for (const page of pages) {
       'what-happens': () => has(['what-happens']),
       'in-production': () => has(['in-production']),
       'extend-and-clean-up': () => has(['extend-this-solution', 'clean-up']),
-      'what-you-do-code-short': () => codeIn('what-you-do', 5),
-      'what-you-do-code': () => codeIn('what-you-do', 0),
+      'what-you-do-code-short': () => codeIn('build-it', 5) || codeIn('what-you-do', 5),
+      'what-you-do-code': () => codeIn('build-it', 0) || codeIn('what-you-do', 0),
     }
     TRIM_ORDER.slice(0, Math.max(last, 0)).forEach((name) => {
       if (!source.trimmed.includes(name)) assert.ok(!canTrim[name](), `${name} was skipped but has something to trim (${source.trimmed.join(', ')})`)
@@ -358,7 +358,7 @@ test('past the hard cap, Verify code is shortened and then the text is cut', { s
 
 test('pages over the cap after every trim', { skip }, (t) => {
   // Not a failure: these pages have more protected text (preamble, Why this
-  // approach, Verify, the prose of What you do) than the cap allows. The cap
+  // approach, Verify, the prose of Build it) than the cap allows. The cap
   // is a starting value, to be set by the quiz evals.
   t.diagnostic(overCap.length ? overCap.join('; ') : 'none')
 })
@@ -420,3 +420,30 @@ test('a field the page does not have leaves its line out', () => {
     '<<<STEP SOURCE END>>>',
   ].join('\n'))
 })
+
+// Build it was titled What you do before redpanda-solutions renamed it, so
+// its anchor is build-it on new builds and what-you-do on old ones. Both are
+// the section whose code is trimmed last and whose prose is kept.
+for (const [id, title] of [['build-it', 'Build it'], ['what-you-do', 'What you do']]) {
+  test(`over the cap, the code of ${title} (#${id}) is shortened and its prose kept`, { skip: parseHTML ? false : 'linkedom is not installed (npm ci)' }, () => {
+    const code = (tag) => Array.from({ length: 40 }, (_, i) => `rpk topic produce ${tag} --key k${i} --value "event number ${i} for the step"`).join('\n')
+    const listing = (tag) => `<div class="listingblock"><div class="content"><pre>${code(tag)}</pre></div></div>`
+    const { document } = parseHTML('<article class="doc">' +
+      '<div id="preamble"><p>This step sends events.</p></div>' +
+      `<div class="sect1"><h2 id="${id}">${title}</h2><div class="sectionbody">` +
+      '<div class="paragraph"><p>Produce the first batch so the consumer has something to read.</p></div>' +
+      'abcdefghij'.split('').map(listing).join('') +
+      '</div></div>' +
+      '<div class="sect1"><h2 id="verify">Verify</h2><div class="sectionbody"><div class="paragraph"><p>Check the count.</p></div></div></div>' +
+      '</article>')
+    const article = document.querySelector('article')
+    assert.ok(quiz.extractStepSource(article, { maxChars: Infinity }).chars > quiz.QUIZ_SOURCE_MAX_CHARS, 'the fixture is over the cap')
+    const source = quiz.extractStepSource(article)
+    assert.ok(source.trimmed.includes('what-you-do-code-short'), source.trimmed.join(', '))
+    assert.ok(source.chars <= quiz.QUIZ_SOURCE_MAX_CHARS, `${source.chars} characters`)
+    const section = sectionText(source.text, title)
+    assert.match(section, /Produce the first batch so the consumer has something to read\./)
+    for (const lines of fences(section)) assert.ok(lines.length <= 5 + 1, `${lines.length} lines`)
+    assert.match(source.text, /Check the count\./)
+  })
+}

@@ -5,12 +5,18 @@
  * The card offers three ways to apply the design to the reader's own system:
  *  - Plan it with Ask AI. The drawer runs in productionize mode
  *    (react/chatModes.js) on its own Kapa integration, grounded on the
- *    solution's agent companion. The companion is fetched when the reader
- *    clicks, sliced into sections, and handed to the drawer: the Rules and the
- *    names of the Production gaps topics go into the prompt, and every section
- *    is available to the get_solution_guide tool (react/agentTools.js), which
- *    reads it from the provider context and never sends the whole file to
- *    Kapa.
+ *    solution's agent companion. The companion is a core file,
+ *    agent-companion.md, and, for most solutions, part files,
+ *    agent-companion-part-<n>.md, that hold the Design contract, Production
+ *    gaps and Reference build; Step 2 of the core's How to use this lists
+ *    them. When the reader clicks, the core and every part are fetched,
+ *    merged back into one document (each "## X (continued)" folded into its
+ *    "## X"), sliced into sections, and handed to the drawer: the Rules and
+ *    the names of the Production gaps topics go into the prompt, and every
+ *    section is available to the get_solution_guide tool
+ *    (react/agentTools.js), which reads it from the provider context and
+ *    never sends the whole companion to Kapa. An older build serves the
+ *    companion as one file with no parts list, and is read as it is.
  *  - Copy prompt for your coding agent. A short pointer: use the
  *    redpanda-solutions skill if it is installed, otherwise download the
  *    companion with curl and follow its How to use this, which holds the
@@ -25,12 +31,20 @@
  * rewritten to this page's origin, and a preview reads and links its own
  * pages.
  *
- * The Plan it button needs a signed-in reader and a productionize
- * integration: signed out it reads "Sign in to plan it with Ask AI" and opens
- * the sign-in modal with a return to this card, and with
+ * The whole card needs a signed-in reader. Signed out, and without this
+ * script, it shows only its title, a sentence on what signing in gives, and
+ * Sign in, which opens the sign-in modal with a return to this card. The rest
+ * of the card ships with the hidden attribute and is shown once the reader is
+ * signed in, including a sign-in learned after load (kapa-session); the
+ * prompt text is written into the page only then. The UI preview has no
+ * backend, so it shows the signed-out card unless the rp_docs_auth=1 cookie
+ * is set by hand.
+ *
+ * The Plan it button also needs a productionize integration: with
  * KAPA_PRODUCTIONIZE_INTEGRATION_ID set to '' it is hidden. When the
- * companion cannot be fetched it is hidden too, and a note says the prompt
- * still works.
+ * companion cannot be fetched, the core or any one of its parts, it is
+ * hidden too, and a note says the prompt still works: a guide with sections
+ * missing is never offered.
  *
  * Exposed as window.__solutionProductionize, and as module.exports so the
  * tests can run the slicer and the prompt on real companions
@@ -67,6 +81,94 @@
   function rewriteHost (text, origin) {
     if (!origin) return String(text || '')
     return String(text || '').split(PROD_SOLUTIONS).join(String(origin).replace(/\/+$/, '') + '/solutions/')
+  }
+
+  // The part files a split companion lists in Step 2 of its How to use this,
+  // as { number, url }, sorted by number. Only same-origin URLs at
+  // /solutions/<slug>/agent-companion-part-<n>.md are kept, so the page never
+  // fetches a URL the companion chose. `split` is true when How to use this
+  // names any part file at all, kept or not: an unsplit companion (an older
+  // build or preview) names none. Call it after rewriteHost, which points the
+  // generator's https://docs.redpanda.com links at this origin.
+  function companionParts (md, origin, solution) {
+    var how = topSection(sliceCompanion(md), 'How to use this')
+    var text = how ? how.text : ''
+    var base = String(origin || '').replace(/\/+$/, '')
+    var rx = /[^\s`<>()[\]]*agent-companion-part-\d+\.md/g
+    var seen = {}
+    var parts = []
+    var split = false
+    var match
+    while ((match = rx.exec(text))) {
+      split = true
+      var url
+      try { url = new URL(match[0], base + '/') } catch (e) { continue }
+      var n = new RegExp('^/solutions/' + String(solution).replace(/[^A-Za-z0-9_-]/g, '\\$&') +
+        '/agent-companion-part-([1-9]\\d*)\\.md$').exec(url.pathname)
+      if (!n || url.origin !== base || url.search || url.hash || seen[n[1]]) continue
+      seen[n[1]] = true
+      parts.push({ number: Number(n[1]), url: url.href })
+    }
+    parts.sort(function (a, b) { return a.number - b.number })
+    return { split: split || /not the whole companion/.test(text), parts: parts }
+  }
+
+  // Markdown as its ## sections, fence-aware like sliceCompanion: the lines
+  // before the first ##, then one { title, lines } per ## heading.
+  function h2Sections (md) {
+    var head = []
+    var sections = []
+    var cur = null
+    var fence = null
+    String(md || '').replace(/\r\n?/g, '\n').split('\n').forEach(function (line) {
+      var marker = /^\s*(```+|~~~+)/.exec(line)
+      if (marker) {
+        if (!fence) fence = marker[1].charAt(0)
+        else if (marker[1].charAt(0) === fence) fence = null
+      }
+      var heading = !fence && !marker ? /^## (.+?)\s*#*\s*$/.exec(line) : null
+      if (heading) {
+        cur = { title: heading[1], lines: [] }
+        sections.push(cur)
+        return
+      }
+      ;(cur ? cur.lines : head).push(line)
+    })
+    return { head: head, sections: sections }
+  }
+
+  // A split companion as one document: the core file, then every part's
+  // sections in order, each part's header and pointer line dropped and every
+  // "## X (continued)" folded back into its "## X". sliceCompanion then reads
+  // it as it reads an unsplit companion. `parts`: the part files' text, in
+  // order. Throws when a part is not the part it should be (number, total, or
+  // header) or continues a section nothing opened, so a guide is never built
+  // with sections missing.
+  function mergeCompanion (core, parts) {
+    var total = parts.length
+    var merged = []
+    var byTitle = {}
+    parts.forEach(function (text, i) {
+      var header = /^# Agent companion part (\d+) of (\d+):/.exec(String(text || ''))
+      if (!header) throw new Error('not_part')
+      if (Number(header[1]) !== i + 1 || Number(header[2]) !== total) throw new Error('part_count')
+      h2Sections(text).sections.forEach(function (s) {
+        var cont = /^(.+) \(continued\)$/.exec(s.title)
+        if (!cont) {
+          var section = { title: s.title, lines: s.lines.slice() }
+          merged.push(section)
+          byTitle[norm(s.title)] = section
+          return
+        }
+        var open = byTitle[norm(cont[1])]
+        if (!open) throw new Error('orphan_continued')
+        open.lines.push('')
+        Array.prototype.push.apply(open.lines, s.lines)
+      })
+    })
+    var out = [String(core || '').replace(/\s+$/, '')]
+    merged.forEach(function (s) { out.push('## ' + s.title + '\n\n' + trimLines(s.lines)) })
+    return out.join('\n\n') + '\n'
   }
 
   // The companion as its headings: the # title, then each ## section with its
@@ -278,17 +380,18 @@
     var prompt = buildProductionizePrompt(meta)
 
     var plan = card.querySelector('[data-sol-productionize-plan]')
-    var planLabel = card.querySelector('[data-sol-productionize-plan-label]')
     var copy = card.querySelector('[data-sol-productionize-copy]')
     var status = card.querySelector('[data-sol-productionize-status]')
     var note = card.querySelector('[data-sol-productionize-note]')
     var preview = card.querySelector('[data-sol-productionize-preview]')
     var promptEl = card.querySelector('[data-sol-productionize-prompt]')
     var mcp = card.querySelector('[data-sol-productionize-mcp]')
-
-    if (promptEl) promptEl.textContent = prompt
-    if (preview) preview.hidden = false
-    if (copy) copy.hidden = false
+    var signedOut = card.querySelector('[data-sol-productionize-signedout]')
+    var gated = card.querySelector('[data-sol-productionize-gated]')
+    var signin = card.querySelector('[data-sol-productionize-signin]')
+    // The prompt is written into the page only once a signed-in reader can
+    // see it, so a signed-out page never holds it.
+    var revealed = false
 
     // The plan on this page: idle, loading (fetching the companion), active
     // (running in the drawer under `nonce`), ended, or unavailable (the
@@ -297,11 +400,22 @@
     var nonce = null
     var guidePromise = null
 
+    // Signed out, only the title, the sign-in sentence and Sign in show;
+    // signed in, the whole card. Runs again on every kapa-session event, so a
+    // sign-in learned after load opens the card without a reload.
     function render () {
+      var inside = signedIn()
+      if (signedOut) signedOut.hidden = inside
+      if (gated) gated.hidden = !inside
+      if (inside && !revealed) {
+        revealed = true
+        if (promptEl) promptEl.textContent = prompt
+        if (preview) preview.hidden = false
+        if (copy) copy.hidden = false
+      }
       if (!plan) return
       plan.hidden = state === 'unavailable' || !window.KAPA_PRODUCTIONIZE_INTEGRATION_ID
       plan.disabled = state === 'loading'
-      if (planLabel) planLabel.textContent = signedIn() ? 'Plan it with Ask AI' : 'Sign in to plan it with Ask AI'
       if (note) note.hidden = state !== 'unavailable'
     }
 
@@ -323,17 +437,35 @@
       return urls
     }
 
-    // Fetched once per page, on the first click.
-    function loadGuide () {
-      if (guidePromise) return guidePromise
-      guidePromise = window.fetch(companionUrl, { credentials: 'same-origin' })
+    // One companion file's text, or a rejection with the reason.
+    function fetchText (url, firstLine, prefix) {
+      return window.fetch(url, { credentials: 'same-origin' })
         .then(function (res) {
-          if (!res.ok) throw new Error('http_' + res.status)
+          if (!res.ok) throw new Error(prefix + 'http_' + res.status)
           return res.text()
         })
         .then(function (text) {
-          if (!/^# Agent companion/.test(text)) throw new Error('not_companion')
-          var guide = guideSections(sliceCompanion(rewriteHost(text, origin)), {
+          if (!firstLine.test(text)) throw new Error('not_' + (prefix ? 'part' : 'companion'))
+          return rewriteHost(text, origin)
+        })
+    }
+
+    // Fetched once per page, on the first click: the core file, then every
+    // part it lists, merged into one document. Any part that fails fails the
+    // whole guide, as the core does.
+    function loadGuide () {
+      if (guidePromise) return guidePromise
+      guidePromise = fetchText(companionUrl, /^# Agent companion/, '')
+        .then(function (core) {
+          var found = companionParts(core, origin, meta.slug)
+          if (!found.split) return core
+          if (!found.parts.length) throw new Error('no_parts')
+          return Promise.all(found.parts.map(function (p) {
+            return fetchText(p.url, /^# Agent companion part/, 'part_')
+          })).then(function (parts) { return mergeCompanion(core, parts) })
+        })
+        .then(function (text) {
+          var guide = guideSections(sliceCompanion(text), {
             doc: document,
             lastStepUrl: origin + loc.pathname,
             stepUrls: stepUrls(),
@@ -380,17 +512,21 @@
       }
     }
 
+    function openSignin () {
+      track('solution_productionize_signin', baseProps())
+      dispatch('docs-account:open-signin', {
+        title: 'Sign in to take this to production',
+        lead: 'Ask AI plans this design for your system with you, and you get a prompt for your coding agent ' +
+          'and the docs MCP server setup.',
+        cta: 'Sign in',
+        returnTo: loc.pathname + '#' + CARD_ID,
+      })
+    }
+
     function onPlan () {
-      if (!signedIn()) {
-        track('solution_productionize_signin', baseProps())
-        dispatch('docs-account:open-signin', {
-          title: 'Sign in to plan it with Ask AI',
-          lead: 'Ask AI plans the move to production with you, from this solution\'s production guide.',
-          cta: 'Sign in and plan it',
-          returnTo: loc.pathname + '#' + CARD_ID,
-        })
-        return
-      }
+      // Plan it shows only signed in; a sign-out the page has not heard about
+      // yet still goes to sign-in rather than to a failed plan.
+      if (!signedIn()) return openSignin()
       if (running()) {
         if (typeof window.openChatPanel === 'function') window.openChatPanel()
         return
@@ -425,6 +561,7 @@
       }
     }
 
+    if (signin) signin.addEventListener('click', openSignin)
     if (plan) plan.addEventListener('click', onPlan)
     if (copy) copy.addEventListener('click', onCopy)
     if (mcp) {
@@ -461,6 +598,8 @@
     CARD_ID: CARD_ID,
     MODE: MODE,
     rewriteHost: rewriteHost,
+    companionParts: companionParts,
+    mergeCompanion: mergeCompanion,
     sliceCompanion: sliceCompanion,
     gapUrl: gapUrl,
     guideSections: guideSections,
