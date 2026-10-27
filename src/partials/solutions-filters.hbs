@@ -20,6 +20,7 @@
 --}}
 <details class="sol-filters" data-sol-filters open>
   <summary class="sol-filters-summary">
+    <svg class="sol-filters-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></svg>
     <span>Filters</span>
     <span class="sol-filters-active" data-sol-filters-active hidden></span>
   </summary>
@@ -65,6 +66,11 @@
       {{/each}}
     </fieldset>
     {{/if}}
-    <button type="button" class="sol-link-btn sol-filters-clear" data-sol-filters-clear hidden>Clear filters</button>
+    {{!-- Done shows only where the filters are a collapsed <details> above the
+          grid (below 1024px); in the sidebar the foot is display: contents. --}}
+    <div class="sol-filters-foot">
+      <button type="button" class="sol-link-btn sol-filters-clear" data-sol-filters-clear hidden>Clear filters</button>
+      <button type="button" class="sol-btn sol-btn--primary sol-btn--sm sol-filters-done" onclick="var d = this.closest('details'); if (d) d.open = false">Done</button>
+    </div>
   </form>
 </details>
