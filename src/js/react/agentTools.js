@@ -534,8 +534,9 @@ const openConsole = {
 }
 
 // ——— Solution production guide (productionize mode only) ————————————————
-// The "Take this to production" card fetches the solution's agent companion
-// and slices it into sections (33-solution-productionize.js). The sections
+// The "Take this to production" card fetches the solution's agent companion,
+// its core file and every part file, merges them and slices the result into
+// sections (33-solution-productionize.js). The sections
 // reach this tool through the provider context, which stays in the browser,
 // so the prompt carries only the Rules and the section names and the model
 // reads a section when it needs one.

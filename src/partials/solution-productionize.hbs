@@ -9,10 +9,11 @@
 
   33-solution-productionize.js drives it:
   - Plan it with Ask AI opens the drawer in productionize mode, grounded on
-    the agent companion at data-sol-companion-url. Signed out it reads "Sign
-    in to plan it with Ask AI". It stays hidden when the productionize
-    integration is switched off, and when the companion cannot be read, the
-    note below says the prompt still works.
+    the agent companion at data-sol-companion-url, its core file, and the
+    part files the core lists beside it. Signed out it reads "Sign in to plan
+    it with Ask AI". It stays hidden when the productionize integration is
+    switched off, and when the core or any part cannot be read, the note
+    below says the prompt still works.
   - Copy prompt and Preview prompt need the script (the prompt is built from
     the page's origin), so both ship hidden.
   - Install the Redpanda skills for Claude Code renders only when the

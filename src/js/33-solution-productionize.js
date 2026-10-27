@@ -5,12 +5,18 @@
  * The card offers three ways to apply the design to the reader's own system:
  *  - Plan it with Ask AI. The drawer runs in productionize mode
  *    (react/chatModes.js) on its own Kapa integration, grounded on the
- *    solution's agent companion. The companion is fetched when the reader
- *    clicks, sliced into sections, and handed to the drawer: the Rules and the
- *    names of the Production gaps topics go into the prompt, and every section
- *    is available to the get_solution_guide tool (react/agentTools.js), which
- *    reads it from the provider context and never sends the whole file to
- *    Kapa.
+ *    solution's agent companion. The companion is a core file,
+ *    agent-companion.md, and, for most solutions, part files,
+ *    agent-companion-part-<n>.md, that hold the Design contract, Production
+ *    gaps and Reference build; Step 2 of the core's How to use this lists
+ *    them. When the reader clicks, the core and every part are fetched,
+ *    merged back into one document (each "## X (continued)" folded into its
+ *    "## X"), sliced into sections, and handed to the drawer: the Rules and
+ *    the names of the Production gaps topics go into the prompt, and every
+ *    section is available to the get_solution_guide tool
+ *    (react/agentTools.js), which reads it from the provider context and
+ *    never sends the whole companion to Kapa. An older build serves the
+ *    companion as one file with no parts list, and is read as it is.
  *  - Copy prompt for your coding agent. A short pointer: use the
  *    redpanda-solutions skill if it is installed, otherwise download the
  *    companion with curl and follow its How to use this, which holds the
@@ -29,8 +35,9 @@
  * integration: signed out it reads "Sign in to plan it with Ask AI" and opens
  * the sign-in modal with a return to this card, and with
  * KAPA_PRODUCTIONIZE_INTEGRATION_ID set to '' it is hidden. When the
- * companion cannot be fetched it is hidden too, and a note says the prompt
- * still works.
+ * companion cannot be fetched, the core or any one of its parts, it is
+ * hidden too, and a note says the prompt still works: a guide with sections
+ * missing is never offered.
  *
  * Exposed as window.__solutionProductionize, and as module.exports so the
  * tests can run the slicer and the prompt on real companions
@@ -67,6 +74,94 @@
   function rewriteHost (text, origin) {
     if (!origin) return String(text || '')
     return String(text || '').split(PROD_SOLUTIONS).join(String(origin).replace(/\/+$/, '') + '/solutions/')
+  }
+
+  // The part files a split companion lists in Step 2 of its How to use this,
+  // as { number, url }, sorted by number. Only same-origin URLs at
+  // /solutions/<slug>/agent-companion-part-<n>.md are kept, so the page never
+  // fetches a URL the companion chose. `split` is true when How to use this
+  // names any part file at all, kept or not: an unsplit companion (an older
+  // build or preview) names none. Call it after rewriteHost, which points the
+  // generator's https://docs.redpanda.com links at this origin.
+  function companionParts (md, origin, solution) {
+    var how = topSection(sliceCompanion(md), 'How to use this')
+    var text = how ? how.text : ''
+    var base = String(origin || '').replace(/\/+$/, '')
+    var rx = /[^\s`<>()[\]]*agent-companion-part-\d+\.md/g
+    var seen = {}
+    var parts = []
+    var split = false
+    var match
+    while ((match = rx.exec(text))) {
+      split = true
+      var url
+      try { url = new URL(match[0], base + '/') } catch (e) { continue }
+      var n = new RegExp('^/solutions/' + String(solution).replace(/[^A-Za-z0-9_-]/g, '\\$&') +
+        '/agent-companion-part-([1-9]\\d*)\\.md$').exec(url.pathname)
+      if (!n || url.origin !== base || url.search || url.hash || seen[n[1]]) continue
+      seen[n[1]] = true
+      parts.push({ number: Number(n[1]), url: url.href })
+    }
+    parts.sort(function (a, b) { return a.number - b.number })
+    return { split: split || /not the whole companion/.test(text), parts: parts }
+  }
+
+  // Markdown as its ## sections, fence-aware like sliceCompanion: the lines
+  // before the first ##, then one { title, lines } per ## heading.
+  function h2Sections (md) {
+    var head = []
+    var sections = []
+    var cur = null
+    var fence = null
+    String(md || '').replace(/\r\n?/g, '\n').split('\n').forEach(function (line) {
+      var marker = /^\s*(```+|~~~+)/.exec(line)
+      if (marker) {
+        if (!fence) fence = marker[1].charAt(0)
+        else if (marker[1].charAt(0) === fence) fence = null
+      }
+      var heading = !fence && !marker ? /^## (.+?)\s*#*\s*$/.exec(line) : null
+      if (heading) {
+        cur = { title: heading[1], lines: [] }
+        sections.push(cur)
+        return
+      }
+      ;(cur ? cur.lines : head).push(line)
+    })
+    return { head: head, sections: sections }
+  }
+
+  // A split companion as one document: the core file, then every part's
+  // sections in order, each part's header and pointer line dropped and every
+  // "## X (continued)" folded back into its "## X". sliceCompanion then reads
+  // it as it reads an unsplit companion. `parts`: the part files' text, in
+  // order. Throws when a part is not the part it should be (number, total, or
+  // header) or continues a section nothing opened, so a guide is never built
+  // with sections missing.
+  function mergeCompanion (core, parts) {
+    var total = parts.length
+    var merged = []
+    var byTitle = {}
+    parts.forEach(function (text, i) {
+      var header = /^# Agent companion part (\d+) of (\d+):/.exec(String(text || ''))
+      if (!header) throw new Error('not_part')
+      if (Number(header[1]) !== i + 1 || Number(header[2]) !== total) throw new Error('part_count')
+      h2Sections(text).sections.forEach(function (s) {
+        var cont = /^(.+) \(continued\)$/.exec(s.title)
+        if (!cont) {
+          var section = { title: s.title, lines: s.lines.slice() }
+          merged.push(section)
+          byTitle[norm(s.title)] = section
+          return
+        }
+        var open = byTitle[norm(cont[1])]
+        if (!open) throw new Error('orphan_continued')
+        open.lines.push('')
+        Array.prototype.push.apply(open.lines, s.lines)
+      })
+    })
+    var out = [String(core || '').replace(/\s+$/, '')]
+    merged.forEach(function (s) { out.push('## ' + s.title + '\n\n' + trimLines(s.lines)) })
+    return out.join('\n\n') + '\n'
   }
 
   // The companion as its headings: the # title, then each ## section with its
@@ -323,17 +418,35 @@
       return urls
     }
 
-    // Fetched once per page, on the first click.
-    function loadGuide () {
-      if (guidePromise) return guidePromise
-      guidePromise = window.fetch(companionUrl, { credentials: 'same-origin' })
+    // One companion file's text, or a rejection with the reason.
+    function fetchText (url, firstLine, prefix) {
+      return window.fetch(url, { credentials: 'same-origin' })
         .then(function (res) {
-          if (!res.ok) throw new Error('http_' + res.status)
+          if (!res.ok) throw new Error(prefix + 'http_' + res.status)
           return res.text()
         })
         .then(function (text) {
-          if (!/^# Agent companion/.test(text)) throw new Error('not_companion')
-          var guide = guideSections(sliceCompanion(rewriteHost(text, origin)), {
+          if (!firstLine.test(text)) throw new Error('not_' + (prefix ? 'part' : 'companion'))
+          return rewriteHost(text, origin)
+        })
+    }
+
+    // Fetched once per page, on the first click: the core file, then every
+    // part it lists, merged into one document. Any part that fails fails the
+    // whole guide, as the core does.
+    function loadGuide () {
+      if (guidePromise) return guidePromise
+      guidePromise = fetchText(companionUrl, /^# Agent companion/, '')
+        .then(function (core) {
+          var found = companionParts(core, origin, meta.slug)
+          if (!found.split) return core
+          if (!found.parts.length) throw new Error('no_parts')
+          return Promise.all(found.parts.map(function (p) {
+            return fetchText(p.url, /^# Agent companion part/, 'part_')
+          })).then(function (parts) { return mergeCompanion(core, parts) })
+        })
+        .then(function (text) {
+          var guide = guideSections(sliceCompanion(text), {
             doc: document,
             lastStepUrl: origin + loc.pathname,
             stepUrls: stepUrls(),
@@ -461,6 +574,8 @@
     CARD_ID: CARD_ID,
     MODE: MODE,
     rewriteHost: rewriteHost,
+    companionParts: companionParts,
+    mergeCompanion: mergeCompanion,
     sliceCompanion: sliceCompanion,
     gapUrl: gapUrl,
     guideSections: guideSections,
