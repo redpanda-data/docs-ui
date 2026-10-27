@@ -59,8 +59,17 @@
   var RULES = 'Rules'
   var DESIGN_CONTRACT = 'Design contract'
   var PRODUCTION_GAPS = 'Production gaps'
-  // Whole top-level sections get_solution_guide returns by name.
-  var WHOLE_SECTIONS = ['Adapt', 'Acceptance', 'System map', 'Reference build']
+  // Whole top-level sections get_solution_guide returns by name, in the
+  // order the prompt lists them (GUIDE_WHOLE_SECTIONS in react/chatModes.js).
+  var WHOLE_SECTIONS = ['What the system must do', 'Adapt', 'System map', 'Acceptance', 'Canonical docs', 'Reference build']
+  // The Production gaps text before its first topic (### heading), such as a
+  // per-service ACL table, returned as a section of its own.
+  var GAPS_OVERVIEW = PRODUCTION_GAPS + ': overview'
+  // get_solution_guide returns at most GUIDE_SECTION_MAX_CHARS (6000) of a
+  // section (react/agentTools.js), and the Kapa agent cannot open a URL, so a
+  // longer section is split here and every piece stays whole. The margin
+  // leaves room for the note the tool adds that names the next piece.
+  var SECTION_SPLIT_AT = 5500
   // Where a gap topic links when the last step has no heading for it.
   var GAPS_ANCHOR = 'production-considerations'
   var MODE = 'productionize'
@@ -201,6 +210,7 @@
         return
       }
       if (heading && heading[1] === '###' && h2) {
+        if (!h2.children.length) h2.intro = h2.lines.slice()
         h3 = { title: heading[2], lines: [] }
         h2.children.push(h3)
         h2.lines.push(line)
@@ -216,6 +226,8 @@
       return {
         title: s.title,
         text: trimLines(s.lines),
+        // The text before the first ###: all of it when there is none.
+        intro: trimLines(s.intro || s.lines),
         children: s.children.map(function (c) { return { title: c.title, text: trimLines(c.lines) } }),
       }
     })
@@ -228,6 +240,74 @@
       if (norm(sliced.sections[i].title) === want) return sliced.sections[i]
     }
     return null
+  }
+
+  // `text` as pieces of at most `limit` characters that together hold all of
+  // it, cut at blank lines outside code fences where it can be, then at line
+  // ends, and only for a single line longer than `limit`, inside it.
+  function chunkText (text, limit) {
+    text = String(text || '')
+    if (text.length <= limit) return [text]
+    var blocks = []
+    var cur = []
+    var fence = null
+    text.split('\n').forEach(function (line) {
+      var marker = /^\s*(```+|~~~+)/.exec(line)
+      if (marker) {
+        if (!fence) fence = marker[1].charAt(0)
+        else if (marker[1].charAt(0) === fence) fence = null
+      }
+      if (!fence && !marker && !line.trim()) {
+        if (cur.length) blocks.push(cur.join('\n'))
+        cur = []
+        return
+      }
+      cur.push(line)
+    })
+    if (cur.length) blocks.push(cur.join('\n'))
+    var units = []
+    blocks.forEach(function (block) {
+      if (block.length <= limit) return units.push({ text: block, sep: '\n\n' })
+      block.split('\n').forEach(function (line, i) {
+        for (var at = 0; at === 0 || at < line.length; at += limit) {
+          units.push({ text: line.slice(at, at + limit), sep: at ? '' : i ? '\n' : '\n\n' })
+        }
+      })
+    })
+    var pieces = []
+    var piece = ''
+    units.forEach(function (u) {
+      if (piece && piece.length + u.sep.length + u.text.length > limit) {
+        pieces.push(piece)
+        piece = ''
+      }
+      piece = piece ? piece + u.sep + u.text : u.text
+    })
+    if (piece) pieces.push(piece)
+    return pieces
+  }
+
+  // Add one get_solution_guide section, in pieces when it is too long for the
+  // tool: the first keeps the name, the rest are "<name> (part <n> of <m>)",
+  // and each names the next, so the tool can say what to request.
+  function pushSection (sections, entry) {
+    var pieces = chunkText(entry.text, SECTION_SPLIT_AT)
+    var names = pieces.map(function (p, i) {
+      return i ? entry.section + ' (part ' + (i + 1) + ' of ' + pieces.length + ')' : entry.section
+    })
+    pieces.forEach(function (text, i) {
+      var out = {}
+      for (var k in entry) if (Object.prototype.hasOwnProperty.call(entry, k)) out[k] = entry[k]
+      out.section = names[i]
+      out.text = text
+      if (i) {
+        out.part = i + 1
+        delete out.aliases
+        delete out.parts
+      }
+      if (i < pieces.length - 1) out.next = names[i + 1]
+      sections.push(out)
+    })
   }
 
   // Where a Production gaps topic is on the last step: its h3 (id prod-*),
@@ -251,9 +331,15 @@
 
   // The sections get_solution_guide can return, each with the page to cite
   // for it:
-  //   a Production gaps topic   the last step, at that topic's heading
-  //   step:<n>                  step n's page (its Design contract entry)
-  //   Adapt, Acceptance, System map, Reference build   the companion itself
+  //   Production gaps: overview  the last step, at Production considerations
+  //   a Production gaps topic    the last step, at that topic's heading
+  //   step:<n>                   step n's page (its Design contract entry)
+  //   each of WHOLE_SECTIONS     the companion itself
+  // A whole section too long for the tool comes as "<name>: overview" (its
+  // text before the first ###, also found as "<name>") and one
+  // "<name>: <subsection>" per ###, each with `parent` set to the name, so
+  // the prompt can list them. Any section still too long continues in parts
+  // (pushSection). Together the pieces hold every line of the section.
   // `o`: { doc, lastStepUrl, stepUrls (in order), companionUrl }.
   function guideSections (sliced, o) {
     var opts = o || {}
@@ -261,9 +347,17 @@
     var topics = []
     var gaps = topSection(sliced, PRODUCTION_GAPS)
     if (gaps) {
+      if (gaps.intro) {
+        pushSection(sections, {
+          section: GAPS_OVERVIEW,
+          aliases: [PRODUCTION_GAPS],
+          guide_url: String(opts.lastStepUrl || '').split('#')[0] + '#' + GAPS_ANCHOR,
+          text: gaps.intro,
+        })
+      }
       gaps.children.forEach(function (c) {
         topics.push(c.title)
-        sections.push({ section: c.title, guide_url: gapUrl(opts.doc, c.title, opts.lastStepUrl), text: c.text })
+        pushSection(sections, { section: c.title, guide_url: gapUrl(opts.doc, c.title, opts.lastStepUrl), text: c.text })
       })
     }
     var steps = 0
@@ -274,12 +368,21 @@
         if (!n) return
         steps = Math.max(steps, Number(n[1]))
         var url = (opts.stepUrls || [])[Number(n[1]) - 1] || opts.companionUrl || ''
-        sections.push({ section: 'step:' + n[1], title: n[2], guide_url: url, text: c.text })
+        pushSection(sections, { section: 'step:' + n[1], title: n[2], guide_url: url, text: c.text })
       })
     }
     WHOLE_SECTIONS.forEach(function (name) {
       var s = topSection(sliced, name)
-      if (s) sections.push({ section: s.title, guide_url: opts.companionUrl || '', text: s.text })
+      if (!s) return
+      var url = opts.companionUrl || ''
+      if (s.text.length <= SECTION_SPLIT_AT || !s.children.length) {
+        return pushSection(sections, { section: s.title, guide_url: url, text: s.text })
+      }
+      var names = s.children.map(function (c) { return s.title + ': ' + c.title })
+      pushSection(sections, { section: s.title + ': overview', aliases: [s.title], parent: s.title, parts: names, guide_url: url, text: s.intro })
+      s.children.forEach(function (c, i) {
+        pushSection(sections, { section: names[i], parent: s.title, guide_url: url, text: '### ' + c.title + '\n\n' + c.text })
+      })
     })
     var rules = topSection(sliced, RULES)
     return {
@@ -601,6 +704,8 @@
     companionParts: companionParts,
     mergeCompanion: mergeCompanion,
     sliceCompanion: sliceCompanion,
+    chunkText: chunkText,
+    SECTION_SPLIT_AT: SECTION_SPLIT_AT,
     gapUrl: gapUrl,
     guideSections: guideSections,
     buildProductionizePrompt: buildProductionizePrompt,

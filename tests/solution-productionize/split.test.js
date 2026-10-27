@@ -103,8 +103,9 @@ test('the merged flagship gives the same guide as the unsplit flagship', () => {
   assert.equal(got.title, want.title)
   // Every section the unsplit file has, the merged one has, under the same name.
   assert.deepEqual(got.sections.map((s) => s.section), want.sections.map((s) => s.section))
+  // A section too long for one result is found by its name as an alias.
   for (const name of ['Adapt', 'Acceptance', 'System map', 'Reference build']) {
-    assert.ok(got.sections.some((s) => s.section === name), name)
+    assert.ok(got.sections.some((s) => s.section === name || (s.aliases || []).includes(name)), name)
   }
   assert.deepEqual(got.topics, rawChildren(split.parts, 'Production gaps'))
   // The same text, section by section: nothing lost or duplicated at a part boundary.

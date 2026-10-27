@@ -124,6 +124,8 @@ Start
 Planning
 - The Rules are invariants the design depends on. Keep the reason for each rule even where their system differs.
 - Before advising on a production topic, step, Adapt item, or Acceptance, call get_solution_guide for it and base your advice on what it returns. Cite it as [<section>](<guide_url>).
+- Call get_solution_guide for "Production gaps: overview" before the topics: it holds what applies across them, such as per-service ACLs. Check a request against What the system must do, and take docs links from Canonical docs.
+- If a result ends by naming another section, request that one too before you rely on the section.
 - The guide's docs links mostly point at Self-Managed pages. Search the knowledge base for the page that matches the user's deployment and cite that variant. If a topic does not apply to their deployment (for example, broker sizing on Serverless), say so in one line and move on.
 - Give the plan as a numbered checklist grouped by topic, highest risk first: what to change, why (the rule or gap it comes from), and the docs page.
 
@@ -161,8 +163,21 @@ export function productionizeContext (detail) {
   lines.push('Sections get_solution_guide returns:')
   if (guide.topics && guide.topics.length) lines.push(`- Production gaps topics: ${guide.topics.join('; ')}`)
   if (guide.steps) lines.push(`- Design contract entries: step:1 to step:${guide.steps}`)
-  const whole = guide.sections.map((s) => s.section).filter((name) => GUIDE_WHOLE_SECTIONS.includes(name))
+  // A section too long for one result is listed by its sub-sections
+  // (`parent`); its continuation parts (`part`) are named by the piece before.
+  const whole = []
+  const split = {}
+  for (const s of guide.sections) {
+    if (s.part > 1) continue
+    if (s.parent) {
+      if (!split[s.parent]) whole.push(s.parent)
+      split[s.parent] = (split[s.parent] || []).concat(s.section)
+    } else if (GUIDE_WHOLE_SECTIONS.includes(s.section)) {
+      whole.push(s.section)
+    }
+  }
   if (whole.length) lines.push(`- Also: ${whole.join(', ')}`)
+  for (const name of Object.keys(split)) lines.push(`- ${name}, in sub-sections: ${split[name].join('; ')}`)
   if (guide.rules) lines.push('', '### Rules', guide.rules)
   return lines.join('\n')
 }
@@ -173,8 +188,9 @@ export function productionizeOpener (detail) {
   return d.title ? `Help me take this design to production: ${d.title}.` : 'Help me take this solution to production.'
 }
 
-// Top-level companion sections get_solution_guide returns whole.
-export const GUIDE_WHOLE_SECTIONS = ['Adapt', 'Acceptance', 'System map', 'Reference build']
+// Companion sections get_solution_guide returns whole, as
+// 33-solution-productionize.js names them.
+export const GUIDE_WHOLE_SECTIONS = ['Production gaps: overview', 'What the system must do', 'Adapt', 'System map', 'Acceptance', 'Canonical docs', 'Reference build']
 // One entry per mode.
 //   label            banner prefix, as in "Quiz: Create the topics"
 //   integrationKey   window global holding the Kapa integration id. Empty or

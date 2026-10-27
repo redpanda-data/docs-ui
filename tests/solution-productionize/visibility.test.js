@@ -515,7 +515,8 @@ test('a split companion: the core and every part it lists are fetched and read a
   // Design contract entries and Reference build come from the parts.
   for (let n = 1; n <= mode.guide.steps; n++) assert.ok(names.includes('step:' + n), 'step:' + n)
   assert.ok(mode.guide.steps >= 8)
-  assert.ok(names.includes('Reference build'))
+  // A Reference build too long for one result comes as sub-sections.
+  assert.ok(names.includes('Reference build') || names.includes('Reference build: overview'))
   assert.ok(names.includes('Adapt') && names.includes('Acceptance') && names.includes('System map'))
   // The same guide the unsplit flagship gives.
   const whole = await planned({ fetch: serve(fixture('multiplayer-gaming-unsplit')) })
