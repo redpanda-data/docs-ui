@@ -16,6 +16,8 @@
 //     pattern whats-new-{n}-title
 //   - helpers that receive an attributes object as a parameter, listed in
 //     INDIRECT below
+//   - {{#with <x>.attributes}} blocks, where {{key}}, {{#if key}}, and
+//     {{#unless key}} inside the block read key
 //
 // Anything it cannot classify is returned in `unclassified` so the test fails
 // instead of silently missing a read.
@@ -84,6 +86,24 @@ function normalizeKey (key) {
   return key.replace(/\$\{[^}]+\}/g, '{n}')
 }
 
+// For `{{#with <x>.attributes}}` opened at `open`, returns the text up to the
+// matching `{{/with}}`, or undefined when the `with` has an `as |x|` alias or
+// wraps more than the attributes object.
+function withBlockBody (text, open, match) {
+  const tagEnd = text.indexOf('}}', match.index)
+  if (tagEnd < 0) return undefined
+  if (!/^\{\{#with\s+[\w.]*\.attributes\s*\}\}$/.test(text.slice(open, tagEnd + 2))) return undefined
+  const re = /\{\{#with\b|\{\{\/with\s*\}\}/g
+  re.lastIndex = tagEnd + 2
+  let depth = 1
+  let m
+  while ((m = re.exec(text))) {
+    depth += m[0] === '{{#with' ? 1 : -1
+    if (depth === 0) return text.slice(tagEnd + 2, m.index)
+  }
+  return undefined
+}
+
 function scan (srcDir = SRC) {
   const reads = new Map() // writer name -> Set of files
   const unclassified = []
@@ -112,7 +132,15 @@ function scan (srcDir = SRC) {
       // The nearest enclosing `(helper ...)` or `{{helper ...}}`.
       const open = Math.max(before.lastIndexOf('('), before.lastIndexOf('{{'))
       const helper = open >= 0 ? (before.slice(open).match(/^(?:\(|\{\{[#^]?)([a-z][a-z-]*)\s/) || [])[1] : undefined
-      if (!helper || !HELPERS_TAKING_ATTRIBUTES[helper]) {
+      const withBody = helper === 'with' ? withBlockBody(text, open, m) : undefined
+      if (withBody !== undefined) {
+        // {{#with page.attributes}} ... {{latest-x}} ... {{/with}}: bare keys
+        // inside the block are attribute reads.
+        const prefix = m[0].startsWith('page') ? 'page-' : ''
+        const keyRe = new RegExp(`\\{\\{(?:[#^]?(?:if|unless)\\s+)?(${KEY})\\s*\\}\\}`, 'g')
+        let k
+        while ((k = keyRe.exec(withBody))) if (k[1] !== 'else' && k[1] !== 'this') add(prefix + k[1], file)
+      } else if (!helper || !HELPERS_TAKING_ATTRIBUTES[helper]) {
         unclassified.push(`${file}: attributes object passed to ${helper || 'something'} the scanner does not know`)
       } else if (!INDIRECT[HELPERS_TAKING_ATTRIBUTES[helper]]) {
         unclassified.push(`${file}: helper ${helper} takes attributes but is missing from INDIRECT`)

@@ -146,14 +146,35 @@
       "setIn": ["component"],
       "setBy": "extension",
       "type": "string",
-      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions.",
+      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions. Also emitted as the latest-connect-release meta tag for the Ask AI latest-version tool.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "latest-console-version": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Latest Redpanda Console release, emitted as the latest-console-release meta tag for the Ask AI latest-version tool. Set by the version-fetcher extension.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "latest-operator-version": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Latest Redpanda Operator release, emitted as the latest-operator-release meta tag for the Ask AI latest-version tool. Set by the version-fetcher extension.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "latest-redpanda-helm-chart-version": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Latest Redpanda Helm chart release, emitted as the latest-helm-chart-release meta tag for the Ask AI latest-version tool. Set by the version-fetcher extension.",
       "readBy": ["src/partials/head-meta.hbs"]
     },
     "latest-redpanda-tag": {
       "setIn": ["component"],
       "setBy": "extension",
       "type": "string",
-      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions.",
+      "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions. Also emitted as the latest-redpanda-release meta tag for the Ask AI latest-version tool.",
       "readBy": ["src/partials/head-meta.hbs"]
     },
     "learning-objective-{n}": {
@@ -1035,6 +1056,20 @@
       "type": "string",
       "description": "Home page (role home): heading of the intent cards.",
       "readBy": ["src/partials/home.hbs"]
+    },
+    "page-introduced-in": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Release that introduced the page's feature, as X.Y.Z (a leading v or trailing period is stripped). Shows a \"Since X.Y.Z\" badge in the page header. Ignored on Cloud pages.",
+      "readBy": ["src/partials/article.hbs"]
+    },
+    "page-introduced-in-product": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Product named in the page-introduced-in badge tooltip, for example Redpanda Connect. Without it the tooltip says \"Introduced in version X.Y.Z\".",
+      "readBy": ["src/partials/article.hbs"]
     },
     "page-is-nearing-eol": {
       "setIn": ["page"],
