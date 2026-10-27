@@ -35,6 +35,8 @@ function fetchLatestVersion () {
       }
       let body = ''
       res.setEncoding('utf8')
+      // A connection dropped mid-body errors on res, not req.
+      res.on('error', reject)
       res.on('data', (chunk) => (body += chunk))
       res.on('end', () => {
         const match = /<meta\s+name="latest-redpanda-version"\s+content="([^"]*)"/i.exec(body)
@@ -137,7 +139,7 @@ async function ensureRootVersion(context) {
     // Without a version the Bump widgets ship "Self-Managed v" as the search
     // tag and an empty latest-redpanda-version meta tag, so a release build
     // (CI) stops here. Locally it only warns, so the build works offline.
-    if (process.env.CI) {
+    if (process.env.CI === 'true') {
       console.error(`❌ Could not get the latest Redpanda version: ${err.message}. Set LATEST_ENTERPRISE to build without it.`);
       process.exit(1);
     }
