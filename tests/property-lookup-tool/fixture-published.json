@@ -1,0 +1,85 @@
+{
+ "properties": {
+  "default_topic_replications": {
+   "category": "other",
+   "cloud_byoc_only": false,
+   "cloud_editable": false,
+   "cloud_readonly": true,
+   "cloud_supported": true,
+   "config_scope": "cluster",
+   "default": 1,
+   "defined_in": "src/v/config/configuration.cc",
+   "description": "Default replication factor for new topics.",
+   "example": "`1`",
+   "gets_restored": true,
+   "is_deprecated": false,
+   "is_enterprise": false,
+   "is_secret": false,
+   "minimum": 1,
+   "name": "default_topic_replications",
+   "needs_restart": false,
+   "nullable": false,
+   "type": "integer",
+   "visibility": "user",
+   "description_html": "Default replication factor for new topics."
+  },
+  "write_caching_default": {
+   "category": "other",
+   "cloud_byoc_only": false,
+   "cloud_editable": false,
+   "cloud_readonly": false,
+   "cloud_supported": false,
+   "config_scope": "cluster",
+   "default": "false",
+   "defined_in": "src/v/config/configuration.cc",
+   "description": "The default write caching mode to apply to user topics. Write caching acknowledges a message as soon as it is received and acknowledged on a majority of brokers, without waiting for it to be written to disk. With `acks=all`, this provides lower latency while still ensuring that a majority of brokers acknowledge the write. \n\nFsyncs follow `raft_replica_max_pending_flush_bytes` and `raft_replica_max_flush_delay_ms`, whichever is reached first.\n\nThe `write_caching_default` cluster property can be overridden with the `write.caching` topic property, unless set to `disabled`, which takes precedence over topic overrides and disables write caching for the entire cluster.",
+   "enum": [
+    "true",
+    "false",
+    "disabled"
+   ],
+   "example": "`true`",
+   "gets_restored": true,
+   "is_deprecated": false,
+   "is_enterprise": false,
+   "is_secret": false,
+   "links": {
+    "`raft_replica_max_flush_delay_ms`": "#raft_replica_max_flush_delay_ms",
+    "`raft_replica_max_pending_flush_bytes`": "#raft_replica_max_pending_flush_bytes"
+   },
+   "name": "write_caching_default",
+   "needs_restart": false,
+   "nullable": false,
+   "see_also": [
+    "xref:reference:properties/topic-properties.adoc#write-caching[`write.caching`]",
+    "xref:develop:manage-topics/config-topics.adoc#configure-write-caching[Write caching]"
+   ],
+   "type": "string",
+   "visibility": "user",
+   "description_html": "<div class=\"paragraph\">\n<p>The default write caching mode to apply to user topics. Write caching acknowledges a message as soon as it is received and acknowledged on a majority of brokers, without waiting for it to be written to disk. With <code>acks=all</code>, this provides lower latency while still ensuring that a majority of brokers acknowledge the write.</p>\n</div>\n<div class=\"paragraph\">\n<p>Fsyncs follow <code>raft_replica_max_pending_flush_bytes</code> and <code>raft_replica_max_flush_delay_ms</code>, whichever is reached first.</p>\n</div>\n<div class=\"paragraph\">\n<p>The <code>write_caching_default</code> cluster property can be overridden with the <code>write.caching</code> topic property, unless set to <code>disabled</code>, which takes precedence over topic overrides and disables write caching for the entire cluster.</p>\n</div>"
+  },
+  "log_segment_size": {
+   "category": "other",
+   "cloud_byoc_only": false,
+   "cloud_editable": false,
+   "cloud_readonly": false,
+   "cloud_supported": false,
+   "config_scope": "cluster",
+   "default": 134217728,
+   "defined_in": "src/v/config/configuration.cc",
+   "description": "Default log segment size in bytes for topics which do not set segment.bytes",
+   "example": "`2147483648`",
+   "gets_restored": true,
+   "is_deprecated": false,
+   "is_enterprise": false,
+   "is_secret": false,
+   "minimum": 1048576,
+   "name": "log_segment_size",
+   "needs_restart": false,
+   "nullable": false,
+   "type": "integer",
+   "visibility": "tunable",
+   "description_html": "Default log segment size in bytes for topics which do not set segment.bytes"
+  }
+ }
+}
