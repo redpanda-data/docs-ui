@@ -99,6 +99,8 @@ jobs:
         run: npm run test:introduced-in-badge
       - name: Test the Ask AI latest-version tool
         run: npm run test:latest-version-tool
+      - name: Test the Ask AI config property lookup
+        run: npm run test:property-lookup-tool
       - name: Cache generated files
         uses: actions/cache@v4
         with:

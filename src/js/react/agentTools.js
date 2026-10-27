@@ -362,24 +362,31 @@ const submitDocsFeedback = {
   },
 }
 
-// ——— Config property lookup (grounded in the shipped reference) ———————————
-// redpanda-properties.json ships in the UI bundle (the same file the property
-// tooltips read). Cache the fetch so repeated lookups in a session are free.
-let propertiesPromise = null
-function loadProperties () {
-  if (propertiesPromise) return propertiesPromise
-  // redpanda-properties.json is a UI static_file, so (like blobl.wasm) Antora
-  // emits it to the SITE root in a normal build and to the UI root in the
-  // docs-ui preview. Mirror the WASM loader's resolution.
-  const rootPath = typeof window.uiRootPath !== 'undefined' ? window.uiRootPath : '/_'
-  const siteRoot = typeof window.siteRootPath !== 'undefined' ? window.siteRootPath : ''
+// ——— Config property lookup (grounded in the published reference) —————————
+// Read the same property reference the property tooltips read: the JSON that
+// head-meta names in <meta name="properties-json-url">, which the docs build
+// publishes per release (691 properties). The redpanda-properties.json that
+// ships in the UI bundle is a small sample for the docs-ui preview, which has
+// no docs build behind it, so it is used there and nowhere else. Cache by URL
+// so repeated lookups in a session are free.
+const propertiesPromises = {}
+function propertiesUrl () {
+  const meta = document.querySelector('meta[name="properties-json-url"]')
+  if (meta && meta.content) return meta.content
   const isPreview = typeof window.isUiPreview !== 'undefined' ? window.isUiPreview : false
-  const url = isPreview ? `${rootPath}/redpanda-properties.json` : `${siteRoot}/redpanda-properties.json`
-  propertiesPromise = fetch(url)
+  if (!isPreview) return null
+  const rootPath = typeof window.uiRootPath !== 'undefined' ? window.uiRootPath : '/_'
+  return `${rootPath}/redpanda-properties.json`
+}
+function loadProperties () {
+  const url = propertiesUrl()
+  if (!url) return Promise.reject(new Error('this page names no property reference'))
+  if (propertiesPromises[url]) return propertiesPromises[url]
+  propertiesPromises[url] = fetch(url)
     .then((r) => { if (!r.ok) throw new Error(`properties reference not found (${r.status})`); return r.json() })
     .then((data) => data.properties || {})
-    .catch((err) => { propertiesPromise = null; throw err }) // allow retry
-  return propertiesPromise
+    .catch((err) => { delete propertiesPromises[url]; throw err }) // allow retry
+  return propertiesPromises[url]
 }
 
 const lookupConfigProperty = {
@@ -427,6 +434,9 @@ const lookupConfigProperty = {
       deprecated: rec.is_deprecated,
       minimum: rec.minimum,
       maximum: rec.maximum,
+      cloudEditable: rec.cloud_editable,
+      cloudReadonly: rec.cloud_readonly,
+      cloudByocOnly: rec.cloud_byoc_only,
     }
   },
 }
