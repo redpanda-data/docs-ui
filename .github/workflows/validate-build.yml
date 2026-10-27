@@ -101,6 +101,10 @@ jobs:
         run: npm run test:page-attribute-prefix
       - name: Test malformed JSON attributes do not fail the build
         run: npm run test:json-attribute-guard
+      - name: Test the introduced-in version badge
+        run: npm run test:introduced-in-badge
+      - name: Test the Ask AI latest-version tool
+        run: npm run test:latest-version-tool
       - name: Cache generated files
         uses: actions/cache@v4
         with:
