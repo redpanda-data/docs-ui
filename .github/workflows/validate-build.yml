@@ -95,6 +95,12 @@ jobs:
         run: npm run test:hero-scroll
       - name: Test docs page weight (lazy images, trimmed Prism, on-demand highlighting, head)
         run: npm run test:docs-page-weight
+      - name: Test the UI attribute manifest matches the templates
+        run: npm run test:ui-attributes
+      - name: Test templates read page attributes without the page- prefix
+        run: npm run test:page-attribute-prefix
+      - name: Test malformed JSON attributes do not fail the build
+        run: npm run test:json-attribute-guard
       - name: Test the introduced-in version badge
         run: npm run test:introduced-in-badge
       - name: Test the Ask AI latest-version tool

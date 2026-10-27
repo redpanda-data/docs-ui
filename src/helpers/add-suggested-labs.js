@@ -7,7 +7,7 @@ module.exports = (attributes, content, { data: { root } }) => {
   if (!contentCatalog) return content
 
   // Extract related labs from attributes
-  const relatedLabs = attributes['related-labs'] ? JSON.parse(attributes['related-labs']) : []
+  const relatedLabs = parseRelatedLabs(attributes['related-labs'], root)
 
   if (!relatedLabs.length) return content
 
@@ -54,4 +54,20 @@ module.exports = (attributes, content, { data: { root } }) => {
 
   const modifiedContent = Buffer.from(contentString, 'utf8')
   return modifiedContent
+}
+
+// Malformed page-related-labs JSON is logged and skipped instead of failing the build.
+function parseRelatedLabs (value, root) {
+  if (!value) return []
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (err) {
+    const { page, logger } = root || {}
+    const where = (page && page.src && page.src.path) || (page && page.relativeSrcPath) || 'unknown page'
+    const message = `${where}: ignoring malformed JSON in page-related-labs (${err.message})`
+    if (logger && typeof logger.warn === 'function') logger.warn(message)
+    else console.warn(`[add-suggested-labs] ${message}`)
+    return []
+  }
 }

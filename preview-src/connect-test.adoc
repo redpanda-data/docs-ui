@@ -1,6 +1,7 @@
 = Redpanda Connect
 :page-layout: component-home-v3
 :page-role: component-home-v3
+:page-commercial-names: Apache Kafka, Kafka
 :page-hero-color: #A21CAF
 :hero-description: Stream processing and data integration with 200+ connectors. Build real-time pipelines without writing code.
 :hero-ask-placeholder: Ask AI about Redpanda Connect...
