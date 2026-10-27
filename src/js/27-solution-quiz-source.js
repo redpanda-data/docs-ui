@@ -26,7 +26,7 @@
  *
  * Over QUIZ_SOURCE_MAX_CHARS, parts are shortened or left out in TRIM_ORDER,
  * one step at a time until the text fits. The preamble, Why this approach,
- * Verify and the prose of What you do are never left out: the quiz's
+ * Verify and the prose of Build it are never left out: the quiz's
  * questions come from them. A page that is still over the cap after every
  * step is sent as it is, and the corpus test reports it, up to
  * QUIZ_SOURCE_HARD_MAX_CHARS. Past that, as a last resort, Verify code keeps
@@ -57,10 +57,12 @@
     { name: 'what-happens', ids: ['what-happens'] },
     { name: 'in-production', ids: ['in-production'] },
     { name: 'extend-and-clean-up', ids: ['extend-this-solution', 'clean-up'] },
-    // What you do is mostly commands and their expected output. Its prose says
+    // Build it is mostly commands and their expected output. Its prose says
     // what each command is for, so the code goes first, a little at a time.
-    { name: 'what-you-do-code-short', ids: ['what-you-do'], codeLines: 5 },
-    { name: 'what-you-do-code', ids: ['what-you-do'], codeOnly: true },
+    // Older builds title it What you do (what-you-do); the step names keep
+    // that id so the trimmed list reads the same for both.
+    { name: 'what-you-do-code-short', ids: ['build-it', 'what-you-do'], codeLines: 5 },
+    { name: 'what-you-do-code', ids: ['build-it', 'what-you-do'], codeOnly: true },
   ]
   var KEEP_CODE_WHOLE = ['verify']
   var ADMONITIONS = ['note', 'tip', 'important', 'warning', 'caution']
