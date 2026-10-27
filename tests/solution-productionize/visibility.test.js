@@ -170,6 +170,7 @@ function load (o) {
   const calls = { fetch: [], open: [], panel: 0, events: [], tracked: [], copied: [] }
   window.location = { origin: ORIGIN, pathname: opts.step ? stepUrl(opts.step) : `/solutions/${SLUG}/`, search: '', hash: '' }
   window.KAPA_PRODUCTIONIZE_INTEGRATION_ID = opts.integration
+  if (opts.uiPreview) window.isUiPreview = true
   let signedIn = opts.signedIn
   window.docsSolutions = {
     signedIn: () => signedIn,
@@ -194,7 +195,7 @@ function load (o) {
   for (const name of ['docs-account:open-signin', 'docs-chat:mode']) {
     window.addEventListener(name, (e) => calls.events.push({ name, detail: e.detail }))
   }
-  vm.runInNewContext(SCRIPT, { window, document, URL, console })
+  if (!opts.noScript) vm.runInNewContext(SCRIPT, { window, document, URL, console })
   const $ = (sel) => document.querySelector(sel)
   return {
     window,
@@ -208,6 +209,7 @@ function load (o) {
     note: $('[data-sol-productionize-note]'),
     preview: $('[data-sol-productionize-preview]'),
     status: $('[data-sol-productionize-status]'),
+    signin: $('[data-sol-productionize-signin]'),
     signIn: (value) => { signedIn = value; window.dispatchEvent(new window.CustomEvent('kapa-session', { detail: {} })) },
   }
 }
@@ -248,11 +250,93 @@ test('the step rail offers the quiz and the way into production on every step', 
   assert.equal(load({ step: null }).document.querySelector('[data-sol-rail-actions]'), null, 'not on the overview')
 })
 
-test('signed out: the plan button asks to sign in and returns to the card', { skip }, () => {
+// The card's text a reader can see: every text node with no hidden element
+// above it, and not inside a closed <details> past its <summary>.
+function visibleText (root) {
+  const out = []
+  const walk = (el) => {
+    if (el.nodeType === 3) { if (el.textContent.trim()) out.push(el.textContent.replace(/\s+/g, ' ').trim()); return }
+    if (el.nodeType !== 1 || el.hasAttribute('hidden')) return
+    const tag = el.tagName.toLowerCase()
+    if (tag === 'script' || tag === 'template') return
+    Array.from(el.childNodes).forEach((c) => {
+      if (tag === 'details' && !el.open && !(c.nodeType === 1 && c.tagName.toLowerCase() === 'summary')) return
+      walk(c)
+    })
+  }
+  walk(root)
+  return out
+}
+const visible = (el) => { for (let n = el; n && n.nodeType === 1; n = n.parentNode) if (n.hasAttribute('hidden')) return false; return true }
+const SIGNED_OUT_TEXT = ['Take this to production',
+  'Sign in to have Ask AI plan this design for your system, get a prompt for your coding agent, and see how to connect the docs MCP server.',
+  'Sign in']
+const GATED = ['[data-sol-productionize-plan]', '[data-sol-productionize-copy]', '[data-sol-productionize-preview]',
+  '[data-sol-productionize-skill]', '[data-sol-productionize-mcp]']
+
+function assertSignedOut (page, where) {
+  assert.deepEqual(visibleText(page.card), SIGNED_OUT_TEXT, where)
+  assert.ok(visible(page.signin), where + ': Sign in is visible')
+  for (const sel of GATED) {
+    const el = page.$(sel)
+    if (el) assert.ok(!visible(el), `${where}: ${sel} is hidden`)
+  }
+  // No prompt in the page at all, visible or not.
+  assert.doesNotMatch(page.card.textContent, /Take this design to production|curl -sf/, where)
+}
+
+test('signed out: only the title, the sentence and Sign in, and no prompt in the page', { skip }, () => {
+  for (const site of [{}, { keys: { solutionsSkillInstall: 'true' } }]) {
+    const page = load({ signedIn: false, site })
+    assertSignedOut(page, site.keys ? 'skills on' : 'skills off')
+    assert.equal(page.calls.fetch.length, 0)
+  }
+})
+
+test('without the script, the card is in its signed-out state', { skip }, () => {
+  for (const signedIn of [false, true]) assertSignedOut(load({ signedIn, noScript: true }), 'no script, signedIn ' + signedIn)
+})
+
+test('the UI preview, with no backend, shows the signed-out card and its Sign in opens the modal', { skip }, () => {
+  const page = load({ signedIn: false, uiPreview: true })
+  assertSignedOut(page, 'ui preview')
+  page.signin.click()
+  assert.ok(page.calls.events.some((e) => e.name === 'docs-account:open-signin'))
+})
+
+test('signed in: the whole card shows, and the sign-in block does not', { skip }, () => {
+  const page = load({ site: { keys: { solutionsSkillInstall: 'true' } } })
+  assert.ok(!visible(page.signin))
+  assert.ok(!visible(page.$('[data-sol-productionize-signedout]')))
+  for (const sel of GATED) assert.ok(visible(page.$(sel)), sel)
+  const text = visibleText(page.card)
+  assert.ok(text.includes('Turn the reference build into a plan for your own system: your deployment, your scale, your security model.'))
+  assert.ok(text.includes('Plan it with Ask AI'))
+  assert.ok(text.includes('Copy prompt for your coding agent'))
+  assert.ok(text.includes('Preview prompt'))
+  assert.ok(!text.includes('Sign in'), 'no Sign in for a signed-in reader')
+  assert.match(page.$('[data-sol-productionize-prompt]').textContent, /^# Take this design to production: /)
+})
+
+test('signing in after load opens the whole card without a reload', { skip }, async () => {
   const page = load({ signedIn: false })
-  assert.equal(page.plan.hidden, false)
-  assert.equal(page.label.textContent, 'Sign in to plan it with Ask AI')
+  assertSignedOut(page, 'before')
+  page.signIn(true)
+  for (const sel of GATED.filter((x) => x !== '[data-sol-productionize-skill]')) assert.ok(visible(page.$(sel)), sel)
+  assert.ok(!visible(page.signin))
+  assert.match(page.$('[data-sol-productionize-prompt]').textContent, /^# Take this design to production: /)
   page.plan.click()
+  await flush()
+  assert.equal(page.window.__docsChatMode.mode, 'productionize')
+  // And back: a sign-out the page hears about closes the card again.
+  page.signIn(false)
+  assert.ok(visible(page.signin))
+  for (const sel of GATED) { const el = page.$(sel); if (el) assert.ok(!visible(el), sel) }
+})
+
+test('signed out: Sign in opens the sign-in modal and returns to the card', { skip }, () => {
+  const page = load({ signedIn: false })
+  page.signin.click()
   const signin = page.calls.events.find((e) => e.name === 'docs-account:open-signin')
   assert.ok(signin, 'opened the sign-in modal')
   assert.equal(signin.detail.returnTo, LAST + '#take-to-production')
@@ -262,12 +346,6 @@ test('signed out: the plan button asks to sign in and returns to the card', { sk
   assert.ok(encodeURIComponent(signin.detail.returnTo).endsWith('%23take-to-production'))
   assert.equal(page.calls.fetch.length, 0, 'nothing fetched before sign-in')
   assert.equal(page.calls.open.length, 0)
-})
-
-test('signing in relabels the button without a reload', { skip }, () => {
-  const page = load({ signedIn: false })
-  page.signIn(true)
-  assert.equal(page.label.textContent, 'Plan it with Ask AI')
 })
 
 test('signed in: a click fetches the companion from this origin and starts the planner', { skip }, async () => {
@@ -314,7 +392,7 @@ test('a second click before the companion arrives starts one plan, not two', { s
 
 test('sign-in, copy and opening the MCP block are tracked', { skip }, async () => {
   const out = load({ signedIn: false })
-  out.plan.click()
+  out.signin.click()
   assert.ok(out.calls.tracked.some((t) => t.name === 'solution_productionize_signin'))
   const page = load({})
   page.copy.click()
@@ -480,7 +558,7 @@ test('an extra part URL off this origin is ignored, and the listed parts still m
 })
 
 test('the prompt is shown in Preview prompt and copied as it is', { skip }, async () => {
-  const page = load({ signedIn: false })
+  const page = load({})
   const shown = page.$('[data-sol-productionize-prompt]').textContent
   assert.ok(shown.startsWith(`# Take this design to production: ${TITLE}`))
   assert.ok(shown.includes(`curl -sf ${ORIGIN}/solutions/${SLUG}/agent-companion.md`))

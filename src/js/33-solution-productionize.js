@@ -31,9 +31,16 @@
  * rewritten to this page's origin, and a preview reads and links its own
  * pages.
  *
- * The Plan it button needs a signed-in reader and a productionize
- * integration: signed out it reads "Sign in to plan it with Ask AI" and opens
- * the sign-in modal with a return to this card, and with
+ * The whole card needs a signed-in reader. Signed out, and without this
+ * script, it shows only its title, a sentence on what signing in gives, and
+ * Sign in, which opens the sign-in modal with a return to this card. The rest
+ * of the card ships with the hidden attribute and is shown once the reader is
+ * signed in, including a sign-in learned after load (kapa-session); the
+ * prompt text is written into the page only then. The UI preview has no
+ * backend, so it shows the signed-out card unless the rp_docs_auth=1 cookie
+ * is set by hand.
+ *
+ * The Plan it button also needs a productionize integration: with
  * KAPA_PRODUCTIONIZE_INTEGRATION_ID set to '' it is hidden. When the
  * companion cannot be fetched, the core or any one of its parts, it is
  * hidden too, and a note says the prompt still works: a guide with sections
@@ -373,17 +380,18 @@
     var prompt = buildProductionizePrompt(meta)
 
     var plan = card.querySelector('[data-sol-productionize-plan]')
-    var planLabel = card.querySelector('[data-sol-productionize-plan-label]')
     var copy = card.querySelector('[data-sol-productionize-copy]')
     var status = card.querySelector('[data-sol-productionize-status]')
     var note = card.querySelector('[data-sol-productionize-note]')
     var preview = card.querySelector('[data-sol-productionize-preview]')
     var promptEl = card.querySelector('[data-sol-productionize-prompt]')
     var mcp = card.querySelector('[data-sol-productionize-mcp]')
-
-    if (promptEl) promptEl.textContent = prompt
-    if (preview) preview.hidden = false
-    if (copy) copy.hidden = false
+    var signedOut = card.querySelector('[data-sol-productionize-signedout]')
+    var gated = card.querySelector('[data-sol-productionize-gated]')
+    var signin = card.querySelector('[data-sol-productionize-signin]')
+    // The prompt is written into the page only once a signed-in reader can
+    // see it, so a signed-out page never holds it.
+    var revealed = false
 
     // The plan on this page: idle, loading (fetching the companion), active
     // (running in the drawer under `nonce`), ended, or unavailable (the
@@ -392,11 +400,22 @@
     var nonce = null
     var guidePromise = null
 
+    // Signed out, only the title, the sign-in sentence and Sign in show;
+    // signed in, the whole card. Runs again on every kapa-session event, so a
+    // sign-in learned after load opens the card without a reload.
     function render () {
+      var inside = signedIn()
+      if (signedOut) signedOut.hidden = inside
+      if (gated) gated.hidden = !inside
+      if (inside && !revealed) {
+        revealed = true
+        if (promptEl) promptEl.textContent = prompt
+        if (preview) preview.hidden = false
+        if (copy) copy.hidden = false
+      }
       if (!plan) return
       plan.hidden = state === 'unavailable' || !window.KAPA_PRODUCTIONIZE_INTEGRATION_ID
       plan.disabled = state === 'loading'
-      if (planLabel) planLabel.textContent = signedIn() ? 'Plan it with Ask AI' : 'Sign in to plan it with Ask AI'
       if (note) note.hidden = state !== 'unavailable'
     }
 
@@ -493,17 +512,21 @@
       }
     }
 
+    function openSignin () {
+      track('solution_productionize_signin', baseProps())
+      dispatch('docs-account:open-signin', {
+        title: 'Sign in to take this to production',
+        lead: 'Ask AI plans this design for your system with you, and you get a prompt for your coding agent ' +
+          'and the docs MCP server setup.',
+        cta: 'Sign in',
+        returnTo: loc.pathname + '#' + CARD_ID,
+      })
+    }
+
     function onPlan () {
-      if (!signedIn()) {
-        track('solution_productionize_signin', baseProps())
-        dispatch('docs-account:open-signin', {
-          title: 'Sign in to plan it with Ask AI',
-          lead: 'Ask AI plans the move to production with you, from this solution\'s production guide.',
-          cta: 'Sign in and plan it',
-          returnTo: loc.pathname + '#' + CARD_ID,
-        })
-        return
-      }
+      // Plan it shows only signed in; a sign-out the page has not heard about
+      // yet still goes to sign-in rather than to a failed plan.
+      if (!signedIn()) return openSignin()
       if (running()) {
         if (typeof window.openChatPanel === 'function') window.openChatPanel()
         return
@@ -538,6 +561,7 @@
       }
     }
 
+    if (signin) signin.addEventListener('click', openSignin)
     if (plan) plan.addEventListener('click', onPlan)
     if (copy) copy.addEventListener('click', onCopy)
     if (mcp) {
