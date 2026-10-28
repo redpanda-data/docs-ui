@@ -1691,12 +1691,6 @@
   white-space: pre-wrap;
 }
 
-#chat-panel-kapa-root .answer-cut-note {
-  margin: 8px 0 4px;
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--kapa-text-muted, #6b7280);
-}
-
 /* ——— Clarifying-question option chips (OPTIONS: A | B protocol) ——— */
 #chat-panel-kapa-root .answer-options {
   display: flex;

@@ -17,7 +17,7 @@ import { safeHeap } from '../heap.js'
 import { Answer, Toast } from './chatShared.jsx'
 import { ModeBanner, QuizSummary } from './ModeBanner.jsx'
 import {
-  MODES, MODE_END_EVENT, MODE_COMPLETE_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, answerLooksCut, quizProgress,
+  MODES, MODE_END_EVENT, MODE_COMPLETE_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
   markModeThreads, registerSubmit, rememberThread, threadToResume, forgetThread, endChatMode,
   mergeListedOptions, modePlaceholder, stripScoreLine,
 } from '../chatModes.js'
@@ -1147,9 +1147,6 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
               // final message's chips.
               const summary = modeDef && modeDef.summary && split.result && !m.isError ? split.result : null
               const shownBody = summary && isLast && !isStreaming ? stripScoreLine(answerBody) : answerBody
-              // A turn Kapa ended mid-answer says so, and offers to go on,
-              // rather than ending mid-sentence as if it were finished.
-              const cut = modeDef && modeDef.cutNote && isLast && !isStreaming && !m.isError && !options.length && answerLooksCut(shownBody)
               return (
                 <div key={idx} className={`qa-pair ${m.isError ? 'qa-pair-error' : ''}`}>
                   {blocks.map((block, bi) => {
@@ -1178,12 +1175,6 @@ export default function ChatInterface({ mode = null, modeDetail = null, persistT
                     )
                   })}
                   {lastTextIdx < 0 && <Answer md={shownBody} />}
-                  {cut && (
-                    <>
-                      <p className="answer-cut-note" role="status">Answer stopped early. Ask Ask AI to continue.</p>
-                      <AnswerOptions options={['Continue']} onPick={(opt) => doQuery(opt, 'chip')} disabled={false} />
-                    </>
-                  )}
                   {options.length > 0 && !summary && (
                     <AnswerOptions options={options} listed={listed} onPick={(opt) => doQuery(opt, 'chip')} disabled={!optionsLive} />
                   )}
