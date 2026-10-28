@@ -225,6 +225,8 @@ export const GUIDE_WHOLE_SECTIONS = ['Production gaps: overview', 'What the syst
 //                    (QUIZ_RESULT) with Mark step complete, Next step, Retry
 //   copyPlan         whether the banner offers Copy plan and the coding
 //                    agent hand-off once there is an answer
+//   cutNote          whether a finished answer that looks cut off
+//                    (answerLooksCut) shows a note saying so, with Continue
 //   note             one line the banner shows under the title, if any
 //   signInTitle      what the anonymous tier says instead of running the mode
 //   returnHash       where on the page signing in from the drawer returns to
@@ -293,6 +295,7 @@ export const MODES = {
     restart: false,
     status: (detail) => 'Production plan' + (detail && detail.title ? ': ' + detail.title : ''),
     copyPlan: true,
+    cutNote: true,
     note: 'This conversation is stored with your account. Don\'t paste credentials or internal hostnames.',
     signInTitle: 'Sign in to plan it with Ask AI',
     // The card's own sign-in returns here too (33-solution-productionize.js).
@@ -501,6 +504,30 @@ export function answerText (message) {
     if (blocks[i].type === 'text' && (blocks[i].content || '').trim()) return blocks[i].content
   }
   return (message && message.content) || ''
+}
+
+// Why a finished answer looks cut off, or null. Kapa can end a turn mid-answer
+// without an error: the SDK reads the end of the stream as the end of the
+// answer, so the drawer cannot tell from events alone. The text shows it:
+// an open code block, an open backtick or bracket on the last line, a last
+// line that ends on a comma or a joining word ("call out lag as"), or prose
+// that ends without punctuation. Headings, list items and table rows may end
+// without a period, so only the first checks apply to them.
+const CUT_WORDS = /\b(?:a|an|the|and|or|but|as|to|of|for|in|on|at|by|with|from|into|than|that|which|is|are|was|be|if|when|so|such|per|via|your|their|its)$/
+export function answerLooksCut (md) {
+  const text = String(md || '').replace(/\s+$/, '')
+  if (!text) return null
+  if ((text.match(/^\s*(```|~~~)/gm) || []).length % 2) return 'open_code_block'
+  const last = text.slice(text.lastIndexOf('\n') + 1).trim()
+  if (/^(```|~~~)/.test(last)) return null
+  if (last.replace(/`[^`]*`/g, '').includes('`')) return 'open_code_span'
+  if ((last.match(/\[/g) || []).length > (last.match(/\]/g) || []).length ||
+    (last.match(/\(/g) || []).length > (last.match(/\)/g) || []).length) return 'open_bracket'
+  const words = last.replace(/[*_]+$/, '')
+  if (/[,(\-–—]$/.test(words) || CUT_WORDS.test(words)) return 'mid_sentence'
+  const structured = /^(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|\||>)/.test(last)
+  if (!structured && /[A-Za-z0-9]$/.test(words)) return 'mid_sentence'
+  return null
 }
 
 // Where a quiz stands, from the conversation alone. `tally` counts answers
