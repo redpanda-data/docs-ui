@@ -51,8 +51,11 @@
     return /(?:^|;\s*)rp_docs_auth=1(?:;|$)/.test(document.cookie)
   }
 
+  // The hash keeps the reader at the section they were reading, for example a
+  // Solutions page's #take-to-production. docs-login stores return_to whole
+  // and /auth/return redirects to it, fragment included.
   function returnTo () {
-    return encodeURIComponent(window.location.pathname + window.location.search)
+    return encodeURIComponent(window.location.pathname + window.location.search + (window.location.hash || ''))
   }
 
   // Feature modal shown before sending the user to /login.
