@@ -175,7 +175,27 @@ for (const slug of SLUGS) {
     assert.equal(tools.findGuideSection(guide, 'step:2').guide_url, `${ORIGIN}/solutions/${slug}/step-2/`)
     const miss = tools.findGuideSection(guide, 'Kubernetes operators on Mars')
     assert.equal(miss.error, 'not_found')
-    assert.deepEqual(miss.available, guide.sections.map((s) => s.section))
+    assert.deepEqual(Object.values(miss.available).flat().sort(), guide.sections.map((s) => s.section).sort())
+  })
+
+  test(`${slug}: a miss, no name, and several names each fit in one result`, { skip }, async () => {
+    const guide = guideFor(slug)
+    const names = guide.sections.map((s) => s.section)
+    const tool = tools.productionizeTools.find((t) => t.name === 'get_solution_guide')
+    for (const args of [{ section: 'Kubernetes operators on Mars' }, {}, { section: '' }]) {
+      const r = await tool.execute(args, { solutionGuide: guide })
+      assert.equal(r.error, 'not_found', JSON.stringify(args))
+      assert.ok(JSON.stringify(r).length <= tools.GUIDE_SECTION_MAX_CHARS, `${JSON.stringify(args)}: ${JSON.stringify(r).length}`)
+      // Every valid name, grouped, the Production gaps topics together.
+      assert.deepEqual(Object.values(r.available).flat().sort(), names.slice().sort())
+      assert.deepEqual(r.available['Production gaps'], ['Production gaps: overview'].concat(guide.topics))
+    }
+    // Every topic in one list: what fits comes back, the rest is named.
+    const all = await tool.execute({ sections: guide.topics }, { solutionGuide: guide })
+    assert.ok(all.results.length > 1)
+    const text = all.results.reduce((n, r) => n + r.text.length, 0)
+    assert.ok(text <= tools.GUIDE_SECTION_MAX_CHARS, `${text}`)
+    assert.deepEqual(all.results.map((r) => r.section).concat(all.remaining || []), guide.topics)
   })
 }
 
