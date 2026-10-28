@@ -267,6 +267,14 @@ test('productionize keeps the citing, choices and tool blocks, minus tools it do
   const prompt = def.instructions({ title: 'T', guide: { sections: [{ section: 'Security', text: 'x' }], topics: ['Security'], steps: 0, rules: '1. R' } })
   assert.match(prompt, /^\n\n## Productionize mode\n/)
   assert.match(prompt, /- Production gaps topics: Security/)
+  // Every topic gets a line, a request outside the solution is declined, and
+  // an unsourced value is asked for or labelled as an assumption.
+  assert.match(prompt, /request each Production gaps topic below with get_solution_guide\. Give every topic one line in the checklist/)
+  assert.match(prompt, /"Does not apply: <reason from their facts>"\. Never drop a topic silently\./)
+  assert.match(prompt, /say plainly in your first sentence that this solution does not cover it\. Do not apply this solution's Rules or topics to it\./)
+  assert.match(prompt, /Point them to the docs search or another solution instead\./)
+  assert.match(prompt, /Ask for any value they did not give and the guide or docs do not fix, such as partition counts, retention, replica counts, and sizes\./)
+  assert.match(prompt, /label it "Assumption, confirm with <who or what decides it>"\. Never state it as the recommendation\./)
 })
 
 test('the guide reaches get_solution_guide through the provider context, not the prompt', () => {
