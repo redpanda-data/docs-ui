@@ -217,6 +217,30 @@
     }
   }
 
+  // Set every sign-in, sign-out, and sign-up href from the current address.
+  // Runs on each render and again on hashchange, so following an on-page
+  // section link after load still returns the reader to that section.
+  var reauth = false // set by showLoginError; kept across refreshes
+  function setReturnLinks () {
+    var retry = reauth ? '&reauth=1' : ''
+    signinLink.href = '/login?return_to=' + returnTo() + retry
+    signoutLink.href = '/logout?return_to=' + returnTo()
+    // disclosed=1: the modal shows the privacy/data-collection note itself, so
+    // /login can skip the server interstitial (which exists to show that note)
+    // and go straight to Auth0. The bare signinLink href (middle-click, or no
+    // modal markup) stays undisclosed and gets the interstitial.
+    if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo() + retry
+    // "Create a free account" — a same-origin path instead of a hardcoded
+    // cloud.redpanda.com URL, since docs-ui has no way to know which Cloud
+    // environment a given deploy (prod vs integration preview) should point
+    // at. docs-login.mjs's own /signup already resolves that per context and
+    // 302s straight to the right signup URL. Its own path rather than a
+    // /login query flag: unlike modalCta above, it shares no state with
+    // sign-in (no CSRF nonce, no PKCE, no auth-request write).
+    if (modalSignup) modalSignup.href = '/signup?return_to=' + returnTo()
+  }
+  window.addEventListener('hashchange', setReturnLinks)
+
   function render () {
     var signedIn = hasAuthHint()
     // Auth availability: the Ask AI panel's session probe sets
@@ -251,21 +275,7 @@
         nudge.hidden = signinLink.hidden || nudgeAlreadySeen()
       }
     }
-    signinLink.href = '/login?return_to=' + returnTo()
-    signoutLink.href = '/logout?return_to=' + returnTo()
-    // disclosed=1: the modal shows the privacy/data-collection note itself, so
-    // /login can skip the server interstitial (which exists to show that note)
-    // and go straight to Auth0. The bare signinLink href (middle-click, or no
-    // modal markup) stays undisclosed and gets the interstitial.
-    if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo()
-    // "Create a free account" — a same-origin path instead of a hardcoded
-    // cloud.redpanda.com URL, since docs-ui has no way to know which Cloud
-    // environment a given deploy (prod vs integration preview) should point
-    // at. docs-login.mjs's own /signup already resolves that per context and
-    // 302s straight to the right signup URL. Its own path rather than a
-    // /login query flag: unlike modalCta above, it shares no state with
-    // sign-in (no CSRF nonce, no PKCE, no auth-request write).
-    if (modalSignup) modalSignup.href = '/signup?return_to=' + returnTo()
+    setReturnLinks()
 
     // Signed in: the console link lives in the account dropdown, so hide the
     // standalone toolbar/overflow Cloud Console links (avoid two paths)
@@ -341,12 +351,8 @@
     // login (reauth=1 -> docs-login.mjs adds prompt=login) so the FIRST retry
     // click reaches the login screen instead of silently re-using the SSO
     // session that just failed. Belt-and-suspenders with the reauth cookie.
-    ;[signinLink, modalCta].forEach(function (el) {
-      if (el && el.getAttribute('href')) {
-        var href = el.getAttribute('href')
-        el.setAttribute('href', href + (href.indexOf('?') === -1 ? '?' : '&') + 'reauth=1')
-      }
-    })
+    reauth = true
+    setReturnLinks()
 
     var MESSAGES = {
       upstream_failed: 'Sorry, sign-in couldn’t be completed. Please try again.',

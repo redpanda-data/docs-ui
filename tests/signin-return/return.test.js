@@ -68,6 +68,8 @@ function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows, uiPreview, st
     encodeURIComponent,
     JSON,
     RegExp,
+    URLSearchParams,
+    setTimeout () {},
     fetch: () => Promise.resolve({ status: 200, ok: true, json: () => Promise.resolve({}) }),
     localStorage: storageThrows
       ? {
@@ -85,6 +87,7 @@ function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows, uiPreview, st
       cookie: signedIn ? 'rp_docs_auth=1' : '',
       activeElement: null,
       body: { appendChild () {} },
+      createElement: () => Object.assign(makeEl({}), { style: {} }),
       querySelector: (sel) => (sel === '[data-docs-account]' ? els.container : null),
       querySelectorAll: () => [],
       addEventListener () {},
@@ -102,7 +105,6 @@ function run ({ signedIn, loginUrlKnown, nudgeSeen, storageThrows, uiPreview, st
   vm.runInNewContext(fs.readFileSync(SCRIPT, 'utf8'), context)
   return { els, store, listeners }
 }
-
 
 const PAGE = { pathname: '/solutions/multiplayer-gaming/verify-end-to-end/', search: '', hash: '#take-to-production' }
 
@@ -124,4 +126,27 @@ test('a page with no hash returns to the page alone', () => {
 test('header Sign out keeps the hash too', () => {
   const { els } = run({ signedIn: true, loginUrlKnown: true, nudgeSeen: true, location: PAGE })
   assert.equal(els.signout.href, '/logout?return_to=' + encodeURIComponent('/solutions/multiplayer-gaming/verify-end-to-end/#take-to-production'))
+})
+
+test('following a section link after load updates every return address', () => {
+  const location = { pathname: '/home/', search: '', hash: '' }
+  const { els, listeners } = run({ signedIn: false, loginUrlKnown: true, nudgeSeen: true, location })
+  location.hash = '#install'
+  listeners.hashchange()
+  const want = encodeURIComponent('/home/#install')
+  assert.equal(els.signin.href, '/login?return_to=' + want)
+  assert.equal(els.signout.href, '/logout?return_to=' + want)
+  assert.equal(els.modalCta.href, '/login?disclosed=1&return_to=' + want)
+  assert.equal(els.modalSignup.href, '/signup?return_to=' + want)
+})
+
+test('a login-error retry keeps reauth=1 after section navigation', () => {
+  const location = { pathname: '/home/', search: '?login_error=upstream_failed', hash: '' }
+  const { els, listeners } = run({ signedIn: false, loginUrlKnown: true, nudgeSeen: true, location })
+  assert.ok(els.signin.href.endsWith('&reauth=1'))
+  location.search = ''
+  location.hash = '#install'
+  listeners.hashchange()
+  assert.equal(els.signin.href, '/login?return_to=' + encodeURIComponent('/home/#install') + '&reauth=1')
+  assert.equal(els.modalCta.href, '/login?disclosed=1&return_to=' + encodeURIComponent('/home/#install') + '&reauth=1')
 })
