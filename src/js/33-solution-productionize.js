@@ -410,8 +410,10 @@
   /* eslint-disable max-len */
   function buildProductionizePrompt (m, from) {
     var origin = String(m.origin || '').replace(/\/+$/, '')
-    var companion = origin + '/solutions/' + m.slug + '/agent-companion.md' +
-      (from ? '?from=' + encodeURIComponent(from) : '')
+    var companion = origin + '/solutions/' + m.slug + '/agent-companion.md'
+    // A marked URL is single-quoted: unquoted, zsh reads the ? as a glob and
+    // fails with "no matches found" before curl runs.
+    var curl = 'curl -sf ' + (from ? "'" + companion + '?from=' + encodeURIComponent(from) + "'" : companion)
     var built = '(version ' + m.version + (m.verifiedVersion ? ', verified against Redpanda ' + m.verifiedVersion : '') + ')'
     return [
       '# Take this design to production: ' + m.title,
@@ -425,7 +427,7 @@
       // restricted permission mode refused every one. -f makes a 404 fail
       // instead of returning the 404 page. The companion repeats this rule
       // for an agent that reaches it another way.
-      'Otherwise, download this solution\'s agent companion in full with this one command, exactly as written, with no pipes, redirects, `cd`, or temporary directories: `curl -sf ' + companion + '`. If curl exits non-zero, or its output does not start with `# Agent companion:`, the download failed: stop and tell me, and do not work from memory. If you cannot run curl, ask me to paste the file. Do not rely on a summarizing web-fetch tool.',
+      'Otherwise, download this solution\'s agent companion in full with this one command, exactly as written, with no pipes, redirects, `cd`, or temporary directories: `' + curl + '`. If curl exits non-zero, or its output does not start with `# Agent companion:`, the download failed: stop and tell me, and do not work from memory. If you cannot run curl, ask me to paste the file. Do not rely on a summarizing web-fetch tool.',
       '',
       'Then follow the companion\'s "How to use this" section.',
     ].join('\n')
