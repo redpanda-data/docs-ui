@@ -315,7 +315,9 @@ async function runAgentCase (c, ctx) {
   // which title line a successful read shows.
   const served = server.served[c.companion || c.slug]
 
-  const shipped = buildProductionizePrompt(Object.assign({}, meta, { origin: promptOrigin }))
+  // The source marker the Copy prompt button adds, so the eval runs the
+  // command that ships.
+  const shipped = buildProductionizePrompt(Object.assign({}, meta, { origin: promptOrigin }), 'prompt')
   const shippedUrl = `${promptOrigin}/solutions/${c.slug}/agent-companion.md`
   if (!shipped.includes(shippedUrl)) throw new Error('the built prompt does not name ' + shippedUrl)
   let prompt = shipped

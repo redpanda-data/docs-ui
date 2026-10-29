@@ -106,6 +106,15 @@ test('companionFetchRan needs a curl or WebFetch of the exact URL that the permi
   assert.equal(c.companionFetchRan(other, URL_OK).pass, false)
 })
 
+test('companionFetches counts the marked URL the copied prompt gives, quoted or in WebFetch', () => {
+  const quoted = c.parseStream(stream(bash('a', `curl -sf '${URL_OK}?from=prompt'`), toolResult('a', TITLE)))
+  assert.equal(c.companionFetchRan(quoted, URL_OK).pass, true)
+  const web = c.parseStream(stream(tool('w', 'WebFetch', { url: `${URL_OK}?from=prompt` }), toolResult('w', 'x')))
+  assert.equal(c.companionFetches(web, URL_OK).length, 1)
+  const otherWeb = c.parseStream(stream(tool('w', 'WebFetch', { url: URL_OK.replace('.md', '-part-1.md') + '?from=prompt' }), toolResult('w', 'x')))
+  assert.equal(c.companionFetches(otherWeb, URL_OK).length, 0)
+})
+
 test('companionReadOk needs a successful curl and the title line in a successful result', () => {
   const inline = c.parseStream(stream(bash('a', `curl -sf ${URL_OK}`), toolResult('a', TITLE + '\n\n## Rules')))
   assert.equal(c.companionReadOk(inline, URL_OK, TITLE).pass, true)

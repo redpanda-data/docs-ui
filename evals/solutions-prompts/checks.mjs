@@ -340,10 +340,11 @@ export function mismatchNamed (text, other) {
 function escapeRe (s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
 
 // Every attempt to fetch the exact companion URL: curl in Bash, or WebFetch.
+// A query string, such as the prompt's ?from= marker, still names the URL.
 export function companionFetches (parsed, url) {
   const exact = new RegExp(escapeRe(url) + '(?![\\w./-])')
   return parsed.toolCalls
-    .filter((c) => (c.name === 'Bash' && /\bcurl\b/.test(c.input.command || '') && exact.test(c.input.command || '')) || (c.name === 'WebFetch' && c.input.url === url))
+    .filter((c) => (c.name === 'Bash' && /\bcurl\b/.test(c.input.command || '') && exact.test(c.input.command || '')) || (c.name === 'WebFetch' && String(c.input.url || '').split('?')[0] === url))
     .map((c) => Object.assign({ call: c }, toolOutcome(parsed, c)))
 }
 
