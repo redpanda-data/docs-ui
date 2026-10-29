@@ -375,6 +375,10 @@ test('signed in: a click fetches the companion from this origin and starts the p
   // The drawer's guide link comes from this.
   assert.equal(mode.guideUrl, `${ORIGIN}/solutions/${SLUG}/`)
   assert.equal(mode.companionUrl, `${ORIGIN}/solutions/${SLUG}/agent-companion.md`)
+  // Hand this plan to your coding agent carries from=handoff; the page's own
+  // fetch above carries no marker.
+  assert.ok(mode.agentPrompt.includes(`curl -sf ${ORIGIN}/solutions/${SLUG}/agent-companion.md?from=handoff\``))
+  assert.ok(!mode.agentPrompt.includes('from=prompt'))
 })
 
 test('a second click before the companion arrives starts one plan, not two', { skip }, async () => {
@@ -562,7 +566,7 @@ test('the prompt is shown in Preview prompt and copied as it is', { skip }, asyn
   const page = load({})
   const shown = page.$('[data-sol-productionize-prompt]').textContent
   assert.ok(shown.startsWith(`# Take this design to production: ${TITLE}`))
-  assert.ok(shown.includes(`curl -sf ${ORIGIN}/solutions/${SLUG}/agent-companion.md`))
+  assert.ok(shown.includes(`curl -sf ${ORIGIN}/solutions/${SLUG}/agent-companion.md?from=prompt\``))
   page.copy.click()
   await flush()
   assert.deepEqual(page.calls.copied, [shown])

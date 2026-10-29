@@ -401,11 +401,17 @@
   // follows, so a change to it never has to be made here. The only facts the
   // prompt fills in are the ones the page shows: the title, the version, and
   // the companion URL. `m`: { origin, slug, title, version, verifiedVersion }.
+  // `from` marks where the prompt went, as ?from=<from> on the companion URL:
+  // 'prompt' for Copy prompt, 'handoff' for the Ask AI banner's Hand this plan
+  // to your coding agent. The docs-site fetch counter reads it to tell those
+  // fetches from the skill's, which use the bare URL. Only this first fetch
+  // carries it; the page's own companion fetch has none.
   // One line per instruction, as the agent reads it, so the lines run long.
   /* eslint-disable max-len */
-  function buildProductionizePrompt (m) {
+  function buildProductionizePrompt (m, from) {
     var origin = String(m.origin || '').replace(/\/+$/, '')
-    var companion = origin + '/solutions/' + m.slug + '/agent-companion.md'
+    var companion = origin + '/solutions/' + m.slug + '/agent-companion.md' +
+      (from ? '?from=' + encodeURIComponent(from) : '')
     var built = '(version ' + m.version + (m.verifiedVersion ? ', verified against Redpanda ' + m.verifiedVersion : '') + ')'
     return [
       '# Take this design to production: ' + m.title,
@@ -480,7 +486,7 @@
     }
     var companionUrl = new URL(rewriteHost(attr(card, 'data-sol-companion-url') ||
       '/solutions/' + meta.slug + '/agent-companion.md', origin), origin).href
-    var prompt = buildProductionizePrompt(meta)
+    var prompt = buildProductionizePrompt(meta, 'prompt')
 
     var plan = card.querySelector('[data-sol-productionize-plan]')
     var copy = card.querySelector('[data-sol-productionize-copy]')
@@ -600,7 +606,7 @@
         guide: guide,
         // The banner's Hand this plan to your coding agent copies this prompt
         // with the plan so far after it (react/components/ModeBanner.jsx).
-        agentPrompt: prompt,
+        agentPrompt: buildProductionizePrompt(meta, 'handoff'),
         props: baseProps(),
       }
       // Same opener as the drawer's productionizeOpener.

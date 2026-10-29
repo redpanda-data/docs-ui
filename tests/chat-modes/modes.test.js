@@ -892,7 +892,7 @@ test('Copy plan copies every answer as Markdown, and the hand-off adds it to the
   const text = modes.agentHandoff('# Take this design to production: X\n\nThen follow it.\n', plan)
   assert.equal(text, '# Take this design to production: X\n\nThen follow it.\n\n## Plan so far\n\n' + plan + '\n')
   assert.equal(modes.MODES.productionize.copyPlan, true)
-  assert.match(read('src/js/33-solution-productionize.js'), /agentPrompt: prompt,/)
+  assert.match(read('src/js/33-solution-productionize.js'), /agentPrompt: buildProductionizePrompt\(meta, 'handoff'\),/)
   const banner = read('src/js/react/components/ModeBanner.jsx')
   assert.match(banner, /\{plan && detail\.agentPrompt && \(/, 'the hand-off waits for an answer and a prompt')
   assert.match(banner, /Hand this plan to your coding agent/)

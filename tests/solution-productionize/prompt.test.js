@@ -34,22 +34,40 @@ const META = {
   verifiedVersion: '26.2.1',
 }
 const COMPANION = `${META.origin}/solutions/${META.slug}/agent-companion.md`
+const COPIED = `${COMPANION}?from=prompt`
+const HANDOFF = `${COMPANION}?from=handoff`
 
 test('the prompt points at this origin\'s companion, and nowhere else', () => {
-  const prompt = prod.buildProductionizePrompt(META)
+  const prompt = prod.buildProductionizePrompt(META, 'prompt')
   assert.ok(prompt.startsWith(`# Take this design to production: ${META.title}\n`))
   assert.ok(prompt.includes(`"${META.title}" (version v1.0.0, verified against Redpanda 26.2.1)`))
   assert.ok(prompt.includes('Do not copy the reference system.'))
   const urls = prompt.match(/https?:\/\/[^\s`]+/g)
-  assert.deepEqual(urls, [COMPANION], 'the companion is the only URL')
+  assert.deepEqual(urls, [COPIED], 'the companion is the only URL')
+})
+
+test('the companion URL says which hand-off it came from', () => {
+  // The docs-site fetch counter tells these from the skill's bare fetch.
+  const copied = prod.buildProductionizePrompt(META, 'prompt')
+  const handoff = prod.buildProductionizePrompt(META, 'handoff')
+  assert.ok(copied.includes(`\`curl -sf ${COPIED}\``), 'Copy prompt marks from=prompt')
+  assert.ok(handoff.includes(`\`curl -sf ${HANDOFF}\``), 'the Ask AI hand-off marks from=handoff')
+  assert.ok(!copied.includes('from=handoff') && !handoff.includes('from=prompt'))
+  assert.equal(handoff, copied.split(COPIED).join(HANDOFF), 'the marker is the only difference')
+  // Without a source, the bare URL.
+  assert.deepEqual(prod.buildProductionizePrompt(META).match(/https?:\/\/[^\s`]+/g), [COMPANION])
+  // The page copies from=prompt and hands from=handoff to the banner.
+  const page = fs.readFileSync(path.join(ROOT, 'src/js/33-solution-productionize.js'), 'utf8')
+  assert.ok(page.includes("var prompt = buildProductionizePrompt(meta, 'prompt')"))
+  assert.ok(page.includes("agentPrompt: buildProductionizePrompt(meta, 'handoff'),"))
 })
 
 test('the prompt is a pointer: the skill, else the companion\'s How to use this', () => {
-  const prompt = prod.buildProductionizePrompt(META)
+  const prompt = prod.buildProductionizePrompt(META, 'prompt')
   assert.ok(prompt.includes('If the `redpanda-solutions` skill is available, use it.'))
   // One plain command (an allow rule for curl matches it), -f so a 404
   // fails, what failure looks like, and what to do when curl is not allowed.
-  assert.ok(prompt.includes(`with this one command, exactly as written, with no pipes, redirects, \`cd\`, or temporary directories: \`curl -sf ${COMPANION}\`.`))
+  assert.ok(prompt.includes(`with this one command, exactly as written, with no pipes, redirects, \`cd\`, or temporary directories: \`curl -sf ${COPIED}\`.`))
   assert.ok(prompt.includes('If curl exits non-zero, or its output does not start with `# Agent companion:`, the download failed'))
   assert.ok(prompt.includes('If you cannot run curl, ask me to paste the file.'))
   assert.ok(!/curl -s /.test(prompt), 'no curl without -f')
