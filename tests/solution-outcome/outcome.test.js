@@ -7,7 +7,8 @@
  *    hidden from screen readers;
  *  - the partial names it with :page-solution-outcome-alt: and renders
  *    nothing without the attribute or when the image does not resolve;
- *  - the layout puts it after the hero and before the metadata panel;
+ *  - the layout puts it after the metadata panel and the first paragraph of
+ *    the introduction (split-after-first-paragraph), before the Steps list;
  *  - solutions.css sets every --oc-* color for light and for
  *    html[data-theme="dark"], which is what makes it follow the site toggle.
  */
@@ -106,13 +107,29 @@ test('the partial renders nothing without the attribute or the image', () => {
   assert.equal(render({ 'solution-outcome-image': 'missing.svg' }, catalog({})).trim(), '')
 })
 
-test('the overview layout puts the diagram between the hero and the metadata panel', () => {
+test('the overview layout puts the diagram after the metadata panel and the first paragraph', () => {
   const layout = read('src/layouts/solution.hbs')
-  const hero = layout.indexOf('{{> solution-hero')
-  const diagram = layout.indexOf('{{> solution-outcome')
   const meta = layout.indexOf('{{> solution-meta')
-  assert.ok(hero > -1 && diagram > hero && meta > diagram, 'expected hero, then the outcome diagram, then the metadata panel')
+  const first = layout.indexOf('{{{intro.before}}}')
+  const diagram = layout.indexOf('{{> solution-outcome')
+  const rest = layout.indexOf('{{{intro.after}}}')
+  const steps = layout.indexOf('{{> solution-steps')
+  assert.ok(meta > -1 && first > meta && diagram > first && rest > diagram && steps > rest,
+    'expected the metadata panel, the first paragraph, the outcome diagram, the rest of the introduction, then Steps')
   assert.ok(!read('src/layouts/solution-step.hbs').includes('solution-outcome'), 'step pages do not show it')
+})
+
+test('split-after-first-paragraph ends the first part after the first paragraph block', () => {
+  const split = require('../../src/helpers/split-after-first-paragraph.js')
+  const html = '<div id="preamble">\n<div class="sectionbody">\n<div class="paragraph">\n<p>A studio runs.</p>\n</div>\n<div class="paragraph">\n<p>Second.</p>\n</div>\n</div>\n</div>'
+  const { before, after } = split(html)
+  assert.ok(before.endsWith('<p>A studio runs.</p>\n</div>'))
+  assert.ok(after.startsWith('\n<div class="paragraph">\n<p>Second.</p>'))
+  assert.equal(before + after, html)
+  const titled = split('<div class="paragraph lead"><div class="title">T</div><p>One.</p></div><p>x</p>')
+  assert.equal(titled.before, '<div class="paragraph lead"><div class="title">T</div><p>One.</p></div>')
+  assert.deepEqual(split('<div class="ulist"><ul><li><p>a</p></li></ul></div>'), { before: '<div class="ulist"><ul><li><p>a</p></li></ul></div>', after: '' })
+  assert.deepEqual(split(undefined), { before: '', after: '' })
 })
 
 test('solutions.css sets every diagram color for light and for the dark theme', () => {

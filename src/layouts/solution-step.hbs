@@ -52,8 +52,7 @@
               the code, and On this page. --}}
         <summary class="sol-rail-summary"><span class="sol-rail-summary-label">Step {{page.attributes.solution-step-index}} of {{page.attributes.solution-step-count}}</span><span class="sol-bar sol-bar--sm sol-rail-summary-bar" aria-hidden="true"><span class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></span></span><span class="sol-rail-summary-meta">Progress, code, contents</span></summary>
         <div class="sol-rail-body">
-          {{> solution-progress solution=(parse-json page.attributes.solution)}}
-          {{> solution-step-rail-actions solution=(parse-json page.attributes.solution)}}
+          {{> solution-rail-tools solution=(parse-json page.attributes.solution) step=true}}
           {{> toc}}
         </div>
       </details>

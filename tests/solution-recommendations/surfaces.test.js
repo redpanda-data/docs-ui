@@ -246,7 +246,7 @@ test('Ask AI on a solutions page suggests solution questions, not the agent defa
 // ---- overview layout ----------------------------------------------------------------
 
 test('the overview puts Steps after the introduction and before the first section, as an On this page section', () => {
-  const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'get-header-color', 'split-at-first-section', 'html-has-id', 'solution-outcome'], ['solution-steps', 'solution-related-docs', 'solution-overview-next', 'solution-outcome'])
+  const hbs = engine(['eq', 'or', 'parse-json', 'relativize', 'get-header-color', 'split-at-first-section', 'split-after-first-paragraph', 'html-has-id', 'solution-outcome'], ['solution-steps', 'solution-related-docs', 'solution-overview-next', 'solution-outcome', 'solution-rail-tools'])
   ;['head', 'head-component-color', 'header', 'nav', 'toolbar', 'breadcrumbs', 'solution-hero', 'solution-meta', 'feedback-footer', 'tracking-pixel', 'solution-progress', 'toc', 'solution-code-download', 'footer', 'chat-panel'].forEach((name) => hbs.registerPartial(name, ''))
   const solution = {
     id: 'g',

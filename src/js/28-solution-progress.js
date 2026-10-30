@@ -1604,9 +1604,17 @@
 
     // Version-changed notice.
     var mismatch = !!(record && record.solutionVersion && pageVersion && record.solutionVersion !== pageVersion)
+    var showNotice = mismatch && !versionNoticeDismissed()
     $$('[data-sol-version-notice]').forEach(function (el) {
-      el.hidden = !(mismatch && !versionNoticeDismissed())
+      el.hidden = !showNotice
     })
+    // The notice is in the collapsible rail tools; open them so it is seen.
+    // __solApplied keeps this from being stored as the reader's choice.
+    if (showNotice) {
+      $$('[data-sol-rail-tools]').forEach(function (el) {
+        if (!el.open) { el.open = true; el.__solApplied = true }
+      })
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1810,6 +1818,38 @@
     }
     els.forEach(function (el) {
       el.addEventListener('toggle', function () { if (mq.matches) el.__solToggled = true })
+    })
+    apply()
+    if (typeof mq.addEventListener === 'function') mq.addEventListener('change', apply)
+    else if (typeof mq.addListener === 'function') mq.addListener(apply)
+  }
+
+  // The rail's tools <details> (solution-rail-tools.hbs): from 1281px it
+  // starts collapsed so On this page stays in view, and opens for a reader
+  // who opened it before (remembered in this browser) or, on an overview,
+  // finished the solution, where it holds the download offer. Below that the
+  // rail <details> does the collapsing, so the tools are always open inside it.
+  var RAIL_TOOLS_KEY = 'docs-solutions-rail-tools-open'
+
+  function manageRailTools () {
+    var els = $$('[data-sol-rail-tools]')
+    if (!els.length || typeof window.matchMedia !== 'function') return
+    var mq = window.matchMedia('(max-width: 1280px)')
+    var apply = function () {
+      els.forEach(function (el) {
+        el.open = mq.matches || readJSON(localArea(), RAIL_TOOLS_KEY) === true ||
+          (isOverview && overviewFinished())
+        el.__solApplied = el.open
+      })
+    }
+    els.forEach(function (el) {
+      el.addEventListener('toggle', function () {
+        // toggle fires asynchronously for apply's own changes too; only a
+        // wide-screen state that differs from the last one set is the reader's.
+        if (mq.matches || el.open === el.__solApplied) return
+        el.__solApplied = el.open
+        writeJSON(localArea(), RAIL_TOOLS_KEY, el.open)
+      })
     })
     apply()
     if (typeof mq.addEventListener === 'function') mq.addEventListener('change', apply)
@@ -2123,6 +2163,7 @@
       }
     }
     manageDetails('[data-sol-rail]')
+    manageRailTools()
     render()
     handleDownloadError()
     handleIntent()

@@ -60,9 +60,11 @@ test('the quiz button under the step is a secondary button with an icon, shared 
   assert.match(read('src/partials/solution-step-rail-actions.hbs'), /\{\{> solution-quiz-button class='sol-btn sol-btn--sm sol-rail-action' placement='rail'\}\}/)
   const layout = read('src/layouts/solution-step.hbs')
   const at = (s) => layout.indexOf(s)
-  assert.ok(at('<div class="sol-rail-body">') < at('{{> solution-progress'), 'the progress card is in the rail body')
-  assert.ok(at('{{> solution-progress') < at('{{> solution-step-rail-actions') && at('{{> solution-step-rail-actions') < at('{{> toc}}'),
-    'under Your progress, in the rail body')
+  assert.ok(at('<div class="sol-rail-body">') < at('{{> solution-rail-tools') && at('{{> solution-rail-tools') < at('{{> toc}}'),
+    'the rail tools are in the rail body, above On this page')
+  assert.match(layout, /\{\{> solution-rail-tools [^}]*step=true\}\}/)
+  const tools = read('src/partials/solution-rail-tools.hbs')
+  assert.ok(tools.indexOf('{{> solution-progress') < tools.indexOf('{{> solution-step-rail-actions'), 'under Your progress')
 })
 
 test('the overview says each step ends with a quiz and the last plans production', () => {

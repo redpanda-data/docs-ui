@@ -25,16 +25,20 @@
     <article class="doc sol-doc">
       {{> breadcrumbs}}
       {{> solution-hero solution=(parse-json page.attributes.solution)}}
-      {{!-- The outcome diagram: the first thing after the title and the
-            description, above the metadata panel. --}}
-      {{> solution-outcome}}
       {{> solution-meta solution=(parse-json page.attributes.solution)}}
       {{!-- The Steps list goes right after the introduction, before the
             first authored section: it is what the reader came to start, and
             Architecture or Prerequisites should not push it below the fold.
-            It is a sect1 with an h2, so On this page lists it. --}}
+            It is a sect1 with an h2, so On this page lists it.
+            The outcome diagram goes after the metadata panel and the first
+            paragraph of the introduction, which sets up the problem the
+            diagram answers. --}}
       {{#with (split-at-first-section page.contents) as |parts|}}
-      {{{parts.before}}}
+      {{#with (split-after-first-paragraph parts.before) as |intro|}}
+      {{{intro.before}}}
+      {{> solution-outcome}}
+      {{{intro.after}}}
+      {{/with}}
       {{> solution-steps solution=(parse-json @root.page.attributes.solution)}}
       {{{parts.after}}}
       {{/with}}
@@ -50,7 +54,7 @@
              throws, which fails the whole site build. --}}
         <summary class="sol-rail-summary">Progress and code{{#with (parse-json page.attributes.solution)}}<span class="sol-rail-summary-meta"><span data-sol-progress-count>0 of {{steps.length}}</span> done</span>{{/with}}</summary>
         <div class="sol-rail-body">
-          {{> solution-progress solution=(parse-json page.attributes.solution)}}
+          {{> solution-rail-tools solution=(parse-json page.attributes.solution)}}
           {{> toc}}
         </div>
       </details>
