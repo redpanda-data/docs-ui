@@ -146,4 +146,43 @@
 {{#if page.attributes.disable-property-tooltips}}
 <meta name="disable-property-tooltips" content="true">
 {{/if}}
+{{!--
+  rpk JSON URL for rpkcmd: tooltips (28-macro-tooltips.js)
+
+  The docs rpk workflows publish the newest command tree of a branch as
+  modules/reference/attachments/rpk-<tag>.json in streaming. The tag is chosen
+  exactly as the properties tag above is:
+  1. available-rpk-tag, when an extension set it to the newest attachment in
+     the catalog (the page's own component, if it declares one)
+  2. latest-redpanda-tag: on a streaming page, its own version's tag; on any
+     other page, streaming latest's
+  Nothing is emitted when the file does not resolve, and the tooltips stay idle.
+--}}
+{{#if page.componentVersion.asciidoc.attributes.available-rpk-tag}}
+{{#with (resolve-resource (concat 'attachment$rpk-' page.componentVersion.asciidoc.attributes.available-rpk-tag '.json') component=page.component.name module='reference' version=page.version fallback='') as |url|}}
+<meta name="rpk-json-url" content="{{url}}">
+{{/with}}
+{{else if (and (eq page.component.name 'streaming') page.componentVersion.asciidoc.attributes.latest-redpanda-tag)}}
+{{#with (resolve-resource (concat 'attachment$rpk-' page.componentVersion.asciidoc.attributes.latest-redpanda-tag '.json') component='streaming' module='reference' version=page.version fallback='') as |url|}}
+<meta name="rpk-json-url" content="{{url}}">
+{{/with}}
+{{else}}
+{{#with (or site.components.streaming site.components.ROOT)}}
+{{#with (or this.latest.asciidoc.attributes.available-rpk-tag this.latest.asciidoc.attributes.latest-redpanda-tag) as |tag|}}
+{{#with (resolve-resource (concat 'attachment$rpk-' tag '.json') component='streaming' module='reference' version=(or @root.site.components.streaming.latest.version @root.site.components.ROOT.latest.version) fallback='') as |url|}}
+<meta name="rpk-json-url" content="{{url}}">
+{{/with}}
+{{/with}}
+{{/with}}
+{{/if}}
+{{!-- Opt-outs for the inline macro tooltips, one per family --}}
+{{#if page.attributes.disable-bloblang-tooltips}}
+<meta name="disable-bloblang-tooltips" content="true">
+{{/if}}
+{{#if page.attributes.disable-connect-tooltips}}
+<meta name="disable-connect-tooltips" content="true">
+{{/if}}
+{{#if page.attributes.disable-rpk-tooltips}}
+<meta name="disable-rpk-tooltips" content="true">
+{{/if}}
 <meta itemprop="datePublished" content="{{iso-date}}">

@@ -219,3 +219,71 @@ test('resolve-resource: a cross-component lookup never inherits the page version
   resolveResourceHelper('attachment$redpanda-properties-v9.9.9.json', { data: { root: { page, contentCatalog } }, hash: { module: 'reference', fallback: '' } })
   assert.equal(seen[0].version, '26.2')
 })
+
+// rpk JSON for the rpkcmd: tooltips. The docs rpk workflows publish one
+// rpk-<tag>.json per streaming branch, in reference/attachments, and the tag is
+// chosen as the properties tag is: available-rpk-tag first, then the release
+// tag of the page's own streaming version, then streaming latest's.
+const RPK_BLOCK = slice(
+  '{{#if page.componentVersion.asciidoc.attributes.available-rpk-tag}}',
+  '{{!-- Opt-outs for the inline macro tooltips'
+)
+const RPK = Handlebars.compile(RPK_BLOCK)
+
+function renderRpk (page, { latest, attachments }) {
+  const site = { components: { streaming: { latest }, ROOT: { latest: { version: '' } } } }
+  const contentCatalog = {
+    getComponent: (name) => (name === 'streaming' ? { name, latest } : undefined),
+    resolveResource: (spec, ctx) => {
+      if (ctx.component !== 'streaming' || ctx.module !== 'reference') return undefined
+      const hit = attachments.find((a) => a.version === ctx.version && spec === `attachment$rpk-${a.tag}.json`)
+      return hit ? { pub: { url: `/streaming/${hit.segment}/reference/_attachments/rpk-${hit.tag}.json` } } : undefined
+    },
+  }
+  return RPK({ page, site }, { data: { root: { page, contentCatalog } } })
+}
+
+const RPK_STREAMING = {
+  latest: { version: '26.2', asciidoc: { attributes: { 'latest-redpanda-tag': 'v26.2.2' } } },
+  attachments: [
+    { version: '26.2', tag: 'v26.2.2', segment: 'current' },
+    { version: '26.1', tag: 'v26.1.12', segment: '26.1' },
+  ],
+}
+
+test('rpk: a streaming page resolves its own version\'s rpk JSON from latest-redpanda-tag', () => {
+  // Distinct versions per test: resolve-resource caches within a tick.
+  const html = renderRpk(streamingPage('26.1', { 'latest-redpanda-tag': 'v26.1.12' }), RPK_STREAMING)
+  assert.deepEqual(metas(html), { 'rpk-json-url': '/streaming/26.1/reference/_attachments/rpk-v26.1.12.json' })
+})
+
+test('rpk: available-rpk-tag wins over a release tag the snapshot has not caught up with', () => {
+  const streaming = {
+    latest: RPK_STREAMING.latest,
+    attachments: [{ version: '26.3', tag: 'v26.3.1', segment: '26.3' }],
+  }
+  const html = renderRpk(streamingPage('26.3', { 'latest-redpanda-tag': 'v26.3.4', 'available-rpk-tag': 'v26.3.1' }), streaming)
+  assert.deepEqual(metas(html), { 'rpk-json-url': '/streaming/26.3/reference/_attachments/rpk-v26.3.1.json' })
+})
+
+test('rpk: a non-streaming page resolves streaming latest\'s rpk JSON', () => {
+  const cloud = { version: '', component: { name: 'cloud-data-platform' }, componentVersion: { asciidoc: { attributes: {} } } }
+  assert.deepEqual(metas(renderRpk(cloud, RPK_STREAMING)), { 'rpk-json-url': '/streaming/current/reference/_attachments/rpk-v26.2.2.json' })
+})
+
+test('rpk: a version with no published rpk JSON emits nothing', () => {
+  const html = renderRpk(streamingPage('25.3', { 'latest-redpanda-tag': 'v25.3.11' }), RPK_STREAMING)
+  assert.deepEqual(metas(html), {}, `expected no meta tags, got: ${html}`)
+  const markup = RPK_BLOCK.replace(/\{\{!--[\s\S]*?--\}\}/g, '')
+  assert.ok(!markup.includes('https://docs.redpanda.com'), 'a hard-coded production URL is in the rpk block')
+})
+
+test('the macro tooltip off switches become meta tags', () => {
+  const block = slice('{{!-- Opt-outs for the inline macro tooltips', '<meta itemprop="datePublished"')
+  const template = Handlebars.compile(block)
+  for (const family of ['bloblang', 'connect', 'rpk']) {
+    const page = { attributes: { [`disable-${family}-tooltips`]: 'true' } }
+    assert.deepEqual(metas(template({ page })), { [`disable-${family}-tooltips`]: 'true' })
+  }
+  assert.deepEqual(metas(template({ page: { attributes: {} } })), {})
+})

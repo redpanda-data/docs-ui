@@ -51,6 +51,7 @@
 @import "bloblang-interactive.css";
 @import "tooltips.css";
 @import "property-tooltips.css";
+@import "macro-tooltips.css";
 @import "markdown-dropdown.css";
 @import "component-tools-fab.css";
 @import "chat-panel.css";

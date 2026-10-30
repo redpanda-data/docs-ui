@@ -24,7 +24,8 @@ module.exports = (src, previewSrc, previewDest, sink = () => map()) => (done) =>
         registerHelpers(src),
         registerVendorsCss(src),
         registerVendorsJs(src),
-        copyImages(previewSrc, previewDest)
+        copyImages(previewSrc, previewDest),
+        copyDataFixtures(previewSrc, previewDest)
       )
     ),
   ])
@@ -155,6 +156,17 @@ function copyImages (src, dest) {
   return vfs
     .src('**/*.{png,svg}', { base: src, cwd: src })
     .pipe(vfs.dest(dest))
+    .pipe(map((file, enc, next) => next()))
+}
+
+// Trimmed data fixtures (preview-src/_data/*.json) go where the tooltip
+// scripts look in preview mode, the UI root: the preview has no content
+// catalog and no attachments. They are not in src/static, so they never ship
+// in the bundle.
+function copyDataFixtures (src, dest) {
+  return vfs
+    .src('_data/*.json', { base: ospath.join(src, '_data'), cwd: src })
+    .pipe(vfs.dest(ospath.join(dest, '_')))
     .pipe(map((file, enc, next) => next()))
 }
 

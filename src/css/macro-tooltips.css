@@ -1,0 +1,68 @@
+/* Inline macro tooltips (blobl:, connect:, rpkcmd:), 28-macro-tooltips.js.
+ * The tooltip body reuses the property tooltip classes (.property-doc-tooltip
+ * and its .prop-tooltip-* children, light and dark), so only what is new is
+ * styled here.
+ */
+
+/* The reference is a link already; the dotted underline says it also has a
+   preview, as it does for property references. */
+.doc code.has-macro-tooltip,
+code.has-macro-tooltip {
+  border-bottom: 2px dotted var(--link-highlight-color, #444ce7);
+}
+
+.doc a:hover code.has-macro-tooltip,
+.doc a:focus code.has-macro-tooltip,
+code.has-macro-tooltip:hover,
+code.has-macro-tooltip:focus {
+  border-bottom-style: solid;
+}
+
+code.has-macro-tooltip[role="button"]:focus-visible {
+  outline: 2px solid var(--link-color, #005cc5);
+  outline-offset: 2px;
+}
+
+/* "input", "processor", ... after the component name */
+.macro-doc-tooltip .macro-tooltip-kind {
+  font-family: var(--body-font-family, inherit);
+  font-weight: 400;
+  color: var(--body-font-color, #333);
+}
+
+/* "Field of the kafka_franz input", "Flag of rpk topic create" */
+.macro-doc-tooltip .macro-tooltip-context {
+  font-size: 0.8125rem;
+  color: var(--body-font-color, #333);
+  opacity: 0.8;
+}
+
+.macro-doc-tooltip .macro-tooltip-context code {
+  background: var(--code-background, #f6f8fa);
+  padding: 1px 4px;
+  border-radius: 3px;
+  border: none;
+}
+
+/* beta, experimental */
+.property-doc-tooltip .prop-badge-status {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+html[data-theme="dark"] .macro-doc-tooltip .macro-tooltip-kind,
+html[data-theme="dark"] .macro-doc-tooltip .macro-tooltip-context {
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .macro-doc-tooltip .macro-tooltip-context code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .property-doc-tooltip .prop-badge-status {
+  background: #453a1f;
+  color: #ffd54f;
+  border-color: #5a4a28;
+}
