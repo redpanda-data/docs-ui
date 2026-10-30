@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Redpanda Solutions'}}
+{{> head-component-color}}
+  </head>
+  <body class="article solutions-home" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}>
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article solutions-home">
+  {{> toolbar}}
+  <div class="content">
+    <article class="doc sol-doc sol-home">
+      {{> breadcrumbs}}
+      <header class="sol-hero sol-hero--home">
+        <h1 class="page sol-title">{{#if page.attributes.hero-title}}{{{page.attributes.hero-title}}}{{else}}{{{page.title}}}{{/if}}</h1>
+        {{!-- One lede, and the same sentence as the meta description, so
+              search snippets and the page agree. No eyebrow: the breadcrumb
+              and the h1 already name the page. --}}
+        {{#if page.attributes.hero-subtitle}}
+        <p class="sol-lede">{{page.attributes.hero-subtitle}}</p>
+        {{else if page.description}}
+        <p class="sol-lede">{{{detag page.description}}}</p>
+        {{/if}}
+      </header>
+      {{{page.contents}}}
+      {{#*inline "sol-none-published"}}
+      <div class="sol-empty sol-empty--none" data-sol-none>
+        <h2>No solutions published yet</h2>
+        <p>Solutions appear here as soon as the first one is published.</p>
+      </div>
+      {{/inline}}
+      {{!-- A catalog with no records (before the first publish) gets the "none
+            published" state, not the grid, whose own empty state says "No
+            solutions match your filters". --}}
+      {{#with (get-solutions-catalog) as |catalog|}}
+      {{#if catalog.count}}
+      {{!-- The filters render in the sidebar (nav-tree-solution.hbs). Below
+            1024px the sidebar is a drawer behind the menu button, so this
+            script moves them into the slot, collapsed, before first paint.
+            29-solutions-home.js keeps them in the right place when the
+            viewport changes afterwards. The slot comes before Continue
+            learning, so a returning reader reaches the filters without
+            scrolling past their in-progress solutions. --}}
+      <div class="sol-filters-slot" data-sol-filters-slot></div>
+      <script>
+        (function () {
+          var filters = document.querySelector('[data-sol-filters]')
+          var slot = document.querySelector('[data-sol-filters-slot]')
+          if (!filters || !slot || typeof window.matchMedia !== 'function') return
+          if (!window.matchMedia('(max-width: 1023px)').matches) return
+          filters.removeAttribute('open')
+          slot.appendChild(filters)
+        })()
+      </script>
+      <section class="sol-continue" data-sol-continue hidden aria-labelledby="sol-continue-title">
+        <div class="sol-recs-head">
+          <h2 id="sol-continue-title" class="sol-section-title">Continue learning</h2>
+          <p class="sol-recs-sub" data-sol-continue-sub>Pick up where you left off.</p>
+        </div>
+        <div class="sol-continue-grid" data-sol-continue-grid></div>
+      </section>
+      <div class="sol-home-layout">
+        {{> solutions-grid catalog=catalog}}
+      </div>
+      <script type="application/json" data-sol-catalog>{{{catalog.json}}}</script>
+      {{else}}
+      {{> sol-none-published}}
+      {{/if}}
+      {{else}}
+      {{> sol-none-published}}
+      {{/with}}
+      {{> feedback-footer}}
+      {{> tracking-pixel}}
+    </article>
+  </div>
+  {{> footer}}
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

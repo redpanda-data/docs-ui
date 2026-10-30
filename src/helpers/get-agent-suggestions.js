@@ -59,6 +59,13 @@ module.exports = function (options) {
       'Open the Bloblang playground with a sample mapping',
       'Take me to the Redpanda Connect quickstart',
     ],
+    // Solutions readers are building something end to end: lead with finding
+    // the right solution and the reference docs behind a step.
+    solutions: [
+      'Which solution shows change data capture into a lakehouse?',
+      "What's the latest Redpanda Streaming version?",
+      'Take me to the Shadowing docs behind the disaster recovery solution',
+    ],
   }
 
   const generic = [

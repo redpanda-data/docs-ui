@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Untitled'}}
+{{> head-component-color}}
+  </head>
+  {{!-- See solution.hbs for why page-solution is parsed per partial. Step
+        pages add the step id and position from the page-solution-step-*
+        attributes the solutions-catalog extension sets.
+
+        Shell: the same as default pages (main > .content holds article.doc
+        and a sidebar aside), because 02-on-this-page.js builds the TOC from
+        headings that are direct .sect children of article.doc. The left nav
+        (nav-tree-solution) owns navigation; the right rail is the progress
+        card, the on-this-page TOC and the code panel. Below 1281px the rail
+        collapses and, on a step page, follows the article (solutions.css). --}}
+  <body class="article solution-step{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}"{{#if draftDownloads}} data-solution-draft-downloads="true"{{/if}} data-solution-title="{{title}}" data-solution-file-count="{{files.length}}"{{#if files.length}} data-solution-files="{{json-stringify files}}"{{/if}}{{#if verified.platforms.length}} data-solution-tested-on="{{platform-list verified.platforms names=(lookup (get-solutions-catalog) 'platformNames')}}"{{/if}} data-step-id="{{@root.page.attributes.solution-step-id}}" data-step-index="{{@root.page.attributes.solution-step-index}}" data-solution-step-count="{{@root.page.attributes.solution-step-count}}"{{/with}}>
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article solution-step">
+  {{> toolbar}}
+  <div class="content sol-content">
+    <article class="doc sol-doc sol-step-doc">
+      {{> breadcrumbs}}
+      {{> solution-step-header solution=(parse-json page.attributes.solution)}}
+      {{!-- The last step's Take this to production card goes directly after
+            Production considerations, the section it builds on, and ahead of
+            the step actions; without that section, at the end of the content.
+            It is a sect1 with an h2, so On this page lists it. --}}
+      {{#if page.attributes.solution-next-url}}
+      {{{page.contents}}}
+      {{else}}
+      {{#with (split-after-section page.contents 'production-considerations') as |parts|}}
+      {{{parts.before}}}
+      {{> solution-productionize solution=(parse-json @root.page.attributes.solution)}}
+      {{{parts.after}}}
+      {{/with}}
+      {{/if}}
+      {{> solution-step-actions solution=(parse-json page.attributes.solution)}}
+      {{> feedback-footer}}
+      {{> tracking-pixel}}
+    </article>
+    <aside class="sol-rail">
+      <details class="sol-rail-details" data-sol-rail open>
+        {{!-- The position belongs in the summary: below 1280px
+             28-solution-progress.js closes this details, and a
+             collapsed "Progress and code" told the reader nothing
+             about where they were. --}}
+        {{!-- Below 1281px this summary is the step page's sticky bar: where
+              you are, how far through, and the way into the progress card,
+              the code, and On this page. --}}
+        <summary class="sol-rail-summary"><span class="sol-rail-summary-label">Step {{page.attributes.solution-step-index}} of {{page.attributes.solution-step-count}}</span><span class="sol-bar sol-bar--sm sol-rail-summary-bar" aria-hidden="true"><span class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></span></span><span class="sol-rail-summary-meta">Progress, code, contents</span></summary>
+        <div class="sol-rail-body">
+          {{> solution-rail-tools solution=(parse-json page.attributes.solution) step=true}}
+          {{> toc}}
+        </div>
+      </details>
+    </aside>
+  </div>
+  {{> footer}}
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

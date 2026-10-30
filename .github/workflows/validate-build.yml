@@ -71,6 +71,8 @@ jobs:
         run: npm run test:signin-nudge
       - name: Test agent navigation closes the chat panel
         run: npm run test:chat-panel-navigation
+      - name: Test truncated breadcrumbs stay readable
+        run: npm run test:breadcrumb-collapse
       - name: Test Kapa source-group scoping
         run: npm run test:kapa-source-groups
       - name: Test collapsible TOC groups
@@ -95,6 +97,16 @@ jobs:
         run: npm run test:hero-scroll
       - name: Test docs page weight (lazy images, trimmed Prism, on-demand highlighting, head)
         run: npm run test:docs-page-weight
+      - name: Test Solutions progress store, intents and gates
+        run: npm run test:solution-progress
+      - name: Test Solutions recommendations partial and guards
+        run: npm run test:solution-recommendations
+      - name: Test Solutions code folding
+        run: npm run test:solution-code-fold
+      - name: Test Solutions industry and use-case filtering
+        run: npm run test:solution-facets
+      - name: Test every Handlebars template parses
+        run: npm run test:template-syntax
       - name: Test the introduced-in version badge
         run: npm run test:introduced-in-badge
       - name: Test the Ask AI latest-version tool

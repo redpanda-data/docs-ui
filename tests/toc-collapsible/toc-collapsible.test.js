@@ -6,6 +6,10 @@
  * when one of its entries is activated. Activation is covered on every path the script has: a
  * sidebar click, the load pass that handles deep links, scrolling, and the end-of-page pass.
  * Pages without the attribute must keep the flat list.
+ *
+ * Solutions pages get data-collapse-after=6 instead (toc.hbs): only a group with
+ * more entries than that collapses, it starts collapsed, its toggle shows the count, and the same
+ * activation paths open it.
  */
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
@@ -125,10 +129,15 @@ const HEADINGS = [
 // Drive the IIFE against a stub DOM and hand back the built list. Headings are copied so scrollTo()
 // can position them per test; scrollY and scrollHeight feed the end-of-page check in onScroll, and
 // hash is what window.location.hash reports on load.
-function run ({ collapsible, headings = HEADINGS, scrollY = 0, scrollHeight = 5000, hash = '' }) {
+function run ({ collapsible, collapseAfter, headings = HEADINGS, scrollY = 0, scrollHeight = 5000, hash = '' }) {
   headings = headings.map((h) => Object.assign({}, h))
   const sidebar = makeEl('aside')
-  sidebar.dataset = { levels: '2', title: '', collapsible: collapsible ? 'true' : undefined }
+  sidebar.dataset = {
+    levels: '2',
+    title: '',
+    collapsible: collapsible ? 'true' : undefined,
+    collapseAfter: collapseAfter === undefined ? undefined : String(collapseAfter),
+  }
   const menu = makeEl('div')
   menu.className = 'toc-menu'
   sidebar.appendChild(menu)
@@ -384,4 +393,117 @@ test('entries before the first level-1 heading stay at the top level', () => {
   assert.equal(list.children[0].classList.contains('toc-group'), false)
   assert.equal(list.children[0].children[0].href, '#intro-note')
   assert.equal(list.children[1].classList.contains('is-expanded'), true, 'first real group is the expanded one')
+})
+
+// ---- collapseAfter (Solutions layouts) ----
+
+// The last step of a solution: short sections, a three-entry Extend group, and a long
+// Production considerations group, in the order the real pages use.
+const PROD_TOPICS = ['brokers', 'security', 'partitions', 'schema-validation', 'consumer-scaling', 'retention', 'observability', 'disaster-recovery']
+const SOLUTION_HEADINGS = [
+  heading(2, 'what-you-do', 'What you do'),
+  heading(2, 'verify', 'Verify'),
+  heading(2, 'extend-this-solution', 'Extend this solution'),
+  heading(3, 'tiered-storage', 'Keep a season of events with Tiered Storage'),
+  heading(3, 'iceberg', 'Move to Iceberg'),
+  heading(3, 'second-stream', 'Fan out a second stream'),
+  heading(2, 'clean-up', 'Clean up'),
+  heading(2, 'production-considerations', 'Production considerations'),
+].concat(PROD_TOPICS.map((id) => heading(3, 'prod-' + id, id)))
+
+function topLevelHrefs (list) {
+  return list.children.map((li) => li.children[0].href)
+}
+
+test('collapseAfter collapses only a group with more entries than the threshold', () => {
+  const { list } = run({ collapseAfter: 6, headings: SOLUTION_HEADINGS })
+  assert.deepEqual(topLevelHrefs(list), [
+    '#what-you-do', '#verify', '#extend-this-solution',
+    '#tiered-storage', '#iceberg', '#second-stream',
+    '#clean-up', '#production-considerations',
+  ], 'the three-entry Extend group stays a flat list; the eight production topics move under their heading')
+  const groups = list.querySelectorAll('li.toc-group')
+  assert.equal(groups.length, 1)
+  const prod = groups[0]
+  assert.equal(prod.children[0].href, '#production-considerations')
+  assert.deepEqual(prod.children.map((c) => c.tagName), ['A', 'BUTTON', 'UL'])
+  assert.equal(prod.children[2].children.length, PROD_TOPICS.length)
+})
+
+test('a collapseAfter group starts collapsed and its toggle shows the count', () => {
+  const { list } = run({ collapseAfter: 6, headings: SOLUTION_HEADINGS })
+  const prod = list.querySelector('li.toc-group')
+  const toggle = prod.children[1]
+  assert.equal(prod.classList.contains('is-expanded'), false, 'collapsed by default, even as the only group')
+  assert.equal(toggle.type, 'button', 'a real button, so it is keyboard operable')
+  assert.equal(toggle.getAttribute('aria-expanded'), 'false')
+  assert.equal(toggle.getAttribute('aria-controls'), prod.children[2].id)
+  assert.ok(toggle.classList.contains('toc-group-toggle--count'))
+  assert.equal(toggle.textContent, '(8)', 'the visible label is the count')
+  assert.equal(toggle.getAttribute('aria-label'), 'Production considerations: 8 entries', 'the accessible name carries the count')
+
+  toggle.handlers.click()
+  assert.equal(prod.classList.contains('is-expanded'), true)
+  assert.equal(toggle.getAttribute('aria-expanded'), 'true')
+  toggle.handlers.click()
+  assert.equal(prod.classList.contains('is-expanded'), false)
+  assert.equal(toggle.getAttribute('aria-expanded'), 'false')
+})
+
+test('a group at the threshold stays flat', () => {
+  const { list } = run({ collapseAfter: 8, headings: SOLUTION_HEADINGS })
+  assert.equal(list.querySelectorAll('li.toc-group').length, 0)
+  assert.equal(list.querySelectorAll('button').length, 0)
+  assert.equal(list.children.length, SOLUTION_HEADINGS.length)
+})
+
+test('scrolling onto the collapsed group heading opens it', () => {
+  const { list, listeners, headings } = run({ collapseAfter: 6, headings: SOLUTION_HEADINGS })
+  const prod = list.querySelector('li.toc-group')
+  scrollTo(headings, 'clean-up')
+  listeners.load()
+  assert.equal(prod.classList.contains('is-expanded'), false)
+
+  scrollTo(headings, 'production-considerations')
+  listeners.scroll()
+  assert.equal(linksByHref(list)['#production-considerations'].classList.contains('is-active'), true)
+  assert.equal(prod.classList.contains('is-expanded'), true)
+  assert.equal(prod.children[1].getAttribute('aria-expanded'), 'true')
+})
+
+test('scrolling to an entry inside the collapsed group opens it', () => {
+  const { list, listeners, headings } = run({ collapseAfter: 6, headings: SOLUTION_HEADINGS })
+  const prod = list.querySelector('li.toc-group')
+  scrollTo(headings, 'what-you-do')
+  listeners.load()
+  scrollTo(headings, 'prod-retention')
+  listeners.scroll()
+  assert.equal(linksByHref(list)['#prod-retention'].classList.contains('is-active'), true)
+  assert.equal(prod.classList.contains('is-expanded'), true)
+})
+
+test('arriving on an anchor inside the collapsed group opens it', () => {
+  const { list, listeners, headings } = run({ collapseAfter: 6, headings: SOLUTION_HEADINGS, hash: '#prod-security' })
+  const prod = list.querySelector('li.toc-group')
+  scrollTo(headings, 'prod-security', 165)
+  listeners.load()
+  assert.equal(linksByHref(list)['#prod-security'].classList.contains('is-active'), true)
+  assert.equal(prod.classList.contains('is-expanded'), true)
+})
+
+test(':page-toc-collapsible: wins over collapseAfter', () => {
+  const { list } = run({ collapsible: true, collapseAfter: 6, headings: SOLUTION_HEADINGS })
+  const groups = list.querySelectorAll('li.toc-group')
+  assert.equal(groups.length, 2, 'every group with entries collapses, short ones included')
+  assert.equal(groups[0].classList.contains('is-expanded'), true, 'and the first starts expanded')
+  assert.equal(groups[0].children[1].getAttribute('aria-label'), 'Toggle Extend this solution')
+})
+
+test('toc.hbs sets data-collapse-after on Solutions layouts only', () => {
+  const hbs = fs.readFileSync(PARTIAL, 'utf8')
+  const aside = hbs.match(/<aside class="toc sidebar"[^>]*>/)
+  assert.ok(
+    aside[0].includes(`{{#if (or (eq page.layout 'solution') (eq page.layout 'solution-step'))}} data-collapse-after="6"{{/if}}`),
+    'gated on the solution and solution-step layouts'
+  )
 })

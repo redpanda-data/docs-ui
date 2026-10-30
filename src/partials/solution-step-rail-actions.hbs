@@ -1,0 +1,21 @@
+{{!--
+  The step page's rail, under Your progress: the two things a step leads to
+  besides the next step. Context: `solution`.
+  - Quiz me on this step: the same button, and the same handler, as the one
+    under the step (solution-quiz-button.hbs).
+  - Take this to production: the card on the last step
+    (solution-productionize.hbs). The URL is the last entry of the solution's
+    steps, so it needs no page attribute; on the last step itself relativize
+    makes it the bare #take-to-production.
+  It sits in the rail body, so below 1281px it is in the collapsed rail with
+  the progress card, wherever the rail shows.
+--}}
+<div class="sol-rail-actions" data-sol-rail-actions>
+  {{> solution-quiz-button class='sol-btn sol-btn--sm sol-rail-action' placement='rail'}}
+  {{#with (lookup solution.steps (subtract solution.steps.length 1)) as |last|}}
+  <a class="sol-btn sol-btn--sm sol-rail-action" href="{{{relativize (concat last.url '#take-to-production')}}}" data-sol-productionize-link data-placement="rail" data-analytics="solution_productionize_link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    <span>Take this to production</span>
+  </a>
+  {{/with}}
+</div>
