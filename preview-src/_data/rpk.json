@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "rpk_version": "v26.2.2",
+  "generated_at": "2026-10-28T12:58:53.280Z",
+  "plugin_versions": {
+    "ai": "0.2.99",
+    "connect": "4.106.0",
+    "k8s": "26.2.2"
+  },
+  "deprecated_commands": {
+    "rpk benchmark": {
+      "deprecated": true,
+      "_note": "Hidden: true, found by scanning Go source"
+    },
+    "rpk cloud resourcegroup": {
+      "deprecated": true,
+      "_note": "Hidden: true, found by scanning Go source"
+    },
+    "rpk redpanda admin": {
+      "deprecated": true,
+      "_note": "Hidden: true, found by scanning Go source",
+      "replacement": "Use xref:reference:rpk/rpk-cluster/rpk-cluster.adoc[`rpk cluster`] instead.",
+      "deprecatedMessage": "use `rpk cluster` subcommands; see `rpk cluster brokers`, `rpk cluster info --detailed`, `rpk cluster config list --node-id`, and `rpk cluster loggers`"
+    },
+    "rpk redpanda admin brokers": {
+      "deprecated": true,
+      "_note": "Hidden: true, found by scanning Go source"
+    },
+    "rpk redpanda admin config": {
+      "deprecated": true,
+      "_note": "Hidden: true, found by scanning Go source"
+    },
+    "rpk redpanda admin partitions": {
+      "deprecated": true,
+      "_note": "Hidden: true, found by scanning Go source"
+    }
+  },
+  "tree": {
+    "name": "rpk",
+    "version": "(Redpanda CLI):  (rev )",
+    "description": "rpk is the Redpanda CLI and toolbox for managing Redpanda clusters, topics, consumer groups, and streaming pipelines.",
+    "usage": "rpk [flags]",
+    "global_flags": [
+      {
+        "name": "config",
+        "type": "string",
+        "description": "Redpanda or rpk config file; default search paths are \"~/.config/rpk/rpk.yaml\", $PWD/redpanda.yaml, and /etc/redpanda/redpanda.yaml",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "config-opt",
+        "shorthand": "X",
+        "type": "stringArray",
+        "description": "Override rpk configuration settings; '-X help' for detail or '-X list' for terser detail",
+        "default": [],
+        "required": false
+      },
+      {
+        "name": "ignore-profile",
+        "type": "bool",
+        "description": "Ignore rpk.yaml and redpanda.yaml; use default settings",
+        "default": false,
+        "required": false
+      },
+      {
+        "name": "profile",
+        "type": "string",
+        "description": "rpk profile to use",
+        "default": "",
+        "required": false
+      },
+      {
+        "name": "verbose",
+        "shorthand": "v",
+        "type": "bool",
+        "description": "Enable verbose logging",
+        "default": false,
+        "required": false
+      }
+    ],
+    "commands": [
+      {
+        "name": "topic",
+        "description": "Manage Kafka topics, including creating, deleting, and configuring topics. Also includes commands for producing and consuming messages.",
+        "usage": "rpk topic [flags]",
+        "aliases": [],
+        "flags": [],
+        "platforms": [
+          "linux",
+          "darwin"
+        ],
+        "seeAlso": [
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-create.adoc[Create a topic]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-produce.adoc[Produce records to a topic]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-list.adoc[List topics]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-consume.adoc[Consume records from a topic]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-delete.adoc[Delete a topic]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-describe.adoc[Describe a topic and its configuration]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-describe-storage.adoc[Describe the storage status of a topic]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-alter-config.adoc[Modify topic configuration]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-trim-prefix.adoc[Trim existing records in a topic]",
+            "selfHostedOnly": true
+          },
+          {
+            "content": "xref:reference:rpk/rpk-topic/rpk-topic-add-partitions.adoc[Add partitions to an existing topic]",
+            "selfHostedOnly": true
+          }
+        ],
+        "pageAliases": "reference:rpk/rpk-topic.adoc",
+        "commands": [
+          {
+            "name": "create",
+            "description": "Create one or more Kafka topics with configurable partitions, replication factor, and topic-level settings.\n\nAll topics created with one invocation have the same number of partitions, replication factor, and key/value configs. For example, `rpk topic create -c cleanup.policy=compact -r 3 -p 20 foo bar` creates two topics, `foo` and `bar`, each with 20 partitions, 3 replicas, and the `cleanup.policy=compact` config option set.",
+            "usage": "rpk topic create [TOPICS...] [flags]",
+            "aliases": [],
+            "flags": [
+              {
+                "name": "dry",
+                "shorthand": "d",
+                "type": "bool",
+                "description": "Validate the topic creation request without actually creating the topic. Useful for testing configuration.",
+                "default": false,
+                "required": false
+              },
+              {
+                "name": "if-not-exists",
+                "type": "bool",
+                "description": "Only create the topic if it does not already exist",
+                "default": false,
+                "required": false
+              },
+              {
+                "name": "partitions",
+                "shorthand": "p",
+                "type": "int32",
+                "description": "Number of partitions for the topic. The default of `-1` uses the cluster's `default_topic_partitions` property. More partitions enable higher parallelism but increase resource usage.",
+                "default": -1,
+                "required": false
+              },
+              {
+                "name": "replicas",
+                "shorthand": "r",
+                "type": "int16",
+                "description": "Replication factor (must be odd); -1 defaults to the cluster's default_topic_replications",
+                "default": -1,
+                "required": false
+              },
+              {
+                "name": "topic-config",
+                "shorthand": "c",
+                "type": "stringArray",
+                "description": "Topic configuration properties in the format `key=value`. Can be specified multiple times. Example: `--topic-config retention.ms=86400000`.",
+                "default": [],
+                "required": false
+              }
+            ],
+            "platforms": [
+              "linux",
+              "darwin"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
