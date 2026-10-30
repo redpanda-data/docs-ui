@@ -1,0 +1,18 @@
+= Macro Tooltips Off Switch Test
+:page-layout: default
+:page-disable-connect-tooltips: true
+:page-disable-rpk-tooltips: true
+
+This page sets `:page-disable-connect-tooltips: true` and `:page-disable-rpk-tooltips: true`, and leaves Bloblang tooltips on, so each switch turns off its own family only. The references are the same macro output as on link:macro-tooltips-test.html[Macro Tooltips Test].
+
+The function +++<a href="../../../connect/guides/bloblang/functions/#now" class="xref page"><code class="bloblang-call" data-bloblang-function="now">now()</code></a>+++ still has its tooltip.
+
+* You should see: the `now()` tooltip, as on the test page.
+
+The input +++<a href="../../../connect/components/inputs/kafka_franz/" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz">kafka_franz</code> input</a>+++ and its field +++<a href="../../../connect/components/inputs/kafka_franz/#consumer_group" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz" data-connect-field="consumer_group">consumer_group</code></a>+++ are switched off.
+
+* You should see: no tooltip and no dotted underline on either. The links still work.
+
+The command +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-create/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic create" data-rpk-flag="partitions">rpk topic create --partitions</code></a>+++ is switched off.
+
+* You should see: no tooltip and no dotted underline. The link still works.

@@ -1,0 +1,106 @@
+= Macro Tooltips Test
+:page-layout: default
+
+Test page for the hover tooltips on the inline `blobl:`, `connect:` and `rpkcmd:` macros (src/js/28-macro-tooltips.js). Each reference below is the macros' real HTML output, captured from docs-extensions-and-macros through Antora's converter, pasted as pass-through HTML because the UI preview doesn't run the docs macros.
+
+The data comes from two trimmed fixtures, which the preview copies to the UI root: preview-src/_data/connect.json (from connect-4.115.1.json in rp-connect-docs) and preview-src/_data/rpk.json (from docs-data/rpk-v26.2.2.json in docs, in the shape of the published rpk-<version>.json attachment). A tooltip only ever shows what the data says. When the data or the entry is missing, there is no tooltip.
+
+A reference with a tooltip has a dotted underline under its code. Hover it, or move focus to its link with kbd:[Tab]. Press kbd:[Esc] to close the tooltip. On a touch device, a tap opens the tooltip instead of following the link, and the tooltip's footer link goes to the reference page.
+
+== Bloblang functions and methods
+
+The function +++<a href="../../../connect/guides/bloblang/functions/#now" class="xref page"><code class="bloblang-call" data-bloblang-function="now">now()</code></a>+++ returns the current time.
+
+* You should see: the signature `now()` and the first paragraph of its description ("Returns the current timestamp as an RFC 3339 formatted string..."), no parameters, and a View full documentation link to `functions/#now`.
+
+The function +++<a href="../../../connect/guides/bloblang/functions/#counter" class="xref page"><code class="bloblang-call" data-bloblang-function="counter">counter(min)</code></a>+++ names a parameter.
+
+* You should see: the signature `counter(min, max, set)` and a parameter list with defaults: `min` (query expression, default: `1`), `max` (query expression, default: `9223372036854776000`, the value the data holds) and `set` (query expression, optional, no default).
+
+The method +++<a href="../../../connect/guides/bloblang/methods/#uppercase" class="xref page"><code class="bloblang-call" data-bloblang-method="uppercase">.uppercase()</code></a>+++ converts a string.
+
+* You should see: the signature `uppercase()` and "Converts all letters in a string to uppercase", with no parameters.
+
+=== A method in several categories
+
+`contains` is listed under two categories on the methods page. The macro links a different copy for each category, but marks the same name, so both show the same tooltip and differ only in the footer link.
+
+With the default category: +++<a href="../../../connect/guides/bloblang/methods/#contains" class="xref page"><code class="bloblang-call" data-bloblang-method="contains">.contains()</code></a>+++.
+
+With `category=String Manipulation`: +++<a href="../../../connect/guides/bloblang/methods/#contains-2" class="xref page"><code class="bloblang-call" data-bloblang-method="contains">.contains()</code></a>+++.
+
+* You should see: on both, the signature `contains(value)`, "Tests if an array or object contains a value", and the parameter `value` (unknown). The footer link goes to `methods/#contains` on the first and `methods/#contains-2` on the second.
+
+== Connect components and fields
+
+The input +++<a href="../../../connect/components/inputs/kafka_franz/" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz">kafka_franz</code> input</a>+++ reads from Kafka.
+
+* You should see: `kafka_franz` input, a DEPRECATED badge, and the summary "A Kafka input using the Franz Kafka client library." with the link macro rendered as its text.
+
+The processor +++<a href="../../../connect/components/processors/retry/" class="xref page"><code class="connect-component" data-connect-component="processors/retry">retry</code> processor</a>+++ retries child processors.
+
+* You should see: `retry` processor, a BETA badge, and "Attempts to execute a series of child processors until success."
+
+The input +++<a href="../../../connect/components/inputs/twitter_search/" class="xref page"><code class="connect-component" data-connect-component="inputs/twitter_search">twitter_search</code> input</a>+++ searches tweets.
+
+* You should see: `twitter_search` input, an EXPERIMENTAL badge, and "Consumes tweets matching a given search using the Twitter recent search V2 API."
+
+=== Fields
+
+The field +++<a href="../../../connect/components/inputs/kafka_franz/#consumer_group" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz" data-connect-field="consumer_group">consumer_group</code></a>+++ names the group.
+
+* You should see: `consumer_group`: `string`, the first sentence of its description ("An optional consumer group."), no default line (the data has none), and "Field of the kafka_franz input".
+
+The nested field +++<a href="../../../connect/components/inputs/kafka_franz/#sasl-mechanism" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz" data-connect-field="sasl.mechanism">sasl.mechanism</code></a>+++ is inside an array of objects.
+
+* You should see: `sasl.mechanism`: `string` and "The SASL mechanism to use for authentication."
+
+The nested field +++<a href="../../../connect/components/inputs/kafka_franz/#tls-enabled" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz" data-connect-field="tls.enabled">tls.enabled</code></a>+++ turns on TLS.
+
+* You should see: `tls.enabled`: `bool`, "Whether to enable TLS for secure connections.", and Default: `false`.
+
+== rpk commands and flags
+
+The command +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-create/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic create">rpk topic create</code></a>+++ creates topics.
+
+* You should see: the usage line `rpk topic create [TOPICS...] [flags]` and "Create one or more Kafka topics with configurable partitions, replication factor, and topic-level settings."
+
+The flag +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-create/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic create" data-rpk-flag="partitions">rpk topic create --partitions</code></a>+++ sets the partition count.
+
+* You should see: `--partitions`, `-p`: `int32`, its description ("Number of partitions for the topic..."), Default: `-1`, and "Flag of rpk topic create".
+
+The shorthand +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-create/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic create" data-rpk-flag="partitions">rpk topic create -p</code></a>+++ is the same flag.
+
+* You should see: the same tooltip as `--partitions`. The macro writes the long name into the marker for a shorthand.
+
+The global flag +++<a href="../../26.2/reference/rpk/rpk/" class="xref page"><code class="rpk-command" data-rpk-command="rpk" data-rpk-flag="profile">rpk --profile</code></a>+++ picks a profile.
+
+* You should see: `--profile`: `string` and "rpk profile to use", with no default line: the data's default is an empty string, which says nothing.
+
+=== Repeat mentions
+
+In one paragraph, only the first mention gets a tooltip: +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-create/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic create">rpk topic create</code></a>+++ and again +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-create/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic create">rpk topic create</code></a>+++.
+
+* You should see: a tooltip and dotted underline on the first only. The second is a plain link.
+
+== Marked, but missing from the data
+
+These are marked exactly as the macros mark them, but name entries the fixtures don't have, as happens when the data is older than the page.
+
+* Function: +++<a href="../../../connect/guides/bloblang/functions/#not_in_data" class="xref page"><code class="bloblang-call" data-bloblang-function="not_in_data">not_in_data()</code></a>+++. You should see: no tooltip, no dotted underline.
+* Component: +++<a href="../../../connect/components/outputs/kafka/" class="xref page"><code class="connect-component" data-connect-component="outputs/kafka">kafka</code> output</a>+++. You should see: no tooltip.
+* Field: +++<a href="../../../connect/components/inputs/kafka_franz/#client_id" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz" data-connect-field="client_id">client_id</code></a>+++. You should see: no tooltip (the fixture trimmed this field out).
+* Command: +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-delete/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic delete">rpk topic delete</code></a>+++. You should see: no tooltip.
+* Flag: +++<a href="../../26.2/reference/rpk/rpk-topic/rpk-topic-create/" class="xref page"><code class="rpk-command" data-rpk-command="rpk topic create" data-rpk-flag="not-a-flag">rpk topic create --not-a-flag</code></a>+++. You should see: no tooltip.
+
+== Plain backticks are never decorated
+
+These look like each kind of reference but carry no marker. You should see: no tooltip and no dotted underline on any of them.
+
+* Bloblang: `now()`, `.uppercase()`, `this.foo.contains("bar")`
+* Connect: `kafka_franz`, `inputs/kafka_franz`, `consumer_group`
+* rpk: `rpk topic create`, `--partitions`, `-p`
+
+== Per-page off switches
+
+Each family has its own switch: `:page-disable-bloblang-tooltips: true`, `:page-disable-connect-tooltips: true` and `:page-disable-rpk-tooltips: true`. See link:macro-tooltips-off-test.html[Macro Tooltips Off Switch Test], which turns off Connect and rpk tooltips and leaves Bloblang on.

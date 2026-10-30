@@ -258,6 +258,12 @@ page:
       - content: Term Tooltips Test
         url: /tooltip-touch-test.html
         urlType: internal
+      - content: Macro Tooltips Test
+        url: /macro-tooltips-test.html
+        urlType: internal
+      - content: Macro Tooltips Off Switch Test
+        url: /macro-tooltips-off-test.html
+        urlType: internal
     - content: Get Started
       url: '#'
       urlType: internal
