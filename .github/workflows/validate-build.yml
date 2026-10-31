@@ -69,6 +69,8 @@ jobs:
         run: npm run test:markdown-dropdown
       - name: Test header sign-in nudge
         run: npm run test:signin-nudge
+      - name: Test where sign-in and sign-out return to
+        run: npm run test:signin-return
       - name: Test agent navigation closes the chat panel
         run: npm run test:chat-panel-navigation
       - name: Test Kapa source-group scoping
