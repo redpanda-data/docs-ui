@@ -631,20 +631,6 @@
   max-width: 320px;
 }
 
-/* Sales links line under the welcome suggestions (DOC-2607); mirrors chat-panel.css */
-#chat-panel-kapa-root .welcome-sales {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--grey-500-new, #6b7280);
-  line-height: 1.5;
-  margin: 20px 0 0;
-  max-width: 360px;
-}
-
-#chat-panel-kapa-root .welcome-sales a {
-  color: inherit;
-  text-decoration: underline;
-}
-
 /* Suggestion cards - full width buttons */
 #chat-panel-kapa-root .suggestion-cards {
   display: flex;
@@ -1058,8 +1044,7 @@ html[data-theme="dark"] #chat-panel-kapa-root .welcome-title {
   color: #e8eef6 !important;
 }
 
-html[data-theme="dark"] #chat-panel-kapa-root .welcome-description,
-html[data-theme="dark"] #chat-panel-kapa-root .welcome-sales {
+html[data-theme="dark"] #chat-panel-kapa-root .welcome-description {
   color: #7c8ca8 !important;
 }
 

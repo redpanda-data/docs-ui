@@ -929,7 +929,6 @@ export default function ChatInterface() {
                 </div>
               </>
             )}
-            <SalesLinks />
           </div>
         )}
 
@@ -1080,6 +1079,7 @@ export default function ChatInterface() {
           </form>
 
           <div className="disclaimer">
+            <SalesLinks />
             <p>
               <a
                 href="https://www.redpanda.com/legal/privacy-policy"

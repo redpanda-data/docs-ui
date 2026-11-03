@@ -513,7 +513,6 @@ export default function ChatSdkInterface ({ loginUrl }) {
                 ))}
               </div>
             )}
-            <SalesLinks />
           </div>
         )}
 
@@ -605,6 +604,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
             </div>
           </form>
           <div className="disclaimer">
+            <SalesLinks />
             <p>
               <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener">Privacy policy</a>
               {' · '}Powered by <a href="https://kapa.ai" target="_blank" rel="noopener noreferrer">kapa.ai</a>

@@ -74,12 +74,12 @@ export function readSalesLinks () {
   return links.filter((l) => l && typeof l.text === 'string' && typeof l.url === 'string')
 }
 
-// One line under the welcome screen's suggestions, in both chat tiers.
+// One line under the chat input, above the privacy line, in both chat tiers.
 export function SalesLinks () {
   const links = readSalesLinks()
   if (links.length === 0) return null
   return (
-    <p className="welcome-sales">
+    <p className="disclaimer-sales">
       Looking for pricing or a demo?{' '}
       {links.map((l, i) => (
         <React.Fragment key={l.url + i}>
