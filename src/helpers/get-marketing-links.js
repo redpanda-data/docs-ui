@@ -28,7 +28,7 @@ const LINKS = {
   adpDemo: { text: 'Watch the demo', url: 'https://www.redpanda.com/agentic-data-plane-demo' },
   tryRedpanda: { text: 'Try Redpanda', url: 'https://www.redpanda.com/try-data-streaming' },
   enterprise: { text: 'Ask about Enterprise Edition', url: 'https://www.redpanda.com/contact' },
-  community: { text: 'Join the community', url: 'https://redpanda.com/slack' },
+  community: { text: 'Join the community', url: 'https://redpanda.com/slack', icon: 'community' },
 }
 
 const SALES = {

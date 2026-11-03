@@ -19,12 +19,13 @@ const helper = require(path.join(ROOT, 'src/helpers/get-marketing-links.js'))
 const hbs = Handlebars.create()
 hbs.registerHelper('get-marketing-links', helper)
 hbs.registerHelper('or', require(path.join(ROOT, 'src/helpers/or.js')))
+hbs.registerHelper('eq', require(path.join(ROOT, 'src/helpers/eq.js')))
 hbs.registerPartial('help-cta', read('src/partials/help-cta.hbs'))
 
 function renderBox (component, call) {
   const html = hbs.compile(call)({ page: { component: { name: component } } })
-  const links = [...html.matchAll(/<a class="([^"]+)" href="([^"]+)"[^>]*>([^<]+)<\/a>/g)]
-    .map(([, cls, url, text]) => ({ cls, url, text }))
+  const links = [...html.matchAll(/<a class="([^"]+)" href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)]
+    .map(([, cls, url, inner]) => ({ cls, url, text: inner.replace(/<svg[\s\S]*?<\/svg>/g, '').trim(), icon: inner.includes('<svg') }))
   return { html, links }
 }
 
@@ -95,3 +96,10 @@ for (const file of ['src/js/react/components/ChatSdkInterface.jsx', 'src/js/reac
     assert.equal(read(file).split('<SalesLinks />').length - 1, 1)
   })
 }
+
+test('only the community link carries the people icon, as before DOC-2607', () => {
+  for (const component of [...Object.keys(LANDING), 'redpanda-connect']) {
+    const { links } = renderBox(component, "{{> help-cta prefix='ch3' askAi=true}}")
+    assert.deepEqual(links.filter((l) => l.icon).map((l) => l.text), ['Join the community'])
+  }
+})
