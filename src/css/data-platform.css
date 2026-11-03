@@ -17,7 +17,7 @@
 /* Add left padding to content to clear nav on desktop */
 @media screen and (min-width: 1024px) {
   .data-platform .dp-content {
-    padding-left: calc(var(--sidebar-width, 260px) + 16px);
+    padding-left: var(--sidebar-width, 280px);
   }
 }
 
@@ -37,7 +37,7 @@ html[data-theme="dark"] .data-platform.article {
 
   /* When nav is collapsed, reduce content padding */
   body.data-platform:has(.nav-container.hidden) .dp-content {
-    padding-left: 16px;
+    padding-left: 0;
   }
 }
 
