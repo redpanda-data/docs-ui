@@ -23,10 +23,10 @@ const LINKS = {
   demo: { text: 'Book a demo', url: 'https://www.redpanda.com/demo' },
   contact: { text: 'Talk to us', url: 'https://www.redpanda.com/contact' },
   getStarted: { text: 'Get started', url: 'https://www.redpanda.com/get-started' },
-  pricing: { text: 'See pricing', url: 'https://www.redpanda.com/pricing' },
+  pricing: { text: 'Estimate pricing', url: 'https://www.redpanda.com/data-streaming/price-estimator' },
   cloudSignup: { text: 'Sign up for Redpanda Cloud', url: 'https://cloud.redpanda.com/sign-up' },
   adpDemo: { text: 'Watch the demo', url: 'https://www.redpanda.com/agentic-data-plane-demo' },
-  tryRedpanda: { text: 'Try Redpanda', url: 'https://www.redpanda.com/try-redpanda' },
+  tryRedpanda: { text: 'Try Redpanda', url: 'https://www.redpanda.com/try-data-streaming' },
   enterprise: { text: 'Ask about Enterprise Edition', url: 'https://www.redpanda.com/contact' },
   community: { text: 'Join the community', url: 'https://redpanda.com/slack' },
 }
@@ -37,7 +37,8 @@ const SALES = {
 }
 
 // Antora component name -> marketing links on that component's landing page,
-// in display order. The first is the primary button.
+// in display order. The first is the primary button only when the box has no
+// Ask Redpanda AI button (the data-platform layout); otherwise Ask AI is primary.
 const PAGES = {
   'data-platform': ['demo', 'contact', 'getStarted'],
   'cloud-data-platform': ['cloudSignup', 'pricing', 'contact'],

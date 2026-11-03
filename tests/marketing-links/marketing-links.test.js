@@ -32,9 +32,9 @@ function renderBox (component, call) {
 // repo's antora.yml; a rename there would silently drop the links.
 const LANDING = {
   'data-platform': ['Book a demo', 'Talk to us', 'Get started'],
-  'cloud-data-platform': ['Sign up for Redpanda Cloud', 'See pricing', 'Talk to us'],
+  'cloud-data-platform': ['Sign up for Redpanda Cloud', 'Estimate pricing', 'Talk to us'],
   'agentic-data-plane': ['Watch the demo', 'Book a demo', 'Talk to us'],
-  streaming: ['Try Redpanda', 'Ask about Enterprise Edition', 'See pricing'],
+  streaming: ['Try Redpanda', 'Ask about Enterprise Edition', 'Estimate pricing'],
 }
 
 for (const [component, expected] of Object.entries(LANDING)) {
