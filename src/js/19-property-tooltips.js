@@ -1043,6 +1043,10 @@
     tryInit(maxRetries)
   }
 
+  // Shared with the Ask AI lookup_config_property tool (src/js/react/agentTools.js),
+  // which reads the same property reference.
+  window.parsePreservingBigInts = parsePreservingBigInts
+
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init)

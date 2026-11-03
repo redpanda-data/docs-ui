@@ -6,9 +6,11 @@
 // and uses the sample redpanda-properties.json from the UI bundle only in the
 // docs-ui preview.
 //
-// fixture-published.json holds three records copied from the published
-// redpanda-properties-v26.2.4.json. The sample in src/static has none of
-// default_topic_replications or write_caching_default.
+// fixture-published.json holds records copied from the published
+// redpanda-properties-v26.2.4.json: three plain ones, one with an
+// ifdef::env-cloud[] block in its description, one marked exclude_from_docs,
+// one with an alias, and one with a uint64 default. The sample in src/static
+// has none of default_topic_replications or write_caching_default.
 //
 // agentTools.js is an ES module and CI runs Node 18, so it is loaded through
 // vm with its single export rewritten into a global assignment (see
@@ -22,11 +24,19 @@ const vm = require('node:vm')
 
 const ROOT = path.join(__dirname, '..', '..')
 const TOOLS = path.join(ROOT, 'src/js/react/agentTools.js')
-const PUBLISHED = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixture-published.json'), 'utf8'))
+const PUBLISHED_TEXT = fs.readFileSync(path.join(__dirname, 'fixture-published.json'), 'utf8')
+const PUBLISHED = JSON.parse(PUBLISHED_TEXT)
 const SAMPLE = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/static/redpanda-properties.json'), 'utf8'))
 const META_URL = '/streaming/current/reference/_attachments/redpanda-properties-v26.2.4.json'
 
-function loadTool ({ metas = {}, preview = false, files = {} } = {}) {
+// The bigint-safe parser the property tooltips script exposes on window.
+const TOOLTIPS = fs.readFileSync(path.join(ROOT, 'src/js/19-property-tooltips.js'), 'utf8')
+const parsePreservingBigInts = new Function( // eslint-disable-line no-new-func
+  TOOLTIPS.slice(TOOLTIPS.indexOf('var UNSAFE_INT_RX ='), TOOLTIPS.indexOf('function escapeHtml')) +
+  '\nreturn parsePreservingBigInts;'
+)()
+
+function loadTool ({ metas = {}, preview = false, files = {}, bigints = false } = {}) {
   const source = fs.readFileSync(TOOLS, 'utf8')
   const rewritten = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
   assert.notEqual(rewritten, source, 'the agentTools export shape changed; update this harness')
@@ -43,13 +53,16 @@ function loadTool ({ metas = {}, preview = false, files = {} } = {}) {
     siteRootPath: '',
   }
   if (preview) window.isUiPreview = true
+  if (bigints) window.parsePreservingBigInts = parsePreservingBigInts
   const context = {
     console,
     URL,
     fetch: (url) => {
       fetched.push(url)
       if (!(url in files)) return Promise.resolve({ ok: false, status: 404 })
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(files[url]) })
+      const body = files[url]
+      const text = typeof body === 'string' ? body : JSON.stringify(body)
+      return Promise.resolve({ ok: true, text: () => Promise.resolve(text) })
     },
     window,
     document: {
@@ -109,6 +122,20 @@ test('on a real page with no meta, says so and never reads the sample', async ()
   assert.deepEqual(fetched, [])
 })
 
+test('in the docs-ui preview, reads the bundled sample even when the meta is present', async () => {
+  // The preview emits a properties-json-url meta from preview-src/ui-model.yml
+  // for a file the preview does not have.
+  const { tool, fetched } = loadTool({
+    preview: true,
+    metas: { 'properties-json-url': '/streaming/reference/_attachments/redpanda-properties-v25.1.1.json' },
+    files: { '/_/redpanda-properties.json': SAMPLE },
+  })
+  const name = Object.keys(SAMPLE.properties)[0]
+  const r = await tool.execute({ property: name })
+  assert.equal(r.found, true)
+  assert.deepEqual(fetched, ['/_/redpanda-properties.json'])
+})
+
 test('in the docs-ui preview with no meta, reads the bundled sample', async () => {
   const { tool, fetched } = loadTool({ preview: true, files: { '/_/redpanda-properties.json': SAMPLE } })
   const name = Object.keys(SAMPLE.properties)[0]
@@ -127,4 +154,59 @@ test('a failed fetch reports an error and is retried on the next lookup', async 
   const second = await tool.execute({ property: 'default_topic_replications' })
   assert.equal(second.found, true)
   assert.equal(fetched.length, 2)
+})
+
+test('treats a property marked exclude_from_docs as not found', async () => {
+  const name = 'enable_developmental_unrecoverable_data_corrupting_features'
+  assert.equal(PUBLISHED.properties[name].exclude_from_docs, true)
+  const { tool } = loadTool({ metas: { 'properties-json-url': META_URL }, files: { [META_URL]: PUBLISHED } })
+  const r = await tool.execute({ property: name })
+  assert.equal(r.found, false)
+  assert.equal(r.default, undefined)
+  assert.equal(r.scope, undefined)
+})
+
+test('returns the Self-Managed description without AsciiDoc conditionals', async () => {
+  const name = 'redpanda.remote.readreplica'
+  assert.match(PUBLISHED.properties[name].description, /ifdef::env-cloud\[\]/)
+  const { tool } = loadTool({ metas: { 'properties-json-url': META_URL }, files: { [META_URL]: PUBLISHED } })
+  const r = await tool.execute({ property: name })
+  assert.equal(r.found, true)
+  assert.equal(r.description, 'The name of the object storage bucket for a Remote Read Replica topic.')
+})
+
+test('strips HTML from a multi-paragraph description', async () => {
+  const { tool } = loadTool({ metas: { 'properties-json-url': META_URL }, files: { [META_URL]: PUBLISHED } })
+  const r = await tool.execute({ property: 'write_caching_default' })
+  assert.equal(r.found, true)
+  assert.doesNotMatch(r.description, /<[a-z/]/i)
+  assert.match(r.description, /acks=all/)
+})
+
+test('resolves an old property name through aliases', async () => {
+  const { tool } = loadTool({ metas: { 'properties-json-url': META_URL }, files: { [META_URL]: PUBLISHED } })
+  const r = await tool.execute({ property: 'wasm_per_function_memory_limit' })
+  assert.equal(r.found, true)
+  assert.equal(r.name, 'data_transforms_per_function_memory_limit')
+  assert.equal(r.alias, 'wasm_per_function_memory_limit')
+})
+
+test('keeps uint64 defaults exact when the tooltips parser is on the page', async () => {
+  const { tool } = loadTool({
+    metas: { 'properties-json-url': META_URL },
+    files: { [META_URL]: PUBLISHED_TEXT },
+    bigints: true,
+  })
+  const r = await tool.execute({ property: 'virtual_cluster_min_producer_ids' })
+  assert.equal(r.found, true)
+  assert.equal(String(r.default), '18446744073709551615')
+})
+
+test('reports the release the reference comes from', async () => {
+  const { tool } = loadTool({
+    metas: { 'properties-json-url': META_URL, 'latest-redpanda-tag': 'v26.2.4' },
+    files: { [META_URL]: PUBLISHED },
+  })
+  const r = await tool.execute({ property: 'default_topic_replications' })
+  assert.equal(r.version, '26.2.4')
 })

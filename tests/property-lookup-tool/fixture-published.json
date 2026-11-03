@@ -80,6 +80,102 @@
    "type": "integer",
    "visibility": "tunable",
    "description_html": "Default log segment size in bytes for topics which do not set segment.bytes"
+  },
+  "redpanda.remote.readreplica": {
+   "acceptable_values": "",
+   "admonitions": [
+    {
+     "text": "Setting `redpanda.remote.readreplica` together with either `redpanda.remote.read` or `redpanda.remote.write` results in an error.",
+     "type": "CAUTION"
+    }
+   ],
+   "alternate_cluster_property": "",
+   "alternate_cluster_property_doc_file": "",
+   "category": "remote-read-replica",
+   "cluster_property_doc_file": "",
+   "config_scope": "topic",
+   "corresponding_cluster_property": null,
+   "default": null,
+   "defined_in": "src/v/kafka/protocol/topic_properties.h",
+   "description": "The name of the object storage bucket for a Remote Read Replica topic.\n\nifdef::env-cloud[]\nRemote Read Replicas are available on BYOC clusters only.\nendif::[]",
+   "is_deprecated": false,
+   "is_enterprise": false,
+   "is_topic_property": true,
+   "name": "redpanda.remote.readreplica",
+   "needs_restart": false,
+   "see_also": [
+    "xref:manage:remote-read-replicas.adoc[Remote Read Replicas]"
+   ],
+   "type": "string",
+   "description_html": "The name of the object storage bucket for a Remote Read Replica topic."
+  },
+  "enable_developmental_unrecoverable_data_corrupting_features": {
+   "category": "other",
+   "cloud_byoc_only": false,
+   "cloud_editable": false,
+   "cloud_readonly": false,
+   "cloud_supported": false,
+   "config_scope": "cluster",
+   "default": null,
+   "defined_in": "override",
+   "description": "Configuration property: enable_developmental_unrecoverable_data_corrupting_features",
+   "exclude_from_docs": true,
+   "is_deprecated": false,
+   "is_topic_property": false,
+   "name": "enable_developmental_unrecoverable_data_corrupting_features",
+   "type": "string",
+   "visibility": "user",
+   "description_html": "Configuration property: enable_developmental_unrecoverable_data_corrupting_features"
+  },
+  "data_transforms_per_function_memory_limit": {
+   "aliases": [
+    "wasm_per_function_memory_limit"
+   ],
+   "category": "other",
+   "cloud_byoc_only": false,
+   "cloud_editable": false,
+   "cloud_readonly": true,
+   "cloud_supported": true,
+   "config_scope": "cluster",
+   "default": 2097152,
+   "defined_in": "src/v/config/configuration.cc",
+   "description": "The amount of memory to give an instance of a data transform (Wasm) virtual machine. The maximum number of functions that can be deployed to a cluster is equal to `data_transforms_per_core_memory_reservation` / `data_transforms_per_function_memory_limit`.",
+   "example": "`5242880`",
+   "gets_restored": true,
+   "is_deprecated": false,
+   "is_enterprise": false,
+   "is_secret": false,
+   "maximum": 4294967296,
+   "minimum": 65536,
+   "name": "data_transforms_per_function_memory_limit",
+   "needs_restart": true,
+   "nullable": false,
+   "type": "integer",
+   "visibility": "user",
+   "description_html": "The amount of memory to give an instance of a data transform (Wasm) virtual machine. The maximum number of functions that can be deployed to a cluster is equal to <code>data_transforms_per_core_memory_reservation</code> / <code>data_transforms_per_function_memory_limit</code>."
+  },
+  "virtual_cluster_min_producer_ids": {
+   "category": "other",
+   "cloud_byoc_only": false,
+   "cloud_editable": false,
+   "cloud_readonly": false,
+   "cloud_supported": false,
+   "config_scope": "cluster",
+   "default": 18446744073709551615,
+   "defined_in": "src/v/config/configuration.cc",
+   "description": "Minimum number of active producers per virtual cluster.",
+   "example": "`18446744073709551615`",
+   "gets_restored": true,
+   "is_deprecated": false,
+   "is_enterprise": false,
+   "is_secret": false,
+   "minimum": 1,
+   "name": "virtual_cluster_min_producer_ids",
+   "needs_restart": false,
+   "nullable": false,
+   "type": "integer",
+   "visibility": "tunable",
+   "description_html": "Minimum number of active producers per virtual cluster."
   }
  }
 }
