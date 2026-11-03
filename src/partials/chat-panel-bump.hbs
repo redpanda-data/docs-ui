@@ -59,6 +59,9 @@
       'How do I create a topic?',
       'Explain consumer groups'
     ];
+    {{!-- Links Ask AI offers for pricing, licensing, and demo questions (DOC-2607).
+          Defined once in the get-marketing-links helper. --}}
+    window.SALES_LINKS = window.SALES_LINKS || {{{get-marketing-links 'kapa-json'}}};
     // Signed-in agent tier: tool-showcasing prompts (static here — the standalone
     // Bump widget has no Antora component context for get-agent-suggestions).
     {{!-- KAPA_SOURCE_GROUP_IDS is deliberately NOT set here. This partial is compiled

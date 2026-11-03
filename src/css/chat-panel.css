@@ -632,6 +632,20 @@
   max-width: 320px;
 }
 
+/* Sales links line under the welcome suggestions (DOC-2607) */
+#chat-panel-kapa-root .welcome-sales {
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  color: var(--kapa-text-muted, #6b7280);
+  line-height: 1.5;
+  margin: 20px 0 0;
+  max-width: 360px;
+}
+
+#chat-panel-kapa-root .welcome-sales a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 /* Suggestion cards - full width buttons */
 #chat-panel-kapa-root .suggestion-cards {
   display: flex;

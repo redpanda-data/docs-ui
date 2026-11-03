@@ -1084,6 +1084,7 @@ html[data-theme="dark"] .dp-concept p {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 32px;
   background: linear-gradient(135deg, rgba(75, 68, 255, 0.05) 0%, var(--grey-50-new, #fafafa) 100%);
   border: 1px solid var(--grey-200-new, #e4e4e7);
@@ -1124,8 +1125,8 @@ html[data-theme="dark"] .dp-help p {
 
 .dp-help-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  flex-shrink: 0;
 }
 
 .dp-help-btn {

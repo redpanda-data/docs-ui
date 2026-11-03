@@ -5,7 +5,7 @@ import { loadConversation, clearConversation } from '../chatPersistence.js'
 import { safeHeap } from '../heap.js'
 import { schedulePeek, forgetQuota, getQuota, quotaExhausted, QUOTA_EVENT } from '../anonQuota.js'
 import { SCOPE_DROPPED_MESSAGE } from '../kapaScope.js'
-import { Answer, Toast } from './chatShared.jsx'
+import { Answer, Toast, SalesLinks } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
 // the same #chat-panel-kapa-root chrome with the same CSS classes as the
@@ -513,6 +513,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
                 ))}
               </div>
             )}
+            <SalesLinks />
           </div>
         )}
 
