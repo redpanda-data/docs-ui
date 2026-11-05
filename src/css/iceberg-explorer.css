@@ -100,13 +100,45 @@
   padding: 1rem 1.1rem;
 }
 
-/* A label and its controls. Groups are spaced by the card gap. */
+/* A radio group: a fieldset with the browser frame removed. Groups are
+   spaced by the card gap. The legend is not a flex item, so it spaces itself. */
 [data-iceberg-explorer] .ice-field {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
+
+[data-iceberg-explorer] .ice-field > legend {
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+
+/* Visually hidden, still read by screen readers. */
+[data-iceberg-explorer] .ice-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Why a control is disabled. */
+[data-iceberg-explorer] .ice-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ice-muted);
+}
+
+[data-iceberg-explorer] .ice-opts .ice-hint { grid-column: 1 / -1; }
 
 [data-iceberg-explorer] .ice-card h3 {
   font-size: 0.8rem;
@@ -144,7 +176,24 @@
   user-select: none;
   transition: border-color 0.15s, background 0.15s;
 }
-[data-iceberg-explorer] .ice-radio:hover { border-color: var(--ice-accent); }
+
+[data-iceberg-explorer] .ice-radio:not(:has(input:disabled)):hover { border-color: var(--ice-accent); }
+
+/* The checked chip is marked by more than the native dot. */
+[data-iceberg-explorer] .ice-radio:has(input:checked) {
+  border-color: var(--ice-accent);
+  background: color-mix(in sRGB, var(--ice-accent) 10%, transparent);
+}
+
+[data-iceberg-explorer] .ice-radio:has(input:focus-visible) {
+  outline: 2px solid var(--ice-accent);
+  outline-offset: 2px;
+}
+
+[data-iceberg-explorer] .ice-radio:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
 
 [data-iceberg-explorer] .ice-radio input {
   accent-color: var(--ice-accent);
@@ -185,6 +234,12 @@
 [data-iceberg-explorer] .ice-textrow input::placeholder {
   color: var(--ice-muted);
   opacity: 1;
+}
+
+[data-iceberg-explorer] .ice-textrow input:focus-visible,
+[data-iceberg-explorer] .ice-copy:focus-visible {
+  outline: 2px solid var(--ice-accent);
+  outline-offset: 2px;
 }
 
 [data-iceberg-explorer] .ice-textrow input:disabled {
@@ -253,6 +308,11 @@
 [data-iceberg-explorer] .ice-copy.ice-copied {
   border-color: var(--ice-green);
   color: var(--ice-green);
+}
+
+[data-iceberg-explorer] .ice-copy.ice-copy-failed {
+  border-color: var(--ice-accent);
+  color: var(--body-font-color);
 }
 
 [data-iceberg-explorer] .ice-tree {

@@ -178,6 +178,24 @@
     return mode === 'schema_id_prefix' || mode === 'schema_latest'
   }
 
+  // Which modes of its section each dependent option is valid with. This is
+  // the one copy of the rule: buildConfigString drops an option outside these
+  // modes, update() disables its control, and the hint under the control is
+  // generated from it. Upstream: "subject and protobuf_name require
+  // mode=schema_latest" and "layout=nested requires a schema mode
+  // (schema_id_prefix or schema_latest)" in model.cc parse_extended_iceberg_mode.
+  var ENABLED_WITH = {
+    subject: ['schema_latest'],
+    protobuf_name: ['schema_latest'],
+    layout: ['schema_id_prefix', 'schema_latest'],
+  }
+  function optionEnabled (option, mode) {
+    return ENABLED_WITH[option].indexOf(mode) !== -1
+  }
+  function enabledHint (option) {
+    return 'Only with ' + ENABLED_WITH[option].join(' or ')
+  }
+
   // ── Config-string builder — mirrors model/model.cc format_to():
   //    legacy strings when legacy-compatible, else the section-based DSL,
   //    always serializing all sections (matches PR #31035 behavior).
@@ -187,13 +205,11 @@
     // IcebergModeLayout.ParseNestedWith*Rejected, IcebergModeParseError.
     // SubjectWith*Mode). Controls can still hold those values after a mode
     // change, so drop them here instead of serializing a rejected string.
-    var keyLatest = cfg.keyMode === 'schema_latest'
-    var valLatest = cfg.valMode === 'schema_latest'
-    var keySubject = keyLatest ? cfg.keySubject : ''
-    var keyProto = keyLatest ? cfg.keyProto : ''
-    var valSubject = valLatest ? cfg.valSubject : ''
-    var valProto = valLatest ? cfg.valProto : ''
-    var valLayout = isSchemaMode(cfg.valMode) ? cfg.valLayout : 'flat'
+    var keySubject = optionEnabled('subject', cfg.keyMode) ? cfg.keySubject : ''
+    var keyProto = optionEnabled('protobuf_name', cfg.keyMode) ? cfg.keyProto : ''
+    var valSubject = optionEnabled('subject', cfg.valMode) ? cfg.valSubject : ''
+    var valProto = optionEnabled('protobuf_name', cfg.valMode) ? cfg.valProto : ''
+    var valLayout = optionEnabled('layout', cfg.valMode) ? cfg.valLayout : 'flat'
     var keyDefault = cfg.keyMode === 'binary'
     var hdrDefault = cfg.hdrType === 'binary'
     var valLayoutDefault = valLayout === 'flat'
@@ -428,53 +444,67 @@
   //    radio `name` attributes are unique — browsers group radios by name
   //    document-wide, so two explorers on one page would otherwise fight over
   //    the checked state of same-named groups.
+  // Every control is labelled with its section ("Key mode", "Value subject"):
+  // key, value and headers all offer the same choices, so a bare "binary" or
+  // "subject" would not say which section it sets. The section word is in a
+  // visually hidden span because the card heading already shows it.
   function template (nid) {
     var r = function (group, value, checked) { return radio(nid, group, value, checked) }
+    var t = function (id, section, option, ph) { return textRow(nid, id, section, option, ph) }
     return '' +
     '<div class="ice-grid">' +
       '<div class="ice-left">' +
         '<div class="ice-card"><h3>Key configuration</h3>' +
-          '<div class="ice-field"><div class="ice-label">Mode</div>' +
-            '<div class="ice-radios" data-group="key-mode">' +
-              r('key-mode', 'binary', true) + r('key-mode', 'string') + r('key-mode', 'schema_id_prefix') + r('key-mode', 'schema_latest') +
-            '</div></div>' +
+          radioField(nid, 'key-mode', 'Key', 'Mode',
+            r('key-mode', 'binary', true) + r('key-mode', 'string') + r('key-mode', 'schema_id_prefix') + r('key-mode', 'schema_latest')) +
           '<div class="ice-opts">' +
-            textRow('key-subject', 'subject', '(default: &lt;topic&gt;-key)') +
-            textRow('key-proto', 'protobuf_name', '(default: first message)') +
+            t('key-subject', 'Key', 'subject', '(default: &lt;topic&gt;-key)') +
+            t('key-proto', 'Key', 'protobuf_name', '(default: first message)') +
+            hint(nid, 'key-opts', 'subject') +
           '</div>' +
         '</div>' +
         '<div class="ice-card"><h3>Value configuration</h3>' +
-          '<div class="ice-field"><div class="ice-label">Mode</div>' +
-            '<div class="ice-radios" data-group="val-mode">' +
-              r('val-mode', 'binary', true) + r('val-mode', 'string') + r('val-mode', 'schema_id_prefix') + r('val-mode', 'schema_latest') +
-            '</div></div>' +
-          '<div class="ice-field"><div class="ice-label">Layout</div>' +
-            '<div class="ice-radios" data-group="val-layout">' +
-              r('val-layout', 'flat', true) + r('val-layout', 'nested') +
-            '</div></div>' +
+          radioField(nid, 'val-mode', 'Value', 'Mode',
+            r('val-mode', 'binary', true) + r('val-mode', 'string') + r('val-mode', 'schema_id_prefix') + r('val-mode', 'schema_latest')) +
+          radioField(nid, 'val-layout', 'Value', 'Layout',
+            r('val-layout', 'flat', true) + r('val-layout', 'nested'), 'layout') +
           '<div class="ice-opts">' +
-            textRow('val-subject', 'subject', '(default: &lt;topic&gt;-value)') +
-            textRow('val-proto', 'protobuf_name', '(default: first message)') +
+            t('val-subject', 'Value', 'subject', '(default: &lt;topic&gt;-value)') +
+            t('val-proto', 'Value', 'protobuf_name', '(default: first message)') +
+            hint(nid, 'val-opts', 'subject') +
           '</div>' +
         '</div>' +
         '<div class="ice-card"><h3>Headers configuration</h3>' +
-          '<div class="ice-field"><div class="ice-label">Value type</div>' +
-            '<div class="ice-radios" data-group="hdr-type">' +
-              r('hdr-type', 'binary', true) + r('hdr-type', 'string') +
-            '</div></div>' +
+          radioField(nid, 'hdr-type', 'Headers', 'Value type',
+            r('hdr-type', 'binary', true) + r('hdr-type', 'string')) +
         '</div>' +
       '</div>' +
       '<div class="ice-right">' +
         '<div class="ice-configbar">' +
-          '<div class="ice-confighead"><span class="ice-configlabel">Config string</span>' +
+          '<div class="ice-confighead"><span class="ice-configlabel" id="' + nid + '-cfglabel">Config string</span>' +
             '<span class="ice-tag" data-out="format"></span>' +
-            '<button type="button" class="ice-copy" data-copy>Copy</button></div>' +
-          '<code class="ice-configstr" data-out="config"></code>' +
+            '<button type="button" class="ice-copy" data-copy>Copy</button>' +
+            '<span class="ice-sr" role="status" data-out="copy-status"></span></div>' +
+          // Announce the string, and only the string, when a control changes it.
+          '<code class="ice-configstr" data-out="config" aria-live="polite" aria-atomic="true" aria-labelledby="' + nid + '-cfglabel"></code>' +
         '</div>' +
         '<div class="ice-card"><h3>Iceberg table schema <span class="ice-tag" data-out="engine"></span></h3><pre class="ice-tree" data-out="schema"></pre></div>' +
         '<div class="ice-card"><h3>Translated record</h3><pre class="ice-tree" data-out="record"></pre></div>' +
       '</div>' +
     '</div>'
+  }
+  // A radio group is a fieldset whose legend names its section. `option`, when
+  // set, is the ENABLED_WITH key that can disable the whole group.
+  function radioField (nid, group, section, label, radiosHtml, option) {
+    return '<fieldset class="ice-field" data-fieldset="' + group + '">' +
+      '<legend class="ice-label"><span class="ice-sr">' + section + ' </span>' + label + '</legend>' +
+      '<div class="ice-radios">' + radiosHtml + '</div>' +
+      (option ? hint(nid, group, option) : '') +
+      '</fieldset>'
+  }
+  // Shown, and linked with aria-describedby, while its controls are disabled.
+  function hint (nid, id, option) {
+    return '<p class="ice-hint" id="' + nid + '-' + id + '-hint" data-hint="' + id + '" hidden>' + esc(enabledHint(option)) + '</p>'
   }
   // A radio's `name` is namespaced by the instance id (nid); its logical group
   // is kept in `data-group` so per-instance queries can find it without knowing
@@ -484,9 +514,22 @@
       '<span>' + value + '</span></label>'
   }
   var instanceCounter = 0
-  function textRow (id, label, ph) {
-    return '<div class="ice-textrow" data-row="' + id + '"><label>' + label + '</label>' +
-      '<input type="text" data-field="' + id + '" placeholder="' + ph + '" disabled></div>'
+  function textRow (nid, id, section, option, ph) {
+    var inputId = nid + '-' + id
+    return '<div class="ice-textrow" data-row="' + id + '">' +
+      '<label for="' + inputId + '"><span class="ice-sr">' + section + ' </span>' + option + '</label>' +
+      '<input type="text" id="' + inputId + '" data-field="' + id + '" placeholder="' + ph + '" disabled></div>'
+  }
+
+  // Copy text to the clipboard. Resolves true only when the write succeeded,
+  // so the button never says "Copied!" for a write that did not happen.
+  function copyText (text, clipboard) {
+    if (!clipboard || typeof clipboard.writeText !== 'function') return Promise.resolve(false)
+    try {
+      return Promise.resolve(clipboard.writeText(text)).then(function () { return true }, function () { return false })
+    } catch (e) {
+      return Promise.resolve(false)
+    }
   }
 
   function hydrate (root) {
@@ -537,26 +580,37 @@
       })
     }
 
+    // Enable or disable controls and toggle the hint that says why. The hint is
+    // only described while it is visible.
+    function setEnabled (els, on, hintId) {
+      var h = q('[data-hint="' + hintId + '"]')
+      if (h) h.hidden = on
+      els.forEach(function (el) {
+        if (!el) return
+        el.disabled = !on
+        if (el.type === 'radio') return
+        if (on) el.removeAttribute('aria-describedby')
+        else el.setAttribute('aria-describedby', nid + '-' + hintId + '-hint')
+      })
+    }
+
     function update () {
       var cfg = getConfig()
-      // Enable subject/protobuf inputs only for schema_latest.
+      // Disable options their section's mode does not allow (ENABLED_WITH)
+      // and show why. Values are kept, so switching back restores them;
+      // buildConfigString leaves disabled options out of the string.
       ;['key', 'val'].forEach(function (p) {
         var mode = p === 'key' ? cfg.keyMode : cfg.valMode
-        var on = mode === 'schema_latest'
-        var sub = root.querySelector('[data-field="' + p + '-subject"]')
-        var pr = root.querySelector('[data-field="' + p + '-proto"]')
-        if (sub) sub.disabled = !on
-        if (pr) pr.disabled = !on
+        var on = optionEnabled('subject', mode)
+        setEnabled([root.querySelector('[data-field="' + p + '-subject"]'), root.querySelector('[data-field="' + p + '-proto"]')],
+          on, p + '-opts')
       })
-      // Layout only applies to schema modes.
-      var valIsSchema = isSchemaMode(cfg.valMode)
-      radios('val-layout').forEach(function (r) {
-        r.disabled = !valIsSchema
-        r.closest('.ice-radio').style.opacity = valIsSchema ? '1' : '0.4'
-      })
-      if (!valIsSchema) {
-        setRadioValue('val-layout', 'flat')
-        cfg.valLayout = 'flat'
+      var layoutOn = optionEnabled('layout', cfg.valMode)
+      setEnabled(Array.prototype.slice.call(radios('val-layout')), layoutOn, 'val-layout')
+      var layoutSet = q('[data-fieldset="val-layout"]')
+      if (layoutSet) {
+        if (layoutOn) layoutSet.removeAttribute('aria-describedby')
+        else layoutSet.setAttribute('aria-describedby', nid + '-val-layout-hint')
       }
 
       // Use the real WASM engine's value fields when loaded and the value is
@@ -604,18 +658,24 @@
     })
 
     var copyBtn = q('[data-copy]')
+    var copyStatus = q('[data-out="copy-status"]')
+    var copyTimer = null
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
-        var text = currentConfig
-        var done = function () {
-          copyBtn.textContent = 'Copied!'
-          copyBtn.classList.add('ice-copied')
-          setTimeout(function () {
+        copyText(currentConfig, navigator.clipboard).then(function (ok) {
+          var msg = ok ? 'Copied!' : 'Copy failed'
+          copyBtn.textContent = msg
+          copyBtn.classList.toggle('ice-copied', ok)
+          copyBtn.classList.toggle('ice-copy-failed', !ok)
+          if (copyStatus) copyStatus.textContent = ok ? 'Config string copied' : 'Could not copy the config string'
+          if (copyTimer) clearTimeout(copyTimer)
+          copyTimer = setTimeout(function () {
+            copyTimer = null
             copyBtn.textContent = 'Copy'
-            copyBtn.classList.remove('ice-copied')
+            copyBtn.classList.remove('ice-copied', 'ice-copy-failed')
+            if (copyStatus) copyStatus.textContent = ''
           }, 1500)
-        }
-        if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, function () {}) } else { done() }
+        })
       })
     }
 
@@ -693,6 +753,10 @@
       parseConfigString: parseConfigString,
       isSchemaMode: isSchemaMode,
       init: init,
+      copyText: copyText,
+      optionEnabled: optionEnabled,
+      enabledHint: enabledHint,
+      template: template,
       mountProblem: mountProblem,
       MOUNT_SELECTOR: MOUNT_SELECTOR,
       isSafeEngineBase: isSafeEngineBase,
