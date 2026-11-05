@@ -1,14 +1,14 @@
 name: Iceberg DSL conformance
 
-# Verifies the Iceberg Mode Explorer's config-string builder (pure JS in
-# src/js/27-iceberg-explorer.js) still matches Redpanda's authoritative DSL
-# serialization, whose expectations live in
-# src/v/model/tests/iceberg_mode_test.cc in the redpanda repo.
+# Verifies the Iceberg Mode Explorer's config-string parser and builder
+# (src/js/27-iceberg-explorer.js) against Redpanda's accept, reject, message
+# and format cases from src/v/model/tests/iceberg_mode_test.cc, copied into
+# tests/iceberg-explorer/fixtures/upstream-vectors.js.
 #
-# The unit test (tests/iceberg-dsl/conformance-test.js) always runs. On a
-# schedule / manual dispatch it also fetches the current C++ test file from a
-# chosen redpanda ref and greps for the expected format strings, so upstream
-# DSL changes surface as a failing check even before anyone updates the JS.
+# The vector tests always run. On a schedule / manual dispatch the job also
+# fetches the current C++ test file from a chosen ref and greps for the
+# expected format strings, so upstream DSL changes surface as a failing check
+# even before anyone updates the fixture.
 
 on:
   pull_request:
@@ -39,11 +39,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        # The explorer DOM tests need jsdom. Nothing in this job uses
+        # Puppeteer's Chrome, so skip its download (see validate-build.yml).
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+        run: npm ci
 
       - name: Run DSL conformance vectors
         run: npm run test:iceberg-dsl
 
-      - name: Check the engine-base guard
+      - name: Run the explorer unit and DOM tests
         run: npm run test:iceberg-explorer
 
       - name: Cross-check vectors against upstream iceberg_mode_test.cc
@@ -67,9 +80,9 @@ jobs:
               echo "::warning::Expected DSL string not found upstream ($REF): $expected"
               missing=$((missing+1))
             fi
-          done < <(grep -oE "expect: '[^']+'" tests/iceberg-dsl/conformance-test.js | sed "s/expect: '//; s/'$//")
+          done < <(grep -oE "expected: '[^']+'" tests/iceberg-explorer/fixtures/upstream-vectors.js | sed "s/expected: '//; s/'$//")
           if [ "$missing" -gt 0 ]; then
-            echo "$missing expected DSL string(s) no longer present upstream — the DSL may have changed; re-sync tests/iceberg-dsl vectors and update buildConfigString."
+            echo "$missing expected DSL string(s) no longer present upstream. The DSL may have changed: re-sync tests/iceberg-explorer/fixtures/upstream-vectors.js (and its docs-extensions-and-macros copy), then the spec in src/js/27-iceberg-explorer.js."
             exit 1
           fi
           echo "All DSL vectors still present in upstream iceberg_mode_test.cc @ $REF"

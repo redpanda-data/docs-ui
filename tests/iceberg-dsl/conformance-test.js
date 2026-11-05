@@ -1,73 +1,58 @@
 #!/usr/bin/env node
 'use strict'
 
-// Conformance test for the Iceberg Mode Explorer's config-string builder.
+// Conformance test for the Iceberg Mode Explorer's config-string parser and
+// builder (src/js/27-iceberg-explorer.js) against Redpanda's own test cases.
 //
-// The DSL string is produced by pure JS in src/js/27-iceberg-explorer.js
-// (buildConfigString). This test pins that JS to Redpanda's OWN format
-// expectations, copied verbatim from the authoritative C++ unit test
-// src/v/model/tests/iceberg_mode_test.cc (the IcebergModeFormat.* cases). If a
-// future Redpanda release changes the DSL serialization, re-syncing these
-// vectors from that test file (and updating the JS to match) is the single
-// maintenance step — that is the "tracks releases" guarantee for the DSL,
-// without needing to compile model.cc to WASM.
+// The cases come from tests/iceberg-explorer/fixtures/upstream-vectors.js,
+// which is copied from docs-extensions-and-macros and was extracted by hand
+// from src/v/model/tests/iceberg_mode_test.cc in streaming-enterprise. It
+// covers every IcebergModeFormat case and the parse, reject and normalize
+// cases, but it is a hand-made copy, not a generated one: when upstream adds
+// or changes a case, update the fixture (in both repos) and then the JS.
 //
-// CI can additionally fetch iceberg_mode_test.cc from a given redpanda ref and
-// diff the expected strings to detect upstream format changes automatically.
+// This runs on every pull request. The scheduled job in
+// .github/workflows/iceberg-dsl-conformance.yml also checks that each
+// expected format string still appears in the upstream test file.
 
-const { ICEBERG_MODE, build, defaultsOf, init, MOUNT_SELECTOR } = require('../../src/js/27-iceberg-explorer.js')
-
-// The config object is keyed by DSL path, as getConfig() returns it.
-function cfg (o) {
-  return Object.assign(defaultsOf(ICEBERG_MODE), o)
-}
-const buildConfigString = (c) => build(ICEBERG_MODE, c)
-
-// Each vector cites the corresponding C++ IcebergModeFormat test case.
-const VECTORS = [
-  // --- legacy strings (backward-compatible serialization) ---
-  { name: 'KeyValue',
-    cfg: cfg({}),
-    expect: 'key_value' },
-  { name: 'ValueSchemaIdPrefix',
-    cfg: cfg({ 'value.mode': 'schema_id_prefix' }),
-    expect: 'value_schema_id_prefix' },
-  { name: 'ValueSchemaLatestBare',
-    cfg: cfg({ 'value.mode': 'schema_latest' }),
-    expect: 'value_schema_latest' },
-  { name: 'ValueSchemaLatestWithSubject',
-    cfg: cfg({ 'value.mode': 'schema_latest', 'value.subject': 'my-topic-value' }),
-    expect: 'value_schema_latest:subject=my-topic-value' },
-  { name: 'ValueSchemaLatestWithProtobuf',
-    cfg: cfg({ 'value.mode': 'schema_latest', 'value.protobuf_name': 'com.example.Msg', 'value.subject': 'my-topic-value' }),
-    expect: 'value_schema_latest:protobuf_name=com.example.Msg,subject=my-topic-value' },
-  // --- section-based format (new): all sections + options always emitted ---
-  { name: 'NewKeySchema',
-    cfg: cfg({ 'key.mode': 'schema_id_prefix' }),
-    expect: 'key:mode=schema_id_prefix;value:mode=binary,layout=flat;headers:value_type=binary' },
-  { name: 'NewHeadersString',
-    cfg: cfg({ 'headers.value_type': 'string' }),
-    expect: 'key:mode=binary;value:mode=binary,layout=flat;headers:value_type=string' },
-]
+const { ICEBERG_MODE, build, parse, defaultsOf, init, MOUNT_SELECTOR } = require('../../src/js/27-iceberg-explorer.js')
+const VECTORS = require('../iceberg-explorer/fixtures/upstream-vectors')
 
 let failures = 0
-for (const v of VECTORS) {
-  const got = buildConfigString(v.cfg).str
-  const ok = got === v.expect
+let total = 0
+function check (name, ok, detail) {
+  total++
   if (!ok) failures++
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${v.name}`)
-  if (!ok) {
-    console.log(`      expected: ${v.expect}`)
-    console.log(`      got:      ${got}`)
-  }
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`)
+  if (!ok) console.log('      ' + detail)
 }
 
-console.log(`\n${VECTORS.length - failures}/${VECTORS.length} conformance vectors passed`)
+// Format: the string Redpanda writes for a config.
+for (const v of VECTORS.format) {
+  const parsed = v.input !== undefined ? parse(ICEBERG_MODE, v.input) : { cfg: Object.assign(defaultsOf(ICEBERG_MODE), v.fields), errors: [] }
+  const got = parsed.errors.length ? 'rejected: ' + parsed.errors[0].message : build(ICEBERG_MODE, parsed.cfg).str
+  check('format ' + v.test, got === v.expected, `expected ${v.expected}, got ${got}`)
+}
+
+// Reject: strings Redpanda refuses must not be accepted.
+for (const v of VECTORS.reject) {
+  const r = parse(ICEBERG_MODE, v.input)
+  check('reject ' + v.test + ' ' + v.input, r.errors.length > 0, 'accepted')
+}
+
+// Error messages: Redpanda's wording.
+for (const v of VECTORS.errorMessages) {
+  const r = parse(ICEBERG_MODE, v.input)
+  const msg = r.errors.length ? r.errors[0].message : '(accepted)'
+  const ok = (v.exact === undefined || msg === v.exact) && (v.contains || []).every((c) => msg.includes(c))
+  check('message ' + v.test, ok, `got "${msg}"`)
+}
+
+console.log(`\n${total - failures}/${total} conformance vectors passed`)
 if (failures) {
-  console.error('\nConfig-string DSL has drifted from iceberg_mode_test.cc vectors.')
+  console.error('\nThe config-string parser or builder has drifted from the iceberg_mode_test.cc vectors.')
   process.exit(1)
 }
-
 
 // --- Mount contract with docs-extensions-and-macros -------------------------
 // The macro (macros/iceberg-explorer.js, MOUNT_ATTRIBUTE) marks its mount with

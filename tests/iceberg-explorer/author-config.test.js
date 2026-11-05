@@ -1,0 +1,72 @@
+'use strict'
+
+// An author's data-config that Redpanda would reject must not be replaced
+// by defaults without a word: the bar keeps the author's string, says why
+// it is invalid in a role=alert, offers nothing to copy, and logs a warning.
+const test = require('node:test')
+const assert = require('node:assert')
+const { page, mount } = require('./helpers/dom')
+
+test('an invalid data-config is shown with Redpanda\'s reason', async () => {
+  const { mounts, warnings, ui } = await page(mount({ 'data-config': 'value:mode=schema_lastest' }))
+  const u = ui(mounts[0])
+  assert.strictEqual(u.config(), 'value:mode=schema_lastest')
+  assert.strictEqual(u.q('[data-out="config-alert"]').getAttribute('role'), 'alert')
+  assert.match(u.alert(), /unknown mode 'schema_lastest' in section 'value'/)
+  assert.strictEqual(u.tag(), 'Not valid')
+  assert.ok(u.copyButtons().every((b) => b.disabled))
+  assert.strictEqual(u.checked('value.mode'), 'binary', 'controls show the defaults')
+  assert.ok(warnings.some((w) => /data-config "value:mode=schema_lastest" is not a valid redpanda\.iceberg\.mode: unknown mode/.test(w)), warnings.join('\n'))
+
+  // The first change to a control replaces it with a string Redpanda accepts.
+  u.pick('value.mode', 'schema_latest')
+  assert.strictEqual(u.alert(), null)
+  assert.strictEqual(u.config(), 'value_schema_latest')
+  assert.ok(u.copyButtons().every((b) => !b.disabled))
+})
+
+test('each kind of upstream rejection reaches the bar', async () => {
+  const cases = {
+    'key:layout=nested': "layout is only valid in the value section, not 'key'",
+    'value:mode=binary;value:mode=string': "duplicate section 'value'",
+    'key_value:subject=x': "unknown section 'key_value'",
+    'value:mode=binary,subject=x': "subject and protobuf_name require mode=schema_latest in section 'value'",
+    'value_schema_latest:layout=nested': "unknown option 'layout' in value_schema_latest",
+    'value:mode=': "malformed options in section 'value' (option 'mode' has no value)",
+  }
+  const { mounts, ui } = await page(Object.keys(cases).map((c) => mount({ 'data-config': c })).join(''))
+  Object.values(cases).forEach((msg, i) => {
+    const alert = ui(mounts[i]).alert()
+    assert.ok(alert && alert.includes(msg), `${Object.keys(cases)[i]}: ${alert}`)
+  })
+})
+
+test('a page for an older release refuses the section format and offers only its own forms', async () => {
+  const { mounts, ui } = await page(
+    mount({ 'data-version': '26.1', 'data-config': 'key:mode=string' }) +
+    mount({ 'data-version': '25.1', 'data-config': 'value_schema_latest:subject=orders-value' }) +
+    mount({ 'data-version': '24.3' }))
+  const [a, b, c] = mounts.map(ui)
+  assert.match(a.alert(), /the section format \(key:, value:, headers:\) requires Redpanda v26\.2\.1 or later, and this page documents 26\.1/)
+  assert.strictEqual(a.config(), 'key:mode=string')
+  for (const u of [a, b, c]) {
+    assert.strictEqual(u.radios('key.mode').length, 0)
+    assert.strictEqual(u.radios('value.layout').length, 0)
+    assert.strictEqual(u.radios('headers.value_type').length, 0)
+  }
+  assert.strictEqual(b.alert(), null)
+  assert.strictEqual(b.config(), 'value_schema_latest:subject=orders-value')
+  assert.strictEqual(b.tag(), 'Requires v25.1 or later')
+  assert.deepStrictEqual(c.radios('value.mode').map((r) => r.value), ['binary', 'schema_id_prefix'])
+  assert.strictEqual(c.input('value.subject'), null)
+})
+
+test('disabled is valid, shown as written, and explained', async () => {
+  const { mounts, warnings, ui } = await page(mount({ 'data-config': 'disabled' }))
+  const u = ui(mounts[0])
+  assert.strictEqual(u.config(), 'disabled')
+  assert.strictEqual(u.alert(), null)
+  assert.match(u.q('[data-out="format-help"]').textContent, /Iceberg is off for the topic/)
+  assert.ok(u.copyButtons().every((b) => !b.disabled))
+  assert.deepStrictEqual(warnings, [])
+})

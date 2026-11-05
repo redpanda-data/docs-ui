@@ -322,8 +322,63 @@
       // Legacy option order (model.cc format_to): protobuf_name then subject.
       { str: 'value_schema_latest', set: { 'value.mode': 'schema_latest' }, section: 'value', options: ['protobuf_name', 'subject'], since: 'v25.1', help: LEGACY_HELP },
     ],
+    disabledLiteral: 'disabled',
     valueRules: VALUE_RULES,
     outputs: 'icebergRow',
+  }
+
+  // ── Older grammars. A page documents one release series, and the explorer
+  //    must never offer or emit a string that series rejects. Before v26.2.1
+  //    only the legacy names exist (model.cc operator>>): from v25.1.1
+  //    `disabled`, `key_value`, `value_schema_id_prefix` and
+  //    `value_schema_latest[:protobuf_name=..,subject=..]`; in v24.3 the
+  //    first three only. Key and headers are always binary there, so only
+  //    the value section has controls.
+  function legacyRevision (modes, legacy, documents) {
+    var value = {
+      name: 'value',
+      label: 'Value',
+      heading: 'Value configuration',
+      fields: [{ name: 'mode', label: 'Mode', type: 'enum', default: 'binary', values: MODES.filter(function (m) { return modes.indexOf(m.value) !== -1 }) }],
+    }
+    if (modes.indexOf('schema_latest') !== -1) value.fields = value.fields.concat(schemaOptions('value'))
+    return {
+      property: ICEBERG_MODE.property,
+      grammar: 'legacy',
+      documents: documents,
+      successor: ICEBERG_MODE,
+      sections: [value],
+      legacy: ICEBERG_MODE.legacy.filter(function (e) { return legacy.indexOf(e.str) !== -1 }),
+      disabledLiteral: 'disabled',
+      valueRules: VALUE_RULES,
+      outputs: 'icebergRow',
+    }
+  }
+  var ICEBERG_MODE_25_1 = legacyRevision(['binary', 'schema_id_prefix', 'schema_latest'],
+    ['key_value', 'value_schema_id_prefix', 'value_schema_latest'], 'a release from v25.1 to v26.1')
+  var ICEBERG_MODE_24_3 = legacyRevision(['binary', 'schema_id_prefix'],
+    ['key_value', 'value_schema_id_prefix'], 'a release before v25.1')
+
+  // Newest first. `since` is the first release series a revision applies to.
+  var REVISIONS = [
+    { since: [26, 2], spec: ICEBERG_MODE },
+    { since: [25, 1], spec: ICEBERG_MODE_25_1 },
+    { since: [0, 0], spec: ICEBERG_MODE_24_3 },
+  ]
+  // "26.2", "v26.1", "26.2.1" -> [26, 2]. Anything else (unversioned,
+  // "master", "beta") documents the latest release.
+  function releaseSeries (version) {
+    var m = /^v?(\d+)\.(\d+)(?:\.\d+)?$/.exec(String(version || '').trim())
+    return m ? [Number(m[1]), Number(m[2])] : null
+  }
+  function specForVersion (version) {
+    var series = releaseSeries(version)
+    if (!series) return REVISIONS[0].spec
+    for (var i = 0; i < REVISIONS.length; i++) {
+      var since = REVISIONS[i].since
+      if (series[0] > since[0] || (series[0] === since[0] && series[1] >= since[1])) return REVISIONS[i].spec
+    }
+    return REVISIONS[REVISIONS.length - 1].spec
   }
 
   // ══ Generic spec machinery ══════════════════════════════════════════════
@@ -449,10 +504,36 @@
 
   // Parse a string against a spec. Returns { cfg, errors, form }: `cfg` holds
   // every path (defaults where the string is silent, all defaults when it is
-  // invalid), `errors` Redpanda's reasons for rejecting it, and `form` one of
-  // 'disabled', 'legacy' or 'sections'.
-  function parse (spec, str) {
+  // invalid), `errors` Redpanda's reasons for rejecting it ({ message,
+  // reason? }, with Redpanda's own wording), and `form` one of 'disabled',
+  // 'legacy' or 'sections'. `options.version` names the release the page
+  // documents, for messages about strings that release does not accept.
+  function parse (spec, str, options) {
     var s = String(str === undefined || str === null ? '' : str).trim()
+    var fail = function (e) { return { cfg: defaultsOf(spec), errors: [e], form: null } }
+    // operator>> stops reading at whitespace, and the rest of the string
+    // makes the setting invalid.
+    if (/\s/.test(s)) return fail(err(VALUE_RULES[0].error))
+    var result = parseGrammar(spec, s, (options && options.version) || '')
+    if (result.errors.length) return result
+    // Text values Redpanda would split or cut short.
+    var problems = fieldsOf(spec).filter(function (e) { return e.field.type === 'text' && result.cfg[e.path] })
+      .map(function (e) {
+        var p = valueProblem(spec, result.cfg[e.path], result.form === 'sections')
+        return p && p.error ? err(e.field.name + " in section '" + e.section.name + "': " + p.error) : null
+      }).filter(Boolean)
+    return problems.length ? fail(problems[0]) : result
+  }
+
+  // The names an older grammar accepts, for its error messages.
+  function legacyForms (spec) {
+    var names = (spec.disabledLiteral ? [spec.disabledLiteral] : []).concat(spec.legacy.map(function (e) {
+      return e.options ? e.str + ' with optional :' + e.options.map(function (o) { return o + '=<name>' }).join(',') : e.str
+    }))
+    return names.slice(0, -1).join(', ') + ', or ' + names[names.length - 1]
+  }
+
+  function parseGrammar (spec, s, version) {
     var cfg = defaultsOf(spec)
     var fail = function (e) { return { cfg: defaultsOf(spec), errors: [e], form: null } }
     if (spec.disabledLiteral && s === spec.disabledLiteral) {
@@ -480,8 +561,20 @@
         return { cfg: cfg, errors: [], form: 'legacy' }
       }
     }
-    if (spec.grammar !== 'sections') return fail(err('not a value this version accepts'))
-    return parseSections(spec, s)
+    if (spec.grammar === 'sections') return parseSections(spec, s)
+    // An older grammar: say why, using what the newest release makes of it.
+    var page = 'this page documents ' + (version || spec.documents)
+    var use = '. Use one of: ' + legacyForms(spec)
+    var newer = spec.successor && parse(spec.successor, s)
+    if (newer && !newer.errors.length && newer.form === 'sections') {
+      var names = spec.successor.sections.map(function (x) { return x.name + ':' }).join(', ')
+      return fail(err('the section format (' + names + ') requires Redpanda ' + spec.successor.sectionsSince + ' or later, and ' + page + use))
+    }
+    if (newer && !newer.errors.length) {
+      var entry = spec.successor.legacy.filter(function (e) { return s.indexOf(e.str) === 0 })[0]
+      if (entry && entry.since) return fail(err(entry.str + ' requires Redpanda ' + entry.since + ' or later, and ' + page + use))
+    }
+    return fail(err('not a value Redpanda accepts in ' + (version || spec.documents) + use))
   }
 
   // model.cc parse_extended_iceberg_mode, driven by the spec.
@@ -838,6 +931,9 @@
           '<code class="ice-configstr" data-out="config" aria-live="polite" aria-atomic="true" aria-labelledby="' + nid + '-cfglabel"></code>' +
           '<p class="ice-help" data-out="format-help"></p>' +
           '<p class="ice-error" data-out="config-error" hidden></p>' +
+          // Why the page's own data-config was not used. role=alert, because
+          // it replaces what the author meant to show.
+          '<p class="ice-error" data-out="config-alert" role="alert" hidden></p>' +
         '</div>' +
         (outputs ? outputs.template(nid) : '') +
       '</div>' +
@@ -858,9 +954,21 @@
   // ══ Hydration ═══════════════════════════════════════════════════════════
 
   var instanceCounter = 0
+  function pageVersion (root) {
+    var nav = typeof document !== 'undefined' && document.querySelector('.nav-container')
+    return root.getAttribute('data-version') || (nav && nav.getAttribute('data-version')) ||
+      (typeof document !== 'undefined' && document.body && document.body.getAttribute('data-version')) || ''
+  }
+
   function hydrate (root, spec) {
-    spec = spec || ICEBERG_MODE
+    var docVersion = pageVersion(root)
+    spec = spec || specForVersion(docVersion)
     var nid = 'ice' + (++instanceCounter)
+    // The page's data-config while it is shown instead of the controls'
+    // string: { str, errors } when Redpanda would reject it, { str, note }
+    // when it is valid but the controls cannot show it (disabled). Cleared by
+    // the first change to a control.
+    var authorState = null
     var engineValFields = null // real-engine value fields, set when WASM loads
     // The config string update() last rendered. Copy uses this, never the DOM
     // text, so markup in the code element (<wbr>, tags) cannot reach the clipboard.
@@ -902,11 +1010,23 @@
       })
     }
 
-    // Apply an author-supplied initial config string (data-config).
+    // Apply an author-supplied initial config string (data-config). A string
+    // Redpanda rejects is shown as written, with Redpanda's reason, rather
+    // than replaced by defaults without a word.
     function applyInitialConfig (str) {
-      if (!str) return
-      var parsed = parse(spec, str)
-      if (!parsed.errors.length) setConfig(parsed.cfg)
+      if (str === null || str === undefined || str === '') return
+      var parsed = parse(spec, str, { version: docVersion })
+      if (parsed.errors.length) {
+        authorState = { str: str, errors: parsed.errors }
+        var e = parsed.errors[0]
+        warn('data-config "' + str + '" is not a valid ' + spec.property + (docVersion ? ' for ' + docVersion : '') +
+          ': ' + e.message + (e.reason ? ' (' + e.reason + ')' : ''))
+        return
+      }
+      setConfig(parsed.cfg)
+      if (parsed.form === 'disabled') {
+        authorState = { str: spec.disabledLiteral, note: 'Iceberg is off for the topic, so no table is written. Pick a mode to see one.' }
+      }
     }
 
     // aria-describedby lists only the ids of visible descriptions.
@@ -917,7 +1037,8 @@
       else el.removeAttribute('aria-describedby')
     }
 
-    function update () {
+    function update (event) {
+      if (event) authorState = null
       var raw = getConfig()
       var built = build(spec, raw)
       var invalid = false
@@ -959,17 +1080,35 @@
         }
       })
 
-      currentConfig = invalid ? '' : built.str
+      var shown = built.str
+      var info = formatInfo(spec, built)
+      var alert = q('[data-out="config-alert"]')
+      var authorBad = !!(authorState && authorState.errors)
+      if (authorState) {
+        shown = authorState.str
+        if (authorBad) {
+          invalid = true
+          var e = authorState.errors[0]
+          alert.textContent = "This page's setting is not valid: " + e.message + (e.reason ? ' (' + e.reason + ')' : '') +
+            '. The controls show the defaults.'
+        } else {
+          info = { tag: formatInfo(spec, { legacy: true }).tag, help: authorState.note }
+        }
+      }
+      alert.hidden = !authorBad
+      if (!authorBad) alert.textContent = ''
+
+      currentConfig = invalid ? '' : shown
       var cfgEl = q('[data-out="config"]')
       // Line breaks go after the separators, so a long string wraps between
       // sections and options instead of inside a key.
-      cfgEl.innerHTML = esc(built.str).replace(/([;,])/g, '$1<wbr>')
+      cfgEl.innerHTML = esc(shown).replace(/([;,])/g, '$1<wbr>')
       cfgEl.classList.toggle('ice-invalid', invalid)
       var errBox = q('[data-out="config-error"]')
-      errBox.hidden = !invalid
-      errBox.textContent = invalid ? 'Not a valid setting. Fix the highlighted field to copy it.' : ''
+      var fieldBad = invalid && !authorBad
+      errBox.hidden = !fieldBad
+      errBox.textContent = fieldBad ? 'Not a valid setting. Fix the highlighted field to copy it.' : ''
       root.querySelectorAll('[data-copy]').forEach(function (b) { b.disabled = invalid })
-      var info = formatInfo(spec, built)
       var fmtEl = q('[data-out="format"]')
       fmtEl.className = 'ice-tag ' + (invalid ? 'ice-bad' : 'ice-info')
       fmtEl.textContent = invalid ? 'Not valid' : info.tag
@@ -986,9 +1125,6 @@
     // re-render when its value fields are available so the schema panel
     // reflects production behavior. Falls back to the interim JS engine.
     if (spec.outputs === 'icebergRow') {
-      var docVersion = root.getAttribute('data-version') ||
-        (document.querySelector('.nav-container') && document.querySelector('.nav-container').getAttribute('data-version')) ||
-        (document.body && document.body.getAttribute('data-version')) || ''
       loadEngineValueFields(docVersion, root.getAttribute('data-engine-base')).then(function (fields) {
         if (fields) { engineValFields = fields; update() }
       })
@@ -1046,9 +1182,12 @@
     }
     return 'unsupported contract version "' + contract + '" (this build supports 1 and 2)'
   }
+  // The spec revision for the mount's property and the release its page
+  // documents.
   function specFor (root) {
     var prop = root.getAttribute('data-property')
-    return SPECS.filter(function (s) { return s.property === prop })[0] || ICEBERG_MODE
+    if (prop && prop !== ICEBERG_MODE.property) return SPECS.filter(function (s) { return s.property === prop })[0]
+    return specForVersion(pageVersion(root))
   }
 
   function warn (msg) {
@@ -1097,6 +1236,10 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       ICEBERG_MODE: ICEBERG_MODE,
+      ICEBERG_MODE_25_1: ICEBERG_MODE_25_1,
+      ICEBERG_MODE_24_3: ICEBERG_MODE_24_3,
+      specForVersion: specForVersion,
+      specFor: specFor,
       MODES: MODES,
       SPECS: SPECS,
       OUTPUTS: OUTPUTS,

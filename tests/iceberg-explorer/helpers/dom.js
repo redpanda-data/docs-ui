@@ -1,0 +1,65 @@
+'use strict'
+
+// Runs the explorer module in a jsdom page, the way site.js runs it in a
+// browser: the script is evaluated in the window with mounts already in the
+// body, and hydration happens on DOMContentLoaded.
+const fs = require('fs')
+const path = require('path')
+const { JSDOM } = require('jsdom')
+
+const SRC = fs.readFileSync(path.join(__dirname, '../../../src/js/27-iceberg-explorer.js'), 'utf8')
+
+const FALLBACK = '<p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer.</p>'
+
+// A mount as the macro writes it. `attrs` are extra attributes.
+function mount (attrs = {}) {
+  const a = Object.assign({ 'data-iceberg-explorer': '2', 'data-property': 'redpanda.iceberg.mode' }, attrs)
+  const html = Object.entries(a).filter(([, v]) => v !== null).map(([k, v]) => ` ${k}="${String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`).join('')
+  return `<div class="iceberg-explorer-mount"${html}>${FALLBACK}</div>`
+}
+
+async function page (body, { src = SRC } = {}) {
+  const dom = new JSDOM(`<!doctype html><html><head></head><body>${body}</body></html>`, {
+    runScripts: 'outside-only',
+    url: 'https://docs.example.test/streaming/current/manage/iceberg.html',
+  })
+  const { window } = dom
+  const warnings = []
+  window.console.warn = (m) => warnings.push(String(m))
+  window.eval(src)
+  if (window.document.readyState === 'loading') {
+    await new Promise((resolve) => window.document.addEventListener('DOMContentLoaded', () => setTimeout(resolve)))
+  }
+  const doc = window.document
+  const mounts = [...doc.querySelectorAll('[data-iceberg-explorer]')]
+  return { dom, window, doc, mounts, warnings, ui: (root) => ui(window, root) }
+}
+
+// Small driver for one hydrated mount.
+function ui (window, root) {
+  const q = (s) => root.querySelector(s)
+  return {
+    root,
+    q,
+    config: () => q('[data-out="config"]').textContent,
+    configHtml: () => q('[data-out="config"]').innerHTML,
+    tag: () => q('[data-out="format"]').textContent,
+    alert: () => { const a = q('[data-out="config-alert"]'); return a.hidden ? null : a.textContent },
+    radios: (p) => [...root.querySelectorAll(`input[type="radio"][data-path="${p}"]`)],
+    checked: (p) => { const r = [...root.querySelectorAll(`input[type="radio"][data-path="${p}"]`)].find((x) => x.checked); return r && r.value },
+    input: (p) => q(`input[type="text"][data-path="${p}"]`),
+    pick (p, v) {
+      const r = this.radios(p).find((x) => x.value === v)
+      if (!r) throw new Error(`no ${p}=${v}`)
+      r.click()
+    },
+    type (p, v) {
+      const i = this.input(p)
+      i.value = v
+      i.dispatchEvent(new window.Event('input', { bubbles: true }))
+    },
+    copyButtons: () => [...root.querySelectorAll('[data-copy]')],
+  }
+}
+
+module.exports = { page, mount, FALLBACK, SRC }
