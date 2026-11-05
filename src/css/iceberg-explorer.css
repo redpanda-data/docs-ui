@@ -5,18 +5,26 @@
  * src/js/27-iceberg-explorer.js into the `[iceberg-explorer]` block mount point.
  */
 
+/* Colors meet WCAG AA (4.5:1) for the small text they are used on, measured
+   on --ice-panel in each theme; tests/iceberg-explorer/css-contrast.test.js
+   checks them. --ice-accent is only used for borders and the native radio dot
+   (3:1 needed), never for text. */
 [data-iceberg-explorer] {
-  --ice-accent: var(--product-color, #e2401b);
-  --ice-muted: var(--color-gray-70, #6b7280);
+  --ice-accent: var(--link-font-color, #e2401b);
+  --ice-muted: var(--color-gray-70, #667085);
   --ice-border: var(--panel-border-color, #d0d3d9);
   --ice-panel: var(--panel-background, #f7f8fa);
   --ice-pre: var(--pre-background, #f0f1f4);
   --ice-code: var(--code-font-color, var(--body-font-color));
   --ice-green: #1a7f5a;
   --ice-blue: #2563c9;
-  --ice-yellow: #9a6b00;
+  --ice-yellow: #7a5400;
   --ice-purple: #7c3aed;
   --ice-cyan: #0e7490;
+  --ice-tag-legacy: #7a5400;
+  --ice-tag-new: #6d28d9;
+  --ice-tag-real: #146c4c;
+  --ice-tag-preview: var(--slate-600, #475467);
 
   font-size: var(--secondary-font-size, 0.9rem);
   margin: 1.25rem 0;
@@ -26,6 +34,13 @@
 }
 
 [data-theme="dark"] [data-iceberg-explorer] {
+  /* --color-gray-70 is not redefined for dark mode, so the light gray would
+     sit at 2.96:1 on the dark card. */
+  --ice-muted: var(--slate-400, #98a2b3);
+  --ice-tag-legacy: #facc15;
+  --ice-tag-new: #d8b4fe;
+  --ice-tag-real: #4ade80;
+  --ice-tag-preview: var(--slate-300, #d0d5dd);
   --ice-green: #4ade80;
   --ice-blue: #60a5fa;
   --ice-yellow: #facc15;
@@ -161,8 +176,15 @@
   border-radius: 5px;
   padding: 0.3rem 0.5rem;
   color: var(--body-font-color);
-  font-family: var(--code-font-family, monospace);
+  font-family: var(--monospace-font-family, monospace);
   font-size: 0.78rem;
+}
+
+/* The site sets ::placeholder { opacity: .5 }, which leaves the defaults shown
+   here at about 1.9:1. */
+[data-iceberg-explorer] .ice-textrow input::placeholder {
+  color: var(--ice-muted);
+  opacity: 1;
 }
 
 [data-iceberg-explorer] .ice-textrow input:disabled {
@@ -204,7 +226,7 @@
 
 [data-iceberg-explorer] .ice-configstr {
   display: block;
-  font-family: var(--code-font-family, monospace);
+  font-family: var(--monospace-font-family, monospace);
   font-size: 0.9rem;
   line-height: 1.6;
   color: var(--ice-green);
@@ -225,7 +247,7 @@
 
 [data-iceberg-explorer] .ice-copy:hover {
   border-color: var(--ice-accent);
-  color: var(--ice-accent);
+  color: var(--body-font-color);
 }
 
 [data-iceberg-explorer] .ice-copy.ice-copied {
@@ -234,7 +256,7 @@
 }
 
 [data-iceberg-explorer] .ice-tree {
-  font-family: var(--code-font-family, monospace);
+  font-family: var(--monospace-font-family, monospace);
   font-size: 0.8rem;
   line-height: 1.65;
   white-space: pre;
@@ -259,36 +281,24 @@
 [data-iceberg-explorer] .ice-tree .field-val-num { color: var(--ice-yellow); }
 [data-iceberg-explorer] .ice-tree .field-val-bin { color: var(--ice-purple); }
 
+/* Each tag sets --tag-fg; the tint is derived from it so text and background
+   cannot drift apart. */
 [data-iceberg-explorer] .ice-tag {
   display: inline-block;
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.1rem 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  padding: 0.05rem 0.4rem;
   border-radius: 4px;
   vertical-align: middle;
+  color: var(--tag-fg);
+  background: color-mix(in sRGB, var(--tag-fg) 12%, transparent);
 }
 
-[data-iceberg-explorer] .ice-tag.ice-new {
-  background: rgba(124, 58, 237, 0.15);
-  color: var(--ice-purple);
-}
-
-[data-iceberg-explorer] .ice-tag.ice-legacy {
-  background: rgba(154, 107, 0, 0.15);
-  color: var(--ice-yellow);
-}
-
-[data-iceberg-explorer] .ice-tag.ice-engine-real {
-  background: rgba(26, 127, 90, 0.15);
-  color: var(--ice-green);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-[data-iceberg-explorer] .ice-tag.ice-engine-preview {
-  background: rgba(107, 114, 128, 0.15);
-  color: var(--ice-muted);
-  text-transform: none;
-  letter-spacing: 0;
-}
+[data-iceberg-explorer] .ice-tag:empty { display: none; }
+[data-iceberg-explorer] .ice-tag.ice-new { --tag-fg: var(--ice-tag-new); }
+[data-iceberg-explorer] .ice-tag.ice-legacy { --tag-fg: var(--ice-tag-legacy); }
+[data-iceberg-explorer] .ice-tag.ice-engine-real { --tag-fg: var(--ice-tag-real); }
+[data-iceberg-explorer] .ice-tag.ice-engine-preview { --tag-fg: var(--ice-tag-preview); }
