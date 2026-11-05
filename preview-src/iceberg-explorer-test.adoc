@@ -6,10 +6,16 @@
 Pick a configuration and see the DSL config string, the resulting Iceberg table
 schema, and a sample translated record update live.
 
-The markup below replicates the exact output of the `[iceberg-explorer]` block
-macro in docs-extensions-and-macros 5.60.0 (`macros/iceberg-explorer.js`), so this
-preview does not depend on that package. The `page-version` attribute is unset
-here, so the macro emits no `data-version`.
+The markup below replicates the output of the `[iceberg-explorer]` block
+macro in docs-extensions-and-macros (`macros/iceberg-explorer.js`), so this
+preview does not depend on that package. Mounts without `data-version` stand
+for a page with no `page-version`.
+
+Each mount waits for the engine built from the Redpanda release it documents:
+`iceberg-engine-<version>.js` (or `iceberg-engine.js` for a mount without
+`data-version`) in the UI root, built with `iceberg-editor/wasm/build.sh web`.
+The engine decides which choices the controls offer. A mount whose engine is
+missing, or built from another release, keeps its fallback text.
 
 == Default
 
@@ -45,7 +51,8 @@ Source: `[iceberg-explorer,config="value:mode=schema_latest,subject=orders-value
 == Contract 2: a page for an older release
 
 Mount contract 2 (docs-extensions-and-macros#485) adds `data-property`. With
-`data-version="26.1"` the explorer offers only the legacy names v26.1 accepts.
+`data-version="26.1"` the explorer loads the v26.1 engine, which accepts only
+the short names, so only the value mode and its options are offered.
 
 ++++
 <div class="iceberg-explorer-mount" data-iceberg-explorer="2" data-property="redpanda.iceberg.mode" data-version="26.1" data-config="value_schema_latest:subject=orders-value">
@@ -64,10 +71,13 @@ visible and says why.
 </div>
 ++++
 
-== Contract 2: Iceberg disabled
+== Contract 2: Iceberg disabled, with property metadata
+
+`data-property-meta` carries the property's entry from the generated property
+JSON: its description, related links and Enterprise flag.
 
 ++++
-<div class="iceberg-explorer-mount" data-iceberg-explorer="2" data-property="redpanda.iceberg.mode" data-version="26.2" data-config="disabled">
+<div class="iceberg-explorer-mount" data-iceberg-explorer="2" data-property="redpanda.iceberg.mode" data-version="26.2" data-config="disabled" data-property-meta="{&quot;description&quot;:&quot;Enables the translation of topic data into Iceberg tables and sets the translation mode.&quot;,&quot;default&quot;:null,&quot;is_enterprise&quot;:true,&quot;cloud_supported&quot;:true,&quot;see_also&quot;:[{&quot;href&quot;:&quot;/streaming/current/manage/iceberg/about-iceberg-topics/&quot;,&quot;text&quot;:&quot;About Iceberg Topics&quot;},{&quot;href&quot;:&quot;/streaming/current/manage/iceberg/specify-iceberg-schema/&quot;,&quot;text&quot;:&quot;Specify Iceberg Schema&quot;}],&quot;source&quot;:&quot;redpanda-properties-v26.2.4.json&quot;}">
   <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
 </div>
 ++++

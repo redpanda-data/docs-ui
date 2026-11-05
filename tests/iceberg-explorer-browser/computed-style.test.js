@@ -7,12 +7,20 @@
 //
 // Needs the preview build: run `npx gulp preview:build` first. The
 // iceberg-dsl-conformance workflow does both.
+//
+// Each mount loads the engine for its data-version from the UI root. A
+// preview build has them only if you built them (iceberg-editor/README.md);
+// for any engine file the build lacks, the server answers with the test
+// stand-in for that release (tests/iceberg-explorer/helpers/fake-engine.js),
+// so the explorer renders as it would with the real one. Set
+// ICEBERG_REAL_ENGINES=1 to fail instead, when checking real builds.
 const test = require('node:test')
 const assert = require('node:assert')
 const fs = require('fs')
 const http = require('http')
 const path = require('path')
 const puppeteer = require('puppeteer')
+const { browserScript } = require('../iceberg-explorer/helpers/fake-engine')
 
 const PUBLIC = path.join(__dirname, '../../public')
 const PAGE = 'iceberg-explorer-test.html'
@@ -27,6 +35,11 @@ test.before(async () => {
   server = http.createServer((req, res) => {
     const rel = decodeURIComponent(new URL(req.url, 'http://x').pathname).replace(/^\/+/, '')
     const file = path.join(PUBLIC, rel)
+    const engine = /(?:^|\/)(iceberg-engine(?:-[\d.]+)?\.js)$/.exec(rel)
+    if (engine && !fs.existsSync(file) && process.env.ICEBERG_REAL_ENGINES !== '1') {
+      res.writeHead(200, { 'content-type': 'text/javascript' })
+      return res.end(browserScript(engine[1]))
+    }
     if (!file.startsWith(PUBLIC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
       res.writeHead(404)
       return res.end()
@@ -79,7 +92,7 @@ function inspect () {
   const mounts = [...document.querySelectorAll('[data-iceberg-explorer]')]
   mounts.forEach((m, i) => {
     const where = `mount ${i + 1}`
-    if (m.getAttribute('data-hydrated') !== 'true') problems.push(`${where} did not hydrate: ${m.getAttribute('data-hydrated')}`)
+    if (m.getAttribute('data-hydrated') !== 'true') return problems.push(`${where} did not hydrate: ${m.getAttribute('data-hydrated')}`)
     const box = m.getBoundingClientRect()
     if (box.right > vw + 1) problems.push(`${where} ends at ${box.right}, past the viewport ${vw}`)
     if (m.scrollWidth > m.clientWidth + 1) problems.push(`${where} overflows: ${m.scrollWidth} > ${m.clientWidth}`)
@@ -100,7 +113,7 @@ function inspect () {
     for (const [k, v] of Object.entries(reset)) if (s[k] !== v) problems.push(`${where}: config string ${k} is ${s[k]}, expected ${v}`)
     if (s.wordBreak === 'break-all') problems.push(`${where}: config string breaks inside words`)
 
-    const small = m.querySelectorAll('.ice-card h3, .ice-label, .ice-textrow label, .ice-configlabel, .ice-help:not(:empty), .ice-hint:not([hidden]), .ice-tag:not(:empty), .ice-copy, .ice-error:not([hidden]), .field-req, .struct-brace, .field-name, .field-type')
+    const small = m.querySelectorAll('.ice-card h3, .ice-label, .ice-textrow label, .ice-configlabel, .ice-help:not(:empty), .ice-seealso a, .ice-hint:not([hidden]), .ice-tag:not(:empty), .ice-copy, .ice-error:not([hidden]), .field-req, .struct-brace, .field-name, .field-type')
     for (const el of small) {
       if (el.offsetParent === null) continue
       const fg = parse(getComputedStyle(el).color)
@@ -113,7 +126,8 @@ function inspect () {
     }
   })
   const alerts = mounts.map((m) => { const a = m.querySelector('[data-out="config-alert"]'); return a && !a.hidden ? a.textContent : null })
-  return { problems, alerts, theme: document.documentElement.getAttribute('data-theme'), mounts: mounts.length }
+  const meta = mounts.map((m) => !!m.querySelector('[data-out="property-description"]') && !!m.querySelector('[data-out="enterprise"]'))
+  return { problems, alerts, meta, theme: document.documentElement.getAttribute('data-theme'), mounts: mounts.length }
 }
 
 for (const width of [390, 1440]) {
@@ -124,9 +138,10 @@ for (const width of [390, 1440]) {
         await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: theme }])
         await page.setViewport({ width, height: 900 })
         await page.goto(`${origin}/${PAGE}`, { waitUntil: 'load' })
+        // Mounts are marked loading until their engine arrives.
         await page.waitForFunction(() => {
           const ms = [...document.querySelectorAll('[data-iceberg-explorer]')]
-          return ms.length && ms.every((m) => m.getAttribute('data-hydrated'))
+          return ms.length && ms.every((m) => m.getAttribute('data-hydrated') && m.getAttribute('data-hydrated') !== 'loading')
         }, { timeout: 10000 })
         // Fonts change widths; measure after they settle.
         await page.evaluate(() => document.fonts && document.fonts.ready)
@@ -136,6 +151,8 @@ for (const width of [390, 1440]) {
         assert.deepStrictEqual(out.problems, [])
         // Only the preview's deliberately invalid config is flagged.
         assert.deepStrictEqual(out.alerts.map((x) => x && /schema_lastest/.test(x)), [null, null, null, null, true, null])
+        // The property's description and Enterprise badge, on the mount that has data-property-meta.
+        assert.deepStrictEqual(out.meta, [false, false, false, false, false, true])
       } finally {
         await page.close()
       }

@@ -31,8 +31,7 @@ function serveEngines (window, engines = {}, requested = []) {
       const url = new URL(el.src).pathname
       requested.push(url)
       const file = url.split('/').pop()
-      const v = /^iceberg-engine-(.+)\.js$/.exec(file)
-      const mod = file in engines ? engines[file] : file === 'iceberg-engine.js' ? fakeEngine.sections() : v && fakeEngine.forVersion(v[1])
+      const mod = file in engines ? engines[file] : fakeEngine.forFile(file)
       setTimeout(() => {
         if (!mod) return el.onerror()
         window.createIcebergEngine = () => Promise.resolve(mod)

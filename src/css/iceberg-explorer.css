@@ -295,8 +295,13 @@
 
 [data-iceberg-explorer] .ice-configstr.ice-invalid { color: var(--ice-muted); }
 
-/* The property's description and related links (data-property-meta). */
-[data-iceberg-explorer] .ice-seealso a { color: var(--link-font-color, inherit); }
+/* The property's related links (data-property-meta). The site link color is
+   under 4.5:1 at this size on the card, so the links use the checked blue
+   and keep their underline. */
+[data-iceberg-explorer] .ice-seealso a {
+  color: var(--ice-blue);
+  text-decoration: underline;
+}
 
 [data-iceberg-explorer] .ice-copy:disabled {
   cursor: not-allowed;
