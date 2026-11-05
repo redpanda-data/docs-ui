@@ -987,7 +987,58 @@
     return html + '</div>'
   }
 
-  function template (spec, nid) {
+  // ── Property metadata (data-property-meta). The macro copies it from the
+  //    generated property JSON (redpanda-properties-v<X.Y.Z>.json) for the
+  //    release the page documents: { description, default, is_enterprise,
+  //    cloud_supported, see_also: [{ href, text }], source }, every key
+  //    optional, unknown keys ignored. Shown near the config bar.
+
+  // Links the page may carry: http(s), root-relative and same-page. Anything
+  // else (javascript:, data:, //host) is shown as text.
+  function isSafeHref (href) {
+    if (typeof href !== 'string' || !href) return false
+    // eslint-disable-next-line no-control-regex
+    if (/[\s\x00-\x1f\x7f\\]/.test(href)) return false
+    return /^(https?:\/\/[^/]|\/(?!\/)|#)/i.test(href)
+  }
+  // The usable part of a data-property-meta value, or null.
+  function parsePropertyMeta (raw) {
+    if (raw === null || raw === undefined || raw === '') return null
+    var m
+    try { m = JSON.parse(raw) } catch (e) {
+      warn('ignored data-property-meta that is not JSON: ' + (e && e.message))
+      return null
+    }
+    if (!m || typeof m !== 'object' || Array.isArray(m)) return null
+    var out = {}
+    if (typeof m.description === 'string' && m.description.trim()) out.description = m.description.trim()
+    if (m.is_enterprise === true) out.isEnterprise = true
+    if (Array.isArray(m.see_also)) {
+      out.seeAlso = m.see_also.filter(function (l) {
+        return l && typeof l === 'object' && typeof l.text === 'string' && l.text.trim()
+      }).map(function (l) { return { text: l.text.trim(), href: isSafeHref(l.href) ? l.href : null } })
+      if (!out.seeAlso.length) delete out.seeAlso
+    }
+    return Object.keys(out).length ? out : null
+  }
+  function metaHeadHtml (meta) {
+    return meta && meta.isEnterprise
+      ? '<span class="ice-tag ice-enterprise" data-out="enterprise" title="Requires an Enterprise license">Enterprise</span>'
+      : ''
+  }
+  function metaBodyHtml (meta) {
+    if (!meta) return ''
+    var html = ''
+    if (meta.description) html += '<p class="ice-help ice-propdesc" data-out="property-description">' + esc(meta.description) + '</p>'
+    if (meta.seeAlso) {
+      html += '<p class="ice-help ice-seealso" data-out="property-see-also">See also: ' + meta.seeAlso.map(function (l) {
+        return l.href ? '<a href="' + esc(l.href) + '">' + esc(l.text) + '</a>' : esc(l.text)
+      }).join(', ') + '</p>'
+    }
+    return html
+  }
+
+  function template (spec, nid, meta) {
     var outputs = OUTPUTS[spec.outputs]
     return '' +
     '<div class="ice-grid">' +
@@ -995,12 +1046,14 @@
       '<div class="ice-right">' +
         '<div class="ice-configbar">' +
           '<div class="ice-confighead"><span class="ice-configlabel" id="' + nid + '-cfglabel">Value for <code class="ice-prop">' + esc(spec.property) + '</code></span>' +
+            metaHeadHtml(meta) +
             '<span class="ice-tag" data-out="format"></span>' +
             '<span class="ice-copies">' +
               '<button type="button" class="ice-copy" data-copy="value">Copy</button>' +
               '<button type="button" class="ice-copy" data-copy="rpk">Copy rpk command</button>' +
             '</span>' +
             '<span class="ice-sr" role="status" data-out="copy-status"></span></div>' +
+          metaBodyHtml(meta) +
           // Announce the string, and only the string, when a control changes it.
           '<code class="ice-configstr" data-out="config" aria-live="polite" aria-atomic="true" aria-labelledby="' + nid + '-cfglabel"></code>' +
           '<p class="ice-help" data-out="format-help"></p>' +
@@ -1057,8 +1110,9 @@
   }
 
   // Render the explorer into `root`. `spec` is the property's spec as the
-  // mount's release offers it (probeSpec), and `engine` that release's engine.
-  function hydrate (root, spec, engine) {
+  // mount's release offers it (probeSpec), `engine` that release's engine,
+  // and `meta` the parsed data-property-meta or null.
+  function hydrate (root, spec, engine, meta) {
     var nid = 'ice' + (++instanceCounter)
     // The page's data-config while it is shown instead of the controls'
     // string: { str, errors } when Redpanda would reject it, { str, note }
@@ -1069,7 +1123,7 @@
     // text, so markup in the code element (<wbr>, tags) cannot reach the clipboard.
     var currentConfig = ''
     var entries = fieldsOf(spec)
-    root.innerHTML = template(spec, nid)
+    root.innerHTML = template(spec, nid, meta)
     var q = function (sel) { return root.querySelector(sel) }
     // Controls are found by data-path within this mount, never by the global
     // radio name. Paths come from the spec, never from the page.
@@ -1268,7 +1322,8 @@
   // The value of the mount attribute is the contract version the macro wrote.
   // A mount this module does not understand keeps its fallback text.
   //   1: data-config, data-version, data-engine-base.
-  //   2: as 1, plus data-property naming the property the mount explores.
+  //   2: as 1, plus data-property naming the property the mount explores,
+  //      and optional data-property-meta (see parsePropertyMeta).
   var SPECS = [ICEBERG_MODE]
   function mountProblem (root) {
     var contract = root.getAttribute('data-iceberg-explorer')
@@ -1304,7 +1359,7 @@
     // One broken mount must not stop the rest of the page.
     var fallback = root.innerHTML
     try {
-      hydrate(root, probeSpec(specFor(root), engine), engine)
+      hydrate(root, probeSpec(specFor(root), engine), engine, parsePropertyMeta(root.getAttribute('data-property-meta')))
       root.setAttribute('data-hydrated', 'true')
     } catch (e) {
       root.innerHTML = fallback
@@ -1359,6 +1414,8 @@
       specFor: specFor,
       probeSpec: probeSpec,
       engineProblem: engineProblem,
+      parsePropertyMeta: parsePropertyMeta,
+      isSafeHref: isSafeHref,
       MODES: MODES,
       SPECS: SPECS,
       OUTPUTS: OUTPUTS,

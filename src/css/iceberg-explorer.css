@@ -24,6 +24,7 @@
   --ice-error: #b42318;
   --ice-tag-info: #1d4ed8;
   --ice-tag-real: #146c4c;
+  --ice-tag-enterprise: #6d28d9;
 
   font-size: var(--secondary-font-size, 0.9rem);
   margin: 1.25rem 0;
@@ -39,6 +40,7 @@
   --ice-error: #fda29b;
   --ice-tag-info: #93c5fd;
   --ice-tag-real: #4ade80;
+  --ice-tag-enterprise: #c4b5fd;
   --ice-green: #4ade80;
   --ice-blue: #60a5fa;
   --ice-yellow: #facc15;
@@ -293,6 +295,9 @@
 
 [data-iceberg-explorer] .ice-configstr.ice-invalid { color: var(--ice-muted); }
 
+/* The property's description and related links (data-property-meta). */
+[data-iceberg-explorer] .ice-seealso a { color: var(--link-font-color, inherit); }
+
 [data-iceberg-explorer] .ice-copy:disabled {
   cursor: not-allowed;
   opacity: 0.4;
@@ -385,7 +390,9 @@
 }
 
 [data-iceberg-explorer] .ice-tag:empty { display: none; }
-/* Version information, not a warning. */
+/* Information, not a warning. */
 [data-iceberg-explorer] .ice-tag.ice-info { --tag-fg: var(--ice-tag-info); }
+/* The property needs an Enterprise license (data-property-meta). */
+[data-iceberg-explorer] .ice-tag.ice-enterprise { --tag-fg: var(--ice-tag-enterprise); }
 [data-iceberg-explorer] .ice-tag.ice-bad { --tag-fg: var(--ice-error); }
 [data-iceberg-explorer] .ice-tag.ice-engine-real { --tag-fg: var(--ice-tag-real); }
