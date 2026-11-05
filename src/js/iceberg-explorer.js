@@ -998,8 +998,12 @@
   }
 
   function hydrate (root, spec) {
+    // The grammar follows only the version the macro stamped on the mount.
+    // The nav's version belongs to whatever component the nav shows (Connect,
+    // Cloud), not necessarily to Redpanda, so it only picks an engine build.
+    var grammarVersion = root.getAttribute('data-version') || ''
     var docVersion = pageVersion(root)
-    spec = spec || specForVersion(docVersion)
+    spec = spec || specForVersion(grammarVersion)
     var nid = 'ice' + (++instanceCounter)
     // The page's data-config while it is shown instead of the controls'
     // string: { str, errors } when Redpanda would reject it, { str, note }
@@ -1052,11 +1056,11 @@
     // than replaced by defaults without a word.
     function applyInitialConfig (str) {
       if (str === null || str === undefined || str === '') return
-      var parsed = parse(spec, str, { version: docVersion })
+      var parsed = parse(spec, str, { version: grammarVersion })
       if (parsed.errors.length) {
         authorState = { str: str, errors: parsed.errors }
         var e = parsed.errors[0]
-        warn('data-config "' + str + '" is not a valid ' + spec.property + (docVersion ? ' for ' + docVersion : '') +
+        warn('data-config "' + str + '" is not a valid ' + spec.property + (grammarVersion ? ' for ' + grammarVersion : '') +
           ': ' + e.message + (e.reason ? ' (' + e.reason + ')' : ''))
         return
       }
@@ -1224,7 +1228,7 @@
   function specFor (root) {
     var prop = root.getAttribute('data-property')
     if (prop && prop !== ICEBERG_MODE.property) return SPECS.filter(function (s) { return s.property === prop })[0]
-    return specForVersion(pageVersion(root))
+    return specForVersion(root.getAttribute('data-version'))
   }
 
   function warn (msg) {

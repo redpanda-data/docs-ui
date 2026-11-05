@@ -70,3 +70,13 @@ test('disabled is valid, shown as written, and explained', async () => {
   assert.ok(u.copyButtons().every((b) => !b.disabled))
   assert.deepStrictEqual(warnings, [])
 })
+
+test('the grammar follows the mount\'s data-version, never the nav\'s', async () => {
+  // The nav can show another component (Connect 4.x, Cloud), so its version
+  // says nothing about which Redpanda release the mount documents.
+  const nav = '<div class="nav-container" data-version="24.3"></div>'
+  const { mounts, ui } = await page(nav + mount({ 'data-config': 'key:mode=string' }) + mount({ 'data-version': '24.3', 'data-config': 'key:mode=string' }))
+  assert.strictEqual(ui(mounts[0]).alert(), null)
+  assert.strictEqual(ui(mounts[0]).config(), 'key:mode=string;value:mode=binary,layout=flat;headers:value_type=binary')
+  assert.match(ui(mounts[1]).alert(), /requires Redpanda v26\.2\.1 or later, and this page documents 24\.3/)
+})
