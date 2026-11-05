@@ -126,13 +126,23 @@
 
 [data-iceberg-explorer] .ice-configbar {
   display: flex;
-  align-items: center;
-  gap: 0.85rem;
+  flex-direction: column;
+  gap: 0.5rem;
   background: var(--ice-panel);
   border: 1px solid var(--ice-border);
   border-radius: 8px;
   padding: 0.85rem 1rem;
   margin-bottom: 1rem;
+}
+
+[data-iceberg-explorer] .ice-confighead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-iceberg-explorer] .ice-confighead .ice-copy {
+  margin-left: auto;
 }
 
 [data-iceberg-explorer] .ice-configlabel {
@@ -143,13 +153,19 @@
   white-space: nowrap;
 }
 
+/* Reset the docs theme's inline-code rule (.doc code), which would make this
+   string thin (font-weight: lighter) and box it in a border with no padding. */
 [data-iceberg-explorer] .ice-configstr {
-  flex: 1;
+  display: block;
   font-family: var(--code-font-family, monospace);
   font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.6;
   color: var(--ice-green);
-  word-break: break-all;
+  overflow-wrap: anywhere;
   background: none;
+  border: 0;
+  border-radius: 0;
   padding: 0;
 }
 

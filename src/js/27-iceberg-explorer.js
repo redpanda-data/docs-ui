@@ -461,9 +461,11 @@
         '</div>' +
       '</div>' +
       '<div class="ice-right">' +
-        '<div class="ice-configbar"><span class="ice-configlabel">Config string</span>' +
+        '<div class="ice-configbar">' +
+          '<div class="ice-confighead"><span class="ice-configlabel">Config string</span>' +
+            '<span class="ice-tag" data-out="format"></span>' +
+            '<button type="button" class="ice-copy" data-copy>Copy</button></div>' +
           '<code class="ice-configstr" data-out="config"></code>' +
-          '<button type="button" class="ice-copy" data-copy>Copy</button>' +
         '</div>' +
         '<div class="ice-card"><h3>Iceberg table schema <span class="ice-tag" data-out="engine"></span></h3><pre class="ice-tree" data-out="schema"></pre></div>' +
         '<div class="ice-card"><h3>Translated record</h3><pre class="ice-tree" data-out="record"></pre></div>' +
@@ -553,8 +555,12 @@
       var useEngine = engineValFields && isSchemaMode(cfg.valMode)
       var out = translate(cfg, useEngine ? engineValFields : null)
       var cfgEl = q('[data-out="config"]')
-      cfgEl.innerHTML = esc(out.config.str) +
-        (out.config.legacy ? ' <span class="ice-tag ice-legacy">legacy format</span>' : ' <span class="ice-tag ice-new">new format</span>')
+      // Line breaks go after the separators, so a long string wraps between
+      // sections and options instead of inside a key.
+      cfgEl.innerHTML = esc(out.config.str).replace(/([;,])/g, '$1<wbr>')
+      var fmtEl = q('[data-out="format"]')
+      fmtEl.className = 'ice-tag ' + (out.config.legacy ? 'ice-legacy' : 'ice-new')
+      fmtEl.textContent = out.config.legacy ? 'legacy format' : 'new format'
       q('[data-out="schema"]').innerHTML = out.schema
       q('[data-out="record"]').innerHTML = out.record
 
@@ -590,7 +596,7 @@
     var copyBtn = q('[data-copy]')
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
-        var text = q('[data-out="config"]').textContent.replace(/\s*(legacy|new) format$/, '')
+        var text = q('[data-out="config"]').textContent
         var done = function () {
           copyBtn.textContent = 'Copied!'
           copyBtn.classList.add('ice-copied')
