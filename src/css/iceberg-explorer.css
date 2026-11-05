@@ -30,6 +30,20 @@
   --ice-cyan: #22d3ee;
 }
 
+/* One reset for every code and pre element in the widget, so the docs theme's
+   .doc code and .doc pre rules (border, padding, radius, background, the thin
+   font weight) cannot leak in. The mount attribute is repeated to outrank
+   .doc p code (0,1,2) without !important. Widget rules that need to style
+   one of these properties on a code or pre must use the same doubled root. */
+[data-iceberg-explorer][data-iceberg-explorer] code,
+[data-iceberg-explorer][data-iceberg-explorer] pre {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+  font-weight: 400;
+}
+
 [data-iceberg-explorer] .ice-grid {
   display: grid;
   grid-template-columns: 340px 1fr;
@@ -153,20 +167,13 @@
   white-space: nowrap;
 }
 
-/* Reset the docs theme's inline-code rule (.doc code), which would make this
-   string thin (font-weight: lighter) and box it in a border with no padding. */
 [data-iceberg-explorer] .ice-configstr {
   display: block;
   font-family: var(--code-font-family, monospace);
   font-size: 0.9rem;
-  font-weight: 400;
   line-height: 1.6;
   color: var(--ice-green);
   overflow-wrap: anywhere;
-  background: none;
-  border: 0;
-  border-radius: 0;
-  padding: 0;
 }
 
 [data-iceberg-explorer] .ice-copy {
@@ -198,7 +205,6 @@
   white-space: pre;
   overflow-x: auto;
   margin: 0;
-  background: none;
   color: var(--ice-code);
 }
 [data-iceberg-explorer] .ice-tree .field-name { color: var(--ice-blue); }

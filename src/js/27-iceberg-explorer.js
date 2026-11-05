@@ -488,6 +488,9 @@
   function hydrate (root) {
     var nid = 'ice' + (++instanceCounter)
     var engineValFields = null // real-engine value fields, set when WASM loads
+    // The config string update() last rendered. Copy uses this, never the DOM
+    // text, so markup in the code element (<wbr>, tags) cannot reach the clipboard.
+    var currentConfig = ''
     root.innerHTML = template(nid)
     var q = function (sel) { return root.querySelector(sel) }
     // Query radios within this mount by their logical group (data-group),
@@ -554,6 +557,7 @@
       // decoded via a schema; otherwise fall back to the interim JS rules.
       var useEngine = engineValFields && isSchemaMode(cfg.valMode)
       var out = translate(cfg, useEngine ? engineValFields : null)
+      currentConfig = out.config.str
       var cfgEl = q('[data-out="config"]')
       // Line breaks go after the separators, so a long string wraps between
       // sections and options instead of inside a key.
@@ -596,7 +600,7 @@
     var copyBtn = q('[data-copy]')
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
-        var text = q('[data-out="config"]').textContent
+        var text = currentConfig
         var done = function () {
           copyBtn.textContent = 'Copied!'
           copyBtn.classList.add('ice-copied')
