@@ -83,6 +83,14 @@ test('the layout\'s engine attachment is tried before the UI root', async () => 
   }
 })
 
+test('a mount with no version uses the layout\'s engine, whatever its release', async () => {
+  const requested = []
+  const head = '<meta name="iceberg-engine-url" content="/streaming/current/reference/_attachments/iceberg-engine-26.2.js">'
+  const { mounts } = await page(head + mount({ 'data-config': 'value_schema_id_prefix' }), { requested })
+  assert.strictEqual(mounts[0].getAttribute('data-hydrated'), 'true')
+  assert.strictEqual(requested[0], '/streaming/current/reference/_attachments/iceberg-engine-26.2.js')
+})
+
 test('without an engine the mount keeps its fallback text', async () => {
   const { mounts, warnings } = await page(mount({ 'data-version': '26.2' }), { engines: { 'iceberg-engine-26.2.js': null, 'iceberg-engine.js': null } })
   assert.strictEqual(mounts[0].getAttribute('data-hydrated'), 'no-engine')

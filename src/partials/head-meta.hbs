@@ -116,11 +116,19 @@
   (iceberg-engine-<version>.js/.wasm, plus a provenance .json). The explorer
   loads it from here without a per-page data-engine-base, and checks the
   engine was built from the release the mount documents. Emitted only when
-  the attachment exists for this page's version.
+  the attachment exists for this page's version. Pages outside streaming
+  (Cloud) document no Redpanda release of their own, so they get the latest
+  streaming release's engine.
 --}}
 {{#if (eq page.component.name 'streaming')}}
 {{#with (resolve-resource (concat 'attachment$iceberg-engine-' page.version '.js') component='streaming' module='reference' version=page.version fallback='') as |url|}}
 <meta name="iceberg-engine-url" content="{{url}}">
+{{/with}}
+{{else}}
+{{#with site.components.streaming.latest.version as |latest|}}
+{{#with (resolve-resource (concat 'attachment$iceberg-engine-' latest '.js') component='streaming' module='reference' version=latest fallback='') as |url|}}
+<meta name="iceberg-engine-url" content="{{url}}">
+{{/with}}
 {{/with}}
 {{/if}}
 {{!--

@@ -116,7 +116,8 @@
   //    attachments). Candidates, in order:
   //      1. data-engine-base on the mount, if the macro set one.
   //      2. the page's <meta name="iceberg-engine-url">, which the layout
-  //         resolves to that attachment for the page's version (head-meta.hbs).
+  //         resolves to that attachment for the page's version, or to the
+  //         latest streaming release's outside streaming (head-meta.hbs).
   //      3. <uiRoot>/iceberg-engine-<v>.js
   //      4. unversioned <uiRoot>/iceberg-engine.js (preview builds).
   //    hydrate() then checks the loaded engine was built from the release the
@@ -145,15 +146,18 @@
     if (/%(?:[01][0-9a-f]|7f|5c)/i.test(base)) return false
     return true
   }
-  // The directory of the layout's resolved engine attachment for `version`,
-  // or '' when the page has none.
-  function metaEngineBase (version) {
+  // The layout's resolved engine attachment, as { dir, file }, or null when
+  // the page has none. A mount for a release only takes that release's file.
+  // A mount with no version (Cloud pages) takes whichever engine the layout
+  // names: for a page outside streaming, that is the latest streaming
+  // release's (head-meta.hbs).
+  function metaEngine (version) {
     var meta = document.querySelector('meta[name="iceberg-engine-url"]')
     var url = meta && meta.getAttribute('content')
-    var file = '/iceberg-engine-' + version + '.js'
-    if (!url || url.slice(-file.length) !== file) return ''
-    var dir = url.slice(0, -file.length)
-    return isSafeEngineBase(dir) ? dir : ''
+    var m = url && /\/(iceberg-engine-(\d+\.\d+)\.js)$/.exec(url)
+    if (!m || (version && m[2] !== version)) return null
+    var dir = url.slice(0, -(m[1].length + 1))
+    return isSafeEngineBase(dir) ? { dir: dir, file: m[1] } : null
   }
   function engineCandidates (version, overrideBase) {
     var root = uiRoot()
@@ -165,10 +169,8 @@
     if (overrideBase && version) {
       list.push({ dir: overrideBase, file: 'iceberg-engine-' + version + '.js' })
     }
-    var metaBase = version && metaEngineBase(version)
-    if (metaBase && metaBase !== overrideBase) {
-      list.push({ dir: metaBase, file: 'iceberg-engine-' + version + '.js' })
-    }
+    var fromMeta = metaEngine(version)
+    if (fromMeta && fromMeta.dir !== overrideBase) list.push(fromMeta)
     if (version) {
       list.push({ dir: root, file: 'iceberg-engine-' + version + '.js' })
     }

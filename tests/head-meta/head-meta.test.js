@@ -236,7 +236,7 @@ function engineCatalog (published) {
     },
   }
 }
-const renderEngine = (page, published) => ICEBERG_BLOCK({ page, site: {} }, { data: { root: { page, contentCatalog: engineCatalog(published) } } })
+const renderEngine = (page, published, site = {}) => ICEBERG_BLOCK({ page, site }, { data: { root: { page, contentCatalog: engineCatalog(published) } } })
 
 test('a streaming version with a published Iceberg engine names it', () => {
   const published = [{ version: '26.2', segment: 'current' }, { version: '26.1', segment: '26.1' }]
@@ -248,8 +248,21 @@ test('a streaming version with a published Iceberg engine names it', () => {
   })
 })
 
-test('no engine meta for a version without one, or outside streaming', () => {
+test('no engine meta for a version without one', () => {
   const published = [{ version: '26.2', segment: 'current' }]
   assert.deepEqual(metas(renderEngine(streamingPage('25.3', {}), published)), {})
-  assert.deepEqual(metas(renderEngine({ version: '26.2', component: { name: 'cloud' }, componentVersion: { asciidoc: { attributes: {} } } }, published)), {})
+})
+
+test('a page outside streaming names the latest streaming release\'s engine', () => {
+  const cloud = { version: '', component: { name: 'cloud' }, componentVersion: { asciidoc: { attributes: {} } } }
+  const site = { components: { streaming: { latest: { version: '26.2' } } } }
+  assert.deepEqual(metas(renderEngine(cloud, [{ version: '26.2', segment: 'current' }], site)), {
+    'iceberg-engine-url': '/streaming/current/reference/_attachments/iceberg-engine-26.2.js',
+  })
+  // Nothing when the latest release has no published engine (a distinct
+  // release, since the helper caches a resolution within a tick), or no
+  // streaming component exists.
+  const newer = { components: { streaming: { latest: { version: '26.3' } } } }
+  assert.deepEqual(metas(renderEngine(cloud, [{ version: '26.2', segment: 'current' }], newer)), {})
+  assert.deepEqual(metas(renderEngine(cloud, [{ version: '26.2', segment: 'current' }])), {})
 })
