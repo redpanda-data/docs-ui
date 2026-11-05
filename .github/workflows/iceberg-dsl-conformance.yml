@@ -14,8 +14,18 @@ on:
   pull_request:
     paths:
       - 'src/js/iceberg-explorer.js'
+      - 'src/js/27-iceberg-explorer.js'
+      - 'src/js/vendor/iceberg-explorer.bundle.js'
+      - 'src/css/iceberg-explorer.css'
+      - 'src/css/site.css'
+      - 'gulp.d/tasks/build.js'
+      - 'preview-src/iceberg-explorer-test.adoc'
       - 'tests/iceberg-dsl/**'
       - 'tests/iceberg-explorer/**'
+      - 'tests/iceberg-explorer-browser/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/iceberg-dsl-conformance.yml'
   workflow_dispatch:
     inputs:
       redpanda_ref:
@@ -86,3 +96,55 @@ jobs:
             exit 1
           fi
           echo "All DSL vectors still present in upstream iceberg_mode_test.cc @ $REF"
+
+  # Computed styles on the built preview page, in Chrome, at 390 and 1440px
+  # in both themes (tests/iceberg-explorer-browser).
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # preview:build compiles the Bloblang playground WASM with Go.
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: blobl-editor/wasm/go.mod
+          cache-dependency-path: blobl-editor/wasm/go.sum
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+        run: npm ci
+      - name: Cache Puppeteer browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      # Same install as test-bloblang-playground.yml: node_modules may come
+      # from a cache that skipped the download.
+      - name: Install Chrome for Puppeteer
+        run: |
+          install_output="$(npx puppeteer browsers install chrome)"
+          echo "$install_output"
+          chrome_path="$(echo "$install_output" | sed -n 's/^chrome@[^ ]* //p' | tail -n1)"
+          if [ ! -x "$chrome_path" ]; then
+            echo "::error::Chrome binary not found at reported path: '$chrome_path'"
+            exit 1
+          fi
+          echo "PUPPETEER_EXECUTABLE_PATH=$chrome_path" >> "$GITHUB_ENV"
+      - name: Build the preview
+        run: npx gulp preview:build
+      - name: Check the explorer's computed styles
+        run: npm run test:iceberg-explorer-browser

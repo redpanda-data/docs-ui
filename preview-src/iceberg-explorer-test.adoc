@@ -41,3 +41,33 @@ Source: `[iceberg-explorer,config="value:mode=schema_latest,subject=orders-value
   <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
 </div>
 ++++
+
+== Contract 2: a page for an older release
+
+Mount contract 2 (docs-extensions-and-macros#485) adds `data-property`. With
+`data-version="26.1"` the explorer offers only the legacy names v26.1 accepts.
+
+++++
+<div class="iceberg-explorer-mount" data-iceberg-explorer="2" data-property="redpanda.iceberg.mode" data-version="26.1" data-config="value_schema_latest:subject=orders-value">
+  <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
+</div>
+++++
+
+== Contract 2: an invalid author config
+
+`value:mode=schema_lastest` is a typo Redpanda rejects. The explorer keeps it
+visible and says why.
+
+++++
+<div class="iceberg-explorer-mount" data-iceberg-explorer="2" data-property="redpanda.iceberg.mode" data-version="26.2" data-config="value:mode=schema_lastest">
+  <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
+</div>
+++++
+
+== Contract 2: Iceberg disabled
+
+++++
+<div class="iceberg-explorer-mount" data-iceberg-explorer="2" data-property="redpanda.iceberg.mode" data-version="26.2" data-config="disabled">
+  <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
+</div>
+++++
