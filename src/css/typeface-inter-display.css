@@ -10,7 +10,9 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("../font/inter-display/InterDisplay-Regular.ttf") format("truetype");
+  src:
+    url("../font/inter-display/InterDisplay-Regular.woff2") format("woff2"),
+    url("../font/inter-display/InterDisplay-Regular.ttf") format("truetype");
 }
 
 /* Medium - 500 */
@@ -19,7 +21,9 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url("../font/inter-display/InterDisplay-Medium.ttf") format("truetype");
+  src:
+    url("../font/inter-display/InterDisplay-Medium.woff2") format("woff2"),
+    url("../font/inter-display/InterDisplay-Medium.ttf") format("truetype");
 }
 
 /* SemiBold - 600 */
@@ -28,7 +32,9 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("../font/inter-display/InterDisplay-SemiBold.ttf") format("truetype");
+  src:
+    url("../font/inter-display/InterDisplay-SemiBold.woff2") format("woff2"),
+    url("../font/inter-display/InterDisplay-SemiBold.ttf") format("truetype");
 }
 
 /* Bold - 700 */
@@ -37,5 +43,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("../font/inter-display/InterDisplay-Bold.ttf") format("truetype");
+  src:
+    url("../font/inter-display/InterDisplay-Bold.woff2") format("woff2"),
+    url("../font/inter-display/InterDisplay-Bold.ttf") format("truetype");
 }

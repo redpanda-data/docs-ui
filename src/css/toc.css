@@ -270,3 +270,71 @@
     max-width: 400px;
   }
 }
+
+/* Collapsible groups: opt-in with :page-toc-collapsible: true (built in 02-on-this-page.js) */
+.toc .toc-menu .toc-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toc .toc-menu .toc-group > a {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.toc .toc-menu .toc-group > ul {
+  flex-basis: 100%;
+  display: none;
+}
+
+.toc .toc-menu .toc-group.is-expanded > ul {
+  display: block;
+}
+
+.toc .toc-menu .toc-group-toggle {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.toc .toc-menu .toc-group-toggle:hover {
+  background: var(--panel-background);
+}
+
+.toc .toc-menu .toc-group-toggle:focus-visible {
+  outline: 2px solid var(--link-highlight-color);
+  outline-offset: 1px;
+}
+
+.toc .toc-menu .toc-group-toggle::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background: transparent url(../img/caret.svg) no-repeat center / 100%;
+  filter: var(--nav-toggle-filter);
+  transform: rotate(90deg); /* caret.svg points up, so a collapsed group points right */
+  transition: transform 0.15s ease;
+}
+
+.toc .toc-menu .toc-group.is-expanded > .toc-group-toggle::before {
+  transform: rotate(180deg); /* expanded points down */
+}
+
+/* The mobile dropdown clones the sidebar list without the toggle behavior, so it shows every entry */
+.toc.embedded .toc-menu .toc-group-toggle {
+  display: none;
+}
+
+.toc.embedded .toc-menu .toc-group > ul {
+  display: block;
+}

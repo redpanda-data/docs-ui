@@ -1,0 +1,14 @@
+= Introduced-In Badge With Other Badges
+:page-beta: true
+:page-limited-availability: true
+:page-introduced-in: v4.43.0
+:page-introduced-in-product: Redpanda Connect
+:description: This page tests the version badge next to the Beta and Limited Availability badges.
+
+This page sets `:page-beta:`, `:page-limited-availability:`, `:page-introduced-in: v4.43.0` and `:page-introduced-in-product: Redpanda Connect`.
+
+== What to check
+
+* The sticky header shows the Beta, Limited Availability and "Since 4.43.0" badges in that order, and wraps cleanly at narrow widths.
+* The leading `v` is stripped: the badge reads "Since 4.43.0", not "Since v4.43.0".
+* Hovering the version badge shows the tooltip "Introduced in Redpanda Connect 4.43.0."

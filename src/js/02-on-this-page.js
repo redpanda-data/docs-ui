@@ -34,6 +34,8 @@
   if (document.querySelector('body.-toc')) return sidebar.parentNode.removeChild(sidebar)
   var levels = parseInt(sidebar.dataset.levels || 2, 10)
   if (levels < 0) return
+  // Set from :page-toc-collapsible: true via toc.hbs. See buildCollapsibleGroups below.
+  var collapsible = sidebar.dataset.collapsible === 'true'
 
   var articleSelector = 'article.doc'
   var article = document.querySelector(articleSelector)
@@ -65,26 +67,46 @@
     return accum
   }, document.createElement('ul'))
 
+  if (collapsible) buildCollapsibleGroups(list)
+
+  /**
+   * Make one fragment the active entry, clearing whatever was active before.
+   *
+   * The scroll pass can leave several entries active at the bottom of a page,
+   * so the previous value is either a fragment or an array of them.
+   *
+   * @param {string} fragment - The '#id' to activate. Ignored if no entry has it.
+   */
+  function setActive (fragment) {
+    if (!links[fragment]) return
+    if (lastActiveFragment && lastActiveFragment !== fragment) {
+      var previous = Array.isArray(lastActiveFragment) ? lastActiveFragment : [lastActiveFragment]
+      previous.forEach(function (f) {
+        if (links[f]) links[f].classList.remove('is-active')
+      })
+    }
+    links[fragment].classList.add('is-active')
+    revealGroup(links[fragment])
+    lastActiveFragment = fragment
+  }
+
+  /**
+   * Hold off the scroll pass for a moment, so it cannot overwrite an activation
+   * the user just caused. The browser is still settling on the target when a
+   * click or a hash change lands.
+   */
+  function holdScrollUpdates () {
+    skipScrollUpdate = true
+    setTimeout(function () {
+      skipScrollUpdate = false
+    }, 100)
+  }
+
   // Add click handlers to TOC links to immediately highlight clicked item
   Object.keys(links).forEach(function (fragment) {
     links[fragment].addEventListener('click', function () {
-      // Immediately update active state on click
-      if (lastActiveFragment && lastActiveFragment !== fragment) {
-        if (Array.isArray(lastActiveFragment)) {
-          lastActiveFragment.forEach(function (f) {
-            links[f].classList.remove('is-active')
-          })
-        } else {
-          links[lastActiveFragment].classList.remove('is-active')
-        }
-      }
-      links[fragment].classList.add('is-active')
-      lastActiveFragment = fragment
-      // Skip scroll-based updates briefly to prevent flicker during scroll animation
-      skipScrollUpdate = true
-      setTimeout(function () {
-        skipScrollUpdate = false
-      }, 100)
+      setActive(fragment)
+      holdScrollUpdates()
     })
   })
 
@@ -139,21 +161,8 @@
         // Update sidebar TOC active state immediately
         var fragment = link.getAttribute('href')
         if (fragment && links[fragment]) {
-          if (lastActiveFragment && lastActiveFragment !== fragment) {
-            if (Array.isArray(lastActiveFragment)) {
-              lastActiveFragment.forEach(function (f) {
-                links[f].classList.remove('is-active')
-              })
-            } else {
-              links[lastActiveFragment].classList.remove('is-active')
-            }
-          }
-          links[fragment].classList.add('is-active')
-          lastActiveFragment = fragment
-          skipScrollUpdate = true
-          setTimeout(function () {
-            skipScrollUpdate = false
-          }, 100)
+          setActive(fragment)
+          holdScrollUpdates()
         }
       })
     })
@@ -164,7 +173,12 @@
 
   window.addEventListener('load', function () {
     onScroll()
+    syncToHashTarget()
     window.addEventListener('scroll', onScroll, { passive: true })
+    // In-page links and back/forward change the hash without a load, so the
+    // highlight has to follow on those too. onScroll alone cannot: it runs on
+    // scroll, and a hash change does not always produce one.
+    window.addEventListener('hashchange', syncToHashTarget)
     // On initial load, scroll active item into view (e.g., when navigating to a hash)
     scrollActiveIntoView()
   })
@@ -195,7 +209,10 @@
         var fragment = '#' + heading.id
         if (idx === lastIdx || heading.getBoundingClientRect().top + getNumericStyleVal(heading, 'paddingTop') > ceil) {
           activeFragments.push(fragment)
-          if (lastActiveFragment.indexOf(fragment) < 0) links[fragment].classList.add('is-active')
+          if (lastActiveFragment.indexOf(fragment) < 0) {
+            links[fragment].classList.add('is-active')
+            revealGroup(links[fragment])
+          }
         } else if (~lastActiveFragment.indexOf(fragment)) {
           links[lastActiveFragment.shift()].classList.remove('is-active')
         }
@@ -220,6 +237,7 @@
       if (lastActiveFragment) links[lastActiveFragment].classList.remove('is-active')
       var activeLink = links[activeFragment]
       activeLink.classList.add('is-active')
+      revealGroup(activeLink)
       if (scrollableContainer.scrollHeight > scrollableContainer.offsetHeight) {
         // Scroll to keep active item visible, centered if possible
         var containerHeight = scrollableContainer.offsetHeight
@@ -233,6 +251,114 @@
       links[lastActiveFragment].classList.remove('is-active')
       lastActiveFragment = undefined
     }
+  }
+
+  /**
+   * Turn the flat TOC list into collapsible groups. Opt-in with :page-toc-collapsible: true.
+   * Each level-1 entry becomes a group that holds the deeper entries following it, behind a
+   * toggle button. A level-1 entry with nothing under it stays a plain entry. Only the first
+   * group starts expanded; a group also opens whenever one of its entries becomes active (click,
+   * scroll, or a hash change). The mobile dropdown clones this markup but shows everything; see
+   * .toc.embedded in toc.css.
+   * @param {HTMLUListElement} root - The <ul> built from the page headings, one <li> per heading.
+   */
+  function buildCollapsibleGroups (root) {
+    var groups = []
+    var groupList
+    find('li', root).forEach(function (item) {
+      if (parseInt(item.dataset.level, 10) === 1) {
+        groupList = document.createElement('ul')
+        groupList.id = 'toc-group-' + (groups.length + 1)
+        groups.push({ item: item, list: groupList })
+      } else if (groupList) {
+        groupList.appendChild(item)
+      }
+    })
+    var firstGroup
+    groups.forEach(function (group) {
+      if (!group.list.children.length) return
+      var item = group.item
+      item.classList.add('toc-group')
+      var toggle = document.createElement('button')
+      toggle.type = 'button'
+      toggle.className = 'toc-group-toggle'
+      toggle.setAttribute('aria-expanded', 'false')
+      toggle.setAttribute('aria-controls', group.list.id)
+      toggle.setAttribute('aria-label', 'Toggle ' + item.textContent)
+      toggle.addEventListener('click', function () {
+        setGroupExpanded(item, !item.classList.contains('is-expanded'))
+      })
+      item.appendChild(toggle)
+      item.appendChild(group.list)
+      if (!firstGroup) firstGroup = item
+    })
+    if (firstGroup) setGroupExpanded(firstGroup, true)
+  }
+
+  /**
+   * Expand or collapse a TOC group and keep its toggle's aria-expanded in sync.
+   * @param {HTMLLIElement} group - A li.toc-group produced by buildCollapsibleGroups.
+   * @param {boolean} expanded - True to expand the group, false to collapse it.
+   */
+  function setGroupExpanded (group, expanded) {
+    if (expanded) {
+      group.classList.add('is-expanded')
+    } else {
+      group.classList.remove('is-expanded')
+    }
+    var toggle = group.querySelector('.toc-group-toggle')
+    if (toggle) toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false')
+  }
+
+  /**
+   * Expand the group that contains a TOC link so an active entry is never hidden.
+   * No-op when the TOC is not collapsible or the link sits at the top level.
+   * @param {HTMLAnchorElement} link - The TOC link that just became active.
+   */
+  function revealGroup (link) {
+    if (!collapsible) return
+    var el = link.parentNode
+    while (el && el !== list) {
+      if (el.classList && el.classList.contains('toc-group')) {
+        setGroupExpanded(el, true)
+        return
+      }
+      el = el.parentNode
+    }
+  }
+
+  /**
+   * Make the entry the URL hash names the active one, on load and on every hash
+   * change, and open the group holding it.
+   *
+   * The hash is authoritative here rather than the scroll position, because the
+   * two disagree. A browser parks a linked heading at scroll-padding-top plus
+   * any scroll-margin-top on the heading, and onScroll's activation line is
+   * scroll-padding-top alone; whenever the heading lands below that line the
+   * scroll pass picks the heading above it and highlights the wrong entry. The
+   * stylesheet now offsets once so the two line up, and this keeps the highlight
+   * correct even if that ever drifts again.
+   *
+   * It also covers the case onScroll cannot see at all: an in-page link fires
+   * hashchange, and a hash change does not always move the scroll position
+   * enough to produce a scroll event.
+   */
+  function syncToHashTarget () {
+    var hash = window.location.hash
+    if (!hash) return
+    var fragment = links[hash] ? hash : null
+    if (!fragment && ~hash.indexOf('%')) {
+      try {
+        var decoded = decodeURIComponent(hash)
+        if (links[decoded]) fragment = decoded
+      } catch (e) {
+        return
+      }
+    }
+    if (!fragment) return
+    setActive(fragment)
+    holdScrollUpdates()
+    scrollActiveIntoView()
   }
 
   function find (selector, from) {

@@ -91,6 +91,29 @@
     })
   }
 
+  // Markup inside a code block that did not come from Prism and must survive
+  // this pass: AsciiDoc callout markers (<i class="conum">, restored by
+  // Prism's keep-markup plugin) and the editable <placeholder> spans added by
+  // 11-editable-placeholders.js.
+  //
+  // Every process* function below re-renders its token from token.textContent,
+  // which flattens child elements away, then assigns innerHTML. Anything of
+  // the above sitting inside that token is destroyed. The conum
+  // MutationObserver in 11-editable-placeholders.js then re-homes the orphans,
+  // so a callout written inside a block scalar does not vanish - it moves to
+  // the end of the block. On the Helm chart quickstart that rendered the
+  // markers as "4 1 3" instead of "1 2 3 4", because <1> and <3> sat inside
+  // "mapping: |" while <2> and <4> were on plain lines.
+  //
+  // Leave such tokens alone. Plain YAML colouring for one scalar is a much
+  // smaller loss than callouts pointing at the wrong lines.
+  var PRESERVED_MARKUP = 'i.conum, [contenteditable="true"]'
+
+  function hasPreservedMarkup(node) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) return false
+    return !!((node.matches && node.matches(PRESERVED_MARKUP)) || node.querySelector(PRESERVED_MARKUP))
+  }
+
   /**
    * Find the YAML key that precedes a token by walking backwards through siblings
    */
@@ -349,6 +372,11 @@
     // is single-line by grammar, and collecting "continuation" for one
     // swallows sibling keys that sit at or above the fallback base indent.
     var continuationNodes = isBlockScalar ? collectLiteralBlockContinuation(token) : []
+
+    // These get removed once their text is folded into the wrapper, so the
+    // same rule applies to them as to the token itself.
+    if (continuationNodes.some(hasPreservedMarkup)) return false
+
     var continuationText = extractTextFromNodes(continuationNodes)
 
     // Combine the token content with continuation
@@ -501,6 +529,12 @@
     nodesToProcess.forEach(function(token) {
       // Skip already processed
       if (token.querySelector('.bloblang-embedded, .bloblang-inline')) {
+        return
+      }
+
+      // Re-rendering this token would destroy the callout markers or editable
+      // placeholders it contains. See PRESERVED_MARKUP.
+      if (hasPreservedMarkup(token)) {
         return
       }
 

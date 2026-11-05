@@ -25,8 +25,8 @@
     <meta property="og:description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
     <meta name="twitter:description" content="Redpanda Documentation: Guides, API references, and resources for event streaming.">
     {{/if}}
-    {{#if (or page.keywords page.attributes.page-commercial-names)}}
-    <meta name="keywords" content="{{#with page.keywords}}{{{this}}}{{#if @root.page.attributes.page-commercial-names}}, {{/if}}{{/with}}{{#with page.attributes.page-commercial-names}}{{{this}}}{{/with}}">
+    {{#if (or page.keywords page.attributes.commercial-names)}}
+    <meta name="keywords" content="{{#with page.keywords}}{{{this}}}{{#if @root.page.attributes.commercial-names}}, {{/if}}{{/with}}{{#with page.attributes.commercial-names}}{{{this}}}{{/with}}">
     {{/if}}
     {{#with (or antoraVersion site.antoraVersion)}}
     <meta name="generator" content="Antora {{{this}}}">

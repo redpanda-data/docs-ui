@@ -246,8 +246,23 @@ page:
       - content: Limited Availability Test
         url: /limited-availability-test.html
         urlType: internal
+      - content: Introduced-In Badge Test
+        url: /introduced-in-test.html
+        urlType: internal
+      - content: Introduced-In Badge With Other Badges
+        url: /introduced-in-combo-test.html
+        urlType: internal
+      - content: Introduced-In Badge on Cloud
+        url: /introduced-in-cloud-test.html
+        urlType: internal
       - content: Preview Status Test
         url: /preview-status-test.html
+        urlType: internal
+      - content: Collapsible TOC Test
+        url: /toc-collapsible-test.html
+        urlType: internal
+      - content: Term Tooltips Test
+        url: /tooltip-touch-test.html
         urlType: internal
     - content: Get Started
       url: '#'

@@ -1,0 +1,10 @@
+= Introduced-In Badge on Cloud
+:page-cloud: true
+:page-introduced-in: 4.43.0
+:description: This page checks that the version badge never shows on Cloud pages.
+
+This page sets `:page-cloud: true` and `:page-introduced-in: 4.43.0`.
+
+== What to check
+
+* The sticky header shows no "Since" badge. A self-managed version doesn't apply to Cloud, so the badge is hidden on Cloud pages even when a single-sourced page carries the attribute.

@@ -3,13 +3,13 @@
 {{> head-title}}
 {{> head-info}}
 {{> head-structured-data}}
-<link rel="preload" href="{{{@root.uiRootPath}}}/font/Inter-Regular.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="{{{@root.uiRootPath}}}/font/Inter-Medium.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="{{{@root.uiRootPath}}}/font/Inter-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="{{{@root.uiRootPath}}}/font/Inter-Light.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="{{{@root.uiRootPath}}}/font/IBMPlexMono-Regular.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="{{{@root.uiRootPath}}}/font/IBMPlexMono-Medium.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="{{{@root.uiRootPath}}}/font/IBMPlexMono-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
+{{!-- Preload only the faces the first paint uses, as woff2 (~100 KB each vs
+      ~310 KB for the TTFs they replace). The old list also forced Inter Light
+      and three IBM Plex Mono TTFs (~1 MB) on every page though no rule uses
+      them: preloads download unconditionally, so they were pure waste. --}}
+<link rel="preload" href="{{{@root.uiRootPath}}}/font/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{{@root.uiRootPath}}}/font/Inter-Medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{{@root.uiRootPath}}}/font/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 {{> head-styles}}
 {{> head-meta}}
 {{> head-icons}}

@@ -61,6 +61,17 @@
     ];
     // Signed-in agent tier: tool-showcasing prompts (static here — the standalone
     // Bump widget has no Antora component context for get-agent-suggestions).
+    {{!-- KAPA_SOURCE_GROUP_IDS is deliberately NOT set here. This partial is compiled
+          at build time from context/chat-panel.json (compileWidgets in gulpfile.js),
+          which carries no Antora page or site data, so get-kapa-source-groups has
+          nothing to resolve against.
+          /api/ pages should scope to the latest version, and docs-site sets it: its
+          proxy-api-docs edge function already fetches this widget's compiled HTML and
+          rewrites the DOM, and it has the source-group mapping available, so it
+          injects the "current" group id there. Keeping the id out of this template
+          avoids a second hardcoded copy that would go stale the moment a group is
+          recreated -- a stale id scopes to a group holding nothing, which silently
+          returns only global sources. --}}
     window.AGENT_SUGGESTIONS = [
       'Write and test a Bloblang mapping that flattens nested JSON',
       "What's the latest Redpanda Streaming version?",
@@ -149,10 +160,21 @@
     }, 100);
   };
 
-  function openPanel() {
+  // `restored` marks the page-load path below, which reopens a panel the reader
+  // left open on a previous page. Both kinds of open are announced to the
+  // drawer's React tree, and this flag says which: a deliberate open is worth a
+  // quota request, a restore leans on the verdict remembered from earlier in
+  // the session, so browsing with the panel open costs one request per session
+  // rather than one per pageview (react/anonQuota.js schedulePeek).
+  function openPanel(restored) {
     isOpen = true;
     chatPanel.classList.add('is-open');
     chatPanel.setAttribute('aria-hidden', 'false');
+
+    // Attribute as well as event: script order against the AskAI bundle is not
+    // guaranteed, and an event sent before anyone listens is lost.
+    chatPanel.dataset.openedBy = restored ? 'restore' : 'user';
+    window.dispatchEvent(new window.CustomEvent('docs-chat:open', { detail: { restored: Boolean(restored) } }));
 
     // Hide Ask AI buttons
     document.querySelectorAll('[data-action="open-chat"]').forEach(function(btn) {
@@ -185,7 +207,7 @@
       chatPanel.classList.add('is-fullscreen');
     }
     if (localStorage.getItem(STORAGE_KEY) === 'true') {
-      openPanel();
+      openPanel(true);
     }
   } catch (e) {}
 })();

@@ -1,4 +1,4 @@
-/* global sessionStorage, fetch */
+/* global sessionStorage, localStorage, fetch */
 /**
  * Docs account control in the header (sign in / user menu).
  *
@@ -22,8 +22,16 @@
   var modal = container.querySelector('[data-signin-modal]')
   var modalCta = container.querySelector('[data-signin-modal-continue]')
   var modalSignup = container.querySelector('[data-signin-modal-signup]')
+  var nudge = container.querySelector('[data-signin-nudge]')
 
   var CACHE_KEY = 'docs-account-me'
+  // First-view nudge, shown once. localStorage (not session) so it doesn't
+  // return in every new tab, and deliberately per-browser: a nudge is not worth
+  // a server round trip, and the cost of it reappearing on a second device is
+  // one dismissal. A storage failure (private browsing, blocked site data)
+  // reads as "already seen", so the nudge fails closed rather than showing on
+  // every single page view.
+  var NUDGE_KEY = 'docs-account-signin-nudge-seen'
 
   // Sign-in/out land on cold Netlify functions (docs-login.mjs, plus the
   // mcp-oauth.mjs callback leg) and a scale-to-zero Neon database — a cold
@@ -43,8 +51,11 @@
     return /(?:^|;\s*)rp_docs_auth=1(?:;|$)/.test(document.cookie)
   }
 
+  // The hash keeps the reader at the section they were reading, for example a
+  // Solutions page's #take-to-production. docs-login stores return_to whole
+  // and /auth/return redirects to it, fragment included.
   function returnTo () {
-    return encodeURIComponent(window.location.pathname + window.location.search)
+    return encodeURIComponent(window.location.pathname + window.location.search + (window.location.hash || ''))
   }
 
   // Feature modal shown before sending the user to /login.
@@ -62,6 +73,9 @@
 
   function openModal () {
     if (!modal) return
+    // Covers every entry point, including docs-account:open-signin from the Ask
+    // AI panel, not just the header link's own click handler.
+    retireNudge()
     warm()
     lastFocused = document.activeElement
     modal.hidden = false
@@ -122,10 +136,14 @@
     })
   }
   signinLink.addEventListener('click', function (e) {
+    retireNudge() // engaging with sign-in is the outcome the nudge exists for
     if (!modal) return // no modal markup — let the link navigate to /login
     e.preventDefault()
     openModal()
   })
+
+  var nudgeDismiss = container.querySelector('[data-signin-nudge-dismiss]')
+  if (nudgeDismiss) nudgeDismiss.addEventListener('click', retireNudge)
 
   // Other surfaces (the Ask AI panel's sign-in upsell) defer to this modal so
   // the feature pitch + privacy note live in one place, and can request a
@@ -179,25 +197,39 @@
     }
   }
 
-  function render () {
-    var signedIn = hasAuthHint()
-    // Auth availability: the Ask AI panel's session probe sets
-    // window.__KAPA_LOGIN_URL (from /kapa/session's 401 login_url) when the auth
-    // backend is present; being signed in implies it exists. Gate the sign-in
-    // entry on this so, if this UI ever ships ahead of the backend, we don't show
-    // a sign-in link that 404s — the account UI stays hidden until auth is known
-    // available. Re-runs on the kapa-session event once the probe resolves.
-    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL || !!cachedLoginUrl()
-    signinLink.hidden = signedIn || !authAvailable
-    menu.hidden = !signedIn
-    container.hidden = !authAvailable
-    signinLink.href = '/login?return_to=' + returnTo()
+  function nudgeAlreadySeen () {
+    try {
+      return localStorage.getItem(NUDGE_KEY) === '1'
+    } catch (e) {
+      return true // fail closed: never nag on every page view
+    }
+  }
+
+  // Retire the nudge for good. Called on dismissal, on any engagement with
+  // sign-in, and once the reader is signed in — all of them mean it has served
+  // its purpose, so it must not come back later (including after a sign-out).
+  function retireNudge () {
+    if (nudge) nudge.hidden = true
+    try {
+      localStorage.setItem(NUDGE_KEY, '1')
+    } catch (e) {
+      // Private browsing: it stays hidden for this page at least.
+    }
+  }
+
+  // Set every sign-in, sign-out, and sign-up href from the current address.
+  // Runs on each render and again on hashchange, so following an on-page
+  // section link after load still returns the reader to that section.
+  var reauth = false // set by showLoginError; kept across refreshes
+  function setReturnLinks () {
+    var retry = reauth ? '&reauth=1' : ''
+    signinLink.href = '/login?return_to=' + returnTo() + retry
     signoutLink.href = '/logout?return_to=' + returnTo()
     // disclosed=1: the modal shows the privacy/data-collection note itself, so
     // /login can skip the server interstitial (which exists to show that note)
     // and go straight to Auth0. The bare signinLink href (middle-click, or no
     // modal markup) stays undisclosed and gets the interstitial.
-    if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo()
+    if (modalCta) modalCta.href = '/login?disclosed=1&return_to=' + returnTo() + retry
     // "Create a free account" — a same-origin path instead of a hardcoded
     // cloud.redpanda.com URL, since docs-ui has no way to know which Cloud
     // environment a given deploy (prod vs integration preview) should point
@@ -206,6 +238,44 @@
     // /login query flag: unlike modalCta above, it shares no state with
     // sign-in (no CSRF nonce, no PKCE, no auth-request write).
     if (modalSignup) modalSignup.href = '/signup?return_to=' + returnTo()
+  }
+  window.addEventListener('hashchange', setReturnLinks)
+
+  function render () {
+    var signedIn = hasAuthHint()
+    // Auth availability: the Ask AI panel's session probe sets
+    // window.__KAPA_LOGIN_URL (from /kapa/session's 401 login_url) when the auth
+    // backend is present; being signed in implies it exists. Gate the sign-in
+    // entry on this so, if this UI ever ships ahead of the backend, we don't show
+    // a sign-in link that 404s — the account UI stays hidden until auth is known
+    // available. Re-runs on the kapa-session event once the probe resolves.
+    //
+    // docs-ui's own preview is the exception. It has no docs-site behind it, so
+    // /kapa/session never answers, no loginUrl is ever announced, and the
+    // account UI would be permanently invisible there — in the one place whose
+    // entire purpose is reviewing frontend changes. Treat the preview as
+    // auth-available so the Sign in control and its nudge can be seen. /login
+    // itself 404s there, which is fine: the preview is for looking, not for
+    // signing in. isUiPreview comes from site.title in head-scripts.hbs, so it
+    // is false on every real docs build (same idiom as 16-bloblang-interactive
+    // and react/agentTools).
+    var isUiPreviewBuild = typeof window.isUiPreview !== 'undefined' ? window.isUiPreview : false
+    var authAvailable = signedIn || !!window.__KAPA_LOGIN_URL || !!cachedLoginUrl() || isUiPreviewBuild
+    signinLink.hidden = signedIn || !authAvailable
+    menu.hidden = !signedIn
+    container.hidden = !authAvailable
+    // Only ever alongside a visible Sign in link: the account UI is gated on
+    // auth availability, and re-renders when the session probe resolves, so
+    // this also stops the nudge appearing for the split second before we know
+    // whether sign-in exists on this deploy.
+    if (nudge) {
+      if (signedIn) {
+        retireNudge()
+      } else {
+        nudge.hidden = signinLink.hidden || nudgeAlreadySeen()
+      }
+    }
+    setReturnLinks()
 
     // Signed in: the console link lives in the account dropdown, so hide the
     // standalone toolbar/overflow Cloud Console links (avoid two paths)
@@ -281,12 +351,8 @@
     // login (reauth=1 -> docs-login.mjs adds prompt=login) so the FIRST retry
     // click reaches the login screen instead of silently re-using the SSO
     // session that just failed. Belt-and-suspenders with the reauth cookie.
-    ;[signinLink, modalCta].forEach(function (el) {
-      if (el && el.getAttribute('href')) {
-        var href = el.getAttribute('href')
-        el.setAttribute('href', href + (href.indexOf('?') === -1 ? '?' : '&') + 'reauth=1')
-      }
-    })
+    reauth = true
+    setReturnLinks()
 
     var MESSAGES = {
       upstream_failed: 'Sorry, sign-in couldn’t be completed. Please try again.',

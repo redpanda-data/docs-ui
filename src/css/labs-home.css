@@ -25,7 +25,12 @@
   padding: 72px 5vw 56px;
   text-align: center;
   background: linear-gradient(180deg, #0b1430 0%, #10173a 100%);
+
+  /* clip, not hidden: see .home-hero in home.css. An overflowing overflow:hidden
+     hero eats the first swipe on a phone because WebKit latches the touch to a
+     box the user can't scroll. */
   overflow: hidden;
+  overflow: clip;
 }
 
 .labs-hero-bg {

@@ -8,6 +8,8 @@ import { agentTools } from './agentTools.js'
 import { safeHeap } from './heap.js'
 import { saveConversation } from './chatPersistence.js'
 import { createPersistentApiService } from './persistentApiService.js'
+import { readScopeIds, dropScope, isScopeRejection, SCOPE_DROPPED_EVENT } from './kapaScope.js'
+import { getSessionToken, installSessionProbe } from './kapaSession.js'
 
 // Singleton Chat SDK api service for the anonymous tier: injects the saved
 // threadId so a conversation survives page navigation. The signed-in tier gets
@@ -15,165 +17,6 @@ import { createPersistentApiService } from './persistentApiService.js'
 // is the only consumer — but it is the DEFAULT tier, so it can't go without.
 const persistentApiService = createPersistentApiService()
 
-/**
- * Fetches a Kapa Agent SDK session token from the docs backend
- * (netlify/functions/kapa-session.mjs in docs-site). The agent tier is
- * signed-in only: anonymous visitors get 401 auth_required, ChatInterface
- * shows a sign-in prompt, and the Ask AI experience falls back to the stock
- * Kapa widget. Session state is broadcast via the `kapa-session` window event
- * and mirrored on window.__KAPA_AUTHENTICATED / window.__KAPA_USER so
- * components mounting after the broadcast (and the feedback tool) can read it.
- */
-// authoritative: true when the session state comes from a definitive backend
-// answer (a 200, or a clean 401 that carries — or deliberately omits — a
-// login_url). false when we're ASSUMING signed-out after a transient/opaque
-// probe failure. Consumers that take destructive action on "signed out" (e.g.
-// the header clearing a stale auth hint) must act only on authoritative signals,
-// so a network blip can't flip a genuinely-signed-in user to signed-out.
-function announceSession (authenticated, user, loginUrl, authoritative = true) {
-  window.__KAPA_AUTHENTICATED = authenticated
-  window.__KAPA_USER = user || null
-  window.__KAPA_LOGIN_URL = loginUrl || null
-  window.dispatchEvent(
-    new CustomEvent('kapa-session', {
-      detail: { authenticated, user: user || null, loginUrl: loginUrl || null, authoritative },
-    })
-  )
-  try {
-    // Persist only authoritative states under the main key. A cached transient
-    // assumption must not replay as if it were a definitive answer.
-    if (authoritative) {
-      sessionStorage.setItem(
-        'kapa-session-state',
-        JSON.stringify({ authenticated, user: user || null, loginUrl: loginUrl || null })
-      )
-      // The backend answered, so any "unavailable" marker is stale.
-      sessionStorage.removeItem(UNAVAILABLE_KEY)
-    }
-  } catch (err) { /* private browsing */ }
-}
-
-// Marker for "the probe failed and we don't know why", kept apart from
-// kapa-session-state so it can never be read back as a definitive answer.
-// Without it, a backend that isn't deployed yet costs one POST /kapa/session
-// per pageview, all 404s. With it, that becomes one per tab per TTL window.
-//
-// Availability is deliberately learned at runtime rather than baked in at build
-// time: kapa-session.mjs treats REDPANDA_OAUTH_CLIENT_ID as the single on/off
-// var for sign-in and signals "off" by omitting login_url. Asking the server
-// keeps that env var an instant kill switch. A build-time flag would move the
-// decision into a playbook key, so disabling sign-in would need a code change
-// and a full docs rebuild, and the two could disagree.
-//
-// The TTL alone is a poor safety net for the day auth ships: nobody holds a
-// session yet, so the hasAuthHint bypass covers no one, and a tab that probed
-// just before the deploy would hide sign-in until the window elapsed. Shortening
-// the TTL doesn't fix that either — pageviews are spread out, so a short window
-// re-probes almost every pageview and gives the noise back. Instead the marker
-// is dropped on explicit intent (see probeOnIntent), so the affordance appears
-// the moment anyone actually reaches for Ask AI while idle navigation stays quiet.
-const UNAVAILABLE_KEY = 'kapa-session-unavailable'
-const UNAVAILABLE_TTL_MS = 10 * 60 * 1000
-
-async function getSessionToken () {
-  const endpoint = window.KAPA_SESSION_ENDPOINT || '/kapa/session'
-  // Client-side timeout: a hung connection (LB/proxy accepts TCP but never
-  // responds) would otherwise neither resolve nor reject, leaving the drawer
-  // stuck on the loading spinner forever. On abort we throw, so probeSession's
-  // .catch degrades to the anonymous tier — matching the network-error fallback.
-  const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(), Number(window.KAPA_SESSION_TIMEOUT_MS || 8000))
-  let res
-  try {
-    res = await fetch(endpoint, { method: 'POST', credentials: 'include', signal: ctrl.signal })
-  } finally {
-    clearTimeout(timer)
-  }
-  if (res.status === 401) {
-    const data = await res.json().catch(() => ({}))
-    announceSession(false, null, data.login_url)
-    throw new Error('Sign in to use the Redpanda AI agent')
-  }
-  if (!res.ok) {
-    throw new Error(`Chat session request failed (${res.status})`)
-  }
-  const data = await res.json()
-  announceSession(Boolean(data.authenticated), data.user, null)
-  return { token: data.session_token, expiresAt: Date.parse(data.expires_at) }
-}
-
-// The SDK only fetches a session token on the first message, so ChatInterface
-// wouldn't know whether to show the agent UI or the sign-in prompt until the
-// user typed something. Probe once per browser session (cached) to learn the
-// session state early. The cache is revalidated whenever the JS-readable
-// rp_docs_auth hint cookie (set/cleared by the docs login flow alongside the
-// HttpOnly session cookie) disagrees with it — i.e. right after login/logout.
-function probeSession () {
-  const hasAuthHint = /(?:^|;\s*)rp_docs_auth=1(?:;|$)/.test(document.cookie)
-  let cached = null
-  try {
-    cached = sessionStorage.getItem('kapa-session-state')
-  } catch (err) { /* private browsing */ }
-  if (cached !== null) {
-    try {
-      const { authenticated, user, loginUrl } = JSON.parse(cached)
-      if (Boolean(authenticated) === hasAuthHint) {
-        announceSession(Boolean(authenticated), user, loginUrl)
-        return
-      }
-      // Login state changed since the cache was written — fall through
-    } catch (err) { /* fall through to a fresh probe */ }
-  }
-  // A recent probe already failed in this tab, so don't ask again on every
-  // pageview. Skipped when the auth hint is present: that visitor may hold a
-  // real session, and getting them the agent tier is worth one request.
-  if (!hasAuthHint) {
-    try {
-      const failedAt = Number(sessionStorage.getItem(UNAVAILABLE_KEY))
-      if (failedAt && Date.now() - failedAt < UNAVAILABLE_TTL_MS) {
-        announceSession(false, null, null, false)
-        return
-      }
-    } catch (err) { /* private browsing */ }
-  }
-  // Establish the tier. getSessionToken announces on a 200 (authenticated) or a
-  // clean 401 (signed-out; carries the real login_url, or null when auth is
-  // deliberately turned off / "coming soon"). Any OTHER failure — network error,
-  // 5xx, abort, or a 404 because this bundle is deployed ahead of the auth
-  // backend — lands here having announced nothing (__KAPA_AUTHENTICATED still
-  // undefined). Degrade to the anonymous Chat SDK tier and announce NO login URL:
-  // we can't distinguish a transient blip from a missing backend from the client,
-  // and guessing a default /login would surface a sign-in affordance that 404s
-  // wherever the backend isn't deployed. Consumers gate sign-in on a login URL
-  // (26-docs-account.js render(), ChatSdkInterface), so it stays hidden until a
-  // real 401 supplies one. authoritative:false keeps this from clearing a
-  // signed-in user's auth hint. Self-heals on the next probe.
-  getSessionToken().catch(() => {
-    if (window.__KAPA_AUTHENTICATED === undefined) {
-      try {
-        sessionStorage.setItem(UNAVAILABLE_KEY, String(Date.now()))
-      } catch (err) { /* private browsing */ }
-      announceSession(false, null, window.__KAPA_LOGIN_URL || null, false)
-    }
-  })
-}
-
-// Explicit intent beats the cached "unavailable" answer. 19-chat-panel.js fires
-// docs-account:warm when a signed-out visitor deliberately opens the drawer (not
-// on the restore-on-load path), which is exactly when a stale marker would cost
-// something real: the sign-in upsell missing on the day auth ships. Drop the
-// marker and ask again. Once per page — a second open learns nothing new.
-let intentProbed = false
-function probeOnIntent () {
-  if (intentProbed) return
-  // Nothing to learn: we already have a definitive answer this pageview.
-  if (window.__KAPA_AUTHENTICATED === true || window.__KAPA_LOGIN_URL) return
-  intentProbed = true
-  try {
-    sessionStorage.removeItem(UNAVAILABLE_KEY)
-  } catch (err) { /* private browsing */ }
-  probeSession()
-}
 
 // Custom instructions are injected into the agent's system prompt server-side
 // (never shown to users) and are, per Kapa's guidance, the single biggest
@@ -207,8 +50,11 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
 - Ask a follow-up ONLY when the answer actually depends on it:
   - Cloud: assume the general case unless it differs by cluster type, then ask
     which (BYOC, Dedicated, or Serverless).
-  - Self-Managed Streaming: assume the latest version unless it differs by
-    version, then ask which (e.g. 25.2).
+  - Self-Managed Streaming: when "Current page" below names a docs version, your
+    search results are already restricted to it, so use it and do not ask. When
+    it says searches are not restricted to a version, the results may mix
+    versions: read each result's url, and ask which version only if the answer
+    actually differs by version.
   - Redpanda Connect (including any Bloblang question): if you do not know
     where they run Connect, ask whether it is on Redpanda Cloud or
     Self-Managed BEFORE answering. This applies even when the mapping or
@@ -287,13 +133,95 @@ const CUSTOM_INSTRUCTIONS = `## Domain context
 // The docs page the widget is open on, appended to the agent instructions so it
 // can infer the user's product (Cloud / Self-Managed / ADP) from context before
 // asking. Antora sets <body data-component> to the docs component.
+// Kapa source group scoping retrieval to the docs version of THIS page
+// (DOC-1807, DOC-2450). The array is emitted per page by chat-panel.hbs via the
+// get-kapa-source-groups helper, so it varies by URL without rebuilding the bundle.
+//
+// The two SDKs spell the same option differently, and Kapa documents the
+// inconsistency deliberately (dev/agent/migrating-from-chat-sdk):
+//
+//   Agent SDK (signed in)  sourceGroupIdsInclude   lowercase d
+//   Chat SDK  (anonymous)  sourceGroupIDsInclude   capital ID
+//
+// A typo in either fails silently -- an unknown prop is ignored, no filter is
+// sent, and answers quietly come from every docs version. So the name is derived
+// from one place rather than written out at each call site.
+//
+// Spread rather than passed directly so that an empty array omits the prop
+// entirely instead of sending []. Kapa treats an explicit empty list as "clear
+// filtering", which is the same outcome, but omitting keeps the provider props
+// identical to their pre-DOC-2450 shape when scoping cannot be resolved.
+const SOURCE_GROUP_PROP = { agent: 'sourceGroupIdsInclude', chat: 'sourceGroupIDsInclude' }
+
+//
+// `ids` is the scope App holds in state (see useKapaScopeIds), so a scope that
+// Kapa rejected mid-session can be dropped by re-rendering the provider without
+// the prop. With no argument it reads the page globals directly.
+function sourceGroupProps (tier, ids) {
+  const fromPage = Array.isArray(window.KAPA_SOURCE_GROUP_IDS) ? window.KAPA_SOURCE_GROUP_IDS : []
+  const list = Array.isArray(ids) ? ids : fromPage
+  const clean = list.filter(Boolean)
+  if (!clean.length) return {}
+  return { [SOURCE_GROUP_PROP[tier]]: clean }
+}
+
+// The scope as React state, so the providers can be re-rendered without it.
+// Starts from the page globals and empties when kapaScope.dropScope() fires
+// SCOPE_DROPPED_EVENT: Kapa answers a stale group id with a 400 (measured live,
+// not the silent global-only fallback the design first assumed), so a group the
+// dashboard no longer knows would otherwise fail every question on the page
+// until the regenerated mapping ships through three repos.
+function useKapaScopeIds () {
+  const [ids, setIds] = useState(readScopeIds)
+  useEffect(() => {
+    const onDropped = () => setIds([])
+    window.addEventListener(SCOPE_DROPPED_EVENT, onDropped)
+    return () => window.removeEventListener(SCOPE_DROPPED_EVENT, onDropped)
+  }, [])
+  return ids
+}
+
 function currentPageContext () {
   try {
     const path = window.location.pathname
     const component = (document.body && document.body.getAttribute('data-component')) || null
+    // Taken from the SAME resolution that chose the source group, never
+    // re-derived. A URL regex here reads "26.2" out of /streaming/26.2/... while
+    // the group actually sent is `current`, because the latest release publishes
+    // at /streaming/current/ and its own number is not a segment. The prompt
+    // below asserts a restriction and forbids asking, so a disagreement makes
+    // the agent attribute an answer to a version it never searched.
+    //
+    // Empty or absent means no group was sent, so nothing is restricted.
+    const version = (typeof window.KAPA_SOURCE_GROUP_SEGMENT === 'string' && window.KAPA_SOURCE_GROUP_SEGMENT) || null
+    // The version the page is published under, when it is NOT the one searched.
+    // Set by chat-panel.hbs only for a published version with no Kapa group of
+    // its own (beta, or a release newer than the mapping), which falls back to
+    // the default group. Absent on the /api/ pages, where docs-site injects the
+    // ids and segment and there is no fallback, so a missing value means the two
+    // agree.
+    const requested = (typeof window.KAPA_SOURCE_GROUP_REQUESTED === 'string' && window.KAPA_SOURCE_GROUP_REQUESTED) || null
+    const fellBack = Boolean(version && requested && requested !== version)
     return '\n\n## Current page\n' +
       `- The user has the docs open at: ${path}` +
       (component ? ` (docs component: ${component})` : '') + '\n' +
+      // Without this the agent asks which version while the reader is standing
+      // on the answer, and retrieval is ALREADY pinned to that version, so a
+      // guess of "latest" contradicts the sections it just received.
+      (fellBack
+        // Retrieval ran against the default because the reader's version has
+        // no search index yet. Say so, or the agent asserts current-version
+        // facts about the beta docs with no caveat and no way to know better.
+        ? `- Docs version: the user is on the ${requested} docs, which have no dedicated search index yet, ` +
+          `so your search results are restricted to ${version}${version === 'current' ? ' (the latest release)' : ''} instead. ` +
+          `Point out where ${requested} may differ from ${version}, and do not ask which version they are on.\n`
+        : version
+          ? `- Docs version: ${version}${version === 'current' ? ' (the latest release)' : ''}. ` +
+            'Your search results are restricted to this version, so do not ask which version they are on.\n'
+          // No group was sent, so retrieval spans every indexed version. Saying
+          // so is what stops the model asserting a version it cannot support.
+          : '- Searches are NOT restricted to a version, so results may mix versions. ' +
+            'Check each result url before stating that something applies to a particular version.\n') +
       '- Use this together with the conversation so far to infer their product before asking.'
   } catch (e) {
     return ''
@@ -313,6 +241,10 @@ function handleAgentEvent (event) {
         thread_id: event.data.threadId,
         error: event.data.error,
       })
+      // The Agent SDK puts Kapa's response body in the message, so a rejected
+      // source group is named outright. Drop the scope so the reader's next
+      // question (and the retry the SDK offers) goes out unscoped.
+      if (isScopeRejection(event.data.error)) dropScope(event.data.error)
       break
     case 'thread_resumed':
       safeHeap('thread_resumed_docs_home', { thread_id: event.data.threadId })
@@ -400,6 +332,7 @@ class ErrorBoundary extends Component {
 }
 
 function App () {
+  const scopeIds = useKapaScopeIds()
   const colorScheme = useSiteColorScheme()
   const { authenticated, user, loginUrl } = useSession()
 
@@ -419,6 +352,7 @@ function App () {
         tools={agentTools}
         customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext()}
         user={user?.email ? { email: user.email } : undefined}
+        {...sourceGroupProps('agent', scopeIds)}
         enableHistory
         onEvent={handleAgentEvent}
         theme={{ accentColor: '#444ce7', colorScheme }}
@@ -441,6 +375,7 @@ function App () {
       <KapaProvider
         integrationId={window.KAPA_CHAT_INTEGRATION_ID}
         apiService={persistentApiService}
+        {...sourceGroupProps('chat', scopeIds)}
         callbacks={{
           askAI: {
             onQuerySubmit: (data) => {
@@ -491,8 +426,8 @@ function mount () {
   const mountEl = homeEl || panelEl
   if (mountEl && !mountEl.dataset.mounted) {
     mountEl.dataset.mounted = 'true'
-    probeSession()
-    window.addEventListener('docs-account:warm', probeOnIntent)
+    // No-op when kapaSession.bundle.js already ran the probe for this page.
+    installSessionProbe()
     createRoot(mountEl).render(<ErrorBoundary><App /></ErrorBoundary>)
   }
 }

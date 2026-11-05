@@ -152,6 +152,24 @@ const runBloblang = {
   },
 }
 
+// Same-tab navigation closes the Ask AI drawer first.
+//
+// 19-chat-panel.js persists the drawer's open state in localStorage and
+// restores it on load, so navigating with it open lands the user on the page
+// they asked for with the drawer sitting over it. That defeats the point of
+// these tools: the agent was asked to SHOW someone a page.
+//
+// Dispatched as an event because the panel is a separate IIFE with no exported
+// API. CustomEvent dispatch is synchronous, so the panel's localStorage write
+// completes before location.assign starts the navigation.
+const closeChatPanelBeforeNavigating = () => {
+  try {
+    window.dispatchEvent(new window.CustomEvent('docs-chat:close'))
+  } catch (e) {
+    // Never block the navigation the user actually asked for.
+  }
+}
+
 const navigateToPage = {
   name: 'navigate_to_page',
   displayName: 'Open documentation page',
@@ -175,6 +193,7 @@ const navigateToPage = {
     if (!resolved) {
       return { error: 'invalid_url', message: 'Only docs.redpanda.com pages can be opened.' }
     }
+    closeChatPanelBeforeNavigating()
     window.location.assign(resolved)
     return { navigated: true, url: resolved }
   },
@@ -230,6 +249,7 @@ const switchProduct = {
     if (match.current) {
       return { alreadyCurrent: true, product: match.label }
     }
+    closeChatPanelBeforeNavigating()
     window.location.assign(match.url)
     return { switched: true, product: match.label, url: match.url }
   },
@@ -412,15 +432,29 @@ const lookupConfigProperty = {
 }
 
 // ——— Latest version (from the page meta + current doc context) ————————————
+// The release metas are written by head-meta.hbs from what the version-fetcher
+// extension resolved at build time (the same lookup as doc-tools
+// get-redpanda-version, which needs a GitHub token so cannot run here).
+const readRelease = (name) => {
+  const content = document.querySelector(`meta[name="${name}"]`)?.content
+  // Some are published as tags (v25.3.4); report the bare version.
+  return content ? content.replace(/^v/, '') : null
+}
+
 const getLatestVersion = {
   name: 'get_latest_version',
   displayName: 'Get the latest version',
   description:
-    'Return the latest released Redpanda Streaming version (the core streaming product, ' +
-    'published on the docs site) and the product and version of the page the user is ' +
-    'currently viewing. Use for "what is the latest Redpanda Streaming version" and to pick ' +
-    'the right version before giving version-specific steps. Note this is the Streaming ' +
-    'version, not Redpanda Connect, Cloud, or Agentic Data Plane, which version separately.',
+    'Return the latest released Self-Managed versions of Redpanda products, plus the product ' +
+    'and version of the page the user is currently viewing. Not for Redpanda Cloud or Agentic ' +
+    'Data Plane, which are not versioned here: never give these numbers as the version a Cloud ' +
+    'cluster runs. For Redpanda Streaming (the core streaming product) it returns the docs ' +
+    'version (major.minor) and the latest patch release. These can differ for a short time ' +
+    'after a release, before the docs version moves up. It also returns the latest Redpanda ' +
+    'Console, Redpanda Connect, Redpanda Operator, and Redpanda Helm chart releases. Use for ' +
+    '"what is the latest version of X" (answer with the patch release) and to pick the right ' +
+    'version before giving version-specific steps. A null release is unknown: say so, and do ' +
+    'not guess a number.',
   needsApproval: false,
   parameters: { type: 'object', properties: {}, required: [] },
   execute: async () => {
@@ -431,10 +465,23 @@ const getLatestVersion = {
       document.querySelector('[data-component]')?.getAttribute('data-component') ||
       null
     const version = document.querySelector('[data-version]')?.getAttribute('data-version') || null
+    const patch = readRelease('latest-redpanda-release')
+    let note
+    if (!latest) {
+      note = 'Latest Redpanda version is not published on this page.'
+    } else if (!patch) {
+      note = `Patch release not available on this page; only the docs version (${latest}) is known. ` +
+        'Do not guess a patch number.'
+    }
     return {
       latestRedpandaStreamingVersion: latest,
+      latestRedpandaStreamingPatchRelease: patch,
+      latestConsoleRelease: readRelease('latest-console-release'),
+      latestConnectRelease: readRelease('latest-connect-release'),
+      latestOperatorRelease: readRelease('latest-operator-release'),
+      latestHelmChartRelease: readRelease('latest-helm-chart-release'),
       currentPage: { product: component, version },
-      note: latest ? undefined : 'Latest Redpanda version is not published on this page.',
+      note,
     }
   },
 }

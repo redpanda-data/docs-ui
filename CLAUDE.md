@@ -22,8 +22,9 @@ This is the UI bundle project for the Redpanda documentation site. It produces a
 
 ### Building Components
 - `gulp build:wasm` - Build WebAssembly files from Go source (blobl-editor and console-config-migrator)
-- `gulp bundle:react` - Bundle React components using esbuild
+- `gulp bundle:react` - Bundle React components using esbuild (minified, React production build; set `NODE_ENV=development` for a readable dev build)
 - `gulp compile:widgets` - Compile standalone widget partials (header, footer, chat-panel-bump, head-bump)
+- `gulp generate:prism` - Assemble `src/js/vendor/prism/prism-core.js` (generated, not tracked) from the `prismjs` package and the grammar list in `gulp.d/prism-languages.js`; runs inside `gulp bundle` and `gulp preview`. Add a grammar there when a new `language-` class shows up unhighlighted
 - `node compile-partial.js <name> <context>` - Compile specific Handlebars partials manually
 
 ### Widget Testing (Bump.sh Standalone Widgets)
@@ -75,6 +76,7 @@ The project uses Gulp 4 with task definitions in `gulpfile.js` and task implemen
 - `font/` - Web fonts
 - `img/` - Images and icons
 - `ui.yml` - Defines which static files to include in bundle
+- `ui-attributes.json` - Every page and component attribute the templates and helpers read, with type, values, and readers. Ships in the bundle and as a release asset for the docs language server. When a template or helper starts or stops reading an attribute, update this file; `npm run test:ui-attributes` fails until it matches
 
 ### WebAssembly Integration
 Two WASM modules built from Go:
@@ -97,7 +99,7 @@ The `compile-partial.js` script compiles specific Handlebars partials into stand
 Context is provided via JSON files in `context/` directory.
 
 ### Handlebars Templates
-Layouts select partials to compose pages. Helpers in `src/helpers/` provide template logic (e.g., `is-beta-feature.js`, `is-enterprise.js`, `get-page-info.js`). Pages specify layout via `page-layout` AsciiDoc attribute.
+Layouts select partials to compose pages. Helpers in `src/helpers/` provide template logic (e.g., `is-beta-feature.js`, `get-page-info.js`). Pages specify layout via `page-layout` AsciiDoc attribute.
 
 ### Preview System
 `preview-src/` contains AsciiDoc sample pages for testing UI locally. UI model is defined in `preview-src/ui-model.yml`. Preview pages are built with Asciidoctor and rendered using the UI templates.
