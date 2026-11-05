@@ -2,6 +2,8 @@
 
 # Fetched Redpanda source (fetch-sources.sh, pinned to $REDPANDA_REF)
 vendor/
+# Other releases side by side (VENDOR_DIR=vendor-<ref>)
+vendor-*/
 
 # Downloaded third-party deps (fmt, boost, avro fork) — keep only the fetcher
 third_party/*
