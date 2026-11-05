@@ -1,16 +1,13 @@
 'use strict'
 
 // Replays Redpanda's own redpanda.iceberg.mode test cases (accept, reject,
-// error messages, format and round trip) against the explorer's parser and
-// builder, and checks that pages for older releases neither accept nor
-// produce strings those releases reject.
+// error messages, format and round trip) against the explorer's reader and
+// builder, which put the engine's normalized strings on the controls and
+// build the candidate strings the engine checks.
 const test = require('node:test')
 const assert = require('node:assert')
 const V = require('./fixtures/upstream-vectors')
-const {
-  ICEBERG_MODE: SPEC, ICEBERG_MODE_25_1: SPEC_25_1, ICEBERG_MODE_24_3: SPEC_24_3,
-  specForVersion, parse, build, defaultsOf, fieldsOf,
-} = require('../../src/js/iceberg-explorer.js')
+const { ICEBERG_MODE: SPEC, parse, build, defaultsOf } = require('../../src/js/iceberg-explorer.js')
 
 const withFields = (fields) => Object.assign(defaultsOf(SPEC), fields)
 const ok = (spec, s) => {
@@ -59,45 +56,6 @@ test('every upstream round trip is stable', () => {
     const back = ok(SPEC, once).cfg
     assert.deepStrictEqual(back, cfg, v.test)
     assert.strictEqual(build(SPEC, back).str, once, `${v.test}: not a fixed point`)
-  }
-})
-
-test('the spec revision follows the page version', () => {
-  for (const v of ['', 'master', 'beta', '26.2', 'v26.2', '26.2.1', '26.3', '27.1']) assert.strictEqual(specForVersion(v), SPEC, v)
-  for (const v of ['25.1', 'v25.3', '26.1', '26.1.9']) assert.strictEqual(specForVersion(v), SPEC_25_1, v)
-  for (const v of ['24.3', '24.2']) assert.strictEqual(specForVersion(v), SPEC_24_3, v)
-})
-
-test('older pages reject the section format with the version that added it', () => {
-  for (const v of V.accept.filter((x) => ok(SPEC, x.input).form === 'sections')) {
-    for (const [spec, version] of [[SPEC_25_1, '26.1'], [SPEC_24_3, '24.3']]) {
-      const msg = parse(spec, v.input, { version }).errors[0].message
-      assert.match(msg, new RegExp(`^the section format \\(key:, value:, headers:\\) requires Redpanda v26\\.2\\.1 or later, and this page documents ${version.replace('.', '\\.')}\\. Use one of: disabled, `), v.test)
-    }
-  }
-  const msg = parse(SPEC_24_3, 'value_schema_latest:subject=s', { version: '24.3' }).errors[0].message
-  assert.match(msg, /^value_schema_latest requires Redpanda v25\.1 or later, and this page documents 24\.3\. Use one of: disabled, key_value, or value_schema_id_prefix$/)
-  assert.match(parse(SPEC_25_1, 'banana', { version: '25.3' }).errors[0].message, /^not a value Redpanda accepts in 25\.3\. Use one of: /)
-})
-
-test('older pages accept the legacy cases their release accepts, and only offer those', () => {
-  for (const v of V.accept.filter((x) => ok(SPEC, x.input).form !== 'sections')) {
-    const legacyLatest = v.input.startsWith('value_schema_latest')
-    assert.deepStrictEqual(parse(SPEC_25_1, v.input).errors, [], v.test)
-    assert.strictEqual(parse(SPEC_24_3, v.input).errors.length > 0, legacyLatest, v.test)
-  }
-  // Every combination the controls of an older page can produce is a legacy
-  // name that release accepts.
-  for (const [spec, names] of [[SPEC_25_1, /^(disabled|key_value|value_schema_id_prefix|value_schema_latest(:.*)?)$/], [SPEC_24_3, /^(disabled|key_value|value_schema_id_prefix)$/]]) {
-    const enums = fieldsOf(spec).filter((e) => e.field.type === 'enum')
-    assert.deepStrictEqual(enums.map((e) => e.path), ['value.mode'])
-    for (const mode of enums[0].field.values.map((x) => x.value)) {
-      for (const subject of ['', 's']) {
-        const str = build(spec, { 'value.mode': mode, 'value.subject': subject }).str
-        assert.match(str, names, `${mode}/${subject}`)
-        assert.deepStrictEqual(parse(spec, str).errors, [], str)
-      }
-    }
   }
 })
 

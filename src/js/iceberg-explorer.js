@@ -23,11 +23,17 @@
   // option, add one field; to explore another property, add a spec and an
   // OUTPUTS renderer for its panels.
   //
-  // ENGINE SEAM: the panels are drawn by the spec's `outputs` renderer. The
-  // Iceberg renderer uses an in-browser port of the rules in Redpanda's
-  // `model/iceberg_mode` and `iceberg/conversion` (an interim engine), and a
-  // per-version WASM build of the real C++ mapper when one is published (see
-  // docs-ui/iceberg-editor/).
+  // ENGINE: what Redpanda accepts comes from the release itself. Each docs
+  // version loads a WASM engine built from that release's own C++ (see
+  // docs-ui/iceberg-editor/): its model.cc parser and formatter decide which
+  // strings are valid, what Redpanda stores for them, and so which choices
+  // the controls offer (probeSpec). The spec only says how to lay the
+  // controls out and what to call them. A mount whose release has no engine
+  // keeps the macro's fallback text rather than guess.
+  //
+  // The panels are drawn by the spec's `outputs` renderer. The Iceberg
+  // renderer uses the engine's Avro -> Iceberg schema mapper when the build
+  // has one, and illustrative sample rules otherwise.
 
   // ── Fixed sample data (illustrative). A future iteration swaps these for
   //    user-supplied schema/record via editors; the engine seam stays the same.
@@ -100,18 +106,22 @@
     ],
   })
 
-  // ── Real WASM engine loader. Resolves to an engine adapter, or null if no
-  //    engine can be loaded (then the interim JS engine is used).
+  // ── WASM engine loader. Resolves to an engine adapter, or null if no
+  //    engine can be loaded.
   //
-  //    The engine is versioned: schema-translation rules can change per release,
-  //    so each docs version loads the engine built from that release tag. We try
-  //    candidates in priority order and fall back gracefully:
-  //      1. data-engine-base override on the mount (CI/author points this at the
-  //         versioned content-attachments dir where release-tag CI publishes
-  //         iceberg-engine-<version>.js/.wasm).
-  //      2. versioned filename in the UI root: <uiRoot>/iceberg-engine-<v>.js
-  //      3. unversioned <uiRoot>/iceberg-engine.js (single-bundle / preview).
-  //      4. none -> interim JS engine.
+  //    The engine is versioned: the grammar and the schema rules change per
+  //    release, so each docs version loads the engine built from that
+  //    release's latest patch tag (build-iceberg-engine.yml publishes
+  //    iceberg-engine-<X.Y>.js/.wasm to the docs repo's reference module
+  //    attachments). Candidates, in order:
+  //      1. data-engine-base on the mount, if the macro set one.
+  //      2. the page's <meta name="iceberg-engine-url">, which the layout
+  //         resolves to that attachment for the page's version (head-meta.hbs).
+  //      3. <uiRoot>/iceberg-engine-<v>.js
+  //      4. unversioned <uiRoot>/iceberg-engine.js (preview builds).
+  //    hydrate() then checks the loaded engine was built from the release the
+  //    mount documents (icebergEngineInfo), so a fallback candidate can never
+  //    stand in for another release's grammar.
   //
   //    Each candidate is loaded at most once per page and shared by every mount
   //    that asks for the same file, so two mounts for different versions get
@@ -135,6 +145,16 @@
     if (/%(?:[01][0-9a-f]|7f|5c)/i.test(base)) return false
     return true
   }
+  // The directory of the layout's resolved engine attachment for `version`,
+  // or '' when the page has none.
+  function metaEngineBase (version) {
+    var meta = document.querySelector('meta[name="iceberg-engine-url"]')
+    var url = meta && meta.getAttribute('content')
+    var file = '/iceberg-engine-' + version + '.js'
+    if (!url || url.slice(-file.length) !== file) return ''
+    var dir = url.slice(0, -file.length)
+    return isSafeEngineBase(dir) ? dir : ''
+  }
   function engineCandidates (version, overrideBase) {
     var root = uiRoot()
     var list = []
@@ -144,6 +164,10 @@
     }
     if (overrideBase && version) {
       list.push({ dir: overrideBase, file: 'iceberg-engine-' + version + '.js' })
+    }
+    var metaBase = version && metaEngineBase(version)
+    if (metaBase && metaBase !== overrideBase) {
+      list.push({ dir: metaBase, file: 'iceberg-engine-' + version + '.js' })
     }
     if (version) {
       list.push({ dir: root, file: 'iceberg-engine-' + version + '.js' })
@@ -164,13 +188,31 @@
       formatIcebergMode: typeof mod.formatIcebergMode === 'function',
     }
     if (!has.avroToIceberg && !has.parseIcebergMode && !has.formatIcebergMode) return null
+    var info = {}
+    if (typeof mod.icebergEngineInfo === 'function') {
+      try { info = JSON.parse(mod.icebergEngineInfo()) || {} } catch (e) { info = {} }
+    }
+    var parsed = {}
     var adapter = {
       source: source,
       has: has,
+      // { redpanda_ref, redpanda_commit } the engine was built from.
+      info: info,
       // { fields } or { error } for an Avro schema (JSON string).
       avroToIceberg: function (schemaJson) {
         if (!has.avroToIceberg) return { error: 'this engine build has no avroToIcebergJson' }
         try { return JSON.parse(mod.avroToIcebergJson(schemaJson)) } catch (e) { return { error: String(e && e.message) } }
+      },
+      // Redpanda's verdict on a redpanda.iceberg.mode value: { ok, normalized,
+      // extended? } or { ok: false, error? }. Memoized: probing and every
+      // control change ask about the same few strings.
+      parseMode: function (str) {
+        if (!has.parseIcebergMode) return { ok: false, error: 'this engine build has no parseIcebergMode' }
+        if (hasOwn(parsed, str)) return parsed[str]
+        var r
+        try { r = JSON.parse(mod.parseIcebergMode(str)) } catch (e) { r = { ok: false, error: String(e && e.message) } }
+        parsed[str] = r
+        return r
       },
       valueFields: null,
     }
@@ -291,20 +333,16 @@
     return { name: 'mode', label: 'Mode', type: 'enum', values: MODES, default: 'binary' }
   }
 
-  // Which Redpanda versions accept a built string. Section strings are only
-  // built when a setting has no short form, and those need the
-  // iceberg_extended_mode_config feature: "extended key/headers config
-  // requires the cluster to be fully upgraded to at least v26.2.1"
-  // (config_utils.h iceberg_config_validator). value_schema_latest first
-  // parses in v25.1.1; key_value and value_schema_id_prefix in every release
-  // with Iceberg.
+  // Help for the two forms format_to writes (model.cc): a short name when the
+  // setting fits one, else every section with every option.
   var LEGACY_HELP = 'Short form. Redpanda shows a setting in this form whenever it fits, because older clusters accept it.'
+  var SECTIONS_HELP = 'Section form, which Redpanda writes when no short form fits.'
+  // The engine's `extended` flag (iceberg_mode::needs_extended_cluster_feature,
+  // checked by config_utils.h iceberg_config_validator).
+  var EXTENDED_HELP = 'Redpanda accepts it only once every broker in the cluster runs this release.'
 
   var ICEBERG_MODE = {
     property: 'redpanda.iceberg.mode',
-    grammar: 'sections',
-    sectionsSince: 'v26.2.1',
-    sectionsHelp: 'Redpanda accepts this form once every broker in the cluster runs v26.2.1 or later.',
     sections: [
       {
         name: 'key',
@@ -356,65 +394,11 @@
       { str: 'key_value', set: { 'value.mode': 'binary' }, help: LEGACY_HELP },
       { str: 'value_schema_id_prefix', set: { 'value.mode': 'schema_id_prefix' }, help: LEGACY_HELP },
       // Legacy option order (model.cc format_to): protobuf_name then subject.
-      { str: 'value_schema_latest', set: { 'value.mode': 'schema_latest' }, section: 'value', options: ['protobuf_name', 'subject'], since: 'v25.1', help: LEGACY_HELP },
+      { str: 'value_schema_latest', set: { 'value.mode': 'schema_latest' }, section: 'value', options: ['protobuf_name', 'subject'], help: LEGACY_HELP },
     ],
     disabledLiteral: 'disabled',
     valueRules: VALUE_RULES,
     outputs: 'icebergRow',
-  }
-
-  // ── Older grammars. A page documents one release series, and the explorer
-  //    must never offer or emit a string that series rejects. Before v26.2.1
-  //    only the legacy names exist (model.cc operator>>): from v25.1.1
-  //    `disabled`, `key_value`, `value_schema_id_prefix` and
-  //    `value_schema_latest[:protobuf_name=..,subject=..]`; in v24.3 the
-  //    first three only. Key and headers are always binary there, so only
-  //    the value section has controls.
-  function legacyRevision (modes, legacy, documents) {
-    var value = {
-      name: 'value',
-      label: 'Value',
-      heading: 'Value configuration',
-      fields: [{ name: 'mode', label: 'Mode', type: 'enum', default: 'binary', values: MODES.filter(function (m) { return modes.indexOf(m.value) !== -1 }) }],
-    }
-    if (modes.indexOf('schema_latest') !== -1) value.fields = value.fields.concat(schemaOptions('value'))
-    return {
-      property: ICEBERG_MODE.property,
-      grammar: 'legacy',
-      documents: documents,
-      successor: ICEBERG_MODE,
-      sections: [value],
-      legacy: ICEBERG_MODE.legacy.filter(function (e) { return legacy.indexOf(e.str) !== -1 }),
-      disabledLiteral: 'disabled',
-      valueRules: VALUE_RULES,
-      outputs: 'icebergRow',
-    }
-  }
-  var ICEBERG_MODE_25_1 = legacyRevision(['binary', 'schema_id_prefix', 'schema_latest'],
-    ['key_value', 'value_schema_id_prefix', 'value_schema_latest'], 'a release from v25.1 to v26.1')
-  var ICEBERG_MODE_24_3 = legacyRevision(['binary', 'schema_id_prefix'],
-    ['key_value', 'value_schema_id_prefix'], 'a release before v25.1')
-
-  // Newest first. `since` is the first release series a revision applies to.
-  var REVISIONS = [
-    { since: [26, 2], spec: ICEBERG_MODE },
-    { since: [25, 1], spec: ICEBERG_MODE_25_1 },
-    { since: [0, 0], spec: ICEBERG_MODE_24_3 },
-  ]
-  // "26.2", "v26.1", "26.2.1" -> [26, 2]. Anything else (unversioned,
-  // "master", "beta") documents the latest release.
-  function releaseSeries (version) {
-    var m = /^v?(\d+)\.(\d+)(?:\.\d+)?$/.exec(String(version || '').trim())
-    return m ? [Number(m[1]), Number(m[2])] : null
-  }
-  function specForVersion (version) {
-    var series = releaseSeries(version)
-    if (!series) return REVISIONS[0].spec
-    for (var i = 0; i < REVISIONS.length; i++) {
-      var since = REVISIONS[i].since
-      if (series[0] > since[0] || (series[0] === since[0] && series[1] >= since[1])) return REVISIONS[i].spec
-    }
-    return REVISIONS[REVISIONS.length - 1].spec
   }
 
   // ══ Generic spec machinery ══════════════════════════════════════════════
@@ -538,19 +522,23 @@
     return reason ? { message: message, reason: reason } : { message: message }
   }
 
-  // Parse a string against a spec. Returns { cfg, errors, form }: `cfg` holds
-  // every path (defaults where the string is silent, all defaults when it is
-  // invalid), `errors` Redpanda's reasons for rejecting it ({ message,
-  // reason? }, with Redpanda's own wording), and `form` one of 'disabled',
-  // 'legacy' or 'sections'. `options.version` names the release the page
-  // documents, for messages about strings that release does not accept.
-  function parse (spec, str, options) {
+  // Read a string onto a spec's paths. Returns { cfg, errors, form }: `cfg`
+  // holds every path (defaults where the string is silent, all defaults when
+  // it is invalid), `errors` the reasons it does not fit the spec ({ message,
+  // reason? }, in Redpanda's wording), and `form` one of 'disabled', 'legacy'
+  // or 'sections'.
+  //
+  // The explorer uses this to put the engine's normalized string back on the
+  // controls, never to decide what Redpanda accepts: the engine does that.
+  // tests/iceberg-engine checks this reader against every engine build, and
+  // tests/iceberg-explorer against the upstream vectors.
+  function parse (spec, str) {
     var s = String(str === undefined || str === null ? '' : str).trim()
     var fail = function (e) { return { cfg: defaultsOf(spec), errors: [e], form: null } }
     // operator>> stops reading at whitespace, and the rest of the string
     // makes the setting invalid.
     if (/\s/.test(s)) return fail(err(VALUE_RULES[0].error))
-    var result = parseGrammar(spec, s, (options && options.version) || '')
+    var result = parseGrammar(spec, s)
     if (result.errors.length) return result
     // Text values Redpanda would split or cut short.
     var problems = fieldsOf(spec).filter(function (e) { return e.field.type === 'text' && result.cfg[e.path] })
@@ -561,15 +549,7 @@
     return problems.length ? fail(problems[0]) : result
   }
 
-  // The names an older grammar accepts, for its error messages.
-  function legacyForms (spec) {
-    var names = (spec.disabledLiteral ? [spec.disabledLiteral] : []).concat(spec.legacy.map(function (e) {
-      return e.options ? e.str + ' with optional :' + e.options.map(function (o) { return o + '=<name>' }).join(',') : e.str
-    }))
-    return names.slice(0, -1).join(', ') + ', or ' + names[names.length - 1]
-  }
-
-  function parseGrammar (spec, s, version) {
+  function parseGrammar (spec, s) {
     var cfg = defaultsOf(spec)
     var fail = function (e) { return { cfg: defaultsOf(spec), errors: [e], form: null } }
     if (spec.disabledLiteral && s === spec.disabledLiteral) {
@@ -597,20 +577,7 @@
         return { cfg: cfg, errors: [], form: 'legacy' }
       }
     }
-    if (spec.grammar === 'sections') return parseSections(spec, s)
-    // An older grammar: say why, using what the newest release makes of it.
-    var page = 'this page documents ' + (version || spec.documents)
-    var use = '. Use one of: ' + legacyForms(spec)
-    var newer = spec.successor && parse(spec.successor, s)
-    if (newer && !newer.errors.length && newer.form === 'sections') {
-      var names = spec.successor.sections.map(function (x) { return x.name + ':' }).join(', ')
-      return fail(err('the section format (' + names + ') requires Redpanda ' + spec.successor.sectionsSince + ' or later, and ' + page + use))
-    }
-    if (newer && !newer.errors.length) {
-      var later = spec.successor.legacy.filter(function (e) { return s.indexOf(e.str) === 0 })[0]
-      if (later && later.since) return fail(err(later.str + ' requires Redpanda ' + later.since + ' or later, and ' + page + use))
-    }
-    return fail(err('not a value Redpanda accepts in ' + (version || spec.documents) + use))
+    return parseSections(spec, s)
   }
 
   // model.cc parse_extended_iceberg_mode, driven by the spec.
@@ -684,13 +651,83 @@
     return null
   }
 
-  // The version tag and help line for a built string.
-  function formatInfo (spec, built) {
-    if (!built.legacy) {
-      return { tag: 'Requires ' + spec.sectionsSince + ' or later', help: spec.sectionsHelp }
+  // The help line for a normalized string: which form format_to wrote, and
+  // whether the engine says only a fully upgraded cluster accepts it.
+  function formatInfo (spec, built, verdict) {
+    var help = built.legacy ? ((built.entry && built.entry.help) || LEGACY_HELP) : SECTIONS_HELP
+    if (verdict && verdict.extended) help += ' ' + EXTENDED_HELP
+    return { help: help }
+  }
+
+  // ══ What the release accepts, asked of its engine ═══════════════════════
+  //
+  // The spec lists every choice any release offers. probeSpec keeps the ones
+  // the page's engine accepts: for each choice it builds the string that
+  // choice makes from the defaults (with the field's enable rule satisfied,
+  // trying each value that satisfies it) and asks the engine. A choice field
+  // left with only its default, a text field no string can carry, and a
+  // section with no fields left are not shown. Nothing here knows which
+  // release added what.
+  var PROBE_TEXT = 'probe'
+  function probeSpec (spec, engine) {
+    var accepts = function (cfg) { return engine.parseMode(build(spec, cfg).str).ok }
+    // Configs that make `entry` apply: the defaults, plus each combination of
+    // its enable rule's values.
+    function enabling (entry) {
+      var base = defaultsOf(spec)
+      var when = entry.field.enabledWhen
+      if (!when) return [base]
+      var out = [base]
+      Object.keys(when).forEach(function (dep) {
+        var next = []
+        out.forEach(function (c) {
+          when[dep].forEach(function (v) {
+            var n = Object.assign({}, c)
+            n[entry.section.name + '.' + dep] = v
+            next.push(n)
+          })
+        })
+        out = next
+      })
+      return out
     }
-    var e = built.entry
-    return { tag: e && e.since ? 'Requires ' + e.since + ' or later' : 'Works on all versions', help: (e && e.help) || LEGACY_HELP }
+    function offered (entry, value) {
+      if (entry.field.type === 'enum' && value === entry.field.default) return true
+      return enabling(entry).some(function (c) {
+        var n = Object.assign({}, c)
+        n[entry.path] = value
+        return accepts(n)
+      })
+    }
+    var out = { sections: [] }
+    Object.keys(spec).forEach(function (k) { if (k !== 'sections') out[k] = spec[k] })
+    spec.sections.forEach(function (sec) {
+      var fields = []
+      sec.fields.forEach(function (f) {
+        var entry = { path: sec.name + '.' + f.name, section: sec, field: f }
+        if (f.type === 'enum') {
+          var values = f.values.filter(function (v) { return offered(entry, v.value) })
+          if (values.length > 1) fields.push(Object.assign({}, f, { values: values }))
+        } else if (offered(entry, PROBE_TEXT)) {
+          fields.push(f)
+        }
+      })
+      // An enable rule names only the choices still offered.
+      var kept = {}
+      fields.forEach(function (f) { if (f.type === 'enum') kept[f.name] = f.values.map(function (v) { return v.value }) })
+      fields = fields.map(function (f) {
+        if (!f.enabledWhen) return f
+        var when = {}
+        Object.keys(f.enabledWhen).forEach(function (dep) {
+          when[dep] = f.enabledWhen[dep].filter(function (v) { return !kept[dep] || kept[dep].indexOf(v) !== -1 })
+        })
+        return Object.assign({}, f, { enabledWhen: when })
+      }).filter(function (f) {
+        return !f.enabledWhen || Object.keys(f.enabledWhen).every(function (dep) { return f.enabledWhen[dep].length })
+      })
+      if (fields.length) out.sections.push(Object.assign({}, sec, { fields: fields }))
+    })
+    return out
   }
 
   // A shell command that sets the property. The value is single-quoted
@@ -991,26 +1028,43 @@
   // ══ Hydration ═══════════════════════════════════════════════════════════
 
   var instanceCounter = 0
-  function pageVersion (root) {
-    var nav = typeof document !== 'undefined' && document.querySelector('.nav-container')
-    return root.getAttribute('data-version') || (nav && nav.getAttribute('data-version')) ||
-      (typeof document !== 'undefined' && document.body && document.body.getAttribute('data-version')) || ''
+
+  // Why `engine` cannot decide the grammar for a mount documenting
+  // `version`, or null. A numeric version ("26.2", "v26.2.1") must match the
+  // release the engine was built from; anything else (unversioned, "beta")
+  // takes whatever engine the page has.
+  function engineProblem (engine, version) {
+    var want = /^v?(\d+)\.(\d+)/.exec(String(version || ''))
+    if (!engine) return 'no Iceberg engine could be loaded for ' + (version ? 'version ' + version : 'this page')
+    if (!engine.has.parseIcebergMode) return 'the Iceberg engine (' + engine.source + ') has no parseIcebergMode'
+    if (!want) return null
+    var ref = String((engine.info && engine.info.redpanda_ref) || '')
+    var got = /^v?(\d+)\.(\d+)/.exec(ref)
+    if (!got || got[1] !== want[1] || got[2] !== want[2]) {
+      return 'the Iceberg engine at ' + engine.source + ' was built from ' + (ref || 'an unknown release') +
+        ', not ' + want[1] + '.' + want[2]
+    }
+    return null
   }
 
-  function hydrate (root, spec) {
-    // The grammar follows only the version the macro stamped on the mount.
-    // The nav's version belongs to whatever component the nav shows (Connect,
-    // Cloud), not necessarily to Redpanda, so it only picks an engine build.
-    var grammarVersion = root.getAttribute('data-version') || ''
-    var docVersion = pageVersion(root)
-    spec = spec || specForVersion(grammarVersion)
+  // A reason Redpanda gives (or the release's name when its parser gives
+  // none) for rejecting `str`.
+  function rejectionMessage (verdict, str, engine) {
+    if (/\s/.test(str)) return VALUE_RULES[0].error
+    if (verdict && verdict.error) return verdict.error
+    var ref = engine && engine.info && engine.info.redpanda_ref
+    return 'Redpanda ' + (ref ? ref + ' ' : '') + 'does not accept this value'
+  }
+
+  // Render the explorer into `root`. `spec` is the property's spec as the
+  // mount's release offers it (probeSpec), and `engine` that release's engine.
+  function hydrate (root, spec, engine) {
     var nid = 'ice' + (++instanceCounter)
     // The page's data-config while it is shown instead of the controls'
     // string: { str, errors } when Redpanda would reject it, { str, note }
     // when it is valid but the controls cannot show it (disabled). Cleared by
     // the first change to a control.
     var authorState = null
-    var engine = null // engine adapter, set when a WASM build loads
     // The config string update() last rendered. Copy uses this, never the DOM
     // text, so markup in the code element (<wbr>, tags) cannot reach the clipboard.
     var currentConfig = ''
@@ -1051,22 +1105,28 @@
       })
     }
 
-    // Apply an author-supplied initial config string (data-config). A string
-    // Redpanda rejects is shown as written, with Redpanda's reason, rather
-    // than replaced by defaults without a word.
+    // Apply an author-supplied initial config string (data-config). The
+    // engine decides whether the release accepts it and what Redpanda would
+    // store. A string it rejects is shown as written, with Redpanda's reason,
+    // rather than replaced by defaults without a word.
     function applyInitialConfig (str) {
       if (str === null || str === undefined || str === '') return
-      var parsed = parse(spec, str, { version: grammarVersion })
-      if (parsed.errors.length) {
-        authorState = { str: str, errors: parsed.errors }
-        var e = parsed.errors[0]
-        warn('data-config "' + str + '" is not a valid ' + spec.property + (grammarVersion ? ' for ' + grammarVersion : '') +
-          ': ' + e.message + (e.reason ? ' (' + e.reason + ')' : ''))
+      var verdict = engine.parseMode(str)
+      if (!verdict.ok) {
+        var message = rejectionMessage(verdict, str, engine)
+        authorState = { str: str, errors: [{ message: message }] }
+        warn('data-config "' + str + '" is not a valid ' + spec.property +
+          (engine.info.redpanda_ref ? ' in ' + engine.info.redpanda_ref : '') + ': ' + message)
         return
       }
-      setConfig(parsed.cfg)
-      if (parsed.form === 'disabled') {
-        authorState = { str: spec.disabledLiteral, note: 'Iceberg is off for the topic, so no table is written. Pick a mode to see one.' }
+      var read = parse(spec, verdict.normalized)
+      if (read.errors.length) {
+        authorState = { str: verdict.normalized, note: 'Redpanda accepts this setting, but these controls cannot show it.' }
+        return
+      }
+      setConfig(read.cfg)
+      if (read.form === 'disabled') {
+        authorState = { str: verdict.normalized, note: 'Iceberg is off for the topic, so no table is written. Pick a mode to see one.' }
       }
     }
 
@@ -1082,7 +1142,9 @@
       if (event) authorState = null
       var raw = getConfig()
       var built = build(spec, raw)
-      var invalid = false
+      var verdict = engine.parseMode(built.str)
+      var invalid = !verdict.ok
+      var fieldFlagged = false
 
       entries.forEach(function (e) {
         var on = isEnabled(e, raw)
@@ -1103,37 +1165,39 @@
           return
         }
 
-        // Check text values where they are written. An invalid value marks
-        // the field and the string, and nothing is offered for copy.
+        // Say why a text value breaks the string. The engine decides
+        // whether it does; the rules only explain it.
         var input = controls(e.path)[0]
         var errEl = byData('data-error', e.path)
         var problem = on ? valueProblem(spec, raw[e.path], !built.legacy) : null
-        if (problem && problem.error) invalid = true
+        if (problem && problem.error && !invalid) problem = null
+        var bad = !!(problem && problem.error)
+        if (bad) fieldFlagged = true
         if (errEl) {
           errEl.textContent = problem ? (problem.error || problem.note) : ''
           errEl.hidden = !problem
           errEl.className = problem && problem.note ? 'ice-note' : 'ice-error'
         }
         if (input) {
-          if (problem && problem.error) input.setAttribute('aria-invalid', 'true')
+          if (bad) input.setAttribute('aria-invalid', 'true')
           else input.removeAttribute('aria-invalid')
           describe(input, [idOf(nid, e.path, 'error')].concat(hintId ? [hintId] : []))
         }
       })
 
-      var shown = built.str
-      var info = formatInfo(spec, built)
+      var shown = verdict.ok ? verdict.normalized : built.str
+      var read = verdict.ok ? parse(spec, shown) : null
+      var info = formatInfo(spec, { legacy: !read || read.form !== 'sections' }, verdict)
       var alert = q('[data-out="config-alert"]')
       var authorBad = !!(authorState && authorState.errors)
       if (authorState) {
         shown = authorState.str
         if (authorBad) {
           invalid = true
-          var e = authorState.errors[0]
-          alert.textContent = "This page's setting is not valid: " + e.message + (e.reason ? ' (' + e.reason + ')' : '') +
-            '. The controls show the defaults.'
+          var ae = authorState.errors[0]
+          alert.textContent = "This page's setting is not valid: " + ae.message + '. The controls show the defaults.'
         } else {
-          info = { tag: formatInfo(spec, { legacy: true }).tag, help: authorState.note }
+          info = { help: authorState.note }
         }
       }
       alert.hidden = !authorBad
@@ -1146,13 +1210,15 @@
       cfgEl.innerHTML = esc(shown).replace(/([;,])/g, '$1<wbr>')
       cfgEl.classList.toggle('ice-invalid', invalid)
       var errBox = q('[data-out="config-error"]')
-      var fieldBad = invalid && !authorBad
-      errBox.hidden = !fieldBad
-      errBox.textContent = fieldBad ? 'Not a valid setting. Fix the highlighted field to copy it.' : ''
+      var controlsBad = invalid && !authorBad
+      errBox.hidden = !controlsBad
+      errBox.textContent = !controlsBad ? ''
+        : fieldFlagged ? 'Not a valid setting. Fix the highlighted field to copy it.'
+          : 'Not a valid setting: ' + rejectionMessage(verdict, built.str, engine) + '.'
       root.querySelectorAll('[data-copy]').forEach(function (b) { b.disabled = invalid })
       var fmtEl = q('[data-out="format"]')
       fmtEl.className = 'ice-tag ' + (invalid ? 'ice-bad' : 'ice-info')
-      fmtEl.textContent = invalid ? 'Not valid' : info.tag
+      fmtEl.textContent = invalid ? 'Not valid' : ''
       q('[data-out="format-help"]').textContent = invalid ? '' : info.help
 
       var outputs = OUTPUTS[spec.outputs]
@@ -1161,15 +1227,6 @@
 
     root.querySelectorAll('input[type="radio"]').forEach(function (r) { r.addEventListener('change', update) })
     root.querySelectorAll('input[type="text"]').forEach(function (i) { i.addEventListener('input', update) })
-
-    // Load the real WASM engine (shared singleton) for this doc version;
-    // re-render when its value fields are available so the schema panel
-    // reflects production behavior. Falls back to the interim JS engine.
-    if (spec.outputs === 'icebergRow') {
-      loadEngine(docVersion, root.getAttribute('data-engine-base')).then(function (loaded) {
-        if (loaded) { engine = loaded; update() }
-      })
-    }
 
     var copyStatus = q('[data-out="copy-status"]')
     var copyTimer = null
@@ -1223,21 +1280,47 @@
     }
     return 'unsupported contract version "' + contract + '" (this build supports 1 and 2)'
   }
-  // The spec revision for the mount's property and the release its page
-  // documents.
+  // The spec for the mount's property, before its release's engine trims it.
   function specFor (root) {
     var prop = root.getAttribute('data-property')
-    if (prop && prop !== ICEBERG_MODE.property) return SPECS.filter(function (s) { return s.property === prop })[0]
-    return specForVersion(root.getAttribute('data-version'))
+    return SPECS.filter(function (s) { return s.property === (prop || ICEBERG_MODE.property) })[0]
   }
 
   function warn (msg) {
     if (typeof console !== 'undefined' && console.warn) console.warn('iceberg-explorer: ' + msg)
   }
 
-  function init (doc) {
+  // Render one mount once its release's engine has loaded. The mount keeps
+  // the macro's fallback text until then, and for good when no engine for
+  // that release can be loaded: the explorer never guesses a grammar.
+  function start (root, engine) {
+    var version = root.getAttribute('data-version') || ''
+    var problem = engineProblem(engine, version)
+    if (problem) {
+      root.setAttribute('data-hydrated', 'no-engine')
+      warn('kept the fallback: ' + problem)
+      return
+    }
+    // One broken mount must not stop the rest of the page.
+    var fallback = root.innerHTML
+    try {
+      hydrate(root, probeSpec(specFor(root), engine), engine)
+      root.setAttribute('data-hydrated', 'true')
+    } catch (e) {
+      root.innerHTML = fallback
+      root.setAttribute('data-hydrated', 'failed')
+      warn('could not render a mount, kept the fallback: ' + (e && e.message))
+    }
+  }
+
+  // Hydrate every mount in `doc`. Resolves when every mount has rendered or
+  // kept its fallback. `options.loadEngine(version, base)` replaces the
+  // script loader (tests).
+  function init (doc, options) {
     doc = doc || document
+    var load = (options && options.loadEngine) || loadEngine
     var mounts = doc.querySelectorAll(MOUNT_SELECTOR)
+    var pending = []
     for (var i = 0; i < mounts.length; i++) {
       var root = mounts[i]
       if (root.getAttribute('data-hydrated')) continue
@@ -1247,17 +1330,14 @@
         warn('kept the fallback for a mount with ' + problem)
         continue
       }
-      root.setAttribute('data-hydrated', 'true')
-      // One broken mount must not stop the rest of the page.
-      var fallback = root.innerHTML
-      try {
-        hydrate(root, specFor(root))
-      } catch (e) {
-        root.innerHTML = fallback
-        root.setAttribute('data-hydrated', 'failed')
-        warn('could not render a mount, kept the fallback: ' + (e && e.message))
-      }
+      root.setAttribute('data-hydrated', 'loading')
+      pending.push((function (r) {
+        var p
+        try { p = Promise.resolve(load(r.getAttribute('data-version') || '', r.getAttribute('data-engine-base'))) } catch (e) { p = Promise.resolve(null) }
+        return p.then(null, function () { return null }).then(function (engine) { start(r, engine) })
+      })(root))
     }
+    return Promise.all(pending)
   }
 
   // DOM bootstrap only in a browser (the bundle defines `module`, so this
@@ -1276,10 +1356,9 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       ICEBERG_MODE: ICEBERG_MODE,
-      ICEBERG_MODE_25_1: ICEBERG_MODE_25_1,
-      ICEBERG_MODE_24_3: ICEBERG_MODE_24_3,
-      specForVersion: specForVersion,
       specFor: specFor,
+      probeSpec: probeSpec,
+      engineProblem: engineProblem,
       MODES: MODES,
       SPECS: SPECS,
       OUTPUTS: OUTPUTS,

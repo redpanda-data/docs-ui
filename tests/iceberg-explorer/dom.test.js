@@ -17,7 +17,7 @@ test('hydration replaces the fallback and marks the mount', async () => {
     assert.ok(!m.querySelector('.iceberg-explorer-fallback'))
     assert.ok(m.querySelector('.ice-grid'))
     assert.strictEqual(ui(m).config(), 'key_value')
-    assert.strictEqual(ui(m).tag(), 'Works on all versions')
+    assert.strictEqual(ui(m).tag(), '', 'no version tag')
   }
   assert.deepStrictEqual(warnings, [])
 })

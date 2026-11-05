@@ -70,24 +70,21 @@ if (failures) {
     attrs: { 'data-iceberg-explorer': '1', class: 'iceberg-explorer-mount' },
     getAttribute: function (k) { return this.attrs[k] === undefined ? null : this.attrs[k] },
     setAttribute: function (k, v) { this.attrs[k] = v },
-    // hydrate() needs a real DOM; stop it at the first touch and record that
-    // the mount was selected. Selection is what this check is about.
-    get innerHTML () { throw new Error('selected') },
-    set innerHTML (v) { throw new Error('selected') }
   }
+  // A selected mount is marked loading while its engine loads; this engine
+  // never arrives, so hydrate() (which needs a real DOM) never runs.
+  var never = { loadEngine: function () { return new Promise(function () {}) } }
   var asked = []
   var fakeDoc = { querySelectorAll: function (sel) { asked.push(sel); return sel === MOUNT_SELECTOR ? [macroMount] : [] } }
-  var selected = false
-  try { init(fakeDoc) } catch (e) { selected = /selected/.test(String(e)) || macroMount.attrs['data-hydrated'] === 'true' }
-  if (!selected && macroMount.attrs['data-hydrated'] !== 'true') {
+  init(fakeDoc, never)
+  if (macroMount.attrs['data-hydrated'] !== 'loading') {
     console.error('init() did not select the macro mount; selectors asked: ' + JSON.stringify(asked))
     failures++
   }
   var legacy = { querySelectorAll: function (sel) { return sel === '.iceberg-explorer' ? [macroMount] : [] } }
   macroMount.attrs['data-hydrated'] = undefined
-  var legacySelected = false
-  try { init(legacy) } catch (e) { legacySelected = true }
-  if (legacySelected || macroMount.attrs['data-hydrated'] === 'true') {
+  init(legacy, never)
+  if (macroMount.attrs['data-hydrated'] !== undefined) {
     console.error('init() still selects the retired .iceberg-explorer class')
     failures++
   }

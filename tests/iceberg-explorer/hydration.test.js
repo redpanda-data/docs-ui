@@ -5,7 +5,10 @@
 // and the loop carries on to the next mount either way.
 const test = require('node:test')
 const assert = require('node:assert')
-const { init, mountProblem } = require('../../src/js/iceberg-explorer.js')
+const { init, mountProblem, makeEngineAdapter } = require('../../src/js/iceberg-explorer.js')
+const fake = require('./helpers/fake-engine')
+
+const loadEngine = () => Promise.resolve(makeEngineAdapter(fake.sections(), '/_/iceberg-engine.js'))
 
 const FALLBACK = '<p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer.</p>'
 
@@ -29,11 +32,11 @@ function mount (attrs) {
 function doc (mounts) {
   return { querySelectorAll: () => mounts }
 }
-function withWarnings (fn) {
+async function withWarnings (fn) {
   const seen = []
   const orig = console.warn
   console.warn = (m) => seen.push(String(m))
-  try { fn() } finally { console.warn = orig }
+  try { await fn() } finally { console.warn = orig }
   return seen
 }
 
@@ -47,11 +50,11 @@ test('contract versions 1 and 2 are accepted, anything else is refused', () => {
   }
 })
 
-test('a mount that fails to render keeps its fallback and later mounts still run', () => {
+test('a mount that fails to render keeps its fallback and later mounts still run', async () => {
   const first = mount({ 'data-iceberg-explorer': '1' })
   const unknown = mount({ 'data-iceberg-explorer': '9' })
   const last = mount({ 'data-iceberg-explorer': '2' })
-  const warnings = withWarnings(() => assert.doesNotThrow(() => init(doc([first, unknown, last]))))
+  const warnings = await withWarnings(() => init(doc([first, unknown, last]), { loadEngine }))
 
   assert.strictEqual(first.renders, 1, 'first mount was not attempted')
   assert.strictEqual(first.innerHTML, FALLBACK)
@@ -66,11 +69,26 @@ test('a mount that fails to render keeps its fallback and later mounts still run
 
   assert.strictEqual(warnings.length, 3)
   assert.ok(warnings.every((w) => w.startsWith('iceberg-explorer: ')))
-  assert.match(warnings[1], /contract version "9"/)
+  // The unknown contract is reported at once; renders finish after the engine loads.
+  assert.match(warnings[0], /contract version "9"/)
 })
 
-test('a mount is only tried once', () => {
+test('a mount is only tried once', async () => {
   const m = mount({ 'data-iceberg-explorer': '1' })
-  withWarnings(() => { init(doc([m])); init(doc([m])) })
+  await withWarnings(() => Promise.all([init(doc([m]), { loadEngine }), init(doc([m]), { loadEngine })]))
   assert.strictEqual(m.renders, 1)
+})
+
+test('a loader that throws or rejects leaves the fallback', async () => {
+  const a = mount({ 'data-iceberg-explorer': '2' })
+  const b = mount({ 'data-iceberg-explorer': '2' })
+  const warnings = await withWarnings(() => Promise.all([
+    init(doc([a]), { loadEngine: () => { throw new Error('x') } }),
+    init(doc([b]), { loadEngine: () => Promise.reject(new Error('y')) }),
+  ]))
+  for (const m of [a, b]) {
+    assert.strictEqual(m.renders, 0)
+    assert.strictEqual(m.attrs['data-hydrated'], 'no-engine')
+  }
+  assert.strictEqual(warnings.length, 2)
 })

@@ -37,15 +37,16 @@ test('every choice in every group has one line of help', () => {
 
 const cfg = (o) => Object.assign(defaultsOf(SPEC), o)
 
-test('the version tag follows the form the builder chose', () => {
-  assert.strictEqual(formatInfo(SPEC, buildConfigString(cfg({}))).tag, 'Works on all versions')
-  assert.strictEqual(formatInfo(SPEC, buildConfigString(cfg({ 'value.mode': 'schema_id_prefix' }))).tag, 'Works on all versions')
-  assert.strictEqual(formatInfo(SPEC, buildConfigString(cfg({ 'value.mode': 'schema_latest', 'value.subject': 's' }))).tag, 'Requires v25.1 or later')
-  for (const o of [{ 'key.mode': 'string' }, { 'headers.value_type': 'string' }, { 'value.mode': 'string' }, { 'value.mode': 'schema_latest', 'value.layout': 'nested' }]) {
-    const b = buildConfigString(cfg(o))
-    assert.strictEqual(b.legacy, false, JSON.stringify(o))
-    assert.strictEqual(formatInfo(SPEC, b).tag, 'Requires v26.2.1 or later', b.str)
-  }
+test('the help line names the form format_to wrote, and the upgrade the engine flags', () => {
+  const legacy = buildConfigString(cfg({ 'value.mode': 'schema_latest', 'value.subject': 's' }))
+  assert.match(formatInfo(SPEC, legacy).help, /^Short form\./)
+  const sections = buildConfigString(cfg({ 'key.mode': 'string' }))
+  assert.match(formatInfo(SPEC, sections).help, /^Section form/)
+  assert.doesNotMatch(formatInfo(SPEC, sections, { ok: true }).help, /every broker/)
+  assert.match(formatInfo(SPEC, sections, { ok: true, extended: true }).help, /every broker in the cluster runs this release/)
+  // No release numbers: each page's engine is that release.
+  const js = require('fs').readFileSync(require.resolve('../../src/js/iceberg-explorer.js'), 'utf8')
+  for (const s of ['Works on all versions', 'or later', 'sectionsSince', 'REVISIONS']) assert.ok(!js.includes(s), s)
 })
 
 test('subject and protobuf_name values Redpanda rejects are flagged', () => {

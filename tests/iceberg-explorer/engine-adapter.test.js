@@ -7,6 +7,7 @@ const test = require('node:test')
 const assert = require('node:assert')
 const { makeEngineAdapter } = require('../../src/js/iceberg-explorer.js')
 const { page, mount } = require('./helpers/dom')
+const fake = require('./helpers/fake-engine')
 
 const FIELDS = [{ name: 'order_id', type: 'string', required: false }]
 
@@ -23,57 +24,75 @@ test('the adapter detects what an engine build offers', () => {
   const future = makeEngineAdapter({ parseIcebergMode: () => '{}' })
   assert.strictEqual(future.has.parseIcebergMode, true)
   assert.match(future.avroToIceberg('{}').error, /no avroToIcebergJson/)
+  assert.deepStrictEqual(future.info, {}, 'an engine without icebergEngineInfo names no release')
+  assert.match(broken.parseMode('key_value').error, /no parseIcebergMode/)
 })
 
-// Serve engine scripts from a table: url -> fields (or null for a 404).
-function engines (table, requested) {
-  return (window) => {
-    const head = window.document.head
-    const append = head.appendChild.bind(head)
-    head.appendChild = (el) => {
-      if (el.tagName === 'SCRIPT' && el.src) {
-        const url = new URL(el.src).pathname
-        requested.push(url)
-        setTimeout(() => {
-          if (!(url in table)) return el.onerror()
-          const fields = table[url]
-          window.createIcebergEngine = () => Promise.resolve({ avroToIcebergJson: () => JSON.stringify({ fields }) })
-          el.onload()
-        })
-        return el
-      }
-      return append(el)
-    }
-  }
-}
-const settle = () => new Promise((resolve) => setTimeout(resolve, 30))
+test('parseMode returns the engine\'s verdict, asks once per string, and survives bad output', () => {
+  let calls = 0
+  const a = makeEngineAdapter(Object.assign(fake.sections('v26.2.4'), {
+    parseIcebergMode: (s) => { calls++; return s === 'boom' ? 'not json' : fake.sections().parseIcebergMode(s) },
+  }))
+  assert.deepStrictEqual(a.info, { redpanda_ref: 'v26.2.4', redpanda_commit: '0'.repeat(40) })
+  assert.deepStrictEqual(a.parseMode('value:mode=schema_id_prefix'), { ok: true, normalized: 'value_schema_id_prefix', extended: false })
+  a.parseMode('value:mode=schema_id_prefix')
+  assert.strictEqual(calls, 1)
+  assert.strictEqual(a.parseMode('boom').ok, false)
+})
 
-test('mounts share an engine per version and fall back per version', async () => {
+const settle = () => new Promise((resolve) => setTimeout(resolve, 30))
+const withFields = (ref, fields) => fake.sections(ref, { avroToIcebergJson: () => JSON.stringify({ fields }) })
+
+test('mounts share an engine per version, and never use another release\'s', async () => {
   const requested = []
-  const table = {
-    '/_/iceberg-engine-26.2.js': [{ name: 'from_262', type: 'string', required: false }],
-    '/_/iceberg-engine.js': [{ name: 'from_unversioned', type: 'string', required: false }],
+  const engines = {
+    'iceberg-engine-26.2.js': withFields('v26.2.4', [{ name: 'from_262', type: 'string', required: false }]),
+    'iceberg-engine-26.3.js': null,
+    'iceberg-engine.js': withFields('v26.2.4', [{ name: 'from_unversioned', type: 'string', required: false }]),
   }
   const body = '<script src="/_/js/site.js"></script>' +
     mount({ 'data-version': '26.2', 'data-config': 'value_schema_id_prefix' }) +
     mount({ 'data-version': '26.2', 'data-config': 'value_schema_id_prefix' }) +
-    mount({ 'data-version': '26.3', 'data-config': 'value_schema_id_prefix' })
-  const { mounts, ui } = await page(body, { beforeEval: engines(table, requested) })
+    mount({ 'data-version': '26.3', 'data-config': 'value_schema_id_prefix' }) +
+    mount({ 'data-config': 'value_schema_id_prefix' })
+  const { mounts, ui, warnings } = await page(body, { engines, requested })
   await settle()
-  const schemas = mounts.map((m) => ui(m).q('[data-out="schema"]').textContent)
-  assert.match(schemas[0], /from_262/)
-  assert.match(schemas[1], /from_262/)
-  assert.match(schemas[2], /from_unversioned/, 'a 26.3 page must not use the 26.2 engine')
+  assert.match(ui(mounts[0]).q('[data-out="schema"]').textContent, /from_262/)
+  assert.match(ui(mounts[1]).q('[data-out="schema"]').textContent, /from_262/)
   assert.strictEqual(ui(mounts[0]).q('[data-out="engine"]').textContent, 'real engine · wasm')
+  // 26.3 has no engine of its own, and the unversioned one is v26.2.4.
+  assert.strictEqual(mounts[2].getAttribute('data-hydrated'), 'no-engine')
+  assert.ok(mounts[2].querySelector('.iceberg-explorer-fallback'))
+  assert.ok(warnings.some((w) => /built from v26\.2\.4, not 26\.3/.test(w)), warnings.join('\n'))
+  assert.match(ui(mounts[3]).q('[data-out="schema"]').textContent, /from_unversioned/)
   // One request per file, not one per mount.
   assert.deepStrictEqual(requested.sort(), ['/_/iceberg-engine-26.2.js', '/_/iceberg-engine-26.3.js', '/_/iceberg-engine.js'])
 })
 
-test('engine fields are shown as the engine returns them, optional included', async () => {
+test('the layout\'s engine attachment is tried before the UI root', async () => {
   const requested = []
-  const table = { '/_/iceberg-engine.js': [{ name: 'opt', type: 'int', required: false }, { name: 'req', type: 'int', required: true }] }
-  const { mounts, ui } = await page('<script src="/_/js/site.js"></script>' + mount({ 'data-config': 'value_schema_id_prefix' }), { beforeEval: engines(table, requested) })
-  await settle()
+  const head = '<meta name="iceberg-engine-url" content="/streaming/current/reference/_attachments/iceberg-engine-26.2.js">'
+  const { mounts } = await page(head + mount({ 'data-version': '26.2' }), { requested })
+  assert.strictEqual(mounts[0].getAttribute('data-hydrated'), 'true')
+  assert.deepStrictEqual(requested, ['/streaming/current/reference/_attachments/iceberg-engine-26.2.js'])
+  // An attachment for another version, or another origin, is not used.
+  for (const content of ['/streaming/26.1/reference/_attachments/iceberg-engine-26.1.js', '//evil.example/iceberg-engine-26.2.js']) {
+    const seen = []
+    await page(`<meta name="iceberg-engine-url" content="${content}">` + mount({ 'data-version': '26.2' }), { requested: seen })
+    assert.deepStrictEqual(seen, ['/_/iceberg-engine-26.2.js'], content)
+  }
+})
+
+test('without an engine the mount keeps its fallback text', async () => {
+  const { mounts, warnings } = await page(mount({ 'data-version': '26.2' }), { engines: { 'iceberg-engine-26.2.js': null, 'iceberg-engine.js': null } })
+  assert.strictEqual(mounts[0].getAttribute('data-hydrated'), 'no-engine')
+  assert.ok(mounts[0].querySelector('.iceberg-explorer-fallback'))
+  assert.ok(warnings.some((w) => /no Iceberg engine could be loaded for version 26\.2/.test(w)))
+})
+
+test('engine fields are shown as the engine returns them, optional included', async () => {
+  const engines = { 'iceberg-engine.js': withFields('v26.2.1', [{ name: 'opt', type: 'int', required: false }, { name: 'req', type: 'int', required: true }]) }
+  const { mounts, ui } = await page('<script src="/_/js/site.js"></script>' + mount({ 'data-config': 'value_schema_id_prefix' }), { engines })
   const schema = ui(mounts[0]).q('[data-out="schema"]').textContent
   assert.match(schema, /opt: int optional/)
   assert.match(schema, /req: int required/)
