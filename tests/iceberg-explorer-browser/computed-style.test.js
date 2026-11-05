@@ -112,7 +112,8 @@ function inspect () {
       if (r < 4.5) problems.push(`${where}: ${el.className || el.tagName} "${el.textContent.slice(0, 30)}" is ${r.toFixed(2)}:1`)
     }
   })
-  return { problems, theme: document.documentElement.getAttribute('data-theme'), mounts: mounts.length }
+  const alerts = mounts.map((m) => { const a = m.querySelector('[data-out="config-alert"]'); return a && !a.hidden ? a.textContent : null })
+  return { problems, alerts, theme: document.documentElement.getAttribute('data-theme'), mounts: mounts.length }
 }
 
 for (const width of [390, 1440]) {
@@ -133,6 +134,8 @@ for (const width of [390, 1440]) {
         assert.strictEqual(out.theme, theme)
         assert.strictEqual(out.mounts, 6)
         assert.deepStrictEqual(out.problems, [])
+        // Only the preview's deliberately invalid config is flagged.
+        assert.deepStrictEqual(out.alerts.map((x) => x && /schema_lastest/.test(x)), [null, null, null, null, true, null])
       } finally {
         await page.close()
       }
