@@ -1,7 +1,7 @@
 ;(function () {
   'use strict'
 
-  // Iceberg Mode Explorer — docs-ui hydration module.
+  // Iceberg Mode Explorer: docs-ui hydration module.
   //
   // The `[iceberg-explorer]` block (docs-extensions-and-macros) emits a mount
   // point carrying the `data-iceberg-explorer` attribute (its value is the
@@ -11,11 +11,19 @@
   // finding zero mounts while every page showed the fallback. This module
   // finds every such mount point and renders the interactive tool into it.
   //
-  // ENGINE SEAM: all translation logic lives behind `translate(cfg)` below.
-  // Today that is an in-browser port of the rules in Redpanda's
-  // `model/iceberg_mode` + `iceberg/conversion` (an interim engine). It is
-  // structured so a per-version WASM build of the real C++ engine can be
-  // dropped in later without touching the UI — see docs-ui/iceberg-editor/.
+  // Everything the tool knows about a property is in one declarative SPEC
+  // (see ICEBERG_MODE below): its sections, fields, choices, defaults, which
+  // fields depend on which, and how the string is written. The markup, the
+  // config builder and parser, the enable rules and hints, and getConfig are
+  // all generated from it. To add a mode, add one entry to MODES; to add an
+  // option, add one field; to explore another property, add a spec and an
+  // OUTPUTS renderer for its panels.
+  //
+  // ENGINE SEAM: the panels are drawn by the spec's `outputs` renderer. The
+  // Iceberg renderer uses an in-browser port of the rules in Redpanda's
+  // `model/iceberg_mode` and `iceberg/conversion` (an interim engine), and a
+  // per-version WASM build of the real C++ mapper when one is published (see
+  // docs-ui/iceberg-editor/).
 
   // ── Fixed sample data (illustrative). A future iteration swaps these for
   //    user-supplied schema/record via editors; the engine seam stays the same.
@@ -172,67 +180,52 @@
   }
 
   function esc (s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   }
-  function isSchemaMode (mode) {
-    return mode === 'schema_id_prefix' || mode === 'schema_latest'
-  }
+  var hasOwn = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k) }
 
-  // Which modes of its section each dependent option is valid with. This is
-  // the one copy of the rule: buildConfigString drops an option outside these
-  // modes, update() disables its control, and the hint under the control is
-  // generated from it. Upstream: "subject and protobuf_name require
-  // mode=schema_latest" and "layout=nested requires a schema mode
-  // (schema_id_prefix or schema_latest)" in model.cc parse_extended_iceberg_mode.
-  var ENABLED_WITH = {
-    subject: ['schema_latest'],
-    protobuf_name: ['schema_latest'],
-    layout: ['schema_id_prefix', 'schema_latest'],
-  }
-  function optionEnabled (option, mode) {
-    return ENABLED_WITH[option].indexOf(mode) !== -1
-  }
-  function enabledHint (option) {
-    return 'Only with ' + ENABLED_WITH[option].join(' or ')
-  }
+  // ══ The spec ════════════════════════════════════════════════════════════
+  //
+  // A spec describes one property for one range of Redpanda versions.
+  //
+  //   property     The property name shown in the config bar.
+  //   sections     In the order Redpanda writes them. Each has `name` (the
+  //                DSL section name), `label` (the word screen readers hear
+  //                before each control), `heading` and `fields`.
+  //   fields       In the order Redpanda writes them within the section. The
+  //                form shows choice fields first, then text fields.
+  //     name       The DSL option name. A field's path is `<section>.<name>`;
+  //                the config object, the DOM (data-path) and the tests all
+  //                use that path.
+  //     type       'enum' (radio group) or 'text'.
+  //     values     For enums: [{ value, help, decodes? }]. `help` is the one
+  //                line shown under the group while that value is checked.
+  //     default    The value Redpanda assumes when the option is left out.
+  //     enabledWhen  { <field in the same section>: [values] }. Outside those
+  //                values the control is disabled with a hint, and the
+  //                option is left out of the string (it is reset to its
+  //                default), because Redpanda rejects it there.
+  //     requires   Redpanda's message when the option is set where
+  //                enabledWhen says it does not apply. Generated if omitted.
+  //     emit       'always' (enums) or 'ifSet' (text): whether the section
+  //                format writes the option when it holds its default.
+  //   misplaced    On a section: option names of other sections that Redpanda
+  //                reports as "only valid in the <home> section" here.
+  //   legacy       Short names Redpanda writes when a config fits one. Build
+  //                tries them in order; `set` gives the paths the name fixes,
+  //                `options` the options it may carry (in Redpanda's order).
+  //                Every other path must hold its default.
+  //   valueRules   Checks on text values, applied where the value is written.
+  //   outputs      Name of the OUTPUTS renderer that draws the panels.
 
-  // One line of help per choice, shown under its group for the checked value.
-  // Wording follows the "Specify Iceberg Schema" docs page.
-  var MODE_HELP = {
-    binary: 'Raw bytes, not decoded.',
-    string: 'Decoded as UTF-8. Invalid bytes become U+FFFD.',
-    schema_id_prefix: 'Decoded with the schema whose ID is embedded in each record, in Schema Registry wire format.',
-    schema_latest: 'Decoded with the latest schema registered for the subject.',
-  }
-  var CHOICE_HELP = {
-    'key-mode': MODE_HELP,
-    'val-mode': MODE_HELP,
-    'val-layout': {
-      flat: 'Value fields become top-level columns.',
-      nested: 'Value fields go in one value struct column.',
-    },
-    'hdr-type': {
-      binary: 'Header values stay raw bytes. Header keys are always strings.',
-      string: 'Header values are decoded as UTF-8. Invalid bytes become U+FFFD.',
-    },
-  }
-
-  // Which Redpanda versions accept a built string. Section strings are only
-  // built when a setting has no short form, and those need the
-  // iceberg_extended_mode_config feature: "extended key/headers config
-  // requires the cluster to be fully upgraded to at least v26.2.1"
-  // (config_utils.h iceberg_config_validator). value_schema_latest first
-  // parses in v25.1.1; key_value and value_schema_id_prefix in every release
-  // with Iceberg.
-  function formatInfo (built) {
-    if (!built.legacy) {
-      return { tag: 'Requires v26.2.1 or later', help: 'Redpanda accepts this form once every broker in the cluster runs v26.2.1 or later.' }
-    }
-    if (/^value_schema_latest/.test(built.str)) {
-      return { tag: 'Requires v25.1 or later', help: 'Short form. Redpanda shows a setting in this form whenever it fits, because older clusters accept it.' }
-    }
-    return { tag: 'Works on all versions', help: 'Short form. Redpanda shows a setting in this form whenever it fits, because older clusters accept it.' }
-  }
+  // Value modes, shared by the key and value sections. `decodes` marks modes
+  // that decode the bytes with a schema, so the table gets typed columns.
+  var MODES = [
+    { value: 'binary', help: 'Raw bytes, not decoded.' },
+    { value: 'string', help: 'Decoded as UTF-8. Invalid bytes become U+FFFD.' },
+    { value: 'schema_id_prefix', decodes: true, help: 'Decoded with the schema whose ID is embedded in each record, in Schema Registry wire format.' },
+    { value: 'schema_latest', decodes: true, help: 'Decoded with the latest schema registered for the subject.' },
+  ]
 
   // Characters a subject or protobuf_name cannot contain. Redpanda splits
   // options on ',' and sections on ';' (parse_extended_iceberg_mode), and reads
@@ -246,123 +239,348 @@
     { re: /;/, error: 'Remove the semicolon. Redpanda uses it to separate sections.', sectionFormOnly: true },
     { re: /=/, note: 'Redpanda keeps "=" as part of the name.' },
   ]
-  function optionValueProblem (value, sectionForm) {
-    for (var i = 0; i < VALUE_RULES.length; i++) {
-      var r = VALUE_RULES[i]
+
+  // subject and protobuf_name pick a schema in Schema Registry, so they only
+  // apply to schema_latest: "subject and protobuf_name require
+  // mode=schema_latest" (model.cc parse_extended_iceberg_mode).
+  function schemaOptions (section) {
+    var only = { mode: ['schema_latest'] }
+    var requires = 'subject and protobuf_name require mode=schema_latest'
+    return [
+      { name: 'subject', type: 'text', default: '', placeholder: '(default: <topic>-' + section + ')', enabledWhen: only, requires: requires },
+      { name: 'protobuf_name', type: 'text', default: '', placeholder: '(default: first message)', enabledWhen: only, requires: requires },
+    ]
+  }
+  function modeField () {
+    return { name: 'mode', label: 'Mode', type: 'enum', values: MODES, default: 'binary' }
+  }
+
+  // Which Redpanda versions accept a built string. Section strings are only
+  // built when a setting has no short form, and those need the
+  // iceberg_extended_mode_config feature: "extended key/headers config
+  // requires the cluster to be fully upgraded to at least v26.2.1"
+  // (config_utils.h iceberg_config_validator). value_schema_latest first
+  // parses in v25.1.1; key_value and value_schema_id_prefix in every release
+  // with Iceberg.
+  var LEGACY_HELP = 'Short form. Redpanda shows a setting in this form whenever it fits, because older clusters accept it.'
+
+  var ICEBERG_MODE = {
+    property: 'redpanda.iceberg.mode',
+    grammar: 'sections',
+    sectionsSince: 'v26.2.1',
+    sectionsHelp: 'Redpanda accepts this form once every broker in the cluster runs v26.2.1 or later.',
+    sections: [
+      {
+        name: 'key',
+        label: 'Key',
+        heading: 'Key configuration',
+        // Options of another section that Redpanda names when they appear
+        // here: "layout is only valid in the value section, not 'key'".
+        misplaced: ['layout'],
+        fields: [modeField()].concat(schemaOptions('key')),
+      },
+      {
+        name: 'value',
+        label: 'Value',
+        heading: 'Value configuration',
+        fields: [modeField()].concat(schemaOptions('value'), [{
+          name: 'layout',
+          label: 'Layout',
+          type: 'enum',
+          default: 'flat',
+          // "layout=nested requires a schema mode (schema_id_prefix or
+          // schema_latest)" (model.cc parse_extended_iceberg_mode).
+          enabledWhen: { mode: ['schema_id_prefix', 'schema_latest'] },
+          requires: 'layout=nested requires a schema mode (schema_id_prefix or schema_latest)',
+          values: [
+            { value: 'flat', help: 'Value fields become top-level columns.' },
+            { value: 'nested', help: 'Value fields go in one value struct column.' },
+          ],
+        }]),
+      },
+      {
+        name: 'headers',
+        label: 'Headers',
+        heading: 'Headers configuration',
+        fields: [{
+          name: 'value_type',
+          label: 'Value type',
+          type: 'enum',
+          default: 'binary',
+          values: [
+            { value: 'binary', help: 'Header values stay raw bytes. Header keys are always strings.' },
+            { value: 'string', help: 'Header values are decoded as UTF-8. Invalid bytes become U+FFFD.' },
+          ],
+        }],
+      },
+    ],
+    // model.cc format_to: a config whose key and headers are defaults and
+    // whose value is flat and not string is written as a legacy name.
+    legacy: [
+      { str: 'key_value', set: { 'value.mode': 'binary' }, help: LEGACY_HELP },
+      { str: 'value_schema_id_prefix', set: { 'value.mode': 'schema_id_prefix' }, help: LEGACY_HELP },
+      // Legacy option order (model.cc format_to): protobuf_name then subject.
+      { str: 'value_schema_latest', set: { 'value.mode': 'schema_latest' }, section: 'value', options: ['protobuf_name', 'subject'], since: 'v25.1', help: LEGACY_HELP },
+    ],
+    valueRules: VALUE_RULES,
+    outputs: 'icebergRow',
+  }
+
+  // ══ Generic spec machinery ══════════════════════════════════════════════
+
+  // Every field of a spec with its path, in spec order.
+  function fieldsOf (spec) {
+    var out = []
+    spec.sections.forEach(function (sec) {
+      sec.fields.forEach(function (f) {
+        out.push({ path: sec.name + '.' + f.name, section: sec, field: f })
+      })
+    })
+    return out
+  }
+  function fieldAt (spec, path) {
+    var all = fieldsOf(spec)
+    for (var i = 0; i < all.length; i++) if (all[i].path === path) return all[i]
+    return null
+  }
+  function defaultsOf (spec) {
+    var cfg = {}
+    fieldsOf(spec).forEach(function (e) { cfg[e.path] = e.field.default })
+    return cfg
+  }
+  // Whether a field applies, given the other values in its section.
+  function isEnabled (entry, cfg) {
+    var when = entry.field.enabledWhen
+    if (!when) return true
+    return Object.keys(when).every(function (dep) {
+      return when[dep].indexOf(cfg[entry.section.name + '.' + dep]) !== -1
+    })
+  }
+  function enabledHintFor (field) {
+    var when = field.enabledWhen
+    return 'Only with ' + Object.keys(when).map(function (dep) { return when[dep].join(' or ') }).join(', ')
+  }
+  // Whether a value is one of an enum's choices.
+  function hasValue (field, v) {
+    return field.values.some(function (x) { return x.value === v })
+  }
+  function valueInfo (spec, path, v) {
+    var e = fieldAt(spec, path)
+    if (!e || e.field.type !== 'enum') return null
+    for (var i = 0; i < e.field.values.length; i++) if (e.field.values[i].value === v) return e.field.values[i]
+    return null
+  }
+  // Fill in missing paths with defaults, and reset fields that do not apply
+  // to their default: Redpanda rejects them, and a control can still hold a
+  // value after the mode it depends on changes.
+  function normalize (spec, cfg) {
+    var n = defaultsOf(spec)
+    Object.keys(n).forEach(function (p) {
+      if (cfg && hasOwn(cfg, p) && cfg[p] !== undefined && cfg[p] !== null) n[p] = cfg[p]
+    })
+    fieldsOf(spec).forEach(function (e) {
+      if (!isEnabled(e, n)) n[e.path] = e.field.default
+    })
+    if (cfg && cfg.disabled) n.disabled = true
+    return n
+  }
+
+  // The legacy name for a normalized config, or null.
+  function legacyFor (spec, n) {
+    var all = fieldsOf(spec)
+    for (var i = 0; i < (spec.legacy || []).length; i++) {
+      var entry = spec.legacy[i]
+      var fits = all.every(function (e) {
+        if (entry.set && hasOwn(entry.set, e.path)) return n[e.path] === entry.set[e.path]
+        if (entry.options && e.section.name === entry.section && entry.options.indexOf(e.field.name) !== -1) return true
+        return n[e.path] === e.field.default
+      })
+      if (!fits) continue
+      var s = entry.str
+      var opts = (entry.options || []).filter(function (o) { return n[entry.section + '.' + o] })
+        .map(function (o) { return o + '=' + n[entry.section + '.' + o] })
+      if (opts.length) s += ':' + opts.join(',')
+      return { str: s, entry: entry }
+    }
+    return null
+  }
+
+  // Build the string Redpanda writes for a config (model.cc format_to):
+  // a legacy name when one fits, else every section with every option it
+  // always writes, in spec order. Returns { str, legacy, entry }.
+  function build (spec, cfg) {
+    if (cfg && cfg.disabled && spec.disabledLiteral) return { str: spec.disabledLiteral, legacy: true, entry: null }
+    var n = normalize(spec, cfg)
+    var legacy = legacyFor(spec, n)
+    if (legacy) return { str: legacy.str, legacy: true, entry: legacy.entry }
+    var parts = spec.sections.map(function (sec) {
+      var opts = sec.fields.filter(function (f) {
+        var emit = f.emit || (f.type === 'enum' ? 'always' : 'ifSet')
+        return emit === 'always' || n[sec.name + '.' + f.name]
+      }).map(function (f) { return f.name + '=' + n[sec.name + '.' + f.name] })
+      return sec.name + ':' + opts.join(',')
+    })
+    return { str: parts.join(';'), legacy: false, entry: null }
+  }
+
+  // "opt1=val1,opt2=val2" into ordered [name, value] pairs (model.cc
+  // parse_section_opts). Duplicate names, empty names and empty values are
+  // errors. An empty string has no options.
+  function parseOpts (str) {
+    var pairs = []
+    var seen = {}
+    if (str === '') return { pairs: pairs }
+    var items = str.split(',')
+    for (var i = 0; i < items.length; i++) {
+      var eq = items[i].indexOf('=')
+      var k = eq < 0 ? items[i] : items[i].slice(0, eq)
+      var v = eq < 0 ? '' : items[i].slice(eq + 1)
+      if (hasOwn(seen, k)) return { reason: "duplicate option '" + k + "'" }
+      seen[k] = true
+      pairs.push([k, v])
+      if (k === '') return { reason: "option '" + items[i] + "' has no name" }
+      if (v === '') return { reason: "option '" + k + "' has no value" }
+    }
+    return { pairs: pairs }
+  }
+  function err (message, reason) {
+    return reason ? { message: message, reason: reason } : { message: message }
+  }
+
+  // Parse a string against a spec. Returns { cfg, errors, form }: `cfg` holds
+  // every path (defaults where the string is silent, all defaults when it is
+  // invalid), `errors` Redpanda's reasons for rejecting it, and `form` one of
+  // 'disabled', 'legacy' or 'sections'.
+  function parse (spec, str) {
+    var s = String(str === undefined || str === null ? '' : str).trim()
+    var cfg = defaultsOf(spec)
+    var fail = function (e) { return { cfg: defaultsOf(spec), errors: [e], form: null } }
+    if (spec.disabledLiteral && s === spec.disabledLiteral) {
+      cfg.disabled = true
+      return { cfg: cfg, errors: [], form: 'disabled' }
+    }
+    var legacy = spec.legacy || []
+    for (var i = 0; i < legacy.length; i++) {
+      var entry = legacy[i]
+      if (!entry.options && s === entry.str) return { cfg: Object.assign(cfg, entry.set), errors: [], form: 'legacy' }
+      if (entry.options && s.indexOf(entry.str) === 0) {
+        Object.assign(cfg, entry.set)
+        var suffix = s.slice(entry.str.length)
+        if (suffix === '') return { cfg: cfg, errors: [], form: 'legacy' }
+        if (suffix.charAt(0) !== ':') return fail(err("expected ':' or end of string after '" + entry.str + "'"))
+        var rest = suffix.slice(1)
+        if (rest === '') return fail(err("expected options after ':' in " + entry.str))
+        var parsed = parseOpts(rest)
+        if (!parsed.pairs) return fail(err('malformed options in ' + entry.str, parsed.reason))
+        for (var j = 0; j < parsed.pairs.length; j++) {
+          var k = parsed.pairs[j][0]
+          if (entry.options.indexOf(k) === -1) return fail(err("unknown option '" + k + "' in " + entry.str))
+          cfg[entry.section + '.' + k] = parsed.pairs[j][1]
+        }
+        return { cfg: cfg, errors: [], form: 'legacy' }
+      }
+    }
+    if (spec.grammar !== 'sections') return fail(err('not a value this version accepts'))
+    return parseSections(spec, s)
+  }
+
+  // model.cc parse_extended_iceberg_mode, driven by the spec.
+  function parseSections (spec, s) {
+    var fail = function (e) { return { cfg: defaultsOf(spec), errors: [e], form: null } }
+    var byName = {}
+    spec.sections.forEach(function (sec) { byName[sec.name] = sec })
+    var given = {}
+    var parts = s.split(';')
+    for (var i = 0; i < parts.length; i++) {
+      var sec = parts[i]
+      if (sec === '') return fail(err('empty section in iceberg_mode config'))
+      var colon = sec.indexOf(':')
+      if (colon < 0) return fail(err("missing ':' in section '" + sec + "'"))
+      var name = sec.slice(0, colon)
+      var parsed = parseOpts(sec.slice(colon + 1))
+      if (!parsed.pairs) return fail(err("malformed options in section '" + name + "'", parsed.reason))
+      if (!hasOwn(byName, name)) return fail(err("unknown section '" + name + "'"))
+      if (hasOwn(given, name)) return fail(err("duplicate section '" + name + "'"))
+      given[name] = parsed.pairs
+    }
+    var cfg = defaultsOf(spec)
+    // Upstream checks the sections in its own order, whatever the source order.
+    for (var si = 0; si < spec.sections.length; si++) {
+      var section = spec.sections[si]
+      var pairs = given[section.name]
+      if (!pairs) continue
+      for (var p = 0; p < pairs.length; p++) {
+        var k = pairs[p][0]
+        var v = pairs[p][1]
+        var field = null
+        section.fields.forEach(function (f) { if (f.name === k) field = f })
+        if (!field) {
+          var home = (section.misplaced || []).indexOf(k) !== -1 && spec.sections.filter(function (o) {
+            return o.fields.some(function (f) { return f.name === k })
+          })[0]
+          if (home) return fail(err(k + ' is only valid in the ' + home.name + " section, not '" + section.name + "'"))
+          return fail(err("unknown option '" + k + "' in section '" + section.name + "'"))
+        }
+        if (field.type === 'enum' && !hasValue(field, v)) {
+          return fail(err('unknown ' + k + " '" + v + "' in section '" + section.name + "'"))
+        }
+        cfg[section.name + '.' + k] = v
+      }
+      // A field set away from its default where it does not apply.
+      for (var fi = 0; fi < section.fields.length; fi++) {
+        var f = section.fields[fi]
+        var entry = { path: section.name + '.' + f.name, section: section, field: f }
+        if (cfg[entry.path] !== f.default && !isEnabled(entry, cfg)) {
+          return fail(err(dependencyMessage(f) + " in section '" + section.name + "'"))
+        }
+      }
+    }
+    return { cfg: cfg, errors: [], form: 'sections' }
+  }
+  function dependencyMessage (field) {
+    if (field.requires) return field.requires
+    var when = field.enabledWhen
+    return field.name + ' requires ' + Object.keys(when).map(function (d) { return d + '=' + when[d].join(' or ') }).join(', ')
+  }
+
+  // A problem with one text value, where `sectionForm` says whether the
+  // string being built is in the section format.
+  function valueProblem (spec, value, sectionForm) {
+    var rules = spec.valueRules || []
+    for (var i = 0; i < rules.length; i++) {
+      var r = rules[i]
       if (r.sectionFormOnly && !sectionForm) continue
       if (r.re.test(value)) return r.error ? { error: r.error } : { note: r.note }
     }
     return null
   }
 
+  // The version tag and help line for a built string.
+  function formatInfo (spec, built) {
+    if (!built.legacy) {
+      return { tag: 'Requires ' + spec.sectionsSince + ' or later', help: spec.sectionsHelp }
+    }
+    var e = built.entry
+    return { tag: e && e.since ? 'Requires ' + e.since + ' or later' : 'Works on all versions', help: (e && e.help) || LEGACY_HELP }
+  }
+
   // A shell command that sets the property. The value is single-quoted
   // because ';' would end the command; rpk's --set is a string array, so ','
   // inside the value is not split.
-  function rpkCommand (value) {
-    return "rpk topic alter-config <topic-name> --set '" + ('redpanda.iceberg.mode=' + value).replace(/'/g, "'\\''") + "'"
+  function rpkCommand (value, property) {
+    return "rpk topic alter-config <topic-name> --set '" + ((property || ICEBERG_MODE.property) + '=' + value).replace(/'/g, "'\\''") + "'"
   }
 
-  // ── Config-string builder — mirrors model/model.cc format_to():
-  //    legacy strings when legacy-compatible, else the section-based DSL,
-  //    always serializing all sections (matches PR #31035 behavior).
-  function buildConfigString (cfg) {
-    // Redpanda rejects layout=nested outside a schema mode, and subject or
-    // protobuf_name outside schema_latest (iceberg_mode_test.cc
-    // IcebergModeLayout.ParseNestedWith*Rejected, IcebergModeParseError.
-    // SubjectWith*Mode). Controls can still hold those values after a mode
-    // change, so drop them here instead of serializing a rejected string.
-    var keySubject = optionEnabled('subject', cfg.keyMode) ? cfg.keySubject : ''
-    var keyProto = optionEnabled('protobuf_name', cfg.keyMode) ? cfg.keyProto : ''
-    var valSubject = optionEnabled('subject', cfg.valMode) ? cfg.valSubject : ''
-    var valProto = optionEnabled('protobuf_name', cfg.valMode) ? cfg.valProto : ''
-    var valLayout = optionEnabled('layout', cfg.valMode) ? cfg.valLayout : 'flat'
-    var keyDefault = cfg.keyMode === 'binary'
-    var hdrDefault = cfg.hdrType === 'binary'
-    var valLayoutDefault = valLayout === 'flat'
-    var valNotString = cfg.valMode !== 'string'
-    var legacyCompat = keyDefault && hdrDefault && valLayoutDefault && valNotString
+  // ══ Outputs: the panels a spec's renderer draws ═════════════════════════
+  //
+  // A renderer has `template(nid)`, the panel markup under the config bar,
+  // and `update(root, cfg, ctx)`, which fills it for a normalized config.
+  // ctx: { spec, engineValFields }.
 
-    if (legacyCompat) {
-      if (cfg.valMode === 'binary') return { str: 'key_value', legacy: true }
-      if (cfg.valMode === 'schema_id_prefix') return { str: 'value_schema_id_prefix', legacy: true }
-      if (cfg.valMode === 'schema_latest') {
-        // Legacy option order (model.cc format_to): protobuf_name then subject.
-        var s = 'value_schema_latest'
-        var opts = []
-        if (valProto) opts.push('protobuf_name=' + valProto)
-        if (valSubject) opts.push('subject=' + valSubject)
-        if (opts.length) s += ':' + opts.join(',')
-        return { str: s, legacy: true }
-      }
-    }
+  var S = function (cls, text) { return '<span class="' + cls + '">' + esc(text) + '</span>' }
+  var indent = function (n) { var o = ''; for (var i = 0; i < n; i++) o += '  '; return o }
 
-    // Section format (model.cc): always emit all sections and all options so
-    // defaults are frozen at set-time. Key: mode, subject?, protobuf_name?.
-    // Value: mode, subject?, protobuf_name?, layout (always, last).
-    var sections = []
-    var keyOpts = ['mode=' + cfg.keyMode]
-    if (keySubject) keyOpts.push('subject=' + keySubject)
-    if (keyProto) keyOpts.push('protobuf_name=' + keyProto)
-    sections.push('key:' + keyOpts.join(','))
-
-    var valOpts = ['mode=' + cfg.valMode]
-    if (valSubject) valOpts.push('subject=' + valSubject)
-    if (valProto) valOpts.push('protobuf_name=' + valProto)
-    valOpts.push('layout=' + valLayout)
-    sections.push('value:' + valOpts.join(','))
-
-    sections.push('headers:value_type=' + cfg.hdrType)
-    return { str: sections.join(';'), legacy: false }
-  }
-
-  // ── Config-string parser: the inverse of buildConfigString. Returns only the
-  //    cfg keys the string sets. The legacy names are matched explicitly
-  //    because the section format allows omitted sections, so a valid section
-  //    string such as `value:mode=schema_latest` need not contain ';'.
-  var LEGACY_VALUE_MODES = { key_value: 'binary', value_schema_id_prefix: 'schema_id_prefix', value_schema_latest: 'schema_latest' }
-  var OPTION_KEYS = { subject: 'Subject', protobuf_name: 'Proto' }
-  function parseConfigString (str) {
-    var out = {}
-    if (!str) return out
-    str = String(str).trim()
-    var colon = str.indexOf(':')
-    var head = colon === -1 ? str : str.slice(0, colon)
-    if (Object.prototype.hasOwnProperty.call(LEGACY_VALUE_MODES, head)) {
-      out.valMode = LEGACY_VALUE_MODES[head]
-      if (colon !== -1) parseOptions('val', str.slice(colon + 1), out)
-      return out
-    }
-    var prefixFor = { key: 'key', value: 'val' }
-    str.split(';').forEach(function (section) {
-      var i = section.indexOf(':')
-      if (i === -1) return
-      var name = section.slice(0, i).trim()
-      var opts = section.slice(i + 1)
-      if (name === 'headers') {
-        opts.split(',').forEach(function (opt) {
-          var kv = opt.split('=')
-          if (kv[0].trim() === 'value_type' && kv[1]) out.hdrType = kv[1].trim()
-        })
-      } else if (prefixFor[name]) {
-        parseOptions(prefixFor[name], opts, out)
-      }
-    })
-    return out
-  }
-  function parseOptions (prefix, opts, out) {
-    opts.split(',').forEach(function (opt) {
-      var eq = opt.indexOf('=')
-      if (eq === -1) return
-      var k = opt.slice(0, eq).trim()
-      var v = opt.slice(eq + 1).trim()
-      if (!v) return
-      if (k === 'mode') out[prefix + 'Mode'] = v
-      else if (k === 'layout' && prefix === 'val') out.valLayout = v
-      else if (OPTION_KEYS[k]) out[prefix + OPTION_KEYS[k]] = v
-    })
-  }
-
-  function renderSchemaFields (lines, fields, depth, S, indent) {
+  function renderSchemaFields (lines, fields, depth) {
     for (var i = 0; i < fields.length; i++) {
       var f = fields[i]
       // Honor an explicit `required` flag (present on real-engine output);
@@ -370,19 +588,19 @@
       var req = f.required === true ? 'required' : 'optional'
       if (f.type === 'struct' && f.fields) {
         lines.push(indent(depth) + S('field-name', f.name) + ': ' + S('struct-brace', '{') + ' ' + S('field-req', req))
-        renderSchemaFields(lines, f.fields, depth + 1, S, indent)
+        renderSchemaFields(lines, f.fields, depth + 1)
         lines.push(indent(depth) + S('struct-brace', '}'))
       } else {
         lines.push(indent(depth) + S('field-name', f.name) + ': ' + S('field-type', f.type) + ' ' + S('field-req', req))
       }
     }
   }
-  function renderRecordFields (lines, fields, values, depth, S, indent) {
+  function renderRecordFields (lines, fields, values, depth) {
     for (var i = 0; i < fields.length; i++) {
       var f = fields[i]
       if (f.type === 'struct' && f.fields && values[f.name]) {
         lines.push(indent(depth) + S('field-name', f.name) + ': ' + S('struct-brace', '{'))
-        renderRecordFields(lines, f.fields, values[f.name], depth + 1, S, indent)
+        renderRecordFields(lines, f.fields, values[f.name], depth + 1)
         lines.push(indent(depth) + S('struct-brace', '}'))
       } else {
         var v = values[f.name]
@@ -398,12 +616,17 @@
     }
   }
 
-  function renderSchema (cfg, valFields) {
+  function decodes (spec, cfg, path) {
+    var info = valueInfo(spec, path, cfg[path])
+    return !!(info && info.decodes)
+  }
+
+  function renderSchema (spec, cfg, valFields) {
     var lines = []
-    var S = function (cls, text) { return '<span class="' + cls + '">' + esc(text) + '</span>' }
-    var indent = function (n) { var o = ''; for (var i = 0; i < n; i++) o += '  '; return o }
-    var useKeySchema = isSchemaMode(cfg.keyMode)
-    var useValSchema = isSchemaMode(cfg.valMode)
+    var keyMode = cfg['key.mode'] || 'binary'
+    var valMode = cfg['value.mode'] || 'binary'
+    var layout = cfg['value.layout'] || 'flat'
+    var hdrType = cfg['headers.value_type'] || 'binary'
     var valSchema = valFields || VAL_SCHEMA
 
     lines.push(S('struct-brace', 'row {'))
@@ -411,47 +634,47 @@
     lines.push(indent(2) + S('field-name', 'partition') + ': ' + S('field-type', 'int') + ' ' + S('field-req', 'optional'))
     lines.push(indent(2) + S('field-name', 'offset') + ': ' + S('field-type', 'long') + ' ' + S('field-req', 'optional'))
     lines.push(indent(2) + S('field-name', 'timestamp') + ': ' + S('field-type', 'timestamptz') + ' ' + S('field-req', 'optional'))
-    var hdrValType = cfg.hdrType === 'string' ? 'string' : 'binary'
+    var hdrValType = hdrType === 'string' ? 'string' : 'binary'
     lines.push(indent(2) + S('field-name', 'headers') + ': ' + S('struct-brace', 'list<{') + ' ' + S('field-req', 'optional'))
     lines.push(indent(3) + S('field-name', 'key') + ': ' + S('field-type', 'string') + ' ' + S('field-req', 'required'))
     lines.push(indent(3) + S('field-name', 'value') + ': ' + S('field-type', hdrValType) + ' ' + S('field-req', 'optional'))
     lines.push(indent(2) + S('struct-brace', '}>'))
-    if (useKeySchema) {
+    if (decodes(spec, cfg, 'key.mode')) {
       lines.push(indent(2) + S('field-name', 'key') + ': ' + S('struct-brace', '{') + ' ' + S('field-req', 'optional'))
       for (var i = 0; i < KEY_SCHEMA.length; i++) {
         lines.push(indent(3) + S('field-name', KEY_SCHEMA[i].name) + ': ' + S('field-type', KEY_SCHEMA[i].type) + ' ' + S('field-req', 'optional'))
       }
       lines.push(indent(2) + S('struct-brace', '}'))
     } else {
-      var keyType = cfg.keyMode === 'string' ? 'string' : 'binary'
+      var keyType = keyMode === 'string' ? 'string' : 'binary'
       lines.push(indent(2) + S('field-name', 'key') + ': ' + S('field-type', keyType) + ' ' + S('field-req', 'optional'))
     }
     lines.push(indent(2) + S('field-name', 'timestamp_type') + ': ' + S('field-type', 'int') + ' ' + S('field-req', 'optional'))
     lines.push(indent(1) + S('struct-brace', '}'))
 
-    if (useValSchema) {
-      var baseIndent = cfg.valLayout === 'flat' ? 1 : 2
-      if (cfg.valLayout === 'flat') {
+    if (decodes(spec, cfg, 'value.mode')) {
+      var baseIndent = layout === 'flat' ? 1 : 2
+      if (layout === 'flat') {
         lines.push(indent(1) + S('comment', '// value fields (flat layout)'))
       } else {
         lines.push(indent(1) + S('field-name', 'value') + ': ' + S('struct-brace', '{') + ' ' + S('field-req', 'optional'))
       }
-      renderSchemaFields(lines, valSchema, baseIndent, S, indent)
-      if (cfg.valLayout !== 'flat') lines.push(indent(1) + S('struct-brace', '}'))
+      renderSchemaFields(lines, valSchema, baseIndent)
+      if (layout !== 'flat') lines.push(indent(1) + S('struct-brace', '}'))
     } else {
-      var valType = cfg.valMode === 'string' ? 'string' : 'binary'
+      var valType = valMode === 'string' ? 'string' : 'binary'
       lines.push(indent(1) + S('field-name', 'value') + ': ' + S('field-type', valType) + ' ' + S('field-req', 'optional'))
     }
     lines.push(S('struct-brace', '}'))
     return lines.join('\n')
   }
 
-  function renderRecord (cfg) {
+  function renderRecord (spec, cfg) {
     var lines = []
-    var S = function (cls, text) { return '<span class="' + cls + '">' + esc(text) + '</span>' }
-    var indent = function (n) { var o = ''; for (var i = 0; i < n; i++) o += '  '; return o }
-    var useKeySchema = isSchemaMode(cfg.keyMode)
-    var useValSchema = isSchemaMode(cfg.valMode)
+    var keyMode = cfg['key.mode'] || 'binary'
+    var valMode = cfg['value.mode'] || 'binary'
+    var layout = cfg['value.layout'] || 'flat'
+    var hdrType = cfg['headers.value_type'] || 'binary'
     var tsUs = RECORD.timestamp * 1000
 
     lines.push(S('struct-brace', '{'))
@@ -462,30 +685,30 @@
     lines.push(indent(2) + S('field-name', 'headers') + ': [')
     for (var i = 0; i < RECORD.headers.length; i++) {
       var h = RECORD.headers[i]
-      var valCls = cfg.hdrType === 'string' ? 'field-val-str' : 'field-val-bin'
-      var valPrefix = cfg.hdrType === 'string' ? '' : 'b'
+      var valCls = hdrType === 'string' ? 'field-val-str' : 'field-val-bin'
+      var valPrefix = hdrType === 'string' ? '' : 'b'
       lines.push(indent(3) + S('struct-brace', '{') + ' ' + S('field-name', 'key') + ': ' + S('field-val-str', '"' + h.key + '"') +
         ', ' + S('field-name', 'value') + ': ' + S(valCls, valPrefix + '"' + h.value + '"') + ' ' + S('struct-brace', '}'))
     }
     lines.push(indent(2) + ']')
-    if (useKeySchema) {
+    if (decodes(spec, cfg, 'key.mode')) {
       lines.push(indent(2) + S('field-name', 'key') + ': ' + S('struct-brace', '{'))
       lines.push(indent(3) + S('field-name', 'user_id') + ': ' + S('field-val-num', '12345'))
       lines.push(indent(3) + S('field-name', 'region') + ': ' + S('field-val-str', '"us-west-2"'))
       lines.push(indent(2) + S('struct-brace', '}'))
-    } else if (cfg.keyMode === 'string') {
+    } else if (keyMode === 'string') {
       lines.push(indent(2) + S('field-name', 'key') + ': ' + S('field-val-str', '"\\x00\\x00...us-west-2"'))
     } else {
       lines.push(indent(2) + S('field-name', 'key') + ': ' + S('field-val-bin', 'b"\\x00\\x00\\x00\\x00\\x01\\xf2\\xc0\\x01\\x12us-west-2"'))
     }
     lines.push(indent(2) + S('field-name', 'timestamp_type') + ': ' + S('field-val-num', '0'))
     lines.push(indent(1) + S('struct-brace', '}'))
-    if (useValSchema) {
-      var baseIndent = cfg.valLayout === 'flat' ? 1 : 2
-      if (cfg.valLayout !== 'flat') lines.push(indent(1) + S('field-name', 'value') + ': ' + S('struct-brace', '{'))
-      renderRecordFields(lines, VAL_SCHEMA, RECORD.value, baseIndent, S, indent)
-      if (cfg.valLayout !== 'flat') lines.push(indent(1) + S('struct-brace', '}'))
-    } else if (cfg.valMode === 'string') {
+    if (decodes(spec, cfg, 'value.mode')) {
+      var baseIndent = layout === 'flat' ? 1 : 2
+      if (layout !== 'flat') lines.push(indent(1) + S('field-name', 'value') + ': ' + S('struct-brace', '{'))
+      renderRecordFields(lines, VAL_SCHEMA, RECORD.value, baseIndent)
+      if (layout !== 'flat') lines.push(indent(1) + S('struct-brace', '}'))
+    } else if (valMode === 'string') {
       lines.push(indent(1) + S('field-name', 'value') + ': ' + S('field-val-str', '"\\x00\\x00...ORD-98765..."'))
     } else {
       lines.push(indent(1) + S('field-name', 'value') + ': ' + S('field-val-bin', 'b"\\x00\\x00\\x00\\x00\\x02\\x12ORD-98765..."'))
@@ -494,60 +717,117 @@
     return lines.join('\n')
   }
 
-  // ── Engine seam. Returns the config string, table schema, and translated
-  //    record for a given config. `valFields`, when provided, are the Iceberg
-  //    value fields computed by the real C++ WASM engine; otherwise the interim
-  //    JS rules (VAL_SCHEMA) are used.
-  function translate (cfg, valFields) {
-    return {
-      config: buildConfigString(cfg),
-      schema: renderSchema(cfg, valFields),
-      record: renderRecord(cfg),
-    }
+  var OUTPUTS = {
+    // An Iceberg table row: the table schema and one translated record.
+    icebergRow: {
+      template: function () {
+        return '<div class="ice-card"><h3>Iceberg table schema <span class="ice-tag" data-out="engine"></span></h3>' +
+          '<p class="ice-help">Illustrative: a fixed Avro key and value schema with one sample record. ' +
+            'subject and protobuf_name pick a schema in Schema Registry, so they do not change this sample.</p>' +
+          '<pre class="ice-tree" data-out="schema"></pre></div>' +
+          '<div class="ice-card"><h3>Translated record</h3><pre class="ice-tree" data-out="record"></pre></div>'
+      },
+      update: function (root, cfg, ctx) {
+        // Use the real WASM engine's value fields when loaded and the value is
+        // decoded via a schema; otherwise fall back to the interim JS rules.
+        var valueDecodes = decodes(ctx.spec, cfg, 'value.mode')
+        var useEngine = ctx.engineValFields && valueDecodes
+        root.querySelector('[data-out="schema"]').innerHTML = renderSchema(ctx.spec, cfg, useEngine ? ctx.engineValFields : null)
+        root.querySelector('[data-out="record"]').innerHTML = renderRecord(ctx.spec, cfg)
+        // Engine provenance badge on the schema card.
+        var engEl = root.querySelector('[data-out="engine"]')
+        if (!engEl) return
+        if (useEngine) {
+          engEl.className = 'ice-tag ice-engine-real'
+          engEl.textContent = 'real engine · wasm'
+        } else if (ctx.engineValFields) {
+          engEl.className = 'ice-tag ice-engine-real'
+          engEl.textContent = 'real engine · wasm ready'
+        } else {
+          // No engine build is published yet; the illustrative note under
+          // the heading says what the panels show.
+          engEl.className = 'ice-tag'
+          engEl.textContent = ''
+        }
+      },
+    },
   }
 
-  // ── UI markup injected into each mount point. `nid` is a per-instance id so
-  //    radio `name` attributes are unique — browsers group radios by name
-  //    document-wide, so two explorers on one page would otherwise fight over
-  //    the checked state of same-named groups.
-  // Every control is labelled with its section ("Key mode", "Value subject"):
-  // key, value and headers all offer the same choices, so a bare "binary" or
-  // "subject" would not say which section it sets. The section word is in a
-  // visually hidden span because the card heading already shows it.
-  function template (nid) {
-    var r = function (group, value, checked) { return radio(nid, group, value, checked) }
-    var t = function (id, section, option, ph) { return textRow(nid, id, section, option, ph) }
+  // ══ Markup, generated from the spec ═════════════════════════════════════
+  //
+  // `nid` is a per-instance id so radio `name` attributes and element ids are
+  // unique: browsers group radios by name document-wide, so two explorers on
+  // one page would otherwise fight over the checked state of same-named
+  // groups. Every control is labelled with its section ("Key mode", "Value
+  // subject"): key, value and headers all offer the same choices, so a bare
+  // "binary" or "subject" would not say which section it sets. The section
+  // word is in a visually hidden span because the card heading already shows
+  // it.
+
+  var idOf = function (nid, path, suffix) { return nid + '-' + path.replace(/\./g, '-') + (suffix ? '-' + suffix : '') }
+
+  // Text fields in a section that share one enable rule share one hint; the
+  // hint belongs to the first of them.
+  function hintPathFor (sec, field) {
+    if (!field.enabledWhen) return null
+    if (field.type === 'enum') return sec.name + '.' + field.name
+    var key = JSON.stringify(field.enabledWhen)
+    var first = sec.fields.filter(function (f) { return f.type === 'text' && f.enabledWhen && JSON.stringify(f.enabledWhen) === key })[0]
+    return sec.name + '.' + first.name
+  }
+
+  function hintHtml (nid, path, field) {
+    return '<p class="ice-hint" id="' + idOf(nid, path, 'hint') + '" data-hint="' + path + '" hidden>' + esc(enabledHintFor(field)) + '</p>'
+  }
+
+  function enumFieldHtml (nid, sec, f) {
+    var path = sec.name + '.' + f.name
+    var radios = f.values.map(function (v) {
+      return '<label class="ice-radio"><input type="radio" name="' + nid + '__' + path + '" data-path="' + path + '" value="' + esc(v.value) + '"' +
+        (v.value === f.default ? ' checked' : '') + '><span>' + esc(v.value) + '</span></label>'
+    }).join('')
+    return '<fieldset class="ice-field" data-fieldset="' + path + '">' +
+      '<legend class="ice-label"><span class="ice-sr">' + esc(sec.label) + ' </span>' + esc(f.label || f.name) + '</legend>' +
+      '<div class="ice-radios">' + radios + '</div>' +
+      '<p class="ice-help" id="' + idOf(nid, path, 'help') + '" data-help="' + path + '"></p>' +
+      (f.enabledWhen ? hintHtml(nid, path, f) : '') +
+      '</fieldset>'
+  }
+
+  function textFieldHtml (nid, sec, f) {
+    var path = sec.name + '.' + f.name
+    var inputId = idOf(nid, path)
+    return '<div class="ice-textrow" data-row="' + path + '">' +
+      '<label for="' + inputId + '"><span class="ice-sr">' + esc(sec.label) + ' </span>' + esc(f.label || f.name) + '</label>' +
+      '<input type="text" id="' + inputId + '" data-path="' + path + '"' +
+        (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + (f.enabledWhen ? ' disabled' : '') + '>' +
+      '<p class="ice-error" id="' + idOf(nid, path, 'error') + '" data-error="' + path + '" hidden></p></div>'
+  }
+
+  function sectionHtml (nid, sec) {
+    var enums = sec.fields.filter(function (f) { return f.type === 'enum' })
+    var texts = sec.fields.filter(function (f) { return f.type === 'text' })
+    var html = '<div class="ice-card" data-section="' + sec.name + '"><h3>' + esc(sec.heading || sec.label) + '</h3>'
+    html += enums.map(function (f) { return enumFieldHtml(nid, sec, f) }).join('')
+    if (texts.length) {
+      html += '<div class="ice-opts">' + texts.map(function (f) { return textFieldHtml(nid, sec, f) }).join('')
+      texts.forEach(function (f) {
+        var hp = hintPathFor(sec, f)
+        if (hp === sec.name + '.' + f.name) html += hintHtml(nid, hp, f)
+      })
+      html += '</div>'
+    }
+    return html + '</div>'
+  }
+
+  function template (spec, nid) {
+    var outputs = OUTPUTS[spec.outputs]
     return '' +
     '<div class="ice-grid">' +
-      '<div class="ice-left">' +
-        '<div class="ice-card"><h3>Key configuration</h3>' +
-          radioField(nid, 'key-mode', 'Key', 'Mode',
-            r('key-mode', 'binary', true) + r('key-mode', 'string') + r('key-mode', 'schema_id_prefix') + r('key-mode', 'schema_latest')) +
-          '<div class="ice-opts">' +
-            t('key-subject', 'Key', 'subject', '(default: &lt;topic&gt;-key)') +
-            t('key-proto', 'Key', 'protobuf_name', '(default: first message)') +
-            hint(nid, 'key-opts', 'subject') +
-          '</div>' +
-        '</div>' +
-        '<div class="ice-card"><h3>Value configuration</h3>' +
-          radioField(nid, 'val-mode', 'Value', 'Mode',
-            r('val-mode', 'binary', true) + r('val-mode', 'string') + r('val-mode', 'schema_id_prefix') + r('val-mode', 'schema_latest')) +
-          radioField(nid, 'val-layout', 'Value', 'Layout',
-            r('val-layout', 'flat', true) + r('val-layout', 'nested'), 'layout') +
-          '<div class="ice-opts">' +
-            t('val-subject', 'Value', 'subject', '(default: &lt;topic&gt;-value)') +
-            t('val-proto', 'Value', 'protobuf_name', '(default: first message)') +
-            hint(nid, 'val-opts', 'subject') +
-          '</div>' +
-        '</div>' +
-        '<div class="ice-card"><h3>Headers configuration</h3>' +
-          radioField(nid, 'hdr-type', 'Headers', 'Value type',
-            r('hdr-type', 'binary', true) + r('hdr-type', 'string')) +
-        '</div>' +
-      '</div>' +
+      '<div class="ice-left">' + spec.sections.map(function (sec) { return sectionHtml(nid, sec) }).join('') + '</div>' +
       '<div class="ice-right">' +
         '<div class="ice-configbar">' +
-          '<div class="ice-confighead"><span class="ice-configlabel" id="' + nid + '-cfglabel">Value for <code class="ice-prop">redpanda.iceberg.mode</code></span>' +
+          '<div class="ice-confighead"><span class="ice-configlabel" id="' + nid + '-cfglabel">Value for <code class="ice-prop">' + esc(spec.property) + '</code></span>' +
             '<span class="ice-tag" data-out="format"></span>' +
             '<span class="ice-copies">' +
               '<button type="button" class="ice-copy" data-copy="value">Copy</button>' +
@@ -559,42 +839,9 @@
           '<p class="ice-help" data-out="format-help"></p>' +
           '<p class="ice-error" data-out="config-error" hidden></p>' +
         '</div>' +
-        '<div class="ice-card"><h3>Iceberg table schema <span class="ice-tag" data-out="engine"></span></h3>' +
-          '<p class="ice-help">Illustrative: a fixed Avro key and value schema with one sample record. ' +
-            'subject and protobuf_name pick a schema in Schema Registry, so they do not change this sample.</p>' +
-          '<pre class="ice-tree" data-out="schema"></pre></div>' +
-        '<div class="ice-card"><h3>Translated record</h3><pre class="ice-tree" data-out="record"></pre></div>' +
+        (outputs ? outputs.template(nid) : '') +
       '</div>' +
     '</div>'
-  }
-  // A radio group is a fieldset whose legend names its section. `option`, when
-  // set, is the ENABLED_WITH key that can disable the whole group.
-  function radioField (nid, group, section, label, radiosHtml, option) {
-    return '<fieldset class="ice-field" data-fieldset="' + group + '">' +
-      '<legend class="ice-label"><span class="ice-sr">' + section + ' </span>' + label + '</legend>' +
-      '<div class="ice-radios">' + radiosHtml + '</div>' +
-      '<p class="ice-help" id="' + nid + '-' + group + '-help" data-help="' + group + '"></p>' +
-      (option ? hint(nid, group, option) : '') +
-      '</fieldset>'
-  }
-  // Shown, and linked with aria-describedby, while its controls are disabled.
-  function hint (nid, id, option) {
-    return '<p class="ice-hint" id="' + nid + '-' + id + '-hint" data-hint="' + id + '" hidden>' + esc(enabledHint(option)) + '</p>'
-  }
-  // A radio's `name` is namespaced by the instance id (nid); its logical group
-  // is kept in `data-group` so per-instance queries can find it without knowing
-  // the prefix.
-  function radio (nid, group, value, checked) {
-    return '<label class="ice-radio"><input type="radio" name="' + nid + '__' + group + '" data-group="' + group + '" value="' + value + '"' + (checked ? ' checked' : '') + '>' +
-      '<span>' + value + '</span></label>'
-  }
-  var instanceCounter = 0
-  function textRow (nid, id, section, option, ph) {
-    var inputId = nid + '-' + id
-    return '<div class="ice-textrow" data-row="' + id + '">' +
-      '<label for="' + inputId + '"><span class="ice-sr">' + section + ' </span>' + option + '</label>' +
-      '<input type="text" id="' + inputId + '" data-field="' + id + '" placeholder="' + ph + '" disabled>' +
-      '<p class="ice-error" id="' + inputId + '-error" data-error="' + id + '" hidden></p></div>'
   }
 
   // Copy text to the clipboard. Resolves true only when the write succeeded,
@@ -608,110 +855,97 @@
     }
   }
 
-  function hydrate (root) {
+  // ══ Hydration ═══════════════════════════════════════════════════════════
+
+  var instanceCounter = 0
+  function hydrate (root, spec) {
+    spec = spec || ICEBERG_MODE
     var nid = 'ice' + (++instanceCounter)
     var engineValFields = null // real-engine value fields, set when WASM loads
     // The config string update() last rendered. Copy uses this, never the DOM
     // text, so markup in the code element (<wbr>, tags) cannot reach the clipboard.
     var currentConfig = ''
-    root.innerHTML = template(nid)
+    var entries = fieldsOf(spec)
+    root.innerHTML = template(spec, nid)
     var q = function (sel) { return root.querySelector(sel) }
-    // Query radios within this mount by their logical group (data-group),
-    // never by the global name attribute.
-    var radios = function (group) { return root.querySelectorAll('input[data-group="' + group + '"]') }
-    var val = function (group) { var el = root.querySelector('input[data-group="' + group + '"]:checked'); return el ? el.value : '' }
-    // `value` can come from the author's data-config, so it is compared, never
-    // put into a selector: a quote or backslash there throws a SyntaxError.
-    var setRadioValue = function (group, value) {
-      var el = Array.prototype.find.call(radios(group), function (r) { return r.value === value })
-      if (el) el.checked = true
-    }
-    var field = function (id) { var el = root.querySelector('[data-field="' + id + '"]'); return el ? el.value.trim() : '' }
+    // Controls are found by data-path within this mount, never by the global
+    // radio name. Paths come from the spec, never from the page.
+    var controls = function (path) { return Array.prototype.slice.call(root.querySelectorAll('[data-path="' + path + '"]')) }
+    var byData = function (attr, path) { return q('[' + attr + '="' + path + '"]') }
 
     function getConfig () {
-      return {
-        keyMode: val('key-mode'),
-        valMode: val('val-mode'),
-        valLayout: val('val-layout'),
-        hdrType: val('hdr-type'),
-        keySubject: field('key-subject'),
-        keyProto: field('key-proto'),
-        valSubject: field('val-subject'),
-        valProto: field('val-proto'),
-      }
+      var cfg = {}
+      entries.forEach(function (e) {
+        var els = controls(e.path)
+        if (e.field.type === 'enum') {
+          var checked = els.filter(function (r) { return r.checked })[0]
+          cfg[e.path] = checked ? checked.value : e.field.default
+        } else {
+          cfg[e.path] = els[0] ? els[0].value.trim() : ''
+        }
+      })
+      return cfg
     }
 
-    // Apply an author-supplied initial config string (data-config) by mapping
-    // it back onto the controls. Unknown tokens are ignored.
+    // Put a parsed config onto the controls. Values are compared, never put
+    // into a selector: they can come from the author's data-config.
+    function setConfig (cfg) {
+      entries.forEach(function (e) {
+        if (!hasOwn(cfg, e.path)) return
+        var els = controls(e.path)
+        if (e.field.type === 'enum') {
+          var el = els.filter(function (r) { return r.value === cfg[e.path] })[0]
+          if (el) el.checked = true
+        } else if (els[0]) {
+          els[0].value = cfg[e.path]
+        }
+      })
+    }
+
+    // Apply an author-supplied initial config string (data-config).
     function applyInitialConfig (str) {
-      var parsed = parseConfigString(str)
-      if (parsed.keyMode) setRadioValue('key-mode', parsed.keyMode)
-      if (parsed.valMode) setRadioValue('val-mode', parsed.valMode)
-      if (parsed.valLayout) setRadioValue('val-layout', parsed.valLayout)
-      if (parsed.hdrType) setRadioValue('hdr-type', parsed.hdrType)
-      var fields = { keySubject: 'key-subject', keyProto: 'key-proto', valSubject: 'val-subject', valProto: 'val-proto' }
-      Object.keys(fields).forEach(function (k) {
-        var el = root.querySelector('[data-field="' + fields[k] + '"]')
-        if (el && parsed[k]) el.value = parsed[k]
-      })
+      if (!str) return
+      var parsed = parse(spec, str)
+      if (!parsed.errors.length) setConfig(parsed.cfg)
     }
 
-    // Enable or disable controls and toggle the hint that says why. The hint is
-    // only described while it is visible.
-    function setEnabled (els, on, hintId) {
-      var h = q('[data-hint="' + hintId + '"]')
-      if (h) h.hidden = on
-      els.forEach(function (el) {
-        if (!el) return
-        el.disabled = !on
-      })
-    }
     // aria-describedby lists only the ids of visible descriptions.
     function describe (el, ids) {
       if (!el) return
-      var live = ids.filter(function (id) { var d = document.getElementById(id); return d && !d.hidden && d.textContent })
+      var live = ids.filter(function (id) { var d = root.querySelector('[id="' + id + '"]'); return d && !d.hidden && d.textContent })
       if (live.length) el.setAttribute('aria-describedby', live.join(' '))
       else el.removeAttribute('aria-describedby')
     }
 
     function update () {
-      var cfg = getConfig()
-      // Disable options their section's mode does not allow (ENABLED_WITH)
-      // and show why. Values are kept, so switching back restores them;
-      // buildConfigString leaves disabled options out of the string.
-      ;['key', 'val'].forEach(function (p) {
-        var mode = p === 'key' ? cfg.keyMode : cfg.valMode
-        var on = optionEnabled('subject', mode)
-        setEnabled([root.querySelector('[data-field="' + p + '-subject"]'), root.querySelector('[data-field="' + p + '-proto"]')],
-          on, p + '-opts')
-      })
-      var layoutOn = optionEnabled('layout', cfg.valMode)
-      setEnabled(Array.prototype.slice.call(radios('val-layout')), layoutOn, 'val-layout')
-
-      // Help line for the checked choice in each group.
-      Object.keys(CHOICE_HELP).forEach(function (group) {
-        var help = q('[data-help="' + group + '"]')
-        // A disabled group gets its hint instead of help for a choice that
-        // does not apply.
-        var off = group === 'val-layout' && !layoutOn
-        if (help) help.textContent = off ? '' : (CHOICE_HELP[group][val(group)] || '')
-        describe(q('[data-fieldset="' + group + '"]'), [nid + '-' + group + '-help', nid + '-' + group + '-hint'])
-      })
-
-      // Use the real WASM engine's value fields when loaded and the value is
-      // decoded via a schema; otherwise fall back to the interim JS rules.
-      var useEngine = engineValFields && isSchemaMode(cfg.valMode)
-      var out = translate(cfg, useEngine ? engineValFields : null)
-
-      // Check subject and protobuf_name where they are emitted. An invalid
-      // value marks the field and the string, and nothing is offered for copy.
+      var raw = getConfig()
+      var built = build(spec, raw)
       var invalid = false
-      ;[['key-subject', 'subject', cfg.keyMode], ['key-proto', 'protobuf_name', cfg.keyMode],
-        ['val-subject', 'subject', cfg.valMode], ['val-proto', 'protobuf_name', cfg.valMode]].forEach(function (f) {
-        var input = q('[data-field="' + f[0] + '"]')
-        var errEl = q('[data-error="' + f[0] + '"]')
-        var on = optionEnabled(f[1], f[2])
-        var problem = on ? optionValueProblem(field(f[0]), !out.config.legacy) : null
+
+      entries.forEach(function (e) {
+        var on = isEnabled(e, raw)
+        var hp = hintPathFor(e.section, e.field)
+        // Values are kept while a field is disabled, so switching back
+        // restores them; build() leaves disabled fields out of the string.
+        controls(e.path).forEach(function (el) { el.disabled = !on })
+        if (hp === e.path) byData('data-hint', hp).hidden = on
+        var hintId = hp ? idOf(nid, hp, 'hint') : null
+
+        if (e.field.type === 'enum') {
+          // Help line for the checked choice. A disabled group gets its hint
+          // instead of help for a choice that does not apply.
+          var help = byData('data-help', e.path)
+          var info = valueInfo(spec, e.path, raw[e.path])
+          if (help) help.textContent = on && info ? (info.help || '') : ''
+          describe(byData('data-fieldset', e.path), [idOf(nid, e.path, 'help')].concat(hintId ? [hintId] : []))
+          return
+        }
+
+        // Check text values where they are written. An invalid value marks
+        // the field and the string, and nothing is offered for copy.
+        var input = controls(e.path)[0]
+        var errEl = byData('data-error', e.path)
+        var problem = on ? valueProblem(spec, raw[e.path], !built.legacy) : null
         if (problem && problem.error) invalid = true
         if (errEl) {
           errEl.textContent = problem ? (problem.error || problem.note) : ''
@@ -721,44 +955,28 @@
         if (input) {
           if (problem && problem.error) input.setAttribute('aria-invalid', 'true')
           else input.removeAttribute('aria-invalid')
-          describe(input, [nid + '-' + f[0] + '-error', nid + '-' + f[0].slice(0, 3) + '-opts-hint'])
+          describe(input, [idOf(nid, e.path, 'error')].concat(hintId ? [hintId] : []))
         }
       })
 
-      currentConfig = invalid ? '' : out.config.str
+      currentConfig = invalid ? '' : built.str
       var cfgEl = q('[data-out="config"]')
       // Line breaks go after the separators, so a long string wraps between
       // sections and options instead of inside a key.
-      cfgEl.innerHTML = esc(out.config.str).replace(/([;,])/g, '$1<wbr>')
+      cfgEl.innerHTML = esc(built.str).replace(/([;,])/g, '$1<wbr>')
       cfgEl.classList.toggle('ice-invalid', invalid)
       var errBox = q('[data-out="config-error"]')
       errBox.hidden = !invalid
       errBox.textContent = invalid ? 'Not a valid setting. Fix the highlighted field to copy it.' : ''
       root.querySelectorAll('[data-copy]').forEach(function (b) { b.disabled = invalid })
-      var info = formatInfo(out.config)
+      var info = formatInfo(spec, built)
       var fmtEl = q('[data-out="format"]')
       fmtEl.className = 'ice-tag ' + (invalid ? 'ice-bad' : 'ice-info')
       fmtEl.textContent = invalid ? 'Not valid' : info.tag
       q('[data-out="format-help"]').textContent = invalid ? '' : info.help
-      q('[data-out="schema"]').innerHTML = out.schema
-      q('[data-out="record"]').innerHTML = out.record
 
-      // Engine provenance badge on the schema card.
-      var engEl = q('[data-out="engine"]')
-      if (engEl) {
-        if (useEngine) {
-          engEl.className = 'ice-tag ice-engine-real'
-          engEl.textContent = 'real engine · wasm'
-        } else if (engineValFields && !isSchemaMode(cfg.valMode)) {
-          engEl.className = 'ice-tag ice-engine-real'
-          engEl.textContent = 'real engine · wasm ready'
-        } else {
-          // No engine build is published yet; the illustrative note under
-          // the heading says what the panels show.
-          engEl.className = 'ice-tag'
-          engEl.textContent = ''
-        }
-      }
+      var outputs = OUTPUTS[spec.outputs]
+      if (outputs) outputs.update(root, normalize(spec, raw), { spec: spec, engineValFields: engineValFields })
     }
 
     root.querySelectorAll('input[type="radio"]').forEach(function (r) { r.addEventListener('change', update) })
@@ -767,12 +985,14 @@
     // Load the real WASM engine (shared singleton) for this doc version;
     // re-render when its value fields are available so the schema panel
     // reflects production behavior. Falls back to the interim JS engine.
-    var docVersion = root.getAttribute('data-version') ||
-      (document.querySelector('.nav-container') && document.querySelector('.nav-container').getAttribute('data-version')) ||
-      (document.body && document.body.getAttribute('data-version')) || ''
-    loadEngineValueFields(docVersion, root.getAttribute('data-engine-base')).then(function (fields) {
-      if (fields) { engineValFields = fields; update() }
-    })
+    if (spec.outputs === 'icebergRow') {
+      var docVersion = root.getAttribute('data-version') ||
+        (document.querySelector('.nav-container') && document.querySelector('.nav-container').getAttribute('data-version')) ||
+        (document.body && document.body.getAttribute('data-version')) || ''
+      loadEngineValueFields(docVersion, root.getAttribute('data-engine-base')).then(function (fields) {
+        if (fields) { engineValFields = fields; update() }
+      })
+    }
 
     var copyStatus = q('[data-out="copy-status"]')
     var copyTimer = null
@@ -781,7 +1001,7 @@
       var what = btn.getAttribute('data-copy') === 'rpk' ? 'rpk command' : 'config string'
       btn.addEventListener('click', function () {
         if (!currentConfig) return
-        var text = btn.getAttribute('data-copy') === 'rpk' ? rpkCommand(currentConfig) : currentConfig
+        var text = btn.getAttribute('data-copy') === 'rpk' ? rpkCommand(currentConfig, spec.property) : currentConfig
         copyText(text, navigator.clipboard).then(function (ok) {
           root.querySelectorAll('[data-copy]').forEach(function (b) {
             b.textContent = b.getAttribute('data-copy') === 'rpk' ? 'Copy rpk command' : 'Copy'
@@ -815,16 +1035,20 @@
   // A mount this module does not understand keeps its fallback text.
   //   1: data-config, data-version, data-engine-base.
   //   2: as 1, plus data-property naming the property the mount explores.
-  var SUPPORTED_PROPERTY = 'redpanda.iceberg.mode'
+  var SPECS = [ICEBERG_MODE]
   function mountProblem (root) {
     var contract = root.getAttribute('data-iceberg-explorer')
     if (contract === '1') return null
     if (contract === '2') {
       var prop = root.getAttribute('data-property')
-      if (prop === null || prop === SUPPORTED_PROPERTY) return null
-      return 'unsupported data-property "' + prop + '" (this build supports ' + SUPPORTED_PROPERTY + ')'
+      if (prop === null || SPECS.some(function (s) { return s.property === prop })) return null
+      return 'unsupported data-property "' + prop + '" (this build supports ' + SPECS.map(function (s) { return s.property }).join(', ') + ')'
     }
     return 'unsupported contract version "' + contract + '" (this build supports 1 and 2)'
+  }
+  function specFor (root) {
+    var prop = root.getAttribute('data-property')
+    return SPECS.filter(function (s) { return s.property === prop })[0] || ICEBERG_MODE
   }
 
   function warn (msg) {
@@ -848,7 +1072,7 @@
       // concatenated bundle, so a throw here would also skip later modules).
       var fallback = root.innerHTML
       try {
-        hydrate(root)
+        hydrate(root, specFor(root))
       } catch (e) {
         root.innerHTML = fallback
         root.setAttribute('data-hydrated', 'failed')
@@ -868,22 +1092,28 @@
     }
   }
 
-  // Export the pure DSL logic for conformance testing under Node. No effect in
-  // the browser (module is undefined there).
+  // Export the pure logic for tests under Node. No effect in the browser
+  // (module is undefined there).
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-      buildConfigString: buildConfigString,
-      parseConfigString: parseConfigString,
-      isSchemaMode: isSchemaMode,
+      ICEBERG_MODE: ICEBERG_MODE,
+      MODES: MODES,
+      SPECS: SPECS,
+      OUTPUTS: OUTPUTS,
+      build: build,
+      parse: parse,
+      normalize: normalize,
+      defaultsOf: defaultsOf,
+      fieldsOf: fieldsOf,
+      isEnabled: isEnabled,
+      enabledHintFor: enabledHintFor,
+      valueProblem: valueProblem,
+      formatInfo: formatInfo,
+      template: template,
+      hydrate: hydrate,
       init: init,
       copyText: copyText,
       rpkCommand: rpkCommand,
-      optionValueProblem: optionValueProblem,
-      formatInfo: formatInfo,
-      CHOICE_HELP: CHOICE_HELP,
-      optionEnabled: optionEnabled,
-      enabledHint: enabledHint,
-      template: template,
       mountProblem: mountProblem,
       MOUNT_SELECTOR: MOUNT_SELECTOR,
       isSafeEngineBase: isSafeEngineBase,

@@ -15,15 +15,13 @@
 // CI can additionally fetch iceberg_mode_test.cc from a given redpanda ref and
 // diff the expected strings to detect upstream format changes automatically.
 
-const { buildConfigString, init, MOUNT_SELECTOR } = require('../../src/js/27-iceberg-explorer.js')
+const { ICEBERG_MODE, build, defaultsOf, init, MOUNT_SELECTOR } = require('../../src/js/27-iceberg-explorer.js')
 
-// cfg shape matches getConfig() in the module.
+// The config object is keyed by DSL path, as getConfig() returns it.
 function cfg (o) {
-  return Object.assign({
-    keyMode: 'binary', valMode: 'binary', valLayout: 'flat', hdrType: 'binary',
-    keySubject: '', keyProto: '', valSubject: '', valProto: '',
-  }, o)
+  return Object.assign(defaultsOf(ICEBERG_MODE), o)
 }
+const buildConfigString = (c) => build(ICEBERG_MODE, c)
 
 // Each vector cites the corresponding C++ IcebergModeFormat test case.
 const VECTORS = [
@@ -32,23 +30,23 @@ const VECTORS = [
     cfg: cfg({}),
     expect: 'key_value' },
   { name: 'ValueSchemaIdPrefix',
-    cfg: cfg({ valMode: 'schema_id_prefix' }),
+    cfg: cfg({ 'value.mode': 'schema_id_prefix' }),
     expect: 'value_schema_id_prefix' },
   { name: 'ValueSchemaLatestBare',
-    cfg: cfg({ valMode: 'schema_latest' }),
+    cfg: cfg({ 'value.mode': 'schema_latest' }),
     expect: 'value_schema_latest' },
   { name: 'ValueSchemaLatestWithSubject',
-    cfg: cfg({ valMode: 'schema_latest', valSubject: 'my-topic-value' }),
+    cfg: cfg({ 'value.mode': 'schema_latest', 'value.subject': 'my-topic-value' }),
     expect: 'value_schema_latest:subject=my-topic-value' },
   { name: 'ValueSchemaLatestWithProtobuf',
-    cfg: cfg({ valMode: 'schema_latest', valProto: 'com.example.Msg', valSubject: 'my-topic-value' }),
+    cfg: cfg({ 'value.mode': 'schema_latest', 'value.protobuf_name': 'com.example.Msg', 'value.subject': 'my-topic-value' }),
     expect: 'value_schema_latest:protobuf_name=com.example.Msg,subject=my-topic-value' },
   // --- section-based format (new): all sections + options always emitted ---
   { name: 'NewKeySchema',
-    cfg: cfg({ keyMode: 'schema_id_prefix' }),
+    cfg: cfg({ 'key.mode': 'schema_id_prefix' }),
     expect: 'key:mode=schema_id_prefix;value:mode=binary,layout=flat;headers:value_type=binary' },
   { name: 'NewHeadersString',
-    cfg: cfg({ hdrType: 'string' }),
+    cfg: cfg({ 'headers.value_type': 'string' }),
     expect: 'key:mode=binary;value:mode=binary,layout=flat;headers:value_type=string' },
 ]
 

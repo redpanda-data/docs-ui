@@ -5,10 +5,15 @@ const test = require('node:test')
 const assert = require('node:assert')
 const { execFileSync } = require('child_process')
 const {
-  template, rpkCommand, optionValueProblem, formatInfo, buildConfigString, CHOICE_HELP,
+  ICEBERG_MODE: SPEC, template, rpkCommand, valueProblem, formatInfo, build, fieldsOf, defaultsOf,
 } = require('../../src/js/27-iceberg-explorer.js')
 
-const html = template('ice3')
+const html = template(SPEC, 'ice3')
+const optionValueProblem = (v, sectionForm) => valueProblem(SPEC, v, sectionForm)
+const buildConfigString = (c) => build(SPEC, c)
+// The help line for each choice of each choice field, from the spec.
+const CHOICE_HELP = Object.fromEntries(fieldsOf(SPEC).filter((e) => e.field.type === 'enum')
+  .map((e) => [e.path, Object.fromEntries(e.field.values.map((v) => [v.value, v.help]))]))
 
 test('the config bar names the property', () => {
   assert.match(html, /<code class="ice-prop">redpanda\.iceberg\.mode<\/code>/)
@@ -22,7 +27,7 @@ test('no warning-style or unexplained tags remain', () => {
 
 test('every choice in every group has one line of help', () => {
   for (const group of Object.keys(CHOICE_HELP)) {
-    const values = [...html.matchAll(new RegExp(`data-group="${group}" value="([^"]+)"`, 'g'))].map((m) => m[1])
+    const values = [...html.matchAll(new RegExp(`data-path="${group}" value="([^"]+)"`, 'g'))].map((m) => m[1])
     assert.ok(values.length > 1, group)
     assert.deepStrictEqual(Object.keys(CHOICE_HELP[group]).sort(), values.sort(), group)
     for (const v of values) assert.ok(!/\n/.test(CHOICE_HELP[group][v]) && CHOICE_HELP[group][v].length < 120, `${group}=${v}`)
@@ -30,16 +35,16 @@ test('every choice in every group has one line of help', () => {
   }
 })
 
-const cfg = (o) => Object.assign({ keyMode: 'binary', valMode: 'binary', valLayout: 'flat', hdrType: 'binary', keySubject: '', keyProto: '', valSubject: '', valProto: '' }, o)
+const cfg = (o) => Object.assign(defaultsOf(SPEC), o)
 
 test('the version tag follows the form the builder chose', () => {
-  assert.strictEqual(formatInfo(buildConfigString(cfg({}))).tag, 'Works on all versions')
-  assert.strictEqual(formatInfo(buildConfigString(cfg({ valMode: 'schema_id_prefix' }))).tag, 'Works on all versions')
-  assert.strictEqual(formatInfo(buildConfigString(cfg({ valMode: 'schema_latest', valSubject: 's' }))).tag, 'Requires v25.1 or later')
-  for (const o of [{ keyMode: 'string' }, { hdrType: 'string' }, { valMode: 'string' }, { valMode: 'schema_latest', valLayout: 'nested' }]) {
+  assert.strictEqual(formatInfo(SPEC, buildConfigString(cfg({}))).tag, 'Works on all versions')
+  assert.strictEqual(formatInfo(SPEC, buildConfigString(cfg({ 'value.mode': 'schema_id_prefix' }))).tag, 'Works on all versions')
+  assert.strictEqual(formatInfo(SPEC, buildConfigString(cfg({ 'value.mode': 'schema_latest', 'value.subject': 's' }))).tag, 'Requires v25.1 or later')
+  for (const o of [{ 'key.mode': 'string' }, { 'headers.value_type': 'string' }, { 'value.mode': 'string' }, { 'value.mode': 'schema_latest', 'value.layout': 'nested' }]) {
     const b = buildConfigString(cfg(o))
     assert.strictEqual(b.legacy, false, JSON.stringify(o))
-    assert.strictEqual(formatInfo(b).tag, 'Requires v26.2.1 or later', b.str)
+    assert.strictEqual(formatInfo(SPEC, b).tag, 'Requires v26.2.1 or later', b.str)
   }
 })
 

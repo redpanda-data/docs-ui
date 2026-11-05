@@ -3,9 +3,11 @@
 // Accessibility semantics of the explorer markup and the helpers it uses.
 const test = require('node:test')
 const assert = require('node:assert')
-const { template, copyText, optionEnabled, enabledHint, buildConfigString } = require('../../src/js/27-iceberg-explorer.js')
+const { ICEBERG_MODE: SPEC, template, copyText, isEnabled, enabledHintFor, build, fieldsOf } = require('../../src/js/27-iceberg-explorer.js')
 
-const html = template('ice9')
+const html = template(SPEC, 'ice9')
+const entry = (path) => fieldsOf(SPEC).find((e) => e.path === path)
+const optionEnabled = (option, section, mode) => isEnabled(entry(`${section}.${option}`), { [`${section}.mode`]: mode })
 const visible = (s) => s.replace(/<span class="ice-sr">[^<]*<\/span>/g, '')
 const text = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
 
@@ -41,24 +43,27 @@ test('only the config string is a live region, and Copy has a status', () => {
 })
 
 test('disabled-state hints come from the enable rule and have ids to describe', () => {
-  assert.strictEqual(enabledHint('subject'), 'Only with schema_latest')
-  assert.strictEqual(enabledHint('protobuf_name'), 'Only with schema_latest')
-  assert.strictEqual(enabledHint('layout'), 'Only with schema_id_prefix or schema_latest')
-  for (const id of ['key-opts', 'val-opts', 'val-layout']) {
-    assert.match(html, new RegExp(`<p class="ice-hint" id="ice9-${id}-hint" data-hint="${id}" hidden>Only with `))
+  assert.strictEqual(enabledHintFor(entry('key.subject').field), 'Only with schema_latest')
+  assert.strictEqual(enabledHintFor(entry('value.protobuf_name').field), 'Only with schema_latest')
+  assert.strictEqual(enabledHintFor(entry('value.layout').field), 'Only with schema_id_prefix or schema_latest')
+  // subject and protobuf_name share one rule, so one hint, under the first.
+  for (const path of ['key.subject', 'value.subject', 'value.layout']) {
+    const id = path.replace('.', '-')
+    assert.match(html, new RegExp(`<p class="ice-hint" id="ice9-${id}-hint" data-hint="${path}" hidden>Only with `))
   }
+  assert.strictEqual((html.match(/class="ice-hint"/g) || []).length, 3)
 })
 
 test('the builder drops exactly the options the enable rule disables', () => {
   const modes = ['binary', 'string', 'schema_id_prefix', 'schema_latest']
   for (const mode of modes) {
-    const base = { keyMode: 'binary', valMode: mode, valLayout: 'nested', hdrType: 'string', keySubject: '', keyProto: '', valSubject: 'S', valProto: 'P' }
-    const str = buildConfigString(base).str
-    assert.strictEqual(/subject=S/.test(str), optionEnabled('subject', mode), `${mode}: ${str}`)
-    assert.strictEqual(/protobuf_name=P/.test(str), optionEnabled('protobuf_name', mode), `${mode}: ${str}`)
-    assert.strictEqual(/layout=nested/.test(str), optionEnabled('layout', mode), `${mode}: ${str}`)
-    const k = buildConfigString(Object.assign({}, base, { keyMode: mode, keySubject: 'KS', valMode: 'binary' })).str
-    assert.strictEqual(/subject=KS/.test(k), optionEnabled('subject', mode), `key ${mode}: ${k}`)
+    const base = { 'key.mode': 'binary', 'value.mode': mode, 'value.layout': 'nested', 'headers.value_type': 'string', 'value.subject': 'S', 'value.protobuf_name': 'P' }
+    const str = build(SPEC, base).str
+    assert.strictEqual(/subject=S/.test(str), optionEnabled('subject', 'value', mode), `${mode}: ${str}`)
+    assert.strictEqual(/protobuf_name=P/.test(str), optionEnabled('protobuf_name', 'value', mode), `${mode}: ${str}`)
+    assert.strictEqual(/layout=nested/.test(str), optionEnabled('layout', 'value', mode), `${mode}: ${str}`)
+    const k = build(SPEC, Object.assign({}, base, { 'key.mode': mode, 'key.subject': 'KS', 'value.mode': 'binary' })).str
+    assert.strictEqual(/subject=KS/.test(k), optionEnabled('subject', 'key', mode), `key ${mode}: ${k}`)
   }
 })
 
