@@ -57,15 +57,20 @@ fi
 
 COMMIT="$(cat "$REDPANDA_COMMIT_FILE")"
 REF="$(cat "$VENDOR/REDPANDA_REF" 2>/dev/null || echo "$COMMIT")"
-# Objects are per revision, so switching releases never links a stale one.
-OBJ="$HERE/build/obj-$COMMIT"
+# Size matters more than speed here: the engine is downloaded by every reader
+# of a page with an explorer, and committed to the docs repo per release.
+# ICEBERG_OPT overrides it (for example -O2 to compare).
+OPT="${ICEBERG_OPT:--Oz}"
+# Objects are per revision and optimization level, so switching either never
+# links a stale one.
+OBJ="$HERE/build/obj-$COMMIT${OPT}"
 GEN="$OBJ/gen"
 mkdir -p "$OBJ" "$GEN"
 
 # -fexceptions everywhere: Avro throws on malformed input, lexical_cast throws
 # on a rejected property value, and the bindings catch both.
 EXC="-fexceptions"
-CXX=(emcc -std=c++23 -c $EXC -O2 -DFMT_HEADER_ONLY=1 -Wno-deprecated-pragma)
+CXX=(emcc -std=c++23 -c $EXC $OPT -DFMT_HEADER_ONLY=1 -Wno-deprecated-pragma)
 ICE_INCS=(-I "$SHIM" -I "$VENDOR" -I "$FMT_INCLUDE")
 AVRO_INCS=(-I "$FMT_INCLUDE" -I "$BOOST_INCLUDE" -I "$AVRO/include" -I "$AVRO/include/avro")
 
@@ -135,7 +140,7 @@ if [ "$TARGET" = "test" ]; then
     fi
     "${CXX[@]}" "${MODE_DEFS[@]}" "${MODE_INCS[@]}" "${GT[@]}" "$GEN/iceberg_mode_test.cc" -o "$OBJ/mode_test.o"
     OUT="$HERE/build/iceberg-mode-test-$COMMIT.js"
-    emcc -std=c++23 $EXC -O2 "$OBJ/mode_iceberg_mode.o" "$OBJ/mode_test.o" "$GT_LIB" "$ABSL_LIB" \
+    emcc -std=c++23 $EXC $OPT "$OBJ/mode_iceberg_mode.o" "$OBJ/mode_test.o" "$GT_LIB" "$ABSL_LIB" \
         -s ENVIRONMENT=node -s ALLOW_MEMORY_GROWTH=1 -s EXIT_RUNTIME=1 -o "$OUT"
     echo "Running $REF's iceberg_mode_test.cc against the extracted parser ..."
     node "$OUT"
@@ -170,7 +175,7 @@ else
     echo "No schema mapper at this revision: parser-only engine."
 fi
 
-LINK=(-std=c++23 $EXC --bind -O2 "${OBJS[@]}" "$ABSL_LIB" -s ALLOW_MEMORY_GROWTH=1
+LINK=(-std=c++23 $EXC --bind $OPT "${OBJS[@]}" "$ABSL_LIB" -s ALLOW_MEMORY_GROWTH=1
     -s MODULARIZE=1 -s EXPORT_NAME=createIcebergEngine)
 
 if [ "$TARGET" = "node" ]; then
