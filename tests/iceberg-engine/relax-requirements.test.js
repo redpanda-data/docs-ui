@@ -40,9 +40,12 @@ function walk (fields, out = []) {
   return out
 }
 
-test('every field the engine reports is optional, as in the real table', { skip: !built && 'engine not built' }, async () => {
+test('every field the engine reports is optional, as in the real table', { skip: !built && 'engine not built' }, async (t) => {
   const createIcebergEngine = require(ENGINE)
   const mod = await createIcebergEngine()
+  // A release whose schema mapper is not built (ICEBERG_SCHEMA_MAPPER=0, or
+  // one from before iceberg/conversion) has the parser only.
+  if (typeof mod.avroToIcebergJson !== 'function') return t.skip('parser-only engine')
   const out = JSON.parse(mod.avroToIcebergJson(SCHEMA))
   assert.ok(!out.error, out.error)
   const all = walk(out.fields)
