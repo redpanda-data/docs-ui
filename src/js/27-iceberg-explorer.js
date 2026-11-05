@@ -182,9 +182,21 @@
   //    legacy strings when legacy-compatible, else the section-based DSL,
   //    always serializing all sections (matches PR #31035 behavior).
   function buildConfigString (cfg) {
+    // Redpanda rejects layout=nested outside a schema mode, and subject or
+    // protobuf_name outside schema_latest (iceberg_mode_test.cc
+    // IcebergModeLayout.ParseNestedWith*Rejected, IcebergModeParseError.
+    // SubjectWith*Mode). Controls can still hold those values after a mode
+    // change, so drop them here instead of serializing a rejected string.
+    var keyLatest = cfg.keyMode === 'schema_latest'
+    var valLatest = cfg.valMode === 'schema_latest'
+    var keySubject = keyLatest ? cfg.keySubject : ''
+    var keyProto = keyLatest ? cfg.keyProto : ''
+    var valSubject = valLatest ? cfg.valSubject : ''
+    var valProto = valLatest ? cfg.valProto : ''
+    var valLayout = isSchemaMode(cfg.valMode) ? cfg.valLayout : 'flat'
     var keyDefault = cfg.keyMode === 'binary'
     var hdrDefault = cfg.hdrType === 'binary'
-    var valLayoutDefault = cfg.valLayout === 'flat'
+    var valLayoutDefault = valLayout === 'flat'
     var valNotString = cfg.valMode !== 'string'
     var legacyCompat = keyDefault && hdrDefault && valLayoutDefault && valNotString
 
@@ -195,8 +207,8 @@
         // Legacy option order (model.cc format_to): protobuf_name then subject.
         var s = 'value_schema_latest'
         var opts = []
-        if (cfg.valProto) opts.push('protobuf_name=' + cfg.valProto)
-        if (cfg.valSubject) opts.push('subject=' + cfg.valSubject)
+        if (valProto) opts.push('protobuf_name=' + valProto)
+        if (valSubject) opts.push('subject=' + valSubject)
         if (opts.length) s += ':' + opts.join(',')
         return { str: s, legacy: true }
       }
@@ -207,18 +219,65 @@
     // Value: mode, subject?, protobuf_name?, layout (always, last).
     var sections = []
     var keyOpts = ['mode=' + cfg.keyMode]
-    if (cfg.keySubject) keyOpts.push('subject=' + cfg.keySubject)
-    if (cfg.keyProto) keyOpts.push('protobuf_name=' + cfg.keyProto)
+    if (keySubject) keyOpts.push('subject=' + keySubject)
+    if (keyProto) keyOpts.push('protobuf_name=' + keyProto)
     sections.push('key:' + keyOpts.join(','))
 
     var valOpts = ['mode=' + cfg.valMode]
-    if (cfg.valSubject) valOpts.push('subject=' + cfg.valSubject)
-    if (cfg.valProto) valOpts.push('protobuf_name=' + cfg.valProto)
-    valOpts.push('layout=' + cfg.valLayout)
+    if (valSubject) valOpts.push('subject=' + valSubject)
+    if (valProto) valOpts.push('protobuf_name=' + valProto)
+    valOpts.push('layout=' + valLayout)
     sections.push('value:' + valOpts.join(','))
 
     sections.push('headers:value_type=' + cfg.hdrType)
     return { str: sections.join(';'), legacy: false }
+  }
+
+  // ── Config-string parser: the inverse of buildConfigString. Returns only the
+  //    cfg keys the string sets. The legacy names are matched explicitly
+  //    because the section format allows omitted sections, so a valid section
+  //    string such as `value:mode=schema_latest` need not contain ';'.
+  var LEGACY_VALUE_MODES = { key_value: 'binary', value_schema_id_prefix: 'schema_id_prefix', value_schema_latest: 'schema_latest' }
+  var OPTION_KEYS = { subject: 'Subject', protobuf_name: 'Proto' }
+  function parseConfigString (str) {
+    var out = {}
+    if (!str) return out
+    str = String(str).trim()
+    var colon = str.indexOf(':')
+    var head = colon === -1 ? str : str.slice(0, colon)
+    if (Object.prototype.hasOwnProperty.call(LEGACY_VALUE_MODES, head)) {
+      out.valMode = LEGACY_VALUE_MODES[head]
+      if (colon !== -1) parseOptions('val', str.slice(colon + 1), out)
+      return out
+    }
+    var prefixFor = { key: 'key', value: 'val' }
+    str.split(';').forEach(function (section) {
+      var i = section.indexOf(':')
+      if (i === -1) return
+      var name = section.slice(0, i).trim()
+      var opts = section.slice(i + 1)
+      if (name === 'headers') {
+        opts.split(',').forEach(function (opt) {
+          var kv = opt.split('=')
+          if (kv[0].trim() === 'value_type' && kv[1]) out.hdrType = kv[1].trim()
+        })
+      } else if (prefixFor[name]) {
+        parseOptions(prefixFor[name], opts, out)
+      }
+    })
+    return out
+  }
+  function parseOptions (prefix, opts, out) {
+    opts.split(',').forEach(function (opt) {
+      var eq = opt.indexOf('=')
+      if (eq === -1) return
+      var k = opt.slice(0, eq).trim()
+      var v = opt.slice(eq + 1).trim()
+      if (!v) return
+      if (k === 'mode') out[prefix + 'Mode'] = v
+      else if (k === 'layout' && prefix === 'val') out.valLayout = v
+      else if (OPTION_KEYS[k]) out[prefix + OPTION_KEYS[k]] = v
+    })
   }
 
   function renderSchemaFields (lines, fields, depth, S, indent) {
@@ -453,38 +512,17 @@
     }
 
     // Apply an author-supplied initial config string (data-config) by mapping
-    // its sections back onto the controls. Best-effort; unknown tokens ignored.
+    // it back onto the controls. Unknown tokens are ignored.
     function applyInitialConfig (str) {
-      if (!str) return
-      // Legacy strings never contain ';'; the section format always joins all
-      // three sections with ';'. A legacy string CAN contain ':' (for example
-      // `value_schema_latest:subject=my-topic-value`), so ':' is not a valid
-      // discriminant.
-      if (str.indexOf(';') === -1) {
-        // legacy string
-        if (str === 'key_value') {
-          setRadioValue('val-mode', 'binary')
-        } else if (str === 'value_schema_id_prefix') {
-          setRadioValue('val-mode', 'schema_id_prefix')
-        } else if (str.indexOf('value_schema_latest') === 0) {
-          setRadioValue('val-mode', 'schema_latest')
-        }
-        return
-      }
-      // Map DSL section names to control-group prefixes. The value section is
-      // named "value" in the DSL but its controls use the "val" prefix.
-      var prefixFor = { key: 'key', value: 'val' }
-      str.split(';').forEach(function (section) {
-        var parts = section.split(':')
-        var name = parts[0]
-        var prefix = prefixFor[name]
-        var opts = (parts[1] || '').split(',')
-        opts.forEach(function (opt) {
-          var kv = opt.split('=')
-          if (kv[0] === 'mode' && prefix) setRadioValue(prefix + '-mode', kv[1])
-          if (kv[0] === 'layout') setRadioValue('val-layout', kv[1])
-          if (name === 'headers' && kv[0] === 'value_type') setRadioValue('hdr-type', kv[1])
-        })
+      var parsed = parseConfigString(str)
+      if (parsed.keyMode) setRadioValue('key-mode', parsed.keyMode)
+      if (parsed.valMode) setRadioValue('val-mode', parsed.valMode)
+      if (parsed.valLayout) setRadioValue('val-layout', parsed.valLayout)
+      if (parsed.hdrType) setRadioValue('hdr-type', parsed.hdrType)
+      var fields = { keySubject: 'key-subject', keyProto: 'key-proto', valSubject: 'val-subject', valProto: 'val-proto' }
+      Object.keys(fields).forEach(function (k) {
+        var el = root.querySelector('[data-field="' + fields[k] + '"]')
+        if (el && parsed[k]) el.value = parsed[k]
       })
     }
 
@@ -505,7 +543,10 @@
         r.disabled = !valIsSchema
         r.closest('.ice-radio').style.opacity = valIsSchema ? '1' : '0.4'
       })
-      if (!valIsSchema) setRadioValue('val-layout', 'flat')
+      if (!valIsSchema) {
+        setRadioValue('val-layout', 'flat')
+        cfg.valLayout = 'flat'
+      }
 
       // Use the real WASM engine's value fields when loaded and the value is
       // decoded via a schema; otherwise fall back to the interim JS rules.
@@ -599,6 +640,13 @@
   // Export the pure DSL logic for conformance testing under Node. No effect in
   // the browser (module is undefined there).
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { buildConfigString: buildConfigString, isSchemaMode: isSchemaMode, init: init, MOUNT_SELECTOR: MOUNT_SELECTOR, isSafeEngineBase: isSafeEngineBase }
+    module.exports = {
+      buildConfigString: buildConfigString,
+      parseConfigString: parseConfigString,
+      isSchemaMode: isSchemaMode,
+      init: init,
+      MOUNT_SELECTOR: MOUNT_SELECTOR,
+      isSafeEngineBase: isSafeEngineBase,
+    }
   }
 })()

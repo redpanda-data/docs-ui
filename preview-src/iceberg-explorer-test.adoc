@@ -6,17 +6,38 @@
 Pick a configuration and see the DSL config string, the resulting Iceberg table
 schema, and a sample translated record update live.
 
+The markup below replicates the exact output of the `[iceberg-explorer]` block
+macro in docs-extensions-and-macros 5.60.0 (`macros/iceberg-explorer.js`), so this
+preview does not depend on that package. The `page-version` attribute is unset
+here, so the macro emits no `data-version`.
+
 == Default
 
-[iceberg-explorer]
---
---
+Source: `[iceberg-explorer]` with an empty open block.
+
+++++
+<div class="iceberg-explorer-mount" data-iceberg-explorer="1">
+  <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
+</div>
+++++
 
 == With an author-supplied initial config
 
-[iceberg-explorer]
-----
-{
-  "config": "key:mode=schema_id_prefix;value:mode=schema_latest,layout=nested;headers:value_type=string"
-}
-----
+Source: `[iceberg-explorer]` with a JSON body whose `config` is
+`key:mode=schema_id_prefix;value:mode=schema_latest,layout=nested;headers:value_type=string`.
+
+++++
+<div class="iceberg-explorer-mount" data-iceberg-explorer="1" data-config="key:mode=schema_id_prefix;value:mode=schema_latest,layout=nested;headers:value_type=string" data-defaults="{&quot;config&quot;:&quot;key:mode=schema_id_prefix;value:mode=schema_latest,layout=nested;headers:value_type=string&quot;}">
+  <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
+</div>
+++++
+
+== With a config that omits sections
+
+Source: `[iceberg-explorer,config="value:mode=schema_latest,subject=orders-value"]`.
+
+++++
+<div class="iceberg-explorer-mount" data-iceberg-explorer="1" data-config="value:mode=schema_latest,subject=orders-value">
+  <p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer. If this text is still here, the explorer could not load: it needs JavaScript and a docs-ui build that includes the explorer module. See the Iceberg topic configuration reference for the equivalent settings.</p>
+</div>
+++++
