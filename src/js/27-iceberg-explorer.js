@@ -434,30 +434,34 @@
     '<div class="ice-grid">' +
       '<div class="ice-left">' +
         '<div class="ice-card"><h3>Key configuration</h3>' +
-          '<div class="ice-label">Mode</div>' +
-          '<div class="ice-radios" data-group="key-mode">' +
-            r('key-mode', 'binary', true) + r('key-mode', 'string') + r('key-mode', 'schema_id_prefix') + r('key-mode', 'schema_latest') +
+          '<div class="ice-field"><div class="ice-label">Mode</div>' +
+            '<div class="ice-radios" data-group="key-mode">' +
+              r('key-mode', 'binary', true) + r('key-mode', 'string') + r('key-mode', 'schema_id_prefix') + r('key-mode', 'schema_latest') +
+            '</div></div>' +
+          '<div class="ice-opts">' +
+            textRow('key-subject', 'subject', '(default: &lt;topic&gt;-key)') +
+            textRow('key-proto', 'protobuf_name', '(default: first message)') +
           '</div>' +
-          textRow('key-subject', 'subject', '(default: &lt;topic&gt;-key)') +
-          textRow('key-proto', 'protobuf_name', '(default: first message)') +
         '</div>' +
         '<div class="ice-card"><h3>Value configuration</h3>' +
-          '<div class="ice-label">Mode</div>' +
-          '<div class="ice-radios" data-group="val-mode">' +
-            r('val-mode', 'binary', true) + r('val-mode', 'string') + r('val-mode', 'schema_id_prefix') + r('val-mode', 'schema_latest') +
+          '<div class="ice-field"><div class="ice-label">Mode</div>' +
+            '<div class="ice-radios" data-group="val-mode">' +
+              r('val-mode', 'binary', true) + r('val-mode', 'string') + r('val-mode', 'schema_id_prefix') + r('val-mode', 'schema_latest') +
+            '</div></div>' +
+          '<div class="ice-field"><div class="ice-label">Layout</div>' +
+            '<div class="ice-radios" data-group="val-layout">' +
+              r('val-layout', 'flat', true) + r('val-layout', 'nested') +
+            '</div></div>' +
+          '<div class="ice-opts">' +
+            textRow('val-subject', 'subject', '(default: &lt;topic&gt;-value)') +
+            textRow('val-proto', 'protobuf_name', '(default: first message)') +
           '</div>' +
-          '<div class="ice-label" style="margin-top:.75rem">Layout</div>' +
-          '<div class="ice-radios" data-group="val-layout">' +
-            r('val-layout', 'flat', true) + r('val-layout', 'nested') +
-          '</div>' +
-          textRow('val-subject', 'subject', '(default: &lt;topic&gt;-value)') +
-          textRow('val-proto', 'protobuf_name', '(default: first message)') +
         '</div>' +
         '<div class="ice-card"><h3>Headers configuration</h3>' +
-          '<div class="ice-label">Value type</div>' +
-          '<div class="ice-radios" data-group="hdr-type">' +
-            r('hdr-type', 'binary', true) + r('hdr-type', 'string') +
-          '</div>' +
+          '<div class="ice-field"><div class="ice-label">Value type</div>' +
+            '<div class="ice-radios" data-group="hdr-type">' +
+              r('hdr-type', 'binary', true) + r('hdr-type', 'string') +
+            '</div></div>' +
         '</div>' +
       '</div>' +
       '<div class="ice-right">' +
