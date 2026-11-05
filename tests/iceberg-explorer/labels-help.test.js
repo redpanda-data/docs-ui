@@ -6,7 +6,7 @@ const assert = require('node:assert')
 const { execFileSync } = require('child_process')
 const {
   ICEBERG_MODE: SPEC, template, rpkCommand, valueProblem, formatInfo, build, fieldsOf, defaultsOf,
-} = require('../../src/js/27-iceberg-explorer.js')
+} = require('../../src/js/iceberg-explorer.js')
 
 const html = template(SPEC, 'ice3')
 const optionValueProblem = (v, sectionForm) => valueProblem(SPEC, v, sectionForm)
@@ -20,7 +20,7 @@ test('the config bar names the property', () => {
 })
 
 test('no warning-style or unexplained tags remain', () => {
-  const js = require('fs').readFileSync(require.resolve('../../src/js/27-iceberg-explorer.js'), 'utf8')
+  const js = require('fs').readFileSync(require.resolve('../../src/js/iceberg-explorer.js'), 'utf8')
   for (const s of ['legacy format', 'new format', 'preview engine']) assert.ok(!js.includes(s), s)
   assert.match(html, /fixed Avro key and value schema/)
 })

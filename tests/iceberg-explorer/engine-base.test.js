@@ -5,7 +5,7 @@
 // in the docs-extensions-and-macros iceberg-explorer macro.
 const test = require('node:test')
 const assert = require('node:assert')
-const { isSafeEngineBase } = require('../../src/js/27-iceberg-explorer.js')
+const { isSafeEngineBase } = require('../../src/js/iceberg-explorer.js')
 
 test('accepts root-relative paths', () => {
   for (const base of ['/_/engine/26.2', '/assets/iceberg/v1']) {

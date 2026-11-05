@@ -5,7 +5,7 @@
 // accept/reject rules come from src/v/model/tests/iceberg_mode_test.cc.
 const test = require('node:test')
 const assert = require('node:assert')
-const { ICEBERG_MODE: SPEC, build, parse, defaultsOf } = require('../../src/js/27-iceberg-explorer.js')
+const { ICEBERG_MODE: SPEC, build, parse, defaultsOf } = require('../../src/js/iceberg-explorer.js')
 
 const cfg = (o) => Object.assign(defaultsOf(SPEC), o)
 const buildConfigString = (c) => build(SPEC, c)

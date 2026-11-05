@@ -6,7 +6,7 @@
 // builder and the parser all follow.
 const test = require('node:test')
 const assert = require('node:assert')
-const { ICEBERG_MODE, OUTPUTS, template, build, parse, defaultsOf } = require('../../src/js/27-iceberg-explorer.js')
+const { ICEBERG_MODE, OUTPUTS, template, build, parse, defaultsOf } = require('../../src/js/iceberg-explorer.js')
 
 const clone = (spec) => structuredClone(spec)
 const radioValues = (html, path) => [...html.matchAll(new RegExp(`data-path="${path.replace('.', '\\.')}" value="([^"]+)"`, 'g'))].map((m) => m[1])

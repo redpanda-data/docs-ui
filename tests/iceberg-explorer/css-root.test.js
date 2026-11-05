@@ -7,7 +7,7 @@ const test = require('node:test')
 const assert = require('node:assert')
 const fs = require('fs')
 const path = require('path')
-const { MOUNT_SELECTOR } = require('../../src/js/27-iceberg-explorer.js')
+const { MOUNT_SELECTOR } = require('../../src/js/iceberg-explorer.js')
 
 const css = fs.readFileSync(path.join(__dirname, '../../src/css/iceberg-explorer.css'), 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '')

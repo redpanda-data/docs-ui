@@ -3,7 +3,7 @@
 // Accessibility semantics of the explorer markup and the helpers it uses.
 const test = require('node:test')
 const assert = require('node:assert')
-const { ICEBERG_MODE: SPEC, template, copyText, isEnabled, enabledHintFor, build, fieldsOf } = require('../../src/js/27-iceberg-explorer.js')
+const { ICEBERG_MODE: SPEC, template, copyText, isEnabled, enabledHintFor, build, fieldsOf } = require('../../src/js/iceberg-explorer.js')
 
 const html = template(SPEC, 'ice9')
 const entry = (path) => fieldsOf(SPEC).find((e) => e.path === path)

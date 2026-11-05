@@ -82,7 +82,9 @@ module.exports = (src, dest, preview) => () => {
     // NOTE use the next line to bundle a JavaScript library that cannot be browserified, like jQuery
     //vfs.src(require.resolve('<package-name-or-require-path>'), opts).pipe(concat('js/vendor/<library-name>.js')),
     vfs
-      .src(['css/site.css', 'css/vendor/*.css'], { ...opts, sourcemaps })
+      // iceberg-explorer.css is its own stylesheet: 27-iceberg-explorer.js loads
+      // it, with js/vendor/iceberg-explorer.js, only on pages with an explorer.
+      .src(['css/site.css', 'css/vendor/*.css', 'css/iceberg-explorer.css'], { ...opts, sourcemaps })
       .pipe(postcss((file) => ({ plugins: postcssPlugins, options: { file } }))),
     vfs.src('font/**/*.{ttf,woff*(2)}', opts),
     vfs.src('img/**/*.{gif,ico,jpg,png,svg}', opts).pipe(

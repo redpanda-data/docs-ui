@@ -2,7 +2,7 @@
  * Iceberg Mode Explorer — interactive docs tool.
  * Built on the site's semantic theme tokens (vars.css / dark-mode.css) so it
  * follows the docs light/dark theme automatically. Rendered by
- * src/js/27-iceberg-explorer.js into the `[iceberg-explorer]` block mount point.
+ * src/js/iceberg-explorer.js into the `[iceberg-explorer]` block mount point.
  */
 
 /* Colors meet WCAG AA (4.5:1) for the small text they are used on, measured

@@ -2,7 +2,7 @@
 'use strict'
 
 // Conformance test for the Iceberg Mode Explorer's config-string parser and
-// builder (src/js/27-iceberg-explorer.js) against Redpanda's own test cases.
+// builder (src/js/iceberg-explorer.js) against Redpanda's own test cases.
 //
 // The cases come from tests/iceberg-explorer/fixtures/upstream-vectors.js,
 // which is copied from docs-extensions-and-macros and was extracted by hand
@@ -15,7 +15,7 @@
 // .github/workflows/iceberg-dsl-conformance.yml also checks that each
 // expected format string still appears in the upstream test file.
 
-const { ICEBERG_MODE, build, parse, defaultsOf, init, MOUNT_SELECTOR } = require('../../src/js/27-iceberg-explorer.js')
+const { ICEBERG_MODE, build, parse, defaultsOf, init, MOUNT_SELECTOR } = require('../../src/js/iceberg-explorer.js')
 const VECTORS = require('../iceberg-explorer/fixtures/upstream-vectors')
 
 let failures = 0

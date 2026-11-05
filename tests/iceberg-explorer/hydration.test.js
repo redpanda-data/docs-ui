@@ -5,7 +5,7 @@
 // and the loop carries on to the next mount either way.
 const test = require('node:test')
 const assert = require('node:assert')
-const { init, mountProblem } = require('../../src/js/27-iceberg-explorer.js')
+const { init, mountProblem } = require('../../src/js/iceberg-explorer.js')
 
 const FALLBACK = '<p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer.</p>'
 

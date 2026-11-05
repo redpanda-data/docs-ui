@@ -10,7 +10,7 @@ const V = require('./fixtures/upstream-vectors')
 const {
   ICEBERG_MODE: SPEC, ICEBERG_MODE_25_1: SPEC_25_1, ICEBERG_MODE_24_3: SPEC_24_3,
   specForVersion, parse, build, defaultsOf, fieldsOf,
-} = require('../../src/js/27-iceberg-explorer.js')
+} = require('../../src/js/iceberg-explorer.js')
 
 const withFields = (fields) => Object.assign(defaultsOf(SPEC), fields)
 const ok = (spec, s) => {

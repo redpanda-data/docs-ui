@@ -1,7 +1,7 @@
 name: Iceberg DSL conformance
 
 # Verifies the Iceberg Mode Explorer's config-string parser and builder
-# (src/js/27-iceberg-explorer.js) against Redpanda's accept, reject, message
+# (src/js/iceberg-explorer.js) against Redpanda's accept, reject, message
 # and format cases from src/v/model/tests/iceberg_mode_test.cc, copied into
 # tests/iceberg-explorer/fixtures/upstream-vectors.js.
 #
@@ -13,7 +13,7 @@ name: Iceberg DSL conformance
 on:
   pull_request:
     paths:
-      - 'src/js/27-iceberg-explorer.js'
+      - 'src/js/iceberg-explorer.js'
       - 'tests/iceberg-dsl/**'
       - 'tests/iceberg-explorer/**'
   workflow_dispatch:
@@ -82,7 +82,7 @@ jobs:
             fi
           done < <(grep -oE "expected: '[^']+'" tests/iceberg-explorer/fixtures/upstream-vectors.js | sed "s/expected: '//; s/'$//")
           if [ "$missing" -gt 0 ]; then
-            echo "$missing expected DSL string(s) no longer present upstream. The DSL may have changed: re-sync tests/iceberg-explorer/fixtures/upstream-vectors.js (and its docs-extensions-and-macros copy), then the spec in src/js/27-iceberg-explorer.js."
+            echo "$missing expected DSL string(s) no longer present upstream. The DSL may have changed: re-sync tests/iceberg-explorer/fixtures/upstream-vectors.js (and its docs-extensions-and-macros copy), then the spec in src/js/iceberg-explorer.js."
             exit 1
           fi
           echo "All DSL vectors still present in upstream iceberg_mode_test.cc @ $REF"

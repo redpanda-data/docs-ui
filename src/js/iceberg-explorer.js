@@ -3,6 +3,10 @@
 
   // Iceberg Mode Explorer: docs-ui hydration module.
   //
+  // Not part of site.js: 27-iceberg-explorer.js loads it, built as
+  // js/vendor/iceberg-explorer.js (src/js/vendor/iceberg-explorer.bundle.js),
+  // only on pages that have an explorer mount.
+  //
   // The `[iceberg-explorer]` block (docs-extensions-and-macros) emits a mount
   // point carrying the `data-iceberg-explorer` attribute (its value is the
   // mount contract version) plus a fallback paragraph. That attribute is the
@@ -96,9 +100,8 @@
     ],
   })
 
-  // ── Real WASM engine loader (lazy singleton). Resolves to the parsed value
-  //    fields computed by Redpanda's actual C++ Avro->Iceberg mapper, or null
-  //    if no engine can be loaded (then the interim JS engine is used).
+  // ── Real WASM engine loader. Resolves to an engine adapter, or null if no
+  //    engine can be loaded (then the interim JS engine is used).
   //
   //    The engine is versioned: schema-translation rules can change per release,
   //    so each docs version loads the engine built from that release tag. We try
@@ -109,7 +112,11 @@
   //      2. versioned filename in the UI root: <uiRoot>/iceberg-engine-<v>.js
   //      3. unversioned <uiRoot>/iceberg-engine.js (single-bundle / preview).
   //      4. none -> interim JS engine.
-  var enginePromise = null
+  //
+  //    Each candidate is loaded at most once per page and shared by every mount
+  //    that asks for the same file, so two mounts for different versions get
+  //    different engines.
+  var engineCache = {}
   function uiRoot () {
     // Derive the UI root (…/_) from the already-loaded site.js script src so
     // this works at any doc version/path.
@@ -144,39 +151,68 @@
     list.push({ dir: root, file: 'iceberg-engine.js' })
     return list
   }
-  // Load one candidate; resolve to value fields, or null on any failure so the
+
+  // Wrap a loaded Emscripten module. Methods are detected, not assumed, so an
+  // engine built before or after a binding was added still loads; callers
+  // check `has` before using an optional one. Null when the module offers
+  // nothing this UI can use.
+  function makeEngineAdapter (mod, source) {
+    if (!mod) return null
+    var has = {
+      avroToIceberg: typeof mod.avroToIcebergJson === 'function',
+      parseIcebergMode: typeof mod.parseIcebergMode === 'function',
+      formatIcebergMode: typeof mod.formatIcebergMode === 'function',
+    }
+    if (!has.avroToIceberg && !has.parseIcebergMode && !has.formatIcebergMode) return null
+    var adapter = {
+      source: source,
+      has: has,
+      // { fields } or { error } for an Avro schema (JSON string).
+      avroToIceberg: function (schemaJson) {
+        if (!has.avroToIceberg) return { error: 'this engine build has no avroToIcebergJson' }
+        try { return JSON.parse(mod.avroToIcebergJson(schemaJson)) } catch (e) { return { error: String(e && e.message) } }
+      },
+      valueFields: null,
+    }
+    if (has.avroToIceberg) {
+      var sample = adapter.avroToIceberg(AVRO_VALUE_SCHEMA)
+      adapter.valueFields = sample.error ? null : sample.fields
+    }
+    return adapter
+  }
+
+  // Load one candidate; resolve to an adapter, or null on any failure so the
   // caller can try the next candidate.
   function tryCandidate (cand) {
-    return new Promise(function (resolve) {
-      var url = cand.dir.replace(/\/$/, '') + '/' + cand.file
+    var url = cand.dir.replace(/\/$/, '') + '/' + cand.file
+    if (engineCache[url]) return engineCache[url]
+    engineCache[url] = new Promise(function (resolve) {
       var script = document.createElement('script')
       script.src = url
       script.onload = function () {
         // Emscripten is built with MODULARIZE + EXPORT_NAME=createIcebergEngine,
-        // so the loaded classic script leaves the factory on `window`.
-        if (typeof window.createIcebergEngine !== 'function') { resolve(null); return }
-        window.createIcebergEngine({ locateFile: function (p) { return cand.dir.replace(/\/$/, '') + '/' + p } })
+        // so the loaded classic script leaves the factory on `window`. Take it
+        // now: another engine version loading later replaces the global.
+        var factory = window.createIcebergEngine
+        if (typeof factory !== 'function') { resolve(null); return }
+        Promise.resolve(factory({ locateFile: function (p) { return cand.dir.replace(/\/$/, '') + '/' + p } }))
           .then(function (mod) {
-            try {
-              var parsed = JSON.parse(mod.avroToIcebergJson(AVRO_VALUE_SCHEMA))
-              resolve(parsed.error ? null : parsed.fields)
-            } catch (e) { resolve(null) }
+            try { resolve(makeEngineAdapter(mod, url)) } catch (e) { resolve(null) }
           }, function () { resolve(null) })
       }
       script.onerror = function () { resolve(null) }
       document.head.appendChild(script)
     })
+    return engineCache[url]
   }
-  function loadEngineValueFields (version, overrideBase) {
-    if (enginePromise) return enginePromise
+  function loadEngine (version, overrideBase) {
     var cands = engineCandidates(version, overrideBase)
-    enginePromise = (function next (i) {
+    return (function next (i) {
       if (i >= cands.length) return Promise.resolve(null)
-      return tryCandidate(cands[i]).then(function (fields) {
-        return fields || next(i + 1)
+      return tryCandidate(cands[i]).then(function (engine) {
+        return engine || next(i + 1)
       })
     })(0)
-    return enginePromise
   }
 
   function esc (s) {
@@ -571,8 +607,8 @@
       return fail(err('the section format (' + names + ') requires Redpanda ' + spec.successor.sectionsSince + ' or later, and ' + page + use))
     }
     if (newer && !newer.errors.length) {
-      var entry = spec.successor.legacy.filter(function (e) { return s.indexOf(e.str) === 0 })[0]
-      if (entry && entry.since) return fail(err(entry.str + ' requires Redpanda ' + entry.since + ' or later, and ' + page + use))
+      var later = spec.successor.legacy.filter(function (e) { return s.indexOf(e.str) === 0 })[0]
+      if (later && later.since) return fail(err(later.str + ' requires Redpanda ' + later.since + ' or later, and ' + page + use))
     }
     return fail(err('not a value Redpanda accepts in ' + (version || spec.documents) + use))
   }
@@ -668,7 +704,8 @@
   //
   // A renderer has `template(nid)`, the panel markup under the config bar,
   // and `update(root, cfg, ctx)`, which fills it for a normalized config.
-  // ctx: { spec, engineValFields }.
+  // ctx: { spec, engine }, where engine is an adapter from makeEngineAdapter
+  // or null.
 
   var S = function (cls, text) { return '<span class="' + cls + '">' + esc(text) + '</span>' }
   var indent = function (n) { var o = ''; for (var i = 0; i < n; i++) o += '  '; return o }
@@ -823,9 +860,9 @@
       update: function (root, cfg, ctx) {
         // Use the real WASM engine's value fields when loaded and the value is
         // decoded via a schema; otherwise fall back to the interim JS rules.
-        var valueDecodes = decodes(ctx.spec, cfg, 'value.mode')
-        var useEngine = ctx.engineValFields && valueDecodes
-        root.querySelector('[data-out="schema"]').innerHTML = renderSchema(ctx.spec, cfg, useEngine ? ctx.engineValFields : null)
+        var valueFields = ctx.engine && ctx.engine.valueFields
+        var useEngine = valueFields && decodes(ctx.spec, cfg, 'value.mode')
+        root.querySelector('[data-out="schema"]').innerHTML = renderSchema(ctx.spec, cfg, useEngine ? valueFields : null)
         root.querySelector('[data-out="record"]').innerHTML = renderRecord(ctx.spec, cfg)
         // Engine provenance badge on the schema card.
         var engEl = root.querySelector('[data-out="engine"]')
@@ -833,7 +870,7 @@
         if (useEngine) {
           engEl.className = 'ice-tag ice-engine-real'
           engEl.textContent = 'real engine · wasm'
-        } else if (ctx.engineValFields) {
+        } else if (valueFields) {
           engEl.className = 'ice-tag ice-engine-real'
           engEl.textContent = 'real engine · wasm ready'
         } else {
@@ -969,7 +1006,7 @@
     // when it is valid but the controls cannot show it (disabled). Cleared by
     // the first change to a control.
     var authorState = null
-    var engineValFields = null // real-engine value fields, set when WASM loads
+    var engine = null // engine adapter, set when a WASM build loads
     // The config string update() last rendered. Copy uses this, never the DOM
     // text, so markup in the code element (<wbr>, tags) cannot reach the clipboard.
     var currentConfig = ''
@@ -1115,7 +1152,7 @@
       q('[data-out="format-help"]').textContent = invalid ? '' : info.help
 
       var outputs = OUTPUTS[spec.outputs]
-      if (outputs) outputs.update(root, normalize(spec, raw), { spec: spec, engineValFields: engineValFields })
+      if (outputs) outputs.update(root, normalize(spec, raw), { spec: spec, engine: engine })
     }
 
     root.querySelectorAll('input[type="radio"]').forEach(function (r) { r.addEventListener('change', update) })
@@ -1125,8 +1162,8 @@
     // re-render when its value fields are available so the schema panel
     // reflects production behavior. Falls back to the interim JS engine.
     if (spec.outputs === 'icebergRow') {
-      loadEngineValueFields(docVersion, root.getAttribute('data-engine-base')).then(function (fields) {
-        if (fields) { engineValFields = fields; update() }
+      loadEngine(docVersion, root.getAttribute('data-engine-base')).then(function (loaded) {
+        if (loaded) { engine = loaded; update() }
       })
     }
 
@@ -1207,8 +1244,7 @@
         continue
       }
       root.setAttribute('data-hydrated', 'true')
-      // One broken mount must not stop the rest of the page (site.js is one
-      // concatenated bundle, so a throw here would also skip later modules).
+      // One broken mount must not stop the rest of the page.
       var fallback = root.innerHTML
       try {
         hydrate(root, specFor(root))
@@ -1220,8 +1256,9 @@
     }
   }
 
-  // DOM bootstrap only in a browser. Guarded so the module can be required in
-  // Node for the config-string conformance test (see tests/iceberg-dsl).
+  // DOM bootstrap only in a browser (the bundle defines `module`, so this
+  // does not test for it). Under Node there is no document and only the
+  // exports below apply.
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
       // init takes a document; the event listener would pass it the Event.
@@ -1231,8 +1268,7 @@
     }
   }
 
-  // Export the pure logic for tests under Node. No effect in the browser
-  // (module is undefined there).
+  // Export the logic for tests under Node and for the bundle.
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
       ICEBERG_MODE: ICEBERG_MODE,
@@ -1260,6 +1296,8 @@
       mountProblem: mountProblem,
       MOUNT_SELECTOR: MOUNT_SELECTOR,
       isSafeEngineBase: isSafeEngineBase,
+      makeEngineAdapter: makeEngineAdapter,
+      loadEngine: loadEngine,
     }
   }
 })()

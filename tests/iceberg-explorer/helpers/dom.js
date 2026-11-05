@@ -7,7 +7,7 @@ const fs = require('fs')
 const path = require('path')
 const { JSDOM } = require('jsdom')
 
-const SRC = fs.readFileSync(path.join(__dirname, '../../../src/js/27-iceberg-explorer.js'), 'utf8')
+const SRC = fs.readFileSync(path.join(__dirname, '../../../src/js/iceberg-explorer.js'), 'utf8')
 
 const FALLBACK = '<p class="iceberg-explorer-fallback">Interactive Iceberg Mode Explorer.</p>'
 
@@ -18,7 +18,7 @@ function mount (attrs = {}) {
   return `<div class="iceberg-explorer-mount"${html}>${FALLBACK}</div>`
 }
 
-async function page (body, { src = SRC } = {}) {
+async function page (body, { src = SRC, beforeEval } = {}) {
   const dom = new JSDOM(`<!doctype html><html><head></head><body>${body}</body></html>`, {
     runScripts: 'outside-only',
     url: 'https://docs.example.test/streaming/current/manage/iceberg.html',
@@ -26,6 +26,7 @@ async function page (body, { src = SRC } = {}) {
   const { window } = dom
   const warnings = []
   window.console.warn = (m) => warnings.push(String(m))
+  if (beforeEval) beforeEval(window)
   window.eval(src)
   if (window.document.readyState === 'loading') {
     await new Promise((resolve) => window.document.addEventListener('DOMContentLoaded', () => setTimeout(resolve)))
