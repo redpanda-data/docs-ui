@@ -219,3 +219,37 @@ test('resolve-resource: a cross-component lookup never inherits the page version
   resolveResourceHelper('attachment$redpanda-properties-v9.9.9.json', { data: { root: { page, contentCatalog } }, hash: { module: 'reference', fallback: '' } })
   assert.equal(seen[0].version, '26.2')
 })
+
+// The Iceberg explorer's engine attachment, published per docs version by
+// build-iceberg-engine.yml. Resolved like the properties JSON: only when the
+// catalog has it, never from a guessed URL.
+const ICEBERG_BLOCK = Handlebars.compile(slice(
+  '{{#if (eq page.component.name \'streaming\')}}\n{{#with (resolve-resource (concat \'attachment$iceberg-engine-\'',
+  '{{!--\n  Cloud components set page-cloud'
+))
+function engineCatalog (published) {
+  return {
+    getComponent: () => undefined,
+    resolveResource: (spec, ctx) => {
+      const hit = published.find((p) => ctx.component === 'streaming' && ctx.module === 'reference' && ctx.version === p.version && spec === `attachment$iceberg-engine-${p.version}.js`)
+      return hit ? { pub: { url: `/streaming/${hit.segment}/reference/_attachments/iceberg-engine-${hit.version}.js` } } : undefined
+    },
+  }
+}
+const renderEngine = (page, published) => ICEBERG_BLOCK({ page, site: {} }, { data: { root: { page, contentCatalog: engineCatalog(published) } } })
+
+test('a streaming version with a published Iceberg engine names it', () => {
+  const published = [{ version: '26.2', segment: 'current' }, { version: '26.1', segment: '26.1' }]
+  assert.deepEqual(metas(renderEngine(streamingPage('26.2', {}), published)), {
+    'iceberg-engine-url': '/streaming/current/reference/_attachments/iceberg-engine-26.2.js',
+  })
+  assert.deepEqual(metas(renderEngine(streamingPage('26.1', {}), published)), {
+    'iceberg-engine-url': '/streaming/26.1/reference/_attachments/iceberg-engine-26.1.js',
+  })
+})
+
+test('no engine meta for a version without one, or outside streaming', () => {
+  const published = [{ version: '26.2', segment: 'current' }]
+  assert.deepEqual(metas(renderEngine(streamingPage('25.3', {}), published)), {})
+  assert.deepEqual(metas(renderEngine({ version: '26.2', component: { name: 'cloud' }, componentVersion: { asciidoc: { attributes: {} } } }, published)), {})
+})

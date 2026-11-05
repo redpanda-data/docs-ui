@@ -110,6 +110,20 @@
 <meta name="properties-pages-url" content="{{this}}">
 {{/with}}
 {{!--
+  Iceberg Mode Explorer engine for this version of streaming: the WASM build
+  of this release's own iceberg_mode parser, which build-iceberg-engine.yml
+  publishes to the docs repo as reference module attachments
+  (iceberg-engine-<version>.js/.wasm, plus a provenance .json). The explorer
+  loads it from here without a per-page data-engine-base, and checks the
+  engine was built from the release the mount documents. Emitted only when
+  the attachment exists for this page's version.
+--}}
+{{#if (eq page.component.name 'streaming')}}
+{{#with (resolve-resource (concat 'attachment$iceberg-engine-' page.version '.js') component='streaming' module='reference' version=page.version fallback='') as |url|}}
+<meta name="iceberg-engine-url" content="{{url}}">
+{{/with}}
+{{/if}}
+{{!--
   Cloud components set page-cloud: true in antora.yml. Property tooltip
   descriptions carry ifdef::env-cloud conditionals; this flag tells the
   tooltip formatter which branch to render.
