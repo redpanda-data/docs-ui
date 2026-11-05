@@ -9,7 +9,7 @@ name: Build Iceberg engine (WASM)
 # iceberg-engine-<major.minor>.js/.wasm as build artifacts; publish those to the
 # versioned docs content repo under
 # modules/<module>/assets/attachments/ so the tool loads the version-matched
-# engine at runtime (see src/js/27-iceberg-explorer.js loader).
+# engine at runtime (see src/js/iceberg-explorer.js loadEngine).
 
 on:
   workflow_dispatch:
@@ -118,6 +118,12 @@ jobs:
             console.log('engine smoke test OK:', out)
           })
           EOF
+
+      # Every field optional except map keys, as relax_field_requirements in
+      # datalake/record_translator.cc writes the table. Uses the Node build
+      # from the step above.
+      - name: Check the engine reports table field requirements
+        run: npm run test:iceberg-engine
 
       - name: Upload versioned engine artifact
         uses: actions/upload-artifact@v4

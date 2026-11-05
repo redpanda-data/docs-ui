@@ -9,7 +9,7 @@
 //                   "fields": [ ... ] /* only when type == "struct" */ } ] }
 //   // or on failure: { "error": "..." }
 //
-// This is the production translation code compiled to WebAssembly — not a
+// This is the production translation code compiled to WebAssembly, not a
 // re-implementation. See iceberg-editor/wasm-spike for the feasibility proof
 // and the pinned toolchain (fmt 12.1.0, redpanda-data/avro fork + patches).
 
@@ -134,6 +134,38 @@ std::string struct_fields_json(const iceberg::struct_type& s) {
     return out;
 }
 
+// Redpanda does not write the schema's requirements to the table: before it
+// builds the table type, datalake/record_translator.cc relax_field_requirements
+// makes every key and value field optional, except map keys, which Iceberg
+// requires. Apply the same rule so the "required" flags shown match the table.
+// Upstream walks the fields with iceberg::for_each_field (parent before
+// children, map key and value fields included); this is the same walk.
+void relax_field(iceberg::nested_field& f, bool map_key) {
+    f.required = map_key ? iceberg::field_required::yes
+                         : iceberg::field_required::no;
+    std::visit(
+      overloaded{
+        [](iceberg::primitive_type&) {},
+        [](iceberg::struct_type& s) {
+            for (auto& c : s.fields) {
+                relax_field(*c, false);
+            }
+        },
+        [](iceberg::list_type& l) { relax_field(*l.element_field, false); },
+        [](iceberg::map_type& m) {
+            relax_field(*m.key_field, true);
+            relax_field(*m.value_field, false);
+        },
+      },
+      f.type);
+}
+
+void relax_field_requirements(iceberg::struct_type& st) {
+    for (auto& f : st.fields) {
+        relax_field(*f, false);
+    }
+}
+
 std::string avro_to_iceberg_json(const std::string& avro_schema_json) {
     avro::ValidSchema schema;
     try {
@@ -153,8 +185,10 @@ std::string avro_to_iceberg_json(const std::string& avro_schema_json) {
         return out;
     }
 
+    auto& st = outcome.value();
+    relax_field_requirements(st);
     std::string out = "{\"fields\":";
-    out += struct_fields_json(outcome.value());
+    out += struct_fields_json(st);
     out += "}";
     return out;
 }

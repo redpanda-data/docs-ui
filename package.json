@@ -85,6 +85,7 @@
     "test:head-meta": "node --test tests/head-meta/*.test.js",
     "test:iceberg-dsl": "node tests/iceberg-dsl/conformance-test.js",
     "test:iceberg-explorer": "node --test tests/iceberg-explorer/*.test.js",
+    "test:iceberg-engine": "node --test tests/iceberg-engine/*.test.js",
     "test:property-tooltips": "node --test tests/property-tooltips/*.test.js",
     "test:signin-nudge": "node --test tests/signin-nudge/*.test.js",
     "test:signin-return": "node --test tests/signin-return/*.test.js",
