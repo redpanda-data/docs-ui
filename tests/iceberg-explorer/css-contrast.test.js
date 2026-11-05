@@ -65,8 +65,8 @@ function card (theme) {
 }
 
 // Text tokens and the tint behind them (tags are 12% of their own color).
-const TEXT = ['--ice-muted', '--ice-cyan', '--ice-green', '--ice-blue', '--ice-yellow', '--ice-purple']
-const TAGS = ['--ice-tag-legacy', '--ice-tag-new', '--ice-tag-real', '--ice-tag-preview']
+const TEXT = ['--ice-muted', '--ice-cyan', '--ice-green', '--ice-blue', '--ice-yellow', '--ice-purple', '--ice-error']
+const TAGS = ['--ice-tag-info', '--ice-tag-real', '--ice-error']
 
 for (const theme of Object.keys(THEMES)) {
   test(`small text reaches 4.5:1 on the card in ${theme} mode`, () => {

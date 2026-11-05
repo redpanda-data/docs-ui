@@ -21,10 +21,9 @@
   --ice-yellow: #7a5400;
   --ice-purple: #7c3aed;
   --ice-cyan: #0e7490;
-  --ice-tag-legacy: #7a5400;
-  --ice-tag-new: #6d28d9;
+  --ice-error: #b42318;
+  --ice-tag-info: #1d4ed8;
   --ice-tag-real: #146c4c;
-  --ice-tag-preview: var(--slate-600, #475467);
 
   font-size: var(--secondary-font-size, 0.9rem);
   margin: 1.25rem 0;
@@ -37,10 +36,9 @@
   /* --color-gray-70 is not redefined for dark mode, so the light gray would
      sit at 2.96:1 on the dark card. */
   --ice-muted: var(--slate-400, #98a2b3);
-  --ice-tag-legacy: #facc15;
-  --ice-tag-new: #d8b4fe;
+  --ice-error: #fda29b;
+  --ice-tag-info: #93c5fd;
   --ice-tag-real: #4ade80;
-  --ice-tag-preview: var(--slate-300, #d0d5dd);
   --ice-green: #4ade80;
   --ice-blue: #60a5fa;
   --ice-yellow: #facc15;
@@ -131,14 +129,25 @@
   border: 0;
 }
 
-/* Why a control is disabled. */
-[data-iceberg-explorer] .ice-hint {
+/* Why a control is disabled, what a choice does, and problems with a value. */
+[data-iceberg-explorer] .ice-hint,
+[data-iceberg-explorer] .ice-help,
+[data-iceberg-explorer] .ice-note,
+[data-iceberg-explorer] .ice-error {
   margin: 0;
   font-size: 0.75rem;
+  line-height: 1.4;
   color: var(--ice-muted);
 }
 
-[data-iceberg-explorer] .ice-opts .ice-hint { grid-column: 1 / -1; }
+[data-iceberg-explorer] .ice-help:empty { display: none; }
+[data-iceberg-explorer] .ice-error { color: var(--ice-error); }
+
+[data-iceberg-explorer] .ice-opts .ice-hint,
+[data-iceberg-explorer] .ice-opts .ice-note,
+[data-iceberg-explorer] .ice-opts .ice-error { grid-column: 1 / -1; }
+
+[data-iceberg-explorer] .ice-textrow input[aria-invalid="true"] { border-color: var(--ice-error); }
 
 [data-iceberg-explorer] .ice-card h3 {
   font-size: 0.8rem;
@@ -267,8 +276,26 @@
   gap: 0.4rem 0.5rem;
 }
 
-[data-iceberg-explorer] .ice-confighead .ice-copy {
+[data-iceberg-explorer] .ice-confighead .ice-copies {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   margin-left: auto;
+}
+
+/* The property name keeps its case inside the uppercase label. */
+[data-iceberg-explorer] .ice-configlabel .ice-prop {
+  font-family: var(--monospace-font-family, monospace);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--body-font-color);
+}
+
+[data-iceberg-explorer] .ice-configstr.ice-invalid { color: var(--ice-muted); }
+
+[data-iceberg-explorer] .ice-copy:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 [data-iceberg-explorer] .ice-configlabel {
@@ -300,7 +327,7 @@
   transition: border-color 0.15s, color 0.15s;
 }
 
-[data-iceberg-explorer] .ice-copy:hover {
+[data-iceberg-explorer] .ice-copy:not(:disabled):hover {
   border-color: var(--ice-accent);
   color: var(--body-font-color);
 }
@@ -358,7 +385,7 @@
 }
 
 [data-iceberg-explorer] .ice-tag:empty { display: none; }
-[data-iceberg-explorer] .ice-tag.ice-new { --tag-fg: var(--ice-tag-new); }
-[data-iceberg-explorer] .ice-tag.ice-legacy { --tag-fg: var(--ice-tag-legacy); }
+/* Version information, not a warning. */
+[data-iceberg-explorer] .ice-tag.ice-info { --tag-fg: var(--ice-tag-info); }
+[data-iceberg-explorer] .ice-tag.ice-bad { --tag-fg: var(--ice-error); }
 [data-iceberg-explorer] .ice-tag.ice-engine-real { --tag-fg: var(--ice-tag-real); }
-[data-iceberg-explorer] .ice-tag.ice-engine-preview { --tag-fg: var(--ice-tag-preview); }

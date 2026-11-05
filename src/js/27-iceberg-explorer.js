@@ -196,6 +196,72 @@
     return 'Only with ' + ENABLED_WITH[option].join(' or ')
   }
 
+  // One line of help per choice, shown under its group for the checked value.
+  // Wording follows the "Specify Iceberg Schema" docs page.
+  var MODE_HELP = {
+    binary: 'Raw bytes, not decoded.',
+    string: 'Decoded as UTF-8. Invalid bytes become U+FFFD.',
+    schema_id_prefix: 'Decoded with the schema whose ID is embedded in each record, in Schema Registry wire format.',
+    schema_latest: 'Decoded with the latest schema registered for the subject.',
+  }
+  var CHOICE_HELP = {
+    'key-mode': MODE_HELP,
+    'val-mode': MODE_HELP,
+    'val-layout': {
+      flat: 'Value fields become top-level columns.',
+      nested: 'Value fields go in one value struct column.',
+    },
+    'hdr-type': {
+      binary: 'Header values stay raw bytes. Header keys are always strings.',
+      string: 'Header values are decoded as UTF-8. Invalid bytes become U+FFFD.',
+    },
+  }
+
+  // Which Redpanda versions accept a built string. Section strings are only
+  // built when a setting has no short form, and those need the
+  // iceberg_extended_mode_config feature: "extended key/headers config
+  // requires the cluster to be fully upgraded to at least v26.2.1"
+  // (config_utils.h iceberg_config_validator). value_schema_latest first
+  // parses in v25.1.1; key_value and value_schema_id_prefix in every release
+  // with Iceberg.
+  function formatInfo (built) {
+    if (!built.legacy) {
+      return { tag: 'Requires v26.2.1 or later', help: 'Redpanda accepts this form once every broker in the cluster runs v26.2.1 or later.' }
+    }
+    if (/^value_schema_latest/.test(built.str)) {
+      return { tag: 'Requires v25.1 or later', help: 'Short form. Redpanda shows a setting in this form whenever it fits, because older clusters accept it.' }
+    }
+    return { tag: 'Works on all versions', help: 'Short form. Redpanda shows a setting in this form whenever it fits, because older clusters accept it.' }
+  }
+
+  // Characters a subject or protobuf_name cannot contain. Redpanda splits
+  // options on ',' and sections on ';' (parse_extended_iceberg_mode), and reads
+  // the property with operator>>, which stops at whitespace, so the rest of
+  // the string makes the whole setting invalid. The legacy value_schema_latest
+  // form is not split on ';'. '=' is accepted: only the first '=' separates
+  // the option name, so it is a note, not an error.
+  var VALUE_RULES = [
+    { re: /\s/, error: 'Remove the whitespace. Redpanda rejects a setting that contains it.' },
+    { re: /,/, error: 'Remove the comma. Redpanda uses it to separate options.' },
+    { re: /;/, error: 'Remove the semicolon. Redpanda uses it to separate sections.', sectionFormOnly: true },
+    { re: /=/, note: 'Redpanda keeps "=" as part of the name.' },
+  ]
+  function optionValueProblem (value, sectionForm) {
+    for (var i = 0; i < VALUE_RULES.length; i++) {
+      var r = VALUE_RULES[i]
+      if (r.sectionFormOnly && !sectionForm) continue
+      if (r.re.test(value)) return r.error ? { error: r.error } : { note: r.note }
+    }
+    return null
+  }
+
+  // A shell command that sets the property. The value is single-quoted
+  // because ';' would end the command; rpk's --set is a string array, so ','
+  // inside the value is not split.
+  function rpkCommand (value) {
+    return "rpk topic alter-config <topic-name> --set '" + ('redpanda.iceberg.mode=' + value).replace(/'/g, "'\\''") + "'"
+  }
+
   // ── Config-string builder — mirrors model/model.cc format_to():
   //    legacy strings when legacy-compatible, else the section-based DSL,
   //    always serializing all sections (matches PR #31035 behavior).
@@ -481,14 +547,22 @@
       '</div>' +
       '<div class="ice-right">' +
         '<div class="ice-configbar">' +
-          '<div class="ice-confighead"><span class="ice-configlabel" id="' + nid + '-cfglabel">Config string</span>' +
+          '<div class="ice-confighead"><span class="ice-configlabel" id="' + nid + '-cfglabel">Value for <code class="ice-prop">redpanda.iceberg.mode</code></span>' +
             '<span class="ice-tag" data-out="format"></span>' +
-            '<button type="button" class="ice-copy" data-copy>Copy</button>' +
+            '<span class="ice-copies">' +
+              '<button type="button" class="ice-copy" data-copy="value">Copy</button>' +
+              '<button type="button" class="ice-copy" data-copy="rpk">Copy rpk command</button>' +
+            '</span>' +
             '<span class="ice-sr" role="status" data-out="copy-status"></span></div>' +
           // Announce the string, and only the string, when a control changes it.
           '<code class="ice-configstr" data-out="config" aria-live="polite" aria-atomic="true" aria-labelledby="' + nid + '-cfglabel"></code>' +
+          '<p class="ice-help" data-out="format-help"></p>' +
+          '<p class="ice-error" data-out="config-error" hidden></p>' +
         '</div>' +
-        '<div class="ice-card"><h3>Iceberg table schema <span class="ice-tag" data-out="engine"></span></h3><pre class="ice-tree" data-out="schema"></pre></div>' +
+        '<div class="ice-card"><h3>Iceberg table schema <span class="ice-tag" data-out="engine"></span></h3>' +
+          '<p class="ice-help">Illustrative: a fixed Avro key and value schema with one sample record. ' +
+            'subject and protobuf_name pick a schema in Schema Registry, so they do not change this sample.</p>' +
+          '<pre class="ice-tree" data-out="schema"></pre></div>' +
         '<div class="ice-card"><h3>Translated record</h3><pre class="ice-tree" data-out="record"></pre></div>' +
       '</div>' +
     '</div>'
@@ -499,6 +573,7 @@
     return '<fieldset class="ice-field" data-fieldset="' + group + '">' +
       '<legend class="ice-label"><span class="ice-sr">' + section + ' </span>' + label + '</legend>' +
       '<div class="ice-radios">' + radiosHtml + '</div>' +
+      '<p class="ice-help" id="' + nid + '-' + group + '-help" data-help="' + group + '"></p>' +
       (option ? hint(nid, group, option) : '') +
       '</fieldset>'
   }
@@ -518,7 +593,8 @@
     var inputId = nid + '-' + id
     return '<div class="ice-textrow" data-row="' + id + '">' +
       '<label for="' + inputId + '"><span class="ice-sr">' + section + ' </span>' + option + '</label>' +
-      '<input type="text" id="' + inputId + '" data-field="' + id + '" placeholder="' + ph + '" disabled></div>'
+      '<input type="text" id="' + inputId + '" data-field="' + id + '" placeholder="' + ph + '" disabled>' +
+      '<p class="ice-error" id="' + inputId + '-error" data-error="' + id + '" hidden></p></div>'
   }
 
   // Copy text to the clipboard. Resolves true only when the write succeeded,
@@ -588,10 +664,14 @@
       els.forEach(function (el) {
         if (!el) return
         el.disabled = !on
-        if (el.type === 'radio') return
-        if (on) el.removeAttribute('aria-describedby')
-        else el.setAttribute('aria-describedby', nid + '-' + hintId + '-hint')
       })
+    }
+    // aria-describedby lists only the ids of visible descriptions.
+    function describe (el, ids) {
+      if (!el) return
+      var live = ids.filter(function (id) { var d = document.getElementById(id); return d && !d.hidden && d.textContent })
+      if (live.length) el.setAttribute('aria-describedby', live.join(' '))
+      else el.removeAttribute('aria-describedby')
     }
 
     function update () {
@@ -607,24 +687,59 @@
       })
       var layoutOn = optionEnabled('layout', cfg.valMode)
       setEnabled(Array.prototype.slice.call(radios('val-layout')), layoutOn, 'val-layout')
-      var layoutSet = q('[data-fieldset="val-layout"]')
-      if (layoutSet) {
-        if (layoutOn) layoutSet.removeAttribute('aria-describedby')
-        else layoutSet.setAttribute('aria-describedby', nid + '-val-layout-hint')
-      }
+
+      // Help line for the checked choice in each group.
+      Object.keys(CHOICE_HELP).forEach(function (group) {
+        var help = q('[data-help="' + group + '"]')
+        // A disabled group gets its hint instead of help for a choice that
+        // does not apply.
+        var off = group === 'val-layout' && !layoutOn
+        if (help) help.textContent = off ? '' : (CHOICE_HELP[group][val(group)] || '')
+        describe(q('[data-fieldset="' + group + '"]'), [nid + '-' + group + '-help', nid + '-' + group + '-hint'])
+      })
 
       // Use the real WASM engine's value fields when loaded and the value is
       // decoded via a schema; otherwise fall back to the interim JS rules.
       var useEngine = engineValFields && isSchemaMode(cfg.valMode)
       var out = translate(cfg, useEngine ? engineValFields : null)
-      currentConfig = out.config.str
+
+      // Check subject and protobuf_name where they are emitted. An invalid
+      // value marks the field and the string, and nothing is offered for copy.
+      var invalid = false
+      ;[['key-subject', 'subject', cfg.keyMode], ['key-proto', 'protobuf_name', cfg.keyMode],
+        ['val-subject', 'subject', cfg.valMode], ['val-proto', 'protobuf_name', cfg.valMode]].forEach(function (f) {
+        var input = q('[data-field="' + f[0] + '"]')
+        var errEl = q('[data-error="' + f[0] + '"]')
+        var on = optionEnabled(f[1], f[2])
+        var problem = on ? optionValueProblem(field(f[0]), !out.config.legacy) : null
+        if (problem && problem.error) invalid = true
+        if (errEl) {
+          errEl.textContent = problem ? (problem.error || problem.note) : ''
+          errEl.hidden = !problem
+          errEl.className = problem && problem.note ? 'ice-note' : 'ice-error'
+        }
+        if (input) {
+          if (problem && problem.error) input.setAttribute('aria-invalid', 'true')
+          else input.removeAttribute('aria-invalid')
+          describe(input, [nid + '-' + f[0] + '-error', nid + '-' + f[0].slice(0, 3) + '-opts-hint'])
+        }
+      })
+
+      currentConfig = invalid ? '' : out.config.str
       var cfgEl = q('[data-out="config"]')
       // Line breaks go after the separators, so a long string wraps between
       // sections and options instead of inside a key.
       cfgEl.innerHTML = esc(out.config.str).replace(/([;,])/g, '$1<wbr>')
+      cfgEl.classList.toggle('ice-invalid', invalid)
+      var errBox = q('[data-out="config-error"]')
+      errBox.hidden = !invalid
+      errBox.textContent = invalid ? 'Not a valid setting. Fix the highlighted field to copy it.' : ''
+      root.querySelectorAll('[data-copy]').forEach(function (b) { b.disabled = invalid })
+      var info = formatInfo(out.config)
       var fmtEl = q('[data-out="format"]')
-      fmtEl.className = 'ice-tag ' + (out.config.legacy ? 'ice-legacy' : 'ice-new')
-      fmtEl.textContent = out.config.legacy ? 'legacy format' : 'new format'
+      fmtEl.className = 'ice-tag ' + (invalid ? 'ice-bad' : 'ice-info')
+      fmtEl.textContent = invalid ? 'Not valid' : info.tag
+      q('[data-out="format-help"]').textContent = invalid ? '' : info.help
       q('[data-out="schema"]').innerHTML = out.schema
       q('[data-out="record"]').innerHTML = out.record
 
@@ -638,8 +753,10 @@
           engEl.className = 'ice-tag ice-engine-real'
           engEl.textContent = 'real engine · wasm ready'
         } else {
-          engEl.className = 'ice-tag ice-engine-preview'
-          engEl.textContent = 'preview engine'
+          // No engine build is published yet; the illustrative note under
+          // the heading says what the panels show.
+          engEl.className = 'ice-tag'
+          engEl.textContent = ''
         }
       }
     }
@@ -657,27 +774,32 @@
       if (fields) { engineValFields = fields; update() }
     })
 
-    var copyBtn = q('[data-copy]')
     var copyStatus = q('[data-out="copy-status"]')
     var copyTimer = null
-    if (copyBtn) {
-      copyBtn.addEventListener('click', function () {
-        copyText(currentConfig, navigator.clipboard).then(function (ok) {
-          var msg = ok ? 'Copied!' : 'Copy failed'
-          copyBtn.textContent = msg
-          copyBtn.classList.toggle('ice-copied', ok)
-          copyBtn.classList.toggle('ice-copy-failed', !ok)
-          if (copyStatus) copyStatus.textContent = ok ? 'Config string copied' : 'Could not copy the config string'
+    root.querySelectorAll('[data-copy]').forEach(function (btn) {
+      var label = btn.textContent
+      var what = btn.getAttribute('data-copy') === 'rpk' ? 'rpk command' : 'config string'
+      btn.addEventListener('click', function () {
+        if (!currentConfig) return
+        var text = btn.getAttribute('data-copy') === 'rpk' ? rpkCommand(currentConfig) : currentConfig
+        copyText(text, navigator.clipboard).then(function (ok) {
+          root.querySelectorAll('[data-copy]').forEach(function (b) {
+            b.textContent = b.getAttribute('data-copy') === 'rpk' ? 'Copy rpk command' : 'Copy'
+            b.classList.remove('ice-copied', 'ice-copy-failed')
+          })
+          btn.textContent = ok ? 'Copied!' : 'Copy failed'
+          btn.classList.add(ok ? 'ice-copied' : 'ice-copy-failed')
+          if (copyStatus) copyStatus.textContent = ok ? 'Copied the ' + what : 'Could not copy the ' + what
           if (copyTimer) clearTimeout(copyTimer)
           copyTimer = setTimeout(function () {
             copyTimer = null
-            copyBtn.textContent = 'Copy'
-            copyBtn.classList.remove('ice-copied', 'ice-copy-failed')
+            btn.textContent = label
+            btn.classList.remove('ice-copied', 'ice-copy-failed')
             if (copyStatus) copyStatus.textContent = ''
           }, 1500)
         })
       })
-    }
+    })
 
     // Author-supplied initial config. The macro also emits data-defaults, but
     // its config is always the same string as data-config, so only that is read.
@@ -754,6 +876,10 @@
       isSchemaMode: isSchemaMode,
       init: init,
       copyText: copyText,
+      rpkCommand: rpkCommand,
+      optionValueProblem: optionValueProblem,
+      formatInfo: formatInfo,
+      CHOICE_HELP: CHOICE_HELP,
       optionEnabled: optionEnabled,
       enabledHint: enabledHint,
       template: template,
