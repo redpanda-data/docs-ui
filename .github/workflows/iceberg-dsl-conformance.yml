@@ -1,14 +1,15 @@
 name: Iceberg DSL conformance
 
-# Verifies the Iceberg Mode Explorer's config-string parser and builder
-# (src/js/iceberg-explorer.js) against Redpanda's accept, reject, message
-# and format cases from src/v/model/tests/iceberg_mode_test.cc, copied into
-# tests/iceberg-explorer/fixtures/upstream-vectors.js.
+# Verifies the Iceberg Mode Explorer (src/js/iceberg-explorer.js) on every PR
+# that touches it: its reader and builder against Redpanda's accept, reject,
+# message and format cases from src/v/model/tests/iceberg_mode_test.cc
+# (tests/iceberg-explorer/fixtures/upstream-vectors.js), its DOM behavior in
+# jsdom, and its styles in Chrome.
 #
-# The vector tests always run. On a schedule / manual dispatch the job also
-# fetches the current C++ test file from a chosen ref and greps for the
-# expected format strings, so upstream DSL changes surface as a failing check
-# even before anyone updates the fixture.
+# Nothing here reads Redpanda's (private) source, so PRs from forks run it
+# without secrets. Upstream drift is caught where the grammar now comes from:
+# build-iceberg-engine.yml builds each release's own parser daily and runs
+# that release's iceberg_mode_test.cc and tests/iceberg-engine against it.
 
 on:
   pull_request:
@@ -18,22 +19,18 @@ on:
       - 'src/js/vendor/iceberg-explorer.bundle.js'
       - 'src/css/iceberg-explorer.css'
       - 'src/css/site.css'
+      - 'src/partials/head-meta.hbs'
       - 'gulp.d/tasks/build.js'
       - 'preview-src/iceberg-explorer-test.adoc'
+      - 'iceberg-editor/ci/**'
       - 'tests/iceberg-dsl/**'
+      - 'tests/iceberg-engine/**'
       - 'tests/iceberg-explorer/**'
       - 'tests/iceberg-explorer-browser/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/iceberg-dsl-conformance.yml'
   workflow_dispatch:
-    inputs:
-      redpanda_ref:
-        description: 'redpanda ref to diff the DSL vectors against'
-        required: false
-        default: 'dev'
-  schedule:
-    - cron: '0 6 * * 1' # weekly: catch upstream DSL drift
 
 jobs:
   conformance:
@@ -69,33 +66,10 @@ jobs:
       - name: Run the explorer unit and DOM tests
         run: npm run test:iceberg-explorer
 
-      - name: Cross-check vectors against upstream iceberg_mode_test.cc
-        if: github.event_name != 'pull_request'
-        env:
-          REF: ${{ github.event.inputs.redpanda_ref || 'dev' }}
-        run: |
-          set -euo pipefail
-          url="https://raw.githubusercontent.com/redpanda-data/redpanda/$REF/src/v/model/tests/iceberg_mode_test.cc"
-          curl -fsSL "$url" -o upstream_iceberg_mode_test.cc
-          # Merge C++ adjacent string-literal concatenation ("a" "b" -> "ab"),
-          # including across line breaks, so long expected strings that the test
-          # file wraps still match.
-          norm="$(tr -d '\n' < upstream_iceberg_mode_test.cc | sed 's/"[[:space:]]*"//g')"
-          # Every expected string in our conformance vectors must still appear
-          # verbatim in the upstream C++ format tests.
-          missing=0
-          while IFS= read -r expected; do
-            [ -z "$expected" ] && continue
-            if ! printf '%s' "$norm" | grep -qF -- "$expected"; then
-              echo "::warning::Expected DSL string not found upstream ($REF): $expected"
-              missing=$((missing+1))
-            fi
-          done < <(grep -oE "expected: '[^']+'" tests/iceberg-explorer/fixtures/upstream-vectors.js | sed "s/expected: '//; s/'$//")
-          if [ "$missing" -gt 0 ]; then
-            echo "$missing expected DSL string(s) no longer present upstream. The DSL may have changed: re-sync tests/iceberg-explorer/fixtures/upstream-vectors.js (and its docs-extensions-and-macros copy), then the spec in src/js/iceberg-explorer.js."
-            exit 1
-          fi
-          echo "All DSL vectors still present in upstream iceberg_mode_test.cc @ $REF"
+      # The engine tests skip the engine checks here (no engine is built
+      # without the private source) and run the publish-target logic.
+      - name: Run the engine target and vector tests
+        run: npm run test:iceberg-engine
 
   # Computed styles on the built preview page, in Chrome, at 390 and 1440px
   # in both themes (tests/iceberg-explorer-browser).
