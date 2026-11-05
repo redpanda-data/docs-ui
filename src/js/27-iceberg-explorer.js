@@ -501,8 +501,10 @@
     // never by the global name attribute.
     var radios = function (group) { return root.querySelectorAll('input[data-group="' + group + '"]') }
     var val = function (group) { var el = root.querySelector('input[data-group="' + group + '"]:checked'); return el ? el.value : '' }
+    // `value` can come from the author's data-config, so it is compared, never
+    // put into a selector: a quote or backslash there throws a SyntaxError.
     var setRadioValue = function (group, value) {
-      var el = root.querySelector('input[data-group="' + group + '"][value="' + value + '"]')
+      var el = Array.prototype.find.call(radios(group), function (r) { return r.value === value })
       if (el) el.checked = true
     }
     var field = function (id) { var el = root.querySelector('[data-field="' + id + '"]'); return el ? el.value.trim() : '' }
@@ -617,12 +619,9 @@
       })
     }
 
-    // Author-supplied defaults: data-config (string) or data-defaults (JSON).
-    var initial = root.getAttribute('data-config')
-    if (!initial && root.getAttribute('data-defaults')) {
-      try { initial = (JSON.parse(root.getAttribute('data-defaults')) || {}).config } catch (e) {}
-    }
-    applyInitialConfig(initial)
+    // Author-supplied initial config. The macro also emits data-defaults, but
+    // its config is always the same string as data-config, so only that is read.
+    applyInitialConfig(root.getAttribute('data-config'))
     update()
   }
 
@@ -630,13 +629,48 @@
   // macros/iceberg-explorer.js. tests/iceberg-dsl/conformance-test.js pins it.
   var MOUNT_SELECTOR = '[data-iceberg-explorer]'
 
+  // The value of the mount attribute is the contract version the macro wrote.
+  // A mount this module does not understand keeps its fallback text.
+  //   1: data-config, data-version, data-engine-base.
+  //   2: as 1, plus data-property naming the property the mount explores.
+  var SUPPORTED_PROPERTY = 'redpanda.iceberg.mode'
+  function mountProblem (root) {
+    var contract = root.getAttribute('data-iceberg-explorer')
+    if (contract === '1') return null
+    if (contract === '2') {
+      var prop = root.getAttribute('data-property')
+      if (prop === null || prop === SUPPORTED_PROPERTY) return null
+      return 'unsupported data-property "' + prop + '" (this build supports ' + SUPPORTED_PROPERTY + ')'
+    }
+    return 'unsupported contract version "' + contract + '" (this build supports 1 and 2)'
+  }
+
+  function warn (msg) {
+    if (typeof console !== 'undefined' && console.warn) console.warn('iceberg-explorer: ' + msg)
+  }
+
   function init (doc) {
     doc = doc || document
     var mounts = doc.querySelectorAll(MOUNT_SELECTOR)
     for (var i = 0; i < mounts.length; i++) {
-      if (!mounts[i].getAttribute('data-hydrated')) {
-        mounts[i].setAttribute('data-hydrated', 'true')
-        hydrate(mounts[i])
+      var root = mounts[i]
+      if (root.getAttribute('data-hydrated')) continue
+      var problem = mountProblem(root)
+      if (problem) {
+        root.setAttribute('data-hydrated', 'skipped')
+        warn('kept the fallback for a mount with ' + problem)
+        continue
+      }
+      root.setAttribute('data-hydrated', 'true')
+      // One broken mount must not stop the rest of the page (site.js is one
+      // concatenated bundle, so a throw here would also skip later modules).
+      var fallback = root.innerHTML
+      try {
+        hydrate(root)
+      } catch (e) {
+        root.innerHTML = fallback
+        root.setAttribute('data-hydrated', 'failed')
+        warn('could not render a mount, kept the fallback: ' + (e && e.message))
       }
     }
   }
@@ -659,6 +693,7 @@
       parseConfigString: parseConfigString,
       isSchemaMode: isSchemaMode,
       init: init,
+      mountProblem: mountProblem,
       MOUNT_SELECTOR: MOUNT_SELECTOR,
       isSafeEngineBase: isSafeEngineBase,
     }
