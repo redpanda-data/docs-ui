@@ -861,7 +861,8 @@
   // Node for the config-string conformance test (see tests/iceberg-dsl).
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init)
+      // init takes a document; the event listener would pass it the Event.
+      document.addEventListener('DOMContentLoaded', function () { init() })
     } else {
       init()
     }
