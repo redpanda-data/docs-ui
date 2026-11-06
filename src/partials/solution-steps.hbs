@@ -1,0 +1,41 @@
+{{!--
+  Ordered step list on the overview. Context: `solution`.
+  Each item carries data-sol-step-id so 28-solution-progress.js can tick
+  completed steps and label the step the reader last opened ("Last opened"),
+  which is where they left off, not a selection.
+
+  Marked up as an Asciidoctor section (div.sect1 > h2[id] + div.sectionbody)
+  so the on-this-page TOC, which reads `article.doc > .sect1 > h2[id]`, lists
+  it like any authored section. solution.hbs renders it before the first
+  authored section.
+
+  The line above the list says what the steps hold besides the build: the quiz
+  at the end of each one (solution-quiz-button.hbs) and the production card
+  on the last (solution-productionize.hbs). It is UI copy, so no solution's
+  content has to repeat it.
+--}}
+{{#if solution.steps.length}}
+<div class="sect1 sol-steps" id="steps">
+  <h2 id="sol-steps-title" class="sol-section-title">Steps</h2>
+  <div class="sectionbody">
+  <p class="sol-steps-note">Each step ends with a short quiz to check your understanding, and the last step helps you plan the production rollout with Ask AI or your coding agent.</p>
+  <ol class="sol-step-list" data-sol-steps>
+    {{#each solution.steps}}
+    <li class="sol-step-item" data-sol-step-id="{{id}}" data-sol-step-url="{{url}}">
+      <a class="sol-step-link" href="{{{relativize url}}}">
+        <span class="sol-step-num" aria-hidden="true">{{order}}</span>
+        <span class="sol-step-body">
+          <span class="sol-step-title">{{title}}</span>
+          <span class="sol-step-resume" data-sol-step-resume hidden>Last opened</span>
+        </span>
+        <span class="sol-step-check" data-sol-step-check aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <span class="visually-hidden" data-sol-step-status></span>
+      </a>
+    </li>
+    {{/each}}
+  </ol>
+  </div>
+</div>
+{{/if}}

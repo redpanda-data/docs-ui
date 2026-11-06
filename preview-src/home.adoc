@@ -4,6 +4,11 @@
 :page-ai-suggestions: ["How do I write from Redpanda Streaming to Snowflake?", "What's the difference between Redpanda and Kafka?", "Which Iceberg catalogs does Redpanda Cloud support?", "How do I create a CDC pipeline from MongoDB to Redpanda Cloud?", "How do I write from Redpanda Cloud to Google BigQuery?", "How do I create a CDC pipeline from Postgres to Redpanda Cloud?", "How do I create a CDC pipeline from MySQL to Redpanda Cloud?"]
 :page-intro: 'Find tutorials, guides, and API references to help you build with Redpanda, the modern streaming data platform for mission-critical workloads.'
 :page-row: [{"title":"Get started","items":[{"title":"Serverless","image":"serverless.svg","description":"Get fast, efficient, and scalable data streaming without infrastructure management.","urls":[{"url":"redpanda-cloud:get-started:cluster-types/serverless.adoc"}]},{"title":"Self-Managed","image":"self-managed.svg","description":"Run Redpanda on your own infrastructure with complete control over your deployment and configuration.","urls":[{"url":"ROOT:get-started:quick-start.adoc"}]},{"title":"Connect","image":"connect.svg","description":"Integrate data across systems with hundreds of prebuilt connectors, including AI and change data capture (CDC).","urls":[{"url":"redpanda-connect:get-started:quickstarts/rpk.adoc"}]}]}]
+// Third intent card (home.hbs): shown only when the site has the solutions component
+:page-intent-solutions-title: Build a complete system
+:page-intent-solutions-desc: Follow a solution step by step, verify each stage, and see what changes in production.
+:page-intent-solutions-link: /solutions-home-test.html
+:page-intent-solutions-cta: Browse solutions
 // Cloud sub-products (for nested cards)
 :product-cloud-streaming-title: Streaming
 :product-cloud-streaming-desc: High-performance Kafka-compatible event streaming in the cloud

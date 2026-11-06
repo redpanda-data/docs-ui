@@ -1,0 +1,12 @@
+# Topics the courier services use. scripts/create_topics.sh reads this file.
+topics:
+  - name: delivery-status
+    partitions: 3
+    replication_factor: 1
+    config:
+      retention.ms: 86400000
+  - name: courier-stats
+    partitions: 3
+    replication_factor: 1
+    config:
+      cleanup.policy: delete

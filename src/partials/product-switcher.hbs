@@ -9,6 +9,7 @@
        - Self-Managed (self-managed component) containing:
          - Streaming (streaming component)
          - Connect (connect component)
+    3. Solutions (solutions component), only when the site has it
 
   CONFIGURATION:
   Each component must have component-metadata in its antora.yml:
@@ -108,6 +109,16 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
       </span>
       <span class="sb-product-name">{{this.title}}</span>
+        {{/with}}
+      {{/with}}
+    {{else if (eq page.component.name 'solutions')}}
+    {{!-- Solutions pages: rocket icon in the component's own color --}}
+      {{#with (find-component site 'solutions')}}
+        {{#with (get-component-header-data this)}}
+      <span class="sb-product-chip" style="background: {{this.color}};">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+      </span>
+      <span class="sb-product-name">{{#if this.title}}{{this.title}}{{else}}Solutions{{/if}}</span>
         {{/with}}
       {{/with}}
     {{else if (eq page.component.name 'agentic-data-plane')}}
@@ -310,6 +321,38 @@
     </div>
       {{/with}}
     {{/with}}
+
+    {{!-- 3. Solutions (component `solutions`). Renders only when the site has
+          the component; color comes from its component-metadata. --}}
+    {{#if (has-component site 'solutions')}}
+    {{#with (find-component site 'solutions')}}
+      {{#with (get-component-header-data this)}}
+    <button
+      role="option"
+      aria-selected="{{#if (eq @root.page.component.name 'solutions')}}true{{else}}false{{/if}}"
+      class="sb-product-opt {{#if (eq @root.page.component.name 'solutions')}}is-current{{/if}}"
+      data-product-id="solutions"
+      data-product-url="{{{relativize ../url}}}"
+      style="--product-color: {{#if this.color}}{{this.color}}{{else}}#b45309{{/if}};"
+    >
+      <span class="sb-product-chip" style="background: {{#if this.color}}{{this.color}}{{else}}#b45309{{/if}};"></span>
+      <span class="sb-product-opt-text">
+        <span class="sb-product-opt-name">{{#if this.title}}{{this.title}}{{else}}Solutions{{/if}}</span>
+        {{#if this.description}}
+        <span class="sb-product-opt-desc">{{{this.description}}}</span>
+        {{else}}
+        <span class="sb-product-opt-desc">Complete, runnable systems built on Redpanda</span>
+        {{/if}}
+      </span>
+      {{#if (eq @root.page.component.name 'solutions')}}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sb-product-opt-check">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      {{/if}}
+    </button>
+      {{/with}}
+    {{/with}}
+    {{/if}}
 
     {{!-- Footer with Cloud link --}}
     <div class="sb-product-menu-foot">

@@ -10,8 +10,12 @@
   var ul = breadcrumbsNav.querySelector('ul')
   if (!ul) return
 
+  // Long trails (more than three crumbs) collapse their middle into the
+  // ellipsis menu. Any trail can also have a crumb the CSS cuts short (the
+  // page title, a solution's name), so the menu is built for every trail of
+  // two or more: it lists the whole trail in full, current page last.
   var items = Array.from(ul.querySelectorAll('li'))
-  if (items.length <= 3) return // No need to collapse if 3 or fewer items
+  if (items.length < 2) return
 
   // Create ellipsis button and dropdown container
   var ellipsisLi = document.createElement('li')
@@ -26,9 +30,7 @@
   ellipsisLi.appendChild(ellipsisBtn)
 
   // Insert ellipsis after first item
-  if (items.length > 1) {
-    items[0].after(ellipsisLi)
-  }
+  items[0].after(ellipsisLi)
 
   // Track which items are hidden
   var hiddenItems = []
@@ -80,6 +82,7 @@
 
     // Reset to expanded state first
     container.classList.remove('is-collapsed')
+    container.classList.remove('has-truncated')
     items.forEach(function (item) {
       item.classList.remove('bc-hidden')
     })
@@ -100,12 +103,39 @@
         hiddenItems.push(items[i])
       }
     }
+
+    markTruncated()
   }
 
-  // Create and show dropdown with hidden items
-  function showDropdown () {
-    if (hiddenItems.length === 0) return
+  // The crumb's own label: a link or a span directly in the item.
+  function label (item) {
+    return Array.from(item.children).filter(function (el) { return el.tagName === 'A' || el.tagName === 'SPAN' })[0] || null
+  }
 
+  // A crumb the CSS cuts short gets its full text as a title, and loses it
+  // once it fits again. If any visible crumb is cut short, the ellipsis
+  // button shows even with nothing hidden, so the full text is one click away
+  // for keyboard and touch readers, who never see a title.
+  function markTruncated () {
+    var truncated = false
+    items.forEach(function (item) {
+      var el = label(item)
+      if (!el) return
+      var cut = !item.classList.contains('bc-hidden') && el.scrollWidth > el.clientWidth
+      if (cut) {
+        el.setAttribute('title', el.textContent.trim())
+        truncated = true
+      } else {
+        el.removeAttribute('title')
+      }
+    })
+    if (truncated) container.classList.add('has-truncated')
+  }
+
+  // The dropdown: every crumb, in order and in full, with the current page
+  // last and marked aria-current. It used to list only the hidden crumbs, so
+  // a visible crumb cut short could not be read anywhere.
+  function showDropdown () {
     isDropdownOpen = true
     ellipsisBtn.classList.add('is-open')
     ellipsisBtn.setAttribute('aria-expanded', 'true')
@@ -113,21 +143,20 @@
     dropdown = document.createElement('div')
     dropdown.className = 'bc-dropdown'
 
-    hiddenItems.forEach(function (item) {
-      var link = item.querySelector('a')
-      if (link) {
-        var dropdownLink = document.createElement('a')
-        dropdownLink.href = link.href
-        dropdownLink.textContent = link.textContent
-        dropdown.appendChild(dropdownLink)
+    items.forEach(function (item, i) {
+      var el = label(item)
+      if (!el) return
+      var current = i === items.length - 1
+      var entry
+      if (el.tagName === 'A' && !current) {
+        entry = document.createElement('a')
+        entry.href = el.href
       } else {
-        var span = item.querySelector('span')
-        if (span) {
-          var dropdownSpan = document.createElement('span')
-          dropdownSpan.textContent = span.textContent
-          dropdown.appendChild(dropdownSpan)
-        }
+        entry = document.createElement('span')
       }
+      entry.textContent = el.textContent.trim()
+      if (current) entry.setAttribute('aria-current', 'page')
+      dropdown.appendChild(entry)
     })
 
     ellipsisLi.appendChild(dropdown)

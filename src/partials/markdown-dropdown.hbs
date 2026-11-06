@@ -1,3 +1,8 @@
+{{!--
+  Page options. Solution layouts pass companionUrl (the solution's
+  agent-companion.md), which adds a link to it: the companion is the version
+  of the solution written for a coding agent.
+--}}
 {{#if (has-markdown)}}
 <div
   class="markdown-dropdown"
@@ -70,6 +75,22 @@
       </svg>
       <span>View as plain text</span>
     </button>
+
+    {{#if companionUrl}}
+    <a
+      class="markdown-dropdown-item"
+      href="{{{relativize companionUrl}}}"
+      role="menuitem"
+      data-action="agent-companion"
+      data-analytics="solution_agent_companion"
+    >
+      <svg aria-hidden="true" width="16" height="16" fill="none" viewBox="0 0 16 16">
+        <path d="M2.5 3.5h11v9h-11z" stroke="currentColor"/>
+        <path d="m5 6 2 2-2 2M8.5 10h2.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Open the agent companion</span>
+    </a>
+    {{/if}}
 
     <button
       class="markdown-dropdown-item"

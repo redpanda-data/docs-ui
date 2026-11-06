@@ -320,7 +320,10 @@ test('the prop name for each tier matches the installed SDK typings, not just it
 
   // Both providers must actually receive it.
   const agentBlock = src.slice(src.indexOf('<AgentProvider'), src.indexOf('</AgentProvider>'))
-  assert.match(agentBlock, /sourceGroupProps\('agent', scopeIds\)/, 'AgentProvider must be scoped')
+  // The agent tier's ids come from agentProps (chatModes.js), which hands
+  // plain Ask AI the page scope; tests/chat-modes checks that it does.
+  assert.match(agentBlock, /sourceGroupProps\('agent', props\.sourceGroupIds\)/, 'AgentProvider must be scoped')
+  assert.match(src, /agentProps\(resolveMode\(mode, window, scopeIds\), \{[\s\S]*?\n\s+scopeIds,\n/, 'agentProps must get the scope')
   const chatBlock = src.slice(src.indexOf('<KapaProvider'), src.indexOf('</KapaProvider>'))
   assert.match(chatBlock, /sourceGroupProps\('chat', scopeIds\)/, 'KapaProvider must be scoped')
 

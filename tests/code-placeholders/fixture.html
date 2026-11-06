@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>code placeholders fixture</title></head>
+<body>
+<article class="doc">
+
+<!-- Block G: command output with counts in parentheses and no callout list.
+     None of them is a callout. -->
+<div class="listingblock" id="block-g">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">ok    achievements: hot_streak fired (169), veteran matches Postgres (24)
+ok    game.player-events.dlq holds exactly the poison records (1)</code></pre>
+</div>
+</div>
+
+<!-- Block H: the same text pattern followed by a callout list. "(1)" here is a
+     callout written as text, so it still becomes one: the control for G. -->
+<div class="listingblock" id="block-h">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">make verify (1)</code></pre>
+</div>
+</div>
+<div class="colist arabic"><ol><li><p>Runs the checks.</p></li></ol></div>
+
+<!-- Block I: a Protobuf comment that names <topic>, and a real placeholder
+     on a code line. Only the code line's placeholder is editable. -->
+<div class="listingblock" id="block-i">
+<div class="content">
+<pre class="highlight"><code class="language-protobuf" data-lang="protobuf">// Registered in Schema Registry under the subjects
+// &lt;topic&gt;-value with BACKWARD compatibility.
+option go_package = "&lt;module-path&gt;/gen";</code></pre>
+</div>
+</div>
+
+<!-- Block J: shell. A "#" comment line naming <cluster-id> stays prose; a
+     continuation line that starts with a flag keeps its placeholder. -->
+<div class="listingblock" id="block-j">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># Replace &lt;cluster-id&gt; with your cluster ID.
+helm upgrade redpanda redpanda/redpanda \
+  --set cluster.id=&lt;cluster-id&gt;</code></pre>
+</div>
+</div>
+
+</article>
+<script src="/src/js/vendor/prism/prism-core.js"></script>
+<script src="/src/js/vendor/prism/prism-bloblang.js"></script>
+<script src="/src/js/10-code-highlight.js"></script>
+<script src="/src/js/11-editable-placeholders.js"></script>
+</body>
+</html>
