@@ -704,6 +704,14 @@
       "caution": "Only the exact string true turns it on.",
       "readBy": ["src/helpers/add-suggested-labs.js"]
     },
+    "page-exclude-related-solutions": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Turns off the Solutions recommendations on a Product Docs page and removes it from recommendation scoring.",
+      "caution": "Any value, even false, turns it off.",
+      "readBy": ["src/partials/component-home-v3.hbs", "src/partials/solution-recommendations-rail.hbs", "src/partials/solution-recommendations.hbs"]
+    },
     "page-faqs": {
       "setIn": ["page"],
       "setBy": "extension",
@@ -896,7 +904,7 @@
       "setBy": "writer",
       "type": "string",
       "description": "Landing pages (home, labs home): hero subtitle.",
-      "readBy": ["src/layouts/labs-home.hbs", "src/partials/home.hbs"]
+      "readBy": ["src/layouts/labs-home.hbs", "src/layouts/solutions-home.hbs", "src/partials/home.hbs"]
     },
     "page-hero-suggestion-{n}": {
       "setIn": ["page"],
@@ -918,7 +926,7 @@
       "setBy": "writer",
       "type": "string",
       "description": "Landing pages (home, component-home-v3, labs home): hero title.",
-      "readBy": ["src/layouts/labs-home.hbs", "src/partials/component-home-v3.hbs", "src/partials/home.hbs"]
+      "readBy": ["src/layouts/labs-home.hbs", "src/layouts/solutions-home.hbs", "src/partials/component-home-v3.hbs", "src/partials/home.hbs"]
     },
     "page-hide-view-latest": {
       "setIn": ["page"],
@@ -1055,6 +1063,34 @@
       "setBy": "writer",
       "type": "string",
       "description": "Home page (role home): heading of the intent cards.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-solutions-cta": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): Solutions intent card link label. Defaults to Browse solutions.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-solutions-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): Solutions intent card description.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-solutions-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "description": "Home page (role home): Solutions intent card link, a resource ID or URL of the Solutions landing page.",
+      "readBy": ["src/partials/home.hbs"]
+    },
+    "page-intent-solutions-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Home page (role home): Solutions intent card title.",
       "readBy": ["src/partials/home.hbs"]
     },
     "page-introduced-in": {
@@ -1476,6 +1512,14 @@
       "caution": "Malformed JSON is logged and ignored.",
       "readBy": ["src/helpers/add-suggested-labs.js", "src/helpers/list-related-labs.js", "src/partials/nav-tree-lab.hbs"]
     },
+    "page-related-solutions": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON array",
+      "description": "Ranked Solutions recommendations for a Product Docs page, which the recommendations partials and the rail render. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/helpers/add-suggested-labs.js", "src/partials/component-home-v3.hbs", "src/partials/solution-recommendations-rail.hbs", "src/partials/solution-recommendations.hbs"]
+    },
     "page-release-date": {
       "setIn": ["page", "component"],
       "setBy": "writer",
@@ -1492,7 +1536,7 @@
       "values": ["home", "component-home", "component-home-v2", "component-home-v3", "bloblang-playground", "bloblang-snippets", "enable-ace-editor", "index-list", "related-labs", "two-column"],
       "description": "Switches the page body to a special layout inside the default template. Also added as a CSS class on the body or main element.",
       "caution": "An unknown value falls back silently to a normal article.",
-      "readBy": ["src/helpers/has-markdown.js", "src/layouts/default.hbs", "src/layouts/index.hbs", "src/layouts/lab.hbs", "src/partials/article.hbs", "src/partials/feedback-footer.hbs", "src/partials/head-info.hbs", "src/partials/head-scripts.hbs", "src/partials/header-scripts.hbs", "src/partials/main.hbs", "src/partials/pagination.hbs", "src/partials/product-switcher.hbs", "src/partials/toc.hbs"]
+      "readBy": ["src/helpers/has-markdown.js", "src/layouts/default.hbs", "src/layouts/index.hbs", "src/layouts/lab.hbs", "src/layouts/solution-step.hbs", "src/layouts/solution.hbs", "src/partials/article.hbs", "src/partials/feedback-footer.hbs", "src/partials/head-info.hbs", "src/partials/head-scripts.hbs", "src/partials/header-scripts.hbs", "src/partials/main.hbs", "src/partials/pagination.hbs", "src/partials/product-switcher.hbs", "src/partials/solution-recommendations-rail.hbs", "src/partials/toc.hbs"]
     },
     "page-self-managed-available": {
       "setIn": ["page"],
@@ -1532,6 +1576,166 @@
       "description": "Shows the Self-Managed-only badge.",
       "caution": "Any non-empty value turns it on. An empty value is off, and so is leaving it unset. The string false still counts as on.",
       "readBy": ["src/partials/article.hbs"]
+    },
+    "page-solution": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON object",
+      "description": "The solution this overview or step page belongs to, as JSON. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/layouts/solution-step.hbs", "src/layouts/solution.hbs", "src/partials/breadcrumbs.hbs"]
+    },
+    "page-solution-adapt": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Step page: what to inspect in another codebase to apply the step's rule, passed to the step quiz.",
+      "readBy": ["src/partials/solution-quiz-button.hbs"]
+    },
+    "page-solution-nav": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "json",
+      "format": "JSON object",
+      "description": "The solution's step list for the sidebar and the overview meta. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/partials/nav-tree-solution.hbs", "src/partials/solution-meta.hbs"]
+    },
+    "page-solution-next-title": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Step page: title of the next step. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/partials/solution-step-actions.hbs"]
+    },
+    "page-solution-next-url": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "url",
+      "description": "Step page: URL of the next step. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/layouts/solution-step.hbs", "src/partials/solution-step-actions.hbs"]
+    },
+    "page-solution-outcome-alt": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Solution overview: alt text of the outcome diagram.",
+      "readBy": ["src/partials/solution-outcome.hbs"]
+    },
+    "page-solution-outcome-image": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Solution overview: image file of the outcome diagram drawn under the title.",
+      "readBy": ["src/partials/solution-outcome.hbs"]
+    },
+    "page-solution-prev-title": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Step page: title of the previous step. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/partials/solution-step-actions.hbs"]
+    },
+    "page-solution-prev-url": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "url",
+      "description": "Step page: URL of the previous step. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/partials/solution-step-actions.hbs"]
+    },
+    "page-solution-rule": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "description": "Step page: the one invariant the step establishes, shown with the step quiz.",
+      "readBy": ["src/partials/solution-quiz-button.hbs"]
+    },
+    "page-solution-step-count": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "number",
+      "description": "Step page: number of steps in the solution. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/layouts/solution-step.hbs", "src/partials/solution-step-header.hbs"]
+    },
+    "page-solution-step-id": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Step page: the step's id from page-solution-steps. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/layouts/solution-step.hbs", "src/partials/nav-tree-solution.hbs"]
+    },
+    "page-solution-step-index": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "number",
+      "description": "Step page: the step's 1-based position. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/layouts/solution-step.hbs", "src/partials/solution-step-header.hbs"]
+    },
+    "page-solution-title": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Step page: the solution's title, appended to the browser title. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/partials/head-title.hbs"]
+    },
+    "page-solution-verified-at": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "date",
+      "description": "Step page: when the solution's test run last passed, from verification.json. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/partials/solution-step-header.hbs"]
+    },
+    "page-solution-verified-version": {
+      "setIn": ["page"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Step page: the Redpanda version the last passing test run used, from verification.json. Set by the solutions-catalog extension; never author it.",
+      "readBy": ["src/partials/solution-productionize.hbs", "src/partials/solution-step-header.hbs"]
+    },
+    "page-solutions-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "description": "Component home page: resource ID or URL for the Solutions section's browse-all link.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-solutions-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "html",
+      "description": "Component home page: heading of the editorial Solutions section. The section shows only with at least one page-solutions-{n}-title.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-solutions-{n}-desc": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home page: description of an editorial Solutions card.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-solutions-{n}-id": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home page: solution id of an editorial Solutions card, for analytics.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-solutions-{n}-link": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "resource-id",
+      "range": [1, 3],
+      "description": "Component home page: resource ID of an editorial Solutions card.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
+    },
+    "page-solutions-{n}-title": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "string",
+      "range": [1, 3],
+      "description": "Component home page: title of an editorial Solutions card.",
+      "readBy": ["src/partials/component-home-v3.hbs"]
     },
     "page-stats": {
       "setIn": ["page"],
