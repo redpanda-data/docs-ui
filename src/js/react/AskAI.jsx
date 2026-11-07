@@ -4,6 +4,7 @@ import { AgentProvider } from '@kapaai/agent-react'
 import { KapaProvider } from '@kapaai/react-sdk'
 import ChatInterface from './components/ChatInterface.jsx'
 import ChatSdkInterface from './components/ChatSdkInterface.jsx'
+import { readSalesLinks } from './components/chatShared.jsx'
 import { agentTools } from './agentTools.js'
 import { safeHeap } from './heap.js'
 import { saveConversation } from './chatPersistence.js'
@@ -181,6 +182,19 @@ function useKapaScopeIds () {
   return ids
 }
 
+// Points sales questions at the same links the welcome screen shows (DOC-2607),
+// read from the one global so the prompt and the UI cannot disagree. Empty
+// when the page sets no links, so the prompt never names a URL it was not given.
+function salesContext () {
+  const links = readSalesLinks()
+  if (links.length === 0) return ''
+  return '\n\n## Sales questions\n' +
+    '- When the user asks about pricing, licensing, buying, or a demo, answer\n' +
+    '  what the docs cover, then point them to: ' +
+    links.map((l) => `[${l.text}](${l.url})`).join(', ') + '.\n' +
+    '- Never state or estimate prices. The docs do not publish them.'
+}
+
 function currentPageContext () {
   try {
     const path = window.location.pathname
@@ -350,7 +364,7 @@ function App () {
         model="kapa-agent-1.0"
         getSessionToken={getSessionToken}
         tools={agentTools}
-        customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext()}
+        customInstructions={CUSTOM_INSTRUCTIONS + currentPageContext() + salesContext()}
         user={user?.email ? { email: user.email } : undefined}
         {...sourceGroupProps('agent', scopeIds)}
         enableHistory

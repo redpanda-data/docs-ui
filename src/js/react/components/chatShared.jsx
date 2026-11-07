@@ -64,6 +64,34 @@ export const marked = new Marked(
   })
 )
 
+// Sales links for pricing, licensing, and demo questions (DOC-2607). The page
+// emits them as window.SALES_LINKS from the get-marketing-links helper, which
+// is the only place the text and URLs are written. Anything malformed is
+// dropped, so a missing or broken global renders nothing.
+export function readSalesLinks () {
+  const links = typeof window !== 'undefined' && window.SALES_LINKS
+  if (!Array.isArray(links)) return []
+  return links.filter((l) => l && typeof l.text === 'string' && typeof l.url === 'string')
+}
+
+// One line under the chat input, above the privacy line, in both chat tiers.
+export function SalesLinks () {
+  const links = readSalesLinks()
+  if (links.length === 0) return null
+  return (
+    <p className="disclaimer-sales">
+      Looking for pricing or a demo?{' '}
+      {links.map((l, i) => (
+        <React.Fragment key={l.url + i}>
+          {i > 0 && ' or '}
+          <a href={l.url} target="_blank" rel="noopener">{l.text}</a>
+        </React.Fragment>
+      ))}
+      .
+    </p>
+  )
+}
+
 export function Toast ({ message, type = 'success', onDismiss }) {
   useEffect(() => {
     const timer = setTimeout(() => { if (onDismiss) onDismiss() }, 3000)
