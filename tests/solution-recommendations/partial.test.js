@@ -172,7 +172,7 @@ const SOLUTION = {
   platforms: ['cloud'],
   version: 'v1.0.0',
 }
-const INDICATOR_HELPERS = ['eq', 'or', 'concat', 'format-release-date', 'format-verified-evidence', 'get-solutions-catalog', 'get-header-data', 'relativize', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode', 'platform-name', 'platform-list']
+const INDICATOR_HELPERS = ['eq', 'or', 'concat', 'split', 'format-release-date', 'format-verified-evidence', 'get-solutions-catalog', 'get-header-data', 'relativize', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode', 'platform-name', 'platform-list']
 function stepRenderer () {
   const stepHbs = Handlebars.create()
   ;INDICATOR_HELPERS.concat(['get-solution-step']).forEach((name) => {
@@ -192,17 +192,18 @@ function indicatorRenderer () {
   return h.compile('{{> solution-indicator solution=solution runAt=solution.verified.runAt version=solution.verified.redpandaVersion platforms=solution.verified.platforms}}')
 }
 const renderIndicator = (ctx) => indicatorRenderer()(Object.assign({ page: { attributes: {} } }, ctx))
-// The badge's screen-reader sentence, decoded, or null when there is no badge.
+// The Verified panel's sentence, decoded, or null when there is no badge.
 const badgeTip = (html) => {
-  if (!/class="status-badge status-badge--verified"/.test(html)) return null
-  const m = html.match(/class="status-badge status-badge--verified">[\s\S]*?<span class="status-badge__sr-text">([^<]*)<\/span>/)
+  const m = html.match(/<div class="sol-verified" data-sol-verified>[\s\S]*?<p class="sol-verified-lead">([^<]*)<\/p>/)
   return m ? m[1].replace(/&#x27;/g, "'").replace(/&amp;/g, '&') : null
 }
-// The badge's visible text, with the separators, or null when there is no badge.
+// The badge's own text (the <summary>), or null when there is no badge.
 const badgeText = (html) => {
-  const m = html.match(/<span class="status-badge__parts" aria-hidden="true">([\s\S]*?)<\/span><\/span>\s*<span class="status-badge__sr-text">/)
-  return m ? (m[1] + '</span>').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : null
+  const m = html.match(/<button type="button" class="status-badge status-badge--verified" aria-expanded="false" aria-controls="sol-verified-panel">([\s\S]*?)<\/button>/)
+  return m ? m[1].replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : null
 }
+// The panel's results list, one entry per item.
+const badgeResults = (html) => [...(html.match(/<ul class="sol-verified-results">([\s\S]*?)<\/ul>/) || ['', ''])[1].matchAll(/<li>([^<]*)<\/li>/g)].map((m) => m[1])
 
 test('a record that still carries difficulty renders no difficulty on the card or the meta strip', () => {
   // An older catalog extension still writes the field; the UI ignores it.
@@ -336,11 +337,13 @@ test('format-verified-evidence adds one clause per extra platform run', () => {
   assert.equal(call({ runs: { kubernetes: {} } }), '', 'an empty run adds nothing')
 })
 
-test('the overview bar shows the Verified badge with the date, version, and platforms as visible text, not a tooltip', () => {
+test('the overview bar shows a short Verified badge that opens to the version, platforms, and test results', () => {
   const html = renderIndicator(withVerified(Object.assign({}, VERIFIED, { platforms: ['self-managed'] })))
-  assert.match(badgeText(html), /^Verified September 13, 2026 · Redpanda 26\.2\.2 · \S.+$/)
-  assert.match(badgeTip(html), /^Last verified September 13, 2026 against Redpanda 26\.2\.2 on .+\.$/, 'screen readers hear one sentence')
+  assert.equal(badgeText(html), 'Verified September 13, 2026', 'the badge itself stays short')
+  assert.match(badgeTip(html), /^Last verified September 13, 2026 against Redpanda 26\.2\.2 on .+\.$/)
+  assert.deepEqual(badgeResults(html), ['34 commands run, 23 outputs checked, 2 screen captures, verify script passed 9 of 9'])
   assert.doesNotMatch(html, /data-tippy-content|title="/, 'nothing is hidden behind a hover')
+  assert.match(html, /<div class="sol-verified-panel" id="sol-verified-panel" hidden>/, 'closed until clicked')
   assert.ok(html.indexOf('status-badge--verified') < html.indexOf('markdown-dropdown'), 'the badge sits before Page options')
 })
 
@@ -368,7 +371,9 @@ test('an old run date is shown exactly as it is, with no softening and no hiding
 
 test('the badge shows only the facts the record has', () => {
   const html = renderIndicator(withVerified({ runAt: '2026-09-13T02:14:07Z', redpandaVersion: '26.2.2' }))
-  assert.equal(badgeText(html), 'Verified September 13, 2026 · Redpanda 26.2.2', 'no platforms, no trailing separator')
+  assert.equal(badgeText(html), 'Verified September 13, 2026')
+  assert.deepEqual(badgeResults(html), [], 'no results list without evidence')
+  assert.doesNotMatch(html, /sol-verified-results/)
   assert.equal(badgeTip(html), 'Last verified September 13, 2026 against Redpanda 26.2.2.')
 })
 
@@ -543,7 +548,7 @@ test('the Verified badge names where the run happened, and the evidence never sh
     stackSha256: 'f'.repeat(64),
   })))
   assert.equal(badgeTip(html), 'Last verified September 13, 2026 against Redpanda 26.2.2 on Docker Compose and Redpanda Cloud.')
-  assert.equal(badgeText(html), 'Verified September 13, 2026 · Redpanda 26.2.2 · Docker Compose and Redpanda Cloud')
+  assert.equal(badgeText(html), 'Verified September 13, 2026')
   assert.doesNotMatch(html, /4b825dc|content [0-9a-f]{7}/, 'the content hash is maintainer evidence, not reader text')
   // Absent: silent, as before.
   assert.match(badgeTip(renderIndicator(withVerified(VERIFIED))), /against Redpanda 26\.2\.2\.$/)

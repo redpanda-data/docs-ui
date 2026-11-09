@@ -3382,32 +3382,94 @@ html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note
 
 /* The sticky bar (solution-indicator.hbs) is the shared one from doc.css.
    Its Verified badge is a status badge like Beta or Since, in a success
-   tone. It carries the date, the Redpanda version, and the platforms as
-   visible text, so it wraps on a narrow screen instead of running off it. */
+   tone, and a button: a click opens a panel under it with the version, the
+   platforms, and the test results. */
 .status-badge--verified {
   background: #ecfdf5;
   color: #047857;
   border: 1px solid #a7f3d0;
   font-weight: 500;
-  white-space: normal;
-  min-width: 0;
 }
 
-.status-badge__parts {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  column-gap: 6px;
+.sol-verified {
+  position: relative;
 }
 
-.status-badge__sep {
-  opacity: 0.6;
+.sol-verified > button {
+  font-family: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+
+.sol-verified > button:hover {
+  border-color: #6ee7b7;
+}
+
+.sol-verified > button:focus-visible {
+  outline: 2px solid #047857;
+  outline-offset: 2px;
+}
+
+.sol-verified-caret {
+  transition: transform 0.15s ease;
+}
+
+.sol-verified > button[aria-expanded="true"] .sol-verified-caret {
+  transform: rotate(180deg);
+}
+
+.sol-verified-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  width: max-content;
+  max-width: min(26rem, calc(100vw - 2rem));
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--grey-200-new);
+  border-radius: var(--radius-lg-new);
+  background: var(--sol-surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  font-size: calc(13 / var(--rem-base) * 1rem);
+  line-height: 1.5;
+  color: var(--grey-800-new);
+}
+
+.sol-verified-lead {
+  margin: 0;
+  font-weight: 500;
+}
+
+.sol-verified-results {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--grey-600-new);
+}
+
+.sol-verified-results li + li {
+  margin-top: 0.25rem;
 }
 
 html[data-theme="dark"] .status-badge--verified {
   background: rgba(16, 185, 129, 0.15);
   color: #6ee7b7;
   border-color: rgba(16, 185, 129, 0.3);
+}
+
+html[data-theme="dark"] .sol-verified-panel {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+  color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .sol-verified-results {
+  color: var(--grey-300-new);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sol-verified-caret {
+    transition: none;
+  }
 }
 
 /* The eyebrow (back link and step count) sits under the bar now, so it needs

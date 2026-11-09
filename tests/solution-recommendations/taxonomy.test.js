@@ -119,7 +119,7 @@ test('platform helpers use the catalog names when given and fall back without th
 test('the solution chips and the Runs on filter render names from the catalog, or the fallback', () => {
   const hbs = Handlebars.create()
   ;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'parse-json', 'encode-uri', 'platform-name', 'platform-list', 'increment', 'concat'].forEach((n) => hbs.registerHelper(n, helper(n)))
-  ;['get-header-data', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode'].forEach((n) => hbs.registerHelper(n, helper(n)))
+  ;['split', 'get-header-data', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode'].forEach((n) => hbs.registerHelper(n, helper(n)))
   hbs.registerPartial('solution-meta', read('src/partials/solution-meta.hbs'))
   hbs.registerPartial('solution-indicator', read('src/partials/solution-indicator.hbs'))
   hbs.registerPartial('markdown-dropdown', read('src/partials/markdown-dropdown.hbs'))
