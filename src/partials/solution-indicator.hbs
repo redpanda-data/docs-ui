@@ -6,10 +6,14 @@
   The overview passes the record's verified block; a step page passes the
   scalar mirrors the solutions-catalog extension sets on it.
 
-  The Verified badge shows everything it knows on the page itself: the date,
-  the Redpanda version, and the platforms, with no tooltip to hover for the
-  rest. Screen readers get the same facts as one sentence. It renders nothing
-  when runAt does not parse as a date, the same rule as before.
+  The Verified badge is short ("Verified November 9, 2026") and opens on
+  click to say what was verified: the Redpanda version, the platforms, and
+  the test results. It is a button and a panel rather than a <details>,
+  because 30-solution-code-fold.js styles every <details> on the page as a
+  code block. Nothing hides behind a hover, the panel's text is in the page
+  for anyone reading the HTML, and 32-solution-page.js opens and closes it
+  (Escape and a click outside close it). It renders
+  nothing when runAt does not parse as a date.
 --}}
 {{#*inline "sol-verified-text"}}Last verified {{verifiedAt}}{{#with version}} against Redpanda {{this}}{{/with}}{{#if platforms.length}} on {{platform-list platforms names=(lookup (get-solutions-catalog) 'platformNames')}}{{/if}}.{{/inline}}
 <div class="component-indicator-sticky sol-indicator">
@@ -21,11 +25,23 @@
   </div>
   {{/with}}
   {{#with (format-release-date runAt long=true) as |verifiedAt|}}
-  <span class="status-badge status-badge--verified">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-    <span class="status-badge__parts" aria-hidden="true"><span>Verified {{verifiedAt}}</span>{{#with ../version}}<span class="status-badge__sep">·</span><span>Redpanda {{this}}</span>{{/with}}{{#if ../platforms.length}}<span class="status-badge__sep">·</span><span>{{platform-list ../platforms names=(lookup (get-solutions-catalog) 'platformNames')}}</span>{{/if}}</span>
-    <span class="status-badge__sr-text">{{> sol-verified-text verifiedAt=verifiedAt version=../version platforms=../platforms}}</span>
-  </span>
+  <div class="sol-verified" data-sol-verified>
+    <button type="button" class="status-badge status-badge--verified" aria-expanded="false" aria-controls="sol-verified-panel">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Verified {{verifiedAt}}</span>
+      <svg class="sol-verified-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="sol-verified-panel" id="sol-verified-panel" hidden>
+      <p class="sol-verified-lead">{{> sol-verified-text verifiedAt=verifiedAt version=../version platforms=../platforms}}</p>
+      {{#with (format-verified-evidence ../solution.verified names=(lookup (get-solutions-catalog) 'platformNames'))}}
+      <ul class="sol-verified-results">
+        {{#each (split this ';')}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      {{/with}}
+    </div>
+  </div>
   {{/with}}
   {{#if solution.id}}{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}{{/if}}
 </div>

@@ -14,6 +14,31 @@
 ;(function () {
   'use strict'
 
+  // The Verified badge (solution-indicator.hbs): the button opens and closes
+  // its panel; Escape closes it and returns focus to the button, and so does
+  // a click anywhere outside it.
+  Array.prototype.forEach.call(document.querySelectorAll('[data-sol-verified]'), function (el) {
+    var button = el.querySelector('button[aria-controls]')
+    var panel = button && document.getElementById(button.getAttribute('aria-controls'))
+    if (!panel) return
+    function set (open) {
+      button.setAttribute('aria-expanded', open ? 'true' : 'false')
+      panel.hidden = !open
+    }
+    button.addEventListener('click', function () {
+      set(button.getAttribute('aria-expanded') !== 'true')
+    })
+    document.addEventListener('click', function (e) {
+      if (!panel.hidden && !el.contains(e.target)) set(false)
+    })
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panel.hidden) {
+        set(false)
+        button.focus()
+      }
+    })
+  })
+
   var doc = document.querySelector('.sol-doc')
   if (!doc) return
 
