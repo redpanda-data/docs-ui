@@ -52,8 +52,8 @@ test('only the cards that render decide the subtitle', () => {
 
 // ---- page options on solution pages ---------------------------------------
 
-const PARTIALS = ['solution-hero', 'solution-step-header', 'markdown-dropdown']
-const HELPERS = ['eq', 'or', 'concat', 'relativize', 'format-release-date', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode']
+const PARTIALS = ['solution-hero', 'solution-step-header', 'solution-indicator', 'markdown-dropdown']
+const HELPERS = ['eq', 'or', 'concat', 'relativize', 'format-release-date', 'format-verified-evidence', 'get-solutions-catalog', 'get-header-data', 'platform-list', 'platform-name', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode']
 const surfaceHbs = engine(HELPERS, PARTIALS)
 const renderHero = surfaceHbs.compile('{{> solution-hero solution=solution}}')
 const renderStep = surfaceHbs.compile('{{> solution-step-header solution=solution}}')
@@ -69,7 +69,7 @@ const stepPage = { title: 'Start the environment', layout: 'solution-step', url:
 
 test('the overview and step headers carry Copy as Markdown and the agent companion link', () => {
   for (const [label, html] of [['overview', renderHero({ solution: SOLUTION, page: overview })], ['step', renderStep({ solution: SOLUTION, page: stepPage })]]) {
-    assert.match(html, /class="sol-page-options"/, label)
+    assert.match(html, /class="component-indicator-sticky sol-indicator"/, label + ': the shared sticky bar')
     assert.match(html, /data-action="copy"[\s\S]*Copy as Markdown/, label + ': the markdown dropdown')
     assert.match(html, /data-component-name="solutions"/, label + ': the dropdown sees the root page, not the partial context')
     assert.match(html, /data-action="agent-companion"/, label + ': the companion link')

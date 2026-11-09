@@ -172,14 +172,30 @@ const SOLUTION = {
   platforms: ['cloud'],
   version: 'v1.0.0',
 }
+const INDICATOR_HELPERS = ['eq', 'or', 'concat', 'format-release-date', 'format-verified-evidence', 'get-solutions-catalog', 'get-header-data', 'relativize', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode', 'platform-name', 'platform-list']
 function stepRenderer () {
   const stepHbs = Handlebars.create()
-  ;['eq', 'or', 'concat', 'format-release-date', 'relativize', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode', 'platform-name', 'platform-list'].forEach((name) => {
+  ;INDICATOR_HELPERS.concat(['get-solution-step']).forEach((name) => {
     stepHbs.registerHelper(name, helper(name))
   })
   stepHbs.registerPartial('solution-step-header', read('src/partials/solution-step-header.hbs'))
+  stepHbs.registerPartial('solution-indicator', read('src/partials/solution-indicator.hbs'))
   stepHbs.registerPartial('markdown-dropdown', read('src/partials/markdown-dropdown.hbs'))
   return stepHbs.compile('{{> solution-step-header solution=solution}}')
+}
+// The overview's sticky bar, given the record's verified block as solution-hero.hbs passes it.
+function indicatorRenderer () {
+  const h = Handlebars.create()
+  INDICATOR_HELPERS.forEach((name) => h.registerHelper(name, helper(name)))
+  h.registerPartial('solution-indicator', read('src/partials/solution-indicator.hbs'))
+  h.registerPartial('markdown-dropdown', read('src/partials/markdown-dropdown.hbs'))
+  return h.compile('{{> solution-indicator solution=solution runAt=solution.verified.runAt version=solution.verified.redpandaVersion platforms=solution.verified.platforms}}')
+}
+const renderIndicator = (ctx) => indicatorRenderer()(Object.assign({ page: { attributes: {} } }, ctx))
+// The badge's tooltip, decoded, or null when there is no badge.
+const badgeTip = (html) => {
+  const m = html.match(/class="status-badge status-badge--verified" data-tippy-content="([^"]*)"/)
+  return m ? m[1].replace(/&#x27;/g, "'").replace(/&amp;/g, '&') : null
 }
 
 test('a record that still carries difficulty renders no difficulty on the card or the meta strip', () => {
@@ -258,23 +274,24 @@ test('a run date that does not parse is silent, and never reaches the page as a 
   // A manifest typo is published to the record as written (with a build
   // warning) so the record never disagrees with the file, so it can arrive here.
   for (const runAt of ['last Tuesday', 'yesterday', 'soon', '13/09/2026', 'null']) {
-    const html = renderMeta(withVerified(Object.assign({}, VERIFIED, { runAt })))
-    assert.doesNotMatch(html, /Last verified/, runAt + ': no row')
+    const html = renderIndicator(withVerified(Object.assign({}, VERIFIED, { runAt })))
+    assert.equal(badgeTip(html), null, runAt + ': no badge')
     assert.doesNotMatch(html, new RegExp(runAt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), runAt + ': the raw value is never printed')
-    assert.match(html, /<dt>Version<\/dt>/, runAt + ': the rest of the strip is unaffected')
+    assert.match(html, /class="component-indicator-sticky sol-indicator"/, runAt + ': the bar still renders')
   }
 })
 
 test('a good date with no recorded version renders without the version clause', () => {
-  const html = renderMeta(withVerified({ runAt: '2026-09-13T02:14:07Z', commands: 11 }))
-  assert.match(html, /<dd class="sol-verified" title="11 commands run">September 13, 2026<\/dd>/)
+  const html = renderIndicator(withVerified({ runAt: '2026-09-13T02:14:07Z', commands: 11 }))
+  assert.match(html, /<span aria-hidden="true">Verified September 13, 2026<\/span>/)
+  assert.equal(badgeTip(html), 'Last verified September 13, 2026. 11 commands run.')
   assert.doesNotMatch(html, /against Redpanda/)
 
   const step = stepRenderer()({
     solution: Object.assign({}, SOLUTION, { steps: [{ id: 's1', title: 'One', url: '/s/1/', order: 1, duration: 5 }] }),
     page: { title: 'One', attributes: { 'solution-step-id': 's1', 'solution-verified-at': '2026-09-13T02:14:07Z' } },
   })
-  assert.match(step, /<span class="sol-fact sol-fact--verified">Last verified September 13, 2026<\/span>/)
+  assert.equal(badgeTip(step), 'Last verified September 13, 2026.')
   assert.doesNotMatch(step, /against Redpanda/)
 })
 
@@ -313,40 +330,43 @@ test('format-verified-evidence adds one clause per extra platform run', () => {
   assert.equal(call({ runs: { kubernetes: {} } }), '', 'an empty run adds nothing')
 })
 
-test('the overview meta strip renders Last verified after Version, with the evidence in the title', () => {
-  const html = renderMeta(withVerified(VERIFIED))
-  assert.match(html, /<dt>Last verified<\/dt>/)
-  assert.match(
-    html,
-    /<dd class="sol-verified" title="34 commands run, 23 outputs checked, 2 screen captures, verify script passed 9 of 9">September 13, 2026 against Redpanda 26\.2\.2<\/dd>/
-  )
-  assert.ok(html.indexOf('Last verified') > html.indexOf('<dt>Version</dt>'), 'sits after the Version row')
+test('the overview bar shows the Verified badge, with the version, platforms, and evidence in its tooltip and screen-reader text', () => {
+  const html = renderIndicator(withVerified(Object.assign({}, VERIFIED, { platforms: ['self-managed'] })))
+  assert.match(html, /<span aria-hidden="true">Verified September 13, 2026<\/span>/)
+  const tip = badgeTip(html)
+  assert.match(tip, /^Last verified September 13, 2026 against Redpanda 26\.2\.2 on .+\. 34 commands run, 23 outputs checked, 2 screen captures, verify script passed 9 of 9\.$/)
+  assert.match(html, new RegExp('<span class="status-badge__sr-text">' + tip.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/'/g, '&#x27;') + '</span>'), 'screen readers hear the same text')
+  assert.ok(html.indexOf('status-badge--verified') < html.indexOf('markdown-dropdown'), 'the badge sits before Page options')
 })
 
-test('the overview renders nothing at all when a solution carries no verified record', () => {
+test('the overview meta strip no longer repeats Last verified', () => {
+  const html = renderMeta(withVerified(VERIFIED))
+  assert.doesNotMatch(html, /Last verified|sol-verified/)
+  assert.match(html, /<dt>Version<\/dt>/)
+})
+
+test('the overview renders no badge at all when a solution carries no verified record', () => {
   for (const missing of [undefined, null, {}, { redpandaVersion: '26.2.2' }, { runAt: '' }, { runAt: 'nonsense' }]) {
-    const html = renderMeta(withVerified(missing))
+    const html = renderIndicator(withVerified(missing))
     const label = JSON.stringify(missing) + ': '
-    assert.doesNotMatch(html, /Last verified/, label + 'no row')
-    assert.doesNotMatch(html, /sol-verified/, label + 'no element')
+    assert.equal(badgeTip(html), null, label + 'no badge')
     assert.doesNotMatch(html, /not verified|unverified|never verified/i, label + 'absence is silence, not a placeholder or warning')
-    assert.match(html, /<dt>Version<\/dt>/, label + 'the rest of the strip is unaffected')
   }
 })
 
 test('an old run date is shown exactly as it is, with no softening and no hiding', () => {
-  const stale = renderMeta(withVerified(Object.assign({}, VERIFIED, { runAt: '2024-01-05T02:00:00Z' })))
-  assert.match(stale, /January 5, 2024 against Redpanda 26\.2\.2/, 'a two-year-old run still states its date')
+  const stale = renderIndicator(withVerified(Object.assign({}, VERIFIED, { runAt: '2024-01-05T02:00:00Z' })))
+  assert.match(stale, /Verified January 5, 2024/, 'a two-year-old run still states its date')
+  assert.match(badgeTip(stale), /January 5, 2024 against Redpanda 26\.2\.2/)
   assert.doesNotMatch(stale, /stale|outdated|out of date|may no longer|warning/i)
 })
 
-test('the title attribute is omitted rather than left empty when CI recorded no evidence', () => {
-  const html = renderMeta(withVerified({ runAt: '2026-09-13T02:14:07Z', redpandaVersion: '26.2.2' }))
-  assert.match(html, /<dd class="sol-verified">September 13, 2026 against Redpanda 26\.2\.2<\/dd>/)
-  assert.doesNotMatch(html, /title=""/)
+test('the tooltip leaves out the evidence clause when CI recorded no evidence', () => {
+  const html = renderIndicator(withVerified({ runAt: '2026-09-13T02:14:07Z', redpandaVersion: '26.2.2' }))
+  assert.equal(badgeTip(html), 'Last verified September 13, 2026 against Redpanda 26.2.2.')
 })
 
-test('step pages render the verified line from the scalar mirrors, and nothing without them', () => {
+test('step pages render the Verified badge from the scalar mirrors, and nothing without them', () => {
   const renderStep = stepRenderer()
   const solution = Object.assign({}, SOLUTION, {
     verified: VERIFIED,
@@ -355,14 +375,15 @@ test('step pages render the verified line from the scalar mirrors, and nothing w
   const at = (attributes) => renderStep({ solution, page: { title: 'Start the environment', attributes: Object.assign({ 'solution-step-id': 'start-environment' }, attributes) } })
 
   const html = at({ 'solution-verified-at': '2026-09-13T02:14:07Z', 'solution-verified-version': '26.2.2' })
-  assert.match(html, /<span class="sol-fact sol-fact--verified">Last verified September 13, 2026 against Redpanda 26\.2\.2<\/span>/)
-  assert.ok(html.indexOf('sol-fact--verified') > html.indexOf('class="sol-step-facts'), 'sits in the facts row')
+  assert.match(badgeTip(html), /^Last verified September 13, 2026 against Redpanda 26\.2\.2\./)
+  assert.ok(html.indexOf('status-badge--verified') < html.indexOf('class="sol-step-header'), 'in the bar above the header')
+  assert.doesNotMatch(html, /sol-fact--verified/, 'not repeated in the facts row')
 
-  assert.match(at({ 'solution-verified-at': '2026-09-13T02:14:07Z' }), /Last verified September 13, 2026<\/span>/, 'date mirror only')
+  assert.match(badgeTip(at({ 'solution-verified-at': '2026-09-13T02:14:07Z' })), /^Last verified September 13, 2026\./, 'date mirror only')
 
   for (const mirrors of [{}, { 'solution-verified-version': '26.2.2' }, { 'solution-verified-at': '' }]) {
     const bare = at(mirrors)
-    assert.doesNotMatch(bare, /verified/i, JSON.stringify(mirrors) + ': the step page says nothing')
+    assert.equal(badgeTip(bare), null, JSON.stringify(mirrors) + ': no badge')
     assert.match(bare, /class="sol-step-facts/, 'the facts row still renders')
   }
 })
@@ -509,17 +530,17 @@ test('the recommendation partial never renders a repository URL', () => {
   }
 })
 
-test('the Last verified line names where the run happened, and the evidence never shows the content hash', () => {
-  const html = renderMeta(withVerified(Object.assign({}, VERIFIED, {
+test('the Verified badge names where the run happened, and the evidence never shows the content hash', () => {
+  const html = renderIndicator(withVerified(Object.assign({}, VERIFIED, {
     platforms: ['self-managed', 'cloud'],
     contentRev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904', docs: 'abc' },
     stackSha256: 'f'.repeat(64),
   })))
-  assert.match(html, /September 13, 2026 against Redpanda 26\.2\.2 on Docker Compose and Redpanda Cloud<\/dd>/)
+  assert.match(badgeTip(html), /^Last verified September 13, 2026 against Redpanda 26\.2\.2 on Docker Compose and Redpanda Cloud\. /)
   assert.doesNotMatch(html, /4b825dc|content [0-9a-f]{7}/, 'the content hash is maintainer evidence, not reader text')
-  assert.match(html, /title="[^"]*verify script passed 9 of 9"/)
+  assert.match(badgeTip(html), /verify script passed 9 of 9\.$/)
   // Absent: silent, as before.
-  assert.match(renderMeta(withVerified(VERIFIED)), /against Redpanda 26\.2\.2<\/dd>/)
+  assert.match(badgeTip(renderIndicator(withVerified(VERIFIED))), /against Redpanda 26\.2\.2\. /)
   assert.equal(helper('format-verified-evidence')({ commands: 1, contentRev: { solution: '4b825dc642cb6eb9a060e54bf8d69288fbee4904' } }), '1 command run')
 
   const step = stepRenderer()({
@@ -529,7 +550,7 @@ test('the Last verified line names where the run happened, and the evidence neve
     }),
     page: { title: 'One', attributes: { 'solution-step-id': 's1', 'solution-verified-at': '2026-09-13T02:14:07Z', 'solution-verified-version': '26.2.2' } },
   })
-  assert.match(step, /Last verified September 13, 2026 against Redpanda 26\.2\.2 on Docker Compose<\/span>/)
+  assert.match(badgeTip(step), /^Last verified September 13, 2026 against Redpanda 26\.2\.2 on Docker Compose\./)
 })
 
 test('a component home with no solution slots falls back to catalog solutions that run on that product', () => {

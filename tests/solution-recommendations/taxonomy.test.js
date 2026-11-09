@@ -119,20 +119,24 @@ test('platform helpers use the catalog names when given and fall back without th
 test('the solution chips and the Runs on filter render names from the catalog, or the fallback', () => {
   const hbs = Handlebars.create()
   ;['eq', 'ne', 'lt', 'gt', 'and', 'or', 'format-release-date', 'format-verified-evidence', 'relativize', 'without', 'get-solutions-catalog', 'parse-json', 'encode-uri', 'platform-name', 'platform-list', 'increment', 'concat'].forEach((n) => hbs.registerHelper(n, helper(n)))
+  ;['get-header-data', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode'].forEach((n) => hbs.registerHelper(n, helper(n)))
   hbs.registerPartial('solution-meta', read('src/partials/solution-meta.hbs'))
+  hbs.registerPartial('solution-indicator', read('src/partials/solution-indicator.hbs'))
+  hbs.registerPartial('markdown-dropdown', read('src/partials/markdown-dropdown.hbs'))
   const meta = hbs.compile('{{> solution-meta solution=solution}}')
+  const bar = hbs.compile('{{> solution-indicator solution=solution runAt=solution.verified.runAt platforms=solution.verified.platforms}}')
   const solution = { platforms: ['self-managed', 'kubernetes'], verified: { runAt: '2026-09-13T02:14:07Z', platforms: ['self-managed'] } }
   const page = { url: '/solutions/x/', attributes: {} }
 
   const fresh = meta({ site: NEW_SITE, page, solution })
   assert.match(fresh, /sol-chip--platform">Docker Compose stack</)
   assert.match(fresh, /sol-chip--platform">Kubernetes \(K8s\)</)
-  assert.match(fresh, / on Docker Compose stack<\/dd>/)
+  assert.match(bar({ site: NEW_SITE, page, solution }), / on Docker Compose stack\./)
 
   const old = meta({ site: OLD_SITE, page, solution })
   assert.match(old, /sol-chip--platform">Docker Compose</)
   assert.match(old, /sol-chip--platform">Kubernetes</)
-  assert.match(old, / on Docker Compose<\/dd>/)
+  assert.match(bar({ site: OLD_SITE, page, solution }), / on Docker Compose\./)
 
   const src = read('src/partials/solutions-filters.hbs')
   assert.match(src, /\{\{platform-name value names=\(lookup \(get-solutions-catalog\) 'platformNames'\)\}\}/, 'the filter passes the catalog names')
