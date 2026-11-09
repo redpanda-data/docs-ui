@@ -1,4 +1,6 @@
 = Start the environment
+:idprefix:
+:idseparator: -
 :description: Bring up Redpanda, Console, Redis, Postgres and Redpanda Connect with one command and confirm every service is healthy.
 :page-layout: solution-step
 :page-topic-type: solution
@@ -236,10 +238,27 @@ Signed-in readers can download each file from this list or with the Download con
 == In production
 
 [.production-note]
-.In production
+.Security
 --
-Do not run Console on the same host as a broker, and put the Schema Registry behind TLS: every producer and consumer in this solution fetches schemas from it.
-For the full picture, see xref:verify-end-to-end.adoc#prod-security[Production considerations: security].
+Encrypt every listener with TLS. Give each service its own SASL principal, with ACLs limited to the topics and consumer groups it uses.
+
+xref:verify-end-to-end.adoc#prod-security[More on security in production]
+--
+
+[.production-note]
+.Brokers and replication
+--
+Run three or more brokers and create every topic with replication factor 3, so that losing a broker loses no acknowledged event.
+
+xref:verify-end-to-end.adoc#prod-brokers-and-replication[More on brokers and replication in production]
+--
+
+[.production-note]
+.Client placement
+--
+Run the producers, the services, and the Connect pipeline in the same cloud provider and region as the cluster.
+
+xref:verify-end-to-end.adoc#prod-client-placement[More on client placement in production]
 --
 
 // A last step lists every production topic under Production considerations,

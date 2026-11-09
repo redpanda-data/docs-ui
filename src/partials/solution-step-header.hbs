@@ -3,6 +3,7 @@
   solutions-catalog extension sets (page-solution-step-index/count, and the
   scalar mirrors page-solution-verified-at/version).
 --}}
+{{> solution-indicator solution=solution runAt=@root.page.attributes.solution-verified-at version=@root.page.attributes.solution-verified-version platforms=solution.verified.platforms}}
 {{#with (get-solution-step solution) as |step|}}
 {{!-- Inside this block the context is the step; ../solution is the partial's own context. --}}
 <header class="sol-step-header">
@@ -13,17 +14,13 @@
     </a>
     <span class="sol-eyebrow-sep" aria-hidden="true">/</span>
     <span class="sol-eyebrow-label">Step {{@root.page.attributes.solution-step-index}} of {{@root.page.attributes.solution-step-count}}</span>
-    {{#with ../solution as |solution|}}{{#if solution.id}}<div class="sol-page-options">{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}</div>{{/if}}{{/with}}
   </div>
   {{#with @root.page.title}}
   <h1 class="page sol-title">{{{this}}}</h1>
   {{/with}}
   <div class="sol-step-facts is-before-toc">
-    {{!-- Proof of the run, from the scalar mirrors the extension sets on every
-          step page. No evidence counts are mirrored, so there is no title. --}}
-    {{#with (format-release-date @root.page.attributes.solution-verified-at long=true) as |verifiedAt|}}
-    <span class="sol-fact sol-fact--verified">Last verified {{verifiedAt}}{{#with @root.page.attributes.solution-verified-version}} against Redpanda {{this}}{{/with}}{{#with ../../solution.verified.platforms}}{{#if this.length}} on {{platform-list this names=(lookup (get-solutions-catalog) 'platformNames')}}{{/if}}{{/with}}</span>
-    {{/with}}
+    {{!-- Last verified is the Verified badge in the sticky bar above
+          (solution-indicator.hbs). --}}
     <span class="sol-fact sol-fact--status" data-sol-step-header-status hidden>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       Completed
@@ -34,7 +31,6 @@
 <header class="sol-step-header">
   <div class="sol-eyebrow">
     <a class="sol-eyebrow-link" href="{{{relativize solution.url}}}">{{solution.title}}</a>
-    {{#if solution.id}}<div class="sol-page-options">{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}</div>{{/if}}
   </div>
   {{#with @root.page.title}}
   <h1 class="page sol-title">{{{this}}}</h1>

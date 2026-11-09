@@ -181,91 +181,6 @@ html[data-theme="dark"] body[data-component="solutions"][data-component-color] {
   margin-bottom: 1.25rem;
 }
 
-/* Page options (markdown-dropdown.hbs) at the end of the eyebrow row, out of
-   the eyebrow's uppercase label styling. */
-.sol-page-options {
-  margin-left: auto;
-  font-size: calc(14 / var(--rem-base) * 1rem);
-  font-weight: 400;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-.sol-page-options .markdown-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-/* Page options in the eyebrow row is solution chrome, not the generic pill
-   (markdown-dropdown.css): the same small outlined control as the code
-   toolbox's Download (.sol-file-download, doc.css), in light and dark. The
-   menu takes the same border and radius. Other pages keep the pill. */
-.sol-page-options .markdown-dropdown-toggle {
-  gap: 5px;
-  min-height: 32px;
-  padding: 4px 8px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-family: var(--body-font-family);
-  line-height: inherit;
-  background: transparent;
-  border: 1px solid var(--grey-300-new, #d1d5db);
-  border-radius: 5px;
-  color: var(--grey-600-new, #4b5563);
-  transition: background 0.12s, color 0.12s;
-}
-
-/* The toggle sits on the right edge of .doc, whose paint containment
-   (doc.css) clips anything drawn outside it, so the focus ring goes inside the
-   border instead of around it. */
-.sol-page-options .markdown-dropdown-toggle:focus-visible {
-  outline-offset: -3px;
-}
-
-.sol-page-options .markdown-dropdown-toggle:hover,
-.sol-page-options .markdown-dropdown-toggle[aria-expanded="true"] {
-  background: var(--grey-100-new, #f3f4f6);
-  border-color: var(--grey-300-new, #d1d5db);
-  color: var(--grey-900-new, #111827);
-}
-
-.sol-page-options .markdown-dropdown-toggle .markdown-icon,
-.sol-page-options .markdown-dropdown-toggle .dropdown-caret {
-  width: 12px;
-  height: 12px;
-  color: currentColor;
-}
-
-.sol-page-options .markdown-dropdown-menu {
-  border: 1px solid var(--grey-300-new, #d1d5db);
-  border-radius: 5px;
-}
-
-.sol-page-options .markdown-dropdown-item {
-  border-radius: 4px;
-}
-
-html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #a8b2c7;
-}
-
-html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle:hover,
-html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle[aria-expanded="true"] {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
-html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle .markdown-icon,
-html[data-theme="dark"] .sol-page-options .markdown-dropdown-toggle .dropdown-caret {
-  color: currentColor;
-}
-
-html[data-theme="dark"] .sol-page-options .markdown-dropdown-menu {
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
 /* The back link is one line of small text; the block padding grows its hit
    area and the negative margin keeps the row where it was. */
 .sol-eyebrow-link {
@@ -357,20 +272,6 @@ html[data-theme="dark"] .sol-page-options .markdown-dropdown-menu {
    "Completed" chip on every step before the reader completed anything. */
 .sol-fact[hidden] {
   display: none;
-}
-
-/* Proof of the last test run. Muted: it is reassurance a reader looks for
-   deliberately, not something to shout over the steps themselves. */
-.sol-verified[title] {
-  cursor: help;
-}
-
-/* "Last verified ... on Self-Managed and Cloud" wraps on a phone instead of
-   running off the edge. */
-.sol-fact--verified {
-  color: var(--sol-meta);
-  white-space: normal;
-  min-width: 0;
 }
 
 .sol-btn {
@@ -1582,11 +1483,11 @@ html[data-theme="dark"] .sol-rail-tools-meta {
   align-items: flex-end;
 }
 
-/* On a filled button (Next is always one) the grey kicker measured 1.23:1
-   against the orange. It takes the button's own text color, 4.6:1, and keeps
-   its size and caps to read as the label. */
-.sol-btn--primary .sol-step-nav-kicker,
-.sol-step-nav--next .sol-step-nav-kicker {
+/* On a filled button the grey kicker measured 1.23:1 against the orange. It
+   takes the button's own text color, 4.6:1, and keeps its size and caps to
+   read as the label. Previous and Next are both secondary buttons (Complete
+   and continue is the primary action), so they share one look. */
+.sol-btn--primary .sol-step-nav-kicker {
   color: inherit;
 }
 
@@ -3253,10 +3154,6 @@ html[data-theme="dark"] .sol-toast {
     padding-block: 0.625rem;
   }
 
-  .sol-page-options .markdown-dropdown-toggle {
-    min-height: 40px;
-  }
-
   .sol-doc .sol-code-title .source-toolbox .copy-button,
   .sol-doc .sol-code-title .source-toolbox .ask-ai-button,
   .sol-doc .sol-code-title .source-toolbox .sol-file-download {
@@ -3376,10 +3273,134 @@ html[data-theme="dark"] .sol-toast {
   cursor: zoom-in;
 }
 
-/* Under == In production each note repeats the section's own heading as its
-   label. The label stays where a note stands alone. */
+/* == In production: one card per topic. The section heading already says
+   "In production", so each card's title is its topic, the summary is the
+   rule, and the last paragraph is the link to the full topic, pinned to the
+   bottom of the card as an arrow link. Cards sit two across where the column
+   is wide enough and stack on a phone. */
+.sol-doc .sect1:has(> h2#in-production) > .sectionbody {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0.75rem;
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--grey-200-new);
+  border-radius: var(--radius-lg-new);
+  background: var(--sol-surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note:hover,
+.sol-doc .sect1:has(> h2#in-production) .production-note:focus-within {
+  border-color: var(--component-200);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 .sol-doc .sect1:has(> h2#in-production) .production-note > .title {
-  display: none;
+  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--grey-900-new);
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note > .title::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  background: var(--component-500);
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note > .content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font-size: calc(14 / var(--rem-base) * 1rem);
+  color: var(--grey-700-new);
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 600;
+  color: var(--component-700);
+  text-decoration: none;
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a::after {
+  content: "\2192";
+  transition: transform 0.15s ease;
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a:hover::after {
+  transform: translateX(3px);
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a:hover {
+  text-decoration: underline;
+}
+
+html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note {
+  background: var(--grey-800-new);
+  border-color: var(--grey-700-new);
+}
+
+html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note:hover,
+html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note:focus-within {
+  border-color: var(--component-500);
+}
+
+html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note > .title {
+  color: var(--grey-50-new);
+}
+
+html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note > .content {
+  color: var(--grey-300-new);
+}
+
+html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a {
+  color: var(--component-200);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sol-doc .sect1:has(> h2#in-production) .production-note,
+  .sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a::after {
+    transition: none;
+  }
+}
+
+/* The sticky bar (solution-indicator.hbs) is the shared one from doc.css.
+   Its Verified badge is a status badge like Beta or Since, in a success
+   tone, with the version and platforms in its tooltip. */
+.status-badge--verified {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .status-badge--verified {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* The eyebrow (back link and step count) sits under the bar now, so it needs
+   less room above the title. */
+.sol-indicator + .sol-step-header .sol-eyebrow,
+.sol-indicator + .sol-hero .sol-eyebrow {
+  margin-bottom: 0.75rem;
 }
 
 .sol-doc .production-note > .content > :first-child,
