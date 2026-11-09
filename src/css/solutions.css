@@ -3382,12 +3382,26 @@ html[data-theme="dark"] .sol-doc .sect1:has(> h2#in-production) .production-note
 
 /* The sticky bar (solution-indicator.hbs) is the shared one from doc.css.
    Its Verified badge is a status badge like Beta or Since, in a success
-   tone, with the version and platforms in its tooltip. */
+   tone. It carries the date, the Redpanda version, and the platforms as
+   visible text, so it wraps on a narrow screen instead of running off it. */
 .status-badge--verified {
   background: #ecfdf5;
   color: #047857;
   border: 1px solid #a7f3d0;
   font-weight: 500;
+  white-space: normal;
+  min-width: 0;
+}
+
+.status-badge__parts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+}
+
+.status-badge__sep {
+  opacity: 0.6;
 }
 
 html[data-theme="dark"] .status-badge--verified {

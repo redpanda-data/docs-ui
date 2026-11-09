@@ -2,17 +2,16 @@
   The sticky bar every docs page has (article.hbs): the component pill, the
   page's badges, and Page options, so a Solutions page opens the way a Connect
   or Streaming page does. Context: `solution` (the parsed page-solution
-  record), plus `runAt`, `version`, and `platforms` for the Verified badge;
-  the evidence counts come from the record's verified block when it has them.
+  record), plus `runAt`, `version`, and `platforms` for the Verified badge.
   The overview passes the record's verified block; a step page passes the
   scalar mirrors the solutions-catalog extension sets on it.
 
-  The Verified badge renders nothing when runAt does not parse as a date, the
-  same rule as the overview's metadata strip. Its visible text is the date; the
-  version and platforms are in the tooltip and in the screen-reader text, from
-  one inline so the two cannot drift.
+  The Verified badge shows everything it knows on the page itself: the date,
+  the Redpanda version, and the platforms, with no tooltip to hover for the
+  rest. Screen readers get the same facts as one sentence. It renders nothing
+  when runAt does not parse as a date, the same rule as before.
 --}}
-{{#*inline "sol-verified-text"}}Last verified {{verifiedAt}}{{#with version}} against Redpanda {{this}}{{/with}}{{#if platforms.length}} on {{platform-list platforms names=(lookup (get-solutions-catalog) 'platformNames')}}{{/if}}.{{#if evidence}} {{evidence}}.{{/if}}{{/inline}}
+{{#*inline "sol-verified-text"}}Last verified {{verifiedAt}}{{#with version}} against Redpanda {{this}}{{/with}}{{#if platforms.length}} on {{platform-list platforms names=(lookup (get-solutions-catalog) 'platformNames')}}{{/if}}.{{/inline}}
 <div class="component-indicator-sticky sol-indicator">
   {{#with (get-header-data @root.page)}}
   <div class="component-indicator">
@@ -22,10 +21,10 @@
   </div>
   {{/with}}
   {{#with (format-release-date runAt long=true) as |verifiedAt|}}
-  <span class="status-badge status-badge--verified" data-tippy-content="{{> sol-verified-text verifiedAt=verifiedAt version=../version platforms=../platforms evidence=(format-verified-evidence ../solution.verified names=(lookup (get-solutions-catalog) 'platformNames'))}}">
+  <span class="status-badge status-badge--verified">
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-    <span aria-hidden="true">Verified {{verifiedAt}}</span>
-    <span class="status-badge__sr-text">{{> sol-verified-text verifiedAt=verifiedAt version=../version platforms=../platforms evidence=(format-verified-evidence ../solution.verified names=(lookup (get-solutions-catalog) 'platformNames'))}}</span>
+    <span class="status-badge__parts" aria-hidden="true"><span>Verified {{verifiedAt}}</span>{{#with ../version}}<span class="status-badge__sep">·</span><span>Redpanda {{this}}</span>{{/with}}{{#if ../platforms.length}}<span class="status-badge__sep">·</span><span>{{platform-list ../platforms names=(lookup (get-solutions-catalog) 'platformNames')}}</span>{{/if}}</span>
+    <span class="status-badge__sr-text">{{> sol-verified-text verifiedAt=verifiedAt version=../version platforms=../platforms}}</span>
   </span>
   {{/with}}
   {{#if solution.id}}{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}{{/if}}
