@@ -3285,9 +3285,11 @@ html[data-theme="dark"] .sol-toast {
 }
 
 .sol-doc .sect1:has(> h2#in-production) .production-note {
+  position: relative;
   display: flex;
   flex-direction: column;
   margin: 0;
+  cursor: pointer;
   padding: 1rem 1.125rem;
   border: 1px solid var(--grey-200-new);
   border-radius: var(--radius-lg-new);
@@ -3341,6 +3343,20 @@ html[data-theme="dark"] .sol-toast {
 .sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a::after {
   content: "\2192";
   transition: transform 0.15s ease;
+}
+
+/* The whole card is the link's target (a stretched link): the link's ::before
+   covers the card, so a click anywhere on it follows the link, while keyboard
+   and screen-reader users still meet one ordinary link. */
+.sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.sol-doc .sect1:has(> h2#in-production) .production-note:hover > .content > .paragraph:last-child a::after {
+  transform: translateX(3px);
 }
 
 .sol-doc .sect1:has(> h2#in-production) .production-note > .content > .paragraph:last-child a:hover::after {
