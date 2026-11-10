@@ -28,7 +28,7 @@ const LINKS = {
   adpDemo: { text: 'Watch the demo', url: 'https://www.redpanda.com/agentic-data-plane-demo' },
   tryRedpanda: { text: 'Try Redpanda', url: 'https://www.redpanda.com/try-data-streaming' },
   enterprise: { text: 'Ask about Enterprise Edition', url: 'https://www.redpanda.com/contact' },
-  community: { text: 'Join the community', url: 'https://redpanda.com/slack', icon: 'community' },
+  community: { text: 'Join the community', url: 'https://github.com/redpanda-data/community', icon: 'community' },
 }
 
 const SALES = {
@@ -49,7 +49,7 @@ const PAGES = {
 // Help box for components with no entry in PAGES: the pre-DOC-2607 text.
 const DEFAULT = {
   heading: 'Need a hand?',
-  lead: 'Ask Redpanda AI, search the docs, or talk to a real human in Slack.',
+  lead: 'Ask Redpanda AI, search the docs, or ask the community on GitHub.',
   links: [],
 }
 
