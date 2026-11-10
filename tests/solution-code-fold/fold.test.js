@@ -71,7 +71,7 @@ function run ({ bodyClass, blocks, reduceMotion }) {
   vm.runInNewContext(SCRIPT, context)
   const flushTimers = () => { const due = timers.splice(0, timers.length); due.forEach((t) => t.fn && t.fn()) }
   const fire = (type) => (listeners[type] || []).forEach((fn) => fn({ type }))
-  return { api: context.window.docsSolutionsCodeFold, doc, document, timers, flushTimers, fire }
+  return { api: context.window.docsSolutionsCodeFold, doc, document, timers, flushTimers, fire, listeners }
 }
 
 test('countLines ignores one trailing newline and empty input', () => {
@@ -151,6 +151,26 @@ test('re-measures on resize (debounced) and on window load: folds late, unfolds 
   late.pre.scrollHeight = 50 * LINE + PAD
   s.fire('load')
   assert.ok(late.block.classes.has('is-folded'))
+})
+
+test('a listing in a hidden tab panel folds once a tab click shows it', () => {
+  const hidden = listing(50, { renderedLines: 0 })
+  const label = el('p', { text: 'Kubernetes' })
+  const tab = el('li', { class: 'tab' }, [label])
+  const tabs = el('div', { class: 'openblock tabs' }, [el('div', { class: 'content' }, [
+    el('ul', { class: 'tablist' }, [tab]),
+    el('div', { class: 'tabpanel' }, [hidden.block]),
+  ])])
+  const r = run({ blocks: [tabs] })
+  assert.ok(!hidden.block.classes.has('sol-code-fold'), 'undecided while hidden')
+
+  hidden.pre.scrollHeight = 50 * LINE + PAD
+  r.fire('click') // a click elsewhere on the page changes nothing
+  assert.ok(!hidden.block.classes.has('sol-code-fold'))
+  ;(r.listeners.click || []).forEach((fn) => fn({ type: 'click', target: label }))
+  assert.ok(hidden.block.classes.has('is-folded'), 'folded once its tab is shown')
+  ;(r.listeners.click || []).forEach((fn) => fn({ type: 'click', target: tab }))
+  assert.equal(hidden.block.querySelectorAll('[data-sol-code-fold]').length, 1, 'one toggle')
 })
 
 test('folding only clips: the code keeps every line for the copy button', () => {
