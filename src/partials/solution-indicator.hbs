@@ -15,7 +15,6 @@
   (Escape and a click outside close it). It renders
   nothing when runAt does not parse as a date.
 --}}
-{{#*inline "sol-verified-text"}}Last verified {{verifiedAt}}{{#with version}} against Redpanda {{this}}{{/with}}{{#if platforms.length}} on {{platform-list platforms names=(lookup (get-solutions-catalog) 'platformNames')}}{{/if}}.{{/inline}}
 <div class="component-indicator-sticky sol-indicator">
   {{#with (get-header-data @root.page)}}
   <div class="component-indicator">
@@ -32,13 +31,15 @@
       <svg class="sol-verified-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="sol-verified-panel" id="sol-verified-panel" hidden>
-      <p class="sol-verified-lead">{{> sol-verified-text verifiedAt=verifiedAt version=../version platforms=../platforms}}</p>
-      {{#with (format-verified-evidence ../solution.verified names=(lookup (get-solutions-catalog) 'platformNames'))}}
+      <p class="sol-verified-lead">{{format-verified-summary verifiedAt ../version ../platforms names=(lookup (get-solutions-catalog) 'platformNames')}}</p>
+      {{#with (format-verified-evidence ../solution.verified names=(lookup (get-solutions-catalog) 'platformNames') list=true)}}
+      {{#if this.length}}
       <ul class="sol-verified-results">
-        {{#each (split this ';')}}
+        {{#each this}}
         <li>{{this}}</li>
         {{/each}}
       </ul>
+      {{/if}}
       {{/with}}
     </div>
   </div>
