@@ -306,13 +306,13 @@ test('a Verify block never folds, however long: the PASS line is at the bottom',
   assert.ok(verify.content.querySelector('.source-toolbox'), 'and the copy button stays in the block')
 })
 
-test('plain-text output folds only when it is much longer than code', () => {
+test('long expected output starts folded, like code, and short output stays whole', () => {
   const output = listing(25, { lang: 'text', title: 'Expected output' })
-  const longLog = listing(45, { lang: 'text' })
+  const short = listing(10, { lang: 'text', title: 'Expected output' })
   const code = listing(45, { lang: 'go' })
-  run({ blocks: [output.block, longLog.block, code.block] })
-  assert.ok(!output.block.classes.has('sol-code-fold'), '25 lines of expected output stay whole')
-  assert.ok(longLog.block.classes.has('is-folded'), '45 lines of log still fold')
+  run({ blocks: [output.block, short.block, code.block] })
+  assert.ok(output.block.classes.has('is-folded'), '25 lines of expected output fold')
+  assert.ok(!short.block.classes.has('sol-code-fold'), '10 lines stay whole')
   assert.ok(code.block.classes.has('is-folded'), '45 lines of Go fold as before')
 })
 

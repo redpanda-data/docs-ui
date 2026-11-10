@@ -13,9 +13,9 @@
  *    resize (debounced), because wrapping changes height: an undecided block
  *    can fold later and a folded block that now fits unfolds.
  *  - A Verify block (.listingblock.solution-verify) never folds and keeps
- *    its title as the role's label rather than a file header bar, and a
- *    plain-text listing (data-lang="text": expected output, logs) folds only
- *    above 40 rendered lines: the line a reader checks is usually the last.
+ *    its title as the role's label rather than a file header bar. A
+ *    plain-text listing (data-lang="text": expected output, logs) folds at
+ *    the same length as code, so a long captured output starts collapsed.
  *  - A block inside a <details> that is not open is left alone (it cannot be
  *    measured and is already collapsed once). When that details opens
  *    (toggle event) the block is measured and folded if it is long.
@@ -40,9 +40,10 @@
   var VISIBLE_LINES = 14
   // Fold only when at least a couple of lines would be hidden.
   var FOLD_AT_LINES = 16
-  // Plain-text listings (expected output, logs) fold only when much longer:
-  // the line a reader checks (PASS, the final count) is usually the last.
-  var TEXT_FOLD_AT_LINES = 40
+  // Plain-text listings (expected output, logs) fold at the same length as
+  // code, so a long captured output starts collapsed like any long block. The
+  // Verify block never folds, so the PASS line a reader checks stays visible.
+  var TEXT_FOLD_AT_LINES = FOLD_AT_LINES
   var DEFAULT_LINE_HEIGHT = 24
   var DEFAULT_PADDING = 16
   var RESIZE_DEBOUNCE_MS = 150
