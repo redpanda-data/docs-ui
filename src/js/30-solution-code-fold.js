@@ -316,8 +316,19 @@
     FOLD_AT_LINES: FOLD_AT_LINES,
   }
 
+  // A listing in a hidden tab panel has no height yet and is deferred.
+  // Asciidoctor tabs switch panels in the tab's own click handler, which runs
+  // before the click reaches window, and synced tab sets switch together, so
+  // measure the whole page once the panel shows.
+  function onClick (event) {
+    var target = event && event.target
+    var isTab = function (n) { return hasClass(n, 'tab') && !!ancestor(n, function (m) { return hasClass(m, 'tabs') }) }
+    if (target && (isTab(target) || ancestor(target, isTab))) measureAll(document)
+  }
+
   run(document)
   window.addEventListener('resize', onResize)
+  window.addEventListener('click', onClick)
   // Web fonts and late stylesheets change line metrics.
   window.addEventListener('load', function () { measureAll(document) })
 })()
