@@ -217,6 +217,9 @@
   padding: 8px;
   z-index: 150;
   animation: sb-product-menu-in 0.12s ease-out;
+  /* 20-product-switcher.js sets max-height to the room below the menu. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 @keyframes sb-product-menu-in {

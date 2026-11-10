@@ -1,0 +1,10 @@
+{{!--
+  "Take this to production" link in a done panel (solution-progress.hbs and
+  the inline copy in solution-step-actions.hbs). Context: `solution`. It goes
+  to the card on the last step (solution-productionize.hbs), and on the last
+  step itself relativize turns that into the bare #take-to-production, so the
+  link only scrolls.
+--}}
+{{#with (lookup solution.steps (subtract solution.steps.length 1)) as |last|}}
+<a class="sol-done-link" href="{{{relativize (concat last.url '#take-to-production')}}}" data-sol-productionize-link data-analytics="solution_productionize_link">Take this to production</a>
+{{/with}}

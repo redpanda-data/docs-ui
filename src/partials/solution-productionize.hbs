@@ -1,0 +1,93 @@
+{{!--
+  "Take this to production" card on a solution's last step. Context:
+  `solution`. layouts/solution-step.hbs includes it on the last step only,
+  directly after the Production considerations section (split-after-section).
+  It is marked up as an Asciidoctor section (.sect1 > h2[id]) so On this page
+  lists it, and the heading carries the id the done panels
+  (solution-progress.hbs and the inline copy in solution-step-actions.hbs) and
+  the step rail (solution-step-rail-actions.hbs) link to.
+
+  The whole card needs a signed-in reader. Signed out, and without the
+  script, it shows only the title, one sentence on what signing in gives,
+  and Sign in (data-sol-productionize-signedout), which opens the sign-in
+  modal with a return to this card. Everything else is in
+  data-sol-productionize-gated, which ships with the hidden attribute, and
+  the script removes it once the reader is signed in, including a sign-in it
+  learns after load (the kapa-session event). The prompt text is written
+  only then, so a signed-out page never holds it.
+
+  33-solution-productionize.js drives it:
+  - Plan it with Ask AI opens the drawer in productionize mode, grounded on
+    the agent companion at data-sol-companion-url, its core file, and the
+    part files the core lists beside it. It stays hidden when the
+    productionize integration is switched off, and when the core or any part
+    cannot be read, the note below says the prompt still works.
+  - Copy prompt and Preview prompt need the script (the prompt is built from
+    the page's origin), so both ship hidden.
+  - Install the Redpanda skills for Claude Code renders only when the
+    playbook sets `solutions-skill-install: true` under site.keys (Antora
+    camelCases it to site.keys.solutionsSkillInstall). Set it in docs-site's
+    antora-playbook.yml once the redpanda-solutions skill is in a published
+    plugin release. The commands
+    follow the README in redpanda-data/skills. With it on, the MCP disclosure
+    is titled for the other agents, because the plugin installs the server.
+  - Connect the docs MCP server is static, and written here: the server URL,
+    the Claude Code add, list and /mcp sign-in steps, the VS Code one-click
+    link and version, and the anonymous allowance. They follow How to use
+    these docs (docs-site), so check them when that page changes. Other
+    clients are only on that page, so this card never keeps its own copy of
+    their setup.
+--}}
+<section class="sect1 sol-panel sol-productionize" data-sol-productionize data-sol-companion-url="{{or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md')}}"{{#with @root.page.attributes.solution-verified-version}} data-sol-verified-version="{{this}}"{{/with}} aria-labelledby="take-to-production">
+  <h2 id="take-to-production" class="sol-productionize-title">Take this to production</h2>
+  <div class="sol-productionize-signedout" data-sol-productionize-signedout>
+    <p class="sol-productionize-sub">Sign in to have Ask AI plan this design for your system, get a prompt for your coding agent, and see how to connect the docs MCP server.</p>
+    <div class="sol-productionize-actions">
+      <button type="button" class="sol-btn sol-btn--primary" data-sol-productionize-signin data-analytics="solution_productionize_signin">Sign in</button>
+    </div>
+  </div>
+  <div class="sol-productionize-gated" data-sol-productionize-gated hidden>
+    <p class="sol-productionize-sub">Turn the reference build into a plan for your own system: your deployment, your scale, your security model.</p>
+    <div class="sol-productionize-actions">
+      <button type="button" class="sol-btn sol-btn--primary" data-sol-productionize-plan data-analytics="solution_productionize_start" hidden>
+        <span data-sol-productionize-plan-label>Plan it with Ask AI</span>
+      </button>
+      <button type="button" class="sol-btn sol-btn--ghost" data-sol-productionize-copy data-analytics="solution_productionize_copy" hidden>
+        <span>Copy prompt for your coding agent</span>
+      </button>
+      <span class="sol-productionize-status" data-sol-productionize-status role="status" aria-live="polite"></span>
+    </div>
+    <p class="sol-productionize-note" data-sol-productionize-note hidden>Ask AI can't load this solution's production guide right now. The prompt for your coding agent still works.</p>
+    <details class="sol-productionize-details" data-sol-productionize-preview hidden>
+      <summary>Preview prompt</summary>
+      <pre class="sol-productionize-prompt" data-sol-productionize-prompt></pre>
+    </details>
+    {{#if @root.site.keys.solutionsSkillInstall}}
+    <details class="sol-productionize-details" data-sol-productionize-skill>
+      <summary>Install the Redpanda skills for Claude Code</summary>
+      <div class="sol-productionize-mcp">
+        <p>The Redpanda plugin adds the <code>redpanda-solutions</code> skill, which finds this solution's agent companion for you, and the docs MCP server. Run in your shell:</p>
+        <pre class="sol-productionize-command"><code>claude plugin marketplace add redpanda-data/skills &amp;&amp; claude plugin install redpanda@redpanda-skills</code></pre>
+        <p>Then ask Claude Code to apply this solution to your repository, or paste the prompt above.</p>
+      </div>
+    </details>
+    {{/if}}
+    <details class="sol-productionize-details" data-sol-productionize-mcp>
+      <summary>{{#if @root.site.keys.solutionsSkillInstall}}Using another coding agent? Connect the docs MCP server{{else}}Connect the docs MCP server{{/if}}</summary>
+      <div class="sol-productionize-mcp" data-sol-mcp-block>
+        <p>Connect the Redpanda docs MCP server so your agent can look up product details.<br>
+        Server URL: <code>https://docs.redpanda.com/mcp</code></p>
+        <p>Claude Code:</p>
+        <pre class="sol-productionize-command"><code>claude mcp add --scope user --transport http redpanda https://docs.redpanda.com/mcp</code></pre>
+        <p>Check it with: <code>claude mcp list</code><br>
+        Sign in for a higher allowance: run <code>/mcp</code> and authenticate the <code>redpanda</code> server.</p>
+        {{!-- The same install URI as Page options > Add MCP server to VS Code
+              (14-markdown-dropdown.js): the server config as URI-encoded JSON. --}}
+        <p>VS Code (1.102 or later, with GitHub Copilot): <a href="vscode:mcp/install?%7B%22name%22%3A%22Redpanda%20Documentation%22%2C%22url%22%3A%22https%3A%2F%2Fdocs.redpanda.com%2Fmcp%22%7D" data-sol-mcp-vscode>Add to VS Code</a> (one-click)</p>
+        <p>Cursor, Claude Desktop, ChatGPT and other clients: see <a href="{{{relativize '/home/how-to-use-these-docs/'}}}">How to use these docs</a>.</p>
+        <p>Without signing in you get 10 tool calls every 24 hours per network address.<br>
+        The server answers general product questions. This solution's own production guide is the agent companion linked in the prompt.</p>
+      </div>
+    </details>
+  </div>
+</section>

@@ -1,0 +1,48 @@
+{{!--
+  The sticky bar every docs page has (article.hbs): the component pill, the
+  page's badges, and Page options, so a Solutions page opens the way a Connect
+  or Streaming page does. Context: `solution` (the parsed page-solution
+  record), plus `runAt`, `version`, and `platforms` for the Verified badge.
+  The overview passes the record's verified block; a step page passes the
+  scalar mirrors the solutions-catalog extension sets on it.
+
+  The Verified badge is short ("Verified November 9, 2026") and opens on
+  click to say what was verified: the Redpanda version, the platforms, and
+  the test results. It is a button and a panel rather than a <details>,
+  because 30-solution-code-fold.js styles every <details> on the page as a
+  code block. Nothing hides behind a hover, the panel's text is in the page
+  for anyone reading the HTML, and 32-solution-page.js opens and closes it
+  (Escape and a click outside close it). It renders
+  nothing when runAt does not parse as a date.
+--}}
+<div class="component-indicator-sticky sol-indicator">
+  {{#with (get-header-data @root.page)}}
+  <div class="component-indicator">
+    <span class="component-indicator-pill" style="background: var(--component-color, #6366f1);">
+      {{#if this.title}}{{{this.title}}}{{else}}{{@root.page.component.title}}{{/if}}
+    </span>
+  </div>
+  {{/with}}
+  {{#with (format-release-date runAt long=true) as |verifiedAt|}}
+  <div class="sol-verified" data-sol-verified>
+    <button type="button" class="status-badge status-badge--verified" aria-expanded="false" aria-controls="sol-verified-panel">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Verified {{verifiedAt}}</span>
+      <svg class="sol-verified-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="sol-verified-panel" id="sol-verified-panel" hidden>
+      <p class="sol-verified-lead">{{format-verified-summary verifiedAt ../version ../platforms names=(lookup (get-solutions-catalog) 'platformNames')}}</p>
+      {{#with (format-verified-evidence ../solution.verified names=(lookup (get-solutions-catalog) 'platformNames') list=true)}}
+      {{#if this.length}}
+      <ul class="sol-verified-results">
+        {{#each this}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      {{/if}}
+      {{/with}}
+    </div>
+  </div>
+  {{/with}}
+  {{#if solution.id}}{{> markdown-dropdown @root companionUrl=(or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md'))}}{{/if}}
+</div>

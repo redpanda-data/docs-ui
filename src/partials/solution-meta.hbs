@@ -1,0 +1,70 @@
+{{!--
+  Solution metadata strip: step count, platforms,
+  use case, industry, technologies, version. Context: `solution`.
+--}}
+<dl class="sol-meta">
+  {{#if solution.steps.length}}
+  <div class="sol-meta-item">
+    <dt>Steps</dt>
+    <dd>{{solution.steps.length}}</dd>
+  </div>
+  {{/if}}
+  {{#if solution.platforms.length}}
+  <div class="sol-meta-item">
+    <dt>Runs on</dt>
+    <dd class="sol-chips">
+      {{#each solution.platforms}}
+      <span class="sol-chip sol-chip--platform">{{platform-name this names=(lookup (get-solutions-catalog) 'platformNames')}}</span>
+      {{/each}}
+    </dd>
+  </div>
+  {{/if}}
+  {{!-- The two facets the landing page filters on. Each chip links to the
+        landing page filtered to that value (?use-case= and ?industry=, the
+        names 29-solutions-home.js reads), so "what else is like this" is one
+        click. The landing URL comes from page-solution-nav; without it the
+        chips are plain text. Industry is absent on most solutions and renders
+        nothing. --}}
+  {{#*inline "sol-facet-chips"}}
+  {{#each values}}
+  {{#if ../home}}
+  <a class="sol-chip sol-chip--link" href="{{{relativize ../home}}}?{{../param}}={{encode-uri this}}" data-analytics="solution_facet_chip">{{this}}</a>
+  {{else}}
+  <span class="sol-chip">{{this}}</span>
+  {{/if}}
+  {{/each}}
+  {{/inline}}
+  {{#if solution.useCases.length}}
+  <div class="sol-meta-item sol-meta-item--wide">
+    <dt>Use case</dt>
+    <dd class="sol-chips">
+      {{> sol-facet-chips values=solution.useCases param='use-case' home=(lookup (lookup (parse-json @root.page.attributes.solution-nav) 'home') 'url')}}
+    </dd>
+  </div>
+  {{/if}}
+  {{#if solution.industries.length}}
+  <div class="sol-meta-item">
+    <dt>Industry</dt>
+    <dd class="sol-chips">
+      {{> sol-facet-chips values=solution.industries param='industry' home=(lookup (lookup (parse-json @root.page.attributes.solution-nav) 'home') 'url')}}
+    </dd>
+  </div>
+  {{/if}}
+  {{#if solution.technologies.length}}
+  <div class="sol-meta-item sol-meta-item--wide">
+    <dt>Technologies</dt>
+    <dd class="sol-chips">
+      {{#each solution.technologies}}
+      <span class="sol-chip sol-chip--tech">{{this}}</span>
+      {{/each}}
+    </dd>
+  </div>
+  {{/if}}
+  {{#if solution.version}}
+  <div class="sol-meta-item">
+    <dt>Version</dt>
+    <dd><code class="sol-version">{{solution.version}}</code></dd>
+  </div>
+  {{/if}}
+  {{!-- Last verified is the Verified badge in the sticky bar (solution-indicator.hbs). --}}
+</dl>

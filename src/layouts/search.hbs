@@ -191,6 +191,9 @@
                     </p>
                     <div class="aa-ItemContentRow">
                       <div class="aa-ItemContentTitle result-type">${hit.type}</div>
+                      ${hit.type === 'Solution' && hit.solutionTitle && hit.solutionTitle !== hit.title
+                        ? html`<div class="aa-ItemContentTitle result-type result-solution-title">${hit.solutionTitle}</div>`
+                        : ''}
                       ${hit.product && Array.isArray(hit.product)
                         ? (() => {
                             const seen = new Set();

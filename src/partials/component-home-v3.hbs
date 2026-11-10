@@ -716,6 +716,79 @@
   </section>
   {{/if}}
 
+  {{!-- Build it in practice: Solutions for this product. Hand-picked
+        page-solutions-N-title/-link/-desc/-id slots win when set (the id is the
+        solution's slug, for analytics). Otherwise page-related-solutions
+        renders when the extension wrote it, and failing that up to three
+        catalog solutions that run on this product (solutions-for-component:
+        featured first, data-provenance="catalog"). Nothing renders when none
+        match, or when the page sets page-exclude-related-solutions. --}}
+  {{#if (and page.attributes.solutions-title (or page.attributes.solutions-1-title page.attributes.solutions-2-title page.attributes.solutions-3-title))}}
+  <section class="ch3-section sol-recs sol-recs--home" data-sol-recs data-component="{{page.component.name}}">
+    <div class="sol-recs-head">
+      <h2 class="ch3-section-title">{{{page.attributes.solutions-title}}}</h2>
+      {{#if page.attributes.solutions-link}}
+      <a class="ch3-labs-all" href="{{#if (is-external-url page.attributes.solutions-link)}}{{{page.attributes.solutions-link}}}{{else}}{{{relativize (resolve-resource page.attributes.solutions-link)}}}{{/if}}">Browse all solutions</a>
+      {{/if}}
+    </div>
+    <div class="sol-recs-grid">
+      {{#if page.attributes.solutions-1-title}}
+      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-1-link)}}}" data-sol-rec data-solution-id="{{page.attributes.solutions-1-id}}" data-provenance="editorial" data-position="1" data-analytics="product_doc_solution_rec_click">
+        <span class="sol-rec-eyebrow">Solution</span>
+        <span class="sol-rec-title">{{{page.attributes.solutions-1-title}}}</span>
+        {{#if page.attributes.solutions-1-desc}}<span class="sol-rec-desc">{{{page.attributes.solutions-1-desc}}}</span>{{/if}}
+      </a>
+      {{/if}}
+      {{#if page.attributes.solutions-2-title}}
+      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-2-link)}}}" data-sol-rec data-solution-id="{{page.attributes.solutions-2-id}}" data-provenance="editorial" data-position="2" data-analytics="product_doc_solution_rec_click">
+        <span class="sol-rec-eyebrow">Solution</span>
+        <span class="sol-rec-title">{{{page.attributes.solutions-2-title}}}</span>
+        {{#if page.attributes.solutions-2-desc}}<span class="sol-rec-desc">{{{page.attributes.solutions-2-desc}}}</span>{{/if}}
+      </a>
+      {{/if}}
+      {{#if page.attributes.solutions-3-title}}
+      <a class="sol-rec-card" href="{{{relativize (resolve-resource page.attributes.solutions-3-link)}}}" data-sol-rec data-solution-id="{{page.attributes.solutions-3-id}}" data-provenance="editorial" data-position="3" data-analytics="product_doc_solution_rec_click">
+        <span class="sol-rec-eyebrow">Solution</span>
+        <span class="sol-rec-title">{{{page.attributes.solutions-3-title}}}</span>
+        {{#if page.attributes.solutions-3-desc}}<span class="sol-rec-desc">{{{page.attributes.solutions-3-desc}}}</span>{{/if}}
+      </a>
+      {{/if}}
+    </div>
+  </section>
+  {{else if (eq page.attributes.exclude-related-solutions undefined)}}
+  {{#if page.attributes.related-solutions}}
+  {{> solution-recommendations}}
+  {{else}}
+  {{#with (get-solutions-catalog) as |catalog|}}
+  {{#with (solutions-for-component catalog.all @root.page.component.name catalog.taxonomy) as |picks|}}
+  {{#if picks.length}}
+  <section class="ch3-section sol-recs sol-recs--home" data-sol-recs data-component="{{@root.page.component.name}}" aria-labelledby="build-it-in-practice">
+    <div class="sol-recs-head">
+      <h2 id="build-it-in-practice" class="ch3-section-title">Build it in practice</h2>
+      <p class="sol-recs-sub">Complete, runnable solutions that run on {{@root.page.component.title}}.</p>
+    </div>
+    <div class="sol-recs-grid">
+      {{#each picks}}
+      <a class="sol-rec-card" href="{{{relativize url}}}" data-sol-rec data-placement="home" data-solution-id="{{id}}" data-provenance="catalog" data-position="{{increment @index}}" data-analytics="product_doc_solution_rec_click">
+        <span class="sol-rec-eyebrow">{{#if featured}}Featured{{else}}Solution{{/if}}</span>
+        <span class="sol-rec-title">{{title}}</span>
+        {{#if description}}<span class="sol-rec-desc">{{description}}</span>{{/if}}
+        <span class="sol-rec-meta">
+          {{#each chipTechnologies}}{{#if (lt @index 3)}}<span class="sol-chip sol-chip--tech">{{this}}</span>{{/if}}{{/each}}
+        </span>
+      </a>
+      {{/each}}
+    </div>
+    {{#with (find-component @root.site 'solutions')}}
+    <p class="sol-recs-foot"><a class="sol-recs-all" href="{{{relativize this.url}}}" data-analytics="product_doc_solution_rec_all">All solutions</a></p>
+    {{/with}}
+  </section>
+  {{/if}}
+  {{/with}}
+  {{/with}}
+  {{/if}}
+  {{/if}}
+
   {{!-- Pathway cards section (e.g., "Pick where to start") --}}
   {{#if page.attributes.pathways-title}}
   <section class="ch3-pathways">

@@ -1,6 +1,14 @@
 {{#if (and (ne page.attributes.role 'two-column') (not page.attributes.no-toc))}}
-<aside class="toc sidebar" data-title="{{{page.attributes.toctitle}}}" data-levels="{{{or page.attributes.toclevels 2}}}"{{#if (eq page.attributes.toc-collapsible 'true')}} data-collapsible="true"{{/if}}>
+<aside class="toc sidebar" data-title="{{{page.attributes.toctitle}}}" data-levels="{{{or page.attributes.toclevels 2}}}"{{#if (eq page.attributes.toc-collapsible 'true')}} data-collapsible="true"{{/if}}{{#if (or (eq page.layout 'solution') (eq page.layout 'solution-step'))}} data-collapse-after="6"{{/if}}>
+  {{!-- data-collapse-after: on Solutions pages only, a TOC group with more than 6 entries
+        under it starts collapsed behind a toggle that shows the count (02-on-this-page.js).
+        6 keeps an ordinary group such as Extend this solution open and collapses the last
+        step's Production considerations, which lists every production topic. --}}
   <div class="toc-menu"></div>
+  {{!-- "Build it in practice": compact Solutions recommendations under the On
+        this page list. Renders nothing unless the page carries
+        page-related-solutions (Product Docs pages only; see the partial). --}}
+  {{> solution-recommendations-rail}}
   {{!-- Configurable tools section - components can define toc-tools-title and toc-tools-links in antora.yml --}}
   {{#if page.componentVersion.asciidoc.attributes.toc-tools-title}}
   <div class="toc-tools is-visible" id="toc-tools">
