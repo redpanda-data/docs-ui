@@ -72,7 +72,6 @@ const PLATFORM_NAMES = { 'self-managed': 'Docker Compose', cloud: 'Redpanda Clou
 const ENVIRONMENT = [
   ['kind', 'kind'],
   ['kubernetes', 'Kubernetes'],
-  ['redpanda_operator', 'Redpanda Operator'],
 ]
 const VERSION_RX = /^v?\d+(\.\d+)*([-+][\w.]+)?$/
 
@@ -91,12 +90,25 @@ function formatRun (platform, run, nameOf) {
   if (script) parts.push(script + (date ? ' on ' + date : ''))
   else if (date) parts.push('run on ' + date)
   const env = run.environment && typeof run.environment === 'object' ? run.environment : {}
+  // Which Redpanda ran, and on which Operator: two products with their own
+  // version numbers, so each is named ("with Redpanda v26.2.2 on Redpanda
+  // Operator v26.2.3").
+  const rp = typeof env.redpanda === 'string' && VERSION_RX.test(env.redpanda) ? env.redpanda : ''
+  const op = typeof env.redpanda_operator === 'string' && VERSION_RX.test(env.redpanda_operator) ? env.redpanda_operator : ''
+  if (rp && op) parts.push('with Redpanda ' + rp + ' on Redpanda Operator ' + op)
+  else if (rp) parts.push('with Redpanda ' + rp)
+  else if (op) parts.push('Redpanda Operator ' + op)
   for (const [key, label] of ENVIRONMENT) {
     const version = env[key]
     if (typeof version === 'string' && VERSION_RX.test(version)) parts.push(label + ' ' + version)
   }
-  if (!parts.length) return ''
-  return nameOf(platform) + ': ' + parts.join(', ')
+  // The checks verify.sh skipped there, each as it printed it with its reason,
+  // so a lower count than the other platforms explains itself.
+  const skipped = Array.isArray(run.skipped) ? run.skipped.filter((x) => typeof x === 'string' && x.trim()).map((x) => x.trim()) : []
+  let text = parts.join(', ')
+  if (skipped.length) text += (text ? '. ' : '') + skipped.length + (skipped.length === 1 ? ' check skipped: ' : ' checks skipped: ') + skipped.join('. ')
+  if (!text) return ''
+  return nameOf(platform) + ': ' + text
 }
 
 module.exports = function (verified, options) {
@@ -122,5 +134,8 @@ module.exports = function (verified, options) {
   // Once another platform's clause follows, the base run needs its own name.
   if (parts.length) clauses.push((others.length ? nameOf('self-managed') + ': ' : '') + parts.join(', '))
   clauses.push(...others)
+  // list=true returns the clauses as a list, one per platform, for a panel
+  // that shows each on its own line (a skipped check's reason can hold a ";").
+  if (options && options.hash && options.hash.list) return clauses
   return clauses.join('; ')
 }

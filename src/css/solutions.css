@@ -818,7 +818,7 @@ html[data-theme="dark"] .sol-rail-tools-meta {
    so without the top margin the line sat on the heading. */
 .doc .sol-steps-note {
   margin: 0.5rem 0 1.25rem;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: inherit;
   color: var(--sol-meta);
 }
 
@@ -3302,7 +3302,7 @@ html[data-theme="dark"] .sol-toast {
 }
 
 .sol-doc .sect1:has(> h2#in-production) .production-note > .title {
-  font-size: calc(15 / var(--rem-base) * 1rem);
+  font-size: calc(18 / var(--rem-base) * 1rem);
   font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
@@ -3320,7 +3320,7 @@ html[data-theme="dark"] .sol-toast {
   display: flex;
   flex: 1;
   flex-direction: column;
-  font-size: calc(14 / var(--rem-base) * 1rem);
+  font-size: inherit;
   color: var(--grey-700-new);
 }
 

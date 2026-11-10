@@ -53,7 +53,7 @@ test('only the cards that render decide the subtitle', () => {
 // ---- page options on solution pages ---------------------------------------
 
 const PARTIALS = ['solution-hero', 'solution-step-header', 'solution-indicator', 'markdown-dropdown']
-const HELPERS = ['eq', 'or', 'concat', 'split', 'relativize', 'format-release-date', 'format-verified-evidence', 'get-solutions-catalog', 'get-header-data', 'platform-list', 'platform-name', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode']
+const HELPERS = ['eq', 'or', 'concat', 'split', 'format-verified-summary', 'relativize', 'format-release-date', 'format-verified-evidence', 'get-solutions-catalog', 'get-header-data', 'platform-list', 'platform-name', 'get-solution-step', 'has-markdown', 'markdown-url', 'has-agent-handoff', 'agent-handoff-mode']
 const surfaceHbs = engine(HELPERS, PARTIALS)
 const renderHero = surfaceHbs.compile('{{> solution-hero solution=solution}}')
 const renderStep = surfaceHbs.compile('{{> solution-step-header solution=solution}}')
