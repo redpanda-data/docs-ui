@@ -1587,10 +1587,12 @@ html[data-theme="dark"] .listingblock .title {
   padding-bottom: 0;
 }
 
+/* Block, not flex: as a flex container, inline code in a title split the words around it into columns.
+   The right padding reserves room for the chevron so a wrapped title never runs under it. */
 .doc details > summary.title {
-  display: flex;
-  align-items: center;
+  display: block;
   position: relative;
+  padding-right: 2rem;
   border-radius: 10px;
   line-height: var(--doc-line-height);
   background: none;
@@ -1618,12 +1620,14 @@ details[open] > summary {
   height: 1.2em;
   position: absolute;
   right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .doc details[open] > summary::after {
   border-color: currentColor transparent transparent;
   border-width: 0.5rem 0.3rem 0;
-  transform: rotate(90deg);
+  transform: translateY(-50%) rotate(90deg);
 }
 
 .doc details {
