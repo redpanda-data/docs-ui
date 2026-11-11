@@ -60,6 +60,9 @@
       "{{{this}}}"{{#unless @last}},{{/unless}}
       {{/each}}
     ];
+    {{!-- Links Ask AI offers for pricing, licensing, and demo questions (DOC-2607).
+          Defined once in the get-marketing-links helper. --}}
+    window.SALES_LINKS = window.SALES_LINKS || {{{get-marketing-links 'kapa-json'}}};
     {{!-- Kapa source group scoping retrieval to THIS page's docs version (DOC-1807,
           DOC-2450). Empty array means send no filter, which is the pre-DOC-2450
           behaviour of searching every version at once. Emitted per page rather than

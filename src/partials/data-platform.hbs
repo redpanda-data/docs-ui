@@ -62,7 +62,7 @@
   </header>
 
   {{!-- Cloud landing: component cards --}}
-  {{#if page.attributes.page-cloud-landing}}
+  {{#if page.attributes.cloud-landing}}
   <section class="dp-section dp-component-cards-section">
     <div class="dp-section-head">
       <h2 class="dp-section-title">{{#if page.attributes.component-cards-title}}{{page.attributes.component-cards-title}}{{else}}Choose your component{{/if}}</h2>
@@ -567,16 +567,7 @@
   </section>
   {{/if}}
 
-  <div class="dp-help">
-    <div>
-      <h3>Need help choosing?</h3>
-      <p>Our team can walk you through the options and help you get started.</p>
-    </div>
-    <div class="dp-help-actions">
-      <a href="https://redpanda.com/contact" class="dp-help-btn">Talk to sales</a>
-      <a href="https://redpanda.com/slack" class="dp-help-btn dp-help-btn-secondary">Join Slack</a>
-    </div>
-  </div>
+  {{> help-cta prefix='dp'}}
 </div>
 
 <script>

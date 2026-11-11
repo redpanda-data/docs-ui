@@ -14,7 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import { safeHeap } from '../heap.js'
-import { Answer, Toast } from './chatShared.jsx'
+import { Answer, Toast, SalesLinks } from './chatShared.jsx'
 
 // Example prompts for the signed-in agent welcome screen come from
 // window.AGENT_SUGGESTIONS (set per component by the get-agent-suggestions
@@ -1079,6 +1079,7 @@ export default function ChatInterface() {
           </form>
 
           <div className="disclaimer">
+            <SalesLinks />
             <p>
               <a
                 href="https://www.redpanda.com/legal/privacy-policy"

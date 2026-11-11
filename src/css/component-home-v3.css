@@ -1688,9 +1688,12 @@ html[data-theme="dark"] .ch3-help-btn-secondary:hover {
     width: 100%;
   }
 
+  /* auto basis so the row wraps whole buttons; body sets overflow-wrap:
+     anywhere, which would otherwise shrink each label to one glyph wide */
   .ch3-help-btn {
-    flex: 1;
+    flex: 1 1 auto;
     justify-content: center;
+    overflow-wrap: normal;
   }
 }
 
