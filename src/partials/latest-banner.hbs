@@ -7,7 +7,7 @@
 <div class="banner-container {{#if @root.page.attributes.is-nearing-eol}} nearing-eol{{else @root.page.attributes.is-past-eol}} past-eol{{/if}}" id="latest-banner">
   {{#if (and @root.page.componentVersion.prerelease (not ./prerelease))}}
     <div>You are viewing the {{@root.page.component.title}} <b>v{{@root.page.version}} beta</b> documentation.
-    <br>We welcome your feedback at the <a href="https://redpandacommunity.slack.com/archives/C04N3C10VUL">Redpanda Community Slack #beta-feedback channel</a>.
+    <br>We welcome your feedback in the <a href="https://github.com/redpanda-data/community" target="_blank" rel="noopener noreferrer">Redpanda community on GitHub</a>.
     </div>
     <div>
       To view the latest available version of the docs, see <a href="{{relativize ./url}}">v{{@root.page.component.latest.version}}</a>.
