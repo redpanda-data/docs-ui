@@ -682,10 +682,11 @@ html[data-theme=dark] {
   padding-bottom: 0;
 }
 
+/* Mirrors .doc details > summary.title in doc.css: block layout, with room reserved for the chevron. */
 .aa-DetachedOverlay .doc details > summary.title {
-  display: flex;
-  align-items: center;
+  display: block;
   position: relative;
+  padding-right: 2rem;
   border-radius: 10px;
   line-height: var(--doc-line-height);
   background: none;
@@ -709,12 +710,14 @@ html[data-theme=dark] {
   height: 1.2em;
   position: absolute;
   right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .aa-DetachedOverlay .doc details[open] > summary::after {
   border-color: currentColor transparent transparent;
   border-width: 0.5rem 0.3rem 0;
-  transform: rotate(90deg);
+  transform: translateY(-50%) rotate(90deg);
 }
 
 .aa-DetachedOverlay .doc details {
