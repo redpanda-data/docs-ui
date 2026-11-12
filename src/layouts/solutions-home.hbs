@@ -41,7 +41,7 @@
             script moves them into the slot, collapsed, before first paint.
             29-solutions-home.js keeps them in the right place when the
             viewport changes afterwards. The slot comes before Continue
-            learning, so a returning reader reaches the filters without
+            where you left off, so a returning reader reaches the filters without
             scrolling past their in-progress solutions. --}}
       <div class="sol-filters-slot" data-sol-filters-slot></div>
       <script>
@@ -56,10 +56,9 @@
       </script>
       <section class="sol-continue" data-sol-continue hidden aria-labelledby="sol-continue-title">
         <div class="sol-recs-head">
-          <h2 id="sol-continue-title" class="sol-section-title">Continue learning</h2>
-          <p class="sol-recs-sub" data-sol-continue-sub>Pick up where you left off.</p>
+          <h2 id="sol-continue-title" class="sol-section-title">Continue where you left off</h2>
         </div>
-        <div class="sol-continue-grid" data-sol-continue-grid></div>
+        <ul class="sol-continue-grid" role="list" data-sol-continue-grid></ul>
       </section>
       <div class="sol-home-layout">
         {{> solutions-grid catalog=catalog}}

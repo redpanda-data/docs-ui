@@ -2613,6 +2613,23 @@ html[data-theme="dark"] .sol-results-note {
   gap: 0.5rem;
 }
 
+/* The resume list is a <ul> for screen readers; the grid supplies the
+   layout, so the list's own bullets and indent go. */
+.doc ul.sol-continue-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.doc ul.sol-continue-grid > li {
+  display: flex;
+  margin: 0;
+}
+
+.doc ul.sol-continue-grid > li > .sol-rec-card {
+  flex: 1 1 auto;
+}
+
 /* doc.css's `.doc h2` top margin and `.doc h2:not(.discrete)` padding and
    negative side margins (0,2,1) otherwise beat .sol-section-title, which
    left a tall empty band above the heading and pulled it toward the panel

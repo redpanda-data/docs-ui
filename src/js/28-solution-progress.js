@@ -3,14 +3,15 @@
  * Solutions progress: local-first, synced for signed-in readers.
  *
  * Runs on every page (it owns window.docsSolutions, which the landing page
- * reads for "Continue learning" and which recommendation cards use for
+ * reads for "Continue where you left off" and which recommendation cards use for
  * analytics) but only wires page UI on solution overview and step pages
  * (<body class="solution|solution-step" data-solution-id=...>).
  *
  * Store (localStorage 'docs-solutions-progress'), v2:
  *   { v: 2, updatedAt, solutions: { <id>: {
  *       steps: { <stepId>: { done: true|false, at } }, currentStep,
- *       startedAt, updatedAt, completedAt, solutionVersion } } }
+ *       startedAt, updatedAt, completedAt, solutionVersion } },
+ *     prefs: { platform: { value, at } } }
  * Timestamps are epoch milliseconds. Every step keeps its own state and the
  * time it was last set, so an un-mark ({ done: false, at }) is an edit like a
  * mark and survives a merge with a copy that still has the step done. v1
@@ -18,6 +19,14 @@
  * getState() and getRecord() also hand out a derived `completedSteps` list
  * (done steps, oldest mark first) for readers such as 29-solutions-home.js;
  * it is never stored or sent.
+ *
+ * `prefs` is optional: the platform tab the reader last picked
+ * (34-solution-platform.js owns it). Each entry carries its own `at`; the
+ * later one wins, a tie goes to the incoming side, and an entry with an
+ * invalid value is dropped, with the same checks as docs-site. An unknown key
+ * or preference name is dropped on read. The store carries `prefs` only when
+ * an entry exists. Signed out, the preferences stay in this browser; they
+ * sync through the same merge once the reader signs in.
  *
  * Storage failures fail closed: the storage objects are reached through a
  * guarded accessor (a blocked-storage getter throws in some browsers), reads
@@ -101,6 +110,7 @@
   var ID_RE = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/
   var VERSION_RE = /^v\d+\.\d+\.\d+$/
   var FUTURE_SKEW_MS = 5 * 60 * 1000
+  var PLATFORMS = ['local', 'kubernetes', 'cloud']
   var SCHEMA_VERSION = 2
   var ISO_RE = /^\d{4}-\d{2}-\d{2}(T|$)/
   var REMOTE_TTL_MS = 60 * 1000
@@ -375,7 +385,7 @@
   // finalize().
   var MAX_BYTES = 32768
 
-  function buildStore (solutions, ids, updatedAt) {
+  function buildStore (solutions, ids, updatedAt, prefs) {
     var kept = {}
     var latest = toTime(updatedAt)
     if (latest === null) latest = 0
@@ -384,19 +394,21 @@
       kept[sorted[i]] = solutions[sorted[i]]
       latest = maxTime(latest, kept[sorted[i]].updatedAt)
     }
-    return { v: SCHEMA_VERSION, updatedAt: latest, solutions: kept }
+    var doc = { v: SCHEMA_VERSION, updatedAt: latest, solutions: kept }
+    if (prefs && Object.keys(prefs).length) doc.prefs = prefs
+    return doc
   }
 
-  function finalizeStore (solutions, updatedAt) {
+  function finalizeStore (solutions, updatedAt, prefs) {
     var ids = Object.keys(solutions).sort(function (x, y) {
       var xm = toTime(solutions[x].updatedAt) || 0
       var ym = toTime(solutions[y].updatedAt) || 0
       return (ym - xm) || (x < y ? -1 : 1)
     }).slice(0, MAX_SOLUTIONS)
-    var doc = buildStore(solutions, ids, updatedAt)
+    var doc = buildStore(solutions, ids, updatedAt, prefs)
     while (ids.length > 1 && JSON.stringify(doc).length > MAX_BYTES) {
       ids = ids.slice(0, -1)
-      doc = buildStore(solutions, ids, updatedAt)
+      doc = buildStore(solutions, ids, updatedAt, prefs)
     }
     return doc
   }
@@ -406,8 +418,9 @@
   function normalizeStore (raw, nowMs) {
     nowMs = nowMs || now()
     if (!isPlainObject(raw)) return finalizeStore({}, null)
+    var prefs = normalizePrefs(raw.prefs, nowMs)
     if (raw.solutions !== undefined && !isPlainObject(raw.solutions)) {
-      return finalizeStore({}, clampTime(raw.updatedAt, nowMs))
+      return finalizeStore({}, clampTime(raw.updatedAt, nowMs), prefs)
     }
     var solutions = {}
     var source = raw.solutions || {}
@@ -416,7 +429,44 @@
       var record = normalizeRecord(source[id], nowMs)
       if (record) solutions[id] = record
     }
-    return finalizeStore(solutions, clampTime(raw.updatedAt, nowMs))
+    return finalizeStore(solutions, clampTime(raw.updatedAt, nowMs), prefs)
+  }
+
+  // ---- preferences (same rules as docs-site normalizePrefs / mergePrefs) ----
+
+  function normalizePlatform (raw, nowMs) {
+    if (!isPlainObject(raw) || PLATFORMS.indexOf(raw.value) === -1) return null
+    var at = clampTime(raw.at, nowMs)
+    return at === null ? null : { value: raw.value, at: at }
+  }
+
+  var PREFS = { platform: normalizePlatform }
+
+  function normalizePrefs (raw, nowMs) {
+    var out = {}
+    if (!isPlainObject(raw)) return out
+    nowMs = nowMs || now()
+    for (var key in PREFS) {
+      if (!Object.prototype.hasOwnProperty.call(PREFS, key)) continue
+      var entry = PREFS[key](raw[key], nowMs)
+      if (entry) out[key] = entry
+    }
+    return out
+  }
+
+  // Per entry: the later `at` wins; a tie goes to the incoming side.
+  function mergePrefs (existing, incoming, nowMs) {
+    var a = normalizePrefs(existing, nowMs)
+    var b = normalizePrefs(incoming, nowMs)
+    var out = {}
+    for (var key in PREFS) {
+      if (!Object.prototype.hasOwnProperty.call(PREFS, key)) continue
+      var x = a[key]
+      var y = b[key]
+      if (x && y) out[key] = y.at >= x.at ? y : x
+      else if (x || y) out[key] = x || y
+    }
+    return out
   }
 
   // A record as handed to callers: a copy, plus the derived completedSteps.
@@ -536,7 +586,7 @@
       var record = mergeRecord(existing.solutions[id], incoming.solutions[id], nowMs)
       if (record) solutions[id] = record
     }
-    return finalizeStore(solutions, maxTime(existing.updatedAt, incoming.updatedAt))
+    return finalizeStore(solutions, maxTime(existing.updatedAt, incoming.updatedAt), mergePrefs(existing.prefs, incoming.prefs, nowMs))
   }
 
   function getState () {
@@ -546,6 +596,31 @@
     }
     return store
   }
+
+  function getPrefs () { return clone(loadStore().prefs || {}) }
+
+  // Record one preference: setPref('platform', 'kubernetes'). Stamped after
+  // the entry it replaces, like a step edit. Returns false, and stores nothing,
+  // for a value the checks reject.
+  function setPref (name, value) {
+    var store = clone(loadStore())
+    var prefs = store.prefs || {}
+    var prev = prefs[name]
+    var t = now()
+    if (prev && prev.at >= t) t = prev.at + 1
+    var raw = {}
+    if (name === 'platform') raw.platform = { value: value, at: t }
+    var entry = normalizePrefs(raw, t)[name]
+    if (!entry) return false
+    prefs[name] = entry
+    store.prefs = prefs
+    localRev++
+    persistStore(store)
+    markDirty()
+    scheduleSync()
+    return true
+  }
+
   // ---------------------------------------------------------------------------
   // Page context
   // ---------------------------------------------------------------------------
@@ -729,6 +804,7 @@
   function putStore (store) {
     if (typeof fetch !== 'function') return Promise.resolve(false)
     var payload = { v: SCHEMA_VERSION, updatedAt: store.updatedAt || now(), solutions: store.solutions }
+    if (store.prefs && Object.keys(store.prefs).length) payload.prefs = store.prefs
     var sentRev = localRev
     setSyncState('Saving...')
     var request = fetch(PROGRESS_ENDPOINT, {
@@ -1421,7 +1497,7 @@
       el.setAttribute('aria-valuenow', String(done))
       el.setAttribute('aria-valuetext', done + ' of ' + total + ' steps complete')
     })
-    // Same words as the landing page's Continue learning cards: opening a
+    // Same words as the landing page's progress cards: opening a
     // step creates the record (setCurrent), so a record with nothing done is
     // "Started", not "In progress".
     setText('[data-sol-progress-state]', !record ? 'Not started' : finished ? 'Completed' : done ? 'In progress' : 'Started')
@@ -2056,6 +2132,9 @@
     placeRailRecs: placeRailRecs,
     decorateFileBlocks: decorateFileBlocks,
     reset: resetProgress,
+    // Preferences (34-solution-platform.js).
+    getPrefs: getPrefs,
+    setPref: setPref,
   }
 
   // Another tab wrote the store: merge its copy into ours (never just adopt
