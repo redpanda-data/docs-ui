@@ -115,7 +115,31 @@ async function main () {
     check('and becomes the tabs script\'s choice for other pages', r.key === 'Redpanda Cloud', r.key)
     r = await signedIn(now - 1000, now - 60000)
     check('an older platform from signed-in progress changes nothing', JSON.stringify(r.tabs) === '["Docker Compose","Docker Compose"]' && r.pref.value === 'local', JSON.stringify(r))
+
+    // ---- platform: applying a synced pick keeps the reader's #anchor ------------
+    await reset({
+      [STORE_KEY]: JSON.stringify({ v: 2, updatedAt: 0, solutions: {}, prefs: { platform: { value: 'local', at: now - 60000 } } }),
+      [TAB_KEY]: 'Docker Compose',
+      'docs-solutions-progress-hint': 'true',
+    })
+    await page.setCookie({ name: 'rp_docs_auth', value: '1', url: origin })
+    remote = { v: 2, updatedAt: 0, solutions: {}, prefs: { platform: { value: 'cloud', at: now - 1000 } } }
+    await page.goto(`${origin}/fixture.html?deep=1#group-2`, { waitUntil: 'load' })
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    const kept = { tabs: await selected(), hash: await page.evaluate(() => window.location.hash) }
+    await page.deleteCookie({ name: 'rp_docs_auth', url: origin })
+    check('applying a synced platform keeps the URL fragment', kept.hash === '#group-2' && JSON.stringify(kept.tabs) === '["Redpanda Cloud","Redpanda Cloud"]', JSON.stringify(kept))
     remote = { v: 2, updatedAt: 0, solutions: {} }
+
+    // ---- platform: a link to a tab wins over the stored pick --------------------
+    await reset({
+      [STORE_KEY]: JSON.stringify({ v: 2, updatedAt: 0, solutions: {}, prefs: { platform: { value: 'local', at: now - 1000 } } }),
+      [TAB_KEY]: 'Docker Compose',
+    })
+    await page.goto(`${origin}/fixture.html?deep=1#_tabs_1_kubernetes`, { waitUntil: 'load' })
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    const linked = { tab: (await selected())[0], pref: ((await stored()) || {}).prefs }
+    check('a link to a platform tab is honored and recorded', linked.tab === 'Kubernetes' && linked.pref && linked.pref.platform && linked.pref.platform.value === 'kubernetes', JSON.stringify(linked))
 
     // ---- the Redpanda Cloud code is left as written ---------------------------
     await reset()

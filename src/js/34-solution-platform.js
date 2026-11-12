@@ -72,6 +72,22 @@
     if (platform) api.setPref('platform', platform)
   }
 
+  // A link to a tab, or to something inside a tab panel, picks the platform
+  // without a click. Honor it: record that platform instead of switching away.
+  function linkedPlatform () {
+    var id = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : ''
+    var el = id && document.getElementById(id)
+    var tabs = el && typeof el.closest === 'function' && el.closest('.tabs')
+    if (!isPlatformTabs(tabs)) return null
+    var tab = el.closest('.tablist li')
+    if (!tab) {
+      var panel = el.closest('.tabpanel, [role="tabpanel"]')
+      var labelledBy = panel && panel.getAttribute('aria-labelledby')
+      tab = labelledBy ? document.getElementById(labelledBy) : null
+    }
+    return tab ? platformOf(tabLabel(tab)) : null
+  }
+
   function applyPlatform () {
     var pref = api.getPrefs().platform
     var label = pref && LABELS[pref.value]
@@ -84,8 +100,13 @@
       var tab = $$('.tablist li', groups[i]).filter(function (li) { return tabLabel(li) === label })[0]
       if (!tab) continue
       if (tab.getAttribute('aria-selected') !== 'true' && typeof tab.click === 'function') {
+        // tabs.js clears the URL fragment on a click; keep the reader's anchor.
+        var hash = window.location.hash
         applying = true
         try { tab.click() } finally { applying = false }
+        if (hash && window.location.hash !== hash && window.history && window.history.replaceState) {
+          window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + hash)
+        }
       }
       return
     }
@@ -96,6 +117,8 @@
   // ---------------------------------------------------------------------------
 
   document.addEventListener('click', onTabClick)
+  var linked = linkedPlatform()
+  if (linked) api.setPref('platform', linked)
   applyPlatform()
   window.addEventListener('docs-solutions:change', applyPlatform)
 })()
