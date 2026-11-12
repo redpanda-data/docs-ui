@@ -3,8 +3,9 @@
  * Solutions landing page: client-side filtering over the catalog the build
  * embedded (<script type="application/json" data-sol-catalog>), URL state
  * (?q= plus one parameter per facet in FACET_ATTR below: use-case, industry,
- * platform), and the "Continue learning" section filled from the
- * progress store owned by 28-solution-progress.js.
+ * platform), and the "Continue where you left off" section filled from the
+ * progress store owned by 28-solution-progress.js (local progress, merged
+ * with the account's once signed-in progress loads; no request of its own).
  *
  * Search matches every query word at the start of a word in the title,
  * description, slug, step titles, technologies, categories, use cases,
@@ -17,7 +18,7 @@
  *
  * The filter form lives in the sidebar (nav-tree-solution.hbs). Below 1024px
  * the sidebar is a drawer, so the form moves to the top of the main column,
- * above Continue learning and the grid: an inline script in
+ * above Continue where you left off and the grid: an inline script in
  * solutions-home.hbs does it before first paint, and placeFilters() below
  * keeps it right when the viewport changes. Every selector here is
  * document-wide for that reason.
@@ -315,11 +316,9 @@
     apply()
   }
 
-  // ---- continue learning -------------------------------------------------------
+  // ---- continue where you left off ---------------------------------------------
 
-  // Where "Continue" goes: the first step, in the solution's order, that is
-  // not done. currentStep is the last step visited, which after finishing a
-  // step is the one just finished.
+  // The first step, in the solution's order, that is not done.
   function firstIncompleteStep (record, progress) {
     var steps = record.steps || []
     var done = progress.completedSteps || []
@@ -338,16 +337,20 @@
     return null
   }
 
-  // One rule for the Continue learning cards and the grid cards alike:
-  //   Completed    every step done; bar full
-  //   In progress  some steps done; bar and "n of M steps"
+  // One rule for the resume list and the grid cards alike:
+  //   Completed    every step done; bar full. On its grid card only: there
+  //                is nothing to resume.
+  //   In progress  some steps done; bar and "n of M steps". Listed under
+  //                Continue where you left off, and on its grid card.
   //   Started      opened, nothing marked done yet; "Next: <step>" and no
   //                bar (a 0% bar reads as "you did nothing", which is not
-  //                what visiting a step means). Never listed under Continue
-  //                learning or on a grid card: opening a page is browsing,
-  //                and listing it pushed the catalog below the fold.
-  // "Next" is the step the reader last had open when nothing is done yet
-  // (that is where they stopped reading), otherwise the first step not done.
+  //                what visiting a step means). Never listed, and not on a
+  //                grid card: opening a page is browsing, and listing it
+  //                pushed the catalog below the fold.
+  // "Next" is the step the reader last had open (currentStep) while it is
+  // not done, which is where they stopped reading; otherwise the first step
+  // not done. After a step is marked, currentStep is that finished step, so
+  // the link moves on to the next one.
   function describe (record, progress) {
     var ids = (record.steps || []).map(function (s) { return s.id })
     var done = 0
@@ -356,8 +359,9 @@
     var finished = total > 0 && done === total
     var nextId = null
     if (!finished) {
-      nextId = !done && progress.currentStep && stepById(record, progress.currentStep)
-        ? progress.currentStep
+      var current = progress.currentStep && stepById(record, progress.currentStep)
+      nextId = current && progress.completedSteps.indexOf(current.id) === -1
+        ? current.id
         : firstIncompleteStep(record, progress)
     }
     var next = nextId ? stepById(record, nextId) : null
@@ -395,13 +399,17 @@
       entries.push(entry)
     }
     entries.sort(function (a, b) { return (b.progress.updatedAt || 0) - (a.progress.updatedAt || 0) })
-    entries = entries.slice(0, 6)
-    if (!entries.length) {
+    var resume = entries.filter(function (entry) { return !entry.finished }).slice(0, 6)
+    paintCards(entries)
+    if (!resume.length) {
       section.hidden = true
+      grid.innerHTML = ''
       return
     }
+    // A list of links: each item names the solution, how far the reader got,
+    // and the step the link opens, so the link text alone says where it goes.
     var html = ''
-    entries.forEach(function (entry) {
+    resume.forEach(function (entry) {
       var progressHtml
       if (entry.state === 'Started') {
         progressHtml = entry.next
@@ -412,17 +420,23 @@
           '<span class="sol-bar sol-bar--sm"><span class="sol-bar-fill" style="width:' + entry.pct + '%"></span></span>' +
           '<span class="sol-card-progress-text">' + entry.done + ' of ' + entry.total + ' steps</span></span>'
       }
-      html += '<a class="sol-rec-card" href="' + escapeHtml(entry.href) + '" data-sol-continue-card' +
+      var nextHtml = entry.state !== 'Started' && entry.next
+        ? '<span class="sol-card-progress-text">Next: ' + escapeHtml(entry.next.title || entry.next.id) + '</span>'
+        : ''
+      html += '<li><a class="sol-rec-card" href="' + escapeHtml(entry.href) + '" data-sol-continue-card' +
         ' data-solution-id="' + escapeHtml(entry.record.id) + '">' +
         '<span class="sol-rec-eyebrow">' + entry.state + '</span>' +
         '<span class="sol-rec-title">' + escapeHtml(entry.record.title) + '</span>' +
-        progressHtml +
-        '</a>'
+        progressHtml + nextHtml +
+        '</a></li>'
     })
     grid.innerHTML = html
     section.hidden = false
+  }
 
-    // Per-card progress in the main grid too, under the same rule.
+  // Per-card progress in the main grid, under the same rule, finished
+  // solutions included.
+  function paintCards (entries) {
     cards.forEach(function (card) {
       var id = card.getAttribute('data-solution-id')
       var slot = $('[data-sol-card-progress]', card)
@@ -447,7 +461,7 @@
 
   // ---- where the filters live -----------------------------------------------------
 
-  // Sidebar from 1024px, above Continue learning and the grid (collapsed)
+  // Sidebar from 1024px, above Continue where you left off and the grid (collapsed)
   // below it. The inline script in solutions-home.hbs made the first
   // placement; this follows viewport changes. A reader who opened or closed the narrow copy keeps
   // their choice while the viewport stays narrow.
