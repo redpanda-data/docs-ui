@@ -2573,8 +2573,10 @@ html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
   width: 20%;
 }
 
+/* The indent must exceed the number's -2em offset below, or the number
+   sits outside the content column and readers see ". text". */
 #footnotes .footnote {
-  margin: 0.5em 0 0 1em;
+  margin: 0.5em 0 0 2.5em;
 }
 
 #footnotes .footnote + .footnote {
