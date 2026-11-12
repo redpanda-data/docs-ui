@@ -1588,7 +1588,8 @@ html[data-theme="dark"] .listingblock .title {
 }
 
 /* Block, not flex: a flex container makes inline code in a title its own item and splits the words around it into columns.
-   The right padding reserves room for the chevron so a wrapped title never runs under it. */
+   The right padding reserves room for the chevron so a wrapped title never runs under it.
+   Mirrored in doc-bump.css (.aa-DetachedOverlay) for the detached search overlay. */
 .doc details > summary.title {
   display: block;
   position: relative;
@@ -1625,8 +1626,6 @@ details[open] > summary {
 }
 
 .doc details[open] > summary::after {
-  border-color: currentColor transparent transparent;
-  border-width: 0.5rem 0.3rem 0;
   transform: translateY(-50%) rotate(90deg);
 }
 

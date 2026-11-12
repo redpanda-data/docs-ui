@@ -715,8 +715,6 @@ html[data-theme=dark] {
 }
 
 .aa-DetachedOverlay .doc details[open] > summary::after {
-  border-color: currentColor transparent transparent;
-  border-width: 0.5rem 0.3rem 0;
   transform: translateY(-50%) rotate(90deg);
 }
 
