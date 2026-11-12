@@ -86,7 +86,7 @@ function run (options) {
     window: {
       location: { pathname: '/solutions/', search: o.search || '', hash: '' },
       history: { replaceState: (state, title, url) => replaceState.push(url) },
-      addEventListener: () => {},
+      addEventListener: (type, fn) => { if (o.onWindowEvent) o.onWindowEvent(type, fn) },
       docsSolutions: o.api || null,
     },
   }
