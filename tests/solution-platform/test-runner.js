@@ -1,17 +1,13 @@
-/* global localStorage, sessionStorage, CustomEvent */
+/* global localStorage, sessionStorage */
 /**
  * 34-solution-platform.js in a real browser, with the real tabs script
  * (@asciidoctor/tabs), Prism, 11-editable-placeholders.js,
- * 06-copy-to-clipboard.js and 28-solution-progress.js, because the
- * placeholder spans, the tab sync and the copy button all come from those.
+ * 06-copy-to-clipboard.js and 28-solution-progress.js, because the tab sync
+ * and the code blocks come from those.
  *
  * Covers: the platform pick is recorded, a newer platform from signed-in
- * progress selects its tab and an older one does not; the Your cluster form
- * (labels, hint, no password field), values filled into the Redpanda Cloud
- * code and env.cloud.example only, <password> and comment lines left alone,
- * the copy button copying the filled text, invalid input refused, markup in a
- * value staying text, Clear restoring the placeholders, and the values
- * surviving a reload.
+ * progress selects its tab and an older one does not, and the code on a
+ * Redpanda Cloud tab keeps its placeholders.
  */
 const puppeteer = require('puppeteer')
 const express = require('express')
@@ -20,8 +16,6 @@ const path = require('path')
 const ROOT = path.resolve(__dirname, '../..')
 const STORE_KEY = 'docs-solutions-progress'
 const TAB_KEY = 'preferred-tab-platform'
-const BS = 'seed-1a2b.byoc.prd.cloud.redpanda.com:9092'
-const SR = 'https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081'
 
 const failures = []
 function check (name, ok, detail) {
@@ -121,112 +115,40 @@ async function main () {
     check('and becomes the tabs script\'s choice for other pages', r.key === 'Redpanda Cloud', r.key)
     r = await signedIn(now - 1000, now - 60000)
     check('an older platform from signed-in progress changes nothing', JSON.stringify(r.tabs) === '["Docker Compose","Docker Compose"]' && r.pref.value === 'local', JSON.stringify(r))
+
+    // ---- platform: applying a synced pick keeps the reader's #anchor ------------
+    await reset({
+      [STORE_KEY]: JSON.stringify({ v: 2, updatedAt: 0, solutions: {}, prefs: { platform: { value: 'local', at: now - 60000 } } }),
+      [TAB_KEY]: 'Docker Compose',
+      'docs-solutions-progress-hint': 'true',
+    })
+    await page.setCookie({ name: 'rp_docs_auth', value: '1', url: origin })
+    remote = { v: 2, updatedAt: 0, solutions: {}, prefs: { platform: { value: 'cloud', at: now - 1000 } } }
+    await page.goto(`${origin}/fixture.html?deep=1#group-2`, { waitUntil: 'load' })
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    const kept = { tabs: await selected(), hash: await page.evaluate(() => window.location.hash) }
+    await page.deleteCookie({ name: 'rp_docs_auth', url: origin })
+    check('applying a synced platform keeps the URL fragment', kept.hash === '#group-2' && JSON.stringify(kept.tabs) === '["Redpanda Cloud","Redpanda Cloud"]', JSON.stringify(kept))
     remote = { v: 2, updatedAt: 0, solutions: {} }
 
-    // ---- Your cluster: the form ------------------------------------------------
+    // ---- platform: a link to a tab wins over the stored pick --------------------
+    await reset({
+      [STORE_KEY]: JSON.stringify({ v: 2, updatedAt: 0, solutions: {}, prefs: { platform: { value: 'local', at: now - 1000 } } }),
+      [TAB_KEY]: 'Docker Compose',
+    })
+    await page.goto(`${origin}/fixture.html?deep=1#_tabs_1_kubernetes`, { waitUntil: 'load' })
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    const linked = { tab: (await selected())[0], pref: ((await stored()) || {}).prefs }
+    check('a link to a platform tab is honored and recorded', linked.tab === 'Kubernetes' && linked.pref && linked.pref.platform && linked.pref.platform.value === 'kubernetes', JSON.stringify(linked))
+
+    // ---- the Redpanda Cloud code is left as written ---------------------------
     await reset()
     await load()
     await page.click('#group-1 #_tabs_1_redpanda_cloud')
-    const form = await page.evaluate(() => {
-      const forms = [...document.querySelectorAll('form[data-sol-cluster]')]
-      const f = forms[0]
-      return {
-        count: forms.length,
-        inCloudTab: !!(f && f.closest('.platform-cloud')),
-        beforeEnv: !!(f && f.nextElementSibling && f.nextElementSibling.id === 'env-block'),
-        legend: f && f.querySelector('legend').textContent,
-        labels: f ? [...f.querySelectorAll('label')].map((l) => l.textContent + '>' + (document.getElementById(l.htmlFor) || {}).tagName) : [],
-        buttons: f ? [...f.querySelectorAll('button')].map((b) => b.textContent) : [],
-        hint: f && f.querySelector('.sol-cluster-hint').textContent,
-        passwordInputs: document.querySelectorAll('input[type="password"]').length,
-        names: f ? [...f.querySelectorAll('input')].map((i) => i.name) : [],
-      }
-    })
-    check('one form, in the Redpanda Cloud tab with placeholders, before the env.cloud.example listing', form.count === 1 && form.inCloudTab && form.beforeEnv, JSON.stringify(form))
-    check('labels and buttons', form.legend === 'Your cluster' &&
-      JSON.stringify(form.labels) === '["Bootstrap server URL>INPUT","Schema Registry URL>INPUT","Username>INPUT"]' &&
-      JSON.stringify(form.buttons) === '["Save","Clear"]', JSON.stringify(form))
-    check('hint text', form.hint === 'These values fill in the commands on this page. Never enter a password here.', form.hint)
-    check('no password field anywhere', form.passwordInputs === 0 && !form.names.some((n) => /pass|secret|token/i.test(n)), JSON.stringify(form.names))
-
-    // ---- Your cluster: save fills the Cloud code only ------------------------
-    const type = async (field, value) => {
-      await page.$eval(`[data-sol-cluster-input="${field}"]`, (el) => { el.value = '' })
-      if (value) await page.type(`[data-sol-cluster-input="${field}"]`, value)
-    }
-    await type('bootstrap', BS)
-    await type('schemaRegistry', SR)
-    await type('user', 'ada')
-    await page.click('form[data-sol-cluster] button[type="submit"]')
     const env = await codeText('env-block')
-    const lines = env.split('\n')
-    check('the bootstrap server is filled in', lines.includes('REDPANDA_BROKERS=' + BS), env)
-    check('the Schema Registry URL is filled in', lines.includes('REDPANDA_SCHEMA_REGISTRY_URL=' + SR), env)
-    check('the username is filled in', lines.includes('REDPANDA_SASL_USERNAME=ada'), env)
-    check('<password> is left as it is', lines.includes('REDPANDA_SASL_PASSWORD=<password>'), env)
-    check('a comment line keeps its placeholder', lines[0].includes('for example <user> below'), lines[0])
-    check('a block type the editable pass skips is filled too', (await codeText('text-block')) === 'Log in as ada at ' + BS, await codeText('text-block'))
-    check('a Docker Compose block is not touched', (await codeText('local-block')).includes('user=<user>'), await codeText('local-block'))
-    check('a block outside any Cloud tab is not touched', (await codeText('outside-block')) === 'echo <user> <bootstrap-server-url>', await codeText('outside-block'))
-    s = await stored()
-    check('the values are stored in prefs.cloud', s.prefs.cloud.bootstrap === BS && s.prefs.cloud.schemaRegistry === SR && s.prefs.cloud.user === 'ada' && typeof s.prefs.cloud.at === 'number', JSON.stringify(s.prefs))
-    check('the status says saved', (await page.$eval('[data-sol-cluster-status]', (el) => el.textContent)) === 'Saved.')
-
-    // ---- copy ------------------------------------------------------------------
-    await page.evaluate(() => { window.__copied = [] })
-    await page.click('#env-block .copy-button')
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    const copied = await page.evaluate(() => window.__copied[0] || '')
-    check('the copy button copies the filled text', copied.includes('REDPANDA_BROKERS=' + BS) && copied.includes('REDPANDA_SASL_USERNAME=ada') && copied.includes('REDPANDA_SASL_PASSWORD=<password>'), JSON.stringify(copied))
-
-    // ---- invalid input is refused ---------------------------------------------
-    await type('user', '<img src=x onerror="window.__pwned=1">')
-    await page.click('form[data-sol-cluster] button[type="submit"]')
-    const bad = await page.evaluate(() => {
-      const input = document.querySelector('[data-sol-cluster-input="user"]')
-      const err = document.querySelector('[data-sol-cluster-error="user"]')
-      return { invalid: input.getAttribute('aria-invalid'), error: err.hidden ? null : err.textContent, focused: document.activeElement === input }
-    })
-    s = await stored()
-    check('an invalid username is refused with a message, and nothing changes', bad.invalid === 'true' && !!bad.error && bad.focused && s.prefs.cloud.user === 'ada', JSON.stringify(bad))
-    await type('user', 'ada')
-    await page.click('form[data-sol-cluster] button[type="submit"]')
-
-    // ---- markup in a value is inert --------------------------------------------
-    // The store refuses markup, so hand the fill a value directly: it must land
-    // as text, never as an element.
-    const inert = await page.evaluate(() => {
-      const api = window.docsSolutions
-      const real = api.getPrefs
-      api.getPrefs = () => ({ cloud: { bootstrap: '<img src=x onerror="window.__pwned=1">', schemaRegistry: null, user: 'ada', at: 1 } })
-      window.dispatchEvent(new CustomEvent('docs-solutions:change', { detail: {} }))
-      const code = document.querySelector('#env-block pre > code')
-      const out = { imgs: code.querySelectorAll('img').length, text: code.textContent }
-      api.getPrefs = real
-      window.dispatchEvent(new CustomEvent('docs-solutions:change', { detail: {} }))
-      return out
-    })
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    check('markup in a value is shown as text, never parsed', inert.imgs === 0 && inert.text.includes('REDPANDA_BROKERS=<img src=x onerror="window.__pwned=1">') &&
-      !(await page.evaluate(() => window.__pwned)), JSON.stringify(inert))
-    check('the stored values come back after that', (await codeText('env-block')).includes('REDPANDA_BROKERS=' + BS))
-
-    // ---- reload keeps the values (signed out: this browser only) --------------
-    await load()
-    const reloaded = await codeText('env-block')
-    check('after a reload the values are filled in again', reloaded.includes('REDPANDA_BROKERS=' + BS) && reloaded.includes('REDPANDA_SASL_USERNAME=ada'), reloaded)
-    check('and the form shows them', (await page.$eval('[data-sol-cluster-input="user"]', (el) => el.value)) === 'ada')
-
-    // ---- Clear ------------------------------------------------------------------
-    await page.click('#group-1 #_tabs_1_redpanda_cloud')
-    await page.click('[data-sol-cluster-clear]')
-    const cleared = await codeText('env-block')
-    check('Clear restores every placeholder', cleared.includes('REDPANDA_BROKERS=<bootstrap-server-url>') && cleared.includes('REDPANDA_SASL_USERNAME=<user>') &&
-      cleared.includes('REDPANDA_SCHEMA_REGISTRY_URL=<schema-registry-url>') && cleared.includes('REDPANDA_SASL_PASSWORD=<password>'), cleared)
-    check('Clear restores the skipped block too', (await codeText('text-block')) === 'Log in as <user> at <bootstrap-server-url>')
-    s = await stored()
-    check('Clear is stored as an empty entry with a time', s.prefs.cloud.bootstrap === null && s.prefs.cloud.schemaRegistry === null && s.prefs.cloud.user === null && typeof s.prefs.cloud.at === 'number', JSON.stringify(s.prefs))
-    check('Clear empties the form', (await page.$$eval('[data-sol-cluster-input]', (els) => els.map((e) => e.value).join(''))) === '')
+    check('no form is added to the page', (await page.$$('form')).length === 0)
+    check('the env.cloud.example placeholders are left as written', env.includes('REDPANDA_BROKERS=<bootstrap-server-url>') &&
+      env.includes('REDPANDA_SASL_USERNAME=<user>') && env.includes('REDPANDA_SCHEMA_REGISTRY_URL=<schema-registry-url>'), env)
 
     check('no uncaught page errors', pageErrors.length === 0, pageErrors.join('; '))
   } finally {

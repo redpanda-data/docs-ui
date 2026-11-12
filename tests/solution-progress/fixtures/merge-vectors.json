@@ -15,7 +15,7 @@
     "Solutions present on only one side are kept unchanged after normalization.",
     "Document updatedAt = max(existing.updatedAt, incoming.updatedAt, every merged record updatedAt); 0 for an empty document.",
     "After merging, keep at most 50 solutions, evicting the smallest updatedAt first (ties by id), then keep evicting until the serialized document is at most 32768 bytes.",
-    "Preferences, optional top-level `prefs`: {platform:{value, at}, cloud:{bootstrap, schemaRegistry, user, at}}. platform.value is one of local, kubernetes, cloud. Each cloud value is a string of at most 256 characters or null (absent and the empty string read as null): bootstrap is host:port[,host:port...] with ports 1 to 65535; schemaRegistry is an https URL with a host, an optional port, and a plain path (no user info, query, or fragment); user is letters, digits, and . _ @ - starting and ending with a letter or digit. An entry with any invalid value, or without a usable `at`, is dropped whole; unknown keys inside an entry (a password, a token) are dropped; unknown preference names are dropped. `at` is clamped like every other timestamp. Per entry the greater `at` wins and a tie goes to the incoming side. A cleared cloud entry is every value null with a fresh `at`. A side without `prefs` changes nothing, so an old client never erases stored preferences. Output carries `prefs` only when it has an entry; preferences do not move the document updatedAt. An invalid preference never rejects a body.",
+    "Preferences, optional top-level `prefs`: {platform:{value, at}}. platform.value is one of local, kubernetes, cloud. An entry with an invalid value, or without a usable `at`, is dropped; unknown keys inside an entry are dropped; unknown preference names are dropped, on the stored side too (a stored document that still carries a retired `cloud` entry reads without error and loses it). `at` is clamped like every other timestamp. Per entry the greater `at` wins and a tie goes to the incoming side. A side without `prefs` changes nothing, so an old client never erases stored preferences. Output carries `prefs` only when it has an entry; preferences do not move the document updatedAt. An invalid preference never rejects a body.",
     "The `invalid` cases are client bodies the strict validator rejects (HTTP 400). The stored side is read leniently: bad keys and records are dropped, the rest kept."
   ],
   "vectors": [
@@ -4116,7 +4116,7 @@
       }
     },
     {
-      "name": "prefs: the later platform and cloud entries win, whichever side carries them",
+      "name": "prefs: the later platform entry wins, whichever side carries it",
       "now": 1789300800000,
       "existing": {
         "v": 2,
@@ -4125,12 +4125,6 @@
           "platform": {
             "value": "local",
             "at": 1789290000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
           }
         }
       },
@@ -4141,12 +4135,6 @@
           "platform": {
             "value": "cloud",
             "at": 1789295000000
-          },
-          "cloud": {
-            "bootstrap": "seed-9z8y.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": null,
-            "user": "grace",
-            "at": 1789298000000
           }
         }
       },
@@ -4158,18 +4146,12 @@
           "platform": {
             "value": "cloud",
             "at": 1789295000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
           }
         }
       }
     },
     {
-      "name": "prefs: a tie on at goes to the incoming side, and a cleared cloud entry is kept as nulls",
+      "name": "prefs: a tie on at goes to the incoming side",
       "now": 1789300800000,
       "existing": {
         "v": 2,
@@ -4178,12 +4160,6 @@
           "platform": {
             "value": "kubernetes",
             "at": 1789280000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
           }
         }
       },
@@ -4194,12 +4170,6 @@
           "platform": {
             "value": "cloud",
             "at": 1789280000000
-          },
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": null,
-            "user": null,
-            "at": 1789299000000
           }
         }
       },
@@ -4211,18 +4181,294 @@
           "platform": {
             "value": "cloud",
             "at": 1789280000000
-          },
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": null,
-            "user": null,
-            "at": 1789299000000
           }
         }
       }
     },
     {
       "name": "prefs: an old client that sends no prefs keeps the stored prefs and still merges its progress",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "updatedAt": 1789290000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "create-topics": {
+                "done": true,
+                "at": 1789290000000
+              }
+            },
+            "currentStep": "create-topics",
+            "startedAt": 1789280000000,
+            "updatedAt": 1789290000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        },
+        "prefs": {
+          "platform": {
+            "value": "kubernetes",
+            "at": 1789285000000
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "updatedAt": 1789296000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "create-topics": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "register-schemas": {
+                "done": true,
+                "at": 1789296000000
+              }
+            },
+            "currentStep": "register-schemas",
+            "startedAt": 1789280000000,
+            "updatedAt": 1789296000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 1789296000000,
+        "solutions": {
+          "gaming": {
+            "steps": {
+              "create-topics": {
+                "done": true,
+                "at": 1789290000000
+              },
+              "register-schemas": {
+                "done": true,
+                "at": 1789296000000
+              }
+            },
+            "currentStep": "register-schemas",
+            "startedAt": 1789280000000,
+            "updatedAt": 1789296000000,
+            "completedAt": null,
+            "solutionVersion": "v1.0.0"
+          }
+        },
+        "prefs": {
+          "platform": {
+            "value": "kubernetes",
+            "at": 1789285000000
+          }
+        }
+      }
+    },
+    {
+      "name": "prefs: an empty or null prefs object from the client changes nothing",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "kubernetes",
+            "at": 1789285000000
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": null
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 0,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "kubernetes",
+            "at": 1789285000000
+          }
+        }
+      }
+    },
+    {
+      "name": "prefs: present on the incoming side only, kept as sent",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "solutions": {}
+      },
+      "incoming": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789280000000
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 0,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789280000000
+          }
+        }
+      }
+    },
+    {
+      "name": "prefs: unknown keys and unknown preference names (a cloud entry with a password, a theme) are dropped, never stored",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "solutions": {}
+      },
+      "incoming": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789280000000,
+            "label": "Docker Compose"
+          },
+          "cloud": {
+            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
+            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
+            "user": "ada",
+            "password": "hunter2",
+            "token": "abc",
+            "at": 1789280000000
+          },
+          "theme": {
+            "value": "dark",
+            "at": 1789280000000
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 0,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789280000000
+          }
+        }
+      }
+    },
+    {
+      "name": "prefs: an unknown platform is dropped",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789280000000
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "windows",
+            "at": 1789280001000
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 0,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789280000000
+          }
+        }
+      }
+    },
+    {
+      "name": "prefs: an at ahead of now by more than 5 minutes is clamped",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789304400000
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "solutions": {}
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 0,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local",
+            "at": 1789301100000
+          }
+        }
+      }
+    },
+    {
+      "name": "prefs: an ISO at is normalized, and an entry without a usable at is dropped",
+      "now": 1789300800000,
+      "existing": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "local"
+          }
+        }
+      },
+      "incoming": {
+        "v": 2,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "kubernetes",
+            "at": "2026-09-13T08:00:00.000Z"
+          }
+        }
+      },
+      "expected": {
+        "v": 2,
+        "updatedAt": 0,
+        "solutions": {},
+        "prefs": {
+          "platform": {
+            "value": "kubernetes",
+            "at": 1789286400000
+          }
+        }
+      }
+    },
+    {
+      "name": "prefs: a stored document that still has a cloud entry (written by an earlier client) reads without error, the cloud entry is dropped, and progress and platform merge as usual",
       "now": 1789300800000,
       "existing": {
         "v": 2,
@@ -4304,598 +4550,6 @@
           "platform": {
             "value": "kubernetes",
             "at": 1789285000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: an empty or null prefs object from the client changes nothing",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "kubernetes",
-            "at": 1789285000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
-          }
-        }
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "platform": null,
-          "cloud": null
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "kubernetes",
-            "at": 1789285000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: present on the incoming side only, kept as sent",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789280000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: unknown keys and a password are dropped, never stored",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789280000000,
-            "label": "Docker Compose"
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "password": "hunter2",
-            "token": "abc",
-            "at": 1789280000000
-          },
-          "theme": {
-            "value": "dark",
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789280000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789280000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: an unknown platform or an entry without a usable at is dropped",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789280000000
-          }
-        }
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "windows",
-            "at": 1789280001000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada"
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789280000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: a newer cloud entry with one invalid value is dropped whole, so the older valid one stays",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
-          }
-        }
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-9z8y.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "http://schema-registry.example.com",
-            "user": "grace",
-            "at": 1789300000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a bootstrap server without a port",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com",
-            "schemaRegistry": null,
-            "user": null,
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a bootstrap port above 65535",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.example.com:70000",
-            "schemaRegistry": null,
-            "user": null,
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a bootstrap list with a URL scheme",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "kafka://seed-1a2b.example.com:9092",
-            "schemaRegistry": null,
-            "user": null,
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a Schema Registry URL with user info",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": "https://ada:secret@schema-registry.example.com",
-            "user": null,
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a Schema Registry URL with a query string",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": "https://schema-registry.example.com/?token=abc",
-            "user": null,
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a javascript: Schema Registry URL",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": "javascript:alert(1)",
-            "user": null,
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a username with shell characters",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": null,
-            "user": "ada; rm -rf ~",
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a username with markup",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": null,
-            "user": "<img src=x onerror=alert(1)>",
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: invalid cloud value dropped: a non-string value",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": null,
-            "user": 42,
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {}
-      }
-    },
-    {
-      "name": "prefs: oversized values are dropped (each value is at most 256 characters)",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
-          }
-        }
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.com:9092",
-            "schemaRegistry": null,
-            "user": null,
-            "at": 1789300000000
-          },
-          "platform": {
-            "value": "cloud",
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "cloud",
-            "at": 1789280000000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "https://schema-registry-1a2b.byoc.prd.cloud.redpanda.com:30081",
-            "user": "ada",
-            "at": 1789299000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: a value of exactly 256 characters is kept",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": null,
-            "user": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": null,
-            "schemaRegistry": null,
-            "user": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
-            "at": 1789280000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: a multi-broker bootstrap list and an empty string as not set",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {}
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092,seed-9z8y.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": "",
-            "user": "svc.loader-01@example",
-            "at": 1789280000000
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092,seed-9z8y.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": null,
-            "user": "svc.loader-01@example",
-            "at": 1789280000000
-          }
-        }
-      }
-    },
-    {
-      "name": "prefs: an at ahead of now by more than 5 minutes is clamped, an ISO at is normalized",
-      "now": 1789300800000,
-      "existing": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789304400000
-          }
-        }
-      },
-      "incoming": {
-        "v": 2,
-        "solutions": {},
-        "prefs": {
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": null,
-            "user": null,
-            "at": "2026-09-13T08:00:00.000Z"
-          }
-        }
-      },
-      "expected": {
-        "v": 2,
-        "updatedAt": 0,
-        "solutions": {},
-        "prefs": {
-          "platform": {
-            "value": "local",
-            "at": 1789301100000
-          },
-          "cloud": {
-            "bootstrap": "seed-1a2b.byoc.prd.cloud.redpanda.com:9092",
-            "schemaRegistry": null,
-            "user": null,
-            "at": 1789286400000
           }
         }
       }
@@ -5011,8 +4665,8 @@
           }
         },
         "prefs": {
-          "cloud": {
-            "user": "<script>",
+          "platform": {
+            "value": "windows",
             "at": 1
           }
         }
