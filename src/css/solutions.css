@@ -2630,103 +2630,6 @@ html[data-theme="dark"] .sol-results-note {
   flex: 1 1 auto;
 }
 
-/* ---- Your cluster (34-solution-platform.js) ------------------------------ */
-
-/* The form on a Redpanda Cloud tab that fills the reader's own values into
-   the commands. Same panel treatment as Continue learning, compact. */
-.sol-cluster {
-  margin: 0 0 1rem;
-  padding: 1rem;
-  border-radius: var(--radius-lg-new);
-  border: 1px solid var(--component-200);
-  background: var(--component-bg-tint);
-}
-
-.sol-cluster-fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-
-.sol-cluster-title {
-  grid-column: 1 / -1;
-  padding: 0;
-  font-weight: 600;
-  font-size: calc(15 / var(--rem-base) * 1rem);
-}
-
-.sol-cluster-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.sol-cluster-row label {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  font-weight: 600;
-}
-
-.sol-cluster input {
-  font: inherit;
-  font-family: var(--monospace-font-family, monospace);
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  padding: 0.5rem 0.625rem;
-  border: 1px solid var(--grey-200-new);
-  border-radius: var(--radius-md-new);
-  background: var(--sol-surface, #fff);
-  color: var(--grey-900-new);
-  min-width: 0;
-}
-
-.sol-cluster input:focus-visible {
-  outline: 2px solid var(--component-500);
-  outline-offset: 1px;
-}
-
-.sol-cluster input[aria-invalid="true"] {
-  border-color: var(--brand-700-new);
-}
-
-.doc .sol-cluster-error {
-  margin: 0;
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--brand-700-new);
-}
-
-.sol-cluster-error[hidden] {
-  display: none;
-}
-
-.sol-cluster-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sol-cluster-status {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--sol-meta);
-}
-
-.doc .sol-cluster-hint {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  color: var(--sol-meta);
-}
-
-/* A filled value reads as the reader's own, not as a placeholder. */
-.doc .sol-cluster-value.is-filled {
-  font-weight: 600;
-}
-
 /* doc.css's `.doc h2` top margin and `.doc h2:not(.discrete)` padding and
    negative side margins (0,2,1) otherwise beat .sol-section-title, which
    left a tall empty band above the heading and pulled it toward the panel
@@ -2893,7 +2796,6 @@ html[data-theme="dark"] .sol-step-link,
 html[data-theme="dark"] .sol-rec-card,
 html[data-theme="dark"] .sol-card,
 html[data-theme="dark"] .sol-search,
-html[data-theme="dark"] .sol-cluster input,
 html[data-theme="dark"] .sol-rail-summary,
 html[data-theme="dark"] .sol-filters-summary {
   background: var(--grey-800-new);
@@ -3043,7 +2945,6 @@ html[data-theme="dark"] .sol-doc .sol-productionize-command {
 html[data-theme="dark"] .sol-meta,
 html[data-theme="dark"] .sol-recs,
 html[data-theme="dark"] .sol-continue,
-html[data-theme="dark"] .sol-cluster,
 html[data-theme="dark"] .sol-doc .solution-verify {
   background: var(--component-bg-tint-hover);
   border-color: var(--grey-700-new);
