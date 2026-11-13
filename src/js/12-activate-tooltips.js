@@ -49,6 +49,11 @@
       interactive: true,
       allowHTML: true,
       delay: [200, 0], // Instant show/hide for faster tooltips
+      // aria-describedby links the element to its tooltip while it is shown,
+      // including the interactive ones, where tippy's 'auto' would leave it
+      // off. The element's own text carries the meaning; the tooltip adds
+      // detail, so a description (not a label) is the right relationship.
+      aria: { content: 'describedby' },
       // Append to body to prevent overflow/clipping issues
       appendTo: () => document.body,
       // Only one tooltip open at a time, across every tooltip on the page.
@@ -85,6 +90,17 @@
     function linkedAnchor (el) {
       if (el.tagName === 'A' && el.getAttribute('href')) return el
       return el.querySelector('a[href]')
+    }
+
+    // Keyboard readers reach a tooltip through focus, so an element that
+    // cannot take focus (a badge is a plain <span>) gets tabindex="0". One
+    // that wraps a link is left alone: focus on the link reaches the tooltip
+    // already (tippy listens for focusin), and a second tab stop would only
+    // repeat it.
+    const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]'
+    function makeFocusable (el) {
+      if (el.matches(FOCUSABLE) || linkedAnchor(el)) return
+      el.setAttribute('tabindex', '0')
     }
 
     // Tooltip content as a DOM node: the text or HTML the element carries,
@@ -139,13 +155,17 @@
       tippy(el, { ...tooltipConfig, ignoreAttributes: true, content: buildContent(el, raw, true) })
     })
 
-    // Initialize tippy for custom data-tooltip elements
+    // Initialize tippy for custom data-tooltip elements. This is the one path
+    // for meaning badges and notices (.rp-badge, .rp-notice): macros and
+    // templates emit data-tooltip, never title or their own tippy() call.
     // allowHTML: false on the data-tooltip paths too. These carry the same
     // registry-authored strings as the promoted title above -- badge tooltips and
     // enterprise tooltips both land here -- and the DOM decodes the escaping the
     // macro applied, so with allowHTML: true tippy re-parsed the result as
     // markup. Tooltip text needs no markup on any of these paths.
     document.querySelectorAll('[data-tooltip]').forEach((el) => {
+      if (!el.getAttribute('data-tooltip')) return
+      makeFocusable(el)
       interceptTap(el)
       tippy(el, {
         ...tooltipConfig,
@@ -156,6 +176,7 @@
 
     // Initialize tippy for enterprise feature terms (enterprise inline macro)
     document.querySelectorAll('[data-enterprise-tooltip]').forEach((el) => {
+      makeFocusable(el)
       interceptTap(el)
       tippy(el, {
         ...tooltipConfig,
@@ -174,6 +195,7 @@
       const titleContent = el.getAttribute('title')
       if (!titleContent) return
       el.removeAttribute('title')
+      makeFocusable(el)
       // allowHTML: false, overriding the shared config. The browser renders a
       // title attribute as plain text, so promoting one to a tippy that parses
       // HTML would turn inert content into markup -- a feature name or registry

@@ -174,3 +174,37 @@ test('enterprise terms wrapping a licensing link get a Learn more link, plain te
   assert.equal(cfg.content.children[0].href, '/licenses/')
   assert.equal(e.attrs.title, undefined, 'native title removed so there is no double tooltip')
 })
+
+// The meaning badges (.rp-badge) are plain spans with data-tooltip. They take
+// the shared config, get a tab stop so keyboard readers can reach the
+// tooltip, and are described by it.
+const tooltipBadge = () => el({ tag: 'span', classes: ['rp-badge', 'rp-badge--beta'], attrs: { 'data-tooltip': 'Beta: available to try, and may change before general availability.' } })
+
+test('data-tooltip badges get the shared config, a tab stop, and aria-describedby', () => {
+  const b = tooltipBadge()
+  const { tippyCalls } = run({ canTouch: false, elements: [b] })
+  const calls = tippyCalls.filter((c) => c.target === b)
+  assert.equal(calls.length, 1, 'one tippy per badge')
+  const cfg = calls[0].cfg
+  assert.equal(cfg.trigger, 'mouseenter focus')
+  assert.equal(cfg.touch, true)
+  assert.equal(cfg.theme, 'redpanda-term')
+  assert.equal(cfg.aria.content, 'describedby')
+  assert.equal(cfg.allowHTML, false)
+  assert.equal(b.attrs.tabindex, '0', 'a span needs tabindex to take focus')
+})
+
+test('no extra tab stop on elements that already take focus or wrap a link', () => {
+  const term = glossaryTerm()
+  const ent = el({ tag: 'span', classes: ['enterprise-feature'], attrs: { 'data-enterprise-tooltip': 'x' }, children: [el({ tag: 'a', attrs: { href: '/licenses/' } })] })
+  const link = el({ tag: 'a', attrs: { href: '#cloud', 'data-tooltip': 'Available in Redpanda Cloud.' } })
+  run({ canTouch: false, elements: [term, ent, link, enterprise()] })
+  for (const e of [term, ent, link]) assert.equal(e.attrs.tabindex, undefined)
+})
+
+test('an empty data-tooltip gets no tooltip and no tab stop', () => {
+  const b = el({ tag: 'span', attrs: { 'data-tooltip': '' } })
+  const { tippyCalls } = run({ canTouch: false, elements: [b] })
+  assert.equal(tippyCalls.filter((c) => c.target === b).length, 0)
+  assert.equal(b.attrs.tabindex, undefined)
+})
