@@ -258,6 +258,9 @@ page:
       - content: Term Tooltips Test
         url: /tooltip-touch-test.html
         urlType: internal
+      - content: Meaning System Test
+        url: /meaning-system-test.html
+        urlType: internal
     - content: Get Started
       url: '#'
       urlType: internal
