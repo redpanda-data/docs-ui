@@ -208,3 +208,11 @@ test('an empty data-tooltip gets no tooltip and no tab stop', () => {
   assert.equal(tippyCalls.filter((c) => c.target === b).length, 0)
   assert.equal(b.attrs.tabindex, undefined)
 })
+
+test('no tab stop on a badge inside a link (a badge after a nav title)', () => {
+  const b = tooltipBadge()
+  b.parentElement = { closest: (sel) => (sel.includes('a[href]') ? { tagName: 'A' } : null) }
+  b.closest = () => null
+  run({ canTouch: false, elements: [b] })
+  assert.equal(b.attrs.tabindex, undefined)
+})

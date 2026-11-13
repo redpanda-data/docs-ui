@@ -17,14 +17,14 @@ Default size, as used in page headers and running text:
 <span class="rp-badge rp-badge--deprecated" data-tooltip="Deprecated: still available, but planned for removal.">Deprecated</span>
 <span class="rp-badge rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
 <span class="rp-badge rp-badge--eol-soon" data-tooltip="Support ends on 2027-03-31.">End of life soon</span>
-<span class="rp-badge rp-badge--new">New</span>
+<span class="rp-badge rp-badge--new" data-tooltip="New in this release.">New</span>
 <span class="rp-badge rp-badge--since" data-tooltip="Introduced in version 25.3.">Since v25.3</span>
 <span class="rp-badge rp-badge--cloud" data-tooltip="Available in Redpanda Cloud.">Cloud</span>
 <span class="rp-badge rp-badge--self-managed" data-tooltip="Available in Self-Managed Redpanda.">Self-Managed</span>
 <span class="rp-badge rp-badge--certified" data-tooltip="Supported and tested by Redpanda.">Certified</span>
 <span class="rp-badge rp-badge--community" data-tooltip="Community-supported.">Community</span>
-<span class="rp-badge rp-badge--use-case">Change data capture</span>
-<span class="rp-badge rp-badge--neutral">Input</span>
+<span class="rp-badge rp-badge--use-case" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</span>
+<span class="rp-badge rp-badge--neutral" data-tooltip="Reads data into a pipeline.">Input</span>
 </p>
 ++++
 
@@ -39,14 +39,14 @@ Small size (`rp-badge--sm`), as used in the nav and on cards:
 <span class="rp-badge rp-badge--deprecated rp-badge--sm" data-tooltip="Deprecated: still available, but planned for removal.">Deprecated</span>
 <span class="rp-badge rp-badge--eol rp-badge--sm" data-tooltip="No longer supported.">End of life</span>
 <span class="rp-badge rp-badge--eol-soon rp-badge--sm" data-tooltip="Support ends on 2027-03-31.">End of life soon</span>
-<span class="rp-badge rp-badge--new rp-badge--sm">New</span>
+<span class="rp-badge rp-badge--new rp-badge--sm" data-tooltip="New in this release.">New</span>
 <span class="rp-badge rp-badge--since rp-badge--sm" data-tooltip="Introduced in version 25.3.">Since v25.3</span>
 <span class="rp-badge rp-badge--cloud rp-badge--sm" data-tooltip="Available in Redpanda Cloud.">Cloud</span>
 <span class="rp-badge rp-badge--self-managed rp-badge--sm" data-tooltip="Available in Self-Managed Redpanda.">Self-Managed</span>
 <span class="rp-badge rp-badge--certified rp-badge--sm" data-tooltip="Supported and tested by Redpanda.">Certified</span>
 <span class="rp-badge rp-badge--community rp-badge--sm" data-tooltip="Community-supported.">Community</span>
-<span class="rp-badge rp-badge--use-case rp-badge--sm">Change data capture</span>
-<span class="rp-badge rp-badge--neutral rp-badge--sm">Input</span>
+<span class="rp-badge rp-badge--use-case rp-badge--sm" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</span>
+<span class="rp-badge rp-badge--neutral rp-badge--sm" data-tooltip="Reads data into a pipeline.">Input</span>
 </p>
 ++++
 
@@ -56,8 +56,8 @@ Badges that link, such as availability in another product or a use case:
 <p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="badges-links">
 <a class="rp-badge rp-badge--cloud" href="#cloud" data-tooltip="Available in Redpanda Cloud.">Cloud</a>
 <a class="rp-badge rp-badge--self-managed" href="#self-managed" data-tooltip="Available in Self-Managed Redpanda.">Self-Managed</a>
-<a class="rp-badge rp-badge--use-case" href="#use-case">Change data capture</a>
-<a class="rp-badge rp-badge--use-case" href="#use-case">Streaming ETL</a>
+<a class="rp-badge rp-badge--use-case" href="#use-case" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</a>
+<a class="rp-badge rp-badge--use-case" href="#use-case" data-tooltip="Transforms data continuously as it moves between systems.">Streaming ETL</a>
 </p>
 ++++
 
@@ -81,7 +81,7 @@ A page-level notice, the Redpanda Connect connector card generalized. Each meani
     <span class="rp-notice-icon" style="--rp-icon: var(--icon-tag)" aria-hidden="true"></span>
     <div class="rp-notice-body">
       <span class="rp-notice-title">Use cases</span>
-      <p class="rp-notice-actions"><a class="rp-badge rp-badge--use-case" href="#uc">Change data capture</a> <a class="rp-badge rp-badge--use-case" href="#uc">Database replication</a></p>
+      <p class="rp-notice-actions"><a class="rp-badge rp-badge--use-case" href="#uc" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</a> <a class="rp-badge rp-badge--use-case" href="#uc" data-tooltip="Copies data from one database to another and keeps them in sync.">Database replication</a></p>
     </div>
   </div>
 </div>

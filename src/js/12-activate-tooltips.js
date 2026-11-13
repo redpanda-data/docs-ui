@@ -94,12 +94,13 @@
 
     // Keyboard readers reach a tooltip through focus, so an element that
     // cannot take focus (a badge is a plain <span>) gets tabindex="0". One
-    // that wraps a link is left alone: focus on the link reaches the tooltip
-    // already (tippy listens for focusin), and a second tab stop would only
-    // repeat it.
+    // that wraps a link, or sits inside a link or button (a badge after a nav
+    // title), is left alone: focus on the link reaches the tooltip already
+    // (tippy listens for focusin), and a nested tab stop would only repeat it.
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]'
     function makeFocusable (el) {
       if (el.matches(FOCUSABLE) || linkedAnchor(el)) return
+      if (typeof el.closest === 'function' && el.parentElement && el.parentElement.closest('a[href], button')) return
       el.setAttribute('tabindex', '0')
     }
 
