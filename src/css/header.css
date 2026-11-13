@@ -1167,12 +1167,6 @@ html[data-theme="dark"] .tb-dropdown-item:hover {
     display: none;
   }
 
-  /* Compact version status badge */
-  .topbar-crumbs .sm-ver-pill-status {
-    font-size: calc(12 / var(--rem-base) * 1rem);
-    padding: 2px 6px;
-  }
-
   .tb-ai-btn svg {
     width: 14px;
     height: 14px;

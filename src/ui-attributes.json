@@ -277,7 +277,7 @@
       "setBy": "writer",
       "type": "string",
       "description": "Tooltip text for the beta badge. Defaults to a generic beta notice.",
-      "readBy": ["src/partials/article.hbs"]
+      "readBy": ["src/partials/article.hbs", "src/partials/component-home-v3.hbs"]
     },
     "page-bloblang-samples": {
       "setIn": ["page"],
@@ -1072,11 +1072,11 @@
       "readBy": ["src/partials/article.hbs"]
     },
     "page-is-nearing-eol": {
-      "setIn": ["page"],
+      "setIn": ["page", "component"],
       "setBy": "extension",
       "type": "boolean-string",
-      "description": "Set to true when the version is close to end of life. Shows the nearing-EOL banner.",
-      "readBy": ["src/partials/latest-banner.hbs"]
+      "description": "Set to true when the version is close to end of life. Shows the nearing-EOL banner, and End of life soon in the version selector.",
+      "readBy": ["src/partials/latest-banner.hbs", "src/partials/version-selector.hbs"]
     },
     "page-is-past-eol": {
       "setIn": ["page", "component"],

@@ -192,21 +192,6 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-toggle:hov
   transform: rotate(180deg);
 }
 
-/* Compact inline badges in sticky bar */
-.component-indicator-sticky .byoc-label--inline,
-.component-indicator-sticky .cloud-label--inline {
-  margin: 0;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-}
-
-.component-indicator-sticky .byoc-label--inline > p,
-.component-indicator-sticky .cloud-label--inline > p {
-  padding: 4px 10px;
-  min-width: auto;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  border-radius: 6px;
-}
-
 /* Context dropdown menu in sticky bar */
 .component-indicator-sticky .context-dropdown-menu {
   position: absolute;
@@ -358,22 +343,6 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
   display: none;
 }
 
-.component-indicator-sticky .sm-ver-pill-status[data-status="current"] {
-  color: #059669;
-}
-
-.component-indicator-sticky .sm-ver-pill-status[data-status="supported"] {
-  color: #059669;
-}
-
-.component-indicator-sticky .sm-ver-pill-status[data-status="eol"] {
-  color: #d97706;
-}
-
-.component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
-  color: #7c3aed;
-}
-
 .component-indicator-sticky .sm-ver-pill-caret {
   color: var(--grey-500-new, #737373);
 }
@@ -391,22 +360,6 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill:hover {
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-num {
   color: #fff;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="current"] {
-  color: #6ee7b7;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="supported"] {
-  color: #a7f3d0;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="eol"] {
-  color: #fcd34d;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
-  color: #c4b5fd;
 }
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
@@ -437,160 +390,6 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
   .component-indicator-sticky .sm-ver.is-open .sm-ver-panel {
     transform: translate(-50%, -50%) scale(1) !important;
   }
-}
-
-/* Status badges (Beta, Preview, Limited Availability, Since) in sticky header */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 5px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-/* Show help cursor when badge has tooltip */
-.status-badge[data-tippy-content] {
-  cursor: help;
-}
-
-.status-badge svg {
-  flex-shrink: 0;
-}
-
-.status-badge--beta {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fcd34d;
-}
-
-.status-badge--preview {
-  background: #1f2937;
-  color: #f9fafb;
-  border: 1px solid #111827;
-}
-
-.status-badge--la {
-  background: #ede9fe;
-  color: #5b21b6;
-  border: 1px solid #c4b5fd;
-}
-
-html[data-theme="dark"] .status-badge--beta {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fcd34d;
-  border-color: rgba(251, 191, 36, 0.3);
-}
-
-/* Since shares the neutral dark palette with Preview */
-html[data-theme="dark"] .status-badge--preview,
-html[data-theme="dark"] .status-badge--since {
-  background: rgba(148, 163, 184, 0.15);
-  color: #cbd5e1;
-  border-color: rgba(148, 163, 184, 0.3);
-}
-
-html[data-theme="dark"] .status-badge--la {
-  background: rgba(139, 92, 246, 0.15);
-  color: #c4b5fd;
-  border-color: rgba(139, 92, 246, 0.3);
-}
-
-.status-badge--byoc,
-.status-badge--cloud {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #7dd3fc;
-}
-
-html[data-theme="dark"] .status-badge--byoc,
-html[data-theme="dark"] .status-badge--cloud {
-  background: rgba(14, 165, 233, 0.15);
-  color: #7dd3fc;
-  border-color: rgba(14, 165, 233, 0.3);
-}
-
-.status-badge--since {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  font-weight: 500;
-}
-
-/* Full badge text for screen readers; the visible "Since X" is aria-hidden */
-.status-badge__sr-text {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Availability badges: links to the other platform's version of this page */
-a.status-badge--cloud-link,
-a.status-badge--self-managed-link {
-  text-decoration: none;
-}
-
-.status-badge--cloud-link {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #7dd3fc;
-}
-
-.status-badge--cloud-link:hover {
-  background: #bae6fd;
-  color: #075985;
-}
-
-.status-badge--self-managed-link {
-  background: #dcfce7;
-  color: #15803d;
-  border: 1px solid #86efac;
-}
-
-.status-badge--self-managed-link:hover {
-  background: #bbf7d0;
-  color: #166534;
-}
-
-.status-badge--self-managed-only {
-  background: var(--grey-100-new, #f3f4f6);
-  color: #4b5563;
-  border: 1px solid var(--grey-200-new, #e5e5e5);
-}
-
-html[data-theme="dark"] .status-badge--cloud-link {
-  background: rgba(14, 165, 233, 0.15);
-  color: #7dd3fc;
-  border-color: rgba(14, 165, 233, 0.3);
-}
-
-html[data-theme="dark"] .status-badge--cloud-link:hover {
-  background: rgba(14, 165, 233, 0.25);
-}
-
-html[data-theme="dark"] .status-badge--self-managed-link {
-  background: rgba(34, 197, 94, 0.15);
-  color: #86efac;
-  border-color: rgba(34, 197, 94, 0.3);
-}
-
-html[data-theme="dark"] .status-badge--self-managed-link:hover {
-  background: rgba(34, 197, 94, 0.25);
-}
-
-html[data-theme="dark"] .status-badge--self-managed-only {
-  background: rgba(148, 163, 184, 0.12);
-  color: #cbd5e1;
-  border-color: rgba(148, 163, 184, 0.25);
 }
 
 @media screen and (min-width: 600px) {
@@ -1794,21 +1593,33 @@ details[open] > summary {
   display: flex;
 }
 
-.doc .tableblock td .enterprise-label {
-  background-color: var(--redpanda-1000);
-  color: #fff;
-  padding: 0.2em 0.2em;
-  line-height: normal;
-  border-radius: 3px;
-  font-size: calc(17 / var(--rem-base) * 1rem);
+/* Enterprise labels in tables and inline: the enterprise badge look
+   (.rp-badge--enterprise in meaning.css), without needing new markup */
+.doc .tableblock td .enterprise-label,
+.doc .inline-enterprise-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--meaning-enterprise-border);
+  border-radius: 999px;
+  background: var(--meaning-enterprise-bg);
+  color: var(--meaning-enterprise-fg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.doc .inline-enterprise-label {
-  background-color: var(--redpanda-1000);
-  color: #fff;
-  padding: 0.2em 0.2em;
-  border-radius: 3px;
-  font-size: calc(17 / var(--rem-base) * 1rem);
+.doc .tableblock td .enterprise-label::before,
+.doc .inline-enterprise-label::before {
+  content: "";
+  flex: none;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-lock) no-repeat center / contain;
+  mask: var(--icon-lock) no-repeat center / contain;
 }
 
 .doc .tableblock td .enterprise-label-container:hover,
@@ -2839,57 +2650,4 @@ html[data-theme="dark"] .availability-selector-menu {
 
 html[data-theme="dark"] .availability-selector-item:hover {
   background: rgba(255, 255, 255, 0.06);
-}
-
-/* Inline badges from the badge macro (badge::[label=...]).
-   Distinct from .status-badge, the page-level beta pill. */
-.doc .badge {
-  display: inline-block;
-  padding: 0 0.4em;
-  border-radius: 9999px;
-  font-size: 0.75em;
-  font-weight: 600;
-  vertical-align: baseline;
-  white-space: nowrap;
-}
-
-.doc .badge--beta {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fcd34d;
-}
-
-.doc .badge--deprecated {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-}
-
-.doc .badge--enterprise {
-  background: #ede9fe;
-  color: #5b21b6;
-  border: 1px solid #c4b5fd;
-}
-
-.doc .badge--large {
-  font-size: 0.9em;
-  padding: 0.15em 0.6em;
-}
-
-html[data-theme="dark"] .doc .badge--beta {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fcd34d;
-  border-color: rgba(251, 191, 36, 0.3);
-}
-
-html[data-theme="dark"] .doc .badge--deprecated {
-  background: rgba(248, 113, 113, 0.15);
-  color: #fca5a5;
-  border-color: rgba(248, 113, 113, 0.3);
-}
-
-html[data-theme="dark"] .doc .badge--enterprise {
-  background: rgba(167, 139, 250, 0.15);
-  color: #c4b5fd;
-  border-color: rgba(167, 139, 250, 0.3);
 }

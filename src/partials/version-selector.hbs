@@ -7,6 +7,7 @@
   - prerelease = Beta
   - page.component.latest = Latest (the most recent GA version)
   - is-eol = End of life
+  - page-is-nearing-eol = End of life soon (compute-end-of-life extension)
   - Otherwise = Supported
 --}}
 {{#if (and page.versions (gt page.versions.length 1))}}
@@ -16,16 +17,16 @@
     {{!-- Status dot - determine version status: beta (prerelease), current (latest GA), supported, or eol --}}
     {{#each page.versions as |ver|}}
       {{#if (eq ver.version @root.page.version)}}
-    <span class="sm-ver-pill-dot" data-status="{{#if ver.prerelease}}beta{{else if (eq ver.version @root.page.component.latest.version)}}current{{else if (is-eol ver.asciidoc.attributes)}}eol{{else}}supported{{/if}}" aria-hidden="true"></span>
+    <span class="sm-ver-pill-dot" data-status="{{#if ver.prerelease}}beta{{else if (eq ver.version @root.page.component.latest.version)}}current{{else if (is-eol ver.asciidoc.attributes)}}eol{{else if (eq ver.asciidoc.attributes.page-is-nearing-eol 'true')}}eol-soon{{else}}supported{{/if}}" aria-hidden="true"></span>
       {{/if}}
     {{/each}}
     <span class="sm-ver-pill-label">Docs for</span>
     <span class="sm-ver-pill-num">v{{page.componentVersion.displayVersion}}</span>
     <span class="sm-ver-pill-sep" aria-hidden="true"></span>
-    {{!-- Status label: Beta (prerelease), Latest (latest GA), End of life (eol), or Supported --}}
+    {{!-- Status label: Beta (prerelease), Latest (latest GA), End of life (eol), End of life soon, or Supported --}}
     {{#each page.versions as |ver|}}
       {{#if (eq ver.version @root.page.version)}}
-    <span class="sm-ver-pill-status" data-status="{{#if ver.prerelease}}beta{{else if (eq ver.version @root.page.component.latest.version)}}current{{else if (is-eol ver.asciidoc.attributes)}}eol{{else}}supported{{/if}}">{{#if ver.prerelease}}Beta{{else if (eq ver.version @root.page.component.latest.version)}}Latest{{else if (is-eol ver.asciidoc.attributes)}}End of life{{else}}Supported{{/if}}</span>
+    <span class="sm-ver-pill-status" data-status="{{#if ver.prerelease}}beta{{else if (eq ver.version @root.page.component.latest.version)}}current{{else if (is-eol ver.asciidoc.attributes)}}eol{{else if (eq ver.asciidoc.attributes.page-is-nearing-eol 'true')}}eol-soon{{else}}supported{{/if}}">{{#if ver.prerelease}}Beta{{else if (eq ver.version @root.page.component.latest.version)}}Latest{{else if (is-eol ver.asciidoc.attributes)}}End of life{{else if (eq ver.asciidoc.attributes.page-is-nearing-eol 'true')}}End of life soon{{else}}Supported{{/if}}</span>
       {{/if}}
     {{/each}}
     <svg class="sm-ver-pill-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -161,10 +162,17 @@
               </span>
             </div>
             {{/if}}
+            {{#if (eq ./asciidoc.attributes.page-is-nearing-eol 'true')}}
+            <span class="sm-ver-row-status" data-status="eol-soon">
+              <span class="sm-ver-row-status-dot"></span>
+              End of life soon
+            </span>
+            {{else}}
             <span class="sm-ver-row-status" data-status="supported">
               <span class="sm-ver-row-status-dot"></span>
               Supported
             </span>
+            {{/if}}
             {{#if (eq ./version @root.page.version)}}
             <span class="sm-ver-row-check" aria-label="Selected">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">

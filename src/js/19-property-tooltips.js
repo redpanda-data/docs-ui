@@ -411,19 +411,25 @@
         '</code></div>'
     )
 
-    // Badges row
+    // Badges row: the site-wide meaning badges (.rp-badge in meaning.css),
+    // so Enterprise and Deprecated look the same here as everywhere else.
+    // Scope and restart have no meaning of their own, so they are neutral.
     var badges = []
+    var badge = function (meaning, label) {
+      return '<span class="rp-badge rp-badge--sm rp-badge--' + meaning + '">' + escapeHtml(label) + '</span>'
+    }
     if (prop.configScope) {
-      badges.push('<span class="prop-badge prop-badge-scope">' + escapeHtml(prop.configScope) + '</span>')
+      var scope = String(prop.configScope)
+      badges.push(badge('neutral', scope.charAt(0).toUpperCase() + scope.slice(1)))
     }
     if (prop.needsRestart) {
-      badges.push('<span class="prop-badge prop-badge-restart">restart required</span>')
+      badges.push(badge('neutral', 'Restart required'))
     }
     if (prop.isEnterprise) {
-      badges.push('<span class="prop-badge prop-badge-enterprise">enterprise</span>')
+      badges.push(badge('enterprise', 'Enterprise'))
     }
     if (prop.isDeprecated) {
-      badges.push('<span class="prop-badge prop-badge-deprecated">deprecated</span>')
+      badges.push(badge('deprecated', 'Deprecated'))
     }
 
     if (badges.length > 0) {

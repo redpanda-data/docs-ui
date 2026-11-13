@@ -5,9 +5,16 @@
     {{#if ./content}}
     <div class="item {{#if (eq ./url @root.page.url)}}is-current-page{{/if}} {{#if ./items.length}}dropdown{{/if}}">
     {{#if ./url}}
-    <a class="nav-link {{~#if (is-beta-feature ./url)}} cloud-beta{{~/if}}{{~#if (is-preview-feature ./url)}} cloud-preview{{~/if}}{{~#if (is-limited-availability-feature ./url)}} cloud-limited-availability{{~/if}}{{~#unless @root.page.attributes.adp}}{{~#if (is-byoc-feature ./url)}} cloud-byoc{{~/if}}{{~#if (is-cloud-feature ./url)}} cloud-only{{~/if}}{{~/unless}}" href="
+    <a class="nav-link" href="
       {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
-      {{~else}}{{{./url}}}{{~/if}}">{{{./content}}} </a>
+      {{~else}}{{{./url}}}{{~/if}}">{{{./content}}}
+      {{~#if (is-beta-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--beta">Beta</span>{{/if}}
+      {{~#if (is-preview-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--preview">Preview</span>{{/if}}
+      {{~#if (is-limited-availability-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--limited">Limited availability</span>{{/if}}
+      {{~#unless @root.page.attributes.adp}}
+      {{~#if (is-byoc-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--cloud">BYOC</span>{{/if}}
+      {{~#if (is-cloud-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--cloud">Cloud</span>{{/if}}
+      {{~/unless}} </a>
     {{else}}
     <span class="nav-text">{{{./content}}} </span>
     {{/if}}

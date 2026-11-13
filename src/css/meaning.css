@@ -11,8 +11,12 @@
    Button: .rp-button, .rp-button--primary, and .rp-notice-link.
    ============================================================================= */
 
+/* The badge macro (docs-extensions-and-macros badge::[label=...]) emits
+   <span class="badge badge--LABEL"> and gets the same look, mapped onto the
+   meanings below. An unknown label is neutral. */
 .rp-badge,
-.rp-notice {
+.rp-notice,
+.badge {
   --rp-fg: var(--meaning-neutral-fg);
   --rp-bg: var(--meaning-neutral-bg);
   --rp-border: var(--meaning-neutral-border);
@@ -20,7 +24,8 @@
 }
 
 .rp-badge--enterprise,
-.rp-notice--enterprise {
+.rp-notice--enterprise,
+.badge--enterprise {
   --rp-fg: var(--meaning-enterprise-fg);
   --rp-bg: var(--meaning-enterprise-bg);
   --rp-border: var(--meaning-enterprise-border);
@@ -28,7 +33,8 @@
 }
 
 .rp-badge--beta,
-.rp-notice--beta {
+.rp-notice--beta,
+.badge--beta {
   --rp-fg: var(--meaning-beta-fg);
   --rp-bg: var(--meaning-beta-bg);
   --rp-border: var(--meaning-beta-border);
@@ -36,7 +42,8 @@
 }
 
 .rp-badge--preview,
-.rp-notice--preview {
+.rp-notice--preview,
+.badge--preview {
   --rp-fg: var(--meaning-preview-fg);
   --rp-bg: var(--meaning-preview-bg);
   --rp-border: var(--meaning-preview-border);
@@ -44,7 +51,8 @@
 }
 
 .rp-badge--limited,
-.rp-notice--limited {
+.rp-notice--limited,
+.badge--limited-availability {
   --rp-fg: var(--meaning-limited-fg);
   --rp-bg: var(--meaning-limited-bg);
   --rp-border: var(--meaning-limited-border);
@@ -52,7 +60,8 @@
 }
 
 .rp-badge--deprecated,
-.rp-notice--deprecated {
+.rp-notice--deprecated,
+.badge--deprecated {
   --rp-fg: var(--meaning-deprecated-fg);
   --rp-bg: var(--meaning-deprecated-bg);
   --rp-border: var(--meaning-deprecated-border);
@@ -76,7 +85,8 @@
 }
 
 .rp-badge--new,
-.rp-notice--new {
+.rp-notice--new,
+.badge--new {
   --rp-fg: var(--meaning-new-fg);
   --rp-bg: var(--meaning-new-bg);
   --rp-border: var(--meaning-new-border);
@@ -91,7 +101,9 @@
 }
 
 .rp-badge--cloud,
-.rp-notice--cloud {
+.rp-notice--cloud,
+.badge--cloud,
+.badge--byoc {
   --rp-fg: var(--meaning-cloud-fg);
   --rp-bg: var(--meaning-cloud-bg);
   --rp-border: var(--meaning-cloud-border);
@@ -137,10 +149,16 @@
   --rp-border: var(--meaning-neutral-border);
 }
 
+.badge--unreleased {
+  --rp-icon: var(--icon-clock);
+}
+
 /* Badge */
 .rp-badge,
 .doc .rp-badge,
-.doc a.rp-badge {
+.doc a.rp-badge,
+.badge,
+.doc .badge {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -175,7 +193,16 @@
 .rp-badge--self-managed::before,
 .rp-badge--certified::before,
 .rp-badge--community::before,
-.rp-badge--use-case::before {
+.rp-badge--use-case::before,
+.badge--enterprise::before,
+.badge--beta::before,
+.badge--preview::before,
+.badge--limited-availability::before,
+.badge--deprecated::before,
+.badge--new::before,
+.badge--cloud::before,
+.badge--byoc::before,
+.badge--unreleased::before {
   content: "";
   flex: none;
   width: 1em;
@@ -210,6 +237,140 @@ a.rp-badge:hover,
 .doc a.rp-badge:focus-visible {
   outline: 2px solid var(--rp-fg);
   outline-offset: 2px;
+}
+
+/* Full text for screen readers where the visible label is aria-hidden
+   (the Since badge) */
+.rp-badge__sr-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* A badge with a tooltip promises one: show the help cursor */
+span.rp-badge[data-tooltip],
+.badge[data-tooltip] {
+  cursor: help;
+}
+
+/* Version selector status chips (version-selector.hbs): Latest, Supported,
+   End of life soon, End of life, Beta, on the meaning tokens. Latest is the
+   new (green) meaning and Supported is neutral, so they no longer match. */
+.sm-ver-pill-status,
+.sm-ver-row-status,
+.sm-ver-row-note {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+}
+
+.sm-ver-pill-status[data-status="current"],
+.sm-ver-row-status[data-status="current"],
+.sm-ver-row[data-status="current"] .sm-ver-row-note {
+  --rp-fg: var(--meaning-new-fg);
+  --rp-bg: var(--meaning-new-bg);
+  --rp-border: var(--meaning-new-border);
+}
+
+.sm-ver-pill-dot[data-status="current"] {
+  background: var(--meaning-new-fg);
+  box-shadow: 0 0 0 3px var(--meaning-new-bg);
+}
+
+.sm-ver-pill-status[data-status="supported"],
+.sm-ver-row-status[data-status="supported"],
+.sm-ver-row[data-status="supported"] .sm-ver-row-note {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+}
+
+.sm-ver-pill-dot[data-status="supported"] {
+  background: var(--meaning-neutral-fg);
+  box-shadow: 0 0 0 3px var(--meaning-neutral-bg);
+}
+
+.sm-ver-pill-status[data-status="eol"],
+.sm-ver-row-status[data-status="eol"],
+.sm-ver-row[data-status="eol"] .sm-ver-row-note {
+  --rp-fg: var(--meaning-eol-fg);
+  --rp-bg: var(--meaning-eol-bg);
+  --rp-border: var(--meaning-eol-border);
+}
+
+.sm-ver-pill-dot[data-status="eol"] {
+  background: var(--meaning-eol-fg);
+  box-shadow: 0 0 0 3px var(--meaning-eol-bg);
+}
+
+.sm-ver-pill-status[data-status="eol-soon"],
+.sm-ver-row-status[data-status="eol-soon"],
+.sm-ver-row[data-status="eol-soon"] .sm-ver-row-note {
+  --rp-fg: var(--meaning-eol-soon-fg);
+  --rp-bg: var(--meaning-eol-soon-bg);
+  --rp-border: var(--meaning-eol-soon-border);
+}
+
+.sm-ver-pill-dot[data-status="eol-soon"] {
+  background: var(--meaning-eol-soon-fg);
+  box-shadow: 0 0 0 3px var(--meaning-eol-soon-bg);
+}
+
+.sm-ver-pill-status[data-status="beta"],
+.sm-ver-row-status[data-status="beta"],
+.sm-ver-row[data-status="beta"] .sm-ver-row-note {
+  --rp-fg: var(--meaning-beta-fg);
+  --rp-bg: var(--meaning-beta-bg);
+  --rp-border: var(--meaning-beta-border);
+}
+
+.sm-ver-pill-dot[data-status="beta"] {
+  background: var(--meaning-beta-fg);
+  box-shadow: 0 0 0 3px var(--meaning-beta-bg);
+}
+
+.sm-ver-pill-status,
+.sm-ver-row-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--rp-border);
+  border-radius: 999px;
+  background: var(--rp-bg);
+  color: var(--rp-fg);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1.2;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+/* A row chip sits in the version row's grid; keep it its own width */
+.sm-ver-row-status {
+  justify-self: end;
+}
+
+.sm-ver-row-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.sm-ver-row-note {
+  color: var(--rp-fg);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 /* Notice: a page-level card, the Connect connector card generalized */

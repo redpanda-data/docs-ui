@@ -666,55 +666,11 @@ html[data-theme="light"] .nav-item-toggle {
   font-family: var(--body-font-family-bold);
 }
 
-.nav-link.cloud-beta::after {
-  display: inline;
-  content: '(beta)';
+/* Status badges after a nav title (nav-tree.hbs): Beta, Preview, Limited
+   availability, BYOC, Cloud. The look is .rp-badge in meaning.css. */
+.nav-link .rp-badge {
   margin-left: 4px;
-  white-space: nowrap;
-}
-
-.nav-link.cloud-preview::after {
-  display: inline;
-  content: '(Preview)';
-  margin-left: 4px;
-  white-space: nowrap;
-}
-
-.nav-link.cloud-limited-availability::after {
-  display: inline;
-  content: '(Limited)';
-  margin-left: 4px;
-  white-space: nowrap;
-}
-
-.nav-link.cloud-byoc::after,
-.nav-link.cloud-only::after {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
-  font-size: calc(10 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 2px 5px;
-  border-radius: 3px;
-  margin-left: 6px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.nav-link.cloud-byoc::after {
-  content: 'SELF-MANAGED';
-  color: #c6cedc;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.nav-link.cloud-only::after {
-  content: 'MANAGED';
-  color: #ffb8a3;
-  background: rgba(226, 67, 40, 0.14);
-  border: 1px solid rgba(226, 67, 40, 0.28);
+  vertical-align: 1px;
 }
 
 /* Status Footer - Shows system status at bottom of sidebar */
@@ -1428,16 +1384,11 @@ html[data-theme="light"] .nav-bucket-version-opt.is-selected {
   color: var(--grey-900-new, var(--grey-900, #181818));
 }
 
-/* EOL badge in version dropdown */
-.version-eol {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  color: #f59e0b;
+/* End of life badge in the version dropdowns (bucket-header.hbs,
+   nav-explore.hbs); the look is .rp-badge in meaning.css */
+.nav-bucket-version-opt .rp-badge,
+.nav-panel-explore .rp-badge {
   margin-left: 4px;
-}
-
-html[data-theme="light"] .version-eol {
-  color: #d97706;
 }
 
 /* Version toggle button - show/hide older versions */
