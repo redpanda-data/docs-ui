@@ -25,7 +25,7 @@ Attributes from page:
     <div class="whats-new-items{{#if (gte items.length 5)}} whats-new-items--scrollable{{/if}}">
       {{#each items}}
       <a href="{{#if link}}{{{relativize (resolve-resource link)}}}{{else}}#{{/if}}" class="whats-new-item">
-        <span class="rp-badge rp-badge--sm rp-badge--new">New</span>
+        <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
         <div class="whats-new-content">
           <h4 class="whats-new-item-title">{{title}}</h4>
           <p class="whats-new-item-desc">{{desc}}</p>
@@ -53,7 +53,7 @@ Attributes from page:
       <div class="whats-new-items{{#if (gte items.length 5)}} whats-new-items--scrollable{{/if}}">
         {{#each items}}
         <a href="{{#if link}}{{{relativize (resolve-resource link)}}}{{else}}#{{/if}}" class="whats-new-item">
-          <span class="rp-badge rp-badge--sm rp-badge--new">New</span>
+          <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
           <div class="whats-new-content">
             <h4 class="whats-new-item-title">{{title}}</h4>
             <p class="whats-new-item-desc">{{desc}}</p>

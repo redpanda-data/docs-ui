@@ -9,6 +9,8 @@
   - is-eol = End of life
   - page-is-nearing-eol = End of life soon (compute-end-of-life extension)
   - Otherwise = Supported
+  Each row and the pill show the status once, as the chip; version-label
+  drops a status word from the display version so it does not repeat.
 --}}
 {{#if (and page.versions (gt page.versions.length 1))}}
   {{#if (ne page.componentVersion.displayVersion 'default')}}
@@ -21,7 +23,7 @@
       {{/if}}
     {{/each}}
     <span class="sm-ver-pill-label">Docs for</span>
-    <span class="sm-ver-pill-num">v{{page.componentVersion.displayVersion}}</span>
+    <span class="sm-ver-pill-num">v{{version-label page.componentVersion.displayVersion}}</span>
     <span class="sm-ver-pill-sep" aria-hidden="true"></span>
     {{!-- Status label: Beta (prerelease), Latest (latest GA), End of life (eol), End of life soon, or Supported --}}
     {{#each page.versions as |ver|}}
@@ -62,8 +64,7 @@
           {{#if ./prerelease}}
           <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="beta" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
-              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
-              <span class="sm-ver-row-note">Beta</span>
+              <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
             {{#if ./asciidoc.attributes.page-release-date}}
             <div class="sm-ver-row-dates">
@@ -104,8 +105,7 @@
           {{#if (and (not ./prerelease) (eq ./version @root.page.component.latest.version))}}
           <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="current" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
-              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
-              <span class="sm-ver-row-note">Latest</span>
+              <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
             {{#if ./asciidoc.attributes.page-release-date}}
             <div class="sm-ver-row-dates">
@@ -148,7 +148,7 @@
           {{#unless (is-eol ./asciidoc.attributes)}}
           <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="supported" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
-              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
+              <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
             {{#if ./asciidoc.attributes.page-release-date}}
             <div class="sm-ver-row-dates">
@@ -199,7 +199,7 @@
           {{#if (is-eol ./asciidoc.attributes)}}
           <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="eol" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
-              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
+              <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
             {{#if ./asciidoc.attributes.page-release-date}}
             <div class="sm-ver-row-dates">

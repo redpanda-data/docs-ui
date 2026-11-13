@@ -433,7 +433,9 @@
     }
 
     if (badges.length > 0) {
-      parts.push('<div class="prop-tooltip-badges">' + badges.join(' ') + '</div>')
+      // data-in-tooltip: these badges are inside a tooltip, so they get no
+      // tooltip of their own (tests/meaning-system/badge-tooltip.test.js)
+      parts.push('<div class="prop-tooltip-badges" data-in-tooltip>' + badges.join(' ') + '</div>')
     }
 
     // Description: first paragraph only. The tooltip is a preview; the full

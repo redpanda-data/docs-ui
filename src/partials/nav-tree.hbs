@@ -8,12 +8,12 @@
     <a class="nav-link" href="
       {{~#if (eq ./urlType 'internal')}}{{{relativize ./url}}}
       {{~else}}{{{./url}}}{{~/if}}">{{{./content}}}
-      {{~#if (is-beta-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--beta">Beta</span>{{/if}}
-      {{~#if (is-preview-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--preview">Preview</span>{{/if}}
-      {{~#if (is-limited-availability-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--limited">Limited availability</span>{{/if}}
+      {{~#if (is-beta-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--beta" data-tooltip="Beta: available to try, and may change before general availability.">Beta</span>{{/if}}
+      {{~#if (is-preview-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--preview" data-tooltip="Preview: not covered by Enterprise Support or SLAs, and may change.">Preview</span>{{/if}}
+      {{~#if (is-limited-availability-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--limited" data-tooltip="Limited availability: open to selected customers.">Limited availability</span>{{/if}}
       {{~#unless @root.page.attributes.adp}}
-      {{~#if (is-byoc-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--cloud">BYOC</span>{{/if}}
-      {{~#if (is-cloud-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--cloud">Cloud</span>{{/if}}
+      {{~#if (is-byoc-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available on Redpanda Cloud BYOC clusters.">BYOC</span>{{/if}}
+      {{~#if (is-cloud-feature ./url)}} <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available in Redpanda Cloud.">Cloud</span>{{/if}}
       {{~/unless}} </a>
     {{else}}
     <span class="nav-text">{{{./content}}} </span>

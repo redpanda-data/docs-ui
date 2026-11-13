@@ -19,7 +19,7 @@ This page turns on every page-header status badge at once, which no real page do
 The `badge` macro from docs-extensions-and-macros emits these:
 
 ++++
-<p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="macro-badges">
+<div class="paragraph"><p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="macro-badges">
 <span class="badge badge--beta" data-tooltip="This feature is in public beta. You can enable it, but it may change before it is generally available.">(beta)</span>
 <span class="badge badge--beta badge--large" data-tooltip="This feature is in public beta.">Beta</span>
 <span class="badge badge--preview">(preview)</span>
@@ -27,13 +27,13 @@ The `badge` macro from docs-extensions-and-macros emits these:
 <span class="badge badge--deprecated">(deprecated)</span>
 <span class="badge badge--unreleased" data-tooltip="This feature is not in a released version of Redpanda yet. It is documented here for the upcoming release.">(unreleased)</span>
 <span class="badge badge--label">(label)</span>
-</p>
+</p></div>
 ++++
 
 == Enterprise marks
 
 ++++
-<p id="enterprise-marks">Enable <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="#ts" class="xref page">Tiered Storage</a></span>, set <code class="is-enterprise-property">audit_enabled</code>, or see the label <span class="inline-enterprise-label">Enterprise</span>.</p>
+<div class="paragraph"><p id="enterprise-marks">Enable <span class="enterprise-feature" title="Tiered Storage requires an Enterprise Edition license."><a href="#ts" class="xref page">Tiered Storage</a></span>, set <code class="is-enterprise-property">audit_enabled</code>, or see the label <span class="inline-enterprise-label">Enterprise</span>.</p></div>
 <table class="tableblock frame-all grid-all stretch"><thead><tr><th class="tableblock">Feature</th><th class="tableblock">License</th></tr></thead>
 <tbody><tr><td class="tableblock"><p class="tableblock">Audit Logging</p></td><td class="tableblock"><div class="enterprise-label-container"><span class="enterprise-label">Enterprise</span></div></td></tr></tbody></table>
 ++++
@@ -46,7 +46,7 @@ A property tooltip from `19-property-tooltips.js`, replicated statically so it s
 <div class="tippy-box" data-theme="bloblang-doc" style="position: static; max-width: 420px;" id="prop-tooltip">
   <div class="tippy-content"><div class="property-doc-tooltip">
     <div class="prop-tooltip-signature"><code>audit_enabled</code>: <code>boolean</code></div>
-    <div class="prop-tooltip-badges"><span class="rp-badge rp-badge--sm rp-badge--neutral">Cluster</span> <span class="rp-badge rp-badge--sm rp-badge--neutral">Restart required</span> <span class="rp-badge rp-badge--sm rp-badge--enterprise">Enterprise</span> <span class="rp-badge rp-badge--sm rp-badge--deprecated">Deprecated</span></div>
+    <div class="prop-tooltip-badges" data-in-tooltip><span class="rp-badge rp-badge--sm rp-badge--neutral">Cluster</span> <span class="rp-badge rp-badge--sm rp-badge--neutral">Restart required</span> <span class="rp-badge rp-badge--sm rp-badge--enterprise">Enterprise</span> <span class="rp-badge rp-badge--sm rp-badge--deprecated">Deprecated</span></div>
     <div class="prop-tooltip-description">Enables audit logging.</div>
   </div></div>
 </div>

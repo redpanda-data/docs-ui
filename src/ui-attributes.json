@@ -1068,7 +1068,7 @@
       "setIn": ["page"],
       "setBy": "writer",
       "type": "string",
-      "description": "Product named in the page-introduced-in badge tooltip, for example Redpanda Connect. Without it the tooltip says \"Introduced in version X.Y.Z\".",
+      "description": "Product named in the page-introduced-in badge tooltip, for example Redpanda Connect. Without it the tooltip says \"Introduced in vX.Y.Z\".",
       "readBy": ["src/partials/article.hbs"]
     },
     "page-is-nearing-eol": {

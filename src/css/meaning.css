@@ -263,80 +263,11 @@ span.rp-badge[data-tooltip],
    End of life soon, End of life, Beta, on the meaning tokens. Latest is the
    new (green) meaning and Supported is neutral, so they no longer match. */
 .sm-ver-pill-status,
-.sm-ver-row-status,
-.sm-ver-row-note {
-  --rp-fg: var(--meaning-neutral-fg);
-  --rp-bg: var(--meaning-neutral-bg);
-  --rp-border: var(--meaning-neutral-border);
-}
-
-.sm-ver-pill-status[data-status="current"],
-.sm-ver-row-status[data-status="current"],
-.sm-ver-row[data-status="current"] .sm-ver-row-note {
-  --rp-fg: var(--meaning-new-fg);
-  --rp-bg: var(--meaning-new-bg);
-  --rp-border: var(--meaning-new-border);
-}
-
-.sm-ver-pill-dot[data-status="current"] {
-  background: var(--meaning-new-fg);
-  box-shadow: 0 0 0 3px var(--meaning-new-bg);
-}
-
-.sm-ver-pill-status[data-status="supported"],
-.sm-ver-row-status[data-status="supported"],
-.sm-ver-row[data-status="supported"] .sm-ver-row-note {
-  --rp-fg: var(--meaning-neutral-fg);
-  --rp-bg: var(--meaning-neutral-bg);
-  --rp-border: var(--meaning-neutral-border);
-}
-
-.sm-ver-pill-dot[data-status="supported"] {
-  background: var(--meaning-neutral-fg);
-  box-shadow: 0 0 0 3px var(--meaning-neutral-bg);
-}
-
-.sm-ver-pill-status[data-status="eol"],
-.sm-ver-row-status[data-status="eol"],
-.sm-ver-row[data-status="eol"] .sm-ver-row-note {
-  --rp-fg: var(--meaning-eol-fg);
-  --rp-bg: var(--meaning-eol-bg);
-  --rp-border: var(--meaning-eol-border);
-}
-
-.sm-ver-pill-dot[data-status="eol"] {
-  background: var(--meaning-eol-fg);
-  box-shadow: 0 0 0 3px var(--meaning-eol-bg);
-}
-
-.sm-ver-pill-status[data-status="eol-soon"],
-.sm-ver-row-status[data-status="eol-soon"],
-.sm-ver-row[data-status="eol-soon"] .sm-ver-row-note {
-  --rp-fg: var(--meaning-eol-soon-fg);
-  --rp-bg: var(--meaning-eol-soon-bg);
-  --rp-border: var(--meaning-eol-soon-border);
-}
-
-.sm-ver-pill-dot[data-status="eol-soon"] {
-  background: var(--meaning-eol-soon-fg);
-  box-shadow: 0 0 0 3px var(--meaning-eol-soon-bg);
-}
-
-.sm-ver-pill-status[data-status="beta"],
-.sm-ver-row-status[data-status="beta"],
-.sm-ver-row[data-status="beta"] .sm-ver-row-note {
-  --rp-fg: var(--meaning-beta-fg);
-  --rp-bg: var(--meaning-beta-bg);
-  --rp-border: var(--meaning-beta-border);
-}
-
-.sm-ver-pill-dot[data-status="beta"] {
-  background: var(--meaning-beta-fg);
-  box-shadow: 0 0 0 3px var(--meaning-beta-bg);
-}
-
-.sm-ver-pill-status,
 .sm-ver-row-status {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -353,6 +284,66 @@ span.rp-badge[data-tooltip],
   white-space: nowrap;
 }
 
+.sm-ver-pill-status[data-status="current"],
+.sm-ver-row-status[data-status="current"] {
+  --rp-fg: var(--meaning-new-fg);
+  --rp-bg: var(--meaning-new-bg);
+  --rp-border: var(--meaning-new-border);
+}
+
+.sm-ver-pill-dot[data-status="current"] {
+  background: var(--meaning-new-fg);
+  box-shadow: 0 0 0 3px var(--meaning-new-bg);
+}
+
+.sm-ver-pill-status[data-status="supported"],
+.sm-ver-row-status[data-status="supported"] {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+}
+
+.sm-ver-pill-dot[data-status="supported"] {
+  background: var(--meaning-neutral-fg);
+  box-shadow: 0 0 0 3px var(--meaning-neutral-bg);
+}
+
+.sm-ver-pill-status[data-status="eol"],
+.sm-ver-row-status[data-status="eol"] {
+  --rp-fg: var(--meaning-eol-fg);
+  --rp-bg: var(--meaning-eol-bg);
+  --rp-border: var(--meaning-eol-border);
+}
+
+.sm-ver-pill-dot[data-status="eol"] {
+  background: var(--meaning-eol-fg);
+  box-shadow: 0 0 0 3px var(--meaning-eol-bg);
+}
+
+.sm-ver-pill-status[data-status="eol-soon"],
+.sm-ver-row-status[data-status="eol-soon"] {
+  --rp-fg: var(--meaning-eol-soon-fg);
+  --rp-bg: var(--meaning-eol-soon-bg);
+  --rp-border: var(--meaning-eol-soon-border);
+}
+
+.sm-ver-pill-dot[data-status="eol-soon"] {
+  background: var(--meaning-eol-soon-fg);
+  box-shadow: 0 0 0 3px var(--meaning-eol-soon-bg);
+}
+
+.sm-ver-pill-status[data-status="beta"],
+.sm-ver-row-status[data-status="beta"] {
+  --rp-fg: var(--meaning-beta-fg);
+  --rp-bg: var(--meaning-beta-bg);
+  --rp-border: var(--meaning-beta-border);
+}
+
+.sm-ver-pill-dot[data-status="beta"] {
+  background: var(--meaning-beta-fg);
+  box-shadow: 0 0 0 3px var(--meaning-beta-bg);
+}
+
 /* A row chip sits in the version row's grid; keep it its own width */
 .sm-ver-row-status {
   justify-self: end;
@@ -363,14 +354,6 @@ span.rp-badge[data-tooltip],
   height: 5px;
   border-radius: 50%;
   background: currentColor;
-}
-
-.sm-ver-row-note {
-  color: var(--rp-fg);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: normal;
-  text-transform: none;
 }
 
 /* Notice: a page-level card, the Connect connector card generalized */

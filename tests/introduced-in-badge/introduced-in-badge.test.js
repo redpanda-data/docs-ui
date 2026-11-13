@@ -35,7 +35,7 @@ test('renders the badge when the page sets introduced-in', () => {
   const html = render({ 'introduced-in': '4.43.0' })
   assert.equal(sinceBadges(html).length, 1)
   assert.equal(visible(html), 'Since v4.43.0')
-  assert.equal(tooltip(html), 'Introduced in version 4.43.0.')
+  assert.equal(tooltip(html), 'Introduced in v4.43.0.')
   assert.equal(srText(html), tooltip(html), 'screen reader text matches the tooltip')
 })
 
@@ -54,7 +54,7 @@ test('never renders on Cloud pages', () => {
 test('names the product in the tooltip and screen reader text when introduced-in-product is set', () => {
   const html = render({ 'introduced-in': '4.43.0', 'introduced-in-product': 'Redpanda Connect' })
   assert.equal(visible(html), 'Since v4.43.0')
-  assert.equal(tooltip(html), 'Introduced in Redpanda Connect 4.43.0.')
+  assert.equal(tooltip(html), 'Introduced in Redpanda Connect v4.43.0.')
   assert.equal(srText(html), tooltip(html), 'screen reader text matches the tooltip')
 })
 
@@ -62,7 +62,7 @@ test('normalizes a leading v and trailing periods', () => {
   for (const raw of ['v4.43.0', 'V4.43.0', '4.43.0.', ' v4.43.0.. ']) {
     const html = render({ 'introduced-in': raw })
     assert.equal(visible(html), 'Since v4.43.0', raw)
-    assert.equal(tooltip(html), 'Introduced in version 4.43.0.', raw)
+    assert.equal(tooltip(html), 'Introduced in v4.43.0.', raw)
     assert.equal(srText(html), tooltip(html), raw)
   }
 })
