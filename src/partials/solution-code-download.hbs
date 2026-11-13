@@ -11,7 +11,9 @@
   the complete bundle and each single file are served by the docs-site
   /solutions/download function, which owns the sign-in redirect for
   `authenticated` solutions. The repository itself is private and its URL is
-  deliberately never rendered here.
+  deliberately never rendered here. Download and run (authenticated only)
+  gets a short-lived signed link from /solutions/download-link instead, so
+  the command works in a terminal with no docs session.
 --}}
 {{#unless (eq solution.download 'none')}}
 <div class="sol-card-section sol-download" data-sol-download-panel role="group" aria-labelledby="sol-download-title">
@@ -27,6 +29,20 @@
   </a>
   {{#if solution.asset}}
   <p class="sol-download-asset"><code>{{solution.asset}}</code></p>
+  {{/if}}
+  {{!-- Download and run: for a signed-in reader a click asks docs-site
+    /solutions/download-link for a ten-minute link and shows a curl command
+    that fetches the bundle, unzips it and starts the stack
+    (28-solution-progress.js builds the command). Signed out, it asks for
+    sign-in like the download above. --}}
+  {{#if (eq solution.download 'authenticated')}}
+  <div class="sol-download-run" data-sol-download-run>
+    <button type="button" class="sol-btn sol-btn--sm" data-sol-download-run-button data-analytics="solution_download_run">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      <span>Download and run</span>
+    </button>
+    <div class="sol-download-run-output" data-sol-download-run-output role="status" hidden></div>
+  </div>
   {{/if}}
   {{#if (eq solution.download 'authenticated')}}
   {{> solution-access-gate}}

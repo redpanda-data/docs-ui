@@ -1388,6 +1388,58 @@ html[data-theme="dark"] .sol-rail-tools-meta {
   overflow-wrap: anywhere;
 }
 
+/* Download and run: the button under the download, then the command it
+   fetched (28-solution-progress.js), with Copy and a one-line note. */
+.sol-download-run {
+  margin-top: 0.5rem;
+}
+
+.sol-download-run[hidden],
+.sol-download-run-output[hidden] {
+  display: none;
+}
+
+.sol-download-run-output {
+  margin-top: 0.5rem;
+}
+
+.sol-download-run-command {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.625rem;
+  max-height: 8rem;
+  overflow: auto;
+  background: var(--grey-50-new, #f9fafb);
+  border: 1px solid var(--grey-200-new, #e5e7eb);
+  border-radius: 6px;
+  font-family: var(--monospace-font-family);
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sol-download-run-command code {
+  font: inherit;
+  background: none;
+  padding: 0;
+}
+
+.sol-download-run-note,
+.sol-download-run-error {
+  margin: 0.5rem 0 0;
+  font-size: calc(12 / var(--rem-base) * 1rem);
+  line-height: 1.45;
+  color: var(--sol-meta);
+}
+
+.sol-download-run-error {
+  color: var(--grey-700-new);
+}
+
+.sol-download-run-note code {
+  font-family: var(--monospace-font-family);
+}
+
 /* One line: the lock, why, and the Sign in link. */
 .sol-gate {
   display: flex;
@@ -3037,6 +3089,15 @@ html[data-theme="dark"] .sol-reset-confirm {
 
 html[data-theme="dark"] .sol-reset-confirm-text {
   color: var(--grey-100-new);
+}
+
+html[data-theme="dark"] .sol-download-run-command {
+  background: #0f1727;
+  border-color: #1c2638;
+}
+
+html[data-theme="dark"] .sol-download-run-error {
+  color: var(--grey-200-new);
 }
 
 html[data-theme="dark"] .sol-btn[data-sol-download][aria-disabled="true"],
