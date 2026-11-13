@@ -27,7 +27,7 @@ const BADGES = hbs.compile(ARTICLE_SRC.slice(start, end))
 
 const render = (attributes) => BADGES({ page: { attributes } })
 const sinceBadges = (html) => html.match(/status-badge--since/g) || []
-const tooltip = (html) => (html.match(/status-badge--since" data-tippy-content="([^"]*)"/) || [])[1]
+const tooltip = (html) => (html.match(/status-badge--since" data-tooltip="([^"]*)"/) || [])[1]
 const visible = (html) => (html.match(/<span aria-hidden="true">([^<]*)<\/span>/) || [])[1]
 const srText = (html) => (html.match(/<span class="status-badge__sr-text">([^<]*)<\/span>/) || [])[1]
 
