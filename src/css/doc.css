@@ -1088,33 +1088,33 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
 }
 
 .admonitionblock.note {
-  background: var(--indigo-50-new, #eef2ff);
-  border: 1px solid var(--indigo-100-new, #e0e7ff);
-  color: var(--indigo-900-new, #312e81);
-}
-
-.admonitionblock.warning {
-  background: #fff7ed;
-  border: 1px solid #fde2b5;
-  color: #7c2d12;
+  background: var(--admonition-note-bg);
+  border: 1px solid var(--admonition-note-border);
+  color: var(--admonition-note-text);
 }
 
 .admonitionblock.tip {
-  background: #f2faf6;
-  border: 1px solid #cce9d9;
-  color: #14532d;
-}
-
-.admonitionblock.caution {
-  background: #fef2f2; /* Red-based caution */
-  border: 1px solid #fecaca; /* Red border */
-  color: #7f1d1d; /* Dark red text */
+  background: var(--admonition-tip-bg);
+  border: 1px solid var(--admonition-tip-border);
+  color: var(--admonition-tip-text);
 }
 
 .admonitionblock.important {
-  background: #fdf4ff; /* Purple-based important */
-  border: 1px solid #f5d0fe; /* Purple border */
-  color: #581c87; /* Dark purple text */
+  background: var(--admonition-important-bg);
+  border: 1px solid var(--admonition-important-border);
+  color: var(--admonition-important-text);
+}
+
+.admonitionblock.caution {
+  background: var(--admonition-caution-bg);
+  border: 1px solid var(--admonition-caution-border);
+  color: var(--admonition-caution-text);
+}
+
+.admonitionblock.warning {
+  background: var(--admonition-warning-bg);
+  border: 1px solid var(--admonition-warning-border);
+  color: var(--admonition-warning-text);
 }
 
 .admonitionblock td.content > :not(.title):first-child,
@@ -1153,116 +1153,61 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   margin-bottom: 5px;
 }
 
-.admonitionblock.caution .icon {
-  color: #dc2626; /* Red icon for caution */
-}
-
-.admonitionblock.important .icon {
-  color: #9333ea; /* Purple icon for important */
-}
-
 .admonitionblock.note .icon {
-  color: var(--indigo-600-new, #444ce7);
+  color: var(--admonition-note-fg);
 }
 
 .admonitionblock.tip .icon {
-  color: var(--green-600, #059669);
+  color: var(--admonition-tip-fg);
+}
+
+.admonitionblock.important .icon {
+  color: var(--admonition-important-fg);
+}
+
+.admonitionblock.caution .icon {
+  color: var(--admonition-caution-fg);
 }
 
 .admonitionblock.warning .icon {
-  color: var(--orange-600, #ea580c);
+  color: var(--admonition-warning-fg);
 }
 
-/* Dark mode admonition styles */
-html[data-theme="dark"] .admonitionblock.note {
-  background: rgba(99, 102, 241, 0.15); /* Indigo tint for dark */
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #c7d2fe; /* Light indigo text */
-}
-
-html[data-theme="dark"] .admonitionblock.tip {
-  background: rgba(16, 185, 129, 0.15); /* Green tint for dark */
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #a7f3d0; /* Light green text */
-}
-
-html[data-theme="dark"] .admonitionblock.warning {
-  background: rgba(251, 146, 60, 0.15); /* Orange tint for dark */
-  border-color: rgba(251, 146, 60, 0.3);
-  color: #fed7aa; /* Light orange text */
-}
-
-html[data-theme="dark"] .admonitionblock.caution {
-  background: rgba(248, 113, 113, 0.15); /* Red tint for dark */
-  border-color: rgba(248, 113, 113, 0.3);
-  color: #fecaca; /* Light red text */
-}
-
-html[data-theme="dark"] .admonitionblock.important {
-  background: rgba(192, 132, 252, 0.15); /* Purple tint for dark */
-  border-color: rgba(192, 132, 252, 0.3);
-  color: #e9d5ff; /* Light purple text */
-}
-
-/* Dark mode admonition icon colors - brighter for visibility */
-html[data-theme="dark"] .admonitionblock.note .icon {
-  color: #818cf8; /* Brighter indigo for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.tip .icon {
-  color: #34d399; /* Brighter green for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.warning .icon {
-  color: #fb923c; /* Brighter orange for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.caution .icon {
-  color: #f87171; /* Brighter red for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.important .icon {
-  color: #c084fc; /* Brighter purple for dark mode */
-}
-
-.icon-note::before {
-  content: "";
-  background: var(--note-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
-}
-
-.icon-tip::before {
-  content: "";
-  background: var(--tip-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
-}
-
+/* The icon before the label (asciidoctor's <i class="fa icon-NAME" title="Note">),
+   masked so it is always the label's color */
+.icon-note::before,
+.icon-tip::before,
+.icon-important::before,
+.icon-caution::before,
 .icon-warning::before {
   content: "";
-  background: var(--warning-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 6px;
+  background-color: currentColor;
+  -webkit-mask: var(--admonition-icon) no-repeat center / contain;
+  mask: var(--admonition-icon) no-repeat center / contain;
 }
 
-.icon-caution::before {
-  content: "";
-  background: var(--caution-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
+.icon-note {
+  --admonition-icon: var(--icon-info);
 }
 
-.icon-important::before {
-  content: "";
-  background: var(--important-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
+.icon-tip {
+  --admonition-icon: var(--icon-check-circle);
+}
+
+.icon-important {
+  --admonition-icon: var(--icon-important);
+}
+
+.icon-caution {
+  --admonition-icon: var(--icon-triangle);
+}
+
+.icon-warning {
+  --admonition-icon: var(--icon-octagon);
 }
 
 .admonitionblock .icon i {

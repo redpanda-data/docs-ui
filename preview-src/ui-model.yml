@@ -261,6 +261,9 @@ page:
       - content: Meaning System Test
         url: /meaning-system-test.html
         urlType: internal
+      - content: Admonitions Test
+        url: /admonitions-test.html
+        urlType: internal
     - content: Get Started
       url: '#'
       urlType: internal

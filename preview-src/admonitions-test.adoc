@@ -1,0 +1,34 @@
+= Admonitions Test
+:page-layout: default
+:description: All five admonition types, for checking colors, icons, and label contrast in light and dark.
+
+Each admonition has one hue, used for its label and its icon: NOTE indigo with an info icon, TIP green with a check, IMPORTANT violet with an exclamation mark in a square, CAUTION amber with a triangle, and WARNING red with an octagon. Switch the theme to check dark mode.
+
+NOTE: A note adds information the reader might want, such as a default value or where a setting lives. It can include `inline code` and a xref:index.adoc[link].
+
+TIP: A tip suggests a better or faster way to do something.
+
+IMPORTANT: Important information the reader must not skip, such as a required step.
+
+CAUTION: Caution warns of a possible problem, such as a slow operation or a setting that is hard to undo.
+
+WARNING: A warning flags a risk of data loss, downtime, or a security problem.
+
+[NOTE]
+.Note with a title
+====
+An admonition with a title and more than one paragraph.
+
+* A list item
+* Another list item
+====
+
+[WARNING]
+====
+A warning with a code block:
+
+[,bash]
+----
+rpk cluster config set enable_rack_awareness true
+----
+====
