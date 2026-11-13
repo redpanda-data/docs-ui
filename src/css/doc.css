@@ -192,21 +192,6 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-toggle:hov
   transform: rotate(180deg);
 }
 
-/* Compact inline badges in sticky bar */
-.component-indicator-sticky .byoc-label--inline,
-.component-indicator-sticky .cloud-label--inline {
-  margin: 0;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-}
-
-.component-indicator-sticky .byoc-label--inline > p,
-.component-indicator-sticky .cloud-label--inline > p {
-  padding: 4px 10px;
-  min-width: auto;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  border-radius: 6px;
-}
-
 /* Context dropdown menu in sticky bar */
 .component-indicator-sticky .context-dropdown-menu {
   position: absolute;
@@ -358,22 +343,6 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-item:focus
   display: none;
 }
 
-.component-indicator-sticky .sm-ver-pill-status[data-status="current"] {
-  color: #059669;
-}
-
-.component-indicator-sticky .sm-ver-pill-status[data-status="supported"] {
-  color: #059669;
-}
-
-.component-indicator-sticky .sm-ver-pill-status[data-status="eol"] {
-  color: #d97706;
-}
-
-.component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
-  color: #7c3aed;
-}
-
 .component-indicator-sticky .sm-ver-pill-caret {
   color: var(--grey-500-new, #737373);
 }
@@ -391,22 +360,6 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill:hover {
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-num {
   color: #fff;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="current"] {
-  color: #6ee7b7;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="supported"] {
-  color: #a7f3d0;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="eol"] {
-  color: #fcd34d;
-}
-
-html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-status[data-status="beta"] {
-  color: #c4b5fd;
 }
 
 html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
@@ -437,160 +390,6 @@ html[data-theme="dark"] .component-indicator-sticky .sm-ver-pill-caret {
   .component-indicator-sticky .sm-ver.is-open .sm-ver-panel {
     transform: translate(-50%, -50%) scale(1) !important;
   }
-}
-
-/* Status badges (Beta, Preview, Limited Availability, Since) in sticky header */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 5px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-/* Show help cursor when badge has tooltip */
-.status-badge[data-tippy-content] {
-  cursor: help;
-}
-
-.status-badge svg {
-  flex-shrink: 0;
-}
-
-.status-badge--beta {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fcd34d;
-}
-
-.status-badge--preview {
-  background: #1f2937;
-  color: #f9fafb;
-  border: 1px solid #111827;
-}
-
-.status-badge--la {
-  background: #ede9fe;
-  color: #5b21b6;
-  border: 1px solid #c4b5fd;
-}
-
-html[data-theme="dark"] .status-badge--beta {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fcd34d;
-  border-color: rgba(251, 191, 36, 0.3);
-}
-
-/* Since shares the neutral dark palette with Preview */
-html[data-theme="dark"] .status-badge--preview,
-html[data-theme="dark"] .status-badge--since {
-  background: rgba(148, 163, 184, 0.15);
-  color: #cbd5e1;
-  border-color: rgba(148, 163, 184, 0.3);
-}
-
-html[data-theme="dark"] .status-badge--la {
-  background: rgba(139, 92, 246, 0.15);
-  color: #c4b5fd;
-  border-color: rgba(139, 92, 246, 0.3);
-}
-
-.status-badge--byoc,
-.status-badge--cloud {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #7dd3fc;
-}
-
-html[data-theme="dark"] .status-badge--byoc,
-html[data-theme="dark"] .status-badge--cloud {
-  background: rgba(14, 165, 233, 0.15);
-  color: #7dd3fc;
-  border-color: rgba(14, 165, 233, 0.3);
-}
-
-.status-badge--since {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  font-weight: 500;
-}
-
-/* Full badge text for screen readers; the visible "Since X" is aria-hidden */
-.status-badge__sr-text {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Availability badges: links to the other platform's version of this page */
-a.status-badge--cloud-link,
-a.status-badge--self-managed-link {
-  text-decoration: none;
-}
-
-.status-badge--cloud-link {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #7dd3fc;
-}
-
-.status-badge--cloud-link:hover {
-  background: #bae6fd;
-  color: #075985;
-}
-
-.status-badge--self-managed-link {
-  background: #dcfce7;
-  color: #15803d;
-  border: 1px solid #86efac;
-}
-
-.status-badge--self-managed-link:hover {
-  background: #bbf7d0;
-  color: #166534;
-}
-
-.status-badge--self-managed-only {
-  background: var(--grey-100-new, #f3f4f6);
-  color: #4b5563;
-  border: 1px solid var(--grey-200-new, #e5e5e5);
-}
-
-html[data-theme="dark"] .status-badge--cloud-link {
-  background: rgba(14, 165, 233, 0.15);
-  color: #7dd3fc;
-  border-color: rgba(14, 165, 233, 0.3);
-}
-
-html[data-theme="dark"] .status-badge--cloud-link:hover {
-  background: rgba(14, 165, 233, 0.25);
-}
-
-html[data-theme="dark"] .status-badge--self-managed-link {
-  background: rgba(34, 197, 94, 0.15);
-  color: #86efac;
-  border-color: rgba(34, 197, 94, 0.3);
-}
-
-html[data-theme="dark"] .status-badge--self-managed-link:hover {
-  background: rgba(34, 197, 94, 0.25);
-}
-
-html[data-theme="dark"] .status-badge--self-managed-only {
-  background: rgba(148, 163, 184, 0.12);
-  color: #cbd5e1;
-  border-color: rgba(148, 163, 184, 0.25);
 }
 
 @media screen and (min-width: 600px) {
@@ -1088,33 +887,33 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
 }
 
 .admonitionblock.note {
-  background: var(--indigo-50-new, #eef2ff);
-  border: 1px solid var(--indigo-100-new, #e0e7ff);
-  color: var(--indigo-900-new, #312e81);
-}
-
-.admonitionblock.warning {
-  background: #fff7ed;
-  border: 1px solid #fde2b5;
-  color: #7c2d12;
+  background: var(--admonition-note-bg);
+  border: 1px solid var(--admonition-note-border);
+  color: var(--admonition-note-text);
 }
 
 .admonitionblock.tip {
-  background: #f2faf6;
-  border: 1px solid #cce9d9;
-  color: #14532d;
-}
-
-.admonitionblock.caution {
-  background: #fef2f2; /* Red-based caution */
-  border: 1px solid #fecaca; /* Red border */
-  color: #7f1d1d; /* Dark red text */
+  background: var(--admonition-tip-bg);
+  border: 1px solid var(--admonition-tip-border);
+  color: var(--admonition-tip-text);
 }
 
 .admonitionblock.important {
-  background: #fdf4ff; /* Purple-based important */
-  border: 1px solid #f5d0fe; /* Purple border */
-  color: #581c87; /* Dark purple text */
+  background: var(--admonition-important-bg);
+  border: 1px solid var(--admonition-important-border);
+  color: var(--admonition-important-text);
+}
+
+.admonitionblock.caution {
+  background: var(--admonition-caution-bg);
+  border: 1px solid var(--admonition-caution-border);
+  color: var(--admonition-caution-text);
+}
+
+.admonitionblock.warning {
+  background: var(--admonition-warning-bg);
+  border: 1px solid var(--admonition-warning-border);
+  color: var(--admonition-warning-text);
 }
 
 .admonitionblock td.content > :not(.title):first-child,
@@ -1153,116 +952,61 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   margin-bottom: 5px;
 }
 
-.admonitionblock.caution .icon {
-  color: #dc2626; /* Red icon for caution */
-}
-
-.admonitionblock.important .icon {
-  color: #9333ea; /* Purple icon for important */
-}
-
 .admonitionblock.note .icon {
-  color: var(--indigo-600-new, #444ce7);
+  color: var(--admonition-note-fg);
 }
 
 .admonitionblock.tip .icon {
-  color: var(--green-600, #059669);
+  color: var(--admonition-tip-fg);
+}
+
+.admonitionblock.important .icon {
+  color: var(--admonition-important-fg);
+}
+
+.admonitionblock.caution .icon {
+  color: var(--admonition-caution-fg);
 }
 
 .admonitionblock.warning .icon {
-  color: var(--orange-600, #ea580c);
+  color: var(--admonition-warning-fg);
 }
 
-/* Dark mode admonition styles */
-html[data-theme="dark"] .admonitionblock.note {
-  background: rgba(99, 102, 241, 0.15); /* Indigo tint for dark */
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #c7d2fe; /* Light indigo text */
-}
-
-html[data-theme="dark"] .admonitionblock.tip {
-  background: rgba(16, 185, 129, 0.15); /* Green tint for dark */
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #a7f3d0; /* Light green text */
-}
-
-html[data-theme="dark"] .admonitionblock.warning {
-  background: rgba(251, 146, 60, 0.15); /* Orange tint for dark */
-  border-color: rgba(251, 146, 60, 0.3);
-  color: #fed7aa; /* Light orange text */
-}
-
-html[data-theme="dark"] .admonitionblock.caution {
-  background: rgba(248, 113, 113, 0.15); /* Red tint for dark */
-  border-color: rgba(248, 113, 113, 0.3);
-  color: #fecaca; /* Light red text */
-}
-
-html[data-theme="dark"] .admonitionblock.important {
-  background: rgba(192, 132, 252, 0.15); /* Purple tint for dark */
-  border-color: rgba(192, 132, 252, 0.3);
-  color: #e9d5ff; /* Light purple text */
-}
-
-/* Dark mode admonition icon colors - brighter for visibility */
-html[data-theme="dark"] .admonitionblock.note .icon {
-  color: #818cf8; /* Brighter indigo for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.tip .icon {
-  color: #34d399; /* Brighter green for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.warning .icon {
-  color: #fb923c; /* Brighter orange for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.caution .icon {
-  color: #f87171; /* Brighter red for dark mode */
-}
-
-html[data-theme="dark"] .admonitionblock.important .icon {
-  color: #c084fc; /* Brighter purple for dark mode */
-}
-
-.icon-note::before {
-  content: "";
-  background: var(--note-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
-}
-
-.icon-tip::before {
-  content: "";
-  background: var(--tip-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
-}
-
+/* The icon before the label (asciidoctor's <i class="fa icon-NAME" title="Note">),
+   masked so it is always the label's color */
+.icon-note::before,
+.icon-tip::before,
+.icon-important::before,
+.icon-caution::before,
 .icon-warning::before {
   content: "";
-  background: var(--warning-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 6px;
+  background-color: currentColor;
+  -webkit-mask: var(--admonition-icon) no-repeat center / contain;
+  mask: var(--admonition-icon) no-repeat center / contain;
 }
 
-.icon-caution::before {
-  content: "";
-  background: var(--caution-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
+.icon-note {
+  --admonition-icon: var(--icon-info);
 }
 
-.icon-important::before {
-  content: "";
-  background: var(--important-icon);
-  width: 1.4em;
-  margin-right: 5px;
-  height: 1.4em;
+.icon-tip {
+  --admonition-icon: var(--icon-check-circle);
+}
+
+.icon-important {
+  --admonition-icon: var(--icon-important);
+}
+
+.icon-caution {
+  --admonition-icon: var(--icon-triangle);
+}
+
+.icon-warning {
+  --admonition-icon: var(--icon-octagon);
 }
 
 .admonitionblock .icon i {
@@ -1849,21 +1593,33 @@ details[open] > summary {
   display: flex;
 }
 
-.doc .tableblock td .enterprise-label {
-  background-color: var(--redpanda-1000);
-  color: #fff;
-  padding: 0.2em 0.2em;
-  line-height: normal;
-  border-radius: 3px;
-  font-size: calc(17 / var(--rem-base) * 1rem);
+/* Enterprise labels in tables and inline: the enterprise badge look
+   (.rp-badge--enterprise in meaning.css), without needing new markup */
+.doc .tableblock td .enterprise-label,
+.doc .inline-enterprise-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--meaning-enterprise-border);
+  border-radius: 999px;
+  background: var(--meaning-enterprise-bg);
+  color: var(--meaning-enterprise-fg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.doc .inline-enterprise-label {
-  background-color: var(--redpanda-1000);
-  color: #fff;
-  padding: 0.2em 0.2em;
-  border-radius: 3px;
-  font-size: calc(17 / var(--rem-base) * 1rem);
+.doc .tableblock td .enterprise-label::before,
+.doc .inline-enterprise-label::before {
+  content: "";
+  flex: none;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-lock) no-repeat center / contain;
+  mask: var(--icon-lock) no-repeat center / contain;
 }
 
 .doc .tableblock td .enterprise-label-container:hover,
@@ -2894,57 +2650,4 @@ html[data-theme="dark"] .availability-selector-menu {
 
 html[data-theme="dark"] .availability-selector-item:hover {
   background: rgba(255, 255, 255, 0.06);
-}
-
-/* Inline badges from the badge macro (badge::[label=...]).
-   Distinct from .status-badge, the page-level beta pill. */
-.doc .badge {
-  display: inline-block;
-  padding: 0 0.4em;
-  border-radius: 9999px;
-  font-size: 0.75em;
-  font-weight: 600;
-  vertical-align: baseline;
-  white-space: nowrap;
-}
-
-.doc .badge--beta {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fcd34d;
-}
-
-.doc .badge--deprecated {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-}
-
-.doc .badge--enterprise {
-  background: #ede9fe;
-  color: #5b21b6;
-  border: 1px solid #c4b5fd;
-}
-
-.doc .badge--large {
-  font-size: 0.9em;
-  padding: 0.15em 0.6em;
-}
-
-html[data-theme="dark"] .doc .badge--beta {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fcd34d;
-  border-color: rgba(251, 191, 36, 0.3);
-}
-
-html[data-theme="dark"] .doc .badge--deprecated {
-  background: rgba(248, 113, 113, 0.15);
-  color: #fca5a5;
-  border-color: rgba(248, 113, 113, 0.3);
-}
-
-html[data-theme="dark"] .doc .badge--enterprise {
-  background: rgba(167, 139, 250, 0.15);
-  color: #c4b5fd;
-  border-color: rgba(167, 139, 250, 0.3);
 }

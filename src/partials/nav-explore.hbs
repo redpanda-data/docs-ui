@@ -11,7 +11,7 @@
           {{#each page.versions as |ver|}}
             {{#if (eq ver.version @root.page.attributes.version)}}
               {{#if (is-eol ver.asciidoc.attributes)}}
-                <span class="eol-label">(end of life)</span>
+                <span class="rp-badge rp-badge--sm rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
               {{/if}}
             {{/if}}
           {{/each}}
@@ -25,7 +25,7 @@
               <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
                 {{../displayVersion}}
                 {{#if (is-eol ../asciidoc.attributes)}}
-                  <span class="eol-label">(end of life)</span>
+                  <span class="rp-badge rp-badge--sm rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
                 {{/if}}
               </a>
             {{/with}}
@@ -38,7 +38,7 @@
         {{#each page.versions as |ver|}}
           {{#if (eq ver.version @root.page.attributes.version)}}
             {{#if (is-eol ver.asciidoc.attributes)}}
-              <span class="eol-label">(end of life)</span>
+              <span class="rp-badge rp-badge--sm rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
             {{/if}}
           {{/if}}
         {{/each}}

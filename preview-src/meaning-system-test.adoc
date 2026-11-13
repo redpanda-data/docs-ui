@@ -1,0 +1,230 @@
+= Meaning System Test
+:page-layout: default
+:description: Every meaning badge and notice from src/css/meaning.css, for checking color, contrast, and tooltips in light and dark.
+
+Every meaning on the docs site has one look: the badges and notices below. Colors come from the `--meaning-*` tokens in `vars.css` and `dark-mode.css`, icons from the `--icon-*` tokens. Switch the theme to check dark mode. Hover, focus (Tab), or tap a badge to see its tooltip: every `data-tooltip` element gets the same tippy tooltip from `12-activate-tooltips.js`.
+
+== Badges
+
+Default size, as used in page headers and running text:
+
+++++
+<div class="paragraph"><p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="badges-default">
+<span class="rp-badge rp-badge--enterprise" data-tooltip="Requires an Enterprise Edition license.">Enterprise</span>
+<span class="rp-badge rp-badge--beta" data-tooltip="Beta: available to try, and may change before general availability.">Beta</span>
+<span class="rp-badge rp-badge--preview" data-tooltip="Preview: not covered by Enterprise Support or SLAs, and may change.">Preview</span>
+<span class="rp-badge rp-badge--limited" data-tooltip="Limited availability: open to selected customers.">Limited availability</span>
+<span class="rp-badge rp-badge--deprecated" data-tooltip="Deprecated: still available, but planned for removal.">Deprecated</span>
+<span class="rp-badge rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
+<span class="rp-badge rp-badge--eol-soon" data-tooltip="Support ends on 2027-03-31.">End of life soon</span>
+<span class="rp-badge rp-badge--new" data-tooltip="New in this release.">New</span>
+<span class="rp-badge rp-badge--since" data-tooltip="Introduced in v25.3.">Since v25.3</span>
+<span class="rp-badge rp-badge--cloud" data-tooltip="Available in Redpanda Cloud.">Cloud</span>
+<span class="rp-badge rp-badge--self-managed" data-tooltip="Available in Self-Managed Redpanda.">Self-Managed</span>
+<span class="rp-badge rp-badge--certified" data-tooltip="Supported and tested by Redpanda.">Certified</span>
+<span class="rp-badge rp-badge--community" data-tooltip="Community-supported.">Community</span>
+<span class="rp-badge rp-badge--use-case" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</span>
+<span class="rp-badge rp-badge--neutral" data-tooltip="Reads data into a pipeline.">Input</span>
+</p></div>
+++++
+
+Small size (`rp-badge--sm`), as used in the nav and on cards:
+
+++++
+<div class="paragraph"><p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="badges-sm">
+<span class="rp-badge rp-badge--enterprise rp-badge--sm" data-tooltip="Requires an Enterprise Edition license.">Enterprise</span>
+<span class="rp-badge rp-badge--beta rp-badge--sm" data-tooltip="Beta: available to try, and may change before general availability.">Beta</span>
+<span class="rp-badge rp-badge--preview rp-badge--sm" data-tooltip="Preview: not covered by Enterprise Support or SLAs, and may change.">Preview</span>
+<span class="rp-badge rp-badge--limited rp-badge--sm" data-tooltip="Limited availability: open to selected customers.">Limited availability</span>
+<span class="rp-badge rp-badge--deprecated rp-badge--sm" data-tooltip="Deprecated: still available, but planned for removal.">Deprecated</span>
+<span class="rp-badge rp-badge--eol rp-badge--sm" data-tooltip="No longer supported.">End of life</span>
+<span class="rp-badge rp-badge--eol-soon rp-badge--sm" data-tooltip="Support ends on 2027-03-31.">End of life soon</span>
+<span class="rp-badge rp-badge--new rp-badge--sm" data-tooltip="New in this release.">New</span>
+<span class="rp-badge rp-badge--since rp-badge--sm" data-tooltip="Introduced in v25.3.">Since v25.3</span>
+<span class="rp-badge rp-badge--cloud rp-badge--sm" data-tooltip="Available in Redpanda Cloud.">Cloud</span>
+<span class="rp-badge rp-badge--self-managed rp-badge--sm" data-tooltip="Available in Self-Managed Redpanda.">Self-Managed</span>
+<span class="rp-badge rp-badge--certified rp-badge--sm" data-tooltip="Supported and tested by Redpanda.">Certified</span>
+<span class="rp-badge rp-badge--community rp-badge--sm" data-tooltip="Community-supported.">Community</span>
+<span class="rp-badge rp-badge--use-case rp-badge--sm" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</span>
+<span class="rp-badge rp-badge--neutral rp-badge--sm" data-tooltip="Reads data into a pipeline.">Input</span>
+</p></div>
+++++
+
+Badges that link, such as availability in another product or a use case:
+
+++++
+<div class="paragraph"><p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="badges-links">
+<a class="rp-badge rp-badge--cloud" href="#cloud" data-tooltip="Available in Redpanda Cloud.">Cloud</a>
+<a class="rp-badge rp-badge--self-managed" href="#self-managed" data-tooltip="Available in Self-Managed Redpanda.">Self-Managed</a>
+<a class="rp-badge rp-badge--use-case" href="#use-case" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</a>
+<a class="rp-badge rp-badge--use-case" href="#use-case" data-tooltip="Transforms data continuously as it moves between systems.">Streaming ETL</a>
+</p></div>
+++++
+
+In running text: the `kafka_franz` input is +++<span class="rp-badge rp-badge--certified" data-tooltip="Supported and tested by Redpanda.">Certified</span>+++ and the cluster property is +++<span class="rp-badge rp-badge--deprecated" data-tooltip="Deprecated: still available, but planned for removal.">Deprecated</span>+++.
+
+== Notices
+
+A page-level notice, the Redpanda Connect connector card generalized. Each meaning has one:
+
+++++
+<div class="rp-notice rp-notice--enterprise" id="notice-enterprise">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Requires an Enterprise Edition license</span>
+      <p class="rp-notice-text">To use this connector, you need an Enterprise Edition license. Start a free 30-day trial, or contact Redpanda to buy a license.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#trial">Start a free trial</a> <a class="rp-button" href="#contact">Contact sales</a> <a class="rp-notice-link" href="#licensing">About licensing</a></p>
+    </div>
+  </div>
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" style="--rp-icon: var(--icon-tag)" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Use cases</span>
+      <p class="rp-notice-actions"><a class="rp-badge rp-badge--use-case" href="#uc" data-tooltip="Streams row-level changes from a database as they happen.">Change data capture</a> <a class="rp-badge rp-badge--use-case" href="#uc" data-tooltip="Copies data from one database to another and keeps them in sync.">Database replication</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="rp-notice rp-notice--beta" id="notice-beta">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Beta</span>
+      <p class="rp-notice-text">Beta: available to try, and may change before general availability.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--preview" id="notice-preview">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Preview</span>
+      <p class="rp-notice-text">Preview: not covered by Enterprise Support or SLAs, and may change.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--limited" id="notice-limited">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Limited availability</span>
+      <p class="rp-notice-text">Limited availability: open to selected customers.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--deprecated" id="notice-deprecated">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Deprecated</span>
+      <p class="rp-notice-text">Deprecated: still available, but planned for removal.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--eol" id="notice-eol">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">End of life</span>
+      <p class="rp-notice-text">No longer supported.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--eol-soon" id="notice-eol-soon">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">End of life soon</span>
+      <p class="rp-notice-text">Support ends on 2027-03-31.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--new" id="notice-new">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">New</span>
+      <p class="rp-notice-text">Notice text for the New meaning.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--since" id="notice-since">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Since v25.3</span>
+      <p class="rp-notice-text">Introduced in version 25.3.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--cloud" id="notice-cloud">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Cloud</span>
+      <p class="rp-notice-text">Available in Redpanda Cloud.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--self-managed" id="notice-self-managed">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Self-Managed</span>
+      <p class="rp-notice-text">Available in Self-Managed Redpanda.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--certified" id="notice-certified">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Certified</span>
+      <p class="rp-notice-text">Supported and tested by Redpanda.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--community" id="notice-community">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Community</span>
+      <p class="rp-notice-text">Community-supported.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--use-case" id="notice-use-case">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Change data capture</span>
+      <p class="rp-notice-text">Notice text for the Change data capture meaning.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+<div class="rp-notice rp-notice--neutral" id="notice-neutral">
+  <div class="rp-notice-section">
+    <span class="rp-notice-icon" aria-hidden="true"></span>
+    <div class="rp-notice-body">
+      <span class="rp-notice-title">Input</span>
+      <p class="rp-notice-text">Notice text for the Input meaning.</p>
+      <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
+    </div>
+  </div>
+</div>
+++++
+

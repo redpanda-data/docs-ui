@@ -6,11 +6,11 @@ This page demonstrates the **Preview** status badge.
 
 == Badge locations
 
-1. **In the sticky header** below the title: a dark "Preview" pill
-2. **In the left nav**: "(Preview)" after the page title (only when a content catalog is available; may not render in the gulp preview)
+1. **In the sticky header** below the title: a violet "Preview" badge with an eye icon
+2. **In the left nav**: a small "Preview" badge after the page title (only when a content catalog is available; may not render in the gulp preview)
 
 == Test the tooltip
 
-Hover the Preview pill. Default text:
+Hover, focus, or tap the Preview badge. Default text:
 
-_"This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process."_
+_"Preview: not covered by Enterprise Support or SLAs, and may change."_

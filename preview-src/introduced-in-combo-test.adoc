@@ -9,6 +9,6 @@ This page sets `:page-beta:`, `:page-limited-availability:`, `:page-introduced-i
 
 == What to check
 
-* The sticky header shows the Beta, Limited Availability and "Since 4.43.0" badges in that order, and wraps cleanly at narrow widths.
-* The leading `v` is stripped: the badge reads "Since 4.43.0", not "Since v4.43.0".
-* Hovering the version badge shows the tooltip "Introduced in Redpanda Connect 4.43.0."
+* The sticky header shows the Beta, Limited Availability and "Since v4.43.0" badges in that order, and wraps cleanly at narrow widths.
+* A leading `v` in the attribute is normalized: the badge reads "Since v4.43.0", not "Since vv4.43.0".
+* Hovering the version badge shows the tooltip "Introduced in Redpanda Connect v4.43.0."

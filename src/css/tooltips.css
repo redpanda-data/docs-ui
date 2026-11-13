@@ -38,8 +38,8 @@ a.glossary-term {
 
 /* Enterprise feature terms, emitted by the enterprise inline macro
    (docs-extensions-and-macros). A dotted underline matches the glossary
-   affordance, and a small lock glyph marks the term as license-gated.
-   Both use --link-highlight-color, so dark mode adapts automatically. */
+   affordance, and a small lock glyph in the enterprise color marks the term
+   as license-gated. Both adapt to dark mode through their tokens. */
 .enterprise-feature > a {
   border-bottom: 2px dotted var(--link-highlight-color);
   text-decoration: none !important;
@@ -56,7 +56,9 @@ code.is-enterprise-property::after {
   width: 0.9em;
   height: 0.9em;
   margin-left: 0.2em;
-  background-color: var(--link-highlight-color);
+  /* The enterprise meaning color (meaning.css), so the lock matches every
+     other Enterprise mark on the site */
+  background-color: var(--meaning-enterprise-fg);
   -webkit-mask: var(--enterprise-lock-icon) no-repeat center / contain;
   mask: var(--enterprise-lock-icon) no-repeat center / contain;
 }

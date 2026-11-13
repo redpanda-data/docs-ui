@@ -47,7 +47,7 @@
       {{/if}}
       {{> version-selector}}
       {{#if page.attributes.beta}}
-      <span class="ch3-status-chip beta">beta</span>
+      <span class="rp-badge rp-badge--beta" data-tooltip="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}Beta: available to try, and may change before general availability.{{/if}}">Beta</span>
       {{/if}}
     </div>
 
@@ -185,10 +185,10 @@
           {{#if (or page.attributes.component-1-is-new (ne page.attributes.component-1-deployments 'all'))}}
           <span class="ch3-component-badges">
             {{#if page.attributes.component-1-is-new}}
-            <span class="ch3-component-badge ch3-component-badge--new">NEW</span>
+            <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
             {{/if}}
             {{#if (eq page.attributes.component-1-deployments 'byoc')}}
-            <span class="ch3-component-badge ch3-component-badge--byoc">Cloud BYOC</span>
+            <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available on Redpanda Cloud BYOC clusters.">BYOC</span>
             {{/if}}
           </span>
           {{/if}}
@@ -217,10 +217,10 @@
           {{#if (or page.attributes.component-2-is-new (ne page.attributes.component-2-deployments 'all'))}}
           <span class="ch3-component-badges">
             {{#if page.attributes.component-2-is-new}}
-            <span class="ch3-component-badge ch3-component-badge--new">NEW</span>
+            <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
             {{/if}}
             {{#if (eq page.attributes.component-2-deployments 'byoc')}}
-            <span class="ch3-component-badge ch3-component-badge--byoc">Cloud BYOC</span>
+            <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available on Redpanda Cloud BYOC clusters.">BYOC</span>
             {{/if}}
           </span>
           {{/if}}
@@ -249,10 +249,10 @@
           {{#if (or page.attributes.component-3-is-new (ne page.attributes.component-3-deployments 'all'))}}
           <span class="ch3-component-badges">
             {{#if page.attributes.component-3-is-new}}
-            <span class="ch3-component-badge ch3-component-badge--new">NEW</span>
+            <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
             {{/if}}
             {{#if (eq page.attributes.component-3-deployments 'byoc')}}
-            <span class="ch3-component-badge ch3-component-badge--byoc">Cloud BYOC</span>
+            <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available on Redpanda Cloud BYOC clusters.">BYOC</span>
             {{/if}}
           </span>
           {{/if}}
@@ -458,7 +458,7 @@
           <div class="ch3-feature-header">
             <h3 class="ch3-feature-title">{{{page.attributes.features-1-title}}}</h3>
             {{#if page.attributes.features-1-new}}
-            <span class="ch3-feature-badge">NEW</span>
+            <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
             {{/if}}
           </div>
           {{#if page.attributes.features-1-desc}}
@@ -484,7 +484,7 @@
           <div class="ch3-feature-header">
             <h3 class="ch3-feature-title">{{{page.attributes.features-2-title}}}</h3>
             {{#if page.attributes.features-2-new}}
-            <span class="ch3-feature-badge">NEW</span>
+            <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
             {{/if}}
           </div>
           {{#if page.attributes.features-2-desc}}
@@ -510,7 +510,7 @@
           <div class="ch3-feature-header">
             <h3 class="ch3-feature-title">{{{page.attributes.features-3-title}}}</h3>
             {{#if page.attributes.features-3-new}}
-            <span class="ch3-feature-badge">NEW</span>
+            <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
             {{/if}}
           </div>
           {{#if page.attributes.features-3-desc}}

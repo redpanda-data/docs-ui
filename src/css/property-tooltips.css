@@ -63,56 +63,6 @@ code.has-property-tooltip:focus-visible {
   margin-bottom: 10px;
 }
 
-/* Badge base styling */
-.property-doc-tooltip .prop-badge {
-  font-size: 0.6875rem;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-/* Scope badge (cluster, broker, topic) */
-.property-doc-tooltip .prop-badge-scope {
-  background: var(--code-background, #f0f4f8);
-  color: var(--code-font-color, #24292e);
-  border: 1px solid var(--panel-border-color, #ddd);
-}
-
-/* Restart required badge */
-.property-doc-tooltip .prop-badge-restart {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-}
-
-/* Enterprise badge */
-.property-doc-tooltip .prop-badge-enterprise {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.property-doc-tooltip .prop-badge-enterprise::before {
-  content: "";
-  display: inline-block;
-  width: 0.9em;
-  height: 0.9em;
-  margin-right: 0.25em;
-  vertical-align: -0.05em;
-  background-color: currentColor;
-  -webkit-mask: var(--enterprise-lock-icon) no-repeat center / contain;
-  mask: var(--enterprise-lock-icon) no-repeat center / contain;
-}
-
-/* Deprecated badge */
-.property-doc-tooltip .prop-badge-deprecated {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
 /* Description text. Long generated descriptions scroll inside the tooltip
    so the signature, default, and documentation link always stay visible.
    The scrollbar is styled so it stays visible when content overflows:
@@ -227,30 +177,6 @@ html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-default code,
 html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-range code {
   background: rgba(255, 255, 255, 0.1);
   color: #e0e0e0;
-}
-
-html[data-theme="dark"] .property-doc-tooltip .prop-badge-scope {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e0e0e0;
-  border-color: #444;
-}
-
-html[data-theme="dark"] .property-doc-tooltip .prop-badge-restart {
-  background: #453a1f;
-  color: #ffd54f;
-  border-color: #5a4a28;
-}
-
-html[data-theme="dark"] .property-doc-tooltip .prop-badge-enterprise {
-  background: #0a3d1a;
-  color: #7ee87e;
-  border-color: #0e5a24;
-}
-
-html[data-theme="dark"] .property-doc-tooltip .prop-badge-deprecated {
-  background: #4d0f15;
-  color: #ff9999;
-  border-color: #751923;
 }
 
 html[data-theme="dark"] .property-doc-tooltip .prop-tooltip-link {

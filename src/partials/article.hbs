@@ -24,20 +24,18 @@
     </div>
     {{/with}}
     {{> version-selector}}
-    {{!-- Status badges: Beta, Preview, Limited Availability, Since (version) --}}
+    {{!-- Status badges: Beta, Preview, Limited availability, Since (version).
+         One look per meaning (.rp-badge in meaning.css). The tooltip comes from
+         data-tooltip (12-activate-tooltips.js); page-*-text attributes override
+         the standard text. --}}
     {{#if page.attributes.beta}}
-    <span class="status-badge status-badge--beta" data-tippy-content="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}This feature is in beta and may change.{{/if}}">beta</span>
+    <span class="rp-badge rp-badge--beta" data-tooltip="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}Beta: available to try, and may change before general availability.{{/if}}">Beta</span>
     {{/if}}
     {{#if page.attributes.preview}}
-    <span class="status-badge status-badge--preview" data-tippy-content="{{#if page.attributes.preview-text}}{{page.attributes.preview-text}}{{else}}This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process.{{/if}}">Preview</span>
+    <span class="rp-badge rp-badge--preview" data-tooltip="{{#if page.attributes.preview-text}}{{page.attributes.preview-text}}{{else}}Preview: not covered by Enterprise Support or SLAs, and may change.{{/if}}">Preview</span>
     {{/if}}
     {{#if page.attributes.limited-availability}}
-    <span class="status-badge status-badge--la" {{#if page.attributes.limited-availability-text}}data-tippy-content="{{page.attributes.limited-availability-text}}"{{/if}}>
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-      </svg>
-      Limited Availability
-    </span>
+    <span class="rp-badge rp-badge--limited" data-tooltip="{{#if page.attributes.limited-availability-text}}{{page.attributes.limited-availability-text}}{{else}}Limited availability: open to selected customers.{{/if}}">Limited availability</span>
     {{/if}}
     {{!-- Version badge: the release that introduced the page's feature.
          :page-introduced-in: takes a bare X.Y.Z (a leading v or trailing period
@@ -48,26 +46,16 @@
     {{#if (and page.attributes.introduced-in (not page.attributes.cloud))}}
     {{#with (normalize-version page.attributes.introduced-in)}}
     {{!-- One source for the tooltip and the screen reader text, so they can't drift --}}
-    {{#*inline "introduced-in-text"}}Introduced in {{#if @root.page.attributes.introduced-in-product}}{{@root.page.attributes.introduced-in-product}}{{else}}version{{/if}} {{this}}.{{/inline}}
-    <span class="status-badge status-badge--since" data-tippy-content="{{> introduced-in-text}}"><span aria-hidden="true">Since {{this}}</span><span class="status-badge__sr-text">{{> introduced-in-text}}</span></span>
+    {{#*inline "introduced-in-text"}}Introduced in {{#if @root.page.attributes.introduced-in-product}}{{@root.page.attributes.introduced-in-product}} {{/if}}v{{this}}.{{/inline}}
+    <span class="rp-badge rp-badge--since" data-tooltip="{{> introduced-in-text}}"><span aria-hidden="true">Since v{{this}}</span><span class="rp-badge__sr-text">{{> introduced-in-text}}</span></span>
     {{/with}}
     {{/if}}
     {{!-- ADP platform badges: only show when limited to one platform --}}
     {{#if page.attributes.adp}}
     {{#if page.attributes.byoc-only}}
-    <span class="status-badge status-badge--byoc" data-tippy-content="This feature is only available in BYOC (Bring Your Own Cloud) clusters.">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-      </svg>
-      Only in BYOC
-    </span>
+    <span class="rp-badge rp-badge--cloud" data-tooltip="Available only on Redpanda Cloud BYOC clusters.">BYOC</span>
     {{else if page.attributes.cloud-only}}
-    <span class="status-badge status-badge--cloud" data-tippy-content="This feature is only available in fully managed Redpanda Cloud clusters.">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-      </svg>
-      Only in Cloud
-    </span>
+    <span class="rp-badge rp-badge--cloud" data-tooltip="Available only in fully managed Redpanda Cloud clusters.">Cloud</span>
     {{/if}}
     {{/if}}
     {{!-- Inline metadata: context switcher and availability badges --}}
@@ -77,41 +65,22 @@
       {{#if page.attributes.context-switcher}}
         {{> context-switcher}}
       {{/if}}
-      {{!-- Connector availability badges with links --}}
+      {{!-- Connector availability badges: links to the other platform's page --}}
       {{#if page.attributes.cloud-available}}
-        <a href="{{page.attributes.cloud-available-url}}" class="status-badge status-badge--cloud-link" title="Also available in Redpanda Cloud - click to view">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-          </svg>
-          Also in Cloud
-        </a>
+        <a href="{{page.attributes.cloud-available-url}}" class="rp-badge rp-badge--cloud" data-tooltip="Available in Redpanda Cloud.">Cloud</a>
       {{/if}}
       {{#if page.attributes.self-managed-available}}
-        <a href="{{page.attributes.self-managed-available-url}}" class="status-badge status-badge--self-managed-link" title="Also available in Self-Managed - click to view">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-          Also in Self-Managed
-        </a>
+        <a href="{{page.attributes.self-managed-available-url}}" class="rp-badge rp-badge--self-managed" data-tooltip="Available in Self-Managed Redpanda.">Self-Managed</a>
       {{/if}}
       {{#if page.attributes.self-managed-only}}
-        <span class="status-badge status-badge--self-managed-only" title="Only available in Self-Managed">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-          Self-Managed Only
-        </span>
+        <span class="rp-badge rp-badge--self-managed" data-tooltip="Available only in Self-Managed Redpanda.">Self-Managed</span>
       {{/if}}
-      {{!-- Legacy BYOC/Cloud badges for ADP and other uses --}}
+      {{!-- BYOC and Cloud badges for non-ADP pages --}}
       {{#if page.attributes.byoc}}
-        <div class="byoc-label byoc-label--inline">
-          <p>BYOC</p>
-        </div>
+        <span class="rp-badge rp-badge--cloud" data-tooltip="{{#if page.attributes.byoc-text}}{{page.attributes.byoc-text}}{{else}}Available on Redpanda Cloud BYOC clusters.{{/if}}">BYOC</span>
       {{/if}}
       {{#if page.attributes.cloud-only}}
-        <div class="cloud-label cloud-label--inline">
-          <p>Cloud</p>
-        </div>
+        <span class="rp-badge rp-badge--cloud" data-tooltip="{{#if page.attributes.cloud-only-text}}{{page.attributes.cloud-only-text}}{{else}}Available in Redpanda Cloud.{{/if}}">Cloud</span>
       {{/if}}
     </div>
     {{/unless}}
@@ -129,151 +98,6 @@
   {{!-- Metadata now shown in sticky bar above --}}
 </div>
 {{/unless}}
-{{#if (or page.attributes.beta page.attributes.preview page.attributes.limited-availability page.attributes.byoc page.attributes.cloud-only page.attributes.context-switcher)}}
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const stickyHeader = document.querySelector(".component-indicator-sticky");
-    const navMetadataContainer = document.querySelector(".metadata--nav");
-
-    // Initialize tooltips for status badges in sticky header
-    const betaBadge = stickyHeader?.querySelector(".status-badge--beta");
-    const navBetaBadge = navMetadataContainer?.querySelector(".nav-beta-label");
-
-    if (betaBadge) {
-      tippy(betaBadge, {
-        content: betaBadge.dataset.tippyContent,
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-    const previewBadge = stickyHeader?.querySelector(".status-badge--preview");
-    if (previewBadge) {
-      tippy(previewBadge, {
-        content: previewBadge.dataset.tippyContent,
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-    if (navBetaBadge) {
-      tippy(navBetaBadge, {
-        content: "{{page.attributes.beta-text}}",
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-
-    // Initialize tooltips for limited availability badges
-    const laBadge = stickyHeader?.querySelector(".status-badge--la");
-    const navLimitedAvailabilityBadge = navMetadataContainer?.querySelector(".nav-limited-availability-label");
-
-    if (laBadge && laBadge.dataset.tippyContent) {
-      tippy(laBadge, {
-        content: laBadge.dataset.tippyContent,
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-    if (navLimitedAvailabilityBadge) {
-      tippy(navLimitedAvailabilityBadge, {
-        content: "{{page.attributes.limited-availability-text}}",
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-
-    // Initialize tooltips for BYOC badges if present
-    const topByocBadge = stickyHeader?.querySelector(".byoc-label--inline p");
-    const navByocBadge = navMetadataContainer?.querySelector(".nav-byoc-label");
-    if (topByocBadge) {
-      tippy(topByocBadge, {
-        content: "{{page.attributes.byoc-text}}",
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-    if (navByocBadge) {
-      tippy(navByocBadge, {
-        content: "{{page.attributes.byoc-text}}",
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-
-    // Initialize tooltips for Cloud badges if present
-    const topCloudBadge = stickyHeader?.querySelector(".cloud-label--inline p");
-    const navCloudBadge = navMetadataContainer?.querySelector(".nav-cloud-label");
-    if (topCloudBadge) {
-      tippy(topCloudBadge, {
-        content: "{{page.attributes.cloud-only-text}}",
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-    if (navCloudBadge) {
-      tippy(navCloudBadge, {
-        content: "{{page.attributes.cloud-only-text}}",
-        animation: "scale",
-        theme: "redpanda-term",
-        touch: "hold",
-        interactive: true,
-        allowHTML: true,
-        appendTo: () => document.body,
-      });
-    }
-
-    // Show nav metadata when main metadata is not visible
-    const metadataContainer = document.querySelector(".metadata--main");
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          navMetadataContainer?.classList.add("hidden");
-        } else {
-          navMetadataContainer?.classList.remove("hidden");
-        }
-      });
-    }, {
-      root: null,
-      threshold: 0.1 // Trigger when 10% of the container is visible
-    });
-
-    if (metadataContainer) {
-      observer.observe(metadataContainer);
-    }
-  });
-  </script>
-{{/if}}
 {{#if page.attributes.console-config-migrator}}
 {{> console-config-migrator}}
 {{/if}}

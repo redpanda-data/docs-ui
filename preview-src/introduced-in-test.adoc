@@ -2,12 +2,12 @@
 :page-introduced-in: 4.43.0
 :description: This page tests the version badge that shows the release a feature was introduced in.
 
-This page sets `:page-introduced-in: 4.43.0`, so the sticky header shows a gray "Since 4.43.0" badge.
+This page sets `:page-introduced-in: 4.43.0`, so the sticky header shows a gray "Since v4.43.0" badge.
 
 == What to check
 
-* The "Since 4.43.0" badge appears in the sticky header.
-* Hovering the badge shows the tooltip "Introduced in version 4.43.0."
+* The "Since v4.43.0" badge appears in the sticky header.
+* Hovering the badge shows the tooltip "Introduced in v4.43.0."
 * The badge is readable in both light and dark themes.
 * Pages that don't set `:page-introduced-in:`, such as the Limited Availability Test page, show no version badge.
 * The Introduced-In Badge With Other Badges page shows the badge next to Beta and Limited Availability, with the product named in the tooltip.

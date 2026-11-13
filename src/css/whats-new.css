@@ -164,19 +164,8 @@ html[data-theme="dark"] .whats-new-item:hover {
   box-shadow: -4px 0 0 rgb(var(--whats-new-color, 16, 185, 129)), 0 4px 16px rgba(var(--whats-new-color, 16, 185, 129), 0.25);
 }
 
-.whats-new-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 10px;
-  font-size: calc(10 / var(--rem-base) * 1rem);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, rgb(var(--whats-new-color, 16, 185, 129)) 0%, rgb(var(--whats-new-color, 16, 185, 129)) 100%);
-  color: #fff;
-  border-radius: 5px;
-  white-space: nowrap;
+/* The New badge is .rp-badge--new (meaning.css); keep it from shrinking */
+.whats-new-item > .rp-badge {
   flex-shrink: 0;
 }
 
@@ -263,11 +252,6 @@ html[data-theme="dark"] .whats-new-tag {
     align-items: flex-start;
     gap: 10px;
     padding: 12px 14px;
-  }
-
-  .whats-new-badge {
-    padding: 3px 8px;
-    font-size: calc(10 / var(--rem-base) * 1rem);
   }
 
   .whats-new-item-title {
