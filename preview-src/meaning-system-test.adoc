@@ -12,7 +12,7 @@ Default size, as used in page headers and running text:
 <div class="paragraph"><p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="badges-default">
 <span class="rp-badge rp-badge--enterprise" data-tooltip="Requires an Enterprise Edition license.">Enterprise</span>
 <span class="rp-badge rp-badge--beta" data-tooltip="Beta: available to try, and may change before general availability.">Beta</span>
-<span class="rp-badge rp-badge--preview" data-tooltip="Preview: not covered by Enterprise Support or SLAs, and may change.">Preview</span>
+<span class="rp-badge rp-badge--preview" data-tooltip="This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process.">Preview</span>
 <span class="rp-badge rp-badge--limited" data-tooltip="Limited availability: open to selected customers.">Limited availability</span>
 <span class="rp-badge rp-badge--deprecated" data-tooltip="Deprecated: still available, but planned for removal.">Deprecated</span>
 <span class="rp-badge rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
@@ -34,7 +34,7 @@ Small size (`rp-badge--sm`), as used in the nav and on cards:
 <div class="paragraph"><p style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="badges-sm">
 <span class="rp-badge rp-badge--enterprise rp-badge--sm" data-tooltip="Requires an Enterprise Edition license.">Enterprise</span>
 <span class="rp-badge rp-badge--beta rp-badge--sm" data-tooltip="Beta: available to try, and may change before general availability.">Beta</span>
-<span class="rp-badge rp-badge--preview rp-badge--sm" data-tooltip="Preview: not covered by Enterprise Support or SLAs, and may change.">Preview</span>
+<span class="rp-badge rp-badge--preview rp-badge--sm" data-tooltip="This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process.">Preview</span>
 <span class="rp-badge rp-badge--limited rp-badge--sm" data-tooltip="Limited availability: open to selected customers.">Limited availability</span>
 <span class="rp-badge rp-badge--deprecated rp-badge--sm" data-tooltip="Deprecated: still available, but planned for removal.">Deprecated</span>
 <span class="rp-badge rp-badge--eol rp-badge--sm" data-tooltip="No longer supported.">End of life</span>
@@ -101,7 +101,7 @@ A page-level notice, the Redpanda Connect connector card generalized. Each meani
     <span class="rp-notice-icon" aria-hidden="true"></span>
     <div class="rp-notice-body">
       <span class="rp-notice-title">Preview</span>
-      <p class="rp-notice-text">Preview: not covered by Enterprise Support or SLAs, and may change.</p>
+      <p class="rp-notice-text">This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process.</p>
       <p class="rp-notice-actions"><a class="rp-button rp-button--primary" href="#a">Primary action</a> <a class="rp-button" href="#b">Secondary</a> <a class="rp-notice-link" href="#c">Learn more</a></p>
     </div>
   </div>
