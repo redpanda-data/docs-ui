@@ -44,6 +44,7 @@ const PAGES = {
   'cloud-data-platform': ['cloudSignup', 'pricing', 'contact'],
   'agentic-data-plane': ['adpDemo', 'demo', 'contact'],
   streaming: ['tryRedpanda', 'enterprise', 'pricing'],
+  connect: ['tryRedpanda', 'enterprise', 'contact'],
 }
 
 // Help box for components with no entry in PAGES: the pre-DOC-2607 text.
