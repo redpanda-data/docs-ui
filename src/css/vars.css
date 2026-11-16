@@ -390,6 +390,69 @@ html:not([data-theme=dark]) {
 
 :root {
   --enterprise-lock-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 1 1 6 0v3H9z"/></svg>');
+  /* Meaning icons: 16px filled SVGs, applied with CSS mask so they take
+     currentColor. One per meaning; see src/css/meaning.css. */
+  --icon-lock: var(--enterprise-lock-icon);
+  --icon-flask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 2h8v2h-1.5v5.1l5.8 9.6A2.2 2.2 0 0 1 18.4 22H5.6a2.2 2.2 0 0 1-1.9-3.3l5.8-9.6V4H8V2zm3.5 2v5.7L9.3 13.4h5.4l-2.2-3.7V4h-1z" fill-rule="evenodd"/></svg>');
+  --icon-eye: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5C6.6 5 2.7 8.6 1 12c1.7 3.4 5.6 7 11 7s9.3-3.6 11-7c-1.7-3.4-5.6-7-11-7zm0 11.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-2.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill-rule="evenodd"/></svg>');
+  --icon-clock: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 4.5h-2v6.1l4.9 2.9 1-1.7-3.9-2.3V6.5z" fill-rule="evenodd"/></svg>');
+  --icon-archive: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 3h20v5H2V3zm1 6.5h18V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5zm6 3V15h6v-2.5H9z" fill-rule="evenodd"/></svg>');
+  --icon-sparkle: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 2c.7 5 2.9 7.3 8 8-5.1.7-7.3 3-8 8-.7-5-2.9-7.3-8-8 5.1-.7 7.3-3 8-8zm9 12c.4 2.4 1.3 3.4 3.5 3.5-2.2.3-3.1 1.1-3.5 3.5-.4-2.4-1.3-3.2-3.5-3.5 2.2-.1 3.1-1.1 3.5-3.5z"/></svg>');
+  --icon-cloud: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.5 20H6.5a5.5 5.5 0 0 1-.8-10.9 7 7 0 0 1 13.2 1.2A4.9 4.9 0 0 1 18.5 20z"/></svg>');
+  --icon-server: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 3h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm0 10h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1zm2.5-7v2h2V6h-2zm0 10v2h2v-2h-2z" fill-rule="evenodd"/></svg>');
+  --icon-check-badge: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1.5l2.6 1.9 3.2-.1 1 3.1 2.6 1.9-1 3.1 1 3.1-2.6 1.9-1 3.1-3.2-.1L12 22.5l-2.6-1.9-3.2.1-1-3.1-2.6-1.9 1-3.1-1-3.1 2.6-1.9 1-3.1 3.2.1L12 1.5zm-1.3 14.3l6-6-1.4-1.4-4.6 4.6-2.3-2.3-1.4 1.4 3.7 3.7z" fill-rule="evenodd"/></svg>');
+  --icon-people: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 11.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM1 20.5c0-3.6 3.6-6.5 8-6.5s8 2.9 8 6.5v.5H1v-.5zm17.9.5H23v-.5c0-2.9-2.6-5.2-6-5.4 1.2 1.4 1.9 3.1 1.9 5.4v.5z"/></svg>');
+  --icon-tag: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.5 3.5A1 1 0 0 1 3.5 2.5h8.1a1 1 0 0 1 .7.3l9.4 9.4a1.5 1.5 0 0 1 0 2.1l-7 7a1.5 1.5 0 0 1-2.1 0L3.2 12a1 1 0 0 1-.3-.7V3.5zM7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill-rule="evenodd"/></svg>');
+
+  /* Meaning tokens: one look per meaning across the site. For each meaning,
+     fg is text and icon color, bg the badge fill, border its outline. Every
+     fg is at least 4.5:1 on its bg and on the page background, in light and
+     dark (tests/meaning-tokens checks it). Dark values are in dark-mode.css. */
+  --meaning-enterprise-fg: #a32d0c;
+  --meaning-enterprise-bg: #fdf0ec;
+  --meaning-enterprise-border: #f6c9bb;
+  --meaning-beta-fg: #92400e;
+  --meaning-beta-bg: #fef3c7;
+  --meaning-beta-border: #fcd34d;
+  --meaning-preview-fg: #6d28d9;
+  --meaning-preview-bg: #f3effe;
+  --meaning-preview-border: #ddd6fe;
+  --meaning-limited-fg: #6d28d9;
+  --meaning-limited-bg: #f3effe;
+  --meaning-limited-border: #ddd6fe;
+  --meaning-deprecated-fg: #b91c1c;
+  --meaning-deprecated-bg: #fef2f2;
+  --meaning-deprecated-border: #fecaca;
+  --meaning-eol-fg: #b91c1c;
+  --meaning-eol-bg: #fef2f2;
+  --meaning-eol-border: #fecaca;
+  --meaning-eol-soon-fg: #92400e;
+  --meaning-eol-soon-bg: #fef3c7;
+  --meaning-eol-soon-border: #fcd34d;
+  --meaning-new-fg: #166534;
+  --meaning-new-bg: #ecfdf3;
+  --meaning-new-border: #bbf7d0;
+  --meaning-since-fg: #475467;
+  --meaning-since-bg: #f2f4f7;
+  --meaning-since-border: #d0d5dd;
+  --meaning-cloud-fg: #075985;
+  --meaning-cloud-bg: #e0f2fe;
+  --meaning-cloud-border: #bae6fd;
+  --meaning-self-managed-fg: #334155;
+  --meaning-self-managed-bg: #eef2f6;
+  --meaning-self-managed-border: #cbd5e1;
+  --meaning-certified-fg: #166534;
+  --meaning-certified-bg: #ecfdf3;
+  --meaning-certified-border: #bbf7d0;
+  --meaning-community-fg: #475467;
+  --meaning-community-bg: #f2f4f7;
+  --meaning-community-border: #d0d5dd;
+  --meaning-use-case-fg: #475467;
+  --meaning-use-case-bg: #f2f4f7;
+  --meaning-use-case-border: #d0d5dd;
+  --meaning-neutral-fg: #475467;
+  --meaning-neutral-bg: #f2f4f7;
+  --meaning-neutral-border: #d0d5dd;
   /* Typography - Font Families */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Inter Display", "Inter", ui-sans-serif, system-ui, sans-serif;
