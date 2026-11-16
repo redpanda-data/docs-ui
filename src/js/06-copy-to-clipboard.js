@@ -52,7 +52,10 @@
     // Create a "Copy" button (if not suppressed)
     if (supportsCopy && !pre.parentNode.parentNode.classList.contains('no-copy')) {
       ;(copy = document.createElement('button')).className = 'copy-button'
-      // Only add tooltip on non-touch devices
+      copy.type = 'button'
+      // The accessible name holds on every device; the title tooltip is only
+      // for pointer devices
+      copy.setAttribute('aria-label', 'Copy to clipboard')
       if (!isTouch) {
         copy.setAttribute('title', 'Copy to clipboard')
       }
@@ -64,6 +67,7 @@
       copySvg.setAttribute('viewBox', '0 0 16 16')
       copySvg.setAttribute('fill', 'none')
       copySvg.setAttribute('class', 'copy-icon')
+      copySvg.setAttribute('aria-hidden', 'true')
 
       // Back page
       var backRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
@@ -93,6 +97,8 @@
 
       toast = document.createElement('span')
       toast.className = 'copy-toast'
+      // Visual only: the copy is announced through the shared status region
+      toast.setAttribute('aria-hidden', 'true')
       toast.appendChild(document.createTextNode('Copied!'))
       copy.appendChild(toast)
 
@@ -104,6 +110,8 @@
     // Create an "Ask AI" button (if chat panel is available)
     if (document.querySelector('[data-chat-panel]') && !pre.parentNode.parentNode.classList.contains('no-copy')) {
       ;(askAI = document.createElement('button')).className = 'ask-ai-button'
+      askAI.type = 'button'
+      askAI.setAttribute('aria-label', 'Ask AI about this code')
       // Only add tooltip on non-touch devices
       if (!isTouch) {
         askAI.setAttribute('title', 'Ask AI about this code')
@@ -116,6 +124,7 @@
       sparklesSvg.setAttribute('viewBox', '0 0 16 16')
       sparklesSvg.setAttribute('fill', 'none')
       sparklesSvg.setAttribute('class', 'ask-ai-icon')
+      sparklesSvg.setAttribute('aria-hidden', 'true')
 
       var sparklesPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
       sparklesPath.setAttribute('fill-rule', 'evenodd')
@@ -223,6 +232,10 @@
     pre.parentNode.appendChild(toolbox)
   })
 
+  // A live region announces reliably only if it is in the page before its
+  // text changes, so add it now when the page has a copy button
+  if (document.querySelector('.copy-button')) ensureStatusRegion()
+
   // This helper function extracts commands from console-style code
   // by removing `$ ` prefixes and line continuations.
   function extractCommands (text) {
@@ -248,9 +261,29 @@
         // Force reflow so the animation can restart properly
         this.offsetHeight // eslint-disable-line no-unused-expressions
         this.classList.remove('clicked')
+        announce('Copied to clipboard')
       }.bind(this),
       function () {}
     )
+  }
+
+  // One polite status region for the page, created on first use. Clearing it
+  // first makes a second copy of the same text announce again.
+  var statusRegion
+  function ensureStatusRegion () {
+    if (statusRegion) return statusRegion
+    statusRegion = document.createElement('span')
+    statusRegion.className = 'copy-status visually-hidden'
+    statusRegion.setAttribute('role', 'status')
+    document.body.appendChild(statusRegion)
+    return statusRegion
+  }
+
+  function announce (message) {
+    ensureStatusRegion().textContent = ''
+    setTimeout(function () {
+      statusRegion.textContent = message
+    }, 50)
   }
 
   // Handles opening chat drawer with the code snippet

@@ -40,9 +40,12 @@ test('the scan leaves data-tooltip badges and titles on other elements alone', (
 })
 
 // Labels are exact, so a meaning reads the same everywhere: no "(beta)", no
-// "NEW", no "Only in BYOC". Static labels only; computed ones are skipped.
+// "NEW", no "Only in BYOC". A page limited to one platform says so in the
+// label ("Cloud only"), not only in its tooltip. Static labels only; computed
+// ones are skipped.
 const LABELS = new Set(['Enterprise', 'Beta', 'Preview', 'Limited availability', 'Deprecated', 'End of life',
-  'End of life soon', 'New', 'Cloud', 'BYOC', 'Serverless', 'Dedicated', 'Self-Managed', 'Certified', 'Community'])
+  'End of life soon', 'New', 'Cloud', 'BYOC', 'Serverless', 'Dedicated', 'Self-Managed', 'Certified', 'Community',
+  'Cloud only', 'BYOC only', 'Self-Managed only'])
 
 test('static .rp-badge labels in templates are the standard labels', () => {
   const bad = []

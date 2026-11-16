@@ -570,6 +570,34 @@
   }
 
   /**
+   * The name of the property a mention refers to. The prop: macro puts it in
+   * data-property-name; without it, the code text, less the build-time
+   * " (Enterprise)" marker that follows the name of an Enterprise property.
+   */
+  function propertyNameOf (codeEl) {
+    var name = codeEl.getAttribute('data-property-name')
+    if (name) return name
+    var text = codeEl.textContent
+    var marker = codeEl.querySelector('.enterprise-feature-marker')
+    if (marker) text = text.replace(marker.textContent, '')
+    return text.trim()
+  }
+
+  /**
+   * Marks an Enterprise property mention the way the prop: macro does at
+   * build time (class is-enterprise-property, "(Enterprise)" in the name),
+   * and returns the mention's accessible name. Cloud pages get neither:
+   * Cloud has no Enterprise license, and the build leaves both off there.
+   * A class the build already added is kept as is, not added again.
+   */
+  function enterpriseMentionLabel (codeEl, name, prop, cloud) {
+    var built = codeEl.classList.contains('is-enterprise-property')
+    var enterprise = !cloud && (prop.isEnterprise || built)
+    if (enterprise && !built) codeEl.classList.add('is-enterprise-property')
+    return name + (enterprise ? ' (Enterprise)' : '') + ' property documentation'
+  }
+
+  /**
    * Attribute names considered "defined" when evaluating ifdef/ifndef
    * conditionals in property descriptions. Property descriptions are shared
    * between the self-managed and cloud sites, so pick the branch matching
@@ -899,6 +927,8 @@
         'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
       )
       var canTouch = canTouchDevice()
+      // Same Cloud test as the ifdef::env-cloud[] evaluation of descriptions
+      var cloud = definedConditionalAttributes().indexOf('env-cloud') !== -1
 
       // Only the first mention of a property in a paragraph (or list item,
       // table cell, ...) gets a tooltip. Repeats render as plain code so a
@@ -956,7 +986,7 @@
       }
 
       codeElements.forEach(function (codeEl) {
-        var text = codeEl.getAttribute('data-property-name') || codeEl.textContent.trim()
+        var text = propertyNameOf(codeEl)
 
         // Look up the marked property in the published data
         if (Object.prototype.hasOwnProperty.call(properties, text)) {
@@ -967,14 +997,12 @@
           // Mark as having tooltip (for styling and to avoid re-processing)
           codeEl.classList.add('has-property-tooltip')
           codeEl.classList.add('has-documentation')
-          if (prop.isEnterprise) {
-            codeEl.classList.add('is-enterprise-property')
-          }
           codeEl.style.cursor = 'help'
           codeEl.setAttribute('tabindex', '0')
           codeEl.setAttribute('role', 'button')
-          // The lock on an Enterprise property is CSS, so the name says it too.
-          codeEl.setAttribute('aria-label', text + (prop.isEnterprise ? ' (Enterprise)' : '') + ' property documentation')
+          // The aria-label replaces the code's text, build marker included,
+          // so the name says Enterprise itself (once).
+          codeEl.setAttribute('aria-label', enterpriseMentionLabel(codeEl, text, prop, cloud))
 
           if (canTouch) {
             codeEl.setAttribute('aria-haspopup', 'dialog')

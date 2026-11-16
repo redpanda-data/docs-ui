@@ -146,10 +146,59 @@
             // Trigger the same toggle behavior as clicking
             hydrateNavItem(element)
             element.classList.toggle('is-active')
+            syncToggle(element)
           }
         })
       }
+      syncToggle(element)
     })
+  }
+
+  // The expand/collapse control of a nav item: its state is aria-expanded,
+  // kept in step with the item's is-active class, and its name says which
+  // item it opens ("Expand Get started", "Collapse Get started").
+  function toggleOf (li) {
+    var div = findClosestChild(li, '.item')
+    return div ? div.querySelector('.nav-item-toggle') : null
+  }
+
+  // The item's own title: the link or text of its row, without the status
+  // badges (Beta, Cloud) that sit inside the link.
+  function itemTitle (li) {
+    var div = findClosestChild(li, '.item')
+    var label = div && (div.querySelector('.nav-link') || div.querySelector('.nav-text'))
+    if (!label) return ''
+    var nodes = label.childNodes
+    if (!nodes) return String(label.textContent || '').replace(/\s+/g, ' ').trim()
+    var text = ''
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i]
+      if (node.nodeType === 1 && node.classList && node.classList.contains('rp-badge')) continue
+      text += node.textContent || ''
+    }
+    return text.replace(/\s+/g, ' ').trim()
+  }
+
+  function syncToggle (li) {
+    var toggle = toggleOf(li)
+    if (!toggle) return
+    var open = li.classList.contains('is-active')
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+    var title = itemTitle(li)
+    toggle.setAttribute('aria-label', (open ? 'Collapse ' : 'Expand ') + (title || 'navigation'))
+  }
+
+  function syncAllToggles (root) {
+    find(root, '.nav-item').forEach(syncToggle)
+  }
+
+  // aria-current="page" follows is-current-page: on the link of the current row only
+  function markCurrentLink (row) {
+    find(menuPanel, '.nav-link').forEach(function (link) {
+      if (link.getAttribute('aria-current') !== null && link.removeAttribute) link.removeAttribute('aria-current')
+    })
+    var link = row && (row.classList.contains('nav-link') ? row : row.querySelector('.nav-link'))
+    if (link) link.setAttribute('aria-current', 'page')
   }
 
   if (explorePanel) {
@@ -222,6 +271,8 @@
     navItem.classList.add('is-current-page')
     currentPageItem = navItem
     activateCurrentPath(navItem)
+    markCurrentLink(navItem)
+    syncAllToggles(menuPanel)
     scrollItemToMidpoint(navLink, smooth)
   }
 
@@ -263,6 +314,7 @@
       // Toggle 'is-active' class to open the dropdown
       hydrateNavItem(this)
       this.classList.toggle('is-active')
+      syncToggle(this)
       keepInView(this)
       event.stopPropagation()
     }

@@ -6,7 +6,8 @@
     <div class="container{{#if (and page.versions (gt page.versions.length 1))}} has-dropdown{{/if}}">
       {{#if (and page.versions (gt page.versions.length 1))}}
       {{!-- Multiple versions: use accessible button trigger --}}
-      <button type="button" class="version-selector-trigger" aria-expanded="false" aria-controls="version-dropdown" aria-label="Select version">
+      <button type="button" class="version-selector-trigger" aria-expanded="false" aria-controls="version-dropdown">
+        <span class="visually-hidden">Select version. Current: </span>
         <span class="current-version">Version {{page.componentVersion.displayVersion}}
           {{#each page.versions as |ver|}}
             {{#if (eq ver.version @root.page.attributes.version)}}

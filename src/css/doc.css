@@ -174,9 +174,9 @@ html[data-theme="dark"] .component-indicator-sticky .context-dropdown-toggle:hov
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Add "Type:" label before dropdown */
-.component-indicator-sticky .context-dropdown-toggle::before {
-  content: 'Type:';
+/* The "Type:" label before the selected variant (real text in
+   context-switcher.hbs and 24-move-connector-metadata.js) */
+.component-indicator-sticky .context-dropdown-label {
   font-weight: 600;
   opacity: 0.7;
   margin-right: 4px;
@@ -972,13 +972,19 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   color: var(--admonition-warning-fg);
 }
 
-/* The icon before the label (asciidoctor's <i class="fa icon-NAME" title="Note">),
-   masked so it is always the label's color */
+/* The icon before the label, masked so it is always the label's color.
+   Asciidoctor emits two markups for the label:
+   - icons=font: <td class="icon"><i class="fa icon-note" title="Note"></i></td>,
+     where the word comes only from the title attribute (drawn by ::after below)
+   - icons unset: <td class="icon"><div class="title">Note</div></td>,
+     where the word is real text
+   Both get the same icon and look the same. */
 .icon-note::before,
 .icon-tip::before,
 .icon-important::before,
 .icon-caution::before,
-.icon-warning::before {
+.icon-warning::before,
+.admonitionblock td.icon > .title::before {
   content: "";
   flex: none;
   width: 1.2em;
@@ -1009,6 +1015,26 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
   --admonition-icon: var(--icon-octagon);
 }
 
+.admonitionblock.note td.icon > .title {
+  --admonition-icon: var(--icon-info);
+}
+
+.admonitionblock.tip td.icon > .title {
+  --admonition-icon: var(--icon-check-circle);
+}
+
+.admonitionblock.important td.icon > .title {
+  --admonition-icon: var(--icon-important);
+}
+
+.admonitionblock.caution td.icon > .title {
+  --admonition-icon: var(--icon-triangle);
+}
+
+.admonitionblock.warning td.icon > .title {
+  --admonition-icon: var(--icon-octagon);
+}
+
 .admonitionblock .icon i {
   display: inline-flex;
   align-items: center;
@@ -1018,6 +1044,18 @@ html[data-theme="dark"] .doc #preamble > .sectionbody > .paragraph:first-child >
 
 .admonitionblock .icon i::after {
   content: attr(title);
+}
+
+/* The no-icons label is a .title; undo the generic .admonitionblock .title
+   styles (bold, top margin) so it matches the font-icon label */
+.admonitionblock td.icon > .title {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  font: unset;
+  font-weight: inherit;
+  color: inherit;
 }
 
 .listingblock .title > * {
@@ -1264,6 +1302,12 @@ html[data-theme="dark"] .listingblock .title {
 
 .doc ul.checklist i.fa-square-o::before {
   content: "\274f";
+}
+
+/* Without font icons, Asciidoctor writes the marker as text (&#10003; or
+   &#10063;) at the start of the paragraph; hang it like the icon */
+.doc ul.checklist li > p:first-child:not(:has(> i.fa:first-child)) {
+  text-indent: -1.25rem;
 }
 
 .doc .dlist .dlist,
@@ -2300,8 +2344,14 @@ html[data-theme="dark"] .doc .source-toolbox .copy-button:hover {
   hyphens: none;
 }
 
+/* icons=font draws the caret with CSS; without font icons Asciidoctor writes
+   it as text in <b class="caret">&#8250;</b>, styled the same */
 .doc .menuseq i.caret::before {
   content: "\203a";
+}
+
+.doc .menuseq i.caret::before,
+.doc .menuseq b.caret {
   font-size: 1.1em;
   font-family: var(--body-font-family-bold);
   line-height: calc(1 / 1.1);

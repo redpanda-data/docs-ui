@@ -984,7 +984,8 @@ export default function ChatInterface() {
                     if (block.type !== 'text' || !(block.content || '').trim()) return null
                     if (bi === lastTextIdx) return <Answer key={bi} md={answerBody} />
                     return (
-                      <div key={bi} className="answer-interim" aria-label="Agent thinking">
+                      <div key={bi} className="answer-interim">
+                        <span className="visually-hidden">Thinking: </span>
                         {block.content}
                       </div>
                     )

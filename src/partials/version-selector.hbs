@@ -62,7 +62,7 @@
         <div class="sm-ver-rows">
           {{#each page.versions}}
           {{#if ./prerelease}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="beta" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}"{{#if (eq ./version @root.page.version)}} aria-current="page"{{/if}} data-status="beta" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
@@ -83,7 +83,8 @@
               Beta
             </span>
             {{#if (eq ./version @root.page.version)}}
-            <span class="sm-ver-row-check" aria-label="Selected">
+            <span class="visually-hidden"> (current)</span>
+            <span class="sm-ver-row-check" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                 <polyline points="5 13 9 17 19 7"></polyline>
               </svg>
@@ -103,7 +104,7 @@
         <div class="sm-ver-rows">
           {{#each page.versions}}
           {{#if (and (not ./prerelease) (eq ./version @root.page.component.latest.version))}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="current" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}"{{#if (eq ./version @root.page.version)}} aria-current="page"{{/if}} data-status="current" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
@@ -124,7 +125,8 @@
               Latest
             </span>
             {{#if (eq ./version @root.page.version)}}
-            <span class="sm-ver-row-check" aria-label="Selected">
+            <span class="visually-hidden"> (current)</span>
+            <span class="sm-ver-row-check" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                 <polyline points="5 13 9 17 19 7"></polyline>
               </svg>
@@ -146,7 +148,7 @@
           {{#unless ./prerelease}}
           {{#unless (eq ./version @root.page.component.latest.version)}}
           {{#unless (is-eol ./asciidoc.attributes)}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="supported" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}"{{#if (eq ./version @root.page.version)}} aria-current="page"{{/if}} data-status="supported" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
@@ -174,7 +176,8 @@
             </span>
             {{/if}}
             {{#if (eq ./version @root.page.version)}}
-            <span class="sm-ver-row-check" aria-label="Selected">
+            <span class="visually-hidden"> (current)</span>
+            <span class="sm-ver-row-check" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                 <polyline points="5 13 9 17 19 7"></polyline>
               </svg>
@@ -197,7 +200,7 @@
           {{#each page.versions}}
           {{#unless ./prerelease}}
           {{#if (is-eol ./asciidoc.attributes)}}
-          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="eol" href="{{{relativize ./url}}}">
+          <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}"{{#if (eq ./version @root.page.version)}} aria-current="page"{{/if}} data-status="eol" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{version-label ./displayVersion}}</span>
             </div>
@@ -218,7 +221,8 @@
               End of life
             </span>
             {{#if (eq ./version @root.page.version)}}
-            <span class="sm-ver-row-check" aria-label="Selected">
+            <span class="visually-hidden"> (current)</span>
+            <span class="sm-ver-row-check" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                 <polyline points="5 13 9 17 19 7"></polyline>
               </svg>
