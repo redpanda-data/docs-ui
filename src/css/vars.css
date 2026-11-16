@@ -314,19 +314,14 @@ html:not([data-theme=dark]) {
   /* admonitions */
   --important-background: rgba(68, 76, 231, 0.1);
   --important-on-color: var(--body-font-color);
-  --important-icon: url(../img/info-purple.svg) no-repeat center right / auto 100%;
   --warning-background: rgba(205, 55, 44, 0.1);
   --warning-on-color: var(--body-font-color);
-  --warning-icon: url(../img/report-red.svg) no-repeat center right / auto 100%;
   --note-background: rgba(69, 173, 232, 0.1);
   --note-on-color: var(--body-font-color);
-  --note-icon: url(../img/info-blue.svg) no-repeat center right / auto 100%;
   --tip-background: rgba(56, 161, 105, 0.1);
   --tip-on-color: var(--body-font-color);
-  --tip-icon: url(../img/check-circle-green.svg) no-repeat center right / auto 100%;
   --caution-background: rgba(249, 161, 101, 0.1);
   --caution-on-color: var(--body-font-color);
-  --caution-icon: url(../img/warning-orange.svg) no-repeat center right / auto 100%;
   /* availability block */
   --availability-block-background: rgba(108, 117, 125, 0.08);
   --availability-block-border: #6c757d;
@@ -403,6 +398,38 @@ html:not([data-theme=dark]) {
   --icon-check-badge: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1.5l2.6 1.9 3.2-.1 1 3.1 2.6 1.9-1 3.1 1 3.1-2.6 1.9-1 3.1-3.2-.1L12 22.5l-2.6-1.9-3.2.1-1-3.1-2.6-1.9 1-3.1-1-3.1 2.6-1.9 1-3.1 3.2.1L12 1.5zm-1.3 14.3l6-6-1.4-1.4-4.6 4.6-2.3-2.3-1.4 1.4 3.7 3.7z" fill-rule="evenodd"/></svg>');
   --icon-people: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 11.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM1 20.5c0-3.6 3.6-6.5 8-6.5s8 2.9 8 6.5v.5H1v-.5zm17.9.5H23v-.5c0-2.9-2.6-5.2-6-5.4 1.2 1.4 1.9 3.1 1.9 5.4v.5z"/></svg>');
   --icon-tag: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.5 3.5A1 1 0 0 1 3.5 2.5h8.1a1 1 0 0 1 .7.3l9.4 9.4a1.5 1.5 0 0 1 0 2.1l-7 7a1.5 1.5 0 0 1-2.1 0L3.2 12a1 1 0 0 1-.3-.7V3.5zM7.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill-rule="evenodd"/></svg>');
+
+  /* Admonition icons, masked like the meaning icons so each takes its
+     label color. NOTE and IMPORTANT have different shapes on purpose. */
+  --icon-info: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.1 8.4h2.2V17h-2.2v-6.6zm0-3.6h2.2V9h-2.2V6.8z" fill-rule="evenodd"/></svg>');
+  --icon-check-circle: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.3 14.4l-4.3-4.3 1.5-1.5 2.8 2.8 5.9-5.9 1.5 1.5-7.4 7.4z" fill-rule="evenodd"/></svg>');
+  --icon-important: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.5 2h13A3.5 3.5 0 0 1 22 5.5v13a3.5 3.5 0 0 1-3.5 3.5h-13A3.5 3.5 0 0 1 2 18.5v-13A3.5 3.5 0 0 1 5.5 2zm5.4 4.5v8.2h2.2V6.5h-2.2zm0 10v2.3h2.2v-2.3h-2.2z" fill-rule="evenodd"/></svg>');
+  --icon-triangle: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.3 3.2a2 2 0 0 1 3.4 0l8.6 15a2 2 0 0 1-1.7 3H3.4a2 2 0 0 1-1.7-3l8.6-15zm.6 5.3v6.2h2.2V8.5h-2.2zm0 7.8v2.2h2.2v-2.2h-2.2z" fill-rule="evenodd"/></svg>');
+  --icon-octagon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9L7.9 2zm3 4.8v7h2.2v-7h-2.2zm0 8.8v2.2h2.2v-2.2h-2.2z" fill-rule="evenodd"/></svg>');
+
+  /* Admonition colors. fg is the label and icon (same hue, no swaps), text
+     the body copy. Label and text are at least 4.5:1 on bg in light and dark
+     (tests/meaning-system checks it). Dark values are in dark-mode.css. */
+  --admonition-note-fg: #3730a3;
+  --admonition-note-bg: #eef2ff;
+  --admonition-note-border: #e0e7ff;
+  --admonition-note-text: #312e81;
+  --admonition-tip-fg: #166534;
+  --admonition-tip-bg: #f0faf4;
+  --admonition-tip-border: #c7ebd6;
+  --admonition-tip-text: #14532d;
+  --admonition-important-fg: #6d28d9;
+  --admonition-important-bg: #f5f3ff;
+  --admonition-important-border: #ddd6fe;
+  --admonition-important-text: #4c1d95;
+  --admonition-caution-fg: #92400e;
+  --admonition-caution-bg: #fffbeb;
+  --admonition-caution-border: #fde68a;
+  --admonition-caution-text: #78350f;
+  --admonition-warning-fg: #b91c1c;
+  --admonition-warning-bg: #fef2f2;
+  --admonition-warning-border: #fecaca;
+  --admonition-warning-text: #7f1d1d;
 
   /* Meaning tokens: one look per meaning across the site. For each meaning,
      fg is text and icon color, bg the badge fill, border its outline. Every

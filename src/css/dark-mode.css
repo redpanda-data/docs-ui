@@ -1,5 +1,26 @@
 html[data-theme=dark] {
   color-scheme: dark;
+  /* Admonition colors, dark values (light values and notes are in vars.css) */
+  --admonition-note-fg: #a5b4fc;
+  --admonition-note-bg: rgba(99, 102, 241, 0.15);
+  --admonition-note-border: rgba(99, 102, 241, 0.3);
+  --admonition-note-text: #c7d2fe;
+  --admonition-tip-fg: #86efac;
+  --admonition-tip-bg: rgba(16, 185, 129, 0.15);
+  --admonition-tip-border: rgba(16, 185, 129, 0.3);
+  --admonition-tip-text: #bbf7d0;
+  --admonition-important-fg: #c4b5fd;
+  --admonition-important-bg: rgba(139, 92, 246, 0.15);
+  --admonition-important-border: rgba(167, 139, 250, 0.35);
+  --admonition-important-text: #ddd6fe;
+  --admonition-caution-fg: #fcd34d;
+  --admonition-caution-bg: rgba(245, 158, 11, 0.13);
+  --admonition-caution-border: rgba(251, 191, 36, 0.3);
+  --admonition-caution-text: #fde68a;
+  --admonition-warning-fg: #fca5a5;
+  --admonition-warning-bg: rgba(239, 68, 68, 0.15);
+  --admonition-warning-border: rgba(248, 113, 113, 0.3);
+  --admonition-warning-text: #fecaca;
   /* Meaning tokens, dark values (light values and notes are in vars.css) */
   --meaning-enterprise-fg: #ffb59e;
   --meaning-enterprise-bg: rgba(226, 64, 27, 0.14);
@@ -108,19 +129,14 @@ html[data-theme=dark] {
   /* admonitions */
   --important-background: rgba(68, 76, 231, 0.2);
   --important-on-color: var(--body-font-color);
-  --important-icon: url(../img/info-white.svg) no-repeat center right / auto 100%;
   --warning-background: rgba(205, 55, 44, 0.2);
   --warning-on-color: var(--body-font-color);
-  --warning-icon: url(../img/report-white.svg) no-repeat center right / auto 100%;
   --note-background: rgba(69, 173, 232, 0.2);
   --note-on-color: var(--body-font-color);
-  --note-icon: url(../img/info-white.svg) no-repeat center right / auto 100%;
   --tip-background: rgba(56, 161, 105, 0.2);
   --tip-on-color: var(--body-font-color);
-  --tip-icon: url(../img/check-circle-white.svg) no-repeat center right / auto 100%;
   --caution-background: rgba(249, 161, 101, 0.2);
   --caution-on-color: var(--body-font-color);
-  --caution-icon: url(../img/warning-white.svg) no-repeat center right / auto 100%;
   /* doc */
   --doc-font-color: var(--body-font-color);
   --heading-font-color: var(--body-font-color);
