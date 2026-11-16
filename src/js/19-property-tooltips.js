@@ -973,7 +973,8 @@
           codeEl.style.cursor = 'help'
           codeEl.setAttribute('tabindex', '0')
           codeEl.setAttribute('role', 'button')
-          codeEl.setAttribute('aria-label', text + ' property documentation')
+          // The lock on an Enterprise property is CSS, so the name says it too.
+          codeEl.setAttribute('aria-label', text + (prop.isEnterprise ? ' (Enterprise)' : '') + ' property documentation')
 
           if (canTouch) {
             codeEl.setAttribute('aria-haspopup', 'dialog')
