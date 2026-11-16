@@ -29,13 +29,14 @@ function renderBox (component, call) {
   return { html, links }
 }
 
-// The components behind the five URLs in the ticket. Names come from each
+// The components behind the landing pages that show marketing links. Names come from each
 // repo's antora.yml; a rename there would silently drop the links.
 const LANDING = {
   'data-platform': ['Book a demo', 'Talk to us', 'Get started'],
   'cloud-data-platform': ['Sign up for Redpanda Cloud', 'Estimate pricing', 'Talk to us'],
   'agentic-data-plane': ['Watch the demo', 'Book a demo', 'Talk to us'],
   streaming: ['Try Redpanda', 'Ask about Enterprise Edition', 'Estimate pricing'],
+  connect: ['Try Redpanda', 'Ask about Enterprise Edition', 'Talk to us'],
 }
 
 for (const [component, expected] of Object.entries(LANDING)) {
@@ -48,7 +49,7 @@ for (const [component, expected] of Object.entries(LANDING)) {
 }
 
 test('components without marketing links keep the original help box', () => {
-  const { html, links } = renderBox('redpanda-connect', "{{> help-cta prefix='ch3' askAi=true}}")
+  const { html, links } = renderBox('api', "{{> help-cta prefix='ch3' askAi=true}}")
   assert.match(html, /<h3>Need a hand\?<\/h3>/)
   assert.match(html, /data-action="open-chat"/)
   assert.deepEqual(links.map((l) => l.text), ['Join the community'])
@@ -98,7 +99,7 @@ for (const file of ['src/js/react/components/ChatSdkInterface.jsx', 'src/js/reac
 }
 
 test('only the community link carries the people icon, as before DOC-2607', () => {
-  for (const component of [...Object.keys(LANDING), 'redpanda-connect']) {
+  for (const component of [...Object.keys(LANDING), 'api']) {
     const { links } = renderBox(component, "{{> help-cta prefix='ch3' askAi=true}}")
     assert.deepEqual(links.filter((l) => l.icon).map((l) => l.text), ['Join the community'])
   }
