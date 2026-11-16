@@ -4,8 +4,11 @@
  * Whether the article uses a Font Awesome icon that needs the font.
  * Usage: {{#if (has-font-awesome-icons)}}...{{/if}}
  *
- * Asciidoctor runs with icons=font, so `icon:name[]` in content emits
- * <i class="fa fa-name">. The Font Awesome stylesheet used to load on every
+ * The site playbook turns font icons off (icons unset), so admonition labels
+ * and checklist markers are real text and doc.css styles that markup. A
+ * content repo's own local playbook may still use icons=font, where
+ * `icon:name[]` emits <i class="fa fa-name">. No content uses that macro, but
+ * this keeps it working where it appears. The Font Awesome stylesheet used to load on every
  * page for that, though no page in a full site build used anything but the
  * checklist squares (fa-square-o, fa-check-square-o), which doc.css draws
  * itself. head-styles.hbs now loads the stylesheet only where the body has

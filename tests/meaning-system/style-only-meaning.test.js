@@ -105,6 +105,8 @@ test('the version selector marks the current version in text and state', () => {
   const explore = read('src/partials/nav-explore.hbs')
   assert.doesNotMatch(explore, /aria-label="Select version"/, 'an aria-label would hide the version and its status')
   assert.match(explore, /<span class="visually-hidden">Select version\. Current: <\/span>/)
+  // With no aria-label the name comes from the button's text, so the icon ligature must stay out of it
+  assert.match(explore, /<span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down<\/span>/, 'the chevron ligature would be read as "keyboard_arrow_down"')
 })
 
 test('Ask AI: interim text says Thinking, and feedback buttons have names and pressed state', () => {
