@@ -4,7 +4,7 @@
 
 This page demonstrates the new **Limited Availability** badge feature.
 
-== Orange Badge Locations
+== Badge Locations
 
 The violet "Limited availability" badge should appear in two places:
 
@@ -15,7 +15,7 @@ The violet "Limited availability" badge should appear in two places:
 
 Hover over any of the badges to see the tooltip text:
 
-_"This feature has limited availability. Contact Redpanda Support for access."_
+_"Limited availability: open to selected customers."_
 
 == Compare with Beta
 
@@ -23,7 +23,7 @@ This is different from the beta badge which:
 
 * Is amber, with a flask icon
 * Shows as a small "Beta" badge in the left nav
-* Has different tooltip text about testing and production
+* Has its own tooltip text: "Beta: available to try, and may change before general availability."
 
 == Page Content
 
@@ -35,7 +35,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. The badge should remain
 
 === Subsection 2
 
-More content to enable scrolling. Check that the orange badge appears in the TOC when you scroll past the main title.
+More content to enable scrolling. Check that the violet badge appears in the TOC when you scroll past the main title.
 
 === Subsection 3
 
@@ -52,7 +52,7 @@ Use `:page-limited-availability: true` for features that:
 
 == Technical Details
 
-**Badge Color**: Orange (`--color-primitives-global-orange-orange-600`)
+**Badge Color**: Violet (`--meaning-limited-fg`)
 
 **Badge Style**: the violet `rp-badge--limited` pill with a clock icon
 
