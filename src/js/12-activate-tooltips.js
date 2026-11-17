@@ -100,8 +100,8 @@
     // Keyboard readers reach a tooltip through focus, so an element that
     // cannot take focus (a badge is a plain <span>) gets tabindex="0". One
     // that wraps a link, or sits inside a link or button (a badge after a nav
-    // title), is left alone: focus on the link reaches the tooltip already
-    // (tippy listens for focusin), and a nested tab stop would only repeat it.
+    // title), is left alone: a nested tab stop would only repeat the link's,
+    // and the tooltip takes the link as its trigger instead (parentControl).
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]'
     // A long listing that repeats the same badges on every row (the property
     // catalog has about 900) opts out with data-tooltip-nofocus on a container:
@@ -111,8 +111,17 @@
     function makeFocusable (el) {
       if (el.closest && el.closest('[data-tooltip-nofocus]')) return
       if (el.matches(FOCUSABLE) || linkedAnchor(el)) return
-      if (typeof el.closest === 'function' && el.parentElement && el.parentElement.closest('a[href], button')) return
+      if (parentControl(el)) return
       el.setAttribute('tabindex', '0')
+    }
+
+    // The link or button an element sits inside, if any. Focus lands on that
+    // control and the focus event does not bubble down to the element, so the
+    // control has to be the tooltip's trigger (tippy's triggerTarget). tippy
+    // also puts aria-describedby on the trigger, which ties the description to
+    // the control that has focus.
+    function parentControl (el) {
+      return el.parentElement ? el.parentElement.closest('a[href], button') : null
     }
 
     // Tooltip content as a DOM node: the text or HTML the element carries,
@@ -181,15 +190,28 @@
     // enterprise tooltips both land here -- and the DOM decodes the escaping the
     // macro applied, so with allowHTML: true tippy re-parsed the result as
     // markup. Tooltip text needs no markup on any of these paths.
-    document.querySelectorAll('[data-tooltip]').forEach((el) => {
-      if (!el.getAttribute('data-tooltip')) return
-      makeFocusable(el)
-      interceptTap(el)
-      tippy(el, {
-        ...tooltipConfig,
-        allowHTML: false,
-        content: buildContent(el, el.getAttribute('data-tooltip'), false),
+    function activateTooltips (root) {
+      root.querySelectorAll('[data-tooltip]').forEach((el) => {
+        if (!el.getAttribute('data-tooltip') || el._tippy) return
+        makeFocusable(el)
+        interceptTap(el)
+        const control = parentControl(el)
+        tippy(el, {
+          ...tooltipConfig,
+          allowHTML: false,
+          content: buildContent(el, el.getAttribute('data-tooltip'), false),
+          ...(control ? { triggerTarget: control } : {}),
+        })
       })
+    }
+    activateTooltips(document)
+
+    // Collapsed nav branches and buckets keep their items in an inert
+    // <template> until first expand (01-nav.js, 23-nav-bucket.js), so their
+    // badges are not in the document for the pass above. Both announce the
+    // new subtree with nav:hydrated.
+    document.addEventListener('nav:hydrated', function (e) {
+      activateTooltips(e.target)
     })
 
     // Initialize tippy for enterprise feature terms (enterprise inline macro)

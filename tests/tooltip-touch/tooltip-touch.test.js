@@ -45,13 +45,18 @@ function el ({ tag = 'span', attrs = {}, classes = [], children = [] } = {}) {
 function run ({ canTouch, isTouch = false, omitCurrentInput = false, elements }) {
   const tippyCalls = []
   const created = []
-  const tippy = (target, cfg) => { tippyCalls.push({ target, cfg }) }
+  const docListeners = {}
+  // Like tippy, leave the instance on the element as _tippy.
+  const tippy = (target, cfg) => { tippyCalls.push({ target, cfg }); target._tippy = {} }
   if (!omitCurrentInput) tippy.currentInput = { isTouch }
   const context = {
     navigator: { maxTouchPoints: canTouch ? 5 : 0 },
     tippy,
     document: {
-      addEventListener: (t, fn) => { if (t === 'DOMContentLoaded') context.fire = fn },
+      addEventListener: (t, fn) => {
+        if (t === 'DOMContentLoaded') context.fire = fn
+        else (docListeners[t] = docListeners[t] || []).push(fn)
+      },
       querySelectorAll: (sel) => {
         if (sel.startsWith('[data-tippy-content]')) return elements.filter((e) => 'data-tippy-content' in e.attrs && !('data-tooltip' in e.attrs))
         if (sel === '[data-tooltip]') return elements.filter((e) => 'data-tooltip' in e.attrs)
@@ -70,7 +75,7 @@ function run ({ canTouch, isTouch = false, omitCurrentInput = false, elements })
   context.window = canTouch ? { ontouchstart: null } : {}
   vm.runInNewContext(SRC, context)
   context.fire()
-  return { tippyCalls, created, tippy }
+  return { tippyCalls, created, tippy, docListeners }
 }
 
 // Does a click on this element navigate, or does the tooltip swallow it?
@@ -209,10 +214,33 @@ test('an empty data-tooltip gets no tooltip and no tab stop', () => {
   assert.equal(b.attrs.tabindex, undefined)
 })
 
-test('no tab stop on a badge inside a link (a badge after a nav title)', () => {
+test('a badge inside a link (a badge after a nav title) gets no tab stop, and focus on the link opens its tooltip', () => {
   const b = tooltipBadge()
-  b.parentElement = { closest: (sel) => (sel.includes('a[href]') ? { tagName: 'A' } : null) }
+  const link = { tagName: 'A' }
+  b.parentElement = { closest: (sel) => (sel.includes('a[href]') ? link : null) }
   b.closest = () => null
-  run({ canTouch: false, elements: [b] })
+  const plain = tooltipBadge()
+  const { tippyCalls } = run({ canTouch: false, elements: [b, plain] })
   assert.equal(b.attrs.tabindex, undefined)
+  // Focus lands on the link, never on the badge, so the link has to be what
+  // tippy listens on. tippy puts aria-describedby on the trigger as well.
+  const cfg = tippyCalls.find((c) => c.target === b).cfg
+  assert.equal(cfg.triggerTarget, link, 'the link is the trigger')
+  assert.match(cfg.trigger, /\bfocus\b/)
+  assert.equal(cfg.aria.content, 'describedby')
+  assert.equal('triggerTarget' in tippyCalls.find((c) => c.target === plain).cfg, false, 'a badge outside a link triggers itself')
+})
+
+test('badges in a nav subtree that arrives later get a tooltip on nav:hydrated, once each', () => {
+  const loaded = tooltipBadge()
+  const { tippyCalls, docListeners } = run({ canTouch: false, elements: [loaded] })
+  const hydrated = tooltipBadge()
+  // The expanded item: its subtree holds the new badge and one from load.
+  const target = { querySelectorAll: (sel) => (sel === '[data-tooltip]' ? [loaded, hydrated] : []) }
+  assert.ok((docListeners['nav:hydrated'] || []).length > 0, 'no nav:hydrated listener')
+  docListeners['nav:hydrated'].forEach((fn) => fn({ target }))
+  docListeners['nav:hydrated'].forEach((fn) => fn({ target }))
+  assert.equal(tippyCalls.filter((c) => c.target === hydrated).length, 1, 'the hydrated badge gets one tooltip')
+  assert.equal(tippyCalls.filter((c) => c.target === loaded).length, 1, 'a badge that already has one is skipped')
+  assert.equal(hydrated.attrs.tabindex, '0')
 })

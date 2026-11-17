@@ -184,6 +184,12 @@ function navEl (tag, attrs = {}, children = []) {
     getAttribute: (k) => (k in el.attrs ? el.attrs[k] : null),
     setAttribute (k, v) { el.attrs[k] = String(v) },
     addEventListener (type, fn) { (el.handlers[type] = el.handlers[type] || []).push(fn) },
+    // Bubbles to the ancestors, as nav:hydrated does in a browser.
+    dispatchEvent (event) {
+      event.target = el
+      for (let node = el; node; node = node.parentNode) (node.handlers[event.type] || []).forEach((fn) => fn(event))
+      return true
+    },
     getBoundingClientRect: () => ({ top: 0, bottom: 0, height: 0 }),
     querySelector: (s) => navFind(el, s)[0] || null,
     querySelectorAll: (s) => navFind(el, s),
@@ -262,6 +268,7 @@ function runNav (entries) {
       addEventListener () {},
       location: { hash: '', href: 'https://docs.example.com/page/' },
       getComputedStyle: () => ({ overflowY: 'visible' }),
+      CustomEvent: class { constructor (type, init) { this.type = type; this.bubbles = init && init.bubbles } },
     },
   }
   vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'src/js/01-nav.js'), 'utf8'), context)
@@ -304,6 +311,20 @@ test('a nav:hydrated subtree is bound, and re-binding never doubles a handler', 
 
   assert.equal(clickCount(dropdown), 1, 'an already-bound item is skipped')
   assert.equal(clickCount(child), 1)
+})
+
+test('expanding a collapsed item announces nav:hydrated from that item, so its badges get tooltips', () => {
+  const dropdown = bindableEntry('/x/guides/', { deferred: true })
+  const { navContainer } = runNav([bindableEntry('/x/overview/'), dropdown])
+  const seen = []
+  navContainer.addEventListener('nav:hydrated', (e) => seen.push(e))
+  const toggle = dropdown.row.querySelector('.nav-item-toggle')
+  toggle.handlers.keydown[0]({ keyCode: 13, preventDefault () {} })
+  toggle.handlers.keydown[0]({ keyCode: 13, preventDefault () {} })
+
+  assert.equal(seen.length, 1, 'fired once, on the expand that moved the template in')
+  assert.equal(seen[0].target, dropdown)
+  assert.equal(seen[0].bubbles, true, '12-activate-tooltips.js listens on document')
 })
 
 // --- nav-tree.hbs: collapsed items inside an open bucket ---

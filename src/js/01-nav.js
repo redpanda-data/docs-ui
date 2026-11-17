@@ -84,12 +84,15 @@
   // A collapsed item's children arrive in an inert <template> (nav-tree.hbs).
   // Move them into the document the first time the item is opened and bind
   // them like everything else. 23-nav-bucket.js does the same for whole
-  // buckets and lets nested templates wait for their own expand.
+  // buckets and lets nested templates wait for their own expand. The event is
+  // the same one 23-nav-bucket.js fires: 12-activate-tooltips.js listens for
+  // it to give the new badges their tooltips.
   function hydrateNavItem (li) {
     var tpl = lazyTemplateOf(li)
     if (!tpl) return
     li.replaceChild(tpl.content.cloneNode(true), tpl)
     bindNavItems(li)
+    li.dispatchEvent(new window.CustomEvent('nav:hydrated', { bubbles: true }))
   }
 
   // Direct children only: a nested collapsed item keeps its own template until
