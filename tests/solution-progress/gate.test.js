@@ -34,18 +34,18 @@ test('anonymous click on the authenticated download is intercepted and opens the
   assert.equal(detail.returnTo, '/solutions/demo/s1/?intent=download&step=s1&version=v1.0.0')
 })
 
-test('the download lead names the file count, title, version, and tested platforms from the record', () => {
+test('the download lead names the file count, version, and tested platforms from the record, and says this solution, not its title', () => {
   const r = run({ signedIn: false, accountHidden: false, title: 'Demo', fileCount: 12, testedOn: 'Docker Compose and Kubernetes' })
   r.els.download.dispatch('click')
   assert.equal(r.signinEvents()[0].detail.lead,
-    'Get all 12 files for Demo v1.0.0 in one zip: the same file tree that passed its recorded test run on Docker Compose and Kubernetes. Signing in also keeps your progress across devices.')
+    'Get all 12 files for this solution (v1.0.0) in one zip: the same file tree that passed its recorded test run on Docker Compose and Kubernetes. Signing in also keeps your progress across devices.')
 })
 
 test('the download lead leaves out any fact the record does not carry', () => {
   const r = run({ signedIn: false, accountHidden: false, fileCount: 0 })
   r.els.download.dispatch('click')
   const lead = r.signinEvents()[0].detail.lead
-  assert.equal(lead, 'Get every file for this solution v1.0.0 in one zip: the same file tree that passed its recorded test run. Signing in also keeps your progress across devices.')
+  assert.equal(lead, 'Get every file for this solution (v1.0.0) in one zip: the same file tree that passed its recorded test run. Signing in also keeps your progress across devices.')
   assert.doesNotMatch(lead, /undefined|null|NaN| on \./)
 })
 
