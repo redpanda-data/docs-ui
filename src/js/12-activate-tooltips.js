@@ -101,7 +101,7 @@
     // cannot take focus (a badge is a plain <span>) gets tabindex="0". One
     // that wraps a link, or sits inside a link or button (a badge after a nav
     // title), is left alone: a nested tab stop would only repeat the link's,
-    // and the tooltip takes the link as its trigger instead (parentControl).
+    // and the link gets a focus tooltip of its own instead (describeControl).
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]'
     // A long listing that repeats the same badges on every row (the property
     // catalog has about 900) opts out with data-tooltip-nofocus on a container:
@@ -115,11 +115,7 @@
       el.setAttribute('tabindex', '0')
     }
 
-    // The link or button an element sits inside, if any. Focus lands on that
-    // control and the focus event does not bubble down to the element, so the
-    // control has to be the tooltip's trigger (tippy's triggerTarget). tippy
-    // also puts aria-describedby on the trigger, which ties the description to
-    // the control that has focus.
+    // The link or button an element sits inside, if any.
     function parentControl (el) {
       return el.parentElement ? el.parentElement.closest('a[href], button') : null
     }
@@ -191,17 +187,45 @@
     // macro applied, so with allowHTML: true tippy re-parsed the result as
     // markup. Tooltip text needs no markup on any of these paths.
     function activateTooltips (root) {
+      const controls = new Map()
       root.querySelectorAll('[data-tooltip]').forEach((el) => {
         if (!el.getAttribute('data-tooltip') || el._tippy) return
         makeFocusable(el)
         interceptTap(el)
-        const control = parentControl(el)
         tippy(el, {
           ...tooltipConfig,
           allowHTML: false,
           content: buildContent(el, el.getAttribute('data-tooltip'), false),
-          ...(control ? { triggerTarget: control } : {}),
         })
+        if (el.closest && el.closest('[data-tooltip-nofocus]')) return
+        const control = parentControl(el)
+        if (control) controls.set(control, (controls.get(control) || []).concat(el))
+      })
+      controls.forEach(describeControl)
+    }
+
+    // A badge inside a link or button has no tab stop, and focus on the
+    // control never reaches the badge's own tooltip: tippy listens for focus,
+    // which does not bubble. So the control gets one tooltip of its own. It
+    // opens on keyboard focus only, sits at the first badge, and carries the
+    // text of every badge in the control, and tippy puts aria-describedby on
+    // the control while it is open. Hover stays with each badge, so pointing
+    // at the rest of a card or nav link opens nothing.
+    function describeControl (badges, control) {
+      if (control._tippy) return
+      const box = document.createElement('div')
+      badges.forEach((badge) => box.appendChild(buildContent(badge, badge.getAttribute('data-tooltip'), false)))
+      tippy(control, {
+        ...tooltipConfig,
+        trigger: 'focus',
+        allowHTML: false,
+        content: box,
+        getReferenceClientRect: () => badges[0].getBoundingClientRect(),
+        onShow (instance) {
+          // A click focuses the control too. Only keyboard focus opens this.
+          if (!control.matches(':focus-visible')) return false
+          tippy.hideAll({ exclude: instance })
+        },
       })
     }
     activateTooltips(document)

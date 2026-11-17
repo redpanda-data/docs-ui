@@ -214,21 +214,73 @@ test('an empty data-tooltip gets no tooltip and no tab stop', () => {
   assert.equal(b.attrs.tabindex, undefined)
 })
 
-test('a badge inside a link (a badge after a nav title) gets no tab stop, and focus on the link opens its tooltip', () => {
+// A link as 12-activate-tooltips.js sees it from a badge inside it.
+function controlLink (badges, focusVisible) {
+  const link = { tagName: 'A', matches: (sel) => sel === ':focus-visible' && focusVisible }
+  badges.forEach((b) => {
+    b.parentElement = { closest: (sel) => (sel.includes('a[href]') ? link : null) }
+    b.closest = () => null
+    b.getBoundingClientRect = () => ({ badge: b })
+  })
+  return link
+}
+
+test('a badge inside a link (a badge after a nav title) gets no tab stop, and keyboard focus on the link opens its tooltip', () => {
   const b = tooltipBadge()
-  const link = { tagName: 'A' }
-  b.parentElement = { closest: (sel) => (sel.includes('a[href]') ? link : null) }
-  b.closest = () => null
+  const link = controlLink([b], true)
   const plain = tooltipBadge()
-  const { tippyCalls } = run({ canTouch: false, elements: [b, plain] })
+  const { tippyCalls, tippy } = run({ canTouch: false, elements: [b, plain] })
   assert.equal(b.attrs.tabindex, undefined)
-  // Focus lands on the link, never on the badge, so the link has to be what
-  // tippy listens on. tippy puts aria-describedby on the trigger as well.
-  const cfg = tippyCalls.find((c) => c.target === b).cfg
-  assert.equal(cfg.triggerTarget, link, 'the link is the trigger')
-  assert.match(cfg.trigger, /\bfocus\b/)
+  // The badge keeps its own tooltip and stays its own trigger, so hovering
+  // the rest of the link opens nothing.
+  const own = tippyCalls.filter((c) => c.target === b)
+  assert.equal(own.length, 1)
+  assert.equal('triggerTarget' in own[0].cfg, false)
+  // Focus lands on the link, never on the badge, so the link carries a
+  // tooltip of its own: focus only, described by it, placed at the badge.
+  const onLink = tippyCalls.filter((c) => c.target === link)
+  assert.equal(onLink.length, 1, 'one focus tooltip on the link')
+  const cfg = onLink[0].cfg
+  assert.equal(cfg.trigger, 'focus', 'hover on the link opens nothing')
   assert.equal(cfg.aria.content, 'describedby')
-  assert.equal('triggerTarget' in tippyCalls.find((c) => c.target === plain).cfg, false, 'a badge outside a link triggers itself')
+  assert.equal(cfg.allowHTML, false)
+  assert.deepEqual(cfg.content.children.map((c) => c.textContent), [b.attrs['data-tooltip']])
+  assert.deepEqual(cfg.getReferenceClientRect(), { badge: b })
+  const hidden = []
+  tippy.hideAll = (opts) => hidden.push(opts)
+  const instance = {}
+  assert.notEqual(cfg.onShow(instance), false, 'keyboard focus opens it')
+  assert.equal(hidden.length, 1, 'and closes any other tooltip')
+  assert.equal(hidden[0].exclude, instance)
+  assert.equal(tippyCalls.length, 3, 'a badge outside a link adds nothing but its own tooltip')
+})
+
+test('a click that focuses the link does not open the focus tooltip', () => {
+  const b = tooltipBadge()
+  const link = controlLink([b], false)
+  const { tippyCalls } = run({ canTouch: false, elements: [b] })
+  assert.equal(tippyCalls.find((c) => c.target === link).cfg.onShow({}), false)
+})
+
+test('two badges in one link share one focus tooltip that carries both texts', () => {
+  const beta = tooltipBadge()
+  const cloud = el({ tag: 'span', classes: ['rp-badge', 'rp-badge--cloud'], attrs: { 'data-tooltip': 'Available only in Redpanda Cloud.' } })
+  const link = controlLink([beta, cloud], true)
+  const { tippyCalls } = run({ canTouch: false, elements: [beta, cloud] })
+  const onLink = tippyCalls.filter((c) => c.target === link)
+  assert.equal(onLink.length, 1)
+  assert.deepEqual(onLink[0].cfg.content.children.map((c) => c.textContent), [beta.attrs['data-tooltip'], cloud.attrs['data-tooltip']])
+  assert.deepEqual(onLink[0].cfg.getReferenceClientRect(), { badge: beta }, 'placed at the first badge')
+  for (const b of [beta, cloud]) assert.equal(tippyCalls.filter((c) => c.target === b).length, 1, 'each badge keeps its hover tooltip')
+})
+
+test('a badge in a data-tooltip-nofocus listing adds no focus tooltip to its link', () => {
+  const b = tooltipBadge()
+  const link = controlLink([b], true)
+  b.closest = (sel) => (sel === '[data-tooltip-nofocus]' ? {} : null)
+  const { tippyCalls } = run({ canTouch: false, elements: [b] })
+  assert.equal(tippyCalls.filter((c) => c.target === link).length, 0)
+  assert.equal(tippyCalls.filter((c) => c.target === b).length, 1)
 })
 
 test('badges in a nav subtree that arrives later get a tooltip on nav:hydrated, once each', () => {
