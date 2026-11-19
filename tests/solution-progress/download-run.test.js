@@ -9,8 +9,8 @@ const test = require('node:test')
 const assert = require('node:assert')
 const { run } = require('./helpers/run')
 
-const TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJzb2wiOiJkZW1vIn0.c2ln'
-const URL_OK = 'https://docs.example.com/solutions/get/' + TOKEN
+// The shape docs-site mints: /solutions/get/<solution>/<version>/<expires>/<signature>
+const URL_OK = 'https://docs.example.com/solutions/get/demo/v1.0.0/1763551800/q3Zx9Kd0P1mVtB7wYcRa2Q'
 
 function linkRoute (reply) {
   return (url, init, defaults) => (url === '/solutions/download-link' ? reply(init) : defaults(url, init))
@@ -57,7 +57,14 @@ test('the saved platform preference wins over the tab key', async () => {
 })
 
 test('a URL that could break out of the quotes is refused', async () => {
-  for (const bad of ['https://docs.example.com/solutions/get/a.b.c"; rm -rf ~; "', 'https://docs.example.com/solutions/get/$(id).b.c', 'javascript:alert(1)', 'https://docs.example.com/solutions/download?x=1']) {
+  for (const bad of [
+    'https://docs.example.com/solutions/get/demo/v1.0.0/1763551800/q3Zx9Kd0P1mVtB7wYcRa2Q"; rm -rf ~; "',
+    'https://docs.example.com/solutions/get/demo/v1.0.0/$(id)/q3Zx9Kd0P1mVtB7wYcRa2Q',
+    'https://docs.example.com/solutions/get/demo/v1.0.0`id`/1763551800/q3Zx9Kd0P1mVtB7wYcRa2Q',
+    'https://docs.example.com/solutions/get/eyJhbGciOiJSUzI1NiJ9.eyJzb2wiOiJkZW1vIn0.c2ln',
+    'javascript:alert(1)',
+    'https://docs.example.com/solutions/download?x=1',
+  ]) {
     const r = run({ downloadRun: true, signedIn: true, hint: 'true', fetch: ok(bad) })
     r.els.runButton.dispatch('click')
     await r.flush()

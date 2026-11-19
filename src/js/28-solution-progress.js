@@ -1192,10 +1192,12 @@
   //   curl -fsSL "<url>" -o <slug>.zip && unzip -q <slug>.zip && cd <slug> && make up
   // (make k8s-up for a reader on the Kubernetes tab). The command is pasted
   // into a shell, so the URL is used only when it is exactly the shape
-  // docs-site mints: an http(s) origin, /solutions/get/ and a compact JWT.
-  // Nothing that could close the double quotes or expand ($, `, \) matches,
-  // and the slug is an ID_RE id. Never piped to a shell.
-  var RUN_URL_RE = /^https?:\/\/[A-Za-z0-9.-]+(?::\d+)?\/solutions\/get\/[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/
+  // docs-site mints: an http(s) origin, then
+  //   /solutions/get/<solution>/<version>/<expires>/<signature>
+  // (solutions-download-link.mjs). Nothing that could close the double quotes
+  // or expand ($, `, \) matches, and the slug is an ID_RE id. Never piped to
+  // a shell.
+  var RUN_URL_RE = /^https?:\/\/[A-Za-z0-9.-]+(?::\d+)?\/solutions\/get\/[a-z0-9][a-z0-9-]*\/v[0-9][0-9A-Za-z.+-]*\/\d{1,12}\/[A-Za-z0-9_-]{22}$/
   // tabs.js keeps the platform tab's label here (34-solution-platform.js).
   var TAB_PLATFORM_KEY = 'preferred-tab-platform'
   var RUN_ERRORS = {
