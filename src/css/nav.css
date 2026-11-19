@@ -668,7 +668,7 @@ html[data-theme="light"] .nav-item-toggle {
 
 .nav-link.cloud-beta::after {
   display: inline;
-  content: '(beta)';
+  content: '(Beta)';
   margin-left: 4px;
   white-space: nowrap;
 }

@@ -39,7 +39,7 @@
       {{#with (get-header-data page)}}
       {{!-- Status chip: "SELF-MANAGED • v25.1 | GA" format --}}
       <span class="ch3-product-chip">
-        {{#if this.eyebrow}}{{{this.eyebrow}}}{{else if this.title}}{{{this.title}}}{{else}}{{@root.page.component.title}}{{/if}}{{#if (and @root.page.versions (gt @root.page.versions.length 1))}}{{#if (ne @root.page.componentVersion.displayVersion 'default')}} • v{{@root.page.componentVersion.displayVersion}}{{/if}}{{/if}}
+        {{#if this.eyebrow}}{{{this.eyebrow}}}{{else if this.title}}{{{this.title}}}{{else}}{{@root.page.component.title}}{{/if}}{{#if (and @root.page.versions (gt @root.page.versions.length 1))}}{{#if (ne @root.page.componentVersion.displayVersion 'default')}} • v{{#if @root.page.componentVersion.prerelease}}{{@root.page.version}}{{else}}{{@root.page.componentVersion.displayVersion}}{{/if}}{{/if}}{{/if}}
       </span>
       {{/with}}
       {{#if page.attributes.status-badge}}
@@ -47,7 +47,7 @@
       {{/if}}
       {{> version-selector}}
       {{#if page.attributes.beta}}
-      <span class="ch3-status-chip beta">beta</span>
+      <span class="ch3-status-chip beta">Beta feature</span>
       {{/if}}
     </div>
 

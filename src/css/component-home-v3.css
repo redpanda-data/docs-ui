@@ -447,15 +447,6 @@ html:not([data-theme=dark]) .sm-ver-pill-caret {
   color: var(--component-color, #0f8b66);
 }
 
-.sm-ver-row-note {
-  font-size: calc(10 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--component-color, #0f8b66);
-  opacity: 0.85;
-}
-
 .sm-ver-row-status {
   display: inline-flex;
   align-items: center;
@@ -493,10 +484,6 @@ html:not([data-theme=dark]) .sm-ver-pill-caret {
 .sm-ver-row-status[data-status="beta"] {
   color: #5b21b6;
   background: #ede9fe;
-}
-
-.sm-ver-row[data-status="beta"] .sm-ver-row-note {
-  color: #7c3aed;
 }
 
 .sm-ver-row-check {
@@ -609,10 +596,6 @@ html[data-theme="dark"] .sm-ver-row-v {
   color: #fff;
 }
 
-html[data-theme="dark"] .sm-ver-row-note {
-  color: #6ee7b7;
-}
-
 html[data-theme="dark"] .sm-ver-row-status[data-status="current"],
 html[data-theme="dark"] .sm-ver-row-status[data-status="supported"] {
   color: #6ee7b7;
@@ -627,10 +610,6 @@ html[data-theme="dark"] .sm-ver-row-status[data-status="eol"] {
 html[data-theme="dark"] .sm-ver-row-status[data-status="beta"] {
   color: #c4b5fd;
   background: rgba(139, 92, 246, 0.15);
-}
-
-html[data-theme="dark"] .sm-ver-row[data-status="beta"] .sm-ver-row-note {
-  color: #c4b5fd;
 }
 
 html[data-theme="dark"] .sm-ver-row-date-l {
@@ -776,7 +755,6 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
   padding: 3px 10px;
   border-radius: 9999px;
   letter-spacing: 0.01em;
-  text-transform: uppercase;
 }
 
 .ch3-status-chip.beta {
