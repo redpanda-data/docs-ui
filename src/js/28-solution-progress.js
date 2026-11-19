@@ -1090,6 +1090,13 @@
       lead: downloadLead(),
       cta: 'Sign in and download',
     },
+    // Download and run: back from sign-in, the page shows the command, which
+    // downloads the build itself. The browser downloads nothing.
+    run: {
+      title: 'Download and run the tested build',
+      lead: 'Sign in to get a command that downloads this solution and starts it in one step. Signing in also keeps your progress across devices.',
+      cta: 'Sign in and get the command',
+    },
   }
 
   // What the zip gives that the pages do not: the whole tree at the version
@@ -1121,14 +1128,14 @@
   function intentReturnTo (intent, filePath) {
     var returnTo = window.location.pathname + '?intent=' + intent
     if (stepId) returnTo += '&step=' + encodeURIComponent(stepId)
-    if (intent === 'download' && pageVersion) returnTo += '&version=' + encodeURIComponent(pageVersion)
+    if ((intent === 'download' || intent === 'run') && pageVersion) returnTo += '&version=' + encodeURIComponent(pageVersion)
     if (intent === 'download' && filePath) returnTo += '&path=' + encodeURIComponent(filePath)
     return returnTo
   }
 
   function openSignin (intent, filePath) {
     // A draft has nothing to download, so signing in can only be for saving.
-    intent = intent === 'download' && !isDraft ? 'download' : 'save'
+    intent = (intent === 'download' || intent === 'run') && !isDraft ? intent : 'save'
     if (intent !== 'download') filePath = null
     if (!authAvailable()) {
       toast(lastWriteOk === false
@@ -1272,7 +1279,7 @@
   function onRunClick (button) {
     if (isDraft || runPending) return
     if (!hasAuthHint()) {
-      openSignin('download')
+      openSignin('run')
       return
     }
     var out = $('[data-sol-download-run-output]')
@@ -1302,7 +1309,7 @@
       if (result.signin) {
         // The hint cookie outlived the session: sign in again.
         if (out) out.hidden = true
-        openSignin('download')
+        openSignin('run')
         return
       }
       if (result.error) {
@@ -1354,6 +1361,18 @@
         if (ok) toast('Progress saved')
         track('solution_save_progress', baseProps({ intent: 'return' }))
       })
+      return
+    }
+    if (intent === 'run') {
+      if (isDraft) return
+      // Same replay guard as a download: a bookmarked or shared URL must not
+      // mint a link on its own.
+      var runButton = $('[data-sol-download-run-button]')
+      if (!fresh || !runButton) {
+        toast('You are signed in. Select Download and run to get the command.')
+        return
+      }
+      onRunClick(runButton)
       return
     }
     if (intent === 'download') {
