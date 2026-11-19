@@ -362,24 +362,77 @@ const submitDocsFeedback = {
   },
 }
 
-// ——— Config property lookup (grounded in the shipped reference) ———————————
-// redpanda-properties.json ships in the UI bundle (the same file the property
-// tooltips read). Cache the fetch so repeated lookups in a session are free.
-let propertiesPromise = null
-function loadProperties () {
-  if (propertiesPromise) return propertiesPromise
-  // redpanda-properties.json is a UI static_file, so (like blobl.wasm) Antora
-  // emits it to the SITE root in a normal build and to the UI root in the
-  // docs-ui preview. Mirror the WASM loader's resolution.
-  const rootPath = typeof window.uiRootPath !== 'undefined' ? window.uiRootPath : '/_'
-  const siteRoot = typeof window.siteRootPath !== 'undefined' ? window.siteRootPath : ''
+// ——— Config property lookup (grounded in the published reference) —————————
+// Read the same property reference the property tooltips read: the JSON that
+// head-meta names in <meta name="properties-json-url">, which the docs build
+// publishes per release (691 properties). The redpanda-properties.json that
+// ships in the UI bundle is a small sample for the docs-ui preview, which has
+// no docs build behind it, so it is used there and nowhere else. The preview
+// does emit a properties-json-url meta (from preview-src/ui-model.yml), but
+// that file does not exist in the preview, so the preview check comes first.
+// Cache by URL so repeated lookups in a session are free.
+const propertiesPromises = {}
+function propertiesUrl () {
   const isPreview = typeof window.isUiPreview !== 'undefined' ? window.isUiPreview : false
-  const url = isPreview ? `${rootPath}/redpanda-properties.json` : `${siteRoot}/redpanda-properties.json`
-  propertiesPromise = fetch(url)
-    .then((r) => { if (!r.ok) throw new Error(`properties reference not found (${r.status})`); return r.json() })
-    .then((data) => data.properties || {})
-    .catch((err) => { propertiesPromise = null; throw err }) // allow retry
-  return propertiesPromise
+  if (isPreview) {
+    const rootPath = typeof window.uiRootPath !== 'undefined' ? window.uiRootPath : '/_'
+    return `${rootPath}/redpanda-properties.json`
+  }
+  const meta = document.querySelector('meta[name="properties-json-url"]')
+  return meta && meta.content ? meta.content : null
+}
+// The property tooltips script exposes its bigint-safe parser, so uint64
+// defaults such as 18446744073709551615 are not rounded. Plain JSON.parse is
+// the fallback when that script is not on the page.
+function parseProperties (text) {
+  const parse = typeof window.parsePreservingBigInts === 'function' ? window.parsePreservingBigInts : JSON.parse
+  return parse(text)
+}
+function loadProperties () {
+  const url = propertiesUrl()
+  if (!url) return Promise.reject(new Error('this page names no property reference'))
+  if (propertiesPromises[url]) return propertiesPromises[url]
+  propertiesPromises[url] = fetch(url)
+    .then((r) => { if (!r.ok) throw new Error(`properties reference not found (${r.status})`); return r.text() })
+    .then((text) => {
+      const properties = parseProperties(text).properties || {}
+      // Old names still accepted by Redpanda resolve to the current record.
+      const aliases = {}
+      Object.keys(properties).forEach((name) => {
+        (properties[name].aliases || []).forEach((alias) => { if (!properties[alias]) aliases[alias] = name })
+      })
+      return { properties, aliases }
+    })
+    .catch((err) => { delete propertiesPromises[url]; throw err }) // allow retry
+  return propertiesPromises[url]
+}
+// description_html is the Self-Managed rendering, with AsciiDoc conditionals
+// already resolved; the raw description still carries ifdef::env-cloud[]
+// blocks. Return it as plain text.
+const HTML_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' }
+function descriptionText (rec) {
+  if (typeof rec.description_html === 'string' && rec.description_html) {
+    return rec.description_html
+      .replace(/<\/(p|div|li|tr)>/gi, '\n')
+      .replace(/<\/?code\b[^>]*>/gi, '`')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e) => {
+        if (e[0] !== '#') return HTML_ENTITIES[e.toLowerCase()] || m
+        const hex = e[1] === 'x' || e[1] === 'X'
+        return String.fromCodePoint(hex ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10))
+      })
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  }
+  return String(rec.description || '')
+    .replace(/^ifdef::env-cloud\[\]\n[\s\S]*?^endif::\[\]\n?/gm, '')
+    .replace(/^(ifndef::env-cloud\[\]|endif::\[\])\n?/gm, '')
+    .trim()
+}
+function referenceVersion () {
+  if (typeof window.isUiPreview !== 'undefined' && window.isUiPreview) return null
+  const tag = document.querySelector('meta[name="latest-redpanda-tag"]')?.content
+  return tag ? tag.replace(/^v/, '') : null
 }
 
 const lookupConfigProperty = {
@@ -389,10 +442,13 @@ const lookupConfigProperty = {
     'Look up a Redpanda configuration property in the docs reference and return its type, ' +
     'default, scope (cluster/broker/topic), whether it needs a restart, whether it is ' +
     'supported on Redpanda Cloud, and its description. Use this to answer questions about a ' +
-    'specific property with grounded values instead of guessing. The reference is for ' +
-    'Self-Managed Redpanda; do NOT use it to answer Redpanda Cloud configuration questions ' +
-    '(Cloud abstracts most of these). If the property is not in the reference, say so and ' +
-    'fall back to searching the docs.',
+    'specific property with grounded values instead of guessing. The type, default, and ' +
+    'description are for Self-Managed Redpanda; `version` is the Redpanda release they come ' +
+    'from. For Redpanda Cloud, use only the Cloud fields: cloudSupported (the property exists ' +
+    'on Cloud), cloudEditable (users can change it on Cloud), cloudReadonly (visible but not ' +
+    'changeable), and cloudByocOnly (BYOC clusters only). Do not give Self-Managed defaults ' +
+    'as Cloud values. If the property is not in the reference, say so and fall back to ' +
+    'searching the docs.',
   needsApproval: false, // read-only, no navigation
   parameters: {
     type: 'object',
@@ -404,22 +460,26 @@ const lookupConfigProperty = {
   execute: async ({ property }) => {
     const name = String(property || '').trim()
     if (!name) return { found: false, error: 'No property name provided.' }
-    let properties
+    let reference
     try {
-      properties = await loadProperties()
+      reference = await loadProperties()
     } catch (err) {
       return { found: false, property: name, error: `Could not load the property reference: ${err.message}` }
     }
-    const rec = properties[name]
-    if (!rec) {
+    const { properties, aliases } = reference
+    const rec = properties[name] || properties[aliases[name]]
+    // exclude_from_docs marks properties the docs hide on purpose (developer
+    // and internal flags): treat them as absent rather than as supported.
+    if (!rec || rec.exclude_from_docs) {
       return { found: false, property: name, note: 'Not in the property reference, so fall back to searching the docs.' }
     }
-    return {
+    const result = {
       found: true,
       name: rec.name,
+      version: referenceVersion(),
       type: rec.type,
       default: rec.default,
-      description: rec.description,
+      description: descriptionText(rec),
       scope: rec.config_scope,
       needsRestart: rec.needs_restart,
       cloudSupported: rec.cloud_supported,
@@ -427,7 +487,12 @@ const lookupConfigProperty = {
       deprecated: rec.is_deprecated,
       minimum: rec.minimum,
       maximum: rec.maximum,
+      cloudEditable: rec.cloud_editable,
+      cloudReadonly: rec.cloud_readonly,
+      cloudByocOnly: rec.cloud_byoc_only,
     }
+    if (rec.name !== name) result.alias = name
+    return result
   },
 }
 
