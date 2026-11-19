@@ -637,6 +637,37 @@ export function stripScoreLine (md) {
   return String(md || '').replace(/^[ \t]*\**You got \d+ of \d+\.\**[ \t]*(\r?\n|$)/m, '').replace(/^\s+/, '')
 }
 
+// An option chip's label as text and inline-code parts: the model writes
+// options in Markdown ("The `leaderboard` group"), and a chip is plain text, so
+// each `code` span becomes its own part for the chip to render as <code>.
+// Unmatched backticks stay as text.
+export function optionParts (text) {
+  const parts = []
+  const re = /`([^`]+)`/g
+  const s = String(text == null ? '' : text)
+  let last = 0
+  let m
+  while ((m = re.exec(s))) {
+    if (m.index > last) parts.push({ code: false, text: s.slice(last, m.index) })
+    parts.push({ code: true, text: m[1] })
+    last = re.lastIndex
+  }
+  if (last < s.length) parts.push({ code: false, text: s.slice(last) })
+  return parts
+}
+
+// Whether a click on a link inside an answer is an ordinary same-tab follow,
+// so the drawer should close and show the page. A modified or middle click,
+// or a link that opens a new tab, leaves the drawer as it is.
+export function isPlainLinkClick (event, link) {
+  if (!event || !link) return false
+  if (event.defaultPrevented || event.button !== 0) return false
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false
+  const target = (link.getAttribute && link.getAttribute('target')) || ''
+  if (target && target !== '_self') return false
+  return Boolean(link.getAttribute && link.getAttribute('href'))
+}
+
 export function mergeListedOptions (md, options) {
   const opts = options || []
   if (opts.length < 2) return { md, options: opts }

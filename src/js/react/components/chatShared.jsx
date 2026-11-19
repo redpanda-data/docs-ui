@@ -3,6 +3,7 @@ import { Check, AlertCircle } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { Marked } from 'marked'
 import { markedHighlight } from 'marked-highlight'
+import { isPlainLinkClick } from '../chatModes.js'
 // highlight.js core plus a curated language set. The bare 'highlight.js'
 // import pulled in all 185 grammars (~880 KB minified), most of which no docs
 // answer will ever contain. highlightAuto only considers registered languages,
@@ -64,6 +65,34 @@ export const marked = new Marked(
   })
 )
 
+// Sales links for pricing, licensing, and demo questions (DOC-2607). The page
+// emits them as window.SALES_LINKS from the get-marketing-links helper, which
+// is the only place the text and URLs are written. Anything malformed is
+// dropped, so a missing or broken global renders nothing.
+export function readSalesLinks () {
+  const links = typeof window !== 'undefined' && window.SALES_LINKS
+  if (!Array.isArray(links)) return []
+  return links.filter((l) => l && typeof l.text === 'string' && typeof l.url === 'string')
+}
+
+// One line under the chat input, above the privacy line, in both chat tiers.
+export function SalesLinks () {
+  const links = readSalesLinks()
+  if (links.length === 0) return null
+  return (
+    <p className="disclaimer-sales">
+      Looking for pricing or a demo?{' '}
+      {links.map((l, i) => (
+        <React.Fragment key={l.url + i}>
+          {i > 0 && ' or '}
+          <a href={l.url} target="_blank" rel="noopener">{l.text}</a>
+        </React.Fragment>
+      ))}
+      .
+    </p>
+  )
+}
+
 export function Toast ({ message, type = 'success', onDismiss }) {
   useEffect(() => {
     const timer = setTimeout(() => { if (onDismiss) onDismiss() }, 3000)
@@ -94,5 +123,12 @@ export function Answer ({ md }) {
       if (containerRef.current) containerRef.current.textContent = md
     }
   }, [md])
-  return <div ref={containerRef} className="answer" />
+  // Following a link in an answer closes the drawer, so the reader sees the
+  // page it opens (19-chat-panel.js listens for docs-chat:close and clears the
+  // persisted open state too).
+  const onClick = (event) => {
+    const link = event.target && event.target.closest ? event.target.closest('a[href]') : null
+    if (isPlainLinkClick(event, link)) window.dispatchEvent(new window.CustomEvent('docs-chat:close'))
+  }
+  return <div ref={containerRef} className="answer" onClick={onClick} />
 }

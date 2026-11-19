@@ -5,7 +5,7 @@ import { loadConversation, clearConversation } from '../chatPersistence.js'
 import { safeHeap } from '../heap.js'
 import { schedulePeek, forgetQuota, getQuota, quotaExhausted, QUOTA_EVENT } from '../anonQuota.js'
 import { SCOPE_DROPPED_MESSAGE } from '../kapaScope.js'
-import { Answer, Toast } from './chatShared.jsx'
+import { Answer, Toast, SalesLinks } from './chatShared.jsx'
 
 // Anonymous drawer, powered by the Chat SDK (not the Agent SDK). Renders into
 // the same #chat-panel-kapa-root chrome with the same CSS classes as the
@@ -604,6 +604,7 @@ export default function ChatSdkInterface ({ loginUrl }) {
             </div>
           </form>
           <div className="disclaimer">
+            <SalesLinks />
             <p>
               <a href="https://www.redpanda.com/legal/privacy-policy" target="_blank" rel="noopener">Privacy policy</a>
               {' · '}Powered by <a href="https://kapa.ai" target="_blank" rel="noopener noreferrer">kapa.ai</a>

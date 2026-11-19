@@ -9,8 +9,8 @@ const test = require('node:test')
 const assert = require('node:assert')
 const { run } = require('./helpers/run')
 
-const TOKEN = 'eyJhbGciOiJSUzI1NiJ9.eyJzb2wiOiJkZW1vIn0.c2ln'
-const URL_OK = 'https://docs.example.com/solutions/get/' + TOKEN
+// The shape docs-site mints: /solutions/get/<solution>/<version>/<expires>/<signature>
+const URL_OK = 'https://docs.example.com/solutions/get/demo/v1.0.0/1763551800/q3Zx9Kd0P1mVtB7wYcRa2Q'
 
 function linkRoute (reply) {
   return (url, init, defaults) => (url === '/solutions/download-link' ? reply(init) : defaults(url, init))
@@ -57,7 +57,14 @@ test('the saved platform preference wins over the tab key', async () => {
 })
 
 test('a URL that could break out of the quotes is refused', async () => {
-  for (const bad of ['https://docs.example.com/solutions/get/a.b.c"; rm -rf ~; "', 'https://docs.example.com/solutions/get/$(id).b.c', 'javascript:alert(1)', 'https://docs.example.com/solutions/download?x=1']) {
+  for (const bad of [
+    'https://docs.example.com/solutions/get/demo/v1.0.0/1763551800/q3Zx9Kd0P1mVtB7wYcRa2Q"; rm -rf ~; "',
+    'https://docs.example.com/solutions/get/demo/v1.0.0/$(id)/q3Zx9Kd0P1mVtB7wYcRa2Q',
+    'https://docs.example.com/solutions/get/demo/v1.0.0`id`/1763551800/q3Zx9Kd0P1mVtB7wYcRa2Q',
+    'https://docs.example.com/solutions/get/eyJhbGciOiJSUzI1NiJ9.eyJzb2wiOiJkZW1vIn0.c2ln',
+    'javascript:alert(1)',
+    'https://docs.example.com/solutions/download?x=1',
+  ]) {
     const r = run({ downloadRun: true, signedIn: true, hint: 'true', fetch: ok(bad) })
     r.els.runButton.dispatch('click')
     await r.flush()
@@ -88,13 +95,37 @@ test('a network error and a rate limit say so', async () => {
   assert.match(rl.els.runOutput.querySelector('.sol-download-run-error').textContent, /Too many downloads/)
 })
 
-test('signed out: asks for sign-in with the download intent, no request', async () => {
+test('signed out: asks for sign-in with its own run intent, no request', async () => {
   const r = run({ downloadRun: true, signedIn: false, accountHidden: false })
   r.els.runButton.dispatch('click')
   await r.flush()
   const [signin] = r.signinEvents()
-  assert.match(signin.detail.returnTo, /intent=download/)
+  assert.match(signin.detail.returnTo, /intent=run&step=s1&version=v1\.0\.0/)
+  assert.equal(signin.detail.cta, 'Sign in and get the command')
   assert.equal(r.calls.fetch.some((c) => c.url === '/solutions/download-link'), false)
+})
+
+test('back from sign-in: shows the command and the browser downloads nothing', async () => {
+  const r = run({
+    downloadRun: true,
+    signedIn: true,
+    hint: 'true',
+    fetch: ok(),
+    search: '?intent=run&step=s1&version=v1.0.0',
+    pending: { intent: 'run', solution: 'demo', step: 's1', version: 'v1.0.0', at: 1700000000000 },
+  })
+  await r.flush()
+  assert.equal(commandText(r), 'curl -fsSL "' + URL_OK + '" -o demo.zip && unzip -q demo.zip && cd demo && make up')
+  assert.deepEqual(r.calls.assign, [], 'no browser download: the command downloads the build')
+  assert.deepEqual(r.calls.replaceState, ['/solutions/demo/s1/'], 'the params are gone from the URL')
+})
+
+test('a run intent with no pending record mints nothing and says what to do', async () => {
+  const r = run({ downloadRun: true, signedIn: true, hint: 'true', fetch: ok(), search: '?intent=run&step=s1&version=v1.0.0' })
+  await r.flush()
+  assert.equal(r.calls.fetch.some((c) => c.url === '/solutions/download-link'), false)
+  assert.deepEqual(r.calls.assign, [])
+  assert.ok(r.toasts().some((t) => /Download and run/.test(t.textContent)))
 })
 
 test('a 401 (stale hint) asks for sign-in again', async () => {
