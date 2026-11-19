@@ -19,7 +19,7 @@ import { ModeBanner, QuizSummary } from './ModeBanner.jsx'
 import {
   MODES, MODE_END_EVENT, MODE_COMPLETE_EVENT, ACTIVE_THREAD_KEY, splitModeControls, answerText, quizProgress,
   markModeThreads, registerSubmit, rememberThread, threadToResume, forgetThread, endChatMode,
-  mergeListedOptions, modePlaceholder, stripScoreLine,
+  mergeListedOptions, modePlaceholder, stripScoreLine, optionParts,
 } from '../chatModes.js'
 
 // Example prompts for the signed-in agent welcome screen come from
@@ -222,7 +222,7 @@ function AnswerOptions({ options, onPick, disabled, listed = false }) {
           disabled={disabled}
           onClick={() => onPick(opt)}
         >
-          {opt}
+          {optionParts(opt).map((part, i) => (part.code ? <code key={i}>{part.text}</code> : part.text))}
         </button>
       ))}
     </div>

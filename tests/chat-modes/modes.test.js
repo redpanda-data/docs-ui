@@ -911,3 +911,33 @@ test('the quiz copies code literals exactly', () => {
   assert.match(modes.QUIZ_INSTRUCTIONS, /Copy every code literal from STEP SOURCE exactly/)
   assert.match(modes.QUIZ_INSTRUCTIONS, /<topic>-value/)
 })
+
+test('option chips render inline code: optionParts splits the backtick spans', () => {
+  const { optionParts } = loadEsm('src/js/react/chatModes.js')
+  assert.deepEqual(optionParts('A. The consumer groups `leaderboard` and `achievements` have lag 0'), [
+    { code: false, text: 'A. The consumer groups ' },
+    { code: true, text: 'leaderboard' },
+    { code: false, text: ' and ' },
+    { code: true, text: 'achievements' },
+    { code: false, text: ' have lag 0' },
+  ])
+  assert.deepEqual(optionParts('B. plain text'), [{ code: false, text: 'B. plain text' }])
+  assert.deepEqual(optionParts('C. an `unmatched backtick'), [{ code: false, text: 'C. an `unmatched backtick' }])
+  assert.deepEqual(optionParts(''), [])
+})
+
+test('a plain click on an answer link closes the drawer; modified clicks and new tabs do not', () => {
+  const { isPlainLinkClick } = loadEsm('src/js/react/chatModes.js')
+  const link = (attrs) => ({ getAttribute: (n) => (n in attrs ? attrs[n] : null) })
+  const click = (over) => Object.assign({ button: 0, defaultPrevented: false, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false }, over)
+  assert.equal(isPlainLinkClick(click(), link({ href: '/current/manage/' })), true)
+  assert.equal(isPlainLinkClick(click(), link({ href: '#section' })), true)
+  assert.equal(isPlainLinkClick(click(), link({ href: '/x', target: '_self' })), true)
+  assert.equal(isPlainLinkClick(click({ metaKey: true }), link({ href: '/x' })), false)
+  assert.equal(isPlainLinkClick(click({ ctrlKey: true }), link({ href: '/x' })), false)
+  assert.equal(isPlainLinkClick(click({ shiftKey: true }), link({ href: '/x' })), false)
+  assert.equal(isPlainLinkClick(click({ button: 1 }), link({ href: '/x' })), false)
+  assert.equal(isPlainLinkClick(click(), link({ href: '/x', target: '_blank' })), false)
+  assert.equal(isPlainLinkClick(click({ defaultPrevented: true }), link({ href: '/x' })), false)
+  assert.equal(isPlainLinkClick(click(), null), false)
+})
