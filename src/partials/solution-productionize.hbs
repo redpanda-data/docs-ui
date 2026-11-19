@@ -1,6 +1,7 @@
 {{!--
-  "Take this to production" card at the end of a solution's Take it to
-  production page, after the production topics. Context: `solution`.
+  "Take this to production" card on a solution's Take it to production
+  page, after the introduction. Context: `solution`, and an optional `title`
+  for the heading (default Take this to production).
   layouts/solution-production.hbs includes it; layouts/solution-step.hbs
   includes it at the end of a last step with no next, which is a solution
   built without that page. It is marked up as an Asciidoctor section (.sect1 > h2[id]) so On this page
@@ -40,7 +41,7 @@
     their setup.
 --}}
 <section class="sect1 sol-panel sol-productionize" data-sol-productionize data-sol-companion-url="{{or solution.agentCompanion (concat '/solutions/' solution.id '/agent-companion.md')}}"{{#with @root.page.attributes.solution-verified-version}} data-sol-verified-version="{{this}}"{{/with}} aria-labelledby="take-to-production">
-  <h2 id="take-to-production" class="sol-productionize-title">Take this to production</h2>
+  <h2 id="take-to-production" class="sol-productionize-title">{{#if title}}{{title}}{{else}}Take this to production{{/if}}</h2>
   <div class="sol-productionize-signedout" data-sol-productionize-signedout>
     <p class="sol-productionize-sub">Sign in to have Ask AI plan this design for your system, get a prompt for your coding agent, and see how to connect the docs MCP server.</p>
     <div class="sol-productionize-actions">
