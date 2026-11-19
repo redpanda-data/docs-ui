@@ -6,4 +6,4 @@
   "Redpanda <component>" (the Solutions landing page) gets no suffix, rather
   than "Redpanda Solutions | Redpanda Solutions".
 --}}
-<title>{{{detag (or page.title defaultPageTitle)}}}{{#if (eq page.layout 'solution-step')}}{{#if page.attributes.solution-title}} | {{{detag page.attributes.solution-title}}}{{/if}}{{/if}}{{#if page.component.title}}{{#unless (eq (detag (or page.title defaultPageTitle)) (concat 'Redpanda ' page.component.title))}} | Redpanda {{{page.component.title}}}{{/unless}}{{/if}}</title>
+<title>{{{detag (or page.title defaultPageTitle)}}}{{#if (or (eq page.layout 'solution-step') (eq page.layout 'solution-production'))}}{{#if page.attributes.solution-title}} | {{{detag page.attributes.solution-title}}}{{/if}}{{/if}}{{#if page.component.title}}{{#unless (eq (detag (or page.title defaultPageTitle)) (concat 'Redpanda ' page.component.title))}} | Redpanda {{{page.component.title}}}{{/unless}}{{/if}}</title>

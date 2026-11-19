@@ -54,7 +54,7 @@ function rawChildren (texts, parent) {
 function guide (md, slug) {
   return prod.guideSections(prod.sliceCompanion(md), {
     companionUrl: `${ORIGIN}/solutions/${slug}/agent-companion.md`,
-    lastStepUrl: `${ORIGIN}/solutions/${slug}/verify-end-to-end/`,
+    productionUrl: `${ORIGIN}/solutions/${slug}/take-to-production/`,
   })
 }
 

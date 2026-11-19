@@ -39,9 +39,10 @@
       </li>
       {{/if}}
     {{/if}}
-    {{!-- Solution step pages: the solutions component has no nav.adoc, so
-          Antora's breadcrumbs skip the overview. Insert it from page-solution. --}}
-    {{#if (eq page.layout 'solution-step')}}
+    {{!-- Solution step pages and the Take it to production page: the
+          solutions component has no nav.adoc, so Antora's breadcrumbs skip
+          the overview. Insert it from page-solution. --}}
+    {{#if (or (eq page.layout 'solution-step') (eq page.layout 'solution-production'))}}
       {{#with (parse-json page.attributes.solution)}}
         {{#if this.url}}
     <li><a href="{{{relativize this.url}}}" class="breadcrumb-solution">{{this.title}}</a></li>

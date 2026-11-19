@@ -16,8 +16,8 @@
 :page-solution-download: authenticated
 :page-solution-verified-at: 2026-09-13T02:14:07Z
 :page-solution-verified-version: 26.2.2
-:page-solution: {"id":"multiplayer-gaming","title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html","description":"Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.","status":"published","duration":45,"assumes":["topics","consumer groups","Protobuf basics","reading Go"],"verified":{"suite":"solutions/multiplayer-gaming","specs":11,"steps":50,"commands":34,"checks":23,"media":2,"verifyScript":{"status":"PASS","passed":9,"total":9},"redpandaVersion":"26.2.2","runAt":"2026-09-13T02:14:07Z"},"featured":true,"platforms":["self-managed","cloud"],"technologies":["Go","Protobuf","Schema Registry","Redpanda Connect","Redis","Postgres"],"categories":["Stream Processing","Clients","Schema Registry","Integration"],"version":"v1.0.0","tag":"multiplayer-gaming/v1.0.0","asset":"multiplayer-gaming-v1.0.0.zip","download":"authenticated","steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"relatedDocs":[{"id":"streaming:develop:consume-data/consumer-offsets.adoc","title":"Consumer offsets","url":"/streaming/24.3/index.html","provenance":"explicit"},{"id":"streaming:manage:schema-reg/schema-reg-overview.adoc","title":"Schema Registry overview","url":"/streaming/24.3/index.html","provenance":"explicit"}],"relatedSolutions":[],"files":[".env.example","connect/match-history.yaml","docker-compose.yml","proto/game_events.proto","scripts/verify-lib.sh","scripts/verify.sh","services/leaderboard/go.mod","services/leaderboard/main.go"],"attachments":[{"name":"verification.json","url":"/solutions/multiplayer-gaming/_attachments/verification.json"}],"lastModified":"2026-09-10T12:00:00Z"}
-:page-solution-nav: {"home":{"title":"Solutions","url":"/solutions-home-test.html"},"overview":{"title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html"},"steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}]}
+:page-solution: {"id":"multiplayer-gaming","title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html","description":"Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.","status":"published","duration":45,"assumes":["topics","consumer groups","Protobuf basics","reading Go"],"verified":{"suite":"solutions/multiplayer-gaming","specs":11,"steps":50,"commands":34,"checks":23,"media":2,"verifyScript":{"status":"PASS","passed":9,"total":9},"redpandaVersion":"26.2.2","runAt":"2026-09-13T02:14:07Z"},"featured":true,"platforms":["self-managed","cloud"],"technologies":["Go","Protobuf","Schema Registry","Redpanda Connect","Redis","Postgres"],"categories":["Stream Processing","Clients","Schema Registry","Integration"],"version":"v1.0.0","tag":"multiplayer-gaming/v1.0.0","asset":"multiplayer-gaming-v1.0.0.zip","download":"authenticated","steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"production":{"title":"Take it to production","url":"/solution-production-test.html"},"relatedDocs":[{"id":"streaming:develop:consume-data/consumer-offsets.adoc","title":"Consumer offsets","url":"/streaming/24.3/index.html","provenance":"explicit"},{"id":"streaming:manage:schema-reg/schema-reg-overview.adoc","title":"Schema Registry overview","url":"/streaming/24.3/index.html","provenance":"explicit"}],"relatedSolutions":[],"files":[".env.example","connect/match-history.yaml","docker-compose.yml","proto/game_events.proto","scripts/verify-lib.sh","scripts/verify.sh","services/leaderboard/go.mod","services/leaderboard/main.go"],"attachments":[{"name":"verification.json","url":"/solutions/multiplayer-gaming/_attachments/verification.json"}],"lastModified":"2026-09-10T12:00:00Z"}
+:page-solution-nav: {"home":{"title":"Solutions","url":"/solutions-home-test.html"},"overview":{"title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html"},"steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"production":{"title":"Take it to production","url":"/solution-production-test.html"}}
 
 == What you do
 
@@ -242,7 +242,7 @@ Signed-in readers can download each file from this list or with the Download con
 --
 Encrypt every listener with TLS. Give each service its own SASL principal, with ACLs limited to the topics and consumer groups it uses.
 
-xref:verify-end-to-end.adoc#prod-security[More on security in production]
+xref:solution-production-test.adoc#prod-security[More on security in production]
 --
 
 [.production-note]
@@ -250,7 +250,7 @@ xref:verify-end-to-end.adoc#prod-security[More on security in production]
 --
 Run three or more brokers and create every topic with replication factor 3, so that losing a broker loses no acknowledged event.
 
-xref:verify-end-to-end.adoc#prod-brokers-and-replication[More on brokers and replication in production]
+xref:solution-production-test.adoc#prod-brokers-and-replication[More on brokers and replication in production]
 --
 
 [.production-note]
@@ -258,43 +258,5 @@ xref:verify-end-to-end.adoc#prod-brokers-and-replication[More on brokers and rep
 --
 Run the producers, the services, and the Connect pipeline in the same cloud provider and region as the cluster.
 
-xref:verify-end-to-end.adoc#prod-client-placement[More on client placement in production]
+xref:solution-production-test.adoc#prod-client-placement[More on client placement in production]
 --
-
-// A last step lists every production topic under Production considerations,
-// often 15 or more. With more than six entries the On this page group starts
-// collapsed and its toggle shows the count (collapseAfter in solution-step.hbs).
-== Production considerations
-
-=== Brokers and replication
-
-Run at least three brokers and set the replication factor of every topic to 3.
-
-[[prod-security]]
-=== Security
-
-Turn on TLS and SASL/SCRAM, and give each service its own principal with the ACLs it needs.
-
-=== Partitions
-
-Size partitions for the peak event rate, not the average.
-
-=== Schema validation
-
-Turn on server-side schema ID validation so a producer cannot write an unregistered schema.
-
-=== Consumer scaling
-
-Scale each consumer group on lag, up to one instance per partition.
-
-=== Data retention
-
-Keep raw events for as long as you need to replay them, and compact the leaderboard topic.
-
-=== Observability
-
-Alert on consumer lag, under-replicated partitions and schema registration failures.
-
-=== Disaster recovery
-
-Replicate the topics to a second region with Shadowing.

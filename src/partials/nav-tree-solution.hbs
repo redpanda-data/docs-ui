@@ -4,13 +4,18 @@
 
   page-solution-nav is the object the solutions-catalog extension writes
   (extensions/solutions-catalog/outputs.js buildNav):
-    { home:     {title, url},
-      overview: {title, url},
-      steps:    [{id, title, url, order}] }
+    { home:       {title, url},
+      overview:   {title, url},
+      steps:      [{id, title, url, order}],
+      production: {title, url} | null }
   The current item is derived here: the overview when page.layout is
-  'solution', a step when its id equals page-solution-step-id (a `current`
-  flag on either is honoured too). 28-solution-progress.js ticks completed
-  steps by matching data-sol-nav-url against the progress store.
+  'solution', a step when its id equals page-solution-step-id, and the Take
+  it to production page when page.layout is 'solution-production' (a
+  `current` flag on any is honoured too). 28-solution-progress.js ticks
+  completed steps by matching data-sol-nav-url against the progress store.
+  The production page comes after the Steps group, unnumbered and with no
+  tick: it is not a step, so it carries no data-sol-nav-step and is never
+  counted or ticked.
 
   The Steps and All solutions groups carry sol-nav-group, which keeps their
   lists open: nav.css hides the list of any .nav-item without is-active, and
@@ -78,6 +83,13 @@
           </li>
           {{/each}}
         </ol>
+      </li>
+      {{/if}}
+      {{#if nav.production.url}}
+      <li class="nav-item sol-nav-production{{#if (or nav.production.current (eq @root.page.layout 'solution-production'))}} is-current-page{{/if}}" data-depth="1">
+        <div class="item">
+          <a class="nav-link" href="{{{relativize nav.production.url}}}"{{#if (or nav.production.current (eq @root.page.layout 'solution-production'))}} aria-current="page"{{/if}}>{{nav.production.title}}</a>
+        </div>
       </li>
       {{/if}}
       {{/with}}

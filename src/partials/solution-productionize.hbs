@@ -1,8 +1,9 @@
 {{!--
-  "Take this to production" card on a solution's last step. Context:
-  `solution`. layouts/solution-step.hbs includes it on the last step only,
-  directly after the Production considerations section (split-after-section).
-  It is marked up as an Asciidoctor section (.sect1 > h2[id]) so On this page
+  "Take this to production" card at the end of a solution's Take it to
+  production page, after the production topics. Context: `solution`.
+  layouts/solution-production.hbs includes it; layouts/solution-step.hbs
+  includes it at the end of a last step with no next, which is a solution
+  built without that page. It is marked up as an Asciidoctor section (.sect1 > h2[id]) so On this page
   lists it, and the heading carries the id the done panels
   (solution-progress.hbs and the inline copy in solution-step-actions.hbs) and
   the step rail (solution-step-rail-actions.hbs) link to.
