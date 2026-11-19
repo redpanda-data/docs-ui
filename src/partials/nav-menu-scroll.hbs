@@ -14,7 +14,7 @@
     {{/each}}
 {{else if (or (eq page.layout 'lab') (eq page.layout 'labs-search'))}}
 {{> nav-tree-lab}}
-{{else if (or (eq page.layout 'solution') (eq page.layout 'solution-step') (eq page.layout 'solutions-home'))}}
+{{else if (or (eq page.layout 'solution') (eq page.layout 'solution-step') (eq page.layout 'solution-production') (eq page.layout 'solutions-home'))}}
 {{> nav-tree-solution}}
 {{else}}
     {{!-- Standard Antora navigation --}}

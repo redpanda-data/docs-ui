@@ -1,0 +1,70 @@
+= Take it to production
+:idprefix:
+:idseparator: -
+:description: What to change before the leaderboard design carries real players.
+:page-layout: solution-production
+:page-topic-type: solution
+// Set by the solutions-catalog extension on the Take it to production page:
+// the solution record and nav, the step count, and the last step as prev. No
+// step id or index: the page is not a step.
+:page-solution-step-count: 4
+:page-solution-prev-url: /solutions/multiplayer-gaming/build-leaderboard/
+:page-solution-prev-title: Build the live leaderboard
+:page-solution-version: v1.0.0
+:page-solution-duration: 45
+:page-solution-status: published
+:page-solution-download: authenticated
+:page-solution-verified-at: 2026-09-13T02:14:07Z
+:page-solution-verified-version: 26.2.2
+:page-solution: {"id":"multiplayer-gaming","title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html","description":"Stream player and match events through Redpanda, fan them out to a live leaderboard, an achievements service and a Postgres match history, and replay them on demand.","status":"published","duration":45,"assumes":["topics","consumer groups","Protobuf basics","reading Go"],"verified":{"suite":"solutions/multiplayer-gaming","specs":11,"steps":50,"commands":34,"checks":23,"media":2,"verifyScript":{"status":"PASS","passed":9,"total":9},"redpandaVersion":"26.2.2","runAt":"2026-09-13T02:14:07Z"},"featured":true,"platforms":["self-managed","cloud"],"technologies":["Go","Protobuf","Schema Registry","Redpanda Connect","Redis","Postgres"],"categories":["Stream Processing","Clients","Schema Registry","Integration"],"version":"v1.0.0","tag":"multiplayer-gaming/v1.0.0","asset":"multiplayer-gaming-v1.0.0.zip","download":"authenticated","steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"production":{"title":"Take it to production","url":"/solution-production-test.html"},"relatedDocs":[{"id":"streaming:develop:consume-data/consumer-offsets.adoc","title":"Consumer offsets","url":"/streaming/24.3/index.html","provenance":"explicit"},{"id":"streaming:manage:schema-reg/schema-reg-overview.adoc","title":"Schema Registry overview","url":"/streaming/24.3/index.html","provenance":"explicit"}],"relatedSolutions":[],"files":[".env.example","connect/match-history.yaml","docker-compose.yml","proto/game_events.proto","scripts/verify-lib.sh","scripts/verify.sh","services/leaderboard/go.mod","services/leaderboard/main.go"],"attachments":[{"name":"verification.json","url":"/solutions/multiplayer-gaming/_attachments/verification.json"}],"lastModified":"2026-09-10T12:00:00Z"}
+:page-solution-nav: {"home":{"title":"Solutions","url":"/solutions-home-test.html"},"overview":{"title":"Multiplayer game events and live leaderboard","url":"/solutions-test.html"},"steps":[{"id":"start-environment","title":"Start the environment","url":"/solution-step-test.html","order":1,"duration":5},{"id":"create-topics","title":"Create the topics","url":"/solutions/multiplayer-gaming/create-topics/","order":2,"duration":5},{"id":"register-schemas","title":"Register the Protobuf schemas","url":"/solutions/multiplayer-gaming/register-schemas/","order":3,"duration":5},{"id":"build-leaderboard","title":"Build the live leaderboard","url":"/solutions/multiplayer-gaming/build-leaderboard/","order":4,"duration":7}],"production":{"title":"Take it to production","url":"/solution-production-test.html"}}
+
+The local stack runs on a single broker with no authentication, so that it starts on a laptop. Before you reuse the design in production, work through each topic on this page.
+
+// The page includes partial$production/_all.adoc with leveloffset=-1, so each
+// topic is an h2 section. With more than six the On this page group starts
+// collapsed and its toggle shows the count (collapseAfter in toc.hbs).
+[#prod-brokers-and-replication]
+== Brokers and replication
+
+Run at least three brokers and set the replication factor of every topic to 3.
+
+[#prod-client-placement]
+== Client placement
+
+Run the producers, the services, and the Connect pipeline in the same cloud provider and region as the cluster.
+
+[#prod-security]
+== Security
+
+Turn on TLS and SASL/SCRAM, and give each service its own principal with the ACLs it needs.
+
+[#prod-partitions]
+== Partitions
+
+Size partitions for the peak event rate, not the average.
+
+[#prod-schema-validation]
+== Schema validation
+
+Turn on server-side schema ID validation so a producer cannot write an unregistered schema.
+
+[#prod-consumer-scaling]
+== Consumer scaling
+
+Scale each consumer group on lag, up to one instance per partition.
+
+[#prod-data-retention]
+== Data retention
+
+Keep raw events for as long as you need to replay them, and compact the leaderboard topic.
+
+[#prod-observability]
+== Observability
+
+Alert on consumer lag, under-replicated partitions and schema registration failures.
+
+[#prod-disaster-recovery]
+== Disaster recovery
+
+Replicate the topics to a second region with Shadowing.
