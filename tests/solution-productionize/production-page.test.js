@@ -5,7 +5,7 @@
  * real templates with the repository's helpers. The page comes after the last
  * step and is not a step: no step number, no Step N of M, no mark-complete,
  * no quiz, the last step as its only neighbour, and the Take this to
- * production card at the end. In the sidebar it follows the Steps group,
+ * production card after the introduction. In the sidebar it follows the Steps group,
  * unnumbered and with no tick.
  *
  * The site chrome (head, header, nav, toolbar, footer, chat panel and the
@@ -56,7 +56,7 @@ const NAV = {
   steps: SOLUTION.steps,
   production: SOLUTION.production,
 }
-const CONTENTS = '<div class="sect1"><h2 id="prod-security">Security</h2><div class="sectionbody"><p>Use TLS.</p></div></div>'
+const CONTENTS = '<div id="preamble"><div class="sectionbody"><div class="paragraph"><p>Work through each topic.</p></div></div></div><div class="sect1"><h2 id="prod-security">Security</h2><div class="sectionbody"><p>Use TLS.</p></div></div>'
 
 function pageModel (layout, attributes, url) {
   return {
@@ -117,14 +117,20 @@ test('the production page has the step shell, with no step number, mark-complete
   assert.equal(document.querySelector('.sol-rail-summary-label').textContent.trim(), 'Take it to production')
 })
 
-test('the production page ends with the card, and its only neighbour is the last step', { skip }, () => {
+test('the production page puts the card after the introduction, and its only neighbour is the last step', { skip }, () => {
   const document = renderLayout()
   const article = document.querySelector('article.doc')
   const card = article.querySelector('[data-sol-productionize]')
   assert.ok(card, 'the Take this to production card')
   assert.equal(card.querySelector('h2').id, 'take-to-production')
+  assert.equal(card.querySelector('h2').textContent.trim(), 'Plan it for your system')
+  const intro = article.querySelector('#preamble .paragraph')
+  assert.ok(intro, 'the introduction')
+  assert.ok(after(document, intro, card), 'the card follows the introduction')
   const topic = article.querySelector('#prod-security')
-  assert.ok(after(document, topic, card), 'the card follows the topics')
+  assert.ok(after(document, card, topic), 'the card comes before the topics')
+  assert.ok(card.closest('#preamble'), 'inside the preamble, so On this page does not list it')
+  assert.equal(card.querySelector('[data-sol-productionize-mcp]').hasAttribute('open'), false, 'MCP setup starts collapsed')
   const prev = article.querySelector('[data-sol-prev]')
   assert.equal(prev.getAttribute('href'), '../verify-end-to-end/')
   assert.match(prev.textContent, /Previous\s*Title of verify-end-to-end/)

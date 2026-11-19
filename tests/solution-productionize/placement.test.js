@@ -2,7 +2,7 @@
 /**
  * Where the solution pages put the quiz and the production card, from the
  * templates:
- *  - the card is at the end of the Take it to production page, and on a step
+ *  - the card follows the introduction of the Take it to production page, and on a step
  *    only at the end of a last step with no next (a solution built without
  *    that page);
  *  - the quiz button under the step is a secondary button with an icon, the
@@ -18,9 +18,9 @@ const ROOT = path.join(__dirname, '..', '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8')
 const quiz = require('../../src/js/27-solution-quiz-source.js')
 
-test('the card is at the end of the production page, and on a step only without a next', () => {
+test('the card follows the production page introduction, and is on a step only without a next', () => {
   const production = read('src/layouts/solution-production.hbs')
-  assert.match(production, /\{\{\{page\.contents\}\}\}\s*\{\{> solution-productionize solution=\(parse-json page\.attributes\.solution\)\}\}/)
+  assert.match(production, /\{\{\{intro\.before\}\}\}\s*\{\{> solution-productionize solution=\(parse-json @root\.page\.attributes\.solution\) title='Plan it for your system'\}\}\s*\{\{\{intro\.after\}\}\}/)
   const step = read('src/layouts/solution-step.hbs')
   assert.match(step, /\{\{\{page\.contents\}\}\}[\s\S]*\{\{#unless page\.attributes\.solution-next-url\}\}\s*\{\{> solution-productionize solution=\(parse-json page\.attributes\.solution\)\}\}\s*\{\{\/unless\}\}/)
   assert.doesNotMatch(step, /split-after-section/)
