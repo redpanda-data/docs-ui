@@ -26,7 +26,7 @@
     {{> version-selector}}
     {{!-- Status badges: Beta, Preview, Limited Availability, Since (version) --}}
     {{#if page.attributes.beta}}
-    <span class="status-badge status-badge--beta" data-tooltip="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}This feature is in beta and may change.{{/if}}">beta</span>
+    <span class="status-badge status-badge--beta" data-tooltip="{{#if page.attributes.beta-text}}{{page.attributes.beta-text}}{{else}}This feature is in beta and may change.{{/if}}">Beta feature</span>
     {{/if}}
     {{#if page.attributes.preview}}
     <span class="status-badge status-badge--preview" data-tooltip="{{#if page.attributes.preview-text}}{{page.attributes.preview-text}}{{else}}This feature is in preview and may change. Features in preview are not covered by Enterprise Support, SLAs, or the standard Redpanda Support process.{{/if}}">Preview</span>

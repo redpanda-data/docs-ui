@@ -20,7 +20,8 @@
       {{/if}}
     {{/each}}
     <span class="sm-ver-pill-label">Docs for</span>
-    <span class="sm-ver-pill-num">v{{page.componentVersion.displayVersion}}</span>
+    {{!-- Prerelease display versions carry a status suffix ("26.3 Beta"); the status label already says it, so show the bare number --}}
+    <span class="sm-ver-pill-num">v{{#if page.componentVersion.prerelease}}{{page.version}}{{else}}{{page.componentVersion.displayVersion}}{{/if}}</span>
     <span class="sm-ver-pill-sep" aria-hidden="true"></span>
     {{!-- Status label: Beta (prerelease), Latest (latest GA), End of life (eol), or Supported --}}
     {{#each page.versions as |ver|}}
@@ -61,8 +62,7 @@
           {{#if ./prerelease}}
           <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="beta" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
-              <span class="sm-ver-row-v">v{{./displayVersion}}</span>
-              <span class="sm-ver-row-note">Beta</span>
+              <span class="sm-ver-row-v">v{{./version}}</span>
             </div>
             {{#if ./asciidoc.attributes.page-release-date}}
             <div class="sm-ver-row-dates">
@@ -104,7 +104,6 @@
           <a class="sm-ver-row{{#if (eq ./version @root.page.version)}} is-selected{{/if}}" data-status="current" href="{{{relativize ./url}}}">
             <div class="sm-ver-row-num">
               <span class="sm-ver-row-v">v{{./displayVersion}}</span>
-              <span class="sm-ver-row-note">Latest</span>
             </div>
             {{#if ./asciidoc.attributes.page-release-date}}
             <div class="sm-ver-row-dates">
