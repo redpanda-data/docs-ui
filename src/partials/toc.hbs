@@ -2,8 +2,10 @@
 <aside class="toc sidebar" data-title="{{{page.attributes.toctitle}}}" data-levels="{{{or page.attributes.toclevels 2}}}"{{#if (eq page.attributes.toc-collapsible 'true')}} data-collapsible="true"{{/if}}{{#if (or (eq page.layout 'solution') (eq page.layout 'solution-step') (eq page.layout 'solution-production'))}} data-collapse-after="6"{{/if}}>
   {{!-- data-collapse-after: on Solutions pages only, a TOC group with more than 6 entries
         under it starts collapsed behind a toggle that shows the count (02-on-this-page.js).
-        6 keeps an ordinary group such as Extend this solution open and collapses the last
-        step's Production considerations, which lists every production topic. --}}
+        6 keeps an ordinary group such as Extend this solution open and collapses a long
+        one, such as the Production considerations section a solution built before the
+        Take it to production page keeps on its last step. That page has its topics as
+        top-level entries, which never collapse. --}}
   <div class="toc-menu"></div>
   {{!-- "Build it in practice": compact Solutions recommendations under the On
         this page list. Renders nothing unless the page carries

@@ -270,8 +270,8 @@
    *    starts expanded.
    *  - data-collapse-after=N, which toc.hbs sets on Solutions pages: only a group with more
    *    than N entries under it collapses, it starts collapsed, and its toggle shows the count.
-   *    Shorter groups stay a plain flat list. This is for the last step's Production considerations, which lists
-   *    about 20 topics.
+   *    Shorter groups stay a plain flat list. This is for a long section such as the Production considerations
+   *    that a solution built before the Take it to production page keeps on its last step, about 20 topics.
    * @param {HTMLUListElement} root - The <ul> built from the page headings, one <li> per heading.
    * @param {number} collapseAfter - 0 to group every entry; otherwise the largest group left open.
    */
