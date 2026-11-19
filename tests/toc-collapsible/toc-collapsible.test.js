@@ -503,7 +503,7 @@ test('toc.hbs sets data-collapse-after on Solutions layouts only', () => {
   const hbs = fs.readFileSync(PARTIAL, 'utf8')
   const aside = hbs.match(/<aside class="toc sidebar"[^>]*>/)
   assert.ok(
-    aside[0].includes(`{{#if (or (eq page.layout 'solution') (eq page.layout 'solution-step'))}} data-collapse-after="6"{{/if}}`),
-    'gated on the solution and solution-step layouts'
+    aside[0].includes(`{{#if (or (eq page.layout 'solution') (eq page.layout 'solution-step') (eq page.layout 'solution-production'))}} data-collapse-after="6"{{/if}}`),
+    'gated on the solution, solution-step and solution-production layouts'
   )
 })
