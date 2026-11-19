@@ -18,8 +18,8 @@
         progress here. What differs from a step: the header has no step
         number, the rail summary has no "Step N of M", there is no Mark step
         complete and no quiz, the only neighbour is the last step, and the
-        page ends with the Take this to production card
-        (solution-productionize.hbs). --}}
+        Take this to production card (solution-productionize.hbs), titled
+        Plan it for your system here, follows the introduction. --}}
   <body class="article solution-step solution-production{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}"{{#if draftDownloads}} data-solution-draft-downloads="true"{{/if}} data-solution-title="{{title}}" data-solution-file-count="{{files.length}}"{{#if files.length}} data-solution-files="{{json-stringify files}}"{{/if}}{{#if verified.platforms.length}} data-solution-tested-on="{{platform-list verified.platforms names=(lookup (get-solutions-catalog) 'platformNames')}}"{{/if}} data-solution-step-count="{{@root.page.attributes.solution-step-count}}"{{/with}}>
 {{> header}}
 <div class="body no-keep-markup">
@@ -32,8 +32,20 @@
       {{!-- No step id on this page, so the header renders without a step
             number: the solution link and the title. --}}
       {{> solution-step-header solution=(parse-json page.attributes.solution)}}
-      {{{page.contents}}}
-      {{> solution-productionize solution=(parse-json page.attributes.solution)}}
+      {{!-- The Plan it card goes right after the first paragraph of the
+            introduction, before the production topics, so a reader sees it
+            without scrolling past every topic. Its disclosures (prompt
+            preview, MCP setup) stay collapsed until opened. Inside the
+            preamble it is not an article-level sect1, so On this page does
+            not list it. --}}
+      {{#with (split-at-first-section page.contents) as |parts|}}
+      {{#with (split-after-first-paragraph parts.before) as |intro|}}
+      {{{intro.before}}}
+      {{> solution-productionize solution=(parse-json @root.page.attributes.solution) title='Plan it for your system'}}
+      {{{intro.after}}}
+      {{/with}}
+      {{{parts.after}}}
+      {{/with}}
       <nav class="sol-step-actions sol-production-actions" aria-label="Solution navigation">
         <div class="sol-step-actions-nav">
           {{#if page.attributes.solution-prev-url}}

@@ -2771,6 +2771,25 @@ html[data-theme="dark"] .sol-results-note {
   display: block;
 }
 
+/* The page you are on: the solution nav marks it on the li (nav-tree-
+   solution.hbs), while the site nav marks the .item, so give the row the
+   site nav's current-page highlight here (nav.css). This is what shows that
+   the Overview or Take it to production page is open. */
+.sol-nav .nav-item.is-current-page > .item {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 500;
+}
+
+.sol-nav .nav-item.is-current-page > .item .nav-link {
+  color: inherit;
+}
+
+html[data-theme="light"] .sol-nav .nav-item.is-current-page > .item {
+  background: var(--indigo-100-new, #e0eaff);
+  color: var(--indigo-600-new, #444ce7);
+}
+
 /* The tick's text equivalent, read with the link name: "Register schemas
    (completed)". Empty until the step is complete. */
 .sol-nav-step.is-complete .sol-nav-step-status:empty::after {
