@@ -7,8 +7,9 @@
  * Covers the states the card can be in: signed out, signed in, the
  * productionize integration switched off, the companion fetch failing, a
  * split companion (its parts fetched and merged, a part failing, a part URL
- * off this origin), and the done-panel links from the last step, another
- * step and the overview.
+ * off this origin), and the done-panel links from the Take it to production
+ * page, a step and the overview. The card is on the Take it to production
+ * page; a solution built without that page keeps it on its last step.
  *
  * Needs linkedom (a devDependency); without it the suite is skipped.
  */
@@ -28,6 +29,10 @@ const STEPS = ['start-environment', 'create-topics', 'verify-end-to-end']
 const stepUrl = (id) => `/solutions/${SLUG}/${id}/`
 const LAST_ID = STEPS[STEPS.length - 1]
 const LAST = stepUrl(LAST_ID)
+// The Take it to production page, after the last step. `step: PROD_ID` in
+// render() and load() is that page.
+const PROD_ID = 'take-to-production'
+const PROD = `/solutions/${SLUG}/${PROD_ID}/`
 
 let parseHTML = null
 try { ({ parseHTML } = require('linkedom')) } catch { /* reported below */ }
@@ -50,34 +55,44 @@ const SOLUTION = {
   download: 'authenticated',
   files: [],
   steps: STEPS.map((id, i) => ({ id, url: stepUrl(id), title: 'Title of ' + id, order: i + 1 })),
+  production: { title: 'Take it to production', url: PROD },
 }
+// A solution built without the Take it to production page.
+const LEGACY = { ...SOLUTION, production: null }
 
-// The step body the way layouts/solution-step.hbs builds it: on the last step
-// the card goes directly after Production considerations, which is last
-// here, as it is on the real pages, ahead of the footnotes. The aside is the
-// step rail, with the quiz and production entries under Your progress.
-const LAYOUT = fs.readFileSync(path.join(ROOT, 'src/layouts/solution-step.hbs'), 'utf8')
-const CONTENTS = `<div class="sect1"><h2 id="clean-up">Clean up</h2><div class="sectionbody"><p>Stop it.</p></div></div>
+// The page bodies the way the layouts build them. The Take it to production
+// page (layouts/solution-production.hbs) has the production topics as h2
+// sections, then the card, ahead of the footnotes' place in the real page;
+// a step page (layouts/solution-step.hbs) has its content, the card only on a
+// last step with no next (a solution without the production page), and the
+// step actions. The aside is the rail: on a step, the quiz and production
+// entries under Your progress.
+const STEP_LAYOUT = fs.readFileSync(path.join(ROOT, 'src/layouts/solution-step.hbs'), 'utf8')
+const PROD_LAYOUT = fs.readFileSync(path.join(ROOT, 'src/layouts/solution-production.hbs'), 'utf8')
+const PROD_CONTENTS = `<div id="preamble"><div class="sectionbody"><p>The local stack runs on one broker.</p></div></div>
+<div class="sect1"><h2 id="prod-security">Security</h2><div class="sectionbody"><p>Use TLS.</p></div></div>
+<div class="sect1"><h2 id="prod-recovery-point-and-time">Recovery point and recovery time</h2><div class="sectionbody"><p>Measure it.</p></div></div>`
+const STEP_CONTENTS = `<div class="sect1"><h2 id="clean-up">Clean up</h2><div class="sectionbody"><p>Stop it.</p></div></div>
+<div id="footnotes"><hr></div>`
+// What a last step of a solution without the production page holds.
+const LEGACY_CONTENTS = `<div class="sect1"><h2 id="clean-up">Clean up</h2><div class="sectionbody"><p>Stop it.</p></div></div>
 <div class="sect1"><h2 id="production-considerations">Production considerations</h2><div class="sectionbody">
 <div class="sect2"><h3 id="prod-security">Security</h3></div>
 <div class="sect2"><h3 id="prod-recovery-point-and-time">Recovery point and recovery time</h3></div>
-</div></div>
-<div id="footnotes"><hr></div>`
+</div></div>`
 
 const PAGE = hbs.compile(`<!DOCTYPE html>
 <html><body class="article {{bodyClass}}" data-solution-id="{{solution.id}}" data-solution-version="{{solution.version}}" data-solution-title="{{solution.title}}" data-solution-tested-on="Docker"{{#if page.attributes.solution-step-id}} data-step-id="{{page.attributes.solution-step-id}}"{{/if}}>
 <ol>{{#each solution.steps}}<li data-sol-nav-step="{{id}}" data-sol-nav-url="{{url}}"><span class="sol-nav-step-title">{{title}}</span></li>{{/each}}</ol>
 <article class="doc sol-doc">
-{{#if page.attributes.solution-step-id}}
-{{#if page.attributes.solution-next-url}}
+{{#if (eq page.layout 'solution-production')}}
 {{{page.contents}}}
-{{else}}
-{{#with (split-after-section page.contents 'production-considerations') as |parts|}}
-{{{parts.before}}}
-{{> solution-productionize solution=@root.solution}}
-{{{parts.after}}}
-{{/with}}
-{{/if}}
+{{> solution-productionize solution=solution}}
+{{else if page.attributes.solution-step-id}}
+{{{page.contents}}}
+{{#unless page.attributes.solution-next-url}}
+{{> solution-productionize solution=solution}}
+{{/unless}}
 {{> solution-step-actions solution=solution}}
 {{else}}{{{page.contents}}}{{/if}}
 </article>
@@ -85,18 +100,31 @@ const PAGE = hbs.compile(`<!DOCTYPE html>
 </body></html>`)
 
 function render (o) {
+  const solution = o.legacy ? LEGACY : SOLUTION
   const attributes = { 'solution-verified-version': '26.2.1' }
   let url = `/solutions/${SLUG}/`
-  if (o.step) {
+  let layout = 'solution'
+  let contents = STEP_CONTENTS
+  if (o.step === PROD_ID) {
+    url = PROD
+    layout = 'solution-production'
+    contents = PROD_CONTENTS
+    attributes['solution-prev-url'] = LAST
+  } else if (o.step) {
     const i = STEPS.indexOf(o.step)
     url = stepUrl(o.step)
+    layout = 'solution-step'
     attributes['solution-step-id'] = o.step
     if (i > 0) attributes['solution-prev-url'] = stepUrl(STEPS[i - 1])
     if (i < STEPS.length - 1) attributes['solution-next-url'] = stepUrl(STEPS[i + 1])
+    else if (!o.legacy) attributes['solution-next-url'] = PROD
+    if (o.legacy && i === STEPS.length - 1) contents = LEGACY_CONTENTS
   }
   Object.assign(attributes, o.attributes)
-  return PAGE({ solution: SOLUTION, bodyClass: o.step ? 'solution-step' : 'solution', page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '', ...o.site } }, {
-    data: { root: { solution: SOLUTION, page: { url, title: 'T', attributes, contents: CONTENTS }, site: { path: '', ...o.site } } },
+  const page = { url, layout, title: 'T', attributes, contents }
+  const bodyClass = layout === 'solution-production' ? 'solution-step solution-production' : layout
+  return PAGE({ solution, bodyClass, page, site: { path: '', ...o.site } }, {
+    data: { root: { solution, page, site: { path: '', ...o.site } } },
   })
 }
 
@@ -155,7 +183,7 @@ function response (status, text) {
 // integration (the productionize id; '' switches it off), fetch (a function
 // returning a response), clipboard (false for none, 'reject' to fail).
 function load (o) {
-  const opts = Object.assign({ step: STEPS[STEPS.length - 1], signedIn: true, integration: 'prod-id' }, o)
+  const opts = Object.assign({ step: PROD_ID, signedIn: true, integration: 'prod-id' }, o)
   const { document } = parseHTML(render(opts))
   // A window of its own: properties set on linkedom's window land on the
   // test process's globalThis, so a stubbed fetch or __docsChatMode would leak
@@ -168,7 +196,7 @@ function load (o) {
     navigator: {},
   }
   const calls = { fetch: [], open: [], panel: 0, events: [], tracked: [], copied: [] }
-  window.location = { origin: ORIGIN, pathname: opts.step ? stepUrl(opts.step) : `/solutions/${SLUG}/`, search: '', hash: '' }
+  window.location = { origin: ORIGIN, pathname: opts.step === PROD_ID ? PROD : opts.step ? stepUrl(opts.step) : `/solutions/${SLUG}/`, search: '', hash: '' }
   window.KAPA_PRODUCTIONIZE_INTEGRATION_ID = opts.integration
   if (opts.uiPreview) window.isUiPreview = true
   let signedIn = opts.signedIn
@@ -216,29 +244,40 @@ function load (o) {
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
-test('the card is on the last step only', { skip }, () => {
-  assert.ok(load({}).card, 'last step')
+test('the card is on the Take it to production page only', { skip }, () => {
+  assert.ok(load({}).card, 'production page')
   assert.equal(load({}).card.querySelector('h2').id, 'take-to-production')
+  assert.equal(load({ step: LAST_ID }).card, null, 'last step')
   assert.equal(load({ step: STEPS[0] }).card, null, 'first step')
   assert.equal(load({ step: null }).card, null, 'overview')
 })
 
-test('the card follows Production considerations, ahead of the step actions, and On this page lists it', { skip }, () => {
+test('the card follows the production topics, and On this page lists every one', { skip }, () => {
   const { document } = load({})
   // The on-this-page TOC's own selector for h2 entries (02-on-this-page.js).
   const toc = Array.from(document.querySelectorAll('article.doc>.sect1>h2[id]')).map((h) => h.id)
-  assert.deepEqual(toc, ['clean-up', 'production-considerations', 'take-to-production'])
-  const order = Array.from(document.querySelector('article.doc').children).map((el) =>
-    el.matches('[data-sol-productionize]') ? 'card' : el.matches('.sol-step-actions') ? 'actions' : el.id || el.querySelector('h2')?.id)
-  assert.deepEqual(order.filter(Boolean), ['clean-up', 'production-considerations', 'card', 'footnotes', 'actions'])
-  // The layout places it with the same helper and section id.
-  assert.match(LAYOUT, /split-after-section page\.contents 'production-considerations'/)
-  assert.match(LAYOUT, /\{\{> solution-productionize solution=/)
+  assert.deepEqual(toc, ['prod-security', 'prod-recovery-point-and-time', 'take-to-production'])
+  // The production layout puts the card after the contents, ahead of the
+  // previous-step link, and has no mark-complete, quiz or step position.
+  const at = (s) => PROD_LAYOUT.indexOf(s)
+  assert.ok(at('{{{page.contents}}}') < at('{{> solution-productionize solution=') && at('{{> solution-productionize solution=') < at('sol-production-actions'))
+  assert.doesNotMatch(PROD_LAYOUT, /solution-step-actions|solution-quiz-button|data-sol-complete|Step \{\{/)
+  assert.doesNotMatch(PROD_LAYOUT, /step=true/)
+  assert.doesNotMatch(STEP_LAYOUT, /split-after-section/)
   assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'src/partials/solution-step-actions.hbs'), 'utf8'), /solution-productionize solution/)
 })
 
+test('without the production page, the card stays at the end of the last step', { skip }, () => {
+  const page = load({ step: LAST_ID, legacy: true })
+  assert.ok(page.card)
+  const order = Array.from(page.document.querySelector('article.doc').children).map((el) =>
+    el.matches('[data-sol-productionize]') ? 'card' : el.matches('.sol-step-actions') ? 'actions' : el.id || el.querySelector('h2')?.id)
+  assert.deepEqual(order.filter(Boolean), ['clean-up', 'production-considerations', 'card', 'actions'])
+  assert.match(STEP_LAYOUT, /\{\{#unless page\.attributes\.solution-next-url\}\}\s*\{\{> solution-productionize solution=/)
+})
+
 test('the step rail offers the quiz and the way into production on every step', { skip }, () => {
-  for (const [step, href] of [[STEPS[0], '../verify-end-to-end/#take-to-production'], [LAST_ID, '#take-to-production']]) {
+  for (const [step, href] of [[STEPS[0], '../take-to-production/'], [LAST_ID, '../take-to-production/']]) {
     const { document } = load({ step })
     const rail = document.querySelector('aside [data-sol-rail-actions]')
     assert.ok(rail, step)
@@ -247,7 +286,11 @@ test('the step rail offers the quiz and the way into production on every step', 
     assert.equal(link.getAttribute('href'), href)
     assert.equal(link.getAttribute('data-placement'), 'rail')
   }
+  // A solution without the production page links the card on its last step.
+  const legacy = load({ step: STEPS[0], legacy: true }).document.querySelector('aside [data-sol-productionize-link]')
+  assert.equal(legacy.getAttribute('href'), '../verify-end-to-end/#take-to-production')
   assert.equal(load({ step: null }).document.querySelector('[data-sol-rail-actions]'), null, 'not on the overview')
+  assert.equal(load({}).document.querySelector('[data-sol-rail-actions]'), null, 'not on the production page')
 })
 
 // The card's text a reader can see: every text node with no hidden element
@@ -339,7 +382,7 @@ test('signed out: Sign in opens the sign-in modal and returns to the card', { sk
   page.signin.click()
   const signin = page.calls.events.find((e) => e.name === 'docs-account:open-signin')
   assert.ok(signin, 'opened the sign-in modal')
-  assert.equal(signin.detail.returnTo, LAST + '#take-to-production')
+  assert.equal(signin.detail.returnTo, PROD + '#take-to-production')
   // 26-docs-account.js accepts it as a same-site path and encodes it into
   // return_to, so the hash survives the sign-in round trip.
   assert.match(signin.detail.returnTo, /^\/(?![/\\])/)
@@ -360,9 +403,11 @@ test('signed in: a click fetches the companion from this origin and starts the p
   assert.equal(mode.verifiedVersion, '26.2.1')
   assert.deepEqual([...mode.guide.topics], ['Security', 'Recovery point and recovery time', 'Rollback'])
   const url = (name) => mode.guide.sections.find((s) => s.section === name).guide_url
-  assert.equal(url('Security'), `${ORIGIN}${LAST}#prod-security`)
-  assert.equal(url('Recovery point and recovery time'), `${ORIGIN}${LAST}#prod-recovery-point-and-time`)
-  assert.equal(url('Rollback'), `${ORIGIN}${LAST}#production-considerations`)
+  // The topics are h2 sections on the production page; a topic with no
+  // heading there links the top of the page.
+  assert.equal(url('Security'), `${ORIGIN}${PROD}#prod-security`)
+  assert.equal(url('Recovery point and recovery time'), `${ORIGIN}${PROD}#prod-recovery-point-and-time`)
+  assert.equal(url('Rollback'), `${ORIGIN}${PROD}`)
   assert.equal(url('step:2'), `${ORIGIN}${stepUrl(STEPS[1])}`)
   assert.ok(mode.guide.rules.includes(`${ORIGIN}/solutions/${SLUG}/start-environment/`), 'rules rewritten to this origin')
   assert.deepEqual(JSON.parse(JSON.stringify(page.calls.open)), [{
@@ -614,12 +659,16 @@ test('the skills install shows only when the playbook turns it on, and retitles 
   assert.equal(on.$('[data-sol-productionize-mcp] > summary').textContent.trim(), 'Using another coding agent? Connect the docs MCP server')
 })
 
-test('done panels link to the card: a scroll on the last step, the last step elsewhere', { skip }, () => {
+test('done panels link to the production page, and on it scroll to the card', { skip }, () => {
   const hrefs = (page) => Array.from(page.document.querySelectorAll('[data-sol-done] [data-sol-productionize-link]')).map((a) => a.getAttribute('href'))
-  assert.deepEqual(hrefs(load({})), ['#take-to-production', '#take-to-production'], 'last step: inline and rail')
-  assert.deepEqual(hrefs(load({ step: STEPS[0] })), ['../verify-end-to-end/#take-to-production', '../verify-end-to-end/#take-to-production'])
-  assert.deepEqual(hrefs(load({ step: null })), ['verify-end-to-end/#take-to-production'], 'overview: rail only')
-  for (const a of load({}).document.querySelectorAll('[data-sol-productionize-link]:not([data-placement])')) {
+  assert.deepEqual(hrefs(load({})), ['#take-to-production'], 'production page: rail only, it has no step actions')
+  assert.deepEqual(hrefs(load({ step: LAST_ID })), ['../take-to-production/', '../take-to-production/'], 'last step: inline and rail')
+  assert.deepEqual(hrefs(load({ step: STEPS[0] })), ['../take-to-production/', '../take-to-production/'])
+  assert.deepEqual(hrefs(load({ step: null })), ['take-to-production/'], 'overview: rail only')
+  // Without the production page: the card on the last step.
+  assert.deepEqual(hrefs(load({ step: LAST_ID, legacy: true })), ['#take-to-production', '#take-to-production'])
+  assert.deepEqual(hrefs(load({ step: null, legacy: true })), ['verify-end-to-end/#take-to-production'])
+  for (const a of load({ step: LAST_ID }).document.querySelectorAll('[data-sol-productionize-link]:not([data-placement])')) {
     assert.equal(a.textContent, 'Take this to production')
     assert.ok(a.closest('[data-sol-done]'), 'inside a done panel')
   }

@@ -1,6 +1,6 @@
 /**
- * Solutions: the "Take this to production" card on a solution's last step
- * (partials/solution-productionize.hbs).
+ * Solutions: the "Take this to production" card at the end of a solution's
+ * Take it to production page (partials/solution-productionize.hbs).
  *
  * The card offers three ways to apply the design to the reader's own system:
  *  - Plan it with Ask AI. The drawer runs in productionize mode
@@ -70,8 +70,9 @@
   // longer section is split here and every piece stays whole. The margin
   // leaves room for the note the tool adds that names the next piece.
   var SECTION_SPLIT_AT = 5500
-  // Where a gap topic links when the last step has no heading for it.
-  var GAPS_ANCHOR = 'production-considerations'
+  // Where a gap topic links when the production page has no heading for it:
+  // the top of the page (no fragment).
+  var GAPS_ANCHOR = ''
   var MODE = 'productionize'
 
   function norm (s) {
@@ -310,14 +311,16 @@
     })
   }
 
-  // Where a Production gaps topic is on the last step: its h3 (id prod-*),
-  // matched on the heading text, then on the id the text would slug to.
-  // Two of the five solutions set custom ids ("prod-recovery-point-and-time"
-  // for "Recovery point and recovery time"), so the text is matched first.
-  // With no match, the Production considerations section itself.
-  function gapUrl (doc, topic, lastStepUrl) {
-    var base = String(lastStepUrl || '').split('#')[0]
-    var headings = doc && doc.querySelectorAll ? Array.prototype.slice.call(doc.querySelectorAll('h3[id^="prod-"]')) : []
+  // Where a Production gaps topic is on the Take it to production page: its
+  // heading (id prod-*), matched on the heading text, then on the id the text
+  // would slug to. The page renders each topic as an h2; a solution built
+  // without that page has them as h3s under Production considerations on its
+  // last step, so both levels count. Two of the five solutions set custom ids
+  // ("prod-recovery-point-and-time" for "Recovery point and recovery time"),
+  // so the text is matched first. With no match, the top of the page.
+  function gapUrl (doc, topic, productionUrl) {
+    var base = String(productionUrl || '').split('#')[0]
+    var headings = doc && doc.querySelectorAll ? Array.prototype.slice.call(doc.querySelectorAll('h2[id^="prod-"], h3[id^="prod-"]')) : []
     var want = norm(topic)
     var id = null
     for (var i = 0; i < headings.length && !id; i++) {
@@ -326,13 +329,17 @@
     for (var j = 0; j < headings.length && !id; j++) {
       if (headings[j].id === 'prod-' + slug(topic)) id = headings[j].id
     }
-    return base + '#' + (id || GAPS_ANCHOR)
+    return anchored(base, id || GAPS_ANCHOR)
+  }
+
+  function anchored (base, id) {
+    return id ? base + '#' + id : base
   }
 
   // The sections get_solution_guide can return, each with the page to cite
   // for it:
-  //   Production gaps: overview  the last step, at Production considerations
-  //   a Production gaps topic    the last step, at that topic's heading
+  //   Production gaps: overview  the Take it to production page, at its top
+  //   a Production gaps topic    that page, at the topic's heading
   //   step:<n>                   step n's page (its Design contract entry)
   //   each of WHOLE_SECTIONS     the companion itself
   // A whole section too long for the tool comes as "<name>: overview" (its
@@ -340,9 +347,11 @@
   // "<name>: <subsection>" per ###, each with `parent` set to the name, so
   // the prompt can list them. Any section still too long continues in parts
   // (pushSection). Together the pieces hold every line of the section.
-  // `o`: { doc, lastStepUrl, stepUrls (in order), companionUrl }.
+  // `o`: { doc, productionUrl (the page the card is on), stepUrls (in order),
+  // companionUrl }.
   function guideSections (sliced, o) {
     var opts = o || {}
+    var productionUrl = opts.productionUrl
     var sections = []
     var topics = []
     var gaps = topSection(sliced, PRODUCTION_GAPS)
@@ -351,13 +360,13 @@
         pushSection(sections, {
           section: GAPS_OVERVIEW,
           aliases: [PRODUCTION_GAPS],
-          guide_url: String(opts.lastStepUrl || '').split('#')[0] + '#' + GAPS_ANCHOR,
+          guide_url: anchored(String(productionUrl || '').split('#')[0], GAPS_ANCHOR),
           text: gaps.intro,
         })
       }
       gaps.children.forEach(function (c) {
         topics.push(c.title)
-        pushSection(sections, { section: c.title, guide_url: gapUrl(opts.doc, c.title, opts.lastStepUrl), text: c.text })
+        pushSection(sections, { section: c.title, guide_url: gapUrl(opts.doc, c.title, productionUrl), text: c.text })
       })
     }
     var steps = 0
@@ -578,7 +587,8 @@
         .then(function (text) {
           var guide = guideSections(sliceCompanion(text), {
             doc: document,
-            lastStepUrl: origin + loc.pathname,
+            // The card is on the Take it to production page, so this page.
+            productionUrl: origin + loc.pathname,
             stepUrls: stepUrls(),
             companionUrl: companionUrl,
           })

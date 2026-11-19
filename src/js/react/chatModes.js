@@ -264,7 +264,8 @@ export const MODES = {
       error: 'solution_quiz_error',
     },
   },
-  // The "Take this to production" planner on a solution's last step. It
+  // The "Take this to production" planner on a solution's Take it to
+  // production page. It
   // keeps every CUSTOM_INSTRUCTIONS block except Clarifying the user's
   // context: that block allows one clarifying question and points at a
   // Current page block the mode leaves out, and the mode's own Start rules

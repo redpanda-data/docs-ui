@@ -671,4 +671,7 @@ page:
         - content: Solution step
           url: /solution-step-test.html
           urlType: internal
+        - content: Solution production page
+          url: /solution-production-test.html
+          urlType: internal
 

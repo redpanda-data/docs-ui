@@ -24,19 +24,14 @@
     <article class="doc sol-doc sol-step-doc">
       {{> breadcrumbs}}
       {{> solution-step-header solution=(parse-json page.attributes.solution)}}
-      {{!-- The last step's Take this to production card goes directly after
-            Production considerations, the section it builds on, and ahead of
-            the step actions; without that section, at the end of the content.
-            It is a sect1 with an h2, so On this page lists it. --}}
-      {{#if page.attributes.solution-next-url}}
       {{{page.contents}}}
-      {{else}}
-      {{#with (split-after-section page.contents 'production-considerations') as |parts|}}
-      {{{parts.before}}}
-      {{> solution-productionize solution=(parse-json @root.page.attributes.solution)}}
-      {{{parts.after}}}
-      {{/with}}
-      {{/if}}
+      {{!-- The Take this to production card is on the Take it to production
+            page (layouts/solution-production.hbs), which is the last step's
+            next. A solution built without that page has no next on its last
+            step, so the card stays at the end of that step's content. --}}
+      {{#unless page.attributes.solution-next-url}}
+      {{> solution-productionize solution=(parse-json page.attributes.solution)}}
+      {{/unless}}
       {{> solution-step-actions solution=(parse-json page.attributes.solution)}}
       {{> feedback-footer}}
       {{> tracking-pixel}}

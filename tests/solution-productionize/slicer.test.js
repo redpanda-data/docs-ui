@@ -79,7 +79,7 @@ function guideFor (slug, doc) {
   const companionUrl = `${ORIGIN}/solutions/${slug}/agent-companion.md`
   return prod.guideSections(prod.sliceCompanion(prod.rewriteHost(companion(slug), ORIGIN)), {
     doc,
-    lastStepUrl: `${ORIGIN}/solutions/${slug}/verify-end-to-end/`,
+    productionUrl: `${ORIGIN}/solutions/${slug}/take-to-production/`,
     stepUrls: Array.from({ length: 12 }, (_, i) => `${ORIGIN}/solutions/${slug}/step-${i + 1}/`),
     companionUrl,
   })
@@ -233,7 +233,8 @@ test('a heading inside a code fence is text, not a section', () => {
   assert.equal(sliced.version, 'v1.2.3')
 })
 
-// The rendered last steps. Two solutions set custom ids on a topic heading
+// The rendered Take it to production pages, or, in a corpus built before that
+// page existed, the last steps. Two solutions set custom ids on a topic heading
 // ("prod-recovery-point-and-time" for "Recovery point and recovery time"), so
 // a slug of the topic text alone misses them; the heading text matches.
 const pagesSkip = skip || (!parseHTML
@@ -242,13 +243,15 @@ const pagesSkip = skip || (!parseHTML
     ? 'no rendered pages at tests/solution-quiz/.corpus: see tests/solution-quiz/build-corpus.mjs'
     : false)
 
-test('every gap topic links to its own heading on the rendered last step', { skip: pagesSkip }, () => {
+test('every gap topic links to its own heading on the rendered production page', { skip: pagesSkip }, () => {
   let bySlug = 0
   let total = 0
   for (const slug of SLUGS) {
-    const file = path.join(QUIZ_PAGES, slug, 'verify-end-to-end.html')
+    const page = path.join(QUIZ_PAGES, slug, 'take-to-production.html')
+    const legacy = !fs.existsSync(page)
+    const file = legacy ? path.join(QUIZ_PAGES, slug, 'verify-end-to-end.html') : page
     const { document } = parseHTML(fs.readFileSync(file, 'utf8'))
-    const ids = new Set(Array.from(document.querySelectorAll('h3[id^="prod-"]')).map((h) => h.id))
+    const ids = new Set(Array.from(document.querySelectorAll('h2[id^="prod-"], h3[id^="prod-"]')).map((h) => h.id))
     const guide = guideFor(slug, document)
     for (const topic of guide.topics) {
       total++
@@ -257,7 +260,6 @@ test('every gap topic links to its own heading on the rendered last step', { ski
       assert.ok(ids.has(id), `${slug} "${topic}" links to #${id}, which is not on the page`)
       if (id === 'prod-' + topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) bySlug++
     }
-    assert.ok(document.getElementById('production-considerations'), `${slug} has the fallback anchor`)
     // The two corpora come from different builds (a published companion, a
     // pinned redpanda-solutions commit), so check they describe the same
     // solution: the same version, and a topic for every heading on the page.
@@ -268,9 +270,20 @@ test('every gap topic links to its own heading on the rendered last step', { ski
   assert.ok(bySlug < total, 'some heading ids differ from the slug of their text, so the text match is what finds them')
 })
 
-test('a topic with no heading on the page falls back to Production considerations', () => {
-  const doc = { querySelectorAll: () => [{ id: 'prod-security', textContent: 'Security' }] }
-  assert.equal(prod.gapUrl(doc, 'Security', 'https://x.test/s/last/#old'), 'https://x.test/s/last/#prod-security')
-  assert.equal(prod.gapUrl(doc, 'Rollback', 'https://x.test/s/last/'), 'https://x.test/s/last/#production-considerations')
-  assert.equal(prod.gapUrl(null, 'Rollback', 'https://x.test/s/last/'), 'https://x.test/s/last/#production-considerations')
+test('a topic with no heading on the page falls back to the top of the page', () => {
+  let selector = null
+  const doc = { querySelectorAll: (sel) => { selector = sel; return [{ id: 'prod-security', textContent: 'Security' }] } }
+  assert.equal(prod.gapUrl(doc, 'Security', 'https://x.test/s/take-to-production/#old'), 'https://x.test/s/take-to-production/#prod-security')
+  // The production page has the topics as h2s; an older last step as h3s.
+  assert.equal(selector, 'h2[id^="prod-"], h3[id^="prod-"]')
+  assert.equal(prod.gapUrl(doc, 'Rollback', 'https://x.test/s/take-to-production/'), 'https://x.test/s/take-to-production/')
+  assert.equal(prod.gapUrl(null, 'Rollback', 'https://x.test/s/take-to-production/'), 'https://x.test/s/take-to-production/')
+})
+
+test('gap topics find their h2 headings in a rendered production page', { skip: parseHTML ? false : 'linkedom is not installed (npm ci)' }, () => {
+  const { document } = parseHTML('<html><body><article class="doc"><div class="sect1"><h2 id="prod-security">Security</h2></div>' +
+    '<div class="sect1"><h2 id="prod-recovery-point-and-time">Recovery point and recovery time</h2></div></article></body></html>')
+  const url = 'https://x.test/s/take-to-production/'
+  assert.equal(prod.gapUrl(document, 'Recovery point and recovery time', url), url + '#prod-recovery-point-and-time')
+  assert.equal(prod.gapUrl(document, 'Security', url), url + '#prod-security')
 })

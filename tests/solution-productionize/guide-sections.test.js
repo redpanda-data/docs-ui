@@ -58,7 +58,7 @@ function companion (name) {
 function guideFor (name) {
   const slug = name.replace(/-(published|unsplit)$/, '')
   return prod.guideSections(prod.sliceCompanion(companion(name)), {
-    lastStepUrl: `${ORIGIN}/solutions/${slug}/verify-end-to-end/`,
+    productionUrl: `${ORIGIN}/solutions/${slug}/take-to-production/`,
     stepUrls: Array.from({ length: 12 }, (_, i) => `${ORIGIN}/solutions/${slug}/step-${i + 1}/`),
     companionUrl: `${ORIGIN}/solutions/${slug}/agent-companion.md`,
   })
@@ -84,7 +84,8 @@ test('the Production gaps overview is a section of its own, with the ACL table',
   assert.match(overview.text, /\| Principal \| Allow \| Group \|/)
   assert.match(overview.text, /\| Leaderboard service \| Read on `game\.player-events`/)
   assert.doesNotMatch(overview.text, /^### /m, 'the overview stops at the first topic')
-  assert.equal(overview.guide_url, `${ORIGIN}/solutions/multiplayer-gaming/verify-end-to-end/#production-considerations`)
+  // The intro of the Take it to production page: its top.
+  assert.equal(overview.guide_url, `${ORIGIN}/solutions/multiplayer-gaming/take-to-production/`)
   // Asked for by the section's own name, the overview comes back.
   const hit = tools.findGuideSection(guide, 'production gaps')
   assert.equal(hit.section, 'Production gaps: overview')
