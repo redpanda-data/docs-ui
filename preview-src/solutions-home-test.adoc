@@ -1,0 +1,7 @@
+= Redpanda Solutions
+:description: Complete, runnable systems built on Redpanda, step by step.
+:page-layout: solutions-home
+// The catalog itself lives on the `solutions` component in ui-model.yml
+// (attribute solutions-catalog), the same place the solutions-catalog
+// extension puts it in a real build. This page only needs the layout. The
+// hero is the title and the description, the same as a real build.

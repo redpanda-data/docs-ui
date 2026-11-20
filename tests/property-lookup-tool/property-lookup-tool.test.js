@@ -38,8 +38,10 @@ const parsePreservingBigInts = new Function( // eslint-disable-line no-new-func
 
 function loadTool ({ metas = {}, preview = false, files = {}, bigints = false } = {}) {
   const source = fs.readFileSync(TOOLS, 'utf8')
-  const rewritten = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
-  assert.notEqual(rewritten, source, 'the agentTools export shape changed; update this harness')
+  const exported = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
+  assert.notEqual(exported, source, 'the agentTools export shape changed; update this harness')
+  // The file's other exports (the chat mode tool lists) stay local to the script.
+  const rewritten = exported.replace(/^export /gm, '')
   const fetched = []
   const querySelector = (sel) => {
     const m = sel.match(/^meta\[name="([^"]+)"\]$/)

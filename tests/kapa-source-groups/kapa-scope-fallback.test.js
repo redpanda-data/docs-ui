@@ -147,7 +147,9 @@ test('the app re-renders the providers without the prop after a drop', () => {
   // pass it to sourceGroupProps, or the providers keep sending the dead group.
   const askai = fs.readFileSync(path.join(ROOT, 'src/js/react/AskAI.jsx'), 'utf8')
   assert.match(askai, /const scopeIds = useKapaScopeIds\(\)/)
-  assert.match(askai, /sourceGroupProps\('agent', scopeIds\)/)
+  // The agent tier gets the scope through agentProps (see tests/chat-modes).
+  assert.match(askai, /resolveMode\(mode, window, scopeIds\)[\s\S]*?\n\s+scopeIds,\n/)
+  assert.match(askai, /sourceGroupProps\('agent', props\.sourceGroupIds\)/)
   assert.match(askai, /sourceGroupProps\('chat', scopeIds\)/)
   assert.match(askai, /addEventListener\(SCOPE_DROPPED_EVENT/)
   // The agent tier detects the rejection from its error event.

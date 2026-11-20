@@ -1247,6 +1247,12 @@ html[data-theme="dark"] #chat-panel-kapa-root .chat-toast-error {
   background: var(--kapa-surface, #fff);
 }
 
+/* Threads a chat mode started stay out of the history list (see
+   chat-panel.css). */
+#chat-panel-kapa-root .chat-history-view li.chat-history-mode-thread {
+  display: none !important;
+}
+
 /* ——— Per-answer sources ——— */
 #chat-panel-kapa-root .answer-sources {
   margin-top: 8px;

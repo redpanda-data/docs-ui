@@ -3,6 +3,7 @@ import { Check, AlertCircle } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { Marked } from 'marked'
 import { markedHighlight } from 'marked-highlight'
+import { isPlainLinkClick } from '../chatModes.js'
 // highlight.js core plus a curated language set. The bare 'highlight.js'
 // import pulled in all 185 grammars (~880 KB minified), most of which no docs
 // answer will ever contain. highlightAuto only considers registered languages,
@@ -122,5 +123,12 @@ export function Answer ({ md }) {
       if (containerRef.current) containerRef.current.textContent = md
     }
   }, [md])
-  return <div ref={containerRef} className="answer" />
+  // Following a link in an answer closes the drawer, so the reader sees the
+  // page it opens (19-chat-panel.js listens for docs-chat:close and clears the
+  // persisted open state too).
+  const onClick = (event) => {
+    const link = event.target && event.target.closest ? event.target.closest('a[href]') : null
+    if (isPlainLinkClick(event, link)) window.dispatchEvent(new window.CustomEvent('docs-chat:close'))
+  }
+  return <div ref={containerRef} className="answer" onClick={onClick} />
 }

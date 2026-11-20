@@ -166,6 +166,40 @@
           </div>
         </div>
       </div>
+
+      {{!-- Third intent card: Solutions. Renders only when the site has the
+            `solutions` component AND the home page sets the title. Attributes
+            (all page-*, set on the home page's index.adoc by docs-site):
+              :page-intent-solutions-title: Build a complete system
+              :page-intent-solutions-desc:  One-paragraph pitch shown under the title
+              :page-intent-solutions-link:  resource id or URL of the Solutions landing page
+              :page-intent-solutions-cta:   link label (default "Browse solutions")
+            Color comes from the component's component-metadata. --}}
+      {{#if (has-component site 'solutions')}}
+      {{#if page.attributes.intent-solutions-title}}
+      <div class="home-intent-card home-intent-card--solutions home-intent-card--clickable" style="--product-color: {{get-component-color site 'solutions'}};" data-href="{{#if page.attributes.intent-solutions-link}}{{{relativize (resolve-resource page.attributes.intent-solutions-link)}}}{{else}}{{#with (find-component site 'solutions')}}{{{relativize this.url}}}{{/with}}{{/if}}">
+        <div class="home-intent-card-header-row">
+          <div class="home-intent-card-icon home-intent-card-icon--solutions">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+            </svg>
+          </div>
+          <div class="home-intent-card-content">
+            <h3 class="home-intent-card-title">{{page.attributes.intent-solutions-title}}</h3>
+            {{#if page.attributes.intent-solutions-desc}}
+            <p class="home-intent-card-desc">{{page.attributes.intent-solutions-desc}}</p>
+            {{/if}}
+          </div>
+        </div>
+        <div class="home-intent-card-links">
+          <a href="{{#if page.attributes.intent-solutions-link}}{{{relativize (resolve-resource page.attributes.intent-solutions-link)}}}{{else}}{{#with (find-component site 'solutions')}}{{{relativize this.url}}}{{/with}}{{/if}}" class="home-intent-card-link home-intent-card-cta" data-analytics="home_intent_solutions">
+            {{#if page.attributes.intent-solutions-cta}}{{page.attributes.intent-solutions-cta}}{{else}}Browse solutions{{/if}}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+      {{/if}}
+      {{/if}}
     </div>
   </div>
 </section>

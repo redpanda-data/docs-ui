@@ -6,7 +6,7 @@
 // version.
 //
 // agentTools.js is an ES module and CI runs Node 18, so it is loaded through
-// vm with its single export rewritten into a global assignment (see
+// vm with its agentTools export rewritten into a global assignment (see
 // tests/chat-panel-navigation for the same harness and why).
 
 const test = require('node:test')
@@ -21,8 +21,10 @@ const TOOLS = path.join(ROOT, 'src/js/react/agentTools.js')
 
 function loadTool (metas) {
   const source = fs.readFileSync(TOOLS, 'utf8')
-  const rewritten = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
-  assert.notEqual(rewritten, source, 'the agentTools export shape changed; update this harness')
+  const exported = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
+  assert.notEqual(exported, source, 'the agentTools export shape changed; update this harness')
+  // The file's other exports (the chat mode tool lists) stay local to the script.
+  const rewritten = exported.replace(/^export /gm, '')
   const querySelector = (sel) => {
     const m = sel.match(/^meta\[name="([^"]+)"\]$/)
     if (m) return m[1] in metas ? { content: metas[m[1]] } : null

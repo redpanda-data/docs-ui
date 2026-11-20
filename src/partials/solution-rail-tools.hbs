@@ -1,0 +1,36 @@
+{{!--
+  The rail's tools: Get the code, Your progress, and on a step page the quiz
+  and Take this to production (solution-step-rail-actions.hbs). Context:
+  `solution`; `step` is true on a step page.
+
+  From 1281px it is a <details> that starts collapsed, so On this page, which
+  sits under it, stays in view: open, the panel was 300 to 330px tall and
+  pushed most of the TOC below the fold. The summary is the way in, with the
+  progress bar and count, so a reader sees how far they are without opening
+  it. 28-solution-progress.js keeps it collapsed unless the reader opened it
+  (remembered per browser) or, on an overview, finished the solution.
+
+  Below 1281px the whole rail is already one collapsed <details>
+  (data-sol-rail), so this summary is hidden and the script keeps the panel
+  open inside it.
+--}}
+<details class="sol-rail-tools" data-sol-rail-tools>
+  <summary class="sol-rail-tools-summary" data-analytics="solution_rail_tools_toggle">
+    <span class="sol-rail-tools-icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </span>
+    <span class="sol-rail-tools-text">
+      <span class="sol-rail-tools-title">{{#if step}}Get the code, progress, and quiz{{else}}Get the code and track progress{{/if}}</span>
+      <span class="sol-rail-tools-meta">
+        <span class="sol-bar sol-bar--sm" aria-hidden="true"><span class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></span></span>
+        <span><span data-sol-progress-count>0 of {{solution.steps.length}}</span> done</span>
+      </span>
+    </span>
+  </summary>
+  <div class="sol-rail-tools-body">
+    {{> solution-progress solution=solution}}
+    {{#if step}}
+    {{> solution-step-rail-actions solution=solution}}
+    {{/if}}
+  </div>
+</details>
