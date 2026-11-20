@@ -5,6 +5,17 @@
 :hero-ask-placeholder: Ask AI about Redpanda Streaming...
 :stats: 10x;;Faster|than Kafka;;6ms;;p99 latency|at scale;;Zero;;Dependencies|single binary
 :page-ai-suggestions: ["How do I get started with Redpanda?", "What's the difference between Redpanda and Kafka?", "How do I deploy Redpanda on Kubernetes?"]
+// Meaning badges on landing cards: New and BYOC (component cards), New (feature cards)
+:page-component-cards-title: Components
+:page-component-1-name: Redpanda SQL
+:page-component-1-desc: Query streaming data with SQL.
+:page-component-1-is-new: true
+:page-component-1-deployments: byoc
+:page-features-title: What's new
+:page-features-1-title: Iceberg topics
+:page-features-1-desc: Write topics straight to Apache Iceberg tables.
+:page-features-1-new: true
+:page-beta: true
 
 :deploy-title: Get started with Streaming
 :deploy-1-title: Docker Quickstart

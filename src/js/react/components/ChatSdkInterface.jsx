@@ -128,10 +128,13 @@ function QuotaWall ({ quota, loginUrl, signingIn, setSigningIn, hero = false }) 
 // Reported to Heap by the provider's onFeedbackSubmit callback (AskAI.jsx).
 function FeedbackButtons ({ questionAnswerId, showToast }) {
   const { addFeedback } = useChat()
+  // The reaction the reader gave, so each button can say whether it is pressed
+  const [given, setGiven] = useState(null)
 
   const handleFeedback = async (reaction) => {
     try {
       await addFeedback(questionAnswerId, reaction)
+      setGiven(reaction)
       showToast(reaction === 'upvote' ? 'Thanks for the feedback!' : 'Feedback received', 'success')
     } catch (err) {
       console.error('Feedback error', err)
@@ -142,11 +145,11 @@ function FeedbackButtons ({ questionAnswerId, showToast }) {
   return (
     <div className="feedback-container">
       <div className="feedback-group">
-        <button className="feedback-button" type="button" onClick={() => handleFeedback('upvote')} title="This was helpful">
-          <ThumbsUp className="feedback-icon" />
+        <button className="feedback-button" type="button" onClick={() => handleFeedback('upvote')} title="This was helpful" aria-label="This was helpful" aria-pressed={given === 'upvote'}>
+          <ThumbsUp className="feedback-icon" aria-hidden="true" />
         </button>
-        <button className="feedback-button" type="button" onClick={() => handleFeedback('downvote')} title="This wasn't helpful">
-          <ThumbsDown className="feedback-icon" />
+        <button className="feedback-button" type="button" onClick={() => handleFeedback('downvote')} title="This wasn't helpful" aria-label="This wasn't helpful" aria-pressed={given === 'downvote'}>
+          <ThumbsDown className="feedback-icon" aria-hidden="true" />
         </button>
       </div>
     </div>

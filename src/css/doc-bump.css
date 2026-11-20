@@ -627,6 +627,12 @@ html[data-theme=dark] {
   content: "\274f";
 }
 
+/* Without font icons, Asciidoctor writes the marker as text (&#10003; or
+   &#10063;) at the start of the paragraph; hang it like the icon */
+.aa-DetachedOverlay .doc ul.checklist li > p:first-child:not(:has(> i.fa:first-child)) {
+  text-indent: -1.25rem;
+}
+
 .aa-DetachedOverlay .doc .dlist .dlist,
 .aa-DetachedOverlay .doc .dlist .olist,
 .aa-DetachedOverlay .doc .dlist .ulist,
@@ -1351,8 +1357,14 @@ html[data-theme="dark"] .aa-DetachedOverlay .doc .source-toolbox {
   hyphens: none;
 }
 
+/* icons=font draws the caret with CSS; without font icons Asciidoctor writes
+   it as text in <b class="caret">&#8250;</b>, styled the same */
 .aa-DetachedOverlay .doc .menuseq i.caret::before {
   content: "\203a";
+}
+
+.aa-DetachedOverlay .doc .menuseq i.caret::before,
+.aa-DetachedOverlay .doc .menuseq b.caret {
   font-size: 1.1em;
   font-family: var(--body-font-family-bold);
   line-height: calc(1 / 1.1);

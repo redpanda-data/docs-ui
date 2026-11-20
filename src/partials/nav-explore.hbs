@@ -6,17 +6,18 @@
     <div class="container{{#if (and page.versions (gt page.versions.length 1))}} has-dropdown{{/if}}">
       {{#if (and page.versions (gt page.versions.length 1))}}
       {{!-- Multiple versions: use accessible button trigger --}}
-      <button type="button" class="version-selector-trigger" aria-expanded="false" aria-controls="version-dropdown" aria-label="Select version">
+      <button type="button" class="version-selector-trigger" aria-expanded="false" aria-controls="version-dropdown">
+        <span class="visually-hidden">Select version. Current: </span>
         <span class="current-version">Version {{page.componentVersion.displayVersion}}
           {{#each page.versions as |ver|}}
             {{#if (eq ver.version @root.page.attributes.version)}}
               {{#if (is-eol ver.asciidoc.attributes)}}
-                <span class="eol-label">(end of life)</span>
+                <span class="rp-badge rp-badge--sm rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
               {{/if}}
             {{/if}}
           {{/each}}
         </span>
-        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+        <span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span>
       </button>
       <div id="version-dropdown" class="versions">
         {{#each page.versions}}
@@ -25,7 +26,7 @@
               <a class="version{{#if ../missing}} is-missing{{/if}}" href="{{{relativize ../url}}}">
                 {{../displayVersion}}
                 {{#if (is-eol ../asciidoc.attributes)}}
-                  <span class="eol-label">(end of life)</span>
+                  <span class="rp-badge rp-badge--sm rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
                 {{/if}}
               </a>
             {{/with}}
@@ -38,7 +39,7 @@
         {{#each page.versions as |ver|}}
           {{#if (eq ver.version @root.page.attributes.version)}}
             {{#if (is-eol ver.asciidoc.attributes)}}
-              <span class="eol-label">(end of life)</span>
+              <span class="rp-badge rp-badge--sm rp-badge--eol" data-tooltip="No longer supported.">End of life</span>
             {{/if}}
           {{/if}}
         {{/each}}
