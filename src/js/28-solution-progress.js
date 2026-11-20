@@ -1205,6 +1205,14 @@
     rate_limited: 'Too many downloads in a short time. Try again in a few minutes.',
   }
   var runPending = false
+  // The command on show, so a second click hides it and a third shows it
+  // again without minting a new link while that link still has time left
+  // (it works for ten minutes; reuse it for eight, so a copied command has
+  // two minutes to run). Reset when the platform changes.
+  var RUN_REUSE_MS = 8 * 60 * 1000
+  var runShown = null
+  var runOpen = false
+  var RUN_LABEL = 'Download and run'
 
   // The platform the reader works on: the saved preference first, then the
   // tab the tabs script remembers. Anything but Kubernetes runs make up.
@@ -1278,20 +1286,54 @@
     out.hidden = false
   }
 
+  function setRunLabel (button, text) {
+    var label = button.querySelector('[data-sol-download-run-label]')
+    if (label) label.textContent = text
+  }
+
+  // Open: the command shows and the button hides it. Closed: the button gets
+  // the command (again).
+  function setRunOpen (button, out, open) {
+    runOpen = open
+    button.setAttribute('aria-expanded', open ? 'true' : 'false')
+    setRunLabel(button, open ? 'Hide command' : RUN_LABEL)
+    if (!open && out) out.hidden = true
+  }
+
+  // Shown at once, so a slow link request never looks like a dead button.
+  function showRunPending (out) {
+    if (!out) return
+    clearChildren(out)
+    out.appendChild(textEl('p', 'sol-download-run-note', 'Getting your command\u2026'))
+    out.hidden = false
+  }
+
   function onRunClick (button) {
     if (isDraft || runPending) return
+    var out = $('[data-sol-download-run-output]')
+    if (runOpen) {
+      setRunOpen(button, out, false)
+      return
+    }
     if (!hasAuthHint()) {
       openSignin('run')
       return
     }
-    var out = $('[data-sol-download-run-output]')
     if (!isId(solutionId) || !isVersion(pageVersion)) {
       showRunError(out, 'failed')
       return
     }
     var platform = runPlatform()
+    if (runShown && runShown.platform === platform && now() - runShown.at < RUN_REUSE_MS) {
+      showRunCommand(out, runShown.command, platform)
+      setRunOpen(button, out, true)
+      return
+    }
+    runShown = null
     runPending = true
     button.setAttribute('aria-busy', 'true')
+    setRunLabel(button, 'Getting command\u2026')
+    showRunPending(out)
     fetch(DOWNLOAD_LINK_ENDPOINT, {
       method: 'POST',
       credentials: 'same-origin',
@@ -1308,6 +1350,7 @@
     }).then(function (result) {
       runPending = false
       button.removeAttribute('aria-busy')
+      setRunLabel(button, RUN_LABEL)
       if (result.signin) {
         // The hint cookie outlived the session: sign in again.
         if (out) out.hidden = true
@@ -1319,7 +1362,10 @@
         track('solution_download_error', baseProps({ error: result.error, kind: 'run' }))
         return
       }
-      showRunCommand(out, runCommand(result.url, platform), platform)
+      var command = runCommand(result.url, platform)
+      runShown = { command: command, platform: platform, at: now() }
+      showRunCommand(out, command, platform)
+      setRunOpen(button, out, true)
       track('solution_download', baseProps({ source: 'click', kind: 'run', platform: platform }))
     })
   }
