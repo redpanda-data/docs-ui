@@ -33,15 +33,17 @@
   {{!-- Download and run: for a signed-in reader a click asks docs-site
     /solutions/download-link for a ten-minute link and shows a curl command
     that fetches the bundle, unzips it and starts the stack
-    (28-solution-progress.js builds the command). Signed out, it asks for
-    sign-in like the download above. --}}
+    (28-solution-progress.js builds the command). The button then reads Hide
+    command and toggles the output (aria-expanded); showing it again reuses
+    the link while it has time left. Signed out, it asks for sign-in like
+    the download above. --}}
   {{#if (eq solution.download 'authenticated')}}
   <div class="sol-download-run" data-sol-download-run>
-    <button type="button" class="sol-btn sol-btn--sm" data-sol-download-run-button data-analytics="solution_download_run">
+    <button type="button" class="sol-btn sol-btn--sm" data-sol-download-run-button aria-expanded="false" aria-controls="sol-download-run-output" data-analytics="solution_download_run">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-      <span>Download and run</span>
+      <span data-sol-download-run-label>Download and run</span>
     </button>
-    <div class="sol-download-run-output" data-sol-download-run-output role="status" hidden></div>
+    <div class="sol-download-run-output" id="sol-download-run-output" data-sol-download-run-output role="status" hidden></div>
   </div>
   {{/if}}
   {{#if (eq solution.download 'authenticated')}}

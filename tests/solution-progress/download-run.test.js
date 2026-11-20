@@ -156,3 +156,57 @@ test('hidden for a draft, and where sign-in is not possible', () => {
   const shown = run({ downloadRun: true, signedIn: true, hint: 'true' })
   assert.equal(shown.els.run.hidden, false)
 })
+
+test('says it is getting the command while the request is in flight', async () => {
+  let release
+  const gate = new Promise((resolve) => { release = resolve })
+  const r = run({
+    downloadRun: true,
+    signedIn: true,
+    hint: 'true',
+    fetch: linkRoute(() => gate.then(() => ({ status: 200, ok: true, json: () => Promise.resolve({ url: URL_OK, expiresAt: 'x' }) }))),
+  })
+  r.els.runButton.dispatch('click')
+  assert.equal(r.els.runOutput.hidden, false)
+  assert.match(r.els.runOutput.querySelector('.sol-download-run-note').textContent, /^Getting your command/)
+  assert.equal(r.els.runButton.getAttribute('aria-busy'), 'true')
+  release()
+  await r.flush()
+  assert.match(commandText(r), /^curl /)
+  assert.equal(r.els.runButton.getAttribute('aria-busy'), null)
+})
+
+test('a second click hides the command, and a third shows it again without a new link', async () => {
+  const r = run({ downloadRun: true, signedIn: true, hint: 'true', fetch: ok() })
+  const posts = () => r.calls.fetch.filter((c) => c.url === '/solutions/download-link').length
+  r.els.runButton.dispatch('click')
+  await r.flush()
+  assert.equal(r.els.runButton.getAttribute('aria-expanded'), 'true')
+  r.els.runButton.dispatch('click')
+  await r.flush()
+  assert.equal(r.els.runOutput.hidden, true)
+  assert.equal(r.els.runButton.getAttribute('aria-expanded'), 'false')
+  r.els.runButton.dispatch('click')
+  await r.flush()
+  assert.equal(r.els.runOutput.hidden, false)
+  assert.equal(commandText(r), 'curl -fsSL "' + URL_OK + '" -o demo.zip && unzip -q demo.zip && cd demo && make up')
+  assert.equal(posts(), 1, 'the link still has time left, so no second request')
+})
+
+test('after a failure the next click tries again rather than hiding the message', async () => {
+  let n = 0
+  const r = run({
+    downloadRun: true,
+    signedIn: true,
+    hint: 'true',
+    fetch: linkRoute(() => (n++ === 0
+      ? { status: 503, ok: false, json: () => Promise.resolve({}) }
+      : { status: 200, ok: true, json: () => Promise.resolve({ url: URL_OK, expiresAt: 'x' }) })),
+  })
+  r.els.runButton.dispatch('click')
+  await r.flush()
+  assert.ok(r.els.runOutput.querySelector('.sol-download-run-error'))
+  r.els.runButton.dispatch('click')
+  await r.flush()
+  assert.match(commandText(r), /^curl /)
+})

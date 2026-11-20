@@ -1403,6 +1403,12 @@ html[data-theme="dark"] .sol-rail-tools-meta {
   margin-top: 0.5rem;
 }
 
+/* While the link is being minted (aria-busy, 28-solution-progress.js). */
+.sol-download-run [data-sol-download-run-button][aria-busy="true"] {
+  cursor: progress;
+  opacity: 0.7;
+}
+
 .sol-download-run-command {
   margin: 0 0 0.5rem;
   padding: 0.5rem 0.625rem;
