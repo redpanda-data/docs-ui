@@ -103,6 +103,7 @@
   var DEBUG_RECS_KEY = 'docs-debug-recs'
   var PROGRESS_ENDPOINT = '/solutions/progress'
   var DOWNLOAD_ENDPOINT = '/solutions/download'
+  var DOWNLOAD_LINK_ENDPOINT = '/solutions/download-link'
   var ACTIVITY_ENDPOINT = '/docs-activity'
   var MAX_SOLUTIONS = 50
   var MAX_STEPS = 100
@@ -1089,6 +1090,13 @@
       lead: downloadLead(),
       cta: 'Sign in and download',
     },
+    // Download and run: back from sign-in, the page shows the command, which
+    // downloads the build itself. The browser downloads nothing.
+    run: {
+      title: 'Download and run the tested build',
+      lead: 'Sign in to get a command that downloads this solution and starts it in one step. Signing in also keeps your progress across devices.',
+      cta: 'Sign in and get the command',
+    },
   }
 
   // What the zip gives that the pages do not: the whole tree at the version
@@ -1120,14 +1128,14 @@
   function intentReturnTo (intent, filePath) {
     var returnTo = window.location.pathname + '?intent=' + intent
     if (stepId) returnTo += '&step=' + encodeURIComponent(stepId)
-    if (intent === 'download' && pageVersion) returnTo += '&version=' + encodeURIComponent(pageVersion)
+    if ((intent === 'download' || intent === 'run') && pageVersion) returnTo += '&version=' + encodeURIComponent(pageVersion)
     if (intent === 'download' && filePath) returnTo += '&path=' + encodeURIComponent(filePath)
     return returnTo
   }
 
   function openSignin (intent, filePath) {
     // A draft has nothing to download, so signing in can only be for saving.
-    intent = intent === 'download' && !isDraft ? 'download' : 'save'
+    intent = (intent === 'download' || intent === 'run') && !isDraft ? intent : 'save'
     if (intent !== 'download') filePath = null
     if (!authAvailable()) {
       toast(lastWriteOk === false
@@ -1176,6 +1184,192 @@
     try { window.location.assign(url) } catch (e) { /* ignore */ }
   }
 
+  // ---------------------------------------------------------------------------
+  // Download and run (solution-code-download.hbs)
+  // ---------------------------------------------------------------------------
+
+  // A signed-in click asks docs-site for a ten-minute signed link and shows
+  //   curl -fsSL "<url>" -o <slug>.zip && unzip -q <slug>.zip && cd <slug> && make up
+  // (make k8s-up for a reader on the Kubernetes tab). The command is pasted
+  // into a shell, so the URL is used only when it is exactly the shape
+  // docs-site mints: an http(s) origin, then
+  //   /solutions/get/<solution>/<version>/<expires>/<signature>
+  // (solutions-download-link.mjs). Nothing that could close the double quotes
+  // or expand ($, `, \) matches, and the slug is an ID_RE id. Never piped to
+  // a shell.
+  var RUN_URL_RE = /^https?:\/\/[A-Za-z0-9.-]+(?::\d+)?\/solutions\/get\/[a-z0-9][a-z0-9-]*\/v[0-9][0-9A-Za-z.+-]*\/\d{1,12}\/[A-Za-z0-9_-]{22}$/
+  // tabs.js keeps the platform tab's label here (34-solution-platform.js).
+  var TAB_PLATFORM_KEY = 'preferred-tab-platform'
+  var RUN_ERRORS = {
+    failed: 'Could not get the command. Try again, or use Download the complete example.',
+    rate_limited: 'Too many downloads in a short time. Try again in a few minutes.',
+  }
+  var runPending = false
+  // The command on show, so a second click hides it and a third shows it
+  // again without minting a new link while that link still has time left
+  // (it works for ten minutes; reuse it for eight, so a copied command has
+  // two minutes to run). Reset when the platform changes.
+  var RUN_REUSE_MS = 8 * 60 * 1000
+  var runShown = null
+  var runOpen = false
+  var RUN_LABEL = 'Download and run'
+
+  // The platform the reader works on: the saved preference first, then the
+  // tab the tabs script remembers. Anything but Kubernetes runs make up.
+  function runPlatform () {
+    var pref = getPrefs().platform
+    if (pref && isString(pref.value)) return pref.value
+    return readString(localArea(), TAB_PLATFORM_KEY) === 'Kubernetes' ? 'kubernetes' : 'local'
+  }
+
+  function runCommand (url, platform) {
+    return 'curl -fsSL "' + url + '" -o ' + solutionId + '.zip && unzip -q ' + solutionId + '.zip && cd ' +
+      solutionId + ' && make ' + (platform === 'kubernetes' ? 'k8s-up' : 'up')
+  }
+
+  function clearChildren (el) {
+    while (el.firstChild) el.removeChild(el.firstChild)
+  }
+
+  function textEl (tag, className, text) {
+    var node = document.createElement(tag)
+    if (className) node.className = className
+    node.textContent = text
+    return node
+  }
+
+  function showRunError (out, code) {
+    if (!out) return
+    clearChildren(out)
+    out.appendChild(textEl('p', 'sol-download-run-error', RUN_ERRORS[code] || RUN_ERRORS.failed))
+    out.hidden = false
+  }
+
+  function copyRunCommand (button, command) {
+    var clip = window.navigator && window.navigator.clipboard
+    var done = function (label) {
+      button.textContent = label
+      setTimeout(function () { button.textContent = 'Copy' }, 2000)
+    }
+    if (!clip || typeof clip.writeText !== 'function') {
+      done('Select and copy')
+      return
+    }
+    clip.writeText(command).then(function () { done('Copied') }, function () { done('Select and copy') })
+  }
+
+  // Built with textContent only: the command and the note are never parsed
+  // as markup.
+  function showRunCommand (out, command, platform) {
+    if (!out) return
+    clearChildren(out)
+    var pre = document.createElement('pre')
+    pre.className = 'sol-download-run-command'
+    pre.appendChild(textEl('code', '', command))
+    var copy = textEl('button', 'sol-btn sol-btn--sm sol-download-run-copy', 'Copy')
+    copy.setAttribute('type', 'button')
+    copy.setAttribute('aria-label', 'Copy the command')
+    copy.addEventListener('click', function () {
+      copyRunCommand(copy, command)
+      track('solution_download_run_copy', baseProps({ platform: platform }))
+    })
+    var note = document.createElement('p')
+    note.className = 'sol-download-run-note'
+    note.appendChild(textEl('span', '', platform === 'kubernetes'
+      ? 'The link works for 10 minutes. You need Docker, kind, Helm, kubectl, and '
+      : 'The link works for 10 minutes. You need Docker and '))
+    note.appendChild(textEl('code', '', 'unzip'))
+    note.appendChild(textEl('span', '', '.'))
+    out.appendChild(pre)
+    out.appendChild(copy)
+    out.appendChild(note)
+    out.hidden = false
+  }
+
+  function setRunLabel (button, text) {
+    var label = button.querySelector('[data-sol-download-run-label]')
+    if (label) label.textContent = text
+  }
+
+  // Open: the command shows and the button hides it. Closed: the button gets
+  // the command (again).
+  function setRunOpen (button, out, open) {
+    runOpen = open
+    button.setAttribute('aria-expanded', open ? 'true' : 'false')
+    setRunLabel(button, open ? 'Hide command' : RUN_LABEL)
+    if (!open && out) out.hidden = true
+  }
+
+  // Shown at once, so a slow link request never looks like a dead button.
+  function showRunPending (out) {
+    if (!out) return
+    clearChildren(out)
+    out.appendChild(textEl('p', 'sol-download-run-note', 'Getting your command\u2026'))
+    out.hidden = false
+  }
+
+  function onRunClick (button) {
+    if (isDraft || runPending) return
+    var out = $('[data-sol-download-run-output]')
+    if (runOpen) {
+      setRunOpen(button, out, false)
+      return
+    }
+    if (!hasAuthHint()) {
+      openSignin('run')
+      return
+    }
+    if (!isId(solutionId) || !isVersion(pageVersion)) {
+      showRunError(out, 'failed')
+      return
+    }
+    var platform = runPlatform()
+    if (runShown && runShown.platform === platform && now() - runShown.at < RUN_REUSE_MS) {
+      showRunCommand(out, runShown.command, platform)
+      setRunOpen(button, out, true)
+      return
+    }
+    runShown = null
+    runPending = true
+    button.setAttribute('aria-busy', 'true')
+    setRunLabel(button, 'Getting command\u2026')
+    showRunPending(out)
+    fetch(DOWNLOAD_LINK_ENDPOINT, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ solution: solutionId, version: pageVersion }),
+    }).then(function (res) {
+      if (res.status === 401) return { signin: true }
+      if (!res.ok) return { error: res.status === 429 ? 'rate_limited' : 'failed' }
+      return res.json().then(function (data) {
+        return data && isString(data.url) && RUN_URL_RE.test(data.url) ? { url: data.url } : { error: 'failed' }
+      }, function () { return { error: 'failed' } })
+    }, function () {
+      return { error: 'failed' }
+    }).then(function (result) {
+      runPending = false
+      button.removeAttribute('aria-busy')
+      setRunLabel(button, RUN_LABEL)
+      if (result.signin) {
+        // The hint cookie outlived the session: sign in again.
+        if (out) out.hidden = true
+        openSignin('run')
+        return
+      }
+      if (result.error) {
+        showRunError(out, result.error)
+        track('solution_download_error', baseProps({ error: result.error, kind: 'run' }))
+        return
+      }
+      var command = runCommand(result.url, platform)
+      runShown = { command: command, platform: platform, at: now() }
+      showRunCommand(out, command, platform)
+      setRunOpen(button, out, true)
+      track('solution_download', baseProps({ source: 'click', kind: 'run', platform: platform }))
+    })
+  }
+
   function stripIntentParams (params) {
     params.delete('intent')
     params.delete('step')
@@ -1217,6 +1411,18 @@
       })
       return
     }
+    if (intent === 'run') {
+      if (isDraft) return
+      // Same replay guard as a download: a bookmarked or shared URL must not
+      // mint a link on its own.
+      var runButton = $('[data-sol-download-run-button]')
+      if (!fresh || !runButton) {
+        toast('You are signed in. Select Download and run to get the command.')
+        return
+      }
+      onRunClick(runButton)
+      return
+    }
     if (intent === 'download') {
       if (isDraft) return
       // The pending record is the replay guard: a bookmarked or shared URL with
@@ -1249,6 +1455,7 @@
     rate_limited: 'Too many downloads in a short time. Try again in a few minutes.',
     not_found: 'This download is not available for this version of the solution. Reload the page and try again.',
     file_too_large: 'That file is too large to download here.',
+    bundle_too_large: 'The complete example is too large to download here.',
   }
   var DOWNLOAD_FALLBACK = ' Every file you need is also shown in full on the steps,' +
     ' and each step lists its files under Files for this step.'
@@ -1659,6 +1866,9 @@
       var authOnly = !!$('[data-sol-download][data-requires-auth]', el)
       el.hidden = authOnly && !available
     })
+    // Like the gated download: only where signing in is possible, and not for
+    // a draft, which has nothing to run.
+    $$('[data-sol-download-run]').forEach(function (el) { el.hidden = !available || isDraft })
     disableDraftDownloads()
     // Signed in, progress syncs on its own, so Save is only there to retry
     // a sync that failed. Anonymous, it is the way to start syncing.
@@ -2214,6 +2424,9 @@
         }
         track('solution_download', baseProps({ source: 'click', kind: 'bundle' }))
       })
+    })
+    $$('[data-sol-download-run-button]').forEach(function (el) {
+      el.addEventListener('click', function () { onRunClick(el) })
     })
     decorateFileList()
     wireFileLinks()

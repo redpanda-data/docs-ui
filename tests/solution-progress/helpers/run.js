@@ -158,6 +158,14 @@ function buildPage (o) {
   // gate: false mirrors solution-code-download.hbs for a non-authenticated
   // download, which renders no gate.
   els.downloadPanel = el('section', { 'data-sol-download-panel': '' }, (els.download ? [els.download] : []).concat(o.gate === false ? [els.asset] : [els.asset, els.gate]))
+  // Download and run (opt in): solution-code-download.hbs renders it for an
+  // authenticated download only.
+  if (o.downloadRun) {
+    els.runButton = el('button', { type: 'button', 'data-sol-download-run-button': '' })
+    els.runOutput = el('div', { 'data-sol-download-run-output': '', role: 'status', hidden: '' })
+    els.run = el('div', { 'data-sol-download-run': '' }, [els.runButton, els.runOutput])
+    els.downloadPanel.appendChild(els.run)
+  }
   els.rail = el('details', { 'data-sol-rail': '', open: '' }, [els.progress, els.downloadPanel])
 
   const main = []
@@ -343,6 +351,7 @@ function run (options) {
       heap: o.heap === false ? undefined : { track: (name, props) => calls.heap.push(plain({ name, props })) },
       dataLayer: [],
       KAPA_QUIZ_INTEGRATION_ID: o.quizIntegration === false ? undefined : 'quiz-integration',
+      navigator: o.clipboard ? { clipboard: o.clipboard } : {},
       submitChatQuery: () => {},
       openChatWithQuery: (query, autoSubmit, opts) => calls.chatQueries.push(Object.assign({ query, autoSubmit }, opts && o.chatOpts ? { opts } : {})),
       openChatPanel: () => { calls.openPanel++ },
