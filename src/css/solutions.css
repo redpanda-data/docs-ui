@@ -1860,7 +1860,17 @@ html[data-theme="dark"] .sol-doc {
   content: none;
 }
 
+/* doc.css makes summary.title a block, which ignores the summary's gap and
+   this badge's margin-left: auto, so the line count ran into the file name.
+   As a flex row the count sits at the right edge, clear of the title. The
+   chevron (::after) is absolutely positioned, so the row does not move it. */
+.sol-doc details.sol-details > summary {
+  display: flex;
+  align-items: baseline;
+}
+
 .sol-doc .sol-details-lines {
+  flex: none;
   margin-left: auto;
   font-family: var(--body-font-family-mono, monospace);
   font-size: calc(12 / var(--rem-base) * 1rem);
