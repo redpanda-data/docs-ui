@@ -1,8 +1,8 @@
 = Limited Availability Test Page
 :page-limited-availability: true
-:description: This page tests the Limited Availability badge in the UI preview.
+:description: This page tests the Limited availability badge in the UI preview.
 
-This page demonstrates the new **Limited Availability** badge feature.
+This page demonstrates the new **Limited availability** badge feature.
 
 == Badge Locations
 

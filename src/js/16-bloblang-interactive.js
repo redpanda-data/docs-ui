@@ -621,7 +621,7 @@
 
     const button = document.createElement('button');
     button.className = 'try-bloblang-button';
-    button.textContent = 'Try It';
+    button.textContent = 'Try it';
     button.setAttribute('aria-label', 'Try this Bloblang mapping');
 
     button.addEventListener('click', () => {

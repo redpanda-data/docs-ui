@@ -3,7 +3,7 @@
 
 Test page for Bloblang syntax highlighting and interactive features.
 
-TIP: Hover over functions and methods to see documentation. Click "Try It" to execute mappings!
+TIP: Hover over functions and methods to see documentation. Click "Try it" to execute mappings!
 
 == Pure Bloblang Code Block
 

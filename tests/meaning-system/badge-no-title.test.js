@@ -43,7 +43,8 @@ test('the scan leaves data-tooltip badges and titles on other elements alone', (
 // "NEW", no "Only in BYOC". A page limited to one platform says so in the
 // label ("Cloud only"), not only in its tooltip. Static labels only; computed
 // ones are skipped.
-const LABELS = new Set(['Enterprise', 'Beta', 'Preview', 'Limited availability', 'Deprecated', 'End of life',
+// 'Beta feature' is the page-level badge, so a beta feature is not read as a beta release.
+const LABELS = new Set(['Enterprise', 'Beta', 'Beta feature', 'Preview', 'Limited availability', 'Deprecated', 'End of life',
   'End of life soon', 'New', 'Cloud', 'BYOC', 'Serverless', 'Dedicated', 'Self-Managed', 'Certified', 'Community',
   'Cloud only', 'BYOC only', 'Self-Managed only'])
 
