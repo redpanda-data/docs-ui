@@ -271,7 +271,8 @@ A `+{n}+` in a key stands for each number in the entry's `range`.
 
 When you add, rename, or remove an attribute read, update the manifest in the same change.
 `npm run test:ui-attributes` scans the layouts, partials, helpers, and `src/js`, and fails when the UI reads an attribute the manifest does not declare, when the manifest declares an attribute nothing reads, or when a `readBy` list is out of date.
-The `validate-build` workflow runs this test on every pull request.
+The scanner finds the read patterns listed at the top of `tests/ui-attributes/scan-attribute-reads.js`, such as `page.attributes.X` and `{{#with page.attributes}}` blocks. A read written another way, such as through `doc.attributes`, is not found, so use one of those patterns or add the new one to the scanner.
+The `validate-build` workflow runs this test on every pull request to `main` and on every push to `main`.
 
 The build copies the manifest into the root of the UI bundle, and each release attaches it as a separate asset at https://github.com/redpanda-data/docs-ui/releases/latest/download/ui-attributes.json.
 Antora does not read it.
