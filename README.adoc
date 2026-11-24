@@ -262,6 +262,22 @@ The exceptions include the layout, role, title, contents, and, in the case of ho
 
 For information about what goes in the UI model, refer the https://docs.antora.org/antora-ui-default/templates/[Handlebars templates page] in the Antora documentation.
 
+=== Page Attributes the UI Reads
+
+`src/ui-attributes.json` lists every AsciiDoc attribute that the templates, helpers, and scripts read.
+Each entry gives the attribute's type, its allowed values or format, where it is set (page, component, or site), who sets it (a writer, an extension, or Antora), any cautions, and the files that read it in `readBy`.
+Keys are the names a writer types: `page-*` attributes in a page header, and component attributes in `antora.yml`.
+A `+{n}+` in a key stands for each number in the entry's `range`.
+
+When you add, rename, or remove an attribute read, update the manifest in the same change.
+`npm run test:ui-attributes` scans the layouts, partials, helpers, and `src/js`, and fails when the UI reads an attribute the manifest does not declare, when the manifest declares an attribute nothing reads, or when a `readBy` list is out of date.
+The scanner finds the read patterns listed at the top of `tests/ui-attributes/scan-attribute-reads.js`, such as `page.attributes.X` and `{{#with page.attributes}}` blocks. A read written another way, such as through `doc.attributes`, is not found, so use one of those patterns or add the new one to the scanner.
+The `validate-build` workflow runs this test on every pull request to `main` and on every push to `main`.
+
+The build copies the manifest into the root of the UI bundle, and each release attaches it as a separate asset at https://github.com/redpanda-data/docs-ui/releases/latest/download/ui-attributes.json.
+Antora does not read it.
+It is for editor tooling, such as the docs language server, that checks page attributes as a writer types them.
+
 == Integrations
 
 === Algolia Search
@@ -283,6 +299,7 @@ This project provides a GitHub Action that fully automates the release.
 
 Whenever you push a new tag to this repository, the GitHub Action will generate a new release and bundle the UI before publishing the bundle to the releases section of the repository on GitHub.
 The bundle can then be downloaded using a unique URL, accessible from the release page.
+Each release also attaches `ui-attributes.json`, the manifest of the attributes the UI reads. See <<page-attributes-the-ui-reads>>.
 You can see a list of all past releases on the {url-ui}/releases[releases page].
 
 == Troubleshooting
