@@ -176,28 +176,8 @@ html[data-theme=dark] .ch3-hero::after {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #4ade80;
-  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18);
-}
-
-.sm-ver-pill-dot[data-status="supported"] {
-  background: #4ade80;
-  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18);
-}
-
-.sm-ver-pill-dot[data-status="current"] {
-  background: #34d399;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.22);
-}
-
-.sm-ver-pill-dot[data-status="eol"] {
-  background: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
-}
-
-.sm-ver-pill-dot[data-status="beta"] {
-  background: #c084fc;
-  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
+  background: var(--meaning-neutral-fg);
+  box-shadow: 0 0 0 3px var(--meaning-neutral-bg);
 }
 
 .sm-ver-pill-label {
@@ -219,46 +199,6 @@ html[data-theme=dark] .ch3-hero::after {
   width: 1px;
   height: 14px;
   background: rgba(255, 255, 255, 0.16);
-}
-
-.sm-ver-pill-status {
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.sm-ver-pill-status[data-status="current"] {
-  color: #6ee7b7;
-}
-
-.sm-ver-pill-status[data-status="supported"] {
-  color: #a7f3d0;
-}
-
-.sm-ver-pill-status[data-status="eol"] {
-  color: #fcd34d;
-}
-
-.sm-ver-pill-status[data-status="beta"] {
-  color: #c4b5fd;
-}
-
-/* Light mode: darker colors for visibility on light backgrounds */
-html:not([data-theme=dark]) .sm-ver-pill-status[data-status="current"] {
-  color: #059669;
-}
-
-html:not([data-theme=dark]) .sm-ver-pill-status[data-status="supported"] {
-  color: #059669;
-}
-
-html:not([data-theme=dark]) .sm-ver-pill-status[data-status="eol"] {
-  color: #d97706;
-}
-
-html:not([data-theme=dark]) .sm-ver-pill-status[data-status="beta"] {
-  color: #7c3aed;
 }
 
 .sm-ver-pill-caret {
@@ -447,58 +387,6 @@ html:not([data-theme=dark]) .sm-ver-pill-caret {
   color: var(--component-color, #0f8b66);
 }
 
-.sm-ver-row-note {
-  font-size: calc(10 / var(--rem-base) * 1rem);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--component-color, #0f8b66);
-  opacity: 0.85;
-}
-
-.sm-ver-row-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 4px 8px;
-  border-radius: 5px;
-}
-
-.sm-ver-row-status-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.sm-ver-row-status[data-status="current"] {
-  color: #047857;
-  background: rgba(5, 150, 105, 0.1);
-}
-
-.sm-ver-row-status[data-status="supported"] {
-  color: #047857;
-  background: rgba(5, 150, 105, 0.08);
-}
-
-.sm-ver-row-status[data-status="eol"] {
-  color: #92400e;
-  background: rgba(245, 158, 11, 0.1);
-}
-
-.sm-ver-row-status[data-status="beta"] {
-  color: #5b21b6;
-  background: #ede9fe;
-}
-
-.sm-ver-row[data-status="beta"] .sm-ver-row-note {
-  color: #7c3aed;
-}
-
 .sm-ver-row-check {
   display: inline-flex;
   align-items: center;
@@ -609,30 +497,6 @@ html[data-theme="dark"] .sm-ver-row-v {
   color: #fff;
 }
 
-html[data-theme="dark"] .sm-ver-row-note {
-  color: #6ee7b7;
-}
-
-html[data-theme="dark"] .sm-ver-row-status[data-status="current"],
-html[data-theme="dark"] .sm-ver-row-status[data-status="supported"] {
-  color: #6ee7b7;
-  background: rgba(52, 211, 153, 0.15);
-}
-
-html[data-theme="dark"] .sm-ver-row-status[data-status="eol"] {
-  color: #fcd34d;
-  background: rgba(245, 158, 11, 0.15);
-}
-
-html[data-theme="dark"] .sm-ver-row-status[data-status="beta"] {
-  color: #c4b5fd;
-  background: rgba(139, 92, 246, 0.15);
-}
-
-html[data-theme="dark"] .sm-ver-row[data-status="beta"] .sm-ver-row-note {
-  color: #c4b5fd;
-}
-
 html[data-theme="dark"] .sm-ver-row-date-l {
   color: #8a9bb0;
 }
@@ -728,11 +592,6 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
     display: none;
   }
 
-  .sm-ver-row-status {
-    font-size: calc(10 / var(--rem-base) * 1rem);
-    padding: 3px 6px;
-  }
-
   .ch3-hero .sm-ver {
     margin-left: 0;
   }
@@ -755,10 +614,6 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
     display: none;
   }
 
-  .sm-ver-pill-status {
-    font-size: calc(10 / var(--rem-base) * 1rem);
-  }
-
   .sm-ver-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -768,20 +623,6 @@ html[data-theme="dark"] .sm-ver-foot-link:hover {
     padding: 5px 6px;
     font-size: calc(12 / var(--rem-base) * 1rem);
   }
-}
-
-.ch3-status-chip {
-  font-size: calc(13 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-
-.ch3-status-chip.beta {
-  background: rgba(99, 102, 241, 0.2);
-  color: #a4bcfd;
 }
 
 /* Use .ch3-hero prefix for specificity over .doc h1 */
@@ -1205,20 +1046,6 @@ html:not([data-theme=dark]) .ch3-hero-glow {
   color: var(--color-jet, #181818);
   margin: 0;
   letter-spacing: -0.01em;
-}
-
-.ch3-feature-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  font-size: calc(12 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #fff;
-  border-radius: 4px;
-  white-space: nowrap;
 }
 
 .ch3-feature-desc {
@@ -1977,35 +1804,6 @@ html[data-theme="dark"] .ch3-path-or {
   align-items: center;
   margin-left: 12px;
   vertical-align: middle;
-}
-
-.ch3-component-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: calc(11 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-.ch3-component-badge--new {
-  background: linear-gradient(135deg, #1f5bd6 0%, #1845a8 100%);
-  color: #fff;
-}
-
-.ch3-component-badge--byoc {
-  background: rgba(31, 91, 214, 0.12);
-  color: #1f5bd6;
-  border: 1px solid rgba(31, 91, 214, 0.3);
-}
-
-html[data-theme="dark"] .ch3-component-badge--byoc {
-  background: rgba(31, 91, 214, 0.2);
-  color: #68a3ff;
-  border: 1px solid rgba(31, 91, 214, 0.4);
 }
 
 .ch3-component-features {

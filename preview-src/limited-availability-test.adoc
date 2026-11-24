@@ -1,30 +1,29 @@
 = Limited Availability Test Page
 :page-limited-availability: true
-:description: This page tests the Limited Availability badge in the UI preview.
+:description: This page tests the Limited availability badge in the UI preview.
 
-This page demonstrates the new **Limited Availability** badge feature.
+This page demonstrates the new **Limited availability** badge feature.
 
-== Orange Badge Locations
+== Badge Locations
 
-The orange "Limited Availability" badge should appear in three places:
+The violet "Limited availability" badge should appear in two places:
 
-1. **Below this title** - In the main content area
-2. **In the TOC** (right side) - When you scroll, it appears in the sticky navigation
-3. **In the left nav** - An additional (Limited) will be shown next to the page title in the left navigation
+1. **In the sticky header** - Above the title
+2. **In the left nav** - A small "Limited availability" badge is shown next to the page title in the left navigation
 
 == Test the Tooltip
 
 Hover over any of the badges to see the tooltip text:
 
-_"This feature has limited availability. Contact Redpanda Support for access."_
+_"Limited availability: open to selected customers."_
 
 == Compare with Beta
 
 This is different from the beta badge which:
 
-* Uses blue color
-* Shows as `(beta)` in the left nav
-* Has different tooltip text about testing and production
+* Is amber, with a flask icon
+* Shows as a small "Beta" badge in the left nav
+* Has its own tooltip text: "Beta: available to try, and may change before general availability."
 
 == Page Content
 
@@ -36,7 +35,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. The badge should remain
 
 === Subsection 2
 
-More content to enable scrolling. Check that the orange badge appears in the TOC when you scroll past the main title.
+More content to enable scrolling. Check that the violet badge appears in the TOC when you scroll past the main title.
 
 === Subsection 3
 
@@ -53,8 +52,8 @@ Use `:page-limited-availability: true` for features that:
 
 == Technical Details
 
-**Badge Color**: Orange (`--color-primitives-global-orange-orange-600`)
+**Badge Color**: Violet (`--meaning-limited-fg`)
 
-**Badge Style**: Pill-shaped with white text
+**Badge Style**: the violet `rp-badge--limited` pill with a clock icon
 
 **Attribute**: `:page-limited-availability: true`

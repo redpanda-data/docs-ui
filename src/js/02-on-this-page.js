@@ -82,15 +82,27 @@
    *
    * @param {string} fragment - The '#id' to activate. Ignored if no entry has it.
    */
+  // The active TOC link carries aria-current="location" as well as is-active,
+  // so the state is not only a color
+  function markActive (link, on) {
+    if (on) {
+      link.classList.add('is-active')
+      link.setAttribute('aria-current', 'location')
+    } else {
+      link.classList.remove('is-active')
+      if (link.removeAttribute) link.removeAttribute('aria-current')
+    }
+  }
+
   function setActive (fragment) {
     if (!links[fragment]) return
     if (lastActiveFragment && lastActiveFragment !== fragment) {
       var previous = Array.isArray(lastActiveFragment) ? lastActiveFragment : [lastActiveFragment]
       previous.forEach(function (f) {
-        if (links[f]) links[f].classList.remove('is-active')
+        if (links[f]) markActive(links[f], false)
       })
     }
-    links[fragment].classList.add('is-active')
+    markActive(links[fragment], true)
     revealGroup(links[fragment])
     lastActiveFragment = fragment
   }
@@ -215,11 +227,11 @@
         if (idx === lastIdx || heading.getBoundingClientRect().top + getNumericStyleVal(heading, 'paddingTop') > ceil) {
           activeFragments.push(fragment)
           if (lastActiveFragment.indexOf(fragment) < 0) {
-            links[fragment].classList.add('is-active')
+            markActive(links[fragment], true)
             revealGroup(links[fragment])
           }
         } else if (~lastActiveFragment.indexOf(fragment)) {
-          links[lastActiveFragment.shift()].classList.remove('is-active')
+          markActive(links[lastActiveFragment.shift()], false)
         }
       })
       scrollableContainer.scrollTop = scrollableContainer.scrollHeight - scrollableContainer.offsetHeight
@@ -228,7 +240,7 @@
     }
     if (Array.isArray(lastActiveFragment)) {
       lastActiveFragment.forEach(function (fragment) {
-        links[fragment].classList.remove('is-active')
+        markActive(links[fragment], false)
       })
       lastActiveFragment = undefined
     }
@@ -239,9 +251,9 @@
     })
     if (activeFragment) {
       if (activeFragment === lastActiveFragment) return
-      if (lastActiveFragment) links[lastActiveFragment].classList.remove('is-active')
+      if (lastActiveFragment) markActive(links[lastActiveFragment], false)
       var activeLink = links[activeFragment]
-      activeLink.classList.add('is-active')
+      markActive(activeLink, true)
       revealGroup(activeLink)
       if (scrollableContainer.scrollHeight > scrollableContainer.offsetHeight) {
         // Scroll to keep active item visible, centered if possible
@@ -253,7 +265,7 @@
       }
       lastActiveFragment = activeFragment
     } else if (lastActiveFragment) {
-      links[lastActiveFragment].classList.remove('is-active')
+      markActive(links[lastActiveFragment], false)
       lastActiveFragment = undefined
     }
   }

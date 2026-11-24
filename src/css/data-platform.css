@@ -336,23 +336,6 @@ button.dp-hero-ask-submit svg,
   color: #fff;
 }
 
-/* NEW badge for BYOC SQL */
-.dp-product-badge--new {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  font-size: calc(10 / var(--rem-base) * 1rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #fff;
-  border-radius: 4px;
-  white-space: nowrap;
-  margin-left: 6px;
-  vertical-align: middle;
-}
-
 /* ---- Sections ---- */
 .dp-section {
   padding: 32px 56px 0; /* Tightened from 56px to 32px for closer spacing */
@@ -1200,35 +1183,6 @@ html[data-theme="dark"] .dp-help-btn-secondary:hover {
   align-items: center;
   margin-left: 12px;
   vertical-align: middle;
-}
-
-.dp-component-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: calc(11 / var(--rem-base) * 1rem);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-.dp-component-badge--new {
-  background: linear-gradient(135deg, #1f5bd6 0%, #1845a8 100%);
-  color: #fff;
-}
-
-.dp-component-badge--byoc {
-  background: rgba(31, 91, 214, 0.12);
-  color: #1f5bd6;
-  border: 1px solid rgba(31, 91, 214, 0.3);
-}
-
-html[data-theme="dark"] .dp-component-badge--byoc {
-  background: rgba(31, 91, 214, 0.2);
-  color: #68a3ff;
-  border: 1px solid rgba(31, 91, 214, 0.4);
 }
 
 /* Cloud landing: deployment options */
