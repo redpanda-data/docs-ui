@@ -44,13 +44,6 @@ code.has-macro-tooltip[role="button"]:focus-visible {
   border: none;
 }
 
-/* beta, experimental */
-.property-doc-tooltip .prop-badge-status {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-}
-
 html[data-theme="dark"] .macro-doc-tooltip .macro-tooltip-kind,
 html[data-theme="dark"] .macro-doc-tooltip .macro-tooltip-context {
   color: #e0e0e0;
@@ -59,10 +52,4 @@ html[data-theme="dark"] .macro-doc-tooltip .macro-tooltip-context {
 html[data-theme="dark"] .macro-doc-tooltip .macro-tooltip-context code {
   background: rgba(255, 255, 255, 0.1);
   color: #e0e0e0;
-}
-
-html[data-theme="dark"] .property-doc-tooltip .prop-badge-status {
-  background: #453a1f;
-  color: #ffd54f;
-  border-color: #5a4a28;
 }

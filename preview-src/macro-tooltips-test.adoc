@@ -35,15 +35,15 @@ With `category=String Manipulation`: +++<a href="../../../connect/guides/bloblan
 
 The input +++<a href="../../../connect/components/inputs/kafka_franz/" class="xref page"><code class="connect-component" data-connect-component="inputs/kafka_franz">kafka_franz</code> input</a>+++ reads from Kafka.
 
-* You should see: `kafka_franz` input, a DEPRECATED badge, and the summary "A Kafka input using the Franz Kafka client library." with the link macro rendered as its text.
+* You should see: `kafka_franz` input, a Deprecated badge, and the summary "A Kafka input using the Franz Kafka client library." with the link macro rendered as its text.
 
 The processor +++<a href="../../../connect/components/processors/retry/" class="xref page"><code class="connect-component" data-connect-component="processors/retry">retry</code> processor</a>+++ retries child processors.
 
-* You should see: `retry` processor, a BETA badge, and "Attempts to execute a series of child processors until success."
+* You should see: `retry` processor, a Beta badge, and "Attempts to execute a series of child processors until success."
 
 The input +++<a href="../../../connect/components/inputs/twitter_search/" class="xref page"><code class="connect-component" data-connect-component="inputs/twitter_search">twitter_search</code> input</a>+++ searches tweets.
 
-* You should see: `twitter_search` input, an EXPERIMENTAL badge, and "Consumes tweets matching a given search using the Twitter recent search V2 API."
+* You should see: `twitter_search` input, an Experimental badge, and "Consumes tweets matching a given search using the Twitter recent search V2 API."
 
 === Fields
 

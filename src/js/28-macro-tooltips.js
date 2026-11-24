@@ -241,12 +241,19 @@
     return '<a href="' + escapeAttr(href) + '" class="prop-tooltip-link">View full documentation &rarr;</a>'
   }
 
-  function badge (text, kind) {
-    return '<span class="prop-badge prop-badge-' + kind + '">' + escapeHtml(text) + '</span>'
+  // The site-wide meaning badges (.rp-badge in meaning.css), as the property
+  // tooltips use, so a status looks the same here as everywhere else.
+  function badge (meaning, label) {
+    return '<span class="rp-badge rp-badge--sm rp-badge--' + meaning + '">' + escapeHtml(label) + '</span>'
   }
 
-  // Shown only for statuses a reader must notice; stable is the norm.
-  var CONNECT_STATUS_BADGES = { beta: 'status', experimental: 'status', deprecated: 'deprecated' }
+  // Shown only for statuses a reader must notice; stable is the norm. Each
+  // status maps to a meaning badge and its label.
+  var CONNECT_STATUS_BADGES = {
+    beta: ['beta', 'Beta'],
+    experimental: ['preview', 'Experimental'],
+    deprecated: ['deprecated', 'Deprecated'],
+  }
 
   function typeWords (type) {
     return String(type || '').replace(/_/g, ' ')
@@ -260,7 +267,7 @@
         '</div>'
     )
     var kind = CONNECT_STATUS_BADGES[component.status]
-    if (kind) parts.push('<div class="prop-tooltip-badges">' + badge(component.status, kind) + '</div>')
+    if (kind) parts.push('<div class="prop-tooltip-badges">' + badge(kind[0], kind[1]) + '</div>')
     if (component.summary) {
       parts.push('<div class="prop-tooltip-description">' + formatDescription(firstParagraph(component.summary)) + '</div>')
     }
@@ -283,7 +290,7 @@
         (type ? ': <code>' + escapeHtml(type) + '</code>' : '') +
         '</div>'
     )
-    if (field.is_deprecated) parts.push('<div class="prop-tooltip-badges">' + badge('deprecated', 'deprecated') + '</div>')
+    if (field.is_deprecated) parts.push('<div class="prop-tooltip-badges">' + badge('deprecated', 'Deprecated') + '</div>')
     var sentence = firstSentence(field.description)
     if (sentence) parts.push('<div class="prop-tooltip-description">' + formatDescription(sentence) + '</div>')
     if (Object.prototype.hasOwnProperty.call(field, 'default')) {

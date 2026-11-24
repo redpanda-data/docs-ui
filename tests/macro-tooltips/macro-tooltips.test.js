@@ -154,8 +154,13 @@ test('Connect: component name, type, status and summary; fields with path, type,
   assert.equal(instances.length, 5)
 
   const franz = textOf(byText(instances, 'kafka_franz input').html)
-  assert.equal(franz, 'kafka_franz input deprecated A Kafka input using the Franz Kafka client library. View full documentation ->')
-  assert.match(textOf(byText(instances, 'retry processor').html), /^retry processor beta Attempts to execute a series of child processors until success\./)
+  assert.equal(franz, 'kafka_franz input Deprecated A Kafka input using the Franz Kafka client library. View full documentation ->')
+  assert.match(textOf(byText(instances, 'retry processor').html), /^retry processor Beta Attempts to execute a series of child processors until success\./)
+  // textOf() drops the tags, so check the badge markup itself: the status
+  // must be one of the site-wide meaning badges, which meaning.css styles.
+  assert.match(byText(instances, 'kafka_franz input').html, /<span class="rp-badge rp-badge--sm rp-badge--deprecated">Deprecated<\/span>/)
+  assert.match(byText(instances, 'retry processor').html, /<span class="rp-badge rp-badge--sm rp-badge--beta">Beta<\/span>/)
+  for (const i of instances) assert.doesNotMatch(i.html, /prop-badge/, 'no class without a style rule')
 
   const group = textOf(byText(instances, 'consumer_group').html)
   assert.equal(group, 'consumer_group : string An optional consumer group. Field of the kafka_franz input View full documentation ->',
