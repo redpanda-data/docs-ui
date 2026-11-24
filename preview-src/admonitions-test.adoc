@@ -1,0 +1,121 @@
+= Admonitions Test
+:page-layout: default
+:description: All five admonition types, for checking colors, icons, and label contrast in light and dark.
+
+Each admonition has one hue, used for its label and its icon: NOTE indigo with an info icon, TIP green with a check, IMPORTANT violet with an exclamation mark in a square, CAUTION amber with a triangle, and WARNING red with an octagon. Switch the theme to check dark mode.
+
+NOTE: A note adds information the reader might want, such as a default value or where a setting lives. It can include `inline code` and a xref:index.adoc[link].
+
+TIP: A tip suggests a better or faster way to do something.
+
+IMPORTANT: Important information the reader must not skip, such as a required step.
+
+CAUTION: Caution warns of a possible problem, such as a slow operation or a setting that is hard to undo.
+
+WARNING: A warning flags a risk of data loss, downtime, or a security problem.
+
+[NOTE]
+.Note with a title
+====
+An admonition with a title and more than one paragraph.
+
+* A list item
+* Another list item
+====
+
+[WARNING]
+====
+A warning with a code block:
+
+[,bash]
+----
+rpk cluster config set enable_rack_awareness true
+----
+====
+
+== With font icons
+
+* [x] A done item
+* [ ] A to-do item
+
+Select menu:File[Save > As].
+
+== Without font icons
+
+The production playbook turns font icons off, so Asciidoctor writes the label as text in `<td class="icon"><div class="title">Note</div></td>`, the checklist marker as text, and the menu caret as text. Local playbooks can still use `icons=font`, so both markups must look the same. The blocks below are the exact no-icons output.
+
+++++
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The same note without font icons. The label is real text.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+The same tip without font icons. The label is real text.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+The same important without font icons. The label is real text.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+The same caution without font icons. The label is real text.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+The same warning without font icons. The label is real text.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist checklist">
+<ul class="checklist">
+<li>
+<p>&#10003; A done item without font icons</p>
+</li>
+<li>
+<p>&#10063; A to-do item without font icons</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><span class="menuseq"><b class="menu">File</b>&#160;<b class="caret">&#8250;</b> <b class="submenu">Save</b>&#160;<b class="caret">&#8250;</b> <b class="menuitem">As</b></span> without font icons</p>
+</div>
+++++

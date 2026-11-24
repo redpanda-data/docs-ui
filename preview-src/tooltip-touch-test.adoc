@@ -36,8 +36,8 @@ The enterprise macro wraps a link to the licensing or feature page, so the toolt
 Elements that carry a tooltip but no link get no footer link, and a tap on them is not intercepted (there is nothing to intercept):
 
 ++++
-<p><span class="status-badge status-badge--beta" data-tippy-content="This is a beta feature. Beta features are available for testing and feedback.">beta</span>
-<span class="status-badge status-badge--preview" data-tooltip="This feature is in preview and may change.">Preview</span></p>
+<p><span class="rp-badge rp-badge--beta" data-tooltip="This is a beta feature. Beta features are available for testing and feedback.">Beta</span>
+<span class="rp-badge rp-badge--preview" data-tooltip="This feature is in preview and may change.">Preview</span></p>
 ++++
 
 == Anchors for the glossary links above

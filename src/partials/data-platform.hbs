@@ -62,7 +62,7 @@
   </header>
 
   {{!-- Cloud landing: component cards --}}
-  {{#if page.attributes.page-cloud-landing}}
+  {{#if page.attributes.cloud-landing}}
   <section class="dp-section dp-component-cards-section">
     <div class="dp-section-head">
       <h2 class="dp-section-title">{{#if page.attributes.component-cards-title}}{{page.attributes.component-cards-title}}{{else}}Choose your component{{/if}}</h2>
@@ -80,10 +80,10 @@
               {{#if (or page.attributes.component-1-is-new (ne page.attributes.component-1-deployments 'all'))}}
               <span class="dp-component-badges">
                 {{#if page.attributes.component-1-is-new}}
-                <span class="dp-component-badge dp-component-badge--new">NEW</span>
+                <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
                 {{/if}}
                 {{#if (eq page.attributes.component-1-deployments 'byoc')}}
-                <span class="dp-component-badge dp-component-badge--byoc">Cloud BYOC</span>
+                <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available on Redpanda Cloud BYOC clusters.">BYOC</span>
                 {{/if}}
               </span>
               {{/if}}
@@ -118,10 +118,10 @@
               {{#if (or page.attributes.component-2-is-new (ne page.attributes.component-2-deployments 'all'))}}
               <span class="dp-component-badges">
                 {{#if page.attributes.component-2-is-new}}
-                <span class="dp-component-badge dp-component-badge--new">NEW</span>
+                <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
                 {{/if}}
                 {{#if (eq page.attributes.component-2-deployments 'byoc')}}
-                <span class="dp-component-badge dp-component-badge--byoc">Cloud BYOC</span>
+                <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available on Redpanda Cloud BYOC clusters.">BYOC</span>
                 {{/if}}
               </span>
               {{/if}}
@@ -156,10 +156,10 @@
               {{#if (or page.attributes.component-3-is-new (ne page.attributes.component-3-deployments 'all'))}}
               <span class="dp-component-badges">
                 {{#if page.attributes.component-3-is-new}}
-                <span class="dp-component-badge dp-component-badge--new">NEW</span>
+                <span class="rp-badge rp-badge--sm rp-badge--new" data-tooltip="New in this release.">New</span>
                 {{/if}}
                 {{#if (eq page.attributes.component-3-deployments 'byoc')}}
-                <span class="dp-component-badge dp-component-badge--byoc">Cloud BYOC</span>
+                <span class="rp-badge rp-badge--sm rp-badge--cloud" data-tooltip="Available on Redpanda Cloud BYOC clusters.">BYOC</span>
                 {{/if}}
               </span>
               {{/if}}
@@ -567,16 +567,7 @@
   </section>
   {{/if}}
 
-  <div class="dp-help">
-    <div>
-      <h3>Need help choosing?</h3>
-      <p>Our team can walk you through the options and help you get started.</p>
-    </div>
-    <div class="dp-help-actions">
-      <a href="https://redpanda.com/contact" class="dp-help-btn">Talk to sales</a>
-      <a href="https://redpanda.com/slack" class="dp-help-btn dp-help-btn-secondary">Join Slack</a>
-    </div>
-  </div>
+  {{> help-cta prefix='dp'}}
 </div>
 
 <script>

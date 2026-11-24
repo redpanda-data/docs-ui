@@ -59,6 +59,8 @@ module.exports = (src, dest, preview) => () => {
 
   return merge(
     vfs.src('ui.yml', { ...opts, allowEmpty: true }),
+    // Machine-readable list of the page attributes the templates read, for the docs language server.
+    vfs.src('ui-attributes.json', opts),
     vfs
       .src('js/+([0-9])-*.js', { ...opts, read: false, sourcemaps })
       .pipe(bundle(opts))

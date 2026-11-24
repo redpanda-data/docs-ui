@@ -1,12 +1,12 @@
 {{!-- Skip pagination for home page and when explicitly disabled --}}
 {{#unless (or (eq page.attributes.role 'home') (eq page.attributes.pagination undefined))}}
 {{#if (or page.previous page.next)}}
-<nav class="pagination">
+<nav class="pagination" aria-label="Previous and next page">
   {{#with page.previous}}
-  <span class="prev"><a href="{{{relativize ./url}}}">{{{./content}}}</a></span>
+  <span class="prev"><span class="pagination-label">Prev</span><a href="{{{relativize ./url}}}">{{{./content}}}</a></span>
   {{/with}}
   {{#with page.next}}
-  <span class="next"><a href="{{{relativize ./url}}}">{{{./content}}}</a></span>
+  <span class="next"><span class="pagination-label">Next</span><a href="{{{relativize ./url}}}">{{{./content}}}</a></span>
   {{/with}}
 </nav>
 {{/if}}

@@ -49,6 +49,16 @@
       interactive: true,
       allowHTML: true,
       delay: [200, 0], // Instant show/hide for faster tooltips
+      // aria-describedby links the element to its tooltip while it is shown,
+      // including the interactive ones, where tippy's 'auto' would leave it
+      // off. The element's own text carries the meaning; the tooltip adds
+      // detail, so a description (not a label) is the right relationship.
+      // expanded: false because these tooltips open nothing a reader
+      // operates: tippy's 'auto' put aria-expanded on every interactive
+      // reference, which is not allowed on a generic <span> (axe flags it as
+      // critical) and made screen readers call every badge and copy button
+      // "expandable".
+      aria: { content: 'describedby', expanded: false },
       // Append to body to prevent overflow/clipping issues
       appendTo: () => document.body,
       // Only one tooltip open at a time, across every tooltip on the page.
@@ -85,6 +95,29 @@
     function linkedAnchor (el) {
       if (el.tagName === 'A' && el.getAttribute('href')) return el
       return el.querySelector('a[href]')
+    }
+
+    // Keyboard readers reach a tooltip through focus, so an element that
+    // cannot take focus (a badge is a plain <span>) gets tabindex="0". One
+    // that wraps a link, or sits inside a link or button (a badge after a nav
+    // title), is left alone: a nested tab stop would only repeat the link's,
+    // and the link gets a focus tooltip of its own instead (describeControl).
+    const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]'
+    // A long listing that repeats the same badges on every row (the property
+    // catalog has about 900) opts out with data-tooltip-nofocus on a container:
+    // a tab stop per badge would bury the controls that do something. The
+    // listing carries the detail as text for assistive technology instead,
+    // and the tooltip still opens on hover and tap.
+    function makeFocusable (el) {
+      if (el.closest && el.closest('[data-tooltip-nofocus]')) return
+      if (el.matches(FOCUSABLE) || linkedAnchor(el)) return
+      if (parentControl(el)) return
+      el.setAttribute('tabindex', '0')
+    }
+
+    // The link or button an element sits inside, if any.
+    function parentControl (el) {
+      return el.parentElement ? el.parentElement.closest('a[href], button') : null
     }
 
     // Tooltip content as a DOM node: the text or HTML the element carries,
@@ -128,6 +161,12 @@
       })
     }
 
+    // Escape dismisses an open tooltip without moving focus (WCAG 1.4.13).
+    // tippy has no Escape handling of its own.
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' || e.key === 'Esc') tippy.hideAll({ duration: 0 })
+    })
+
     // Initialize tippy for elements with built-in data-tippy-content
     // ignoreAttributes: tippy otherwise reads data-tippy-content itself and
     // lets it override the content passed here, which would drop the footer
@@ -139,23 +178,69 @@
       tippy(el, { ...tooltipConfig, ignoreAttributes: true, content: buildContent(el, raw, true) })
     })
 
-    // Initialize tippy for custom data-tooltip elements
+    // Initialize tippy for custom data-tooltip elements. This is the one path
+    // for meaning badges and notices (.rp-badge, .rp-notice): macros and
+    // templates emit data-tooltip, never title or their own tippy() call.
     // allowHTML: false on the data-tooltip paths too. These carry the same
     // registry-authored strings as the promoted title above -- badge tooltips and
     // enterprise tooltips both land here -- and the DOM decodes the escaping the
     // macro applied, so with allowHTML: true tippy re-parsed the result as
     // markup. Tooltip text needs no markup on any of these paths.
-    document.querySelectorAll('[data-tooltip]').forEach((el) => {
-      interceptTap(el)
-      tippy(el, {
-        ...tooltipConfig,
-        allowHTML: false,
-        content: buildContent(el, el.getAttribute('data-tooltip'), false),
+    function activateTooltips (root) {
+      const controls = new Map()
+      root.querySelectorAll('[data-tooltip]').forEach((el) => {
+        if (!el.getAttribute('data-tooltip') || el._tippy) return
+        makeFocusable(el)
+        interceptTap(el)
+        tippy(el, {
+          ...tooltipConfig,
+          allowHTML: false,
+          content: buildContent(el, el.getAttribute('data-tooltip'), false),
+        })
+        if (el.closest && el.closest('[data-tooltip-nofocus]')) return
+        const control = parentControl(el)
+        if (control) controls.set(control, (controls.get(control) || []).concat(el))
       })
+      controls.forEach(describeControl)
+    }
+
+    // A badge inside a link or button has no tab stop, and focus on the
+    // control never reaches the badge's own tooltip: tippy listens for focus,
+    // which does not bubble. So the control gets one tooltip of its own. It
+    // opens on keyboard focus only, sits at the first badge, and carries the
+    // text of every badge in the control, and tippy puts aria-describedby on
+    // the control while it is open. Hover stays with each badge, so pointing
+    // at the rest of a card or nav link opens nothing.
+    function describeControl (badges, control) {
+      if (control._tippy) return
+      const box = document.createElement('div')
+      badges.forEach((badge) => box.appendChild(buildContent(badge, badge.getAttribute('data-tooltip'), false)))
+      tippy(control, {
+        ...tooltipConfig,
+        trigger: 'focus',
+        allowHTML: false,
+        content: box,
+        getReferenceClientRect: () => badges[0].getBoundingClientRect(),
+        onShow (instance) {
+          // A click focuses the control too. Only keyboard focus opens this.
+          if (!control.matches(':focus-visible')) return false
+          tippy.hideAll({ exclude: instance })
+        },
+      })
+    }
+    activateTooltips(document)
+
+    // Collapsed nav branches and buckets keep their items in an inert
+    // <template> until first expand (01-nav.js, 23-nav-bucket.js), so their
+    // badges are not in the document for the pass above. Both announce the
+    // new subtree with nav:hydrated.
+    document.addEventListener('nav:hydrated', function (e) {
+      activateTooltips(e.target)
     })
 
     // Initialize tippy for enterprise feature terms (enterprise inline macro)
     document.querySelectorAll('[data-enterprise-tooltip]').forEach((el) => {
+      makeFocusable(el)
       interceptTap(el)
       tippy(el, {
         ...tooltipConfig,
@@ -174,6 +259,7 @@
       const titleContent = el.getAttribute('title')
       if (!titleContent) return
       el.removeAttribute('title')
+      makeFocusable(el)
       // allowHTML: false, overriding the shared config. The browser renders a
       // title attribute as plain text, so promoting one to a tippy that parses
       // HTML would turn inert content into markup -- a feature name or registry

@@ -411,23 +411,31 @@
         '</code></div>'
     )
 
-    // Badges row
+    // Badges row: the site-wide meaning badges (.rp-badge in meaning.css),
+    // so Enterprise and Deprecated look the same here as everywhere else.
+    // Scope and restart have no meaning of their own, so they are neutral.
     var badges = []
+    var badge = function (meaning, label) {
+      return '<span class="rp-badge rp-badge--sm rp-badge--' + meaning + '">' + escapeHtml(label) + '</span>'
+    }
     if (prop.configScope) {
-      badges.push('<span class="prop-badge prop-badge-scope">' + escapeHtml(prop.configScope) + '</span>')
+      var scope = String(prop.configScope)
+      badges.push(badge('neutral', scope.charAt(0).toUpperCase() + scope.slice(1)))
     }
     if (prop.needsRestart) {
-      badges.push('<span class="prop-badge prop-badge-restart">restart required</span>')
+      badges.push(badge('neutral', 'Restart required'))
     }
     if (prop.isEnterprise) {
-      badges.push('<span class="prop-badge prop-badge-enterprise">enterprise</span>')
+      badges.push(badge('enterprise', 'Enterprise'))
     }
     if (prop.isDeprecated) {
-      badges.push('<span class="prop-badge prop-badge-deprecated">deprecated</span>')
+      badges.push(badge('deprecated', 'Deprecated'))
     }
 
     if (badges.length > 0) {
-      parts.push('<div class="prop-tooltip-badges">' + badges.join(' ') + '</div>')
+      // data-in-tooltip: these badges are inside a tooltip, so they get no
+      // tooltip of their own (tests/meaning-system/badge-tooltip.test.js)
+      parts.push('<div class="prop-tooltip-badges" data-in-tooltip>' + badges.join(' ') + '</div>')
     }
 
     // Description: first paragraph only. The tooltip is a preview; the full
@@ -559,6 +567,34 @@
       })
     }
     return anchorIndex[anchor] || null
+  }
+
+  /**
+   * The name of the property a mention refers to. The prop: macro puts it in
+   * data-property-name; without it, the code text, less the build-time
+   * " (Enterprise)" marker that follows the name of an Enterprise property.
+   */
+  function propertyNameOf (codeEl) {
+    var name = codeEl.getAttribute('data-property-name')
+    if (name) return name
+    var text = codeEl.textContent
+    var marker = codeEl.querySelector('.enterprise-feature-marker')
+    if (marker) text = text.replace(marker.textContent, '')
+    return text.trim()
+  }
+
+  /**
+   * Marks an Enterprise property mention the way the prop: macro does at
+   * build time (class is-enterprise-property, "(Enterprise)" in the name),
+   * and returns the mention's accessible name. Cloud pages get neither:
+   * Cloud has no Enterprise license, and the build leaves both off there.
+   * A class the build already added is kept as is, not added again.
+   */
+  function enterpriseMentionLabel (codeEl, name, prop, cloud) {
+    var built = codeEl.classList.contains('is-enterprise-property')
+    var enterprise = !cloud && (prop.isEnterprise || built)
+    if (enterprise && !built) codeEl.classList.add('is-enterprise-property')
+    return name + (enterprise ? ' (Enterprise)' : '') + ' property documentation'
   }
 
   /**
@@ -891,6 +927,8 @@
         'code[data-property-name]:not(.has-property-tooltip), code.property-ref:not(.has-property-tooltip)'
       )
       var canTouch = canTouchDevice()
+      // Same Cloud test as the ifdef::env-cloud[] evaluation of descriptions
+      var cloud = definedConditionalAttributes().indexOf('env-cloud') !== -1
 
       // Only the first mention of a property in a paragraph (or list item,
       // table cell, ...) gets a tooltip. Repeats render as plain code so a
@@ -948,7 +986,7 @@
       }
 
       codeElements.forEach(function (codeEl) {
-        var text = codeEl.getAttribute('data-property-name') || codeEl.textContent.trim()
+        var text = propertyNameOf(codeEl)
 
         // Look up the marked property in the published data
         if (Object.prototype.hasOwnProperty.call(properties, text)) {
@@ -959,13 +997,12 @@
           // Mark as having tooltip (for styling and to avoid re-processing)
           codeEl.classList.add('has-property-tooltip')
           codeEl.classList.add('has-documentation')
-          if (prop.isEnterprise) {
-            codeEl.classList.add('is-enterprise-property')
-          }
           codeEl.style.cursor = 'help'
           codeEl.setAttribute('tabindex', '0')
           codeEl.setAttribute('role', 'button')
-          codeEl.setAttribute('aria-label', text + ' property documentation')
+          // The aria-label replaces the code's text, build marker included,
+          // so the name says Enterprise itself (once).
+          codeEl.setAttribute('aria-label', enterpriseMentionLabel(codeEl, text, prop, cloud))
 
           if (canTouch) {
             codeEl.setAttribute('aria-haspopup', 'dialog')
@@ -1042,6 +1079,10 @@
 
     tryInit(maxRetries)
   }
+
+  // Shared with the Ask AI lookup_config_property tool (src/js/react/agentTools.js),
+  // which reads the same property reference.
+  window.parsePreservingBigInts = parsePreservingBigInts
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {

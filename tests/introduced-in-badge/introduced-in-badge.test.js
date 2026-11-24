@@ -26,16 +26,16 @@ assert.ok(start >= 0 && end > start, `article.hbs changed under this test: could
 const BADGES = hbs.compile(ARTICLE_SRC.slice(start, end))
 
 const render = (attributes) => BADGES({ page: { attributes } })
-const sinceBadges = (html) => html.match(/status-badge--since/g) || []
-const tooltip = (html) => (html.match(/status-badge--since" data-tippy-content="([^"]*)"/) || [])[1]
+const sinceBadges = (html) => html.match(/rp-badge--since/g) || []
+const tooltip = (html) => (html.match(/rp-badge--since" data-tooltip="([^"]*)"/) || [])[1]
 const visible = (html) => (html.match(/<span aria-hidden="true">([^<]*)<\/span>/) || [])[1]
-const srText = (html) => (html.match(/<span class="status-badge__sr-text">([^<]*)<\/span>/) || [])[1]
+const srText = (html) => (html.match(/<span class="rp-badge__sr-text">([^<]*)<\/span>/) || [])[1]
 
 test('renders the badge when the page sets introduced-in', () => {
   const html = render({ 'introduced-in': '4.43.0' })
   assert.equal(sinceBadges(html).length, 1)
-  assert.equal(visible(html), 'Since 4.43.0')
-  assert.equal(tooltip(html), 'Introduced in version 4.43.0.')
+  assert.equal(visible(html), 'Since v4.43.0')
+  assert.equal(tooltip(html), 'Introduced in v4.43.0.')
   assert.equal(srText(html), tooltip(html), 'screen reader text matches the tooltip')
 })
 
@@ -53,16 +53,16 @@ test('never renders on Cloud pages', () => {
 
 test('names the product in the tooltip and screen reader text when introduced-in-product is set', () => {
   const html = render({ 'introduced-in': '4.43.0', 'introduced-in-product': 'Redpanda Connect' })
-  assert.equal(visible(html), 'Since 4.43.0')
-  assert.equal(tooltip(html), 'Introduced in Redpanda Connect 4.43.0.')
+  assert.equal(visible(html), 'Since v4.43.0')
+  assert.equal(tooltip(html), 'Introduced in Redpanda Connect v4.43.0.')
   assert.equal(srText(html), tooltip(html), 'screen reader text matches the tooltip')
 })
 
 test('normalizes a leading v and trailing periods', () => {
   for (const raw of ['v4.43.0', 'V4.43.0', '4.43.0.', ' v4.43.0.. ']) {
     const html = render({ 'introduced-in': raw })
-    assert.equal(visible(html), 'Since 4.43.0', raw)
-    assert.equal(tooltip(html), 'Introduced in version 4.43.0.', raw)
+    assert.equal(visible(html), 'Since v4.43.0', raw)
+    assert.equal(tooltip(html), 'Introduced in v4.43.0.', raw)
     assert.equal(srText(html), tooltip(html), raw)
   }
 })
@@ -75,8 +75,8 @@ test('escapes attribute values', () => {
 
 test('sits after Beta and Limited Availability when several badges show', () => {
   const html = render({ beta: 'true', 'limited-availability': 'true', 'introduced-in': '4.43.0' })
-  const beta = html.indexOf('status-badge--beta')
-  const la = html.indexOf('status-badge--la')
-  const since = html.indexOf('status-badge--since')
+  const beta = html.indexOf('rp-badge--beta')
+  const la = html.indexOf('rp-badge--limited')
+  const since = html.indexOf('rp-badge--since')
   assert.ok(beta >= 0 && la > beta && since > la, 'order is Beta, Limited Availability, Since')
 })

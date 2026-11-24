@@ -1,0 +1,565 @@
+/* =============================================================================
+   Meaning system: one look per meaning (Enterprise, Beta, Preview, and so on).
+   Colors come from the --meaning-* tokens in vars.css (light) and
+   dark-mode.css (dark); icons from the --icon-* tokens in vars.css.
+
+   Badge:  <span class="rp-badge rp-badge--NAME" data-tooltip="...">Label</span>
+           (an <a> when it links; rp-badge--sm in dense places like nav and cards)
+   Notice: <div class="rp-notice rp-notice--NAME"> with .rp-notice-section
+           children, each an .rp-notice-icon plus an .rp-notice-body holding
+           .rp-notice-title, .rp-notice-text, and .rp-notice-actions.
+   Button: .rp-button, .rp-button--primary, and .rp-notice-link.
+   ============================================================================= */
+
+/* The badge macro (docs-extensions-and-macros badge::[label=...]) emits
+   <span class="badge badge--LABEL"> and gets the same look, mapped onto the
+   meanings below. An unknown label is neutral. */
+.rp-badge,
+.rp-notice,
+.badge {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+  --rp-icon: none;
+}
+
+.rp-badge--enterprise,
+.rp-notice--enterprise,
+.badge--enterprise {
+  --rp-fg: var(--meaning-enterprise-fg);
+  --rp-bg: var(--meaning-enterprise-bg);
+  --rp-border: var(--meaning-enterprise-border);
+  --rp-icon: var(--icon-lock);
+}
+
+.rp-badge--beta,
+.rp-notice--beta,
+.badge--beta {
+  --rp-fg: var(--meaning-beta-fg);
+  --rp-bg: var(--meaning-beta-bg);
+  --rp-border: var(--meaning-beta-border);
+  --rp-icon: var(--icon-flask);
+}
+
+.rp-badge--preview,
+.rp-notice--preview,
+.badge--preview {
+  --rp-fg: var(--meaning-preview-fg);
+  --rp-bg: var(--meaning-preview-bg);
+  --rp-border: var(--meaning-preview-border);
+  --rp-icon: var(--icon-eye);
+}
+
+.rp-badge--limited,
+.rp-notice--limited,
+.badge--limited-availability {
+  --rp-fg: var(--meaning-limited-fg);
+  --rp-bg: var(--meaning-limited-bg);
+  --rp-border: var(--meaning-limited-border);
+  --rp-icon: var(--icon-clock);
+}
+
+.rp-badge--deprecated,
+.rp-notice--deprecated,
+.badge--deprecated {
+  --rp-fg: var(--meaning-deprecated-fg);
+  --rp-bg: var(--meaning-deprecated-bg);
+  --rp-border: var(--meaning-deprecated-border);
+  --rp-icon: var(--icon-archive);
+}
+
+.rp-badge--eol,
+.rp-notice--eol {
+  --rp-fg: var(--meaning-eol-fg);
+  --rp-bg: var(--meaning-eol-bg);
+  --rp-border: var(--meaning-eol-border);
+  --rp-icon: var(--icon-archive);
+}
+
+.rp-badge--eol-soon,
+.rp-notice--eol-soon {
+  --rp-fg: var(--meaning-eol-soon-fg);
+  --rp-bg: var(--meaning-eol-soon-bg);
+  --rp-border: var(--meaning-eol-soon-border);
+  --rp-icon: var(--icon-clock);
+}
+
+.rp-badge--new,
+.rp-notice--new,
+.badge--new {
+  --rp-fg: var(--meaning-new-fg);
+  --rp-bg: var(--meaning-new-bg);
+  --rp-border: var(--meaning-new-border);
+  --rp-icon: var(--icon-sparkle);
+}
+
+.rp-badge--since,
+.rp-notice--since {
+  --rp-fg: var(--meaning-since-fg);
+  --rp-bg: var(--meaning-since-bg);
+  --rp-border: var(--meaning-since-border);
+}
+
+.rp-badge--cloud,
+.rp-notice--cloud,
+.badge--cloud,
+.badge--byoc {
+  --rp-fg: var(--meaning-cloud-fg);
+  --rp-bg: var(--meaning-cloud-bg);
+  --rp-border: var(--meaning-cloud-border);
+  --rp-icon: var(--icon-cloud);
+}
+
+.rp-badge--self-managed,
+.rp-notice--self-managed {
+  --rp-fg: var(--meaning-self-managed-fg);
+  --rp-bg: var(--meaning-self-managed-bg);
+  --rp-border: var(--meaning-self-managed-border);
+  --rp-icon: var(--icon-server);
+}
+
+.rp-badge--certified,
+.rp-notice--certified {
+  --rp-fg: var(--meaning-certified-fg);
+  --rp-bg: var(--meaning-certified-bg);
+  --rp-border: var(--meaning-certified-border);
+  --rp-icon: var(--icon-check-badge);
+}
+
+.rp-badge--community,
+.rp-notice--community {
+  --rp-fg: var(--meaning-community-fg);
+  --rp-bg: var(--meaning-community-bg);
+  --rp-border: var(--meaning-community-border);
+  --rp-icon: var(--icon-people);
+}
+
+.rp-badge--use-case,
+.rp-notice--use-case {
+  --rp-fg: var(--meaning-use-case-fg);
+  --rp-bg: var(--meaning-use-case-bg);
+  --rp-border: var(--meaning-use-case-border);
+  --rp-icon: var(--icon-tag);
+}
+
+.rp-badge--neutral,
+.rp-notice--neutral {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+}
+
+.badge--unreleased {
+  --rp-icon: var(--icon-clock);
+}
+
+/* Badge */
+.rp-badge,
+.doc .rp-badge,
+.doc a.rp-badge,
+.badge,
+.doc .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--rp-border);
+  border-radius: 999px;
+  background: var(--rp-bg);
+  color: var(--rp-fg);
+  font-family: var(--font-sans, inherit);
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1.2;
+  text-decoration: none;
+  text-transform: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.rp-badge--enterprise::before,
+.rp-badge--beta::before,
+.rp-badge--preview::before,
+.rp-badge--limited::before,
+.rp-badge--deprecated::before,
+.rp-badge--eol::before,
+.rp-badge--eol-soon::before,
+.rp-badge--new::before,
+.rp-badge--cloud::before,
+.rp-badge--self-managed::before,
+.rp-badge--certified::before,
+.rp-badge--community::before,
+.rp-badge--use-case::before,
+.badge--enterprise::before,
+.badge--beta::before,
+.badge--preview::before,
+.badge--limited-availability::before,
+.badge--deprecated::before,
+.badge--new::before,
+.badge--cloud::before,
+.badge--byoc::before,
+.badge--unreleased::before {
+  content: "";
+  flex: none;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  -webkit-mask: var(--rp-icon) no-repeat center / contain;
+  mask: var(--rp-icon) no-repeat center / contain;
+}
+
+.rp-badge--sm,
+.doc .rp-badge--sm,
+.doc a.rp-badge--sm {
+  gap: 0.25rem;
+  padding: 0.125rem 0.45rem;
+  font-size: 0.6875rem;
+}
+
+a.rp-badge,
+.doc a.rp-badge {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.rp-badge:hover,
+.doc a.rp-badge:hover {
+  border-color: var(--rp-fg);
+  color: var(--rp-fg);
+  text-decoration: none;
+}
+
+.rp-badge:focus-visible,
+.doc a.rp-badge:focus-visible {
+  outline: 2px solid var(--rp-fg);
+  outline-offset: 2px;
+}
+
+/* Full text for screen readers where the visible label is aria-hidden
+   (the Since badge) */
+.rp-badge__sr-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* A badge with a tooltip promises one: show the help cursor */
+span.rp-badge[data-tooltip],
+.badge[data-tooltip] {
+  cursor: help;
+}
+
+/* Version selector status chips (version-selector.hbs): Latest, Supported,
+   End of life soon, End of life, Beta, on the meaning tokens. Latest is the
+   new (green) meaning and Supported is neutral, so they no longer match. */
+.sm-ver-pill-status,
+.sm-ver-row-status {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--rp-border);
+  border-radius: 999px;
+  background: var(--rp-bg);
+  color: var(--rp-fg);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1.2;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.sm-ver-pill-status[data-status="current"],
+.sm-ver-row-status[data-status="current"] {
+  --rp-fg: var(--meaning-new-fg);
+  --rp-bg: var(--meaning-new-bg);
+  --rp-border: var(--meaning-new-border);
+}
+
+.sm-ver-pill-dot[data-status="current"] {
+  background: var(--meaning-new-fg);
+  box-shadow: 0 0 0 3px var(--meaning-new-bg);
+}
+
+.sm-ver-pill-status[data-status="supported"],
+.sm-ver-row-status[data-status="supported"] {
+  --rp-fg: var(--meaning-neutral-fg);
+  --rp-bg: var(--meaning-neutral-bg);
+  --rp-border: var(--meaning-neutral-border);
+}
+
+.sm-ver-pill-dot[data-status="supported"] {
+  background: var(--meaning-neutral-fg);
+  box-shadow: 0 0 0 3px var(--meaning-neutral-bg);
+}
+
+.sm-ver-pill-status[data-status="eol"],
+.sm-ver-row-status[data-status="eol"] {
+  --rp-fg: var(--meaning-eol-fg);
+  --rp-bg: var(--meaning-eol-bg);
+  --rp-border: var(--meaning-eol-border);
+}
+
+.sm-ver-pill-dot[data-status="eol"] {
+  background: var(--meaning-eol-fg);
+  box-shadow: 0 0 0 3px var(--meaning-eol-bg);
+}
+
+.sm-ver-pill-status[data-status="eol-soon"],
+.sm-ver-row-status[data-status="eol-soon"] {
+  --rp-fg: var(--meaning-eol-soon-fg);
+  --rp-bg: var(--meaning-eol-soon-bg);
+  --rp-border: var(--meaning-eol-soon-border);
+}
+
+.sm-ver-pill-dot[data-status="eol-soon"] {
+  background: var(--meaning-eol-soon-fg);
+  box-shadow: 0 0 0 3px var(--meaning-eol-soon-bg);
+}
+
+.sm-ver-pill-status[data-status="beta"],
+.sm-ver-row-status[data-status="beta"] {
+  --rp-fg: var(--meaning-beta-fg);
+  --rp-bg: var(--meaning-beta-bg);
+  --rp-border: var(--meaning-beta-border);
+}
+
+.sm-ver-pill-dot[data-status="beta"] {
+  background: var(--meaning-beta-fg);
+  box-shadow: 0 0 0 3px var(--meaning-beta-bg);
+}
+
+/* A row chip sits in the version row's grid; keep it its own width */
+.sm-ver-row-status {
+  justify-self: end;
+}
+
+.sm-ver-row-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Notice: a page-level card, the Connect connector card generalized */
+.rp-notice {
+  position: relative;
+  margin: 1.25rem 0 1.5rem;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--rp-border);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--rp-bg) 0%, var(--body-background, #fff) 60%);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.rp-notice::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: var(--rp-fg);
+}
+
+.rp-notice--enterprise::before {
+  background: linear-gradient(180deg, #e2401b, #f2a33a);
+}
+
+.rp-notice-section {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+}
+
+.rp-notice-section + .rp-notice-section {
+  border-top: 1px solid var(--rp-border);
+}
+
+.rp-notice-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--rp-bg);
+  color: var(--rp-fg);
+}
+
+.rp-notice-icon::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask: var(--rp-icon) no-repeat center / contain;
+  mask: var(--rp-icon) no-repeat center / contain;
+}
+
+/* Meanings with no icon (since, neutral) show no tile */
+.rp-notice--since .rp-notice-icon,
+.rp-notice--neutral .rp-notice-icon {
+  display: none;
+}
+
+.rp-notice-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rp-notice .rp-notice-title,
+.doc .rp-notice .rp-notice-title {
+  display: block;
+  margin: 0.25rem 0;
+  color: var(--heading-font-color, #111827);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+.rp-notice .rp-notice-text,
+.doc .rp-notice p.rp-notice-text {
+  margin: 0 0 0.75rem;
+  color: var(--body-font-color, #4b5563);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.rp-notice .rp-notice-text:last-child,
+.doc .rp-notice p.rp-notice-text:last-child {
+  margin-bottom: 0;
+}
+
+.rp-notice .rp-notice-actions,
+.doc .rp-notice p.rp-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+}
+
+.rp-notice a.rp-notice-link,
+.doc .rp-notice a.rp-notice-link {
+  color: var(--rp-fg);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.rp-notice a:focus-visible {
+  outline: 2px solid var(--rp-fg);
+  outline-offset: 2px;
+}
+
+/* Button */
+.rp-button,
+.doc a.rp-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4375rem 0.875rem;
+  border: 1px solid #d6d3d1;
+  border-radius: 8px;
+  background: var(--body-background, #fff);
+  color: var(--body-font-color, #1f2937);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rp-button:hover,
+.doc a.rp-button:hover {
+  border-color: #a8a29e;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  color: var(--body-font-color, #1f2937);
+  text-decoration: none;
+}
+
+/* Primary: the meaning's fg as the fill and the page background as the text,
+   so the pair inherits the 4.5:1 the token test guarantees. Outside a notice
+   it is the enterprise (brand) color. */
+.rp-button--primary,
+.doc a.rp-button--primary,
+.rp-button--primary:hover,
+.doc a.rp-button--primary:hover {
+  border-color: var(--rp-fg, var(--meaning-enterprise-fg));
+  background: var(--rp-fg, var(--meaning-enterprise-fg));
+  color: var(--body-background, #fff);
+}
+
+.rp-button--primary:hover,
+.doc a.rp-button--primary:hover {
+  filter: brightness(0.92);
+}
+
+.rp-button:focus-visible {
+  outline: 2px solid var(--rp-fg, var(--meaning-enterprise-fg));
+  outline-offset: 2px;
+}
+
+html[data-theme=dark] .rp-notice {
+  background: linear-gradient(135deg, var(--rp-bg) 0%, rgba(255, 255, 255, 0.02) 60%);
+  box-shadow: none;
+}
+
+html[data-theme=dark] .rp-button,
+html[data-theme=dark] .doc a.rp-button {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme=dark] .rp-button:hover,
+html[data-theme=dark] .doc a.rp-button:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+html[data-theme=dark] .rp-button--primary,
+html[data-theme=dark] .doc a.rp-button--primary {
+  border-color: var(--rp-fg, var(--meaning-enterprise-fg));
+  background: var(--rp-fg, var(--meaning-enterprise-fg));
+  color: var(--body-background);
+}
+
+html[data-theme=dark] .rp-button--primary:hover,
+html[data-theme=dark] .doc a.rp-button--primary:hover {
+  filter: brightness(1.08);
+}
+
+@media (max-width: 480px) {
+  .rp-notice-section {
+    padding: 0.875rem 1rem 0.875rem 1.25rem;
+  }
+
+  .rp-notice-icon {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a.rp-badge,
+  .doc a.rp-badge,
+  .rp-button,
+  .doc a.rp-button {
+    transition: none;
+  }
+}
