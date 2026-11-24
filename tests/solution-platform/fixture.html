@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>solution platform fixture</title></head>
+<body class="article solution-step" data-component="solutions" data-solution-id="demo" data-step-id="start-environment" data-step-index="1" data-solution-version="v1.0.0" data-solution-status="published" data-solution-download="none">
+<article class="doc sol-doc">
+<p>Before the tabs.</p>
+<div class="tabs is-sync data-sync-group-id=platform is-loading" id="group-1">
+<div class="tablist ul"><ul>
+<li id="_tabs_1_docker_compose" class="tab"><p>Docker Compose</p></li>
+<li id="_tabs_1_kubernetes" class="tab"><p>Kubernetes</p></li>
+<li id="_tabs_1_redpanda_cloud" class="tab"><p>Redpanda Cloud</p></li>
+</ul></div>
+<div id="_tabs_1_docker_compose--panel" class="tabpanel" aria-labelledby="_tabs_1_docker_compose">
+<div class="openblock platform platform-local"><div class="content">
+<p>Local.</p>
+<div class="listingblock" id="local-block">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">rpk topic create demo -X user=&lt;user&gt;</code></pre>
+</div>
+</div>
+</div></div>
+</div>
+<div id="_tabs_1_kubernetes--panel" class="tabpanel" aria-labelledby="_tabs_1_kubernetes">
+<div class="openblock platform platform-kubernetes"><div class="content">
+<p>Kubernetes.</p>
+</div></div>
+</div>
+<div id="_tabs_1_redpanda_cloud--panel" class="tabpanel" aria-labelledby="_tabs_1_redpanda_cloud">
+<div class="openblock platform platform-cloud"><div class="content">
+<p>Cloud.</p>
+<div class="listingblock" id="env-block" data-solution-file="env.cloud.example">
+<div class="title"><code>env.cloud.example</code></div>
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># The connection lines to change in .env, for example &lt;user&gt; below.
+COMPOSE_PROFILES=
+REDPANDA_BROKERS=&lt;bootstrap-server-url&gt;
+REDPANDA_TLS_ENABLED=true
+REDPANDA_SASL_USERNAME=&lt;user&gt;
+REDPANDA_SASL_PASSWORD=&lt;password&gt;
+REDPANDA_SCHEMA_REGISTRY_URL=&lt;schema-registry-url&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock" id="text-block">
+<div class="content">
+<pre class="highlight"><code class="language-text" data-lang="text">Log in as &lt;user&gt; at &lt;bootstrap-server-url&gt;</code></pre>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<p>Between the tabs.</p>
+<div class="tabs is-sync data-sync-group-id=platform is-loading" id="group-2">
+<div class="tablist ul"><ul>
+<li id="_tabs_2_docker_compose" class="tab"><p>Docker Compose</p></li>
+<li id="_tabs_2_kubernetes" class="tab"><p>Kubernetes</p></li>
+<li id="_tabs_2_redpanda_cloud" class="tab"><p>Redpanda Cloud</p></li>
+</ul></div>
+<div id="_tabs_2_docker_compose--panel" class="tabpanel" aria-labelledby="_tabs_2_docker_compose">
+<div class="openblock platform platform-local"><div class="content">
+<p>Local two.</p>
+</div></div>
+</div>
+<div id="_tabs_2_kubernetes--panel" class="tabpanel" aria-labelledby="_tabs_2_kubernetes">
+<div class="openblock platform platform-kubernetes"><div class="content">
+<p>Kubernetes two.</p>
+</div></div>
+</div>
+<div id="_tabs_2_redpanda_cloud--panel" class="tabpanel" aria-labelledby="_tabs_2_redpanda_cloud">
+<div class="openblock platform platform-cloud"><div class="content">
+<p>Cloud two, no placeholders.</p>
+<div class="listingblock" id="plain-cloud">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">make up</code></pre>
+</div>
+</div>
+</div></div>
+</div>
+</div>
+<div class="listingblock" id="outside-block">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">echo &lt;user&gt; &lt;bootstrap-server-url&gt;</code></pre>
+</div>
+</div>
+</article>
+<script src="/node_modules/@asciidoctor/tabs/dist/js/tabs.js" data-sync-storage-key="preferred-tab"></script>
+<script src="/src/js/vendor/prism/prism-core.js"></script>
+<script src="/src/js/06-copy-to-clipboard.js"></script>
+<script src="/src/js/10-code-highlight.js"></script>
+<script src="/src/js/11-editable-placeholders.js"></script>
+<script src="/src/js/28-solution-progress.js"></script>
+<script src="/src/js/34-solution-platform.js"></script>
+</body>
+</html>

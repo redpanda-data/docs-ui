@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+{{> head defaultPageTitle='Untitled'}}
+{{> head-component-color}}
+  </head>
+  {{!-- The Take it to production page: pages/take-to-production.adoc, after a
+        solution's last step, with every production topic as an h2 section
+        (the page includes partial$production/_all.adoc with leveloffset=-1).
+        The solutions-catalog extension sets page-solution, page-solution-nav,
+        page-solution-step-count and page-solution-prev-url/title (the last
+        step) on it, and no step id or index: it is not a step.
+
+        Shell: the step page's (layouts/solution-step.hbs), so it carries the
+        solution-step class as well as solution-production, and the step CSS,
+        the left nav, the rail and the scripts apply. 28-solution-progress.js
+        needs a step id to mark or track a step, so with none it only shows
+        progress here. What differs from a step: the header has no step
+        number, the rail summary has no "Step N of M", there is no Mark step
+        complete and no quiz, the only neighbour is the last step, and the
+        Take this to production card (solution-productionize.hbs), titled
+        Plan it for your system here, follows the introduction. --}}
+  <body class="article solution-step solution-production{{#with (or page.attributes.role page.role)}} {{{this}}}{{/with}}" data-component="{{page.component.name}}"{{#with (get-header-color page)}} data-component-color="{{{this}}}"{{/with}}{{#with (parse-json page.attributes.solution)}} data-solution-id="{{id}}" data-solution-version="{{version}}" data-solution-status="{{status}}" data-solution-download="{{download}}"{{#if draftDownloads}} data-solution-draft-downloads="true"{{/if}} data-solution-title="{{title}}" data-solution-file-count="{{files.length}}"{{#if files.length}} data-solution-files="{{json-stringify files}}"{{/if}}{{#if verified.platforms.length}} data-solution-tested-on="{{platform-list verified.platforms names=(lookup (get-solutions-catalog) 'platformNames')}}"{{/if}} data-solution-step-count="{{@root.page.attributes.solution-step-count}}"{{/with}}>
+{{> header}}
+<div class="body no-keep-markup">
+{{> nav}}
+<main class="article solution-step solution-production">
+  {{> toolbar}}
+  <div class="content sol-content">
+    <article class="doc sol-doc sol-step-doc sol-production-doc">
+      {{> breadcrumbs}}
+      {{!-- No step id on this page, so the header renders without a step
+            number: the solution link and the title. --}}
+      {{> solution-step-header solution=(parse-json page.attributes.solution)}}
+      {{!-- The Plan it card goes right after the first paragraph of the
+            introduction, before the production topics, so a reader sees it
+            without scrolling past every topic. Its disclosures (prompt
+            preview, MCP setup) stay collapsed until opened. Inside the
+            preamble it is not an article-level sect1, so On this page does
+            not list it. --}}
+      {{#with (split-at-first-section page.contents) as |parts|}}
+      {{#with (split-after-first-paragraph parts.before) as |intro|}}
+      {{{intro.before}}}
+      {{> solution-productionize solution=(parse-json @root.page.attributes.solution) title='Plan it for your system'}}
+      {{{intro.after}}}
+      {{/with}}
+      {{{parts.after}}}
+      {{/with}}
+      <nav class="sol-step-actions sol-production-actions" aria-label="Solution navigation">
+        <div class="sol-step-actions-nav">
+          {{#if page.attributes.solution-prev-url}}
+          <a class="sol-btn sol-step-nav" data-sol-prev href="{{{relativize page.attributes.solution-prev-url}}}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            <span class="sol-step-nav-text"><span class="sol-step-nav-kicker">Previous</span>{{page.attributes.solution-prev-title}}</span>
+          </a>
+          {{/if}}
+          {{#with (parse-json page.attributes.solution)}}
+          <a class="sol-btn sol-step-nav sol-step-nav--next" data-sol-finish href="{{{relativize url}}}">
+            <span class="sol-step-nav-text"><span class="sol-step-nav-kicker">Done</span>Back to overview</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+          {{/with}}
+        </div>
+      </nav>
+      {{> feedback-footer}}
+      {{> tracking-pixel}}
+    </article>
+    <aside class="sol-rail">
+      <details class="sol-rail-details" data-sol-rail open>
+        <summary class="sol-rail-summary"><span class="sol-rail-summary-label">{{detag page.title}}</span><span class="sol-bar sol-bar--sm sol-rail-summary-bar" aria-hidden="true"><span class="sol-bar-fill" data-sol-progress-fill style="width: 0%"></span></span><span class="sol-rail-summary-meta">Progress, code, contents</span></summary>
+        <div class="sol-rail-body">
+          {{> solution-rail-tools solution=(parse-json page.attributes.solution)}}
+          {{> toc}}
+        </div>
+      </details>
+    </aside>
+  </div>
+  {{> footer}}
+</main>
+</div>
+{{> chat-panel}}
+  </body>
+</html>

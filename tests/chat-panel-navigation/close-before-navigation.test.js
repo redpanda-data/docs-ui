@@ -21,7 +21,7 @@ const PANEL = path.join(__dirname, '../../src/js/19-chat-panel.js')
 // runs Node 18, which will not reparse a .js file as ESM the way newer Node
 // does — a dynamic import() here passes locally and throws
 // "Unexpected token 'export'" in CI. Load it through vm instead, rewriting its
-// single export into a global assignment (top-level const/let stay in the
+// agentTools export into a global assignment (top-level const/let stay in the
 // script's lexical scope and never reach the context object, so the rewrite has
 // to be an assignment). Version independent, and it matches the vm approach the
 // other suites in this repo use.
@@ -31,8 +31,10 @@ const PANEL = path.join(__dirname, '../../src/js/19-chat-panel.js')
 function loadTools () {
   const calls = []
   const source = fs.readFileSync(TOOLS, 'utf8')
-  const rewritten = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
-  assert.notEqual(rewritten, source, 'the agentTools export shape changed; update this harness')
+  const exported = source.replace(/^export const agentTools =/m, 'globalThis.agentTools =')
+  assert.notEqual(exported, source, 'the agentTools export shape changed; update this harness')
+  // The file's other exports (the chat mode tool lists) stay local to the script.
+  const rewritten = exported.replace(/^export /gm, '')
 
   const context = {
     console,
