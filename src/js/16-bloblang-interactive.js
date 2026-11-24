@@ -15,6 +15,10 @@
   let bloblangDocs = null;
   let docsLoading = false;
   let docsLoadQueue = [];
+  // 'connect' when bloblangDocs came from the Connect JSON, 'fallback' when it
+  // is the hand-written bloblang-docs.json. Inline macro tooltips use only
+  // 'connect': the fallback file is older than the data and differs from it.
+  let bloblangDocsSource = null;
 
   /**
    * Check if a value is an unresolved Antora resource ID
@@ -226,7 +230,8 @@
     try {
       let url;
 
-      // In preview mode, always use static fallback (resolved URLs won't exist)
+      // In preview mode, always use static fallback (resolved URLs won't exist).
+      // The UI preview copies a trimmed fixture there (preview-src/_data).
       if (isPreviewMode()) {
         const rootPath = typeof uiRootPath !== 'undefined' ? uiRootPath : '/_';
         url = `${rootPath}/connect.json`;
@@ -258,9 +263,30 @@
     }
   }
 
+  // One request per page for the Connect JSON, shared by the code-block
+  // tooltips here and the inline macro tooltips (28-macro-tooltips.js).
+  let connectDataPromise = null;
+  function loadConnectData() {
+    if (!connectDataPromise) connectDataPromise = tryFetchConnectJSON();
+    return connectDataPromise;
+  }
+
   /**
    * Transform Connect JSON into documentation format
    */
+  // The data has no return types, and a parameter has a default only when
+  // the Connect JSON gives one, so neither is filled in here.
+  function toParam(p) {
+    const param = {
+      name: p.name,
+      type: p.type || 'any',
+      description: p.description || ''
+    };
+    if (Object.prototype.hasOwnProperty.call(p, 'default')) param.default = p.default;
+    if (p.is_optional) param.optional = true;
+    return param;
+  }
+
   function transformConnectData(data) {
     const docs = {
       functions: {},
@@ -270,11 +296,7 @@
     // Transform Bloblang functions
     if (Array.isArray(data['bloblang-functions'])) {
       data['bloblang-functions'].forEach(fn => {
-        const params = fn.params && fn.params.named ? fn.params.named.map(p => ({
-          name: p.name,
-          type: p.type || 'any',
-          description: p.description || ''
-        })) : [];
+        const params = fn.params && fn.params.named ? fn.params.named.map(toParam) : [];
 
         const paramSignature = params.length > 0
           ? params.map(p => p.name).join(', ')
@@ -282,9 +304,8 @@
 
         docs.functions[fn.name] = {
           signature: `${fn.name}(${paramSignature})`,
-          description: fn.description || 'Bloblang function',
+          description: fn.description || '',
           parameters: params,
-          returns: 'any',
           category: fn.category || 'general',
           url: `${getConnectFunctionsUrl()}#${fn.name.toLowerCase().replace(/_/g, '-')}`
         };
@@ -302,11 +323,7 @@
     // Transform Bloblang methods
     if (Array.isArray(data['bloblang-methods'])) {
       data['bloblang-methods'].forEach(method => {
-        const params = method.params && method.params.named ? method.params.named.map(p => ({
-          name: p.name,
-          type: p.type || 'any',
-          description: p.description || ''
-        })) : [];
+        const params = method.params && method.params.named ? method.params.named.map(toParam) : [];
 
         const paramSignature = params.length > 0
           ? params.map(p => p.name).join(', ')
@@ -314,9 +331,8 @@
 
         docs.methods[method.name] = {
           signature: `${method.name}(${paramSignature})`,
-          description: method.description || 'Bloblang method',
+          description: method.description || '',
           parameters: params,
-          returns: 'any',
           category: method.categories && method.categories.length > 0 ? method.categories[0].Category : 'general',
           url: `${getConnectMethodsUrl()}#${method.name.toLowerCase().replace(/_/g, '-')}`
         };
@@ -351,18 +367,15 @@
     docsLoading = true;
 
     try {
-      var data = null;
-      var isDocsUiPreview = window.location.hostname.includes('docs-ui.netlify.app');
-
-      // Skip remote fetches on docs-ui preview site - JSON files don't exist there
-      if (!isDocsUiPreview) {
-        data = await tryFetchConnectJSON();
-      }
+      // On the docs-ui preview site this is the preview's trimmed fixture
+      const data = await loadConnectData();
 
       // Transform data to our format
       if (data) {
         bloblangDocs = transformConnectData(data);
+        bloblangDocsSource = 'connect';
       } else {
+        bloblangDocsSource = 'fallback';
         // Fallback to static file if available (or primary source on localhost)
         try {
           var response = await fetch(uiRootPath + '/bloblang-docs.json');
@@ -386,6 +399,7 @@
       // Unexpected error - tooltips will be disabled
       docsLoading = false;
       bloblangDocs = { functions: {}, methods: {} };
+      bloblangDocsSource = 'fallback';
 
       // Resolve all queued promises with fallback
       for (const resolve of docsLoadQueue) {
@@ -404,13 +418,18 @@
     let html = `
       <div class="bloblang-doc-tooltip">
         <div class="doc-signature"><code>${escapeHtml(doc.signature)}</code></div>
-        <div class="doc-description">${formatDescription(doc.description)}</div>
     `;
+    if (doc.description) {
+      html += `<div class="doc-description">${formatDescription(doc.description)}</div>`;
+    }
 
     if (doc.parameters && doc.parameters.length > 0) {
       html += '<div class="doc-parameters"><strong>Parameters:</strong><ul>';
       doc.parameters.forEach(param => {
-        html += `<li><code>${escapeHtml(param.name)}</code> (${escapeHtml(param.type)}): ${formatDescription(param.description)}</li>`;
+        const facts = [escapeHtml(param.type)];
+        if (param.optional) facts.push('optional');
+        if (param.default !== undefined) facts.push(`default: <code>${escapeHtml(formatValue(param.default))}</code>`);
+        html += `<li><code>${escapeHtml(param.name)}</code> (${facts.join(', ')}): ${formatDescription(param.description)}</li>`;
       });
       html += '</ul></div>';
     }
@@ -424,7 +443,7 @@
     }
 
     if (doc.url) {
-      html += `<a href="${escapeHtml(doc.url)}" target="_blank" rel="noopener" class="doc-link">View full documentation →</a>`;
+      html += `<a href="${escapeHtml(doc.url).replace(/"/g, '&quot;')}" target="_blank" rel="noopener" class="doc-link">View full documentation →</a>`;
     }
 
     html += '</div>';
@@ -447,8 +466,22 @@
     if (!text) return '';
     // First escape HTML
     const escaped = escapeHtml(text);
+    // Connect and rpk descriptions are AsciiDoc. A link inside a tooltip
+    // would point at a page the description was written for, not this one,
+    // so xref:, link: and URL macros, and <<id,text>> references, render as
+    // their text.
+    const linked = escaped
+      .replace(/\bxref:([^\s[\]]+)\[([^\]]*)\]/g, (m, target, label) => label || target.replace(/^.*[:/]/, '').replace(/\.adoc(#.*)?$/, ''))
+      .replace(/\b(?:link:)?((?:https?:\/\/|mailto:)[^\s[\]]+)\[([^\]]*)\]/g, (m, url, label) => label.replace(/\^$/, '') || url)
+      .replace(/\blink:([^\s[\]]+)\[([^\]]*)\]/g, (m, url, label) => label.replace(/\^$/, '') || url)
+      .replace(/&lt;&lt;([^,&]+)(?:,\s*((?:(?!&gt;&gt;).)*?))?&gt;&gt;/g, (m, id, label) => label || id);
     // Then convert backtick-wrapped text to <code> tags
-    return escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+    return linked.replace(/`([^`]+)`/g, '<code>$1</code>');
+  }
+
+  // A default as the data spells it, as JSON: "text", 1, true, [], {}.
+  function formatValue(value) {
+    return JSON.stringify(value);
   }
 
   /**
@@ -1203,4 +1236,16 @@
 
   // Export for use by other modules (e.g., 17-bloblang-yaml.js)
   window.addBloblangTooltips = addDocumentationTooltips;
+
+  // Shared with 28-macro-tooltips.js, which decorates the inline blobl: and
+  // connect: macros: one Connect JSON request, one Bloblang tooltip renderer.
+  window.redpandaConnectDocs = {
+    loadConnectData,
+    // Resolves to the Bloblang docs only when they came from the Connect
+    // JSON, otherwise null.
+    loadBloblangDocsFromData: () => loadBloblangDocs().then(docs => (bloblangDocsSource === 'connect' ? docs : null)),
+    createDocTooltip,
+    formatDescription,
+    formatValue
+  };
 })();

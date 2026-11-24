@@ -79,6 +79,13 @@
       "description": "Version tag used to build the property and connector dataset URLs in head metadata. Set by the version-fetcher and set-available-attachment-versions extensions.",
       "readBy": ["src/partials/head-meta.hbs"]
     },
+    "available-rpk-tag": {
+      "setIn": ["component"],
+      "setBy": "extension",
+      "type": "string",
+      "description": "Version tag of the rpk command-tree attachment (rpk-<tag>.json) behind the rpk-json-url meta tag that rpkcmd: tooltips read. When unset, latest-redpanda-tag is used.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
     "component-metadata": {
       "setIn": ["component"],
       "setBy": "writer",
@@ -660,11 +667,32 @@
       "description": "Landing pages: deployment card name.",
       "readBy": ["src/partials/component-home-v3.hbs", "src/partials/data-platform.hbs"]
     },
+    "page-disable-bloblang-tooltips": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Turns off the inline Bloblang function and method tooltips on the page.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "page-disable-connect-tooltips": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Turns off the inline Connect component tooltips on the page.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
     "page-disable-property-tooltips": {
       "setIn": ["page"],
       "setBy": "extension",
       "type": "flag",
       "description": "Turns off property tooltips. Set by the set-available-attachment-versions extension.",
+      "readBy": ["src/partials/head-meta.hbs"]
+    },
+    "page-disable-rpk-tooltips": {
+      "setIn": ["page"],
+      "setBy": "writer",
+      "type": "flag",
+      "description": "Turns off the inline rpk command tooltips on the page.",
       "readBy": ["src/partials/head-meta.hbs"]
     },
     "page-eol": {
