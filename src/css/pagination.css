@@ -7,7 +7,7 @@ nav.pagination {
   padding: 0;
 }
 
-nav.pagination span {
+nav.pagination > span {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -19,7 +19,7 @@ nav.pagination span {
   transition: border-color 0.12s, box-shadow 0.12s;
 }
 
-nav.pagination span:hover {
+nav.pagination > span:hover {
   border-color: var(--grey-200-new, var(--grey-200, #c3c4c6));
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
 }
@@ -36,20 +36,13 @@ nav.pagination .next {
   align-items: flex-end;
 }
 
-nav.pagination span::before {
+/* "Prev" and "Next" are real text in pagination.hbs, not CSS content */
+nav.pagination .pagination-label {
   font-size: calc(12 / var(--rem-base) * 1rem);
   color: var(--grey-500-new, var(--grey-500, #79797d));
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding-bottom: 0;
-}
-
-nav.pagination .prev::before {
-  content: "Prev";
-}
-
-nav.pagination .next::before {
-  content: "Next";
 }
 
 nav.pagination a {
@@ -90,12 +83,12 @@ nav.pagination .next a::after {
 }
 
 /* Dark mode support */
-html[data-theme="dark"] nav.pagination span {
+html[data-theme="dark"] nav.pagination > span {
   background: var(--dark-blue-800-new, #161e2d);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-html[data-theme="dark"] nav.pagination span:hover {
+html[data-theme="dark"] nav.pagination > span:hover {
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.2);
 }
@@ -104,6 +97,7 @@ html[data-theme="dark"] nav.pagination a {
   color: #e8eef6;
 }
 
-html[data-theme="dark"] nav.pagination span::before {
+html[data-theme="dark"] /* "Prev" and "Next" are real text in pagination.hbs, not CSS content */
+nav.pagination .pagination-label {
   color: #a8b2c7;
 }

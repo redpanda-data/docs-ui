@@ -87,6 +87,8 @@ jobs:
         run: npm run test:tooltip-touch
       - name: Test only one tooltip opens at a time
         run: npm run test:tooltip-single-open
+      - name: Test tooltip accessibility rules
+        run: npm run test:tooltip-a11y
       - name: Test Ask AI bundle loads on demand
         run: npm run test:lazy-askai
       - name: Test collapsed nav buckets stay out of the DOM

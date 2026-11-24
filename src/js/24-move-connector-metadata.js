@@ -37,16 +37,21 @@
       const originalMenu = typeDropdownWrapper.querySelector('.dropdown-menu')
 
       if (originalToggle && originalMenu) {
-        // Create compact toggle with "Type:" prefix (CSS adds this via ::before)
+        // Create compact toggle with a real "Type:" label
         const compactToggle = document.createElement('button')
         compactToggle.type = 'button'
         compactToggle.className = 'context-dropdown-toggle'
         compactToggle.setAttribute('aria-expanded', 'false')
         compactToggle.setAttribute('aria-haspopup', 'true')
 
+        const label = document.createElement('span')
+        label.className = 'context-dropdown-label'
+        label.textContent = 'Type:'
+        compactToggle.appendChild(label)
+
         const dropdownText = originalToggle.querySelector('.dropdown-text')
         if (dropdownText) {
-          compactToggle.textContent = dropdownText.textContent
+          compactToggle.appendChild(document.createTextNode(' ' + dropdownText.textContent.trim()))
         }
 
         // Add arrow
@@ -78,6 +83,7 @@
           // Mark current page as active
           if (window.location.pathname.includes(new URL(item.href).pathname)) {
             compactItem.classList.add('active')
+            compactItem.setAttribute('aria-current', 'page')
           }
 
           compactMenu.appendChild(compactItem)

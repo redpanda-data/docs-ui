@@ -1,6 +1,7 @@
 <div class="context-switcher">
   <div class="context-dropdown">
     <button type="button" class="context-dropdown-toggle" aria-expanded="false" aria-haspopup="true">
+      <span class="context-dropdown-label">Type:</span>
       {{#each (obj page.attributes.context-switcher)}}
         {{#if (eq @root.page.url (resolve-resource this.to))}}
           {{{this.name}}}
@@ -15,6 +16,7 @@
         <a
           href="{{{relativize (resolve-resource this.to)}}}"
           class="context-dropdown-item {{#if (eq @root.page.url (resolve-resource this.to))}}active{{/if}}"
+          {{#if (eq @root.page.url (resolve-resource this.to))}}aria-current="page"{{/if}}
           role="menuitem"
         >
           {{{this.name}}}

@@ -45,13 +45,18 @@ function el ({ tag = 'span', attrs = {}, classes = [], children = [] } = {}) {
 function run ({ canTouch, isTouch = false, omitCurrentInput = false, elements }) {
   const tippyCalls = []
   const created = []
-  const tippy = (target, cfg) => { tippyCalls.push({ target, cfg }) }
+  const docListeners = {}
+  // Like tippy, leave the instance on the element as _tippy.
+  const tippy = (target, cfg) => { tippyCalls.push({ target, cfg }); target._tippy = {} }
   if (!omitCurrentInput) tippy.currentInput = { isTouch }
   const context = {
     navigator: { maxTouchPoints: canTouch ? 5 : 0 },
     tippy,
     document: {
-      addEventListener: (t, fn) => { if (t === 'DOMContentLoaded') context.fire = fn },
+      addEventListener: (t, fn) => {
+        if (t === 'DOMContentLoaded') context.fire = fn
+        else (docListeners[t] = docListeners[t] || []).push(fn)
+      },
       querySelectorAll: (sel) => {
         if (sel.startsWith('[data-tippy-content]')) return elements.filter((e) => 'data-tippy-content' in e.attrs && !('data-tooltip' in e.attrs))
         if (sel === '[data-tooltip]') return elements.filter((e) => 'data-tooltip' in e.attrs)
@@ -70,7 +75,7 @@ function run ({ canTouch, isTouch = false, omitCurrentInput = false, elements })
   context.window = canTouch ? { ontouchstart: null } : {}
   vm.runInNewContext(SRC, context)
   context.fire()
-  return { tippyCalls, created, tippy }
+  return { tippyCalls, created, tippy, docListeners }
 }
 
 // Does a click on this element navigate, or does the tooltip swallow it?
@@ -209,10 +214,85 @@ test('an empty data-tooltip gets no tooltip and no tab stop', () => {
   assert.equal(b.attrs.tabindex, undefined)
 })
 
-test('no tab stop on a badge inside a link (a badge after a nav title)', () => {
+// A link as 12-activate-tooltips.js sees it from a badge inside it.
+function controlLink (badges, focusVisible) {
+  const link = { tagName: 'A', matches: (sel) => sel === ':focus-visible' && focusVisible }
+  badges.forEach((b) => {
+    b.parentElement = { closest: (sel) => (sel.includes('a[href]') ? link : null) }
+    b.closest = () => null
+    b.getBoundingClientRect = () => ({ badge: b })
+  })
+  return link
+}
+
+test('a badge inside a link (a badge after a nav title) gets no tab stop, and keyboard focus on the link opens its tooltip', () => {
   const b = tooltipBadge()
-  b.parentElement = { closest: (sel) => (sel.includes('a[href]') ? { tagName: 'A' } : null) }
-  b.closest = () => null
-  run({ canTouch: false, elements: [b] })
+  const link = controlLink([b], true)
+  const plain = tooltipBadge()
+  const { tippyCalls, tippy } = run({ canTouch: false, elements: [b, plain] })
   assert.equal(b.attrs.tabindex, undefined)
+  // The badge keeps its own tooltip and stays its own trigger, so hovering
+  // the rest of the link opens nothing.
+  const own = tippyCalls.filter((c) => c.target === b)
+  assert.equal(own.length, 1)
+  assert.equal('triggerTarget' in own[0].cfg, false)
+  // Focus lands on the link, never on the badge, so the link carries a
+  // tooltip of its own: focus only, described by it, placed at the badge.
+  const onLink = tippyCalls.filter((c) => c.target === link)
+  assert.equal(onLink.length, 1, 'one focus tooltip on the link')
+  const cfg = onLink[0].cfg
+  assert.equal(cfg.trigger, 'focus', 'hover on the link opens nothing')
+  assert.equal(cfg.aria.content, 'describedby')
+  assert.equal(cfg.allowHTML, false)
+  assert.deepEqual(cfg.content.children.map((c) => c.textContent), [b.attrs['data-tooltip']])
+  assert.deepEqual(cfg.getReferenceClientRect(), { badge: b })
+  const hidden = []
+  tippy.hideAll = (opts) => hidden.push(opts)
+  const instance = {}
+  assert.notEqual(cfg.onShow(instance), false, 'keyboard focus opens it')
+  assert.equal(hidden.length, 1, 'and closes any other tooltip')
+  assert.equal(hidden[0].exclude, instance)
+  assert.equal(tippyCalls.length, 3, 'a badge outside a link adds nothing but its own tooltip')
+})
+
+test('a click that focuses the link does not open the focus tooltip', () => {
+  const b = tooltipBadge()
+  const link = controlLink([b], false)
+  const { tippyCalls } = run({ canTouch: false, elements: [b] })
+  assert.equal(tippyCalls.find((c) => c.target === link).cfg.onShow({}), false)
+})
+
+test('two badges in one link share one focus tooltip that carries both texts', () => {
+  const beta = tooltipBadge()
+  const cloud = el({ tag: 'span', classes: ['rp-badge', 'rp-badge--cloud'], attrs: { 'data-tooltip': 'Available only in Redpanda Cloud.' } })
+  const link = controlLink([beta, cloud], true)
+  const { tippyCalls } = run({ canTouch: false, elements: [beta, cloud] })
+  const onLink = tippyCalls.filter((c) => c.target === link)
+  assert.equal(onLink.length, 1)
+  assert.deepEqual(onLink[0].cfg.content.children.map((c) => c.textContent), [beta.attrs['data-tooltip'], cloud.attrs['data-tooltip']])
+  assert.deepEqual(onLink[0].cfg.getReferenceClientRect(), { badge: beta }, 'placed at the first badge')
+  for (const b of [beta, cloud]) assert.equal(tippyCalls.filter((c) => c.target === b).length, 1, 'each badge keeps its hover tooltip')
+})
+
+test('a badge in a data-tooltip-nofocus listing adds no focus tooltip to its link', () => {
+  const b = tooltipBadge()
+  const link = controlLink([b], true)
+  b.closest = (sel) => (sel === '[data-tooltip-nofocus]' ? {} : null)
+  const { tippyCalls } = run({ canTouch: false, elements: [b] })
+  assert.equal(tippyCalls.filter((c) => c.target === link).length, 0)
+  assert.equal(tippyCalls.filter((c) => c.target === b).length, 1)
+})
+
+test('badges in a nav subtree that arrives later get a tooltip on nav:hydrated, once each', () => {
+  const loaded = tooltipBadge()
+  const { tippyCalls, docListeners } = run({ canTouch: false, elements: [loaded] })
+  const hydrated = tooltipBadge()
+  // The expanded item: its subtree holds the new badge and one from load.
+  const target = { querySelectorAll: (sel) => (sel === '[data-tooltip]' ? [loaded, hydrated] : []) }
+  assert.ok((docListeners['nav:hydrated'] || []).length > 0, 'no nav:hydrated listener')
+  docListeners['nav:hydrated'].forEach((fn) => fn({ target }))
+  docListeners['nav:hydrated'].forEach((fn) => fn({ target }))
+  assert.equal(tippyCalls.filter((c) => c.target === hydrated).length, 1, 'the hydrated badge gets one tooltip')
+  assert.equal(tippyCalls.filter((c) => c.target === loaded).length, 1, 'a badge that already has one is skipped')
+  assert.equal(hydrated.attrs.tabindex, '0')
 })

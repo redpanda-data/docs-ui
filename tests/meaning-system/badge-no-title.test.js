@@ -38,3 +38,26 @@ test('the scan leaves data-tooltip badges and titles on other elements alone', (
   assert.equal(offenders('<button class="copy" title="Copy">x</button>').length, 0)
   assert.equal(offenders('{{> some-partial}}<span class="rp-badge" data-title="x">B</span>').length, 0)
 })
+
+// Labels are exact, so a meaning reads the same everywhere: no "(beta)", no
+// "NEW", no "Only in BYOC". A page limited to one platform says so in the
+// label ("Cloud only"), not only in its tooltip. Static labels only; computed
+// ones are skipped.
+// 'Beta feature' is the page-level badge, so a beta feature is not read as a beta release.
+const LABELS = new Set(['Enterprise', 'Beta', 'Beta feature', 'Preview', 'Limited availability', 'Deprecated', 'End of life',
+  'End of life soon', 'New', 'Cloud', 'BYOC', 'Serverless', 'Dedicated', 'Self-Managed', 'Certified', 'Community',
+  'Cloud only', 'BYOC only', 'Self-Managed only'])
+
+test('static .rp-badge labels in templates are the standard labels', () => {
+  const bad = []
+  for (const file of templates()) {
+    const src = fs.readFileSync(file, 'utf8')
+    const re = /<(span|a)\b[^>]*\bclass="[^"]*\brp-badge--(?!sm\b)([\w-]+)[^"]*"[^>]*>([^<{]*)<\/\1>/g
+    let m
+    while ((m = re.exec(src))) {
+      const label = m[3].trim()
+      if (label && !LABELS.has(label)) bad.push(`${path.relative(ROOT, file)}: rp-badge--${m[2]} "${label}"`)
+    }
+  }
+  assert.deepEqual(bad, [])
+})

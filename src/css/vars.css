@@ -124,24 +124,6 @@ html[data-theme=dark] {
   --admonition-border-radius: 10px;
   --admonition-box-shadow: 0 1px 2px 0 #0000001a;
   --admonition-padding: 1rem;
-  --beta-label-color: #fff;
-  --beta-label-background: var(--link-highlight-color);
-  --beta-label-border: var(--slate-800);
-  --preview-label-background: #1f2937;
-  --preview-label-color: #f9fafb;
-  --limited-availability-label-color: #fff;
-  --limited-availability-label-background: var(--default-header-color);
-  --limited-availability-label-border: var(--amber-800);
-  --limited-availability-highlight-background-color: rgba(202, 133, 4, 0.08);
-  --limited-availability-highlight-background-color: rgba(248, 134, 57, 0.08);
-  /* BYOC badge */
-  --byoc-label-color: #fff;
-  --byoc-label-background: #014f86;
-  --byoc-highlight-background-color: rgba(1, 79, 134, 0.08);
-  /* Cloud badge */
-  --cloud-label-color: #fff;
-  --cloud-label-background: #6c63ff;
-  --cloud-highlight-background-color: rgba(108, 99, 255, 0.08);
   /* doc */
   --doc-font-size: inherit;
   --doc-font-size--desktop: var(--body-font-size);
@@ -194,17 +176,6 @@ html[data-theme=dark] {
 html[data-theme=dark] {
   /* Heading color for dark mode */
   --heading-font-color: var(--grey-100-new, #f3f4f6);
-  /* BYOC badge - brighter blue for dark mode visibility with dark text for contrast */
-  --byoc-label-color: #101828;
-  --byoc-label-background: #4da8da;
-  --byoc-highlight-background-color: rgba(77, 168, 218, 0.15);
-  /* Preview badge - dark mode */
-  --preview-label-background: #cbd5e1;
-  --preview-label-color: #1f2937;
-  /* Cloud badge - brighter purple for dark mode visibility with dark text for contrast */
-  --cloud-label-color: #101828;
-  --cloud-label-background: #9d97ff;
-  --cloud-highlight-background-color: rgba(157, 151, 255, 0.15);
   /* Availability block - brighter for dark mode */
   --availability-block-background: rgba(173, 181, 189, 0.15);
   --availability-block-border: #adb5bd;
