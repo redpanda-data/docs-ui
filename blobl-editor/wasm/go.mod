@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/redpanda-data/benthos/v4 v4.85.0
-	github.com/redpanda-data/connect/v4 v4.119.0
+	github.com/redpanda-data/connect/v4 v4.120.0
 )
 
 require (
